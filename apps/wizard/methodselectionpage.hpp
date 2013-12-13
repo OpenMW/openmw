@@ -7,14 +7,18 @@
 
 namespace Wizard
 {
+    class MainWizard;
 
     class MethodSelectionPage : public QWizardPage, private Ui::MethodSelectionPage
     {
         Q_OBJECT
     public:
-        MethodSelectionPage(QWidget *parent = 0);
+        MethodSelectionPage(MainWizard *wizard);
 
         int nextId() const;
+
+    private:
+        MainWizard *mWizard;
 
     };
 

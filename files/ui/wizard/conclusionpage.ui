@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>398</width>
+    <height>298</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,9 +20,7 @@
    <item>
     <widget class="QLabel" name="textLabel">
      <property name="text">
-      <string>The OpenMW Wizard successfully installed Morrowind on your computer.
-
-Click Finish to close the Wizard.</string>
+      <string>Placeholder</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

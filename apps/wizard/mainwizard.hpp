@@ -2,6 +2,7 @@
 #define MAINWIZARD_HPP
 
 #include <QWizard>
+#include <QMap>
 
 namespace Wizard
 {
@@ -11,6 +12,12 @@ namespace Wizard
         Q_OBJECT
 
     public:
+        struct Installation {
+            bool hasMorrowind;
+            bool hasTribunal;
+            bool hasBloodmoon;
+        };
+
         enum {
             Page_Intro,
             Page_MethodSelection,
@@ -24,8 +31,14 @@ namespace Wizard
 
         MainWizard(QWidget *parent = 0);
 
+        static bool findFiles(const QString &name, const QString &path);
+        QMap<QString, Installation*> mInstallations;
+
     private:
+        void setupInstallations();
         void setupPages();
+
+
     };
 
 }

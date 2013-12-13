@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>396</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
    <item>
     <widget class="QLabel" name="detectedLabel">
      <property name="text">
-      <string>Detected Installations:</string>
+      <string>Detected installations:</string>
      </property>
     </widget>
    </item>
@@ -32,6 +32,9 @@
      <item>
       <property name="text">
        <string>No existing installations detected</string>
+      </property>
+      <property name="flags">
+       <set>NoItemFlags</set>
       </property>
      </item>
     </widget>

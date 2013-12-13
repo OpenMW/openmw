@@ -7,14 +7,27 @@
 
 namespace Wizard
 {
+    class MainWizard;
 
     class ExistingInstallationPage : public QWizardPage, private Ui::ExistingInstallationPage
     {
         Q_OBJECT
     public:
-        ExistingInstallationPage(QWidget *parent = 0);
+        ExistingInstallationPage(MainWizard *wizard);
 
         int nextId() const;
+        virtual bool isComplete() const;
+
+    private slots:
+        void on_browseButton_clicked();
+        void textChanged(const QString &text);
+
+
+    private:
+        MainWizard *mWizard;
+
+    protected:
+        void initializePage();
 
     };
 

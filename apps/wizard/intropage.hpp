@@ -7,15 +7,18 @@
 
 namespace Wizard
 {
+    class MainWizard;
 
     class IntroPage : public QWizardPage, private Ui::IntroPage
     {
         Q_OBJECT
     public:
-        IntroPage(QWidget *parent = 0);
+        IntroPage(MainWizard *wizard);
 
         int nextId() const;
 
+    private:
+        MainWizard *mWizard;
     };
 
 }

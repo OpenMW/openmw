@@ -7,14 +7,24 @@
 
 namespace Wizard
 {
+    class MainWizard;
 
     class InstallationTargetPage : public QWizardPage, private Ui::InstallationTargetPage
     {
         Q_OBJECT
     public:
-        InstallationTargetPage(QWidget *parent = 0);
+        InstallationTargetPage(MainWizard *wizard);
 
         int nextId() const;
+
+    private slots:
+        void on_browseButton_clicked();
+
+    private:
+        MainWizard *mWizard;
+
+    protected:
+        void initializePage();
 
     };
 

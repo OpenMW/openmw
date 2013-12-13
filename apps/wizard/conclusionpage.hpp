@@ -7,14 +7,21 @@
 
 namespace Wizard
 {
+    class MainWizard;
 
     class ConclusionPage : public QWizardPage, private Ui::ConclusionPage
     {
         Q_OBJECT
     public:
-        ConclusionPage(QWidget *parent = 0);
+        ConclusionPage(MainWizard *wizard);
 
         int nextId() const;
+
+    private:
+        MainWizard *mWizard;
+
+    protected:
+        void initializePage();
 
     };
 

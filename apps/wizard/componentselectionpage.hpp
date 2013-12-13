@@ -7,14 +7,24 @@
 
 namespace Wizard
 {
+    class MainWizard;
 
     class ComponentSelectionPage : public QWizardPage, private Ui::ComponentSelectionPage
     {
         Q_OBJECT
     public:
-        ComponentSelectionPage(QWidget *parent = 0);
+        ComponentSelectionPage(MainWizard *wizard);
 
         int nextId() const;
+
+    private slots:
+        void updateButton(QListWidgetItem *item);
+
+    private:
+        MainWizard *mWizard;
+
+    protected:
+        void initializePage();
 
     };
 

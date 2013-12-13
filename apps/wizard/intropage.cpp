@@ -2,8 +2,10 @@
 
 #include "mainwizard.hpp"
 
-Wizard::IntroPage::IntroPage(QWidget *parent) :
-    QWizardPage(parent)
+Wizard::IntroPage::IntroPage(MainWizard *wizard) :
+    QWizardPage(wizard),
+    mWizard(wizard)
+
 {
     setupUi(this);
 }

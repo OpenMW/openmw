@@ -7,14 +7,18 @@
 
 namespace Wizard
 {
+    class MainWizard;
 
     class ImportPage : public QWizardPage, private Ui::ImportPage
     {
         Q_OBJECT
     public:
-        ImportPage(QWidget *parent = 0);
+        ImportPage(MainWizard *wizard);
 
         int nextId() const;
+
+    private:
+        MainWizard *mWizard;
 
     };
 
