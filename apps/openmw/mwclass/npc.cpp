@@ -711,6 +711,8 @@ namespace MWClass
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
         if(get(actor).getStance(actor, MWWorld::Class::Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+        if(get(ptr).getCreatureStats(ptr).isHostile())
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
