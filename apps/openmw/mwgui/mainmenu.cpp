@@ -17,6 +17,7 @@ namespace MWGui
     MainMenu::MainMenu(int w, int h)
         : OEngine::GUI::Layout("openmw_mainmenu.layout")
         , mButtonBox(0)
+        , mNoReturn(false)
     {
         onResChange(w,h);
     }
@@ -33,7 +34,8 @@ namespace MWGui
         int curH = 0;
 
         std::vector<std::string> buttons;
-        buttons.push_back("return");
+        if(!mNoReturn)
+            buttons.push_back("return");
         buttons.push_back("newgame");
         //buttons.push_back("loadgame");
         //buttons.push_back("savegame");
@@ -66,6 +68,15 @@ namespace MWGui
         }
 
         mButtonBox->setCoord (w/2 - maxwidth/2, h/2 - curH/2, maxwidth, curH);
+    }
+
+    void MainMenu::setNoReturn(bool bNoReturn)
+    {
+        if (mNoReturn != bNoReturn)
+        {
+            mNoReturn = bNoReturn;
+            onResChange( Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video") );
+        }
     }
 
     void MainMenu::onButtonClicked(MyGUI::Widget *sender)

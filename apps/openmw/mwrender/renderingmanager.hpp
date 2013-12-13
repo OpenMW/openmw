@@ -98,6 +98,8 @@ public:
     SkyManager* getSkyManager();
     Compositors* getCompositors();
 
+    MWRender::Camera* getCamera() const;
+
     void toggleLight();
     bool toggleRenderMode(int mode);
 

@@ -367,24 +367,27 @@ namespace MWInput
                 }
             }
 
-            if (mControlSwitch["playerviewswitch"]) {
-
-                // work around preview mode toggle when pressing Alt+Tab
-                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
-                    if (mPreviewPOVDelay <= 0.5 &&
-                        (mPreviewPOVDelay += dt) > 0.5)
-                    {
-                        mPreviewPOVDelay = 1.f;
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+            if ( !player.getClass().getCreatureStats(player).isDead() ) {
+                if (mControlSwitch["playerviewswitch"]) {
+                    // work around preview mode toggle when pressing Alt+Tab
+                    if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
+                    
+                        if (mPreviewPOVDelay <= 0.5 &&
+                            (mPreviewPOVDelay += dt) > 0.5)
+                        {
+                            mPreviewPOVDelay = 1.f;
+                            MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                        }
+                    } else {
+                        if (mPreviewPOVDelay > 0.5) {
+                            //disable preview mode
+                            MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                        } else if (mPreviewPOVDelay > 0.f) {
+                            MWBase::Environment::get().getWorld()->togglePOV();
+                        }
+                        mPreviewPOVDelay = 0.f;
                     }
-                } else {
-                    if (mPreviewPOVDelay > 0.5) {
-                        //disable preview mode
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    } else if (mPreviewPOVDelay > 0.f) {
-                        MWBase::Environment::get().getWorld()->togglePOV();
-                    }
-                    mPreviewPOVDelay = 0.f;
                 }
             }
         }

@@ -198,6 +198,9 @@ namespace MWGui
     virtual void setSpellVisibility(bool visible);
     virtual void setSneakVisibility(bool visible);
 
+    //disables 'return' button in the main menu (used when player is dead)
+    void virtual setMainMenuNoReturn(bool noreturn);
+
     virtual void activateQuickKey  (int index);
 
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);

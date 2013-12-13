@@ -12,8 +12,12 @@ namespace MWGui
 
         void onResChange(int w, int h);
 
+        void setNoReturn(bool bNoReturn);
+
     private:
         MyGUI::Widget* mButtonBox;
+
+        bool mNoReturn;
 
         std::map<std::string, MWGui::ImageButton*> mButtons;
 

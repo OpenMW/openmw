@@ -202,6 +202,8 @@ namespace MWBase
             virtual void setSpellVisibility(bool visible) = 0;
             virtual void setSneakVisibility(bool visible) = 0;
 
+            void virtual setMainMenuNoReturn(bool noreturn) = 0;
+
             virtual void activateQuickKey  (int index) = 0;
 
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;

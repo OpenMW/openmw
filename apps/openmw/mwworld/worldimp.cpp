@@ -312,6 +312,8 @@ namespace MWWorld
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
         MWBase::Environment::get().getScriptManager()->resetGlobalScripts();
+
+        MWBase::Environment::get().getWindowManager()->setMainMenuNoReturn(false);
     }
 
 
@@ -402,6 +404,11 @@ namespace MWWorld
     {
         return *mPlayer;
     }
+
+    MWRender::Camera* World::getCamera() const
+	{
+        return mRendering->getCamera(); 
+	}
 
     const MWWorld::ESMStore& World::getStore() const
     {
@@ -1304,7 +1311,7 @@ namespace MWWorld
         // inform the GUI about focused object
         MWWorld::Ptr object = getFacedObject ();
 
-        MWBase::Environment::get().getWindowManager()->setFocusObject(object);
+        MWBase::Environment::get().getWindowManager()->setFocusObject(object);  
 
         // retrieve object dimensions so we know where to place the floating label
         if (!object.isEmpty ())
