@@ -64,8 +64,11 @@ namespace sh
 
 	bool OgrePlatform::supportsShaderSerialization ()
 	{
-		// Not very reliable in OpenGL mode (requires extension), and somehow doesn't work on linux even if the extension is present
+		#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
+		return true;
+		#else
 		return Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") == std::string::npos;
+		#endif
 	}
 
 	bool OgrePlatform::supportsMaterialQueuedListener ()
@@ -110,10 +113,15 @@ namespace sh
 
 	void OgrePlatform::serializeShaders (const std::string& file)
 	{
-		std::fstream output;
-		output.open(file.c_str(), std::ios::out | std::ios::binary);
-		Ogre::DataStreamPtr shaderCache (OGRE_NEW Ogre::FileStreamDataStream(file, &output, false));
-		Ogre::GpuProgramManager::getSingleton().saveMicrocodeCache(shaderCache);
+		#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
+		if (Ogre::GpuProgramManager::getSingleton().isCacheDirty())
+		#endif
+		{
+			std::fstream output;
+			output.open(file.c_str(), std::ios::out | std::ios::binary);
+			Ogre::DataStreamPtr shaderCache (OGRE_NEW Ogre::FileStreamDataStream(file, &output, false));
+			Ogre::GpuProgramManager::getSingleton().saveMicrocodeCache(shaderCache);
+		}
 	}
 
 	void OgrePlatform::deserializeShaders (const std::string& file)
@@ -143,7 +151,7 @@ namespace sh
 			else if (typeid(*value) == typeid(IntValue))
 				type = Ogre::GCT_INT1;
 			else
-				assert(0);
+                throw std::runtime_error("unexpected type");
 			params->addConstantDefinition(name, type);
 			mSharedParameters[name] = params;
 		}
