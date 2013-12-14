@@ -316,8 +316,23 @@ void OpenAL_SoundStream::play()
     throwALerror();
     mSamplesQueued = 0;
 
-    for(ALuint i = 0;i < sNumBuffers;i++)
-        alBufferData(mBuffers[i], mFormat, this, 0, mSampleRate);
+    int srate;
+    ChannelConfig chans;
+    SampleType sampleType;
+    
+    mDecoder->getInfo(&srate, &chans, &sampleType);
+    
+    // Use exactly one sample of silence.
+    // This is required for OpenAL implementations that don't accept empty buffer data.
+    // (like one in OS X 10.9)
+    ALuint sampleSize = framesToBytes(1, chans, sampleType);
+    std::vector<char> silenceSample(sampleSize);
+    
+    if (sampleType == SampleType_UInt8)
+        std::fill(silenceSample.begin(), silenceSample.end(), 0x80);
+    
+    for(ALuint i = 0;i < sNumBuffers;i++) 
+        alBufferData(mBuffers[i], mFormat, &silenceSample[0], sampleSize, mSampleRate);
     throwALerror();
 
     alSourceQueueBuffers(mSource, sNumBuffers, mBuffers);
