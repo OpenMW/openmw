@@ -1061,11 +1061,11 @@ bool CharacterController::kill()
     if( isDead() )
 	{
 		//player death animation is over: toggle game menu without 'return' option
-        if( mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() 
-            && !isAnimPlaying(mCurrentDeath) )
+        if( mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer()
+            && !isAnimPlaying(mCurrentDeath) && MWBase::Environment::get().getWindowManager()->getMode () != MWGui::GM_MainMenu )
         {
-            MWBase::Environment::get().getWindowManager()->setMainMenuNoReturn(true);
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);    
+            MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setHealth(0);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
         return false;
     }
@@ -1106,10 +1106,13 @@ bool CharacterController::kill()
 
     if(mAnimation)
     {
-        if (mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() 
-                && MWBase::Environment::get().getWorld()->getCamera()->isFirstPerson() )
-            MWBase::Environment::get().getWorld()->togglePOV();
-
+        if (mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+        {
+            MWBase::Environment::get().getWindowManager()->setMainMenuNoReturn(true);
+            if (MWBase::Environment::get().getWorld()->getCamera()->isFirstPerson() )
+                  MWBase::Environment::get().getWorld()->togglePOV();
+        }
+          
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                          false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->disable(mCurrentIdle);
