@@ -14,8 +14,16 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(MainWizard *wizard) :
     setCommitPage(true);
     setButtonText(QWizard::CommitButton, tr("&Install"));
 
-    connect(componentsList, SIGNAL(itemChanged(QListWidgetItem*)),
-            this, SLOT(updateButton(QListWidgetItem*)));
+    registerField("installation.components", componentsList);
+
+    connect(componentsList, SIGNAL(itemChanged(QListWidgetItem *)),
+            this, SLOT(updateButton(QListWidgetItem *)));
+
+}
+
+void Wizard::ComponentSelectionPage::debugMe(QString &text)
+{
+    qDebug() << "Debug Me" << text;
 }
 
 void Wizard::ComponentSelectionPage::updateButton(QListWidgetItem *item)

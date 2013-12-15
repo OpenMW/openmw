@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
-    <height>393</height>
+    <width>448</width>
+    <height>387</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,7 +38,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="componentsList"/>
+    <widget class="ComponentListWidget" name="componentsList"/>
    </item>
    <item>
     <spacer name="verticalSpacer">
@@ -55,6 +55,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ComponentListWidget</class>
+   <extends>QListWidget</extends>
+   <header>apps/wizard/utils/componentlistwidget.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -10,6 +10,8 @@ set(WIZARD
     main.cpp
     mainwizard.cpp
     methodselectionpage.cpp
+
+    utils/componentlistwidget.cpp
 )
 # if(NOT WIN32)
 #     LIST(APPEND WIZARD unshieldthread.cpp)
@@ -26,6 +28,8 @@ set(WIZARD_HEADER
     languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
+
+    utils/componentlistwidget.hpp
 )
 # if(NOT WIN32)
 #     LIST(APPEND WIZARD_HEADER unshieldthread.hpp)
@@ -44,6 +48,8 @@ set(WIZARD_HEADER_MOC
     languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
+
+    utils/componentlistwidget.hpp
 )
 
 # if(NOT WIN32)

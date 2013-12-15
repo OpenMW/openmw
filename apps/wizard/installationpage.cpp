@@ -14,9 +14,11 @@ Wizard::InstallationPage::InstallationPage(MainWizard *wizard) :
 void Wizard::InstallationPage::initializePage()
 {
     QString path = field("installation.path").toString();
+    QStringList components = field("installation.components").toStringList();
 
-    qDebug() << "installing to: " << field("installation.path").toString();
-    logTextEdit->setText(QString("Installing to %1").arg(field("installation.path").toString()));
+    logTextEdit->append(QString("Installing to %1").arg(path));
+    logTextEdit->append(QString("Installing %1.").arg(components.join(", ")));
+
 }
 
 int Wizard::InstallationPage::nextId() const

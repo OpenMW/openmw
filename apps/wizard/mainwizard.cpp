@@ -28,6 +28,8 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     // Set the property for comboboxes to the text instead of index
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
 
+    setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
+
     setupInstallations();
     setupPages();
 }

@@ -19,6 +19,7 @@ namespace Wizard
 
     private slots:
         void updateButton(QListWidgetItem *item);
+        void debugMe(QString &text);
 
     private:
         MainWizard *mWizard;
