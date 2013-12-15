@@ -24,6 +24,10 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 #endif
 
     setWindowTitle(tr("OpenMW Wizard"));
+
+    // Set the property for comboboxes to the text instead of index
+    setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
+
     setupInstallations();
     setupPages();
 }

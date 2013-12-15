@@ -13,6 +13,8 @@ Wizard::InstallationPage::InstallationPage(MainWizard *wizard) :
 
 void Wizard::InstallationPage::initializePage()
 {
+    QString path = field("installation.path").toString();
+
     qDebug() << "installing to: " << field("installation.path").toString();
     logTextEdit->setText(QString("Installing to %1").arg(field("installation.path").toString()));
 }

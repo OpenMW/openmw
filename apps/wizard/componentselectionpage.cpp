@@ -28,8 +28,6 @@ void Wizard::ComponentSelectionPage::updateButton(QListWidgetItem *item)
     for (int i =0; i < componentsList->count(); ++i) {
         QListWidgetItem *item = componentsList->item(i);
 
-        qDebug() << "item is " << item->text();
-
         if (!item)
             continue;
 

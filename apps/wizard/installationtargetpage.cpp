@@ -17,6 +17,8 @@ Wizard::InstallationTargetPage::InstallationTargetPage(MainWizard *wizard) :
 
 void Wizard::InstallationTargetPage::initializePage()
 {
+    qDebug() << mWizard->field("installation.language");
+
 #ifdef Q_OS_WIN
     QString path = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
 #endif
