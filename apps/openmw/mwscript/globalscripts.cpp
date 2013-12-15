@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/globalscript.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -89,5 +90,62 @@ namespace MWScript
         {
             addScript (iter->mScript);
         }
+    }
+
+    int GlobalScripts::countSavedGameRecords() const
+    {
+        return mScripts.size();
+    }
+
+    void GlobalScripts::write (ESM::ESMWriter& writer) const
+    {
+        for (std::map<std::string, std::pair<bool, Locals> >::const_iterator iter (mScripts.begin());
+            iter!=mScripts.end(); ++iter)
+        {
+            ESM::GlobalScript script;
+
+            script.mId = iter->first;
+
+            iter->second.second.write (script.mLocals, iter->first);
+
+            script.mRunning = iter->second.first ? 1 : 0;
+
+            writer.startRecord (ESM::REC_GSCR);
+            script.save (writer);
+            writer.endRecord (ESM::REC_GSCR);
+        }
+    }
+
+    bool GlobalScripts::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        if (type==ESM::REC_GSCR)
+        {
+            ESM::GlobalScript script;
+            script.load (reader);
+
+            std::map<std::string, std::pair<bool, Locals> >::iterator iter =
+                mScripts.find (script.mId);
+
+            if (iter==mScripts.end())
+            {
+                if (const ESM::Script *scriptRecord = mStore.get<ESM::Script>().search (script.mId))
+                {
+                    std::pair<bool, Locals> data (false, Locals());
+
+                    data.second.configure (*scriptRecord);
+
+                    iter = mScripts.insert (std::make_pair (script.mId, data)).first;
+                }
+                else // script does not exist anymore
+                    return true;
+            }
+
+            iter->second.first = script.mRunning!=0;
+            iter->second.second.read (script.mLocals, script.mId);
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -87,6 +87,7 @@ enum RecNameInts
     REC_SAVE = 0x45564153,
     REC_JOUR = 0x524f55a4,
     REC_QUES = 0x53455551,
+    REC_GSCR = 0x52435347,
 
     // format 1
     REC_FILT = 0x544C4946

@@ -4,7 +4,15 @@
 #include <string>
 #include <map>
 
+#include <libs/platform/stdint.h>
+
 #include "locals.hpp"
+
+namespace ESM
+{
+    class ESMWriter;
+    class ESMReader;
+}
 
 namespace MWWorld
 {
@@ -35,6 +43,15 @@ namespace MWScript
 
             void addStartup();
             ///< Add startup script
+
+            int countSavedGameRecords() const;
+
+            void write (ESM::ESMWriter& writer) const;
+
+            bool readRecord (ESM::ESMReader& reader, int32_t type);
+            ///< Records for variables that do not exist are dropped silently.
+            ///
+            /// \return Known type?
     };
 }
 
