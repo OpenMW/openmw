@@ -400,6 +400,11 @@ namespace MWWorld
         return mCells.getInterior (name);
     }
 
+    MWRender::Camera* World::getCamera() const
+    {
+        return mRendering->getCamera();
+    }
+
     MWWorld::Player& World::getPlayer()
     {
         return *mPlayer;

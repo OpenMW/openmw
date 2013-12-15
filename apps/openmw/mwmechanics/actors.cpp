@@ -571,19 +571,15 @@ namespace MWMechanics
                         stats.resurrect();
                         continue;
                     }
-
-                    MWBase::Environment::get().getStateManager()->endGame();
                 }
 
-                if(iter->second->isDead())
-                    continue;
+                if (iter->second->kill())
+                {
+                    ++mDeathCount[cls.getId(iter->first)];
 
-                iter->second->kill();
-
-                ++mDeathCount[cls.getId(iter->first)];
-
-                if(cls.isEssential(iter->first))
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+                    if(cls.isEssential(iter->first))
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+                }
             }
         }
 

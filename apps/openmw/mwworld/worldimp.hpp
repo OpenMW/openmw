@@ -185,6 +185,8 @@ namespace MWWorld
 
             virtual CellStore *getInterior (const std::string& name);
 
+            virtual MWRender::Camera* getCamera() const;
+
             virtual void setWaterHeight(const float height);
 
             virtual void toggleWater();
