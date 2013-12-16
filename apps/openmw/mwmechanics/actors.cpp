@@ -19,7 +19,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
- #include "../mwbase/statemanager.hpp"
 
 #include "npcstats.hpp"
 #include "creaturestats.hpp"

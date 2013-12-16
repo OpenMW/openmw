@@ -400,9 +400,15 @@ namespace MWWorld
         return mCells.getInterior (name);
     }
 
-    MWRender::Camera* World::getCamera() const
+    void World::useDeathCamera()
     {
-        return mRendering->getCamera();
+        if(mRendering->getCamera()->isVanityOrPreviewModeEnabled() )
+        {
+            mRendering->getCamera()->togglePreviewMode(false);
+            mRendering->getCamera()->toggleVanityMode(false);
+        }
+        if(mRendering->getCamera()->isFirstPerson())
+            togglePOV();
     }
 
     MWWorld::Player& World::getPlayer()

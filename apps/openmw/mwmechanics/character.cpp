@@ -26,14 +26,12 @@
 #include "creaturestats.hpp"
 #include "security.hpp"
 
-#include "../mwrender/camera.hpp"
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -1058,11 +1056,10 @@ bool CharacterController::kill()
 {
     if( isDead() )
     {
-        //state=end game only when player's death animation is over
+        //player's death animation is over
         if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) 
-                && MWBase::Environment::get().getWindowManager()->getMode () != MWGui::GM_MainMenu )
+                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu )
         {
-            MWBase::Environment::get().getStateManager()->endGame();
             MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setHealth(0);
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
@@ -1105,18 +1102,6 @@ bool CharacterController::kill()
 
     if(mAnimation)
     {
-        //switch to 3rd person before player's death animation 
-        if (mPtr.getRefData().getHandle()=="player")
-        {
-            if(MWBase::Environment::get().getWorld()->getCamera()->isVanityOrPreviewModeEnabled() )
-            {
-                MWBase::Environment::get().getWorld()->getCamera()->togglePreviewMode(false);
-                MWBase::Environment::get().getWorld()->getCamera()->toggleVanityMode(false);
-            }
-            if(MWBase::Environment::get().getWorld()->getCamera()->isFirstPerson())
-                MWBase::Environment::get().getWorld()->togglePOV();
-        }
-
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                          false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->disable(mCurrentIdle);

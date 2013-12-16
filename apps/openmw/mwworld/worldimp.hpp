@@ -42,6 +42,7 @@ namespace MWRender
     class SkyManager;
     class CellRender;
     class Animation;
+    class Camera;
 }
 
 struct ContentLoader;
@@ -185,7 +186,8 @@ namespace MWWorld
 
             virtual CellStore *getInterior (const std::string& name);
 
-            virtual MWRender::Camera* getCamera() const;
+            //switch to POV before showing player's death animation
+            virtual void useDeathCamera();
 
             virtual void setWaterHeight(const float height);
 

@@ -94,35 +94,39 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
         // global scripts
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+
+        bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
+
+        // local scripts
+        executeLocalScripts(); // This does not handle the case where a global script causes a
+                                // cell change, followed by a cell change in a local script during
+                                // the same frame.
+
+        if (changed) // keep change flag for another frame, if cell changed happened in local script
+            MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+            MWBase::Environment::get().getWorld()->advanceTime(
+                frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
+
+        // update actors
+        MWBase::Environment::get().getMechanicsManager()->update(frametime,
+            MWBase::Environment::get().getWindowManager()->isGuiMode());
+
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
-            MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
-
-            bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
-
-            // local scripts
-            executeLocalScripts(); // This does not handle the case where a global script causes a
-                                   // cell change, followed by a cell change in a local script during
-                                   // the same frame.
-
-            if (changed) // keep change flag for another frame, if cell changed happened in local script
-                MWBase::Environment::get().getWorld()->markCellAsUnchanged();
-
-            if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-                MWBase::Environment::get().getWorld()->advanceTime(
-                    frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
-
-            // update actors
-            MWBase::Environment::get().getMechanicsManager()->update(frametime,
-                MWBase::Environment::get().getWindowManager()->isGuiMode());
-
-            // update world
-            MWBase::Environment::get().getWorld()->update(frametime, MWBase::Environment::get().getWindowManager()->isGuiMode());
-
-            // update game state
-            MWBase::Environment::get().getStateManager()->update (frametime);
+            MWWorld::Ptr player = mEnvironment.getWorld()->getPlayer().getPlayer();
+            if(MWWorld::Class::get(player).getCreatureStats(player).isDead())
+                MWBase::Environment::get().getStateManager()->endGame();
         }
+            
+        // update world
+        MWBase::Environment::get().getWorld()->update(frametime, MWBase::Environment::get().getWindowManager()->isGuiMode());
+
+        // update game state
+        MWBase::Environment::get().getStateManager()->update (frametime);
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();

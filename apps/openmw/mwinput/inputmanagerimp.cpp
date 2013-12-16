@@ -181,8 +181,9 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if(MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Running)
-                    toggleMainMenu ();
+                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running 
+                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
+                        toggleMainMenu ();
                 break;
             case A_Screenshot:
                 screenshot();
@@ -303,8 +304,8 @@ namespace MWInput
 
         // Disable movement in Gui mode
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-                || MWWorld::Class::get(mPlayer->getPlayer()).getCreatureStats(mPlayer->getPlayer()).isDead() ) 
-            return;
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running) 
+                return;
 
 
         // Configure player movement according to keyboard input. Actual movement will

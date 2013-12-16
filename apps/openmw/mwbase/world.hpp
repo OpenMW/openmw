@@ -43,7 +43,6 @@ namespace MWRender
 {
     class ExternalRendering;
     class Animation;
-    class Camera;
 }
 
 namespace MWMechanics
@@ -113,7 +112,7 @@ namespace MWBase
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
 
-            virtual MWRender::Camera* getCamera() const = 0;
+            virtual void useDeathCamera() = 0;
 
             virtual void setWaterHeight(const float height) = 0;
 
