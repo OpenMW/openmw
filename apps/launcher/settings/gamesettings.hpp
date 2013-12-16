@@ -31,6 +31,7 @@ namespace Launcher
         inline void setValue(const QString &key, const QString &value)
         {
             mSettings.insert(key, value);
+            mUserSettings.insert(key, value);
         }
 
         inline void setMultiValue(const QString &key, const QString &value)
@@ -38,11 +39,16 @@ namespace Launcher
             QStringList values = mSettings.values(key);
             if (!values.contains(value))
                 mSettings.insertMulti(key, value);
+
+            values = mUserSettings.values(key);
+            if (!values.contains(value))
+                mUserSettings.insertMulti(key, value);
         }
 
         inline void remove(const QString &key)
         {
             mSettings.remove(key);
+            mUserSettings.remove(key);
         }
 
         inline QStringList getDataDirs() { return mDataDirs; }
@@ -52,7 +58,11 @@ namespace Launcher
         bool hasMaster();
 
         QStringList values(const QString &key, const QStringList &defaultValues = QStringList());
+
         bool readFile(QTextStream &stream);
+        bool readFile(QTextStream &stream, QMap<QString, QString> &settings);
+        bool readUserFile(QTextStream &stream);
+
         bool writeFile(QTextStream &stream);
 
     private:
@@ -60,6 +70,7 @@ namespace Launcher
 
         void validatePaths();
         QMap<QString, QString> mSettings;
+        QMap<QString, QString> mUserSettings;
 
         QStringList mDataDirs;
         QString mDataLocal;
