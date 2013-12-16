@@ -8,6 +8,11 @@ namespace ESM
 
 using namespace Misc;
 
+    std::string ESMReader::getName() const
+    {
+        return mCtx.filename;
+    }
+
 ESM_Context ESMReader::getContext()
 {
     // Update the file position before returning

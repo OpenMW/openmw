@@ -52,7 +52,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         if (index == (int)~0) {
             // Tried to load a parent file that has not been loaded yet. This is bad,
             //  the launcher should have taken care of this.
-            std::string fstring = "File " + fname + " asks for parent file " + masters[j].name
+            std::string fstring = "File " + esm.getName() + " asks for parent file " + masters[j].name
                 + ", but it has not been loaded yet. Please check your load order.";
             esm.fail(fstring);
         }
