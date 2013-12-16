@@ -172,7 +172,7 @@ namespace MWClass
         if (ptr.getCellRef().mCharge == -1)
             return ref->mBase->mData.mValue;
         else
-            return ref->mBase->mData.mValue * (ptr.getCellRef().mCharge / getItemMaxHealth(ptr));
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Armor::registerSelf()
@@ -248,7 +248,7 @@ namespace MWClass
                 + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight) + " (" + typeText + ")";
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");

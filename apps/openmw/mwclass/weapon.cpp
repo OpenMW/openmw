@@ -157,7 +157,7 @@ namespace MWClass
         if (ptr.getCellRef().mCharge == -1)
             return ref->mBase->mData.mValue;
         else
-            return ref->mBase->mData.mValue * (ptr.getCellRef().mCharge / getItemMaxHealth(ptr));
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Weapon::registerSelf()
@@ -346,7 +346,7 @@ namespace MWClass
         }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         info.enchant = ref->mBase->mEnchant;
 

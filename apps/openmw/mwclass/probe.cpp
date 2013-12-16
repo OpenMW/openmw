@@ -88,7 +88,7 @@ namespace MWClass
         if (ptr.getCellRef().mCharge == -1)
             return ref->mBase->mData.mValue;
         else
-            return ref->mBase->mData.mValue * (ptr.getCellRef().mCharge / getItemMaxHealth(ptr));
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Probe::registerSelf()
@@ -140,7 +140,7 @@ namespace MWClass
         text += "\n#{sUses}: " + MWGui::ToolTips::toString(remainingUses);
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
