@@ -473,7 +473,7 @@ void WeatherManager::update(float duration)
             {
                 // pick a random sound
                 int sound = rand() % 4;
-                std::string* soundName;
+                std::string* soundName = NULL;
                 if (sound == 0) soundName = &mThunderSoundID0;
                 else if (sound == 1) soundName = &mThunderSoundID1;
                 else if (sound == 2) soundName = &mThunderSoundID2;

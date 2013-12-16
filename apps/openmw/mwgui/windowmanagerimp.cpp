@@ -112,9 +112,6 @@ namespace MWGui
       , mPlayerMinorSkills()
       , mPlayerMajorSkills()
       , mPlayerSkillValues()
-      , mPlayerHealth()
-      , mPlayerMagicka()
-      , mPlayerFatigue()
       , mGui(NULL)
       , mGuiModes()
       , mCursorManager(NULL)
@@ -590,31 +587,7 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
         mHud->setValue (id, value);
         mCharGen->setValue(id, value);
-        if (id == "HBar")
-        {
-            mPlayerHealth = value;
-        }
-        else if (id == "MBar")
-        {
-            mPlayerMagicka = value;
-        }
-        else if (id == "FBar")
-        {
-            mPlayerFatigue = value;
-        }
     }
-
-    #if 0
-    MWMechanics::DynamicStat<int> WindowManager::getValue(const std::string& id)
-    {
-        if(id == "HBar")
-            return mPlayerHealth;
-        else if (id == "MBar")
-            return mPlayerMagicka;
-        else if (id == "FBar")
-            return mPlayerFatigue;
-    }
-    #endif
 
     void WindowManager::setValue (const std::string& id, const std::string& value)
     {

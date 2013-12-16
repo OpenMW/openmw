@@ -37,6 +37,7 @@ MWMechanics::AiSequence& MWMechanics::AiSequence::operator= (const AiSequence& s
     {
         clear();
         copy (sequence);
+        mDone = sequence.mDone;
     }
     
     return *this;

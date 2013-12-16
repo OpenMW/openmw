@@ -214,7 +214,7 @@ namespace MWWorld
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
+      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(false),
       mFacedDistance(FLT_MAX), mGodMode(false)
     {
         mPhysics = new PhysicsSystem(renderer);

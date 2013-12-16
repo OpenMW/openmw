@@ -160,10 +160,10 @@ void Land::loadData(int flags)
     }
     mEsm->restoreContext(mContext);
 
-    memset(mLandData->mNormals, 0, LAND_NUM_VERTS * 3);
+    memset(mLandData->mNormals, 0, sizeof(mLandData->mNormals));
 
     if (mEsm->isNextSub("VNML")) {
-        condLoad(actual, DATA_VNML, mLandData->mNormals, sizeof(VNML));
+        condLoad(actual, DATA_VNML, mLandData->mNormals, sizeof(mLandData->mNormals));
     }
 
     if (mEsm->isNextSub("VHGT")) {

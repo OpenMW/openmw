@@ -209,6 +209,7 @@ namespace MWScript
                         .getDynamic (mIndex));
 
                     stat.setModified (value, 0);
+                    stat.setCurrent(value);
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }

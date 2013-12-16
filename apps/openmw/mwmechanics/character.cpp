@@ -1112,7 +1112,7 @@ void CharacterController::resurrect()
 
     if(mAnimation)
         mAnimation->disable(mCurrentDeath);
-    mCurrentDeath.empty();
+    mCurrentDeath.clear();
     mDeathState = CharState_None;
 }
 
