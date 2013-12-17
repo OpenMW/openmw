@@ -9,20 +9,42 @@
 #include "esmwriter.hpp"
 #include "defs.hpp"
 
+namespace
+{
+    ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
+    void adjustRefNum (ESM::CellRef::RefNum& refNum, ESM::ESMReader& reader)
+    {
+        int local = (refNum.mIndex & 0xff000000) >> 24;
+
+        if (local)
+        {
+            // If the most significant 8 bits are used, then this reference already exists.
+            // In this case, do not spawn a new reference, but overwrite the old one.
+            refNum.mIndex &= 0x00ffffff; // delete old plugin ID
+            refNum.mContentFile = reader.getGameFiles()[local-1].index;
+        }
+        else
+        {
+            // This is an addition by the present plugin. Set the corresponding plugin index.
+            refNum.mContentFile = reader.getIndex();
+        }
+    }
+}
+
 namespace ESM
 {
     unsigned int Cell::sRecordId = REC_CELL;
 
-/// Some overloaded compare operators.
-bool operator==(const MovedCellRef& ref, int pRefnum)
-{
-  return (ref.mRefnum == pRefnum);
-}
+    // Some overloaded compare operators.
+    bool operator== (const MovedCellRef& ref, const CellRef::RefNum& refNum)
+    {
+        return ref.mRefNum == refNum;
+    }
 
-bool operator==(const CellRef& ref, int pRefnum)
-{
-  return (ref.mRefnum == pRefnum);
-}
+    bool operator== (const CellRef& ref, const CellRef::RefNum& refNum)
+    {
+        return ref.mRefNum == refNum;
+    }
 
 
 void Cell::load(ESMReader &esm, bool saveContext)
@@ -163,48 +185,16 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         //esm.getHNOT(NAM0, "NAM0");
     }
 
-    esm.getHNT(ref.mRefnum, "FRMR");
+    esm.getHNT (ref.mRefNum.mIndex, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
 
     // Identify references belonging to a parent file and adapt the ID accordingly.
-    int local = (ref.mRefnum & 0xff000000) >> 24;
-    size_t global = esm.getIndex() + 1;
-    if (local)
-    {
-        // If the most significant 8 bits are used, then this reference already exists.
-        // In this case, do not spawn a new reference, but overwrite the old one.
-        ref.mRefnum &= 0x00ffffff; // delete old plugin ID
-        const std::vector<Header::MasterData> &masters = esm.getGameFiles();
-        global = masters[local-1].index + 1;
-        ref.mRefnum |= global << 24; // insert global plugin ID
-    }
-    else
-    {
-        // This is an addition by the present plugin. Set the corresponding plugin index.
-        ref.mRefnum |= global << 24; // insert global plugin ID
-    }
+    adjustRefNum (ref.mRefNum, esm);
 
     // getHNOT will not change the existing value if the subrecord is
     // missing
     ref.mScale = 1.0;
     esm.getHNOT(ref.mScale, "XSCL");
-
-    // TODO: support loading references from saves, there are tons of keys not recognized yet.
-    // The following is just an incomplete list.
-    if (esm.isNextSub("ACTN"))
-        esm.skipHSub();
-    if (esm.isNextSub("STPR"))
-        esm.skipHSub();
-    if (esm.isNextSub("ACDT"))
-        esm.skipHSub();
-    if (esm.isNextSub("ACSC"))
-        esm.skipHSub();
-    if (esm.isNextSub("ACSL"))
-        esm.skipHSub();
-    if (esm.isNextSub("CHRD"))
-        esm.skipHSub();
-    else if (esm.isNextSub("CRED")) // ???
-        esm.skipHSub();
 
     ref.mOwner = esm.getHNOString("ANAM");
     ref.mGlob = esm.getHNOString("BNAM");
@@ -271,16 +261,10 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
 
 bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
 {
-    esm.getHT(mref.mRefnum);
+    esm.getHT(mref.mRefNum.mIndex);
     esm.getHNOT(mref.mTarget, "CNDT");
 
-    // Identify references belonging to a parent file and adapt the ID accordingly.
-    int local = (mref.mRefnum & 0xff000000) >> 24;
-    size_t global = esm.getIndex() + 1;
-    mref.mRefnum &= 0x00ffffff; // delete old plugin ID
-    const std::vector<Header::MasterData> &masters = esm.getGameFiles();
-    global = masters[local-1].index + 1;
-    mref.mRefnum |= global << 24; // insert global plugin ID
+    adjustRefNum (mref.mRefNum, esm);
 
     return true;
 }

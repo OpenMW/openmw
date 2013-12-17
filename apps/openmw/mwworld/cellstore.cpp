@@ -38,7 +38,7 @@ namespace MWWorld
     void CellRefList<X>::load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
     {
         // Get existing reference, in case we need to overwrite it.
-        typename std::list<LiveRef>::iterator iter = std::find(mList.begin(), mList.end(), ref.mRefnum);
+        typename std::list<LiveRef>::iterator iter = std::find(mList.begin(), mList.end(), ref.mRefNum);
 
         // Skip this when reference was deleted.
         // TODO: Support respawning references, in this case, we need to track it somehow.
@@ -148,13 +148,14 @@ namespace MWWorld
             mCell->restore (esm[index], i);
 
             ESM::CellRef ref;
+            ref.mRefNum.mContentFile = -1;
 
             // Get each reference in turn
             while(mCell->getNextRef(esm[index], ref))
             {
                 // Don't load reference if it was moved to a different cell.
                 std::string lowerCase = Misc::StringUtils::lowerCase(ref.mRefID);
-                ESM::MovedCellRefTracker::const_iterator iter = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefnum);
+                ESM::MovedCellRefTracker::const_iterator iter = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
                 if (iter != mCell->mMovedRefs.end()) {
                     continue;
                 }

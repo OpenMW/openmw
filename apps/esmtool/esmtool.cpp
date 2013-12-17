@@ -244,7 +244,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
 
         if(quiet) continue;
 
-        std::cout << "    Refnum: " << ref.mRefnum << std::endl;
+        std::cout << "    Refnum: " << ref.mRefNum.mIndex << std::endl;
         std::cout << "    ID: '" << ref.mRefID << "'\n";
         std::cout << "    Owner: '" << ref.mOwner << "'\n";
         std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";

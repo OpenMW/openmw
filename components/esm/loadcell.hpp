@@ -27,7 +27,7 @@ class ESMWriter;
 class MovedCellRef
 {
 public:
-    int mRefnum;
+    CellRef::RefNum mRefNum;
 
     // Target cell (if exterior)
     int mTarget[2];
@@ -37,9 +37,9 @@ public:
     //  introduces a henchman (which no one uses), so we may need this as well.
 };
 
-/// Overloaded copare operator used to search inside a list of cell refs.
-bool operator==(const MovedCellRef& ref, int pRefnum);
-bool operator==(const CellRef& ref, int pRefnum);
+/// Overloaded compare operator used to search inside a list of cell refs.
+bool operator==(const MovedCellRef& ref, const CellRef::RefNum& refNum);
+bool operator==(const CellRef& ref, const CellRef::RefNum& refNum);
 
 typedef std::list<MovedCellRef> MovedCellRefTracker;
 typedef std::list<CellRef> CellRefTracker;
