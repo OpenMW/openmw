@@ -112,6 +112,8 @@ namespace MWBase
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
 
+            virtual void useDeathCamera() = 0;
+
             virtual void setWaterHeight(const float height) = 0;
 
             virtual void toggleWater() = 0;

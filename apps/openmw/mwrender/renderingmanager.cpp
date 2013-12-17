@@ -221,6 +221,11 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
+ MWRender::Camera* RenderingManager::getCamera() const
+{
+    return mCamera;
+}
+
 void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
     mObjects.removeCell(store);

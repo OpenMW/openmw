@@ -1052,10 +1052,19 @@ void CharacterController::forceStateUpdate()
     }
 }
 
-void CharacterController::kill()
+bool CharacterController::kill()
 {
-    if(mDeathState != CharState_None)
-        return;
+    if( isDead() )
+    {
+        //player's death animation is over
+        if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) 
+                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu )
+        {
+            MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setHealth(0);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        }
+        return false;
+    }
 
     if(mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
@@ -1100,6 +1109,8 @@ void CharacterController::kill()
 
     mIdleState = CharState_None;
     mCurrentIdle.clear();
+
+    return true;
 }
 
 void CharacterController::resurrect()

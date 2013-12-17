@@ -19,7 +19,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
- #include "../mwbase/statemanager.hpp"
 
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -571,19 +570,15 @@ namespace MWMechanics
                         stats.resurrect();
                         continue;
                     }
-
-                    MWBase::Environment::get().getStateManager()->endGame();
                 }
 
-                if(iter->second->isDead())
-                    continue;
+                if (iter->second->kill())
+                {
+                    ++mDeathCount[cls.getId(iter->first)];
 
-                iter->second->kill();
-
-                ++mDeathCount[cls.getId(iter->first)];
-
-                if(cls.isEssential(iter->first))
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+                    if(cls.isEssential(iter->first))
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+                }
             }
         }
 

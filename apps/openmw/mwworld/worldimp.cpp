@@ -400,6 +400,17 @@ namespace MWWorld
         return mCells.getInterior (name);
     }
 
+    void World::useDeathCamera()
+    {
+        if(mRendering->getCamera()->isVanityOrPreviewModeEnabled() )
+        {
+            mRendering->getCamera()->togglePreviewMode(false);
+            mRendering->getCamera()->toggleVanityMode(false);
+        }
+        if(mRendering->getCamera()->isFirstPerson())
+            togglePOV();
+    }
+
     MWWorld::Player& World::getPlayer()
     {
         return *mPlayer;
