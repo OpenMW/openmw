@@ -220,9 +220,8 @@ namespace Terrain
                         ++neededTextureUnits; // layer texture
 
                         // Check if this layer has a normal map
-                        if (mNormalMapping && !mLayerList[layerOffset].mNormalMap.empty())
+                        if (mNormalMapping && !mLayerList[layerIndex].mNormalMap.empty() && !renderCompositeMap)
                             ++neededTextureUnits; // normal map
-
                         if (neededTextureUnits <= remainingTextureUnits)
                         {
                             // We can fit another!
