@@ -334,6 +334,8 @@ namespace Terrain
                     // Make sure the pass index is fed to the permutation handler, because blendmap components may be different
                     p->mShaderProperties.setProperty ("pass_index", sh::makeProperty(new sh::IntValue(layerOffset)));
 
+                    assert ((int)p->mTexUnits.size() == OGRE_MAX_TEXTURE_LAYERS - remainingTextureUnits);
+
                     layerOffset += numLayersInThisPass;
                 }
             }
