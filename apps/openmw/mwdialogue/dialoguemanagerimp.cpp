@@ -413,10 +413,6 @@ namespace MWDialogue
 
     void DialogueManager::goodbyeSelected()
     {
-        // Do not close the dialogue window if the player has to answer a question
-        if (mIsInChoice)
-            return;
-
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
         // Apply disposition change to NPC's base disposition
@@ -474,6 +470,8 @@ namespace MWDialogue
 
     void DialogueManager::goodbye()
     {
+        mIsInChoice = true;
+
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
         win->goodbye();
