@@ -12,6 +12,7 @@ namespace MWState
     class StateManager : public MWBase::StateManager
     {
             bool mQuitRequest;
+            bool mAskLoadRecent;
             State mState;
             CharacterManager mCharacterManager;
             double mTimePlayed;
@@ -27,6 +28,8 @@ namespace MWState
             virtual void requestQuit();
 
             virtual bool hasQuitRequest() const;
+
+            virtual void askLoadRecent();
 
             virtual State getState() const;
 

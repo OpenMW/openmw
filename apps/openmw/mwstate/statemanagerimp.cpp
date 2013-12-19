@@ -32,7 +32,7 @@ void MWState::StateManager::cleanup()
 }
 
 MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::string& game)
-: mQuitRequest (false), mState (State_NoGame), mCharacterManager (saves, game), mTimePlayed (0)
+: mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, game), mTimePlayed (0)
 {
 
 }
@@ -45,6 +45,48 @@ void MWState::StateManager::requestQuit()
 bool MWState::StateManager::hasQuitRequest() const
 {
     return mQuitRequest;
+}
+
+void MWState::StateManager::askLoadRecent()
+{
+    if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu)
+        return;
+
+    if( !mAskLoadRecent )
+    {
+        if(MWBase::Environment::get().getStateManager()->getCurrentCharacter()->begin()
+            == MWBase::Environment::get().getStateManager()->getCurrentCharacter()->end() )//no saves
+        {
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        }
+        else
+        {
+            MWState::Slot lastSave = *getCurrentCharacter()->begin();
+            std::vector<std::string> buttons;
+            buttons.push_back("Yes");
+            buttons.push_back("No");
+            std::string message = "The most recent Save Game is '" + lastSave.mProfile.mDescription + "'.\n Would you like to load it?";
+            MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
+            mAskLoadRecent = true;
+        }
+    }
+    else
+    {
+        int iButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
+        if(iButton==0)
+        {
+            mAskLoadRecent = false;
+            //Load last saved game for current character
+            MWState::Character *curCharacter = getCurrentCharacter();
+            MWState::Slot lastSave = *curCharacter->begin();
+            loadGame(curCharacter, &lastSave);
+        }
+        else if(iButton==1)
+        {
+            mAskLoadRecent = false;
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        }
+    }
 }
 
 MWState::StateManager::State MWState::StateManager::getState() const
