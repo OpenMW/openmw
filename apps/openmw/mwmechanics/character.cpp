@@ -712,6 +712,20 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     if (MWBase::Environment::get().getWorld()->isNight())
     {
       MWWorld::ContainerStoreIterator item = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+      if (item != inv.end() && item->getTypeName() != typeid(ESM::Light).name())
+      {
+        inv.unequipItem(*item, mPtr);
+      }
+      else if (item == inv.end())
+      {
+        MWWorld::Ptr itemPtr = inv.search("torch_infinite_time");
+        if (!itemPtr.isEmpty())
+        {
+          item = inv.add(itemPtr, mPtr);
+          inv.equip(MWWorld::InventoryStore::Slot_CarriedLeft, item, mPtr);
+        }
+      }
+
       if (item != inv.end() && item->getTypeName() == typeid(ESM::Light).name())
       {
         mAnimation->showLights(true);
@@ -727,8 +741,14 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
       if (mAnimation->isPlaying("torch"))
       {
         mAnimation->disable("torch");
+        mAnimation->showLights(false);
+        MWWorld::ContainerStoreIterator item = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        if (item != inv.end() && item->getTypeName() == typeid(ESM::Light).name())
+        {
+          inv.unequipItem(*item, mPtr);
+          inv.add(*item, mPtr);
+        }
       }
-      mAnimation->showLights(false);
     }
 
     return forcestateupdate;
