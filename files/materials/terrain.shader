@@ -335,7 +335,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 
         float4 albedo = float4(0,0,0,1);
 
-        float2 layerUV = UV * 16;
+        float2 layerUV = float2(UV.x, 1.f-UV.y) * 16; // Reverse Y, required to get proper tangents
         float2 thisLayerUV;
         float4 normalTex;
 
@@ -355,8 +355,6 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 #endif
 
         thisLayerUV = layerUV;
-        // required to play nicely with the tangents
-        thisLayerUV.y *= -1;
 #if @shPropertyBool(use_parallax_@shIterator)
         thisLayerUV += TSeyeDir.xy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS );
 #endif
