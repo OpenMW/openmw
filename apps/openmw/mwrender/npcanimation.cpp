@@ -677,17 +677,17 @@ void NpcAnimation::showShield(bool show)
 
 void NpcAnimation::showLights(bool show)
 {
-    mShowLights = show;
     MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    MWWorld::ContainerStoreIterator light = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
-    if(show && shield != inv.end() && shield->getTypeName() == typeid(ESM::Light).name())
+    if(show && light != inv.end() && light->getTypeName() == typeid(ESM::Light).name())
     {
-        Ogre::Vector3 glowColor = getEnchantmentColor(*shield);
-        std::string mesh = MWWorld::Class::get(*shield).getModel(*shield);
+        mShowLights = show;
+        Ogre::Vector3 glowColor = getEnchantmentColor(*light);
+        std::string mesh = MWWorld::Class::get(*light).getModel(*light);
         addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                                   mesh, !shield->getClass().getEnchantment(*shield).empty(), &glowColor);
-        addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], shield->get<ESM::Light>()->mBase);
+                                   mesh, !light->getClass().getEnchantment(*light).empty(), &glowColor);
+        addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], light->get<ESM::Light>()->mBase);
     }
     else
     {
