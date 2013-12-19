@@ -34,6 +34,8 @@ namespace CSVWorld
             QAction *mCreateAction;
             QAction *mRevertAction;
             QAction *mDeleteAction;
+            QAction *mMoveUpAction;
+            QAction *mMoveDownAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
             bool mEditLock;
@@ -49,8 +51,9 @@ namespace CSVWorld
 
         public:
 
-            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete);
+            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete, bool sorting);
             ///< \param createAndDelete Allow creation and deletion of records.
+            /// \param sorting Allow changing order of rows in the view via column headers.
 
             void setEditLock (bool locked);
 
@@ -78,6 +81,10 @@ namespace CSVWorld
             void deleteRecord();
 
             void editRecord();
+
+            void moveUpRecord();
+
+            void moveDownRecord();
 
         public slots:
 

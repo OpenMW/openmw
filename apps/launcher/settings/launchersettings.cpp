@@ -5,15 +5,17 @@
 #include <QRegExp>
 #include <QMap>
 
-LauncherSettings::LauncherSettings()
+#include <QDebug>
+
+Launcher::LauncherSettings::LauncherSettings()
 {
 }
 
-LauncherSettings::~LauncherSettings()
+Launcher::LauncherSettings::~LauncherSettings()
 {
 }
 
-QStringList LauncherSettings::values(const QString &key, Qt::MatchFlags flags)
+QStringList Launcher::LauncherSettings::values(const QString &key, Qt::MatchFlags flags)
 {
     QMap<QString, QString> settings = SettingsBase::getSettings();
 
@@ -34,7 +36,7 @@ QStringList LauncherSettings::values(const QString &key, Qt::MatchFlags flags)
     return result;
 }
 
-QStringList LauncherSettings::subKeys(const QString &key)
+QStringList Launcher::LauncherSettings::subKeys(const QString &key)
 {
     QMap<QString, QString> settings = SettingsBase::getSettings();
     QStringList keys = settings.uniqueKeys();
@@ -44,12 +46,9 @@ QStringList LauncherSettings::subKeys(const QString &key)
     QStringList result;
 
     foreach (const QString &currentKey, keys) {
-
         if (keyRe.indexIn(currentKey) != -1) {
-
             QString prefixedKey = keyRe.cap(1);
             if(prefixedKey.startsWith(key)) {
-
                 QString subKey = prefixedKey.remove(key);
                 if (!subKey.isEmpty())
                     result.append(subKey);
@@ -61,7 +60,7 @@ QStringList LauncherSettings::subKeys(const QString &key)
     return result;
 }
 
-bool LauncherSettings::writeFile(QTextStream &stream)
+bool Launcher::LauncherSettings::writeFile(QTextStream &stream)
 {
     QString sectionPrefix;
     QRegExp sectionRe("([^/]+)/(.+)$");

@@ -342,4 +342,18 @@ namespace MWMechanics
     {
         return mLastHitObject;
     }
+
+    bool CreatureStats::canUsePower(const std::string &power) const
+    {
+        std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.find(power);
+        if (it == mUsedPowers.end() || it->second + 24 <= MWBase::Environment::get().getWorld()->getTimeStamp())
+            return true;
+        else
+            return false;
+    }
+
+    void CreatureStats::usePower(const std::string &power)
+    {
+        mUsedPowers[power] = MWBase::Environment::get().getWorld()->getTimeStamp();
+    }
 }

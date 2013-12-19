@@ -4,6 +4,10 @@
 #include <map>
 #include <string>
 
+#include "../mwworld/ptr.hpp"
+
+#include "magiceffects.hpp"
+
 namespace ESM
 {
     struct Spell;
@@ -21,7 +25,7 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::map<std::string, float> TContainer; // ID, normalised magnitude
+            typedef std::map<std::string, std::vector<float> > TContainer; // ID, normalised magnitudes
             typedef TContainer::const_iterator TIterator;
 
         private:
@@ -30,6 +34,11 @@ namespace MWMechanics
             std::string mSelectedSpell;
 
         public:
+
+            void purgeCommonDisease();
+            void purgeBlightDisease();
+            void purgeCorprusDisease();
+            void purgeCurses();
 
             TIterator begin() const;
 
@@ -57,6 +66,8 @@ namespace MWMechanics
             bool hasCommonDisease() const;
 
             bool hasBlightDisease() const;
+
+            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
     };
 }
 

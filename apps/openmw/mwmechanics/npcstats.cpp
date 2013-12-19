@@ -86,7 +86,7 @@ void MWMechanics::NpcStats::setMovementFlag (Flag flag, bool state)
 
 const MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index) const
 {
-    if (index<0 || index>=27)
+    if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
     return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
@@ -94,7 +94,7 @@ const MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index) cons
 
 MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
 {
-    if (index<0 || index>=27)
+    if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
     return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);

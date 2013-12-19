@@ -40,12 +40,17 @@ namespace MWMechanics
 
         std::string mLastHitObject; // The last object to hit this actor
 
+        std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
+
     protected:
         bool mIsWerewolf;
         Stat<int> mWerewolfAttributes[8];
 
     public:
         CreatureStats();
+
+        bool canUsePower (const std::string& power) const;
+        void usePower (const std::string& power);
 
         const Stat<int> & getAttribute(int index) const;
 
@@ -166,6 +171,11 @@ namespace MWMechanics
 
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+
+        // Note, this is just a cache to avoid checking the whole container store every frame TODO: Put it somewhere else?
+        std::set<int> mBoundItems;
+        // Same as above
+        std::map<int, std::string> mSummonedCreatures;
     };
 }
 

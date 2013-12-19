@@ -31,9 +31,7 @@ namespace
 
     std::string textureFilteringToStr(const std::string& val)
     {
-        if (val == "none")
-            return "None";
-        else if (val == "anisotropic")
+        if (val == "anisotropic")
             return "Anisotropic";
         else if (val == "bilinear")
             return "Bilinear";
@@ -145,7 +143,7 @@ namespace MWGui
         mReflectObjectsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mReflectTerrainButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mReflectActorsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
-        mTextureFilteringButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringToggled);
+        mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mVSyncButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mMenuTransparencySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
@@ -157,7 +155,7 @@ namespace MWGui
 
         mShadowsEnabledButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadowsLargeDistance->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
-        mShadowsTextureSize->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSize);
+        mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
         mActorShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mStaticsShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mMiscShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -297,22 +295,9 @@ namespace MWGui
         mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
     }
 
-    void SettingsWindow::onShadowTextureSize(MyGUI::Widget* _sender)
+    void SettingsWindow::onShadowTextureSizeChanged(MyGUI::ComboBox *_sender, size_t pos)
     {
-        std::string size = mShadowsTextureSize->getCaption();
-
-        if (size == "512")
-            size = "1024";
-        else if (size == "1024")
-            size = "2048";
-        else if (size == "2048")
-            size = "4096";
-        else
-            size = "512";
-
-        mShadowsTextureSize->setCaption(size);
-
-        Settings::Manager::setString("texture size", "Shadows", size);
+        Settings::Manager::setString("texture size", "Shadows", _sender->getItemNameAt(pos));
         apply();
     }
 
@@ -482,22 +467,9 @@ namespace MWGui
         apply();
     }
 
-    void SettingsWindow::onTextureFilteringToggled(MyGUI::Widget* _sender)
+    void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        std::string current = Settings::Manager::getString("texture filtering", "General");
-        std::string next;
-        if (current == "none")
-            next = "bilinear";
-        else if (current == "bilinear")
-            next = "trilinear";
-        else if (current == "trilinear")
-            next = "anisotropic";
-        else
-            next = "none";
-
-        mTextureFilteringButton->setCaption(textureFilteringToStr(next));
-
-        Settings::Manager::setString("texture filtering", "General", next);
+        Settings::Manager::setString("texture filtering", "General", Misc::StringUtils::lowerCase(_sender->getItemNameAt(pos)));
         apply();
     }
 

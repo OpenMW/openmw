@@ -12,6 +12,7 @@
 #include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
+#include "../../model/world/columns.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -32,11 +33,43 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
         if (mCreateAction)
             menu.addAction (mCreateAction);
 
-        if (listRevertableSelectedIds().size()>0)
-            menu.addAction (mRevertAction);
+        /// \todo Reverting temporarily disabled on tables that support reordering, because
+        /// revert logic currently can not handle reordering.
+        if (mModel->getReordering()==CSMWorld::IdTable::Reordering_None)
+            if (listRevertableSelectedIds().size()>0)
+                menu.addAction (mRevertAction);
 
         if (listDeletableSelectedIds().size()>0)
             menu.addAction (mDeleteAction);
+
+        if (mModel->getReordering()==CSMWorld::IdTable::Reordering_WithinTopic)
+        {
+            /// \todo allow reordering of multiple rows
+            if (selectedRows.size()==1)
+            {
+                int row =selectedRows.begin()->row();
+
+                int column = mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_Topic);
+
+                if (column==-1)
+                    column = mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_Journal);
+
+                if (column!=-1)
+                {
+                    if (row>0 && mProxyModel->data (mProxyModel->index (row, column))==
+                        mProxyModel->data (mProxyModel->index (row-1, column)))
+                    {
+                        menu.addAction (mMoveUpAction);
+                    }
+
+                    if (row<mProxyModel->rowCount()-1 && mProxyModel->data (mProxyModel->index (row, column))==
+                        mProxyModel->data (mProxyModel->index (row+1, column)))
+                    {
+                        menu.addAction (mMoveDownAction);
+                    }
+                }
+            }
+        }
     }
 
     menu.exec (event->globalPos());
@@ -87,19 +120,33 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
         {
             QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
 
+            // check record state
             CSMWorld::RecordBase::State state =
                 static_cast<CSMWorld::RecordBase::State> (
                 mModel->data (mModel->index (index.row(), 1)).toInt());
 
-            if (state!=CSMWorld::RecordBase::State_Deleted)
+            if (state==CSMWorld::RecordBase::State_Deleted)
+                continue;
+
+            // check other columns (only relevant for a subset of the tables)
+            int dialogueTypeIndex =
+                mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_DialogueType);
+
+            if (dialogueTypeIndex!=-1)
             {
-                int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+                int type = mModel->data (mModel->index (index.row(), dialogueTypeIndex)).toInt();
 
-                std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
-                    toString().toUtf8().constData();
-
-                deletableIds.push_back (id);
+                if (type!=ESM::Dialogue::Topic && type!=ESM::Dialogue::Journal)
+                    continue;
             }
+
+            // add the id to the collection
+            int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+            std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
+                toString().toUtf8().constData();
+
+            deletableIds.push_back (id);
         }
     }
 
@@ -107,7 +154,7 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 }
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
-    bool createAndDelete)
+    bool createAndDelete, bool sorting)
     : mUndoStack (undoStack), mCreateAction (0), mEditLock (false), mRecordStatusDisplay (0)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
@@ -118,7 +165,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     setModel (mProxyModel);
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
     verticalHeader()->hide();
-    setSortingEnabled (true);
+    setSortingEnabled (sorting);
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
@@ -161,6 +208,14 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     mDeleteAction = new QAction (tr ("Delete Record"), this);
     connect (mDeleteAction, SIGNAL (triggered()), this, SLOT (deleteRecord()));
     addAction (mDeleteAction);
+
+    mMoveUpAction = new QAction (tr ("Move Up"), this);
+    connect (mMoveUpAction, SIGNAL (triggered()), this, SLOT (moveUpRecord()));
+    addAction (mMoveUpAction);
+
+    mMoveDownAction = new QAction (tr ("Move Down"), this);
+    connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
+    addAction (mMoveDownAction);
 
     connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
@@ -237,6 +292,64 @@ void CSVWorld::Table::editRecord()
 
         if (selectedRows.size()==1)
             emit editRequest (selectedRows.begin()->row());
+    }
+}
+
+void CSVWorld::Table::moveUpRecord()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    if (selectedRows.size()==1)
+    {
+        int row2 =selectedRows.begin()->row();
+
+        if (row2>0)
+        {
+            int row = row2-1;
+
+            row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
+            row2 = mProxyModel->mapToSource (mProxyModel->index (row2, 0)).row();
+
+            if (row2<=row)
+                throw std::runtime_error ("Inconsistent row order");
+
+            std::vector<int> newOrder (row2-row+1);
+            newOrder[0] = row2-row;
+            newOrder[row2-row] = 0;
+            for (int i=1; i<row2-row; ++i)
+                newOrder[i] = i;
+
+            mUndoStack.push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
+        }
+    }
+}
+
+void CSVWorld::Table::moveDownRecord()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    if (selectedRows.size()==1)
+    {
+        int row =selectedRows.begin()->row();
+
+        if (row<mProxyModel->rowCount()-1)
+        {
+            int row2 = row+1;
+
+            row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
+            row2 = mProxyModel->mapToSource (mProxyModel->index (row2, 0)).row();
+
+            if (row2<=row)
+                throw std::runtime_error ("Inconsistent row order");
+
+            std::vector<int> newOrder (row2-row+1);
+            newOrder[0] = row2-row;
+            newOrder[row2-row] = 0;
+            for (int i=1; i<row2-row; ++i)
+                newOrder[i] = i;
+
+            mUndoStack.push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
+        }
     }
 }
 

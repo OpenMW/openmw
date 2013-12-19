@@ -136,33 +136,54 @@ void CSVDoc::View::setupMechanicsMenu()
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
     mechanics->addAction (gmsts);
 
-    QAction *skills = new QAction (tr ("Skills"), this);
-    connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
-    mechanics->addAction (skills);
-
-    QAction *classes = new QAction (tr ("Classes"), this);
-    connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
-    mechanics->addAction (classes);
-
-    QAction *factions = new QAction (tr ("Factions"), this);
-    connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
-    mechanics->addAction (factions);
-
-    QAction *races = new QAction (tr ("Races"), this);
-    connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
-    mechanics->addAction (races);
-
     QAction *scripts = new QAction (tr ("Scripts"), this);
     connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
     mechanics->addAction (scripts);
 
-    QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
-    connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
-    mechanics->addAction (birthsigns);
-
     QAction *spells = new QAction (tr ("Spells"), this);
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
     mechanics->addAction (spells);
+}
+
+void CSVDoc::View::setupCharacterMenu()
+{
+    QMenu *characters = menuBar()->addMenu (tr ("Characters"));
+
+    QAction *skills = new QAction (tr ("Skills"), this);
+    connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
+    characters->addAction (skills);
+
+    QAction *classes = new QAction (tr ("Classes"), this);
+    connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
+    characters->addAction (classes);
+
+    QAction *factions = new QAction (tr ("Factions"), this);
+    connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
+    characters->addAction (factions);
+
+    QAction *races = new QAction (tr ("Races"), this);
+    connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
+    characters->addAction (races);
+
+    QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
+    connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
+    characters->addAction (birthsigns);
+
+    QAction *topics = new QAction (tr ("Topics"), this);
+    connect (topics, SIGNAL (triggered()), this, SLOT (addTopicsSubView()));
+    characters->addAction (topics);
+
+    QAction *journals = new QAction (tr ("Journals"), this);
+    connect (journals, SIGNAL (triggered()), this, SLOT (addJournalsSubView()));
+    characters->addAction (journals);
+
+    QAction *topicInfos = new QAction (tr ("Topic Infos"), this);
+    connect (topicInfos, SIGNAL (triggered()), this, SLOT (addTopicInfosSubView()));
+    characters->addAction (topicInfos);
+
+    QAction *journalInfos = new QAction (tr ("Journal Infos"), this);
+    connect (journalInfos, SIGNAL (triggered()), this, SLOT (addJournalInfosSubView()));
+    characters->addAction (journalInfos);
 }
 
 void CSVDoc::View::setupAssetsMenu()
@@ -181,6 +202,7 @@ void CSVDoc::View::setupUi()
     setupViewMenu();
     setupWorldMenu();
     setupMechanicsMenu();
+    setupCharacterMenu();
     setupAssetsMenu();
 }
 
@@ -410,6 +432,26 @@ void CSVDoc::View::addFiltersSubView()
 void CSVDoc::View::addSceneSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Scene);
+}
+
+void CSVDoc::View::addTopicsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Topics);
+}
+
+void CSVDoc::View::addJournalsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Journals);
+}
+
+void CSVDoc::View::addTopicInfosSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_TopicInfos);
+}
+
+void CSVDoc::View::addJournalInfosSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_JournalInfos);
 }
 
 void CSVDoc::View::abortOperation (int type)

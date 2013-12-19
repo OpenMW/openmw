@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#include "components/esm/loadcell.hpp"
+#include <stdexcept>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -17,6 +17,8 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/nifogre/ogrenifloader.hpp>
+
+#include <components/esm/loadcell.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -147,6 +149,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(NULL)
   , mActivationDistanceOverride(-1)
+  , mGrab(true)
 
 {
     std::srand ( std::time(NULL) );
@@ -210,7 +213,9 @@ void OMW::Engine::loadBSA()
         }
         else
         {
-            std::cout << "Archive " << *archive << " not found" << std::endl;
+            std::stringstream message;
+            message << "Archive '" << *archive << "' not found";
+            throw std::runtime_error(message.str());
         }
     }
 }
@@ -261,34 +266,14 @@ void OMW::Engine::setCell (const std::string& cellName)
     mCellName = cellName;
 }
 
-// Set master file (esm)
-// - If the given name does not have an extension, ".esm" is added automatically
-
-void OMW::Engine::addMaster (const std::string& master)
+void OMW::Engine::addContentFile(const std::string& file)
 {
-    mMaster.push_back(master);
-    std::string &str = mMaster.back();
+  if (file.find_last_of(".") == std::string::npos)
+  {
+    throw std::runtime_error("Missing extension in content file!");
+  }
 
-    // Append .esm if not already there
-    std::string::size_type sep = str.find_last_of (".");
-    if (sep == std::string::npos)
-    {
-        str += ".esm";
-    }
-}
-
-// Add plugin file (esp)
-void OMW::Engine::addPlugin (const std::string& plugin)
-{
-    mPlugins.push_back(plugin);
-    std::string &str = mPlugins.back();
-
-    // Append .esp if not already there
-    std::string::size_type sep = str.find_last_of (".");
-    if (sep == std::string::npos)
-    {
-        str += ".esp";
-    }
+  mContentFiles.push_back(file);
 }
 
 void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
@@ -357,8 +342,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
-        Settings::Manager::getString("opengl rtt mode", "Video"),
-        false);
+        Settings::Manager::getString("opengl rtt mode", "Video"));
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -370,7 +354,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "shadows");
-    addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
@@ -392,7 +375,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists);
+    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
@@ -401,7 +384,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setWindowManager (window);
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
+    mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
         mActivationDistanceOverride));
     MWBase::Environment::get().getWorld()->setupPlayer();
@@ -416,8 +399,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
-    for (size_t i = 0; i < mMaster.size(); i++)
-      mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[i]);
+    for (size_t i = 0; i < mContentFiles.size(); i++)
+      mTranslationDataStorage.loadTranslationData(mFileCollections, mContentFiles[i]);
 
     Compiler::registerExtensions (mExtensions); 
 
@@ -432,13 +415,16 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mVerboseScripts, *mScriptContext));
 
     // Create game mechanics system
-    mEnvironment.setMechanicsManager (new MWMechanics::MechanicsManager);
+    MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
+    mEnvironment.setMechanicsManager (mechanics);
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     mEnvironment.getWorld()->renderPlayer();
+    mechanics->buildPlayer();
+    window->updatePlayer();
 
     if (!mNewGame)
     {
@@ -482,7 +468,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 void OMW::Engine::go()
 {
     assert (!mCellName.empty());
-    assert (!mMaster.empty());
+    assert (!mContentFiles.empty());
     assert (!mOgre);
 
     Settings::Manager settings;
@@ -503,7 +489,8 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
-    mOgre->start();
+    while (!mEnvironment.getRequestExit())
+        Ogre::Root::getSingleton().renderOneFrame();
 
     // Save user settings
     settings.saveUser(settingspath);
@@ -529,6 +516,8 @@ void OMW::Engine::activate()
     interpreterContext.activate (ptr, action);
 
     std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
     if (!script.empty())
     {

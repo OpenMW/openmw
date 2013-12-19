@@ -94,7 +94,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
 
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
         const int size = 11;
 
@@ -116,11 +116,11 @@ namespace MWClass
         for (int i=0; i<size; ++i)
             if (sMapping[i][0]==ref->mBase->mData.mType)
             {
-                slots.push_back (int (sMapping[i][1]));
+                slots_.push_back (int (sMapping[i][1]));
                 break;
             }
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr) const
@@ -169,7 +169,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
 
-        return ref->mBase->mData.mValue;
+        if (ptr.getCellRef().mCharge == -1)
+            return ref->mBase->mData.mValue;
+        else
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Armor::registerSelf()
@@ -245,7 +248,7 @@ namespace MWClass
                 + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight) + " (" + typeText + ")";
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
@@ -281,6 +284,7 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         ref->mBase = record;
+        ref->mRef.mRefID = record->mId;
     }
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
@@ -288,12 +292,12 @@ namespace MWClass
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        for (std::vector<int>::const_iterator slot=slots_.first.begin();
+            slot!=slots_.first.end(); ++slot)
         {
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)

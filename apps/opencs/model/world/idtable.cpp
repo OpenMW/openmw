@@ -4,15 +4,12 @@
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
-CSMWorld::IdTable::IdTable (CollectionBase *idCollection) : mIdCollection (idCollection)
-{
-
-}
+CSMWorld::IdTable::IdTable (CollectionBase *idCollection, Reordering reordering)
+: mIdCollection (idCollection), mReordering (reordering)
+{}
 
 CSMWorld::IdTable::~IdTable()
-{
-
-}
+{}
 
 int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 {
@@ -118,7 +115,7 @@ QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
 
 void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type)
 {
-    int index = mIdCollection->getAppendIndex();
+    int index = mIdCollection->getAppendIndex (id, type);
 
     beginInsertRows (QModelIndex(), index, index);
 
@@ -138,7 +135,7 @@ void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& reco
 
     if (index==-1)
     {
-        int index = mIdCollection->getAppendIndex();
+        int index = mIdCollection->getAppendIndex (id);
 
         beginInsertRows (QModelIndex(), index, index);
 
@@ -161,21 +158,23 @@ const CSMWorld::RecordBase& CSMWorld::IdTable::getRecord (const std::string& id)
 
 int CSMWorld::IdTable::searchColumnIndex (Columns::ColumnId id) const
 {
-    int columns = mIdCollection->getColumns();
-
-    for (int i=0; i<columns; ++i)
-        if (mIdCollection->getColumn (i).mColumnId==id)
-            return i;
-
-    return -1;
+    return mIdCollection->searchColumnIndex (id);
 }
 
 int CSMWorld::IdTable::findColumnIndex (Columns::ColumnId id) const
 {
-    int index = searchColumnIndex (id);
+    return mIdCollection->findColumnIndex (id);
+}
 
-    if (index==-1)
-        throw std::logic_error ("invalid column index");
+void CSMWorld::IdTable::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+{
+    if (!newOrder.empty())
+        if (mIdCollection->reorderRows (baseIndex, newOrder))
+            emit dataChanged (index (baseIndex, 0),
+                index (baseIndex+newOrder.size()-1, mIdCollection->getColumns()-1));
+}
 
-    return index;
+CSMWorld::IdTable::Reordering CSMWorld::IdTable::getReordering() const
+{
+    return mReordering;
 }

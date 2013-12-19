@@ -13,6 +13,7 @@
 #include "windowmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
+bool MWBase::Environment::sExit = false;
 
 MWBase::Environment::Environment()
 : mWorld (0), mSoundManager (0), mScriptManager (0), mWindowManager (0),

@@ -10,7 +10,6 @@ namespace SFO
 
     SDLCursorManager::SDLCursorManager() :
         mEnabled(false),
-        mCursorVisible(false),
         mInitialized(false)
     {
     }
@@ -70,27 +69,7 @@ namespace SFO
 
     void SDLCursorManager::_setGUICursor(const std::string &name)
     {
-        if(mEnabled && mCursorVisible)
-        {
-            SDL_SetCursor(mCursorMap.find(name)->second);
-            _setCursorVisible(mCursorVisible);
-        }
-    }
-
-    void SDLCursorManager::_setCursorVisible(bool visible)
-    {
-        if(!mEnabled)
-            return;
-
-        SDL_ShowCursor(visible ? SDL_TRUE : SDL_FALSE);
-    }
-
-    void SDLCursorManager::cursorVisibilityChange(bool visible)
-    {
-        mCursorVisible = visible;
-
-        _setGUICursor(mCurrentCursor);
-        _setCursorVisible(visible);
+        SDL_SetCursor(mCursorMap.find(name)->second);
     }
 
     void SDLCursorManager::receiveCursorInfo(const std::string& name, int rotDegrees, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)

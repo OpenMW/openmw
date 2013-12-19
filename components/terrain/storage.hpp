@@ -11,6 +11,13 @@
 namespace Terrain
 {
 
+    struct LayerInfo
+    {
+        std::string mDiffuseMap;
+        std::string mNormalMap;
+        bool mParallax; // Height info in normal map alpha channel?
+    };
+
     /// We keep storage of terrain data abstract here since we need different implementations for game and editor
     class Storage
     {
@@ -58,7 +65,7 @@ namespace Terrain
         /// @param layerList names of the layer textures used will be written here
         void getBlendmaps (float chunkSize, const Ogre::Vector2& chunkCenter, bool pack,
                            std::vector<Ogre::TexturePtr>& blendmaps,
-                           std::vector<std::string>& layerList);
+                           std::vector<LayerInfo>& layerList);
 
         float getHeightAt (const Ogre::Vector3& worldPos);
 
@@ -77,6 +84,10 @@ namespace Terrain
         UniqueTextureId getVtexIndexAt(int cellX, int cellY,
                                                int x, int y);
         std::string getTextureName (UniqueTextureId id);
+
+        std::map<std::string, LayerInfo> mLayerInfoMap;
+
+        LayerInfo getLayerInfo(const std::string& texture);
     };
 
 }

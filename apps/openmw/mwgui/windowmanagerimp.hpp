@@ -16,6 +16,7 @@ namespace MyGUI
 {
     class Gui;
     class Widget;
+    class Window;
     class UString;
 }
 
@@ -77,6 +78,7 @@ namespace MWGui
   class MerchantRepair;
   class Repair;
   class SoulgemDialog;
+  class Recharge;
   class CompanionWindow;
 
   class WindowManager : public MWBase::WindowManager
@@ -263,6 +265,7 @@ namespace MWGui
     virtual void startTraining(MWWorld::Ptr actor);
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
+    virtual void startRecharge(MWWorld::Ptr soulgem);
 
     virtual void frameStarted(float dt);
 
@@ -276,8 +279,14 @@ namespace MWGui
 
     void onSoulgemDialogButtonPressed (int button);
 
+    virtual bool getCursorVisible();
+
   private:
     bool mConsoleOnlyScripts;
+
+    std::map<MyGUI::Window*, std::string> mTrackedWindows;
+    void trackWindow(OEngine::GUI::Layout* layout, const std::string& name);
+    void onWindowChangeCoord(MyGUI::Window* _sender);
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;
@@ -313,6 +322,7 @@ namespace MWGui
     MerchantRepair* mMerchantRepair;
     SoulgemDialog* mSoulgemDialog;
     Repair* mRepair;
+    Recharge* mRecharge;
     CompanionWindow* mCompanionWindow;
 
     Translation::Storage& mTranslationDataStorage;
@@ -336,8 +346,6 @@ namespace MWGui
     std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;
     SkillList mPlayerMajorSkills, mPlayerMinorSkills;
     std::map<int, MWMechanics::Stat<float> > mPlayerSkillValues;
-    MWMechanics::DynamicStat<float> mPlayerHealth, mPlayerMagicka, mPlayerFatigue;
-
 
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
@@ -365,9 +373,6 @@ namespace MWGui
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
-
-    bool mUseHardwareCursors;
-    void setUseHardwareCursors(bool use);
 
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,

@@ -8,6 +8,7 @@
 #include "loadcont.hpp"
 #include "aipackage.hpp"
 #include "spelllist.hpp"
+#include "loadskil.hpp"
 
 namespace ESM {
 
@@ -20,6 +21,8 @@ class ESMWriter;
 
 struct NPC
 {
+    static unsigned int sRecordId;
+
   // Services
   enum Services
     {
@@ -56,6 +59,12 @@ struct NPC
       Metal     = 0x0800  // Metal blood effect (golden?)
     };
 
+  enum NpcType
+  {
+    NPC_WITH_AUTOCALCULATED_STATS = 12,
+    NPC_DEFAULT = 52
+  };
+
     #pragma pack(push)
     #pragma pack(1)
 
@@ -71,7 +80,7 @@ struct NPC
              mPersonality,
              mLuck;
 
-        char mSkills[27];
+        char mSkills[Skill::Length];
         char mReputation;
         short mHealth, mMana, mFatigue;
         char mDisposition, mFactionID, mRank;
@@ -117,7 +126,7 @@ struct NPC
     std::string mHair, mHead;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     bool isMale() const;
 

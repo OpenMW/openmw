@@ -173,9 +173,14 @@ class CharacterController
 
     bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
 
+    void updateVisibility();
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
+
+    // Be careful when to call this, see comment in Actors
+    void updateContinuousVfx();
 
     void updatePtr(const MWWorld::Ptr &ptr);
 

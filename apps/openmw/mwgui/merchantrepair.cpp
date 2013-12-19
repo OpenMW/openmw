@@ -13,7 +13,6 @@
 #include "../mwworld/containerstore.hpp"
 
 #include "inventorywindow.hpp"
-#include "tradewindow.hpp"
 
 namespace MWGui
 {
@@ -119,7 +118,9 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
     MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
 
     int price = boost::lexical_cast<int>(sender->getUserString("Price"));
-    MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-price);
+
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    player.getClass().getContainerStore(player).remove("gold_001", price, player);
 
     startRepair(mActor);
 }

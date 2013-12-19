@@ -237,7 +237,8 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         Nif::ControllerPtr ctrls = matprop->controller;
         while(!ctrls.empty())
         {
-            warn("Unhandled material controller "+ctrls->recName+" in "+name);
+            if (ctrls->recType != Nif::RC_NiAlphaController && ctrls->recType != Nif::RC_NiMaterialColorController)
+                warn("Unhandled material controller "+ctrls->recName+" in "+name);
             ctrls = ctrls->next;
         }
     }
@@ -333,6 +334,10 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("use_detail_map", sh::makeProperty(new sh::BooleanValue(true)));
         instance->setProperty("detailMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DetailTexture].uvSet)));
     }
+
+    bool useParallax = !texName[Nif::NiTexturingProperty::BumpTexture].empty()
+            && texName[Nif::NiTexturingProperty::BumpTexture].find("_nh.") != std::string::npos;
+    instance->setProperty("use_parallax", sh::makeProperty(new sh::BooleanValue(useParallax)));
 
     for(int i = 0;i < 7;i++)
     {

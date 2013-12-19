@@ -14,6 +14,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "contentloader.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -40,6 +42,8 @@ namespace MWRender
     class CellRender;
     class Animation;
 }
+
+struct ContentLoader;
 
 namespace MWWorld
 {
@@ -83,6 +87,26 @@ namespace MWWorld
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening
 
+            struct ProjectileState
+            {
+                // Id of spell or enchantment to apply when it hits
+                std::string mId;
+
+                // Actor who casted this projectile
+                std::string mActorHandle;
+
+                // Name of item to display as effect source in magic menu (in case we casted an enchantment)
+                std::string mSourceName;
+
+                ESM::EffectList mEffects;
+
+                float mSpeed;
+
+                bool mStack;
+            };
+
+            std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
+
             int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
@@ -90,8 +114,7 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-
-            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
+            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos, bool adjustPos=true);
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
@@ -108,21 +131,35 @@ namespace MWWorld
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            void moveProjectiles(float duration);
+
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
             void ensureNeededRecords();
+
+            /**
+             * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
+             * @param fileCollections- Container which holds content file names and their paths
+             * @param content - Container which holds content file names
+             * @param contentLoader -
+             */
+            void loadContentFiles(const Files::Collections& fileCollections,
+                const std::vector<std::string>& content, ContentLoader& contentLoader);
 
             int mPlayIntro;
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
 
+            /// Called when \a object is moved to an inactive cell
+            void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
-                const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+                const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
@@ -273,7 +310,7 @@ namespace MWWorld
 
             virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
 
-            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -341,14 +378,19 @@ namespace MWWorld
 
             virtual void update (float duration, bool paused);
 
-            virtual bool placeObject (const Ptr& object, float cursorX, float cursorY);
-            ///< place an object into the gameworld at the specified cursor position
+            virtual bool placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
+            ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
+            /// @param number of objects to place
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const Ptr& actor, const Ptr& object);
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount);
+            ///< copy and place an object into the gameworld at the given actor's position
+            /// @param actor giving the dropped object position
+            /// @param object
+            /// @param number of objects to place
 
             virtual bool canPlaceObject(float cursorX, float cursorY);
             ///< @return true if it is possible to place on object at specified cursor location
@@ -407,6 +449,9 @@ namespace MWWorld
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all items in active cells owned by this Npc
 
+            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc);
+            ///< get Line of Sight (morrowind stupid implementation)
+
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
@@ -453,6 +498,13 @@ namespace MWWorld
             virtual bool getGodModeState();
 
             virtual bool toggleGodMode();
+
+            virtual void castSpell (const MWWorld::Ptr& actor);
+
+            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
+                                           const MWWorld::Ptr& actor, const std::string& sourceName);
+
+            virtual void breakInvisibility (const MWWorld::Ptr& actor);
     };
 }
 

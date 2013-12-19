@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Pathgrid::sRecordId = REC_PGRD;
 
 void Pathgrid::load(ESMReader &esm)
 {
@@ -70,25 +72,25 @@ void Pathgrid::load(ESMReader &esm)
         }
     }
 }
-void Pathgrid::save(ESMWriter &esm)
+void Pathgrid::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mData, 12);
     esm.writeHNCString("NAME", mCell);
-    
+
     if (!mPoints.empty())
     {
         esm.startSubRecord("PGRP");
-        for (PointList::iterator it = mPoints.begin(); it != mPoints.end(); ++it)
+        for (PointList::const_iterator it = mPoints.begin(); it != mPoints.end(); ++it)
         {
             esm.writeT(*it);
         }
         esm.endRecord("PGRP");
     }
-    
+
     if (!mEdges.empty())
     {
         esm.startSubRecord("PGRC");
-        for (std::vector<Edge>::iterator it = mEdges.begin(); it != mEdges.end(); ++it)
+        for (std::vector<Edge>::const_iterator it = mEdges.begin(); it != mEdges.end(); ++it)
         {
             esm.writeT(it->mV1);
         }

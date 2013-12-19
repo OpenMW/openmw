@@ -98,6 +98,8 @@ namespace MWClass
             data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr),
                                        MWBase::Environment::get().getWorld()->getStore());
 
+            data->mContainerStore.add("gold_001", ref->mBase->mData.mGold, ptr);
+
             // store
             ptr.getRefData().setCustomData (data.release());
         }
@@ -197,7 +199,7 @@ namespace MWClass
         else
         {
             MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
-            fatigue.setCurrent(fatigue.getCurrent() - damage);
+            fatigue.setCurrent(fatigue.getCurrent() - damage, true);
             getCreatureStats(ptr).setFatigue(fatigue);
         }
     }

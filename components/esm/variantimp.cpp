@@ -193,7 +193,7 @@ void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, Var
     }
     else if (format==Variant::Format_Gmst || format==Variant::Format_Info)
     {
-        if (type==VT_Int)
+        if (type!=VT_Int)
         {
             std::ostringstream stream;
             stream

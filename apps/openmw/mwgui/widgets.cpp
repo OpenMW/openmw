@@ -689,22 +689,26 @@ namespace MWGui
             int total_width = 0;
             int total_height = 0;
             std::vector< std::pair<MyGUI::IntSize, bool> > sizes;
+            sizes.resize(count);
 
             for (unsigned int i = 0; i < count; ++i)
             {
                 MyGUI::Widget* w = getChildAt(i);
                 bool hstretch = w->getUserString ("HStretch") == "true";
+                bool hidden = w->getUserString("Hidden") == "true";
+                if (hidden)
+                    continue;
                 h_stretched_count += hstretch;
                 AutoSizedWidget* aw = dynamic_cast<AutoSizedWidget*>(w);
                 if (aw)
                 {
-                    sizes.push_back(std::make_pair(aw->getRequestedSize (), hstretch));
+                    sizes[i] = std::make_pair(aw->getRequestedSize (), hstretch);
                     total_width += aw->getRequestedSize ().width;
                     total_height = std::max(total_height, aw->getRequestedSize ().height);
                 }
                 else
                 {
-                    sizes.push_back (std::make_pair(w->getSize(), hstretch));
+                    sizes[i] = std::make_pair(w->getSize(), hstretch);
                     total_width += w->getSize().width;
                     if (!(w->getUserString("VStretch") == "true"))
                         total_height = std::max(total_height, w->getSize().height);
@@ -729,8 +733,13 @@ namespace MWGui
 
                 MyGUI::Widget* w = getChildAt(i);
 
+                bool hidden = w->getUserString("Hidden") == "true";
+                if (hidden)
+                    continue;
+
                 bool vstretch = w->getUserString ("VStretch") == "true";
-                int height = vstretch ? total_height : sizes[i].first.height;
+                int max_height = getSize().height - mPadding*2;
+                int height = vstretch ? max_height : sizes[i].first.height;
 
                 MyGUI::IntCoord widgetCoord;
                 widgetCoord.left = curX;
@@ -774,6 +783,10 @@ namespace MWGui
             MyGUI::IntSize size(0,0);
             for (unsigned int i = 0; i < getChildCount (); ++i)
             {
+                bool hidden = getChildAt(i)->getUserString("Hidden") == "true";
+                if (hidden)
+                    continue;
+
                 AutoSizedWidget* w = dynamic_cast<AutoSizedWidget*>(getChildAt(i));
                 if (w)
                 {
@@ -810,21 +823,27 @@ namespace MWGui
             int total_height = 0;
             int total_width = 0;
             std::vector< std::pair<MyGUI::IntSize, bool> > sizes;
+            sizes.resize(count);
             for (unsigned int i = 0; i < count; ++i)
             {
                 MyGUI::Widget* w = getChildAt(i);
+
+                bool hidden = w->getUserString("Hidden") == "true";
+                if (hidden)
+                    continue;
+
                 bool vstretch = w->getUserString ("VStretch") == "true";
                 v_stretched_count += vstretch;
                 AutoSizedWidget* aw = dynamic_cast<AutoSizedWidget*>(w);
                 if (aw)
                 {
-                    sizes.push_back(std::make_pair(aw->getRequestedSize (), vstretch));
+                    sizes[i] = std::make_pair(aw->getRequestedSize (), vstretch);
                     total_height += aw->getRequestedSize ().height;
                     total_width = std::max(total_width, aw->getRequestedSize ().width);
                 }
                 else
                 {
-                    sizes.push_back (std::make_pair(w->getSize(), vstretch));
+                    sizes[i] = std::make_pair(w->getSize(), vstretch);
                     total_height += w->getSize().height;
 
                     if (!(w->getUserString("HStretch") == "true"))
@@ -850,8 +869,13 @@ namespace MWGui
 
                 MyGUI::Widget* w = getChildAt(i);
 
+                bool hidden = w->getUserString("Hidden") == "true";
+                if (hidden)
+                    continue;
+
                 bool hstretch = w->getUserString ("HStretch") == "true";
-                int width = hstretch ? total_width : sizes[i].first.width;
+                int maxWidth = getSize().width - mPadding*2;
+                int width = hstretch ? maxWidth : sizes[i].first.width;
 
                 MyGUI::IntCoord widgetCoord;
                 widgetCoord.top = curY;
@@ -890,6 +914,10 @@ namespace MWGui
             MyGUI::IntSize size(0,0);
             for (unsigned int i = 0; i < getChildCount (); ++i)
             {
+                bool hidden = getChildAt(i)->getUserString("Hidden") == "true";
+                if (hidden)
+                    continue;
+
                 AutoSizedWidget* w = dynamic_cast<AutoSizedWidget*>(getChildAt(i));
                 if (w)
                 {

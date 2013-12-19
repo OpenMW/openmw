@@ -1,8 +1,9 @@
 #include <iostream>
+#include <cstdio>
 
 #include <components/files/configurationmanager.hpp>
 
-#include <SDL_main.h>
+#include <SDL.h>
 #include "engine.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
@@ -14,6 +15,13 @@
 // makes __argc and __argv available on windows
 #include <cstdlib>
 
+#endif
+
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <csignal>
+extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
+extern int is_debugger_attached(void);
 #endif
 
 // for Ogre::macBundlePath
@@ -110,11 +118,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("start", bpo::value<std::string>()->default_value("Beshara"),
             "set initial cell")
 
-        ("master", bpo::value<StringsVector>()->default_value(StringsVector(), "")
-            ->multitoken(), "master file(s)")
-
-        ("plugin", bpo::value<StringsVector>()->default_value(StringsVector(), "")
-            ->multitoken(), "plugin file(s)")
+        ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+            ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("anim-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "output animation indices files")
@@ -150,9 +155,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
-        ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
+        ("no-grab", "Don't grab mouse cursor")
 
-        ;
+        ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
         .options(desc).allow_unregistered().run();
@@ -181,6 +186,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());
@@ -211,29 +218,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     engine.setResourceDir(variables["resources"].as<std::string>());
 
-    // master and plugin
-    StringsVector master = variables["master"].as<StringsVector>();
-    if (master.empty())
+    StringsVector content = variables["content"].as<StringsVector>();
+    if (content.empty())
     {
-        std::cout << "No master file given. Aborting...\n";
-        return false;
+      std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
+      return false;
     }
 
-    StringsVector plugin = variables["plugin"].as<StringsVector>();
-    // Removed check for 255 files, which would be the hard-coded limit in Morrowind.
-    //  I'll keep the following variable in, maybe we can use it for something different.
-    //  Say, a feedback like "loading file x/cnt".
-    // Commenting this out for now to silence compiler warning.
-    //int cnt = master.size() + plugin.size();
-
-    // Prepare loading master/plugin files (i.e. send filenames to engine)
-    for (std::vector<std::string>::size_type i = 0; i < master.size(); i++)
+    StringsVector::const_iterator it(content.begin());
+    StringsVector::const_iterator end(content.end());
+    for (; it != end; ++it)
     {
-        engine.addMaster(master[i]);
-    }
-    for (std::vector<std::string>::size_type i = 0; i < plugin.size(); i++)
-    {
-        engine.addPlugin(plugin[i]);
+      engine.addContentFile(*it);
     }
 
     // startup-settings
@@ -255,6 +251,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
 int main(int argc, char**argv)
 {
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    // Unix crash catcher
+    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
+    {
+        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+        cc_install_handlers(argc, argv, 5, s, "crash.log", NULL);
+        std::cout << "Installing crash catcher" << std::endl;
+    }
+    else
+        std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
+#endif
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // set current dir to bundle path
     boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
@@ -273,7 +281,13 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
-        std::cout << "\nERROR: " << e.what() << std::endl;
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        if (isatty(fileno(stdin)) || !SDL_WasInit(SDL_INIT_VIDEO))
+            std::cerr << "\nERROR: " << e.what() << std::endl;
+        else
+#endif
+            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
         return 1;
     }
 

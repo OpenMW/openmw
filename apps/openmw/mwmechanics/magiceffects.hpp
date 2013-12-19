@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_MAGICEFFECTS_H
 
 #include <map>
+#include <string>
 
 namespace ESM
 {
@@ -27,9 +28,12 @@ namespace MWMechanics
 
     struct EffectParam
     {
-        int mMagnitude;
+        // Note usually this would be int, but applying partial resistance might introduce decimal point.
+        float mMagnitude;
 
         EffectParam();
+
+        EffectParam(float magnitude) : mMagnitude(magnitude) {}
 
         EffectParam& operator+= (const EffectParam& param);
 
@@ -47,6 +51,13 @@ namespace MWMechanics
         EffectParam param (left);
         return param -= right;
     }
+
+    // Used by effect management classes (ActiveSpells, InventoryStore, Spells) to list active effect sources for GUI display
+    struct EffectSourceVisitor
+    {
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, float magnitude, float remainingTime = -1) = 0;
+    };
 
     /// \brief Effects currently affecting a NPC or creature
     class MagicEffects
@@ -66,9 +77,6 @@ namespace MWMechanics
             Collection::const_iterator end() const { return mCollection.end(); }
 
             void add (const EffectKey& key, const EffectParam& param);
-
-            void add (const ESM::EffectList& list, float magnitude = -1);
-            ///< \param magnitude normalised magnitude (-1: random)
 
             MagicEffects& operator+= (const MagicEffects& effects);
 

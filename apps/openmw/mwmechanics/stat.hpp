@@ -162,14 +162,26 @@ namespace MWMechanics
                 setCurrent (getCurrent()+diff);
             }
 
-            void setCurrent (const T& value)
+            void setCurrent (const T& value, bool allowDecreaseBelowZero = false)
             {
-                mCurrent = value;
+                if (value > mCurrent)
+                {
+                    // increase
+                    mCurrent = value;
 
-                if (mCurrent<0)
+                    if (mCurrent > getModified())
+                        mCurrent = getModified();
+                }
+                else if (value > 0 || allowDecreaseBelowZero)
+                {
+                    // allowed decrease
+                    mCurrent = value;
+                }
+                else if (mCurrent > 0)
+                {
+                    // capped decrease
                     mCurrent = 0;
-                else if (mCurrent>getModified())
-                    mCurrent = getModified();
+                }
             }
 
             void setModifier (const T& modifier)

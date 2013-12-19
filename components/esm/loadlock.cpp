@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Lockpick::sRecordId = REC_LOCK;
 
 void Lockpick::load(ESMReader &esm)
 {
@@ -17,7 +19,7 @@ void Lockpick::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
 }
 
-void Lockpick::save(ESMWriter &esm)
+void Lockpick::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

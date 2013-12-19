@@ -30,15 +30,16 @@ namespace MWMechanics
 
         std::map<std::string, int> mDeathCount;
 
-        float mDuration;
-
         void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
+
+
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
             void calculateDynamicStats (const MWWorld::Ptr& ptr);
 
-            void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr);
+            void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration);
+            void calculateNpcStatModifiers (const MWWorld::Ptr& ptr);
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
@@ -49,6 +50,10 @@ namespace MWMechanics
         public:
 
             Actors();
+
+            /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
+            /// paused we may want to do it manually (after equipping permanent enchantment)
+            void updateMagicEffects (const MWWorld::Ptr& ptr) { adjustMagicEffects(ptr); }
 
             void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management
@@ -63,8 +68,8 @@ namespace MWMechanics
             void updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr& ptr);
             ///< Updates an actor with a new Ptr
 
-            void dropActors (const MWWorld::CellStore *cellStore);
-            ///< Deregister all actors in the given cell.
+            void dropActors (const MWWorld::CellStore *cellStore, const MWWorld::Ptr& ignore);
+            ///< Deregister all actors (except for \a ignore) in the given cell.
 
             void update (float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement

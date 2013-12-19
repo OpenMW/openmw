@@ -3,6 +3,8 @@
 
 #include <OgreMaterial.h>
 
+#include "storage.hpp"
+
 namespace Terrain
 {
 
@@ -15,13 +17,15 @@ namespace Terrain
         ///                so if this parameter is true, then the supplied blend maps are expected to be packed.
         MaterialGenerator (bool shaders);
 
-        void setLayerList (const std::vector<std::string>& layerList) { mLayerList = layerList; }
+        void setLayerList (const std::vector<LayerInfo>& layerList) { mLayerList = layerList; }
         bool hasLayers() { return mLayerList.size(); }
         void setBlendmapList (const std::vector<Ogre::TexturePtr>& blendmapList) { mBlendmapList = blendmapList; }
         const std::vector<Ogre::TexturePtr>& getBlendmapList() { return mBlendmapList; }
         void setCompositeMap (const std::string& name) { mCompositeMap = name; }
 
         void enableShadows(bool shadows) { mShadows = shadows; }
+        void enableNormalMapping(bool normalMapping) { mNormalMapping = normalMapping; }
+        void enableParallaxMapping(bool parallaxMapping) { mParallaxMapping = parallaxMapping; }
         void enableSplitShadows(bool splitShadows) { mSplitShadows = splitShadows; }
 
         /// Creates a material suitable for displaying a chunk of terrain using alpha-blending.
@@ -43,12 +47,14 @@ namespace Terrain
     private:
         Ogre::MaterialPtr create (Ogre::MaterialPtr mat, bool renderCompositeMap, bool displayCompositeMap);
 
-        std::vector<std::string> mLayerList;
+        std::vector<LayerInfo> mLayerList;
         std::vector<Ogre::TexturePtr> mBlendmapList;
         std::string mCompositeMap;
         bool mShaders;
         bool mShadows;
         bool mSplitShadows;
+        bool mNormalMapping;
+        bool mParallaxMapping;
     };
 
 }

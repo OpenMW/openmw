@@ -530,7 +530,7 @@ void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, Univers
     }
 }
 
-int CSMWorld::RefIdCollection::getAppendIndex (UniversalId::Type type) const
+int CSMWorld::RefIdCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const
 {
     return mData.getAppendIndex (type);
 }
@@ -538,4 +538,14 @@ int CSMWorld::RefIdCollection::getAppendIndex (UniversalId::Type type) const
 std::vector<std::string> CSMWorld::RefIdCollection::getIds (bool listDeleted) const
 {
     return mData.getIds (listDeleted);
+}
+
+bool CSMWorld::RefIdCollection::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+{
+    return false;
+}
+
+void CSMWorld::RefIdCollection::save (int index, ESM::ESMWriter& writer) const
+{
+    mData.save (index, writer);
 }

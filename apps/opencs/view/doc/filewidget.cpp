@@ -51,3 +51,8 @@ void CSVDoc::FileWidget::textChanged (const QString& text)
 {
     emit nameChanged (getName(), mAddon);
 }
+
+void CSVDoc::FileWidget::extensionLabelIsVisible(bool visible)
+{
+    mType->setVisible(visible);
+}

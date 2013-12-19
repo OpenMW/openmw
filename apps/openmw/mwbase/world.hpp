@@ -80,7 +80,6 @@ namespace MWBase
                 Render_CollisionDebug,
                 Render_Wireframe,
                 Render_Pathgrid,
-                Render_Compositors,
                 Render_BoundingBoxes
             };
 
@@ -241,7 +240,7 @@ namespace MWBase
 
             virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
-            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -309,14 +308,19 @@ namespace MWBase
 
             virtual void update (float duration, bool paused) = 0;
 
-            virtual bool placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY) = 0;
-            ///< place an object into the gameworld at the specified cursor position
+            virtual bool placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount) = 0;
+            ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
+            /// @param number of objects to place
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object) = 0;
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount) = 0;
+            ///< copy and place an object into the gameworld at the given actor's position
+            /// @param actor giving the dropped object position
+            /// @param object
+            /// @param number of objects to place
 
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location
@@ -356,6 +360,9 @@ namespace MWBase
             ///< get all containers in active cells owned by this Npc
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all items in active cells owned by this Npc
+
+            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc) = 0;
+            ///< get Line of Sight (morrowind stupid implementation)
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
@@ -406,6 +413,13 @@ namespace MWBase
             virtual bool getGodModeState() = 0;
 
             virtual bool toggleGodMode() = 0;
+
+            virtual void castSpell (const MWWorld::Ptr& actor) = 0;
+
+            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
+                                           const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
+
+            virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
     };
 }
 

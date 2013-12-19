@@ -7,9 +7,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Cell::sRecordId = REC_CELL;
 
 /// Some overloaded compare operators.
 bool operator==(const MovedCellRef& ref, int pRefnum)
@@ -89,7 +91,7 @@ void Cell::postLoad(ESMReader &esm)
     esm.skipRecord();
 }
 
-void Cell::save(ESMWriter &esm)
+void Cell::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mData, 12);
     if (mData.mFlags & Interior)
@@ -172,7 +174,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // If the most significant 8 bits are used, then this reference already exists.
         // In this case, do not spawn a new reference, but overwrite the old one.
         ref.mRefnum &= 0x00ffffff; // delete old plugin ID
-        const std::vector<Header::MasterData> &masters = esm.getMasters();
+        const std::vector<Header::MasterData> &masters = esm.getGameFiles();
         global = masters[local-1].index + 1;
         ref.mRefnum |= global << 24; // insert global plugin ID
     }
@@ -276,7 +278,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
     int local = (mref.mRefnum & 0xff000000) >> 24;
     size_t global = esm.getIndex() + 1;
     mref.mRefnum &= 0x00ffffff; // delete old plugin ID
-    const std::vector<Header::MasterData> &masters = esm.getMasters();
+    const std::vector<Header::MasterData> &masters = esm.getGameFiles();
     global = masters[local-1].index + 1;
     mref.mRefnum |= global << 24; // insert global plugin ID
 

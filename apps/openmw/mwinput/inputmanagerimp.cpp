@@ -87,7 +87,7 @@ namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists)
+            const std::string& userFile, bool userFileExists, bool grab)
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
@@ -111,7 +111,7 @@ namespace MWInput
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
-        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow());
+        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow(), grab);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
@@ -181,9 +181,6 @@ namespace MWInput
             {
             case A_GameMenu:
                 toggleMainMenu ();
-                break;
-            case A_Quit:
-                exitNow();
                 break;
             case A_Screenshot:
                 screenshot();
@@ -267,6 +264,8 @@ namespace MWInput
 
     void InputManager::update(float dt, bool loading)
     {
+        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
+
         mInputManager->capture(loading);
         // inject some fake mouse movement to force updating MyGUI's widget states
         // this shouldn't do any harm since we're moving back to the original position afterwards
@@ -277,7 +276,8 @@ namespace MWInput
         if (!loading)
             mInputBinder->update(dt);
 
-        bool main_menu = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu);
+        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+             && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
 
         bool was_relative = mInputManager->getMouseRelative();
         bool is_relative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
@@ -287,7 +287,7 @@ namespace MWInput
         mInputManager->setMouseRelative(is_relative);
 
         //we let the mouse escape in the main menu
-        mInputManager->setGrabPointer(!main_menu);
+        mInputManager->setGrabPointer(grab);
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
@@ -505,7 +505,7 @@ namespace MWInput
 
         mInputBinder->keyPressed (arg);
 
-        if(arg.keysym.sym == SDLK_RETURN
+        if((arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER)
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
@@ -642,6 +642,11 @@ namespace MWInput
     void InputManager::windowResized(int x, int y)
     {
         mOgre.windowResized(x,y);
+    }
+
+    void InputManager::windowClosed()
+    {
+        MWBase::Environment::setRequestExit();
     }
 
     void InputManager::toggleMainMenu()
@@ -812,13 +817,6 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
         mAlwaysRunActive = !mAlwaysRunActive;
-    }
-
-    // Exit program now button (which is disabled in GUI mode)
-    void InputManager::exitNow()
-    {
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            Ogre::Root::getSingleton().queueEndRendering ();
     }
 
     void InputManager::resetIdleTime()

@@ -292,30 +292,30 @@ namespace
 
 }
 
-bool UnshieldThread::SetMorrowindPath(const std::string& path)
+bool Launcher::UnshieldThread::SetMorrowindPath(const std::string& path)
 {
     mMorrowindPath = path;
     return true;
 }
 
-bool UnshieldThread::SetTribunalPath(const std::string& path)
+bool Launcher::UnshieldThread::SetTribunalPath(const std::string& path)
 {
     mTribunalPath = path;
     return true;
 }
 
-bool UnshieldThread::SetBloodmoonPath(const std::string& path)
+bool Launcher::UnshieldThread::SetBloodmoonPath(const std::string& path)
 {
     mBloodmoonPath = path;
     return true;
 }
 
-void UnshieldThread::SetOutputPath(const std::string& path)
+void Launcher::UnshieldThread::SetOutputPath(const std::string& path)
 {
     mOutputPath = path;
 }
 
-bool UnshieldThread::extract_file(Unshield* unshield, bfs::path output_dir, const char* prefix, int index)
+bool Launcher::UnshieldThread::extract_file(Unshield* unshield, bfs::path output_dir, const char* prefix, int index)
 {
     bool success;
     bfs::path dirname;
@@ -349,7 +349,7 @@ bool UnshieldThread::extract_file(Unshield* unshield, bfs::path output_dir, cons
     return success;
 }
 
-void UnshieldThread::extract_cab(const bfs::path& cab, const bfs::path& output_dir, bool extract_ini)
+void Launcher::UnshieldThread::extract_cab(const bfs::path& cab, const bfs::path& output_dir, bool extract_ini)
 {
     Unshield * unshield;
     unshield = unshield_open(cab.c_str());
@@ -369,7 +369,7 @@ void UnshieldThread::extract_cab(const bfs::path& cab, const bfs::path& output_d
 }
 
 
-bool UnshieldThread::extract()
+bool Launcher::UnshieldThread::extract()
 {
     bfs::path outputDataFilesDir = mOutputPath;
     outputDataFilesDir /= "Data Files";
@@ -475,7 +475,7 @@ bool UnshieldThread::extract()
     return true;
 }
 
-void UnshieldThread::Done()
+void Launcher::UnshieldThread::Done()
 {
     // Get rid of unnecessary files
     bfs::remove_all(mOutputPath / "extract-temp");
@@ -491,28 +491,28 @@ void UnshieldThread::Done()
         bfs::last_write_time(findFile(mOutputPath, "bloodmoon.esm"), getTime("3 June 2003"));
 }
 
-std::string UnshieldThread::GetMWEsmPath()
+std::string Launcher::UnshieldThread::GetMWEsmPath()
 {
     return findFile(mOutputPath / "Data Files", "morrowind.esm").string();
 }
 
-bool UnshieldThread::TribunalDone()
+bool Launcher::UnshieldThread::TribunalDone()
 {
     return mTribunalDone;
 }
 
-bool UnshieldThread::BloodmoonDone()
+bool Launcher::UnshieldThread::BloodmoonDone()
 {
     return mBloodmoonDone;
 }
 
-void UnshieldThread::run()
+void Launcher::UnshieldThread::run()
 {
     extract();
     emit close();
 }
 
-UnshieldThread::UnshieldThread()
+Launcher::UnshieldThread::UnshieldThread()
 {
     unshield_set_log_level(0);
     mMorrowindDone = false;

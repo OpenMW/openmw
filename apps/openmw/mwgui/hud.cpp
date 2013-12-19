@@ -28,6 +28,7 @@ namespace MWGui
         , mStamina(NULL)
         , mDrowning(NULL)
         , mDrowningFrame(NULL)
+        , mDrowningFlash(NULL)
         , mWeapImage(NULL)
         , mSpellImage(NULL)
         , mWeapStatus(NULL)
@@ -53,6 +54,7 @@ namespace MWGui
         , mSpellVisible(true)
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(0)
+        , mIsDrowning(false)
     {
         setCoord(0,0, width, height);
 
@@ -75,6 +77,7 @@ namespace MWGui
         //Drowning bar
         getWidget(mDrowningFrame, "DrowningFrame");
         getWidget(mDrowning, "Drowning");
+        getWidget(mDrowningFlash, "Flash");
         mDrowning->setProgressRange(200);
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
@@ -171,43 +174,45 @@ namespace MWGui
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
-        static const char *ids[] =
-        {
-            "HBar", "MBar", "FBar", 0
-        };
+        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int modified = static_cast<int>(value.getModified());
 
-        for (int i=0; ids[i]; ++i)
-            if (ids[i]==id)
-            {
-                MyGUI::Widget* w;
-                std::string valStr = boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
-                switch (i)
-                {
-                    case 0:
-                        mHealth->setProgressRange (value.getModified());
-                        mHealth->setProgressPosition (value.getCurrent());
-                        getWidget(w, "HealthFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
-                        break;
-                    case 1:
-                        mMagicka->setProgressRange (value.getModified());
-                        mMagicka->setProgressPosition (value.getCurrent());
-                        getWidget(w, "MagickaFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
-                        break;
-                    case 2:
-                        mStamina->setProgressRange (value.getModified());
-                        mStamina->setProgressPosition (value.getCurrent());
-                        getWidget(w, "FatigueFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
-                        break;
-                }
-            }
+        MyGUI::Widget* w;
+        std::string valStr = boost::lexical_cast<std::string>(current) + "/" + boost::lexical_cast<std::string>(modified);
+        if (id == "HBar")
+        {
+            mHealth->setProgressRange(modified);
+            mHealth->setProgressPosition(current);
+            getWidget(w, "HealthFrame");
+            w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
+        }
+        else if (id == "MBar")
+        {
+            mMagicka->setProgressRange (modified);
+            mMagicka->setProgressPosition (current);
+            getWidget(w, "MagickaFrame");
+            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+        }
+        else if (id == "FBar")
+        {
+            mStamina->setProgressRange (modified);
+            mStamina->setProgressPosition (current);
+            getWidget(w, "FatigueFrame");
+            w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
+        }
     }
 
     void HUD::setDrowningTimeLeft(float time)
     {
-        mDrowning->setProgressPosition(time/20.0*200.0);
+        size_t progress = time/20.0*200.0;
+        mDrowning->setProgressPosition(progress);
+
+        bool isDrowning = (progress == 0);
+        if (isDrowning && !mIsDrowning) // Just started drowning
+            mDrowningFlashTheta = 0.0f; // Start out on bright red every time.
+
+        mDrowningFlash->setVisible(isDrowning);
+        mIsDrowning = isDrowning;
     }
 
     void HUD::setDrowningBarVisible(bool visible)
@@ -232,20 +237,15 @@ namespace MWGui
             float mouseX = cursorPosition.left / float(viewSize.width);
             float mouseY = cursorPosition.top / float(viewSize.height);
 
-            int origCount = object.getRefData().getCount();
-            object.getRefData().setCount(mDragAndDrop->mDraggedCount);
-
             if (world->canPlaceObject(mouseX, mouseY))
-                world->placeObject(object, mouseX, mouseY);
+                world->placeObject(object, mouseX, mouseY, mDragAndDrop->mDraggedCount);
             else
-                world->dropObjectOnGround(world->getPlayer().getPlayer(), object);
+                world->dropObjectOnGround(world->getPlayer().getPlayer(), object, mDragAndDrop->mDraggedCount);
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
             std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
             MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
-            object.getRefData().setCount(origCount);
 
             // remove object from the container it was coming from
             mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
@@ -367,6 +367,9 @@ namespace MWGui
             mEnemyHealth->setVisible(false);
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() + MyGUI::IntPoint(0,20));
         }
+
+        if (mIsDrowning)
+            mDrowningFlashTheta += dt * Ogre::Math::TWO_PI;
     }
 
     void HUD::onResChange(int width, int height)
@@ -608,6 +611,12 @@ namespace MWGui
             MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
             mEnemyHealth->setProgressRange(100);
             mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
+        }
+
+        if (mIsDrowning)
+        {
+            float intensity = (cos(mDrowningFlashTheta) + 1.0f) / 2.0f;
+            mDrowningFlash->setColour(MyGUI::Colour(intensity, intensity, intensity));
         }
     }
 

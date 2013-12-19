@@ -49,7 +49,6 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Probe>             probes;
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
-            int mStateId;
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr);
@@ -75,9 +74,25 @@ namespace MWWorld
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
+            ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
+            ///< Utility to construct a ManualRef and call add(ptr, actorPtr)
+
+            int remove(const std::string& itemId, int count, const Ptr& actor);
+            ///< Remove \a count item(s) designated by \a itemId from this container.
+            ///
+            /// @return the number of items actually removed
+
+            virtual int remove(const Ptr& item, int count, const Ptr& actor);
+            ///< Remove \a count item(s) designated by \a item from this inventory.
+            ///
+            /// @return the number of items actually removed
+
+            void unstack (const Ptr& ptr, const Ptr& container);
+            ///< Unstack an item in this container. The item's count will be set to 1, then a new stack will be added with (origCount-1).
+
         protected:
-            ContainerStoreIterator addImpl (const Ptr& ptr);
-            ///< Add the item to this container (no stacking)
+            ContainerStoreIterator addNewStack (const Ptr& ptr);
+            ///< Add the item to this container (do not try to stack it onto existing items)
 
         public:
 
@@ -93,11 +108,6 @@ namespace MWWorld
             virtual void flagAsModified();
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
-
-            int getStateId() const;
-            ///< This ID is changed every time the container is modified or items in the container
-            /// are accessed in a way that may be used to modify the item.
-            /// \note This method of change-tracking will ocasionally yield false positives.
 
             float getWeight() const;
             ///< Return total weight of the items contained in *this.

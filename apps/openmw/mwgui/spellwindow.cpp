@@ -9,7 +9,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 
-#include "../mwmechanics/spellsuccess.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "spellicons.hpp"
 #include "inventorywindow.hpp"
@@ -50,8 +50,6 @@ namespace MWGui
         getWidget(mEffectBox, "EffectsBox");
 
         setCoord(498, 300, 302, 300);
-
-        updateSpells();
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SpellWindow::onWindowResize);
     }
@@ -110,9 +108,9 @@ namespace MWGui
                 allowSelectedItem = false;
 
             // if the selected item can be equipped, make sure that it actually is equipped
-            std::pair<std::vector<int>, bool> slots;
-            slots = MWWorld::Class::get(selectedItem).getEquipmentSlots(selectedItem);
-            if (!slots.first.empty())
+            std::pair<std::vector<int>, bool> slots_;
+            slots_ = MWWorld::Class::get(selectedItem).getEquipmentSlots(selectedItem);
+            if (!slots_.first.empty())
             {
                 bool equipped = false;
                 for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
@@ -284,8 +282,16 @@ namespace MWGui
             MyGUI::Button* costCharge = mSpellView->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
 
-            std::string cost = boost::lexical_cast<std::string>(enchant->mData.mCost);
-            std::string charge = boost::lexical_cast<std::string>(enchant->mData.mCharge); /// \todo track current charge
+            float enchantCost = enchant->mData.mCost;
+            MWMechanics::NpcStats &stats = player.getClass().getNpcStats(player);
+            int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+            int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
+
+            std::string cost = boost::lexical_cast<std::string>(castCost);
+            int currentCharge = int(item.getCellRef().mEnchantmentCharge);
+            if (currentCharge ==  -1)
+                currentCharge = enchant->mData.mCharge;
+            std::string charge = boost::lexical_cast<std::string>(currentCharge);
             if (enchant->mData.mType == ESM::Enchantment::CastOnce)
             {
                 // this is Morrowind behaviour

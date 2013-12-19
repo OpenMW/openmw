@@ -1,8 +1,15 @@
 #include "document.hpp"
+
 #include <cassert>
 
+#include <boost/filesystem.hpp>
+
+#ifndef Q_MOC_RUN
+#include <components/files/configurationmanager.hpp>
+#endif
+
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-    const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
+                             const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
     assert (begin!=end);
 
@@ -12,10 +19,10 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
         --end2;
 
     for (std::vector<boost::filesystem::path>::const_iterator iter (begin); iter!=end2; ++iter)
-        getData().loadFile (*iter, true);
+        getData().loadFile (*iter, true, false);
 
     if (lastAsModified)
-        getData().loadFile (*end2, false);
+        getData().loadFile (*end2, false, false);
 }
 
 void CSMDoc::Document::addGmsts()
@@ -2058,9 +2065,9 @@ void CSMDoc::Document::addOptionalGlobals()
 {
     static const char *sGlobals[] =
     {
-        "dayspassed",
-        "pcwerewolf",
-        "pcyear",
+        "DaysPassed",
+        "PCWerewolf",
+        "PCYear",
         0
     };
 
@@ -2137,11 +2144,86 @@ void CSMDoc::Document::createBase()
 
         getData().getSkills().add (record);
     }
+
+    static const char *sVoice[] =
+    {
+        "Intruder",
+        "Attack",
+        "Hello",
+        "Thief",
+        "Alarm",
+        "Idle",
+        "Flee",
+        "Hit",
+        0
+    };
+
+    for (int i=0; sVoice[i]; ++i)
+    {
+        ESM::Dialogue record;
+        record.mId = sVoice[i];
+        record.mType = ESM::Dialogue::Voice;
+        record.blank();
+
+        getData().getTopics().add (record);
+    }
+
+    static const char *sGreetings[] =
+    {
+        "Greeting 0",
+        "Greeting 1",
+        "Greeting 2",
+        "Greeting 3",
+        "Greeting 4",
+        "Greeting 5",
+        "Greeting 6",
+        "Greeting 7",
+        "Greeting 8",
+        "Greeting 9",
+        0
+    };
+
+    for (int i=0; sGreetings[i]; ++i)
+    {
+        ESM::Dialogue record;
+        record.mId = sGreetings[i];
+        record.mType = ESM::Dialogue::Greeting;
+        record.blank();
+
+        getData().getTopics().add (record);
+    }
+
+    static const char *sPersuasion[] =
+    {
+        "Intimidate Success",
+        "Intimidate Fail",
+        "Service Refusal",
+        "Admire Success",
+        "Taunt Success",
+        "Bribe Success",
+        "Info Refusal",
+        "Admire Fail",
+        "Taunt Fail",
+        "Bribe Fail",
+        0
+    };
+
+    for (int i=0; sPersuasion[i]; ++i)
+    {
+        ESM::Dialogue record;
+        record.mId = sPersuasion[i];
+        record.mType = ESM::Dialogue::Persuasion;
+        record.blank();
+
+        getData().getTopics().add (record);
+    }
 }
 
-CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
-    const boost::filesystem::path& savePath, bool new_)
-: mSavePath (savePath), mTools (mData)
+CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, const boost::filesystem::path& resDir, bool new_)
+    : mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
+      mProjectPath ((configuration.getUserPath() / "projects") /
+                    (savePath.filename().string() + ".project")),
+      mSaving (*this, mProjectPath)
 {
     if (files.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2158,6 +2240,44 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
         load (files.begin(), end, !new_);
     }
 
+    if (new_)
+    {
+        mData.setDescription ("");
+        mData.setAuthor ("");
+    }
+
+    bool filtersFound = false;
+
+    if (boost::filesystem::exists (mProjectPath))
+    {
+        filtersFound = true;
+    }
+    else
+    {
+        boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
+        locCustomFiltersPath /= "defaultfilters";
+
+        if (boost::filesystem::exists(locCustomFiltersPath))
+        {
+            boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
+            filtersFound = true;
+        }
+        else
+        {
+            boost::filesystem::path filters(mResDir);
+            filters /= "defaultfilters";
+
+            if (boost::filesystem::exists(filters))
+            {
+                boost::filesystem::copy_file(filters, mProjectPath);
+                filtersFound = true;
+            }
+        }
+    }
+
+    if (filtersFound)
+        getData().loadFile (mProjectPath, false, true);
+
     addOptionalGmsts();
     addOptionalGlobals();
 
@@ -2166,9 +2286,10 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mTools, SIGNAL (done (int)), this, SLOT (operationDone (int)));
 
-    // dummy implementation -> remove when proper save is implemented.
-    mSaveCount = 0;
-    connect (&mSaveTimer, SIGNAL(timeout()), this, SLOT (saving()));
+    connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
+    connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mSaving, SIGNAL (reportMessage (const QString&, int)),
+             this, SLOT (reportMessage (const QString&, int)));
 }
 
 CSMDoc::Document::~Document()
@@ -2187,7 +2308,7 @@ int CSMDoc::Document::getState() const
     if (!mUndoStack.isClean())
         state |= State_Modified;
 
-    if (mSaveCount)
+    if (mSaving.isRunning())
         state |= State_Locked | State_Saving | State_Operation;
 
     if (int operations = mTools.getRunningOperations())
@@ -2201,12 +2322,20 @@ const boost::filesystem::path& CSMDoc::Document::getSavePath() const
     return mSavePath;
 }
 
+const std::vector<boost::filesystem::path>& CSMDoc::Document::getContentFiles() const
+{
+    return mContentFiles;
+}
+
 void CSMDoc::Document::save()
 {
-    mSaveCount = 1;
-    mSaveTimer.start (500);
+    if (mSaving.isRunning())
+        throw std::logic_error (
+            "Failed to initiate save, because a save operation is already running.");
+
+    mSaving.start();
+
     emit stateChanged (getState(), this);
-    emit progress (1, 16, State_Saving, 1, this);
 }
 
 CSMWorld::UniversalId CSMDoc::Document::verify()
@@ -2218,44 +2347,26 @@ CSMWorld::UniversalId CSMDoc::Document::verify()
 
 void CSMDoc::Document::abortOperation (int type)
 {
-    mTools.abortOperation (type);
-
     if (type==State_Saving)
-    {
-        mSaveCount=0;
-        mSaveTimer.stop();
-        emit stateChanged (getState(), this);
-    }
+        mSaving.abort();
+    else
+        mTools.abortOperation (type);
 }
-
 
 void CSMDoc::Document::modificationStateChanged (bool clean)
 {
     emit stateChanged (getState(), this);
 }
 
+void CSMDoc::Document::reportMessage (const QString& message, int type)
+{
+    /// \todo find a better way to get these messages to the user.
+    std::cout << message.toUtf8().constData() << std::endl;
+}
 
 void CSMDoc::Document::operationDone (int type)
 {
     emit stateChanged (getState(), this);
-}
-
-void CSMDoc::Document::saving()
-{
-    ++mSaveCount;
-
-    emit progress (mSaveCount, 16, State_Saving, 1, this);
-
-    if (mSaveCount>15)
-    {
-        //clear the stack before resetting the save state
-        //to avoid emitting incorrect states
-        mUndoStack.setClean();
-
-        mSaveCount = 0;
-        mSaveTimer.stop();
-        emit stateChanged (getState(), this);
-    }
 }
 
 const CSMWorld::Data& CSMDoc::Document::getData() const

@@ -305,14 +305,14 @@ int load(Arguments& info)
 
         info.data.author = esm.getAuthor();
         info.data.description = esm.getDesc();
-        info.data.masters = esm.getMasters();
+        info.data.masters = esm.getGameFiles();
 
         if (!quiet)
         {
             std::cout << "Author: " << esm.getAuthor() << std::endl
                  << "Description: " << esm.getDesc() << std::endl
                  << "File format version: " << esm.getFVer() << std::endl;
-            std::vector<ESM::Header::MasterData> m = esm.getMasters();
+            std::vector<ESM::Header::MasterData> m = esm.getGameFiles();
             if (!m.empty())
             {
                 std::cout << "Masters:" << std::endl;
@@ -339,6 +339,8 @@ int load(Arguments& info)
             }
 
             std::string id = esm.getHNOString("NAME");
+            if (id.empty())
+                id = esm.getHNOString("INAM");
 
             if(!quiet && interested)
                 std::cout << "\nRecord: " << n.toString()

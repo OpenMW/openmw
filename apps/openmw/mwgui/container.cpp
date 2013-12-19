@@ -100,6 +100,9 @@ namespace MWGui
 
         finish();
         targetView->update();
+
+        // We need to update the view since an other item could be auto-equipped.
+        mSourceView->update();
     }
 
     void DragAndDrop::finish()
@@ -217,11 +220,13 @@ namespace MWGui
 
         mDisposeCorpseButton->setVisible(loot);
 
-        setTitle(MWWorld::Class::get(container).getName(container));
-
         mSortModel = new SortFilterItemModel(mModel);
 
         mItemView->setModel (mSortModel);
+
+        // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
+        // or we end up using a possibly invalid model.
+        setTitle(MWWorld::Class::get(container).getName(container));
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

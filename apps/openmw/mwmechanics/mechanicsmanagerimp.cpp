@@ -159,15 +159,15 @@ namespace MWMechanics
         // auto-equip again. we need this for when the race is changed to a beast race
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
         for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
-            invStore.equip(i, invStore.end());
+            invStore.unequipAll(ptr);
         invStore.autoEquip(ptr);
     }
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),
-      mRaceSelected (false)
+      mRaceSelected (false), mAI(true)
     {
-        buildPlayer();
+        //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
     }
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)
@@ -200,10 +200,7 @@ namespace MWMechanics
 
     void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
     {
-        if(!mWatched.isEmpty() && mWatched.getCell() == cellStore)
-            mWatched = MWWorld::Ptr();
-
-        mActors.dropActors(cellStore);
+        mActors.dropActors(cellStore, mWatched);
         mObjects.dropObjects(cellStore);
     }
 
@@ -211,6 +208,14 @@ namespace MWMechanics
     void MechanicsManager::watchActor(const MWWorld::Ptr& ptr)
     {
         mWatched = ptr;
+    }
+
+    void MechanicsManager::advanceTime (float duration)
+    {
+        // Uses ingame time, but scaled to real time
+        duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
 
     void MechanicsManager::update(float duration, bool paused)
@@ -411,7 +416,7 @@ namespace MWMechanics
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-        if (Misc::StringUtils::lowerCase(npc->mBase->mRace) == Misc::StringUtils::lowerCase(player->mBase->mRace))
+        if (Misc::StringUtils::ciEqual(npc->mBase->mRace, player->mBase->mRace))
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
 
         x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityMult")->getFloat()
@@ -427,7 +432,9 @@ namespace MWMechanics
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
                 it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
             {
-                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)) reaction = it->mReaction;
+                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)
+                        && playerStats.getExpelled().find(Misc::StringUtils::lowerCase(it->mFaction)) == playerStats.getExpelled().end())
+                    reaction = it->mReaction;
             }
             rank = playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
         }
@@ -438,7 +445,8 @@ namespace MWMechanics
             {
                 if(playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerStats.getFactionRanks().end() )
                 {
-                    if(it->mReaction<reaction) reaction = it->mReaction;
+                    if(it->mReaction < reaction)
+                        reaction = it->mReaction;
                 }
             }
             rank = 0;
@@ -679,4 +687,18 @@ namespace MWMechanics
             return false;
     }
 
+    void MechanicsManager::updateMagicEffects(const MWWorld::Ptr &ptr)
+    {
+        mActors.updateMagicEffects(ptr);
+    }
+
+    void MechanicsManager::toggleAI()
+    {
+        mAI = !mAI;
+    }
+
+    bool MechanicsManager::isAIActive()
+    {
+        return mAI;
+    }
 }

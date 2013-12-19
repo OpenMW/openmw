@@ -12,6 +12,8 @@ class ESMWriter;
 
 struct MagicEffect
 {
+    static unsigned int sRecordId;
+
     enum Flags
     {
         TargetSkill = 0x1, // Affects a specific skill, which is specified elsewhere in the effect structure.
@@ -47,8 +49,9 @@ struct MagicEffect
         int mSchool; // SpellSchool, see defs.hpp
         float mBaseCost;
         int mFlags;
-        // Properties of the fired magic 'ball' I think
-        int mRed, mBlue, mGreen;
+        // Glow color for enchanted items with this effect
+        int mRed, mGreen, mBlue;
+        // Properties of the fired magic 'ball'
         float mSpeed, mSize, mSizeCap;
     }; // 36 bytes
 
@@ -56,14 +59,20 @@ struct MagicEffect
 
     static const std::string &effectIdToString(short effectID);
     static short effectStringToId(const std::string &effect);
+
+    /// Returns the effect that provides resistance against \a effect (or -1 if there's none)
+    static short getResistanceEffect(short effect);
+    /// Returns the effect that induces weakness against \a effect (or -1 if there's none)
+    static short getWeaknessEffect(short effect);
+
     MagnitudeDisplayType getMagnitudeDisplayType() const;
 
 
     MEDTstruct mData;
 
     std::string mIcon, mParticle; // Textures
-    std::string mCasting, mHit, mArea; // Statics
-    std::string mBolt; // Weapon
+    std::string mCasting, mHit, mArea; // ESM::Static
+    std::string mBolt; // ESM::Weapon
     std::string mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
     std::string mDescription;
 
@@ -79,7 +88,7 @@ struct MagicEffect
     int mIndex;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
 
     enum Effects
@@ -230,7 +239,9 @@ struct MagicEffect
         SummonBear = 139,
         SummonBonewolf = 140,
         SummonCreature04 = 141,
-        SummonCreature05 = 142
+        SummonCreature05 = 142,
+
+        Length
     };
 };
 }

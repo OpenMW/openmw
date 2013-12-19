@@ -140,9 +140,12 @@ namespace MWWorld
     {
         for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
             ++iter)
+        {
+            if (!iter->mData.getCount())
+                continue;
             if (!functor (iter->mRef, iter->mData))
                 return false;
-
+        }
         return true;
     }
 

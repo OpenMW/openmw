@@ -1,25 +1,7 @@
-
 #include "activespells.hpp"
-
-#include <cstdlib>
-
-#include <boost/algorithm/string.hpp>
-
-#include <components/esm/loadalch.hpp>
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loadingr.hpp>
-#include <components/esm/loadmgef.hpp>
-#include <components/esm/loadskil.hpp>
-
-#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
-#include "../mwworld/class.hpp"
-
-#include "creaturestats.hpp"
-#include "npcstats.hpp"
 
 namespace MWMechanics
 {
@@ -29,6 +11,7 @@ namespace MWMechanics
 
         MWWorld::TimeStamp now = MWBase::Environment::get().getWorld()->getTimeStamp();
 
+        // Erase no longer active spells
         if (mLastUpdate!=now)
         {
             TContainer::iterator iter (mSpells.begin());
@@ -62,161 +45,27 @@ namespace MWMechanics
 
         for (TIterator iter (begin()); iter!=end(); ++iter)
         {
-            std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (iter->first);
+            const MWWorld::TimeStamp& start = iter->second.mTimeStamp;
 
-            const MWWorld::TimeStamp& start = iter->second.first;
-            float magnitude = iter->second.second;
+            const std::vector<Effect>& effects = iter->second.mEffects;
 
-            for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
-                iter!=effects.first.mList.end(); ++iter)
+            for (std::vector<Effect>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
             {
-                if (iter->mDuration)
-                {
-                    int duration = iter->mDuration;
-                    
-                    if (effects.second.first)
-                        duration *= magnitude;
-                    
-                    MWWorld::TimeStamp end = start;
-                    end += static_cast<double> (duration)*
-                        MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
+                int duration = effectIt->mDuration;
+                MWWorld::TimeStamp end = start;
+                end += static_cast<double> (duration)*
+                    MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
 
-                    if (end>now)
-                    {
-                        EffectParam param;
-                        
-                        if (effects.second.first)
-                        {
-                            const ESM::MagicEffect *magicEffect =
-                                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                                iter->mEffectID);                            
-                                
-                            if (iter->mDuration==0)
-                            {
-                                param.mMagnitude =
-                                    static_cast<int> (magnitude / (0.1 * magicEffect->mData.mBaseCost));
-                            }
-                            else
-                            {
-                                param.mMagnitude =
-                                    static_cast<int> (0.05*magnitude / (0.1 * magicEffect->mData.mBaseCost));
-                            }
-                        }
-                        else
-                            param.mMagnitude = static_cast<int> (
-                                (iter->mMagnMax-iter->mMagnMin)*magnitude + iter->mMagnMin);
-                                
-                        mEffects.add (*iter, param);
-                    }
-                }
+                if (end>now)
+                    mEffects.add(effectIt->mKey, MWMechanics::EffectParam(effectIt->mMagnitude));
             }
         }    
     }
 
-    std::pair<ESM::EffectList, std::pair<bool, bool> > ActiveSpells::getEffectList (const std::string& id) const
-    {
-        if (const ESM::Spell *spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
-            return std::make_pair (spell->mEffects, std::make_pair(false, false));
-
-        if (const ESM::Potion *potion =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>().search (id))
-            return std::make_pair (potion->mEffects, std::make_pair(false, true));
-
-        if (const ESM::Ingredient *ingredient =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (id))
-        {
-            const ESM::MagicEffect *magicEffect =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                ingredient->mData.mEffectID[0]);
-        
-            ESM::ENAMstruct effect;
-            effect.mEffectID = ingredient->mData.mEffectID[0];
-            effect.mSkill = ingredient->mData.mSkills[0];
-            effect.mAttribute = ingredient->mData.mAttributes[0];
-            effect.mRange = 0;
-            effect.mArea = 0;
-            effect.mDuration = magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration ? 0 : 1;
-            effect.mMagnMin = 1;
-            effect.mMagnMax = 1;
-            
-            std::pair<ESM::EffectList, std::pair<bool, bool> > result;
-            result.second.second = true;
-            result.second.first = true;
-
-            result.first.mList.push_back (effect);
-
-            return result;
-        }
-
-        throw std::runtime_error ("ID " + id + " can not produce lasting effects");
-    }
-
     ActiveSpells::ActiveSpells()
-    : mSpellsChanged (false), mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
+        : mSpellsChanged (false)
+        , mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
     {}
-
-    bool ActiveSpells::addSpell (const std::string& id, const MWWorld::Ptr& actor)
-    {
-        std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (id);
-        bool stacks = effects.second.second;
-
-        bool found = false;
-
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
-            iter!=effects.first.mList.end(); ++iter)
-        {
-            if (iter->mDuration)
-            {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found)
-            return false;
-
-        TContainer::iterator iter = mSpells.find (id);
-
-        float random = static_cast<float> (std::rand()) / RAND_MAX;
-
-        if (effects.second.first)
-        {
-            // ingredient -> special treatment required.
-            const CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
-            const NpcStats& npcStats = MWWorld::Class::get (actor).getNpcStats (actor);
-        
-            float x =
-                (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
-                0.2 * creatureStats.getAttribute (1).getModified()
-                + 0.1 * creatureStats.getAttribute (7).getModified())
-                * creatureStats.getFatigueTerm();
-            random *= 100;
-            random = random / std::min (x, 100.0f);
-            random *= 0.25 * x;
-        }
-
-        if (iter==mSpells.end() || stacks)
-            mSpells.insert (std::make_pair (id,
-                std::make_pair (MWBase::Environment::get().getWorld()->getTimeStamp(), random)));
-        else
-            iter->second = std::make_pair (MWBase::Environment::get().getWorld()->getTimeStamp(), random);
-
-        mSpellsChanged = true;
-
-        return true;
-    }
-
-    void ActiveSpells::removeSpell (const std::string& id)
-    {
-        TContainer::iterator iter = mSpells.find (id);
-
-        if (iter!=mSpells.end())
-        {
-            mSpells.erase (iter);
-            mSpellsChanged = true;
-        }
-    }
 
     const MagicEffects& ActiveSpells::getMagicEffects() const
     {
@@ -226,36 +75,31 @@ namespace MWMechanics
 
     ActiveSpells::TIterator ActiveSpells::begin() const
     {
-        update();
         return mSpells.begin();
     }
 
     ActiveSpells::TIterator ActiveSpells::end() const
     {
-        update();
         return mSpells.end();
     }
 
     double ActiveSpells::timeToExpire (const TIterator& iterator) const
     {
-        std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (iterator->first);
+        const std::vector<Effect>& effects = iterator->second.mEffects;
 
         int duration = 0;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
-            iter!=effects.first.mList.end(); ++iter)
+        for (std::vector<Effect>::const_iterator iter (effects.begin());
+            iter!=effects.end(); ++iter)
         {
             if (iter->mDuration > duration)
                 duration = iter->mDuration;
         }
 
-        if (effects.second.first)
-            duration *= iterator->second.second;
-
         double scaledDuration = duration *
               MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
 
-        double usedUp = MWBase::Environment::get().getWorld()->getTimeStamp()-iterator->second.first;
+        double usedUp = MWBase::Environment::get().getWorld()->getTimeStamp() - iterator->second.mTimeStamp;
 
         if (usedUp>=scaledDuration)
             return 0;
@@ -280,5 +124,69 @@ namespace MWMechanics
     const ActiveSpells::TContainer& ActiveSpells::getActiveSpells() const
     {
         return mSpells;
+    }
+
+    void ActiveSpells::addSpell(const std::string &id, bool stack, std::vector<Effect> effects, const std::string &displayName)
+    {
+        bool exists = false;
+        for (TContainer::const_iterator it = begin(); it != end(); ++it)
+        {
+            if (id == it->first)
+                exists = true;
+        }
+
+        ActiveSpellParams params;
+        params.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp();
+        params.mEffects = effects;
+        params.mDisplayName = displayName;
+
+        if (!exists || stack)
+            mSpells.insert (std::make_pair(id, params));
+        else
+            mSpells.find(id)->second = params;
+
+        mSpellsChanged = true;
+    }
+
+    void ActiveSpells::visitEffectSources(EffectSourceVisitor &visitor) const
+    {
+        for (TContainer::const_iterator it = begin(); it != end(); ++it)
+        {
+            float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+
+            for (std::vector<Effect>::const_iterator effectIt = it->second.mEffects.begin();
+                 effectIt != it->second.mEffects.end(); ++effectIt)
+            {
+                std::string name = it->second.mDisplayName;
+
+                float remainingTime = effectIt->mDuration +
+                        (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
+                float magnitude = effectIt->mMagnitude;
+
+                if (magnitude)
+                    visitor.visit(effectIt->mKey, name, magnitude, remainingTime);
+            }
+        }
+    }
+
+    void ActiveSpells::purgeAll()
+    {
+        mSpells.clear();
+    }
+
+    void ActiveSpells::purgeEffect(short effectId)
+    {
+        for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); ++it)
+        {
+            for (std::vector<Effect>::iterator effectIt = it->second.mEffects.begin();
+                 effectIt != it->second.mEffects.end();)
+            {
+                if (effectIt->mKey.mId == effectId)
+                    effectIt = it->second.mEffects.erase(effectIt);
+                else
+                    effectIt++;
+            }
+        }
+
     }
 }

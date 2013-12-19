@@ -15,6 +15,8 @@ class ESMWriter;
  */
 struct Pathgrid
 {
+    static unsigned int sRecordId;
+
     struct DATAstruct
     {
         int mX, mY; // Grid location, matches cell for exterior cells
@@ -46,7 +48,7 @@ struct Pathgrid
     EdgeList mEdges;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 }
 #endif

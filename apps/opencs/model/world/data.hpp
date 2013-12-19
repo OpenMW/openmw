@@ -20,6 +20,7 @@
 #include <components/esm/loadregn.hpp>
 #include <components/esm/loadbsgn.hpp>
 #include <components/esm/loadspel.hpp>
+#include <components/esm/loaddial.hpp>
 
 #include "../filter/filter.hpp"
 
@@ -28,6 +29,7 @@
 #include "cell.hpp"
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
+#include "infocollection.hpp"
 
 class QAbstractItemModel;
 
@@ -48,12 +50,18 @@ namespace CSMWorld
             IdCollection<ESM::Region> mRegions;
             IdCollection<ESM::BirthSign> mBirthsigns;
             IdCollection<ESM::Spell> mSpells;
+            IdCollection<ESM::Dialogue> mTopics;
+            IdCollection<ESM::Dialogue> mJournals;
+            InfoCollection mTopicInfos;
+            InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<CSMFilter::Filter> mFilters;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
+            std::string mAuthor;
+            std::string mDescription;
 
             // not implemented
             Data (const Data&);
@@ -65,6 +73,8 @@ namespace CSMWorld
             static void appendIds (std::vector<std::string>& ids, const CollectionBase& collection,
                 bool listDeleted);
             ///< Append all IDs from collection to \a ids.
+
+            static int count (RecordBase::State state, const CollectionBase& collection);
 
         public:
 
@@ -116,6 +126,22 @@ namespace CSMWorld
 
             IdCollection<ESM::Spell>& getSpells();
 
+            const IdCollection<ESM::Dialogue>& getTopics() const;
+
+            IdCollection<ESM::Dialogue>& getTopics();
+
+            const IdCollection<ESM::Dialogue>& getJournals() const;
+
+            IdCollection<ESM::Dialogue>& getJournals();
+
+            const InfoCollection& getTopicInfos() const;
+
+            InfoCollection& getTopicInfos();
+
+            const InfoCollection& getJournalInfos() const;
+
+            InfoCollection& getJournalInfos();
+
             const IdCollection<Cell>& getCells() const;
 
             IdCollection<Cell>& getCells();
@@ -141,8 +167,10 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            void loadFile (const boost::filesystem::path& path, bool base);
+            void loadFile (const boost::filesystem::path& path, bool base, bool project);
             ///< Merging content of a file into base or modified.
+            ///
+            /// \param project load project file instead of content file
 
             bool hasId (const std::string& id) const;
 
@@ -150,6 +178,17 @@ namespace CSMWorld
             ///< Return a sorted collection of all IDs that are not internal to the editor.
             ///
             /// \param listDeleted include deleted record in the list
+
+            int count (RecordBase::State state) const;
+            ///< Return number of top-level records with the given \a state.
+
+            void setDescription (const std::string& description);
+
+            std::string getDescription() const;
+
+            void setAuthor (const std::string& author);
+
+            std::string getAuthor() const;
 
         signals:
 

@@ -26,7 +26,7 @@ namespace CSVWorld
         public:
 
             TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
-                const CreatorFactoryBase& creatorFactory);
+                const CreatorFactoryBase& creatorFactory, bool sorting);
 
             virtual void setEditLock (bool locked);
 

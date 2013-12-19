@@ -63,6 +63,8 @@ namespace CSVDoc
 
             void setupMechanicsMenu();
 
+            void setupCharacterMenu();
+
             void setupAssetsMenu();
 
             void setupUi();
@@ -165,6 +167,14 @@ namespace CSVDoc
             void addFiltersSubView();
 
             void addSceneSubView();
+
+            void addTopicsSubView();
+
+            void addJournalsSubView();
+
+            void addTopicInfosSubView();
+
+            void addJournalInfosSubView();
 
             void toggleShowStatusBar (bool show);
     };

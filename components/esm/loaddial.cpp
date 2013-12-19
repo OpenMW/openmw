@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Dialogue::sRecordId = REC_DIAL;
 
 void Dialogue::load(ESMReader &esm)
 {
@@ -25,7 +27,7 @@ void Dialogue::load(ESMReader &esm)
         esm.fail("Unknown sub record size");
 }
 
-void Dialogue::save(ESMWriter &esm)
+void Dialogue::save(ESMWriter &esm) const
 {
     if (mType != Deleted)
         esm.writeHNT("DATA", mType);
@@ -35,5 +37,10 @@ void Dialogue::save(ESMWriter &esm)
         esm.writeHNT("DELE", (int)1);
     }
 }
+
+    void Dialogue::blank()
+    {
+        mInfo.clear();
+    }
 
 }

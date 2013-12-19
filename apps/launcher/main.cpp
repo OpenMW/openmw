@@ -3,15 +3,15 @@
 #include <QDir>
 #include <QDebug>
 
-#ifdef __APPLE__
+#ifdef MAC_OS_X_VERSION_MIN_REQUIRED
+#undef MAC_OS_X_VERSION_MIN_REQUIRED
 // We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-#endif
+#endif // MAC_OS_X_VERSION_MIN_REQUIRED
+
 #include <SDL.h>
 
 #include "maindialog.hpp"
-// SDL workaround
-#include "graphicspage.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     // Support non-latin characters
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    MainDialog mainWin;
+    Launcher::MainDialog mainWin;
 
     if (mainWin.setup()) {
         mainWin.show();
@@ -61,4 +61,3 @@ int main(int argc, char *argv[])
     SDL_Quit();
     return returnValue;
 }
-

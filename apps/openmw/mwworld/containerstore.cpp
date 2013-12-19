@@ -63,7 +63,7 @@ namespace
     }
 }
 
-MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
+MWWorld::ContainerStore::ContainerStore() : mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
@@ -77,22 +77,53 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
+void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
+{
+    if (ptr.getRefData().getCount() <= 1)
+        return;
+    addNewStack(ptr)->getRefData().setCount(ptr.getRefData().getCount()-1);
+    remove(ptr, ptr.getRefData().getCount()-1, container);
+}
+
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
-    /// \todo add current enchantment charge here when it is implemented
-    if (  Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID)
-          && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
-          && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
+    const MWWorld::Class& cls1 = MWWorld::Class::get(ptr1);
+    const MWWorld::Class& cls2 = MWWorld::Class::get(ptr2);
+
+    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID))
+        return false;
+
+    // If it has an enchantment, don't stack when some of the charge is already used
+    if (!ptr1.getClass().getEnchantment(ptr1).empty())
+    {
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                    ptr1.getClass().getEnchantment(ptr1));
+        float maxCharge = enchantment->mData.mCharge;
+        float enchantCharge1 = ptr1.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr1.getCellRef().mEnchantmentCharge;
+        float enchantCharge2 = ptr2.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr2.getCellRef().mEnchantmentCharge;
+        if (enchantCharge1 != maxCharge || enchantCharge2 != maxCharge)
+            return false;
+    }
+
+    return ptr1 != ptr2 // an item never stacks onto itself
         && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
         && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
-          // item that is already partly used up never stacks
-          && (!MWWorld::Class::get(ptr1).hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
-              || MWWorld::Class::get(ptr1).getItemMaxHealth(ptr1) == ptr1.getCellRef().mCharge)
-        && (!MWWorld::Class::get(ptr2).hasItemHealth(ptr2) || ptr2.getCellRef().mCharge == -1
-            || MWWorld::Class::get(ptr2).getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge))
-        return true;
 
-    return false;
+        && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
+
+        && cls1.getScript(ptr1) == cls2.getScript(ptr2)
+
+        // item that is already partly used up never stacks
+        && (!cls1.hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
+            || cls1.getItemMaxHealth(ptr1) == ptr1.getCellRef().mCharge)
+        && (!cls2.hasItemHealth(ptr2) || ptr2.getCellRef().mCharge == -1
+            || cls2.getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge);
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
+{
+    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
+    return add(ref.getPtr(), actorPtr);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, const Ptr& actorPtr)
@@ -140,22 +171,20 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        MWWorld::ManualRef ref(esmStore, "Gold_001");
-
         int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
 
-        ref.getPtr().getRefData().setCount(count);
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
             if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
             {
-                (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
+                iter->getRefData().setCount(iter->getRefData().getCount() + count);
                 flagAsModified();
                 return iter;
             }
         }
 
-        return addImpl(ref.getPtr());
+        MWWorld::ManualRef ref(esmStore, "Gold_001", count);
+        return addNewStack(ref.getPtr());
     }
 
     // determine whether to stack or not
@@ -171,10 +200,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         }
     }
     // if we got here, this means no stacking
-    return addImpl(ptr);
+    return addNewStack(ptr);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr)
 {
     ContainerStoreIterator it = begin();
 
@@ -198,6 +227,44 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
     return it;
 }
 
+int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor)
+{
+    int toRemove = count;
+
+    for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, itemId))
+            toRemove -= remove(*iter, toRemove, actor);
+
+    flagAsModified();
+
+    // number of removed items
+    return count - toRemove;
+}
+
+int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor)
+{
+    assert(this == item.getContainerStore());
+
+    int toRemove = count;
+    RefData& itemRef = item.getRefData();
+
+    if (itemRef.getCount() <= toRemove)
+    {
+        toRemove -= itemRef.getCount();
+        itemRef.setCount(0);
+    }
+    else
+    {
+        itemRef.setCount(itemRef.getCount() - toRemove);
+        toRemove = 0;
+    }
+
+    flagAsModified();
+
+    // number of removed items
+    return count - toRemove;
+}
+
 void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
@@ -216,7 +283,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
     try
     {
-        ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id);
+        ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
 
         if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
         {
@@ -266,7 +333,6 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         }
         else
         {
-            ref.getPtr().getRefData().setCount (count);
             ref.getPtr().getCellRef().mOwner = owner;
             addImp (ref.getPtr());
         }
@@ -289,13 +355,7 @@ void MWWorld::ContainerStore::clear()
 
 void MWWorld::ContainerStore::flagAsModified()
 {
-    ++mStateId;
     mWeightUpToDate = false;
-}
-
-int MWWorld::ContainerStore::getStateId() const
-{
-    return mStateId;
 }
 
 float MWWorld::ContainerStore::getWeight() const

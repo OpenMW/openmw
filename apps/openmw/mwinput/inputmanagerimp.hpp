@@ -61,7 +61,7 @@ namespace MWInput
     public:
         InputManager(OEngine::Render::OgreRenderer &_ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists);
+            const std::string& userFile, bool userFileExists, bool grab);
 
         virtual ~InputManager();
 
@@ -97,6 +97,7 @@ namespace MWInput
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );
         virtual void windowResized (int x, int y);
+        virtual void windowClosed ();
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
@@ -177,7 +178,6 @@ namespace MWInput
         void activate();
         void toggleWalking();
         void toggleAutoMove();
-        void exitNow();
         void rest();
 
         void quickKey (int index);
@@ -194,7 +194,7 @@ namespace MWInput
 
             A_GameMenu,
 
-            A_Quit,           // Exit the program
+            A_Unused,
 
             A_Screenshot,     // Take a screenshot
 

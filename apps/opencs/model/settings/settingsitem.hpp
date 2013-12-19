@@ -44,7 +44,11 @@ namespace CSMSettings
         inline QStringPair *getValuePair()                  { return mValuePair; }
 
         /// set value range (spinbox / integer use)
-        inline void setValuePair (QStringPair valuePair)    { mValuePair = new QStringPair(valuePair); }
+        inline void setValuePair (QStringPair valuePair)
+        {
+          delete mValuePair;
+          mValuePair = new QStringPair(valuePair);
+        }
 
         inline bool isMultivalue ()                         { return mIsMultiValue; }
 

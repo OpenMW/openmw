@@ -258,7 +258,7 @@ namespace MWWorld
                 typename std::vector<T *>::iterator sharedIter = mShared.begin();
                 typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
 
-                while (sharedIter != mShared.end() && sharedIter != end) { 
+                while (sharedIter != mShared.end() && sharedIter != end) {
                     if((*sharedIter)->mId == item.mId) {
                         mShared.erase(sharedIter);
                         break;

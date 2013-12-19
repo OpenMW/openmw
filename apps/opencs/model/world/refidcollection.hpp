@@ -9,6 +9,11 @@
 #include "collectionbase.hpp"
 #include "refiddata.hpp"
 
+namespace ESM
+{
+    class ESMWriter;
+}
+
 namespace CSMWorld
 {
     class RefIdAdapter;
@@ -87,13 +92,21 @@ namespace CSMWorld
 
             void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
-            virtual int getAppendIndex (UniversalId::Type type) const;
+            virtual int getAppendIndex (const std::string& id, UniversalId::Type type) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual std::vector<std::string> getIds (bool listDeleted) const;
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
+
+            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
+
+            void save (int index, ESM::ESMWriter& writer) const;
     };
 }
 

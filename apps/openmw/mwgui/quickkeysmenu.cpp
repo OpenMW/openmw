@@ -5,7 +5,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
-#include "../mwmechanics/spellsuccess.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 #include "../mwgui/inventorywindow.hpp"
 #include "../mwgui/bookwindow.hpp"
 #include "../mwgui/scrollwindow.hpp"
@@ -284,8 +284,9 @@ namespace MWGui
             MWWorld::Ptr item = *button->getChildAt (0)->getUserData<MWWorld::Ptr>();
 
             // make sure the item is available
-            if (item.getRefData ().getCount() == 0)
+            if (item.getRefData ().getCount() < 1)
             {
+                // TODO: Try to find a replacement with the same ID?
                 MWBase::Environment::get().getWindowManager ()->messageBox (
                             "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item));
                 return;

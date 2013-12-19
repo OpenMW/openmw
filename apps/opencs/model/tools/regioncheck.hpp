@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that region records are internally consistent
-    class RegionCheckStage : public Stage
+    class RegionCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Region>& mRegions;
 
