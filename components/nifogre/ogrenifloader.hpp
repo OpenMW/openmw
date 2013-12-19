@@ -45,6 +45,8 @@ class MaterialControllerManager
 {
 public:
     ~MaterialControllerManager();
+
+    /// @attention if \a movable is an Entity, it needs to have *one* SubEntity
     Ogre::MaterialPtr getWritableMaterial (Ogre::MovableObject* movable);
 
 private:

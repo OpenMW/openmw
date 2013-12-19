@@ -141,14 +141,14 @@ void MWBase::Environment::cleanup()
     delete mScriptManager;
     mScriptManager = 0;
 
+    delete mWindowManager;
+    mWindowManager = 0;
+
     delete mWorld;
     mWorld = 0;
 
     delete mSoundManager;
     mSoundManager = 0;
-
-    delete mWindowManager;
-    mWindowManager = 0;
 
     delete mInputManager;
     mInputManager = 0;

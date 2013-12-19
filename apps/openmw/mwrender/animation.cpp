@@ -146,29 +146,21 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 struct AddGlow
 {
     Ogre::Vector3* mColor;
-    AddGlow(Ogre::Vector3* col) : mColor(col) {}
+    NifOgre::MaterialControllerManager* mMaterialControllerMgr;
+    AddGlow(Ogre::Vector3* col, NifOgre::MaterialControllerManager* materialControllerMgr)
+        : mColor(col)
+        , mMaterialControllerMgr(materialControllerMgr)
+    {}
 
-    // TODO: integrate this with material controllers?
     void operator()(Ogre::Entity* entity) const
     {
-        unsigned int numsubs = entity->getNumSubEntities();
-        for(unsigned int i = 0;i < numsubs;++i)
-        {
-            unsigned int numsubs = entity->getNumSubEntities();
-            for(unsigned int i = 0;i < numsubs;++i)
-            {
-                Ogre::SubEntity* subEnt = entity->getSubEntity(i);
-                std::string newName = subEnt->getMaterialName() + "@fx";
-                if (sh::Factory::getInstance().searchInstance(newName) == NULL)
-                {
-                    sh::MaterialInstance* instance =
-                        sh::Factory::getInstance().createMaterialInstance(newName, subEnt->getMaterialName());
-                    instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
-                    instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
-                }
-                subEnt->setMaterialName(newName);
-            }
-        }
+        if (!entity->getNumSubEntities())
+            return;
+        Ogre::MaterialPtr writableMaterial = mMaterialControllerMgr->getWritableMaterial(entity);
+        sh::MaterialInstance* instance = sh::Factory::getInstance().getMaterialInstance(writableMaterial->getName());
+
+        instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
     }
 };
 
@@ -216,7 +208,7 @@ void Animation::setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint3
 
     if (enchantedGlow)
         std::for_each(objlist->mEntities.begin(), objlist->mEntities.end(),
-                  AddGlow(glowColor));
+                  AddGlow(glowColor, &objlist->mMaterialControllerMgr));
 }
 
 

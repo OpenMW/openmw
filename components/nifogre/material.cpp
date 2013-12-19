@@ -390,7 +390,6 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue(((depthFlags>>1)&1) ? "on" : "off")));
     // depth_func???
 
-    sh::Factory::getInstance()._ensureMaterial(name, "Default");
     return name;
 }
 
