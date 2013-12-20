@@ -211,11 +211,6 @@ MWRender::SkyManager* RenderingManager::getSkyManager()
     return mSkyManager;
 }
 
-MWRender::Camera* RenderingManager::getCamera() const
-{
-    return mCamera;
-}
-
 MWRender::Objects& RenderingManager::getObjects(){
     return *mObjects;
 }

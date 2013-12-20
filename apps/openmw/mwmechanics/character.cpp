@@ -27,7 +27,6 @@
 #include "security.hpp"
 
 #include "../mwrender/animation.hpp"
-#include "../mwrender/camera.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -1056,19 +1055,10 @@ void CharacterController::forceStateUpdate()
     }
 }
 
-bool CharacterController::kill()
+void CharacterController::kill()
 {
-    if( isDead() )
-	{
-		//player death animation is over: toggle game menu without 'return' option
-        if( mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() 
-            && !isAnimPlaying(mCurrentDeath) )
-        {
-            MWBase::Environment::get().getWindowManager()->setMainMenuNoReturn(true);
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);    
-        }
-        return false;
-    }
+    if(mDeathState != CharState_None)
+        return;
 
     if(mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
@@ -1106,10 +1096,6 @@ bool CharacterController::kill()
 
     if(mAnimation)
     {
-        if (mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() 
-                && MWBase::Environment::get().getWorld()->getCamera()->isFirstPerson() )
-            MWBase::Environment::get().getWorld()->togglePOV();
-
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                          false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->disable(mCurrentIdle);
@@ -1117,8 +1103,6 @@ bool CharacterController::kill()
 
     mIdleState = CharState_None;
     mCurrentIdle.clear();
-
-    return true;
 }
 
 void CharacterController::resurrect()

@@ -570,13 +570,15 @@ namespace MWMechanics
                     continue;
                 }
 
-                if (iter->second->kill())
-                {
-                    ++mDeathCount[cls.getId(iter->first)];
+                if(iter->second->isDead())
+                    continue;
 
-                    if(cls.isEssential(iter->first))
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
-                }
+                iter->second->kill();
+
+                ++mDeathCount[cls.getId(iter->first)];
+
+                if(cls.isEssential(iter->first))
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
             }
         }
 

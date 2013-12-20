@@ -187,8 +187,6 @@ namespace MWWorld
 
             virtual Player& getPlayer();
 
-            virtual MWRender::Camera* getCamera() const;
-
             virtual const MWWorld::ESMStore& getStore() const;
 
             virtual std::vector<ESM::ESMReader>& getEsmReader();

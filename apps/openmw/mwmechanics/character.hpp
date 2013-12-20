@@ -190,7 +190,7 @@ public:
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
-    bool kill();
+    void kill();
     void resurrect();
     bool isDead() const
     { return mDeathState != CharState_None; }
