@@ -180,9 +180,7 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if(!(MWWorld::Class::get(mPlayer->getPlayer()).getCreatureStats(mPlayer->getPlayer()).isDead() 
-                        && MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_MainMenu ) )
-                    toggleMainMenu ();
+                toggleMainMenu ();
                 break;
             case A_Screenshot:
                 screenshot();
@@ -302,9 +300,7 @@ namespace MWInput
             return;
 
         // Disable movement in Gui mode
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode() 
-                || MWWorld::Class::get(mPlayer->getPlayer()).getCreatureStats(mPlayer->getPlayer()).isDead() ) 
-            return;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
 
         // Configure player movement according to keyboard input. Actual movement will
@@ -371,28 +367,29 @@ namespace MWInput
                 }
             }
 
-
-            if (mControlSwitch["playerviewswitch"]) {
-                // work around preview mode toggle when pressing Alt+Tab
-                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+            if ( !player.getClass().getCreatureStats(player).isDead() ) {
+                if (mControlSwitch["playerviewswitch"]) {
+                    // work around preview mode toggle when pressing Alt+Tab
+                    if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
                     
-                    if (mPreviewPOVDelay <= 0.5 &&
-                        (mPreviewPOVDelay += dt) > 0.5)
-                    {
-                        mPreviewPOVDelay = 1.f;
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                        if (mPreviewPOVDelay <= 0.5 &&
+                            (mPreviewPOVDelay += dt) > 0.5)
+                        {
+                            mPreviewPOVDelay = 1.f;
+                            MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                        }
+                    } else {
+                        if (mPreviewPOVDelay > 0.5) {
+                            //disable preview mode
+                            MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                        } else if (mPreviewPOVDelay > 0.f) {
+                            MWBase::Environment::get().getWorld()->togglePOV();
+                        }
+                        mPreviewPOVDelay = 0.f;
                     }
-                } else {
-                    if (mPreviewPOVDelay > 0.5) {
-                        //disable preview mode
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    } else if (mPreviewPOVDelay > 0.f) {
-                        MWBase::Environment::get().getWorld()->togglePOV();
-                    }
-                    mPreviewPOVDelay = 0.f;
                 }
             }
-            
         }
         if (actionIsActive(A_MoveForward) ||
             actionIsActive(A_MoveBackward) ||
