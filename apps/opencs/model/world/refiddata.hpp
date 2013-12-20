@@ -219,6 +219,9 @@ namespace CSMWorld
             /// \param listDeleted include deleted record in the list
 
             void save (int index, ESM::ESMWriter& writer) const;
+	    
+	    //RECORD CONTAINERS ACCESS METHODS
+	    const RefIdDataContainer<ESM::Book>& getBooks() const;
     };
 }
 

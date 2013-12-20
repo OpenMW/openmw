@@ -19,6 +19,7 @@
 #include "regioncheck.hpp"
 #include "birthsigncheck.hpp"
 #include "spellcheck.hpp"
+#include "referenceablecheck.hpp"
 
 CSMDoc::Operation *CSMTools::Tools::get (int type)
 {
@@ -74,6 +75,8 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new BirthsignCheckStage (mData.getBirthsigns()));
 
         mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
+	
+	mVerifier->appendStage( new ReferenceableCheckStage (mData.getReferenceables().getDataSet()));
     }
 
     return mVerifier;

@@ -107,6 +107,8 @@ namespace CSMWorld
             /// \return Success?
 
             void save (int index, ESM::ESMWriter& writer) const;
+	    
+	    const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
     };
 }
 

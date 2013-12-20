@@ -231,3 +231,8 @@ void CSMWorld::RefIdData::save (int index, ESM::ESMWriter& writer) const
 
     iter->second->save (localIndex.first, writer);
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Book >& CSMWorld::RefIdData::getBooks() const
+{
+    return mBooks;
+}
