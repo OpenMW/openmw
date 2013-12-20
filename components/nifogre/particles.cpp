@@ -767,7 +767,7 @@ public:
 protected:
     void applyWindForce(Ogre::ParticleSystem *psys, Ogre::Real timeElapsed)
     {
-        const Ogre::Vector3 vec = mDirection * mForce * timeElapsed;
+        const Ogre::Vector3 vec = mBone->_getDerivedOrientation() * mDirection * mForce * timeElapsed;
         Ogre::ParticleIterator pi = psys->_getIterator();
         while (!pi.end())
         {

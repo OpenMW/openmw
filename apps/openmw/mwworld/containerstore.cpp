@@ -109,6 +109,8 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
         && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
         && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
 
+        && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
+
         && cls1.getScript(ptr1) == cls2.getScript(ptr2)
 
         // item that is already partly used up never stacks

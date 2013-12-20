@@ -8,10 +8,6 @@
 #include <OgreViewport.h>
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
-#include <OgreCompositorManager.h>
-#include <OgreCompositorChain.h>
-#include <OgreCompositionTargetPass.h>
-#include <OgreCompositionPass.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreControllerManager.h>
 #include <OgreMeshManager.h>
@@ -43,7 +39,6 @@
 #include "shadows.hpp"
 #include "localmap.hpp"
 #include "water.hpp"
-#include "compositors.hpp"
 #include "npcanimation.hpp"
 #include "externalrendering.hpp"
 #include "globalmap.hpp"
@@ -86,8 +81,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mRendering.getWindow()->addListener(this);
     mRendering.setWindowListener(this);
-
-    mCompositors = new Compositors(mRendering.getViewport());
 
     mWater = 0;
 
@@ -157,8 +150,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
     sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (new sh::Vector4(0,0,0,0)));
 
-    applyCompositors();
-
     mRootNode = mRendering.getScene()->getRootSceneNode();
     mRootNode->createChildSceneNode("player");
 
@@ -198,7 +189,6 @@ RenderingManager::~RenderingManager ()
     delete mTerrain;
     delete mLocalMap;
     delete mOcclusionQuery;
-    delete mCompositors;
     delete mWater;
     delete mVideoPlayer;
     delete mActors;
@@ -478,28 +468,20 @@ bool RenderingManager::toggleRenderMode(int mode)
     {
         if (mRendering.getCamera()->getPolygonMode() == PM_SOLID)
         {
-            mCompositors->setEnabled(false);
-
             mRendering.getCamera()->setPolygonMode(PM_WIREFRAME);
             return true;
         }
         else
         {
-            mCompositors->setEnabled(true);
-
             mRendering.getCamera()->setPolygonMode(PM_SOLID);
             return false;
         }
     }
-    else if (mode == MWBase::World::Render_BoundingBoxes)
+    else //if (mode == MWBase::World::Render_BoundingBoxes)
     {
         bool show = !mRendering.getScene()->getShowBoundingBoxes();
         mRendering.getScene()->showBoundingBoxes(show);
         return show;
-    }
-    else //if (mode == MWBase::World::Render_Compositors)
-    {
-        return mCompositors->toggle();
     }
 }
 
@@ -745,11 +727,6 @@ Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
     return Vector4(min_x, min_y, max_x, max_y);
 }
 
-Compositors* RenderingManager::getCompositors()
-{
-    return mCompositors;
-}
-
 void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
 {
     bool changeRes = false;
@@ -795,7 +772,6 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         }
         else if (it->second == "shader" && it->first == "Water")
         {
-            applyCompositors();
             sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
             rebuild = true;
             mRendering.getViewport ()->setClearEveryFrame (true);
@@ -883,28 +859,16 @@ void RenderingManager::windowResized(int x, int y)
     Settings::Manager::setInt("resolution x", "Video", x);
     Settings::Manager::setInt("resolution y", "Video", y);
     mRendering.adjustViewport();
-    mCompositors->recreate();
 
     mVideoPlayer->setResolution (x, y);
 
     MWBase::Environment::get().getWindowManager()->windowResized(x,y);
 }
 
-void RenderingManager::applyCompositors()
-{
-}
-
 void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
 {
-    if (mCompositors->anyCompositorEnabled())
-    {
-        mCompositors->countTrianglesBatches(triangles, batches);
-    }
-    else
-    {
-        triangles = mRendering.getWindow()->getTriangleCount();
-        batches = mRendering.getWindow()->getBatchCount();
-    }
+    batches = mRendering.getWindow()->getBatchCount();
+    triangles = mRendering.getWindow()->getTriangleCount();
 }
 
 void RenderingManager::setupPlayer(const MWWorld::Ptr &ptr)

@@ -1095,7 +1095,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
     {
-        return copyObjectToCell(ptr,Cell,pos);
+        return copyObjectToCell(ptr,Cell,pos,false);
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -1516,7 +1516,7 @@ namespace MWWorld
         // copy the object and set its count
         int origCount = object.getRefData().getCount();
         object.getRefData().setCount(amount);
-        Ptr dropped = copyObjectToCell(object, *cell, pos);
+        Ptr dropped = copyObjectToCell(object, *cell, pos, true);
         object.getRefData().setCount(origCount);
 
         // only the player place items in the world, so no need to check actor
@@ -1537,13 +1537,13 @@ namespace MWWorld
     }
 
 
-    Ptr World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos)
+    Ptr World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos, bool adjustPos)
     {
         /// \todo add searching correct cell for position specified
         MWWorld::Ptr dropped =
             MWWorld::Class::get(object).copyToCell(object, cell, pos);
 
-        if (object.getClass().isActor())
+        if (object.getClass().isActor() || adjustPos)
         {
             Ogre::Vector3 min, max;
             if (mPhysics->getObjectAABB(object, min, max)) {

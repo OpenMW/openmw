@@ -669,7 +669,7 @@ namespace MWClass
         else
         {
             MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
-            fatigue.setCurrent(fatigue.getCurrent() - damage);
+            fatigue.setCurrent(fatigue.getCurrent() - damage, true);
             getCreatureStats(ptr).setFatigue(fatigue);
         }
     }
