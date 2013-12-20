@@ -32,6 +32,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -1057,11 +1058,10 @@ bool CharacterController::kill()
     if( isDead() )
     {
         //player's death animation is over
-        if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) 
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu )
+        if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) )
         {
             MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setHealth(0);
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+            MWBase::Environment::get().getStateManager()->askLoadRecent();
         }
         return false;
     }

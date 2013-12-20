@@ -44,6 +44,8 @@ namespace MWBase
 
             virtual bool hasQuitRequest() const = 0;
 
+            virtual void askLoadRecent() = 0;
+
             virtual State getState() const = 0;
 
             virtual void newGame (bool bypass = false) = 0;
