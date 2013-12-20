@@ -17,10 +17,12 @@ namespace CSMTools
 
         private:
             void bookCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Book >& records, std::vector< std::string >& messages);
+            void activatorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Activator >& records, std::vector< std::string >& messages);
 	    void setSizeVariables();
 
             const CSMWorld::RefIdData mReferencables;
 	    int mBooksSize;
+	    int mActivatorsSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

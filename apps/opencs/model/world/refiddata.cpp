@@ -236,3 +236,8 @@ const CSMWorld::RefIdDataContainer< ESM::Book >& CSMWorld::RefIdData::getBooks()
 {
     return mBooks;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Activator >& CSMWorld::RefIdData::getActivator() const
+{
+    return mActivators;
+}
