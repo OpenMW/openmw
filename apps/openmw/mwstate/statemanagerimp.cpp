@@ -54,8 +54,7 @@ void MWState::StateManager::askLoadRecent()
 
     if( !mAskLoadRecent )
     {
-        if(MWBase::Environment::get().getStateManager()->getCurrentCharacter()->begin()
-            == MWBase::Environment::get().getStateManager()->getCurrentCharacter()->end() )//no saves
+        if(getCurrentCharacter()->begin() == getCurrentCharacter()->end() )//no saves
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
@@ -65,7 +64,10 @@ void MWState::StateManager::askLoadRecent()
             std::vector<std::string> buttons;
             buttons.push_back("Yes");
             buttons.push_back("No");
-            std::string message = "The most recent Save Game is '" + lastSave.mProfile.mDescription + "'.\n Would you like to load it?";
+            std::string tag("%s");
+            std::string message = MWBase::Environment::get().getWindowManager()->getGameSettingString("sLoadLastSaveMsg", tag);
+            size_t pos = message.find(tag);
+            message.replace(pos, tag.length(), lastSave.mProfile.mDescription);
             MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
             mAskLoadRecent = true;
         }
