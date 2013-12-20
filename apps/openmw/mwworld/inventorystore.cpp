@@ -175,6 +175,13 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
     {
         Ptr test = *iter;
+
+        // Don't autoEquip lights
+        if (test.getTypeName() == typeid(ESM::Light).name())
+        {
+          continue;
+        }
+
         int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
 
         std::pair<std::vector<int>, bool> itemsSlots =

@@ -439,15 +439,48 @@ namespace MWMechanics
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
     {
-        //If holding a light...
+        bool isPlayer = ptr.getRefData().getHandle()=="player";
+
         MWWorld::InventoryStore &inventoryStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator heldIter =
                 inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        /**
+         * Automatically equip NPCs torches at night and unequip them at day
+         */
+        if (!isPlayer && !MWWorld::Class::get (ptr).getCreatureStats (ptr).isHostile())
+        {
+          if (mTorchPtr.isEmpty())
+          {
+            mTorchPtr = inventoryStore.search("torch_infinite_time");
+          }
 
+          if (MWBase::Environment::get().getWorld()->isNight())
+          {
+            if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
+            {
+              inventoryStore.unequipItem(*heldIter, ptr);
+            }
+            else if (heldIter == inventoryStore.end() && !mTorchPtr.isEmpty())
+            {
+              heldIter = inventoryStore.add(mTorchPtr, ptr);
+              inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, heldIter, ptr);
+            }
+          }
+          else
+          {
+            if (heldIter != inventoryStore.end() && heldIter->getTypeName() == typeid(ESM::Light).name())
+            {
+              inventoryStore.unequipItem(*heldIter, ptr);
+              inventoryStore.add(*heldIter, ptr);
+              inventoryStore.autoEquip(ptr);
+            }
+          }
+        }
+
+        //If holding a light...
         if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
         {
             // Use time from the player's light
-            bool isPlayer = ptr.getRefData().getHandle()=="player";
             if(isPlayer)
             {
                 float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
