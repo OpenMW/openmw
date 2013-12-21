@@ -20,31 +20,30 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
 {
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
-    bool CheckPerformed = false;
 
     if (stage <= mBooksSize)
     {
         bookCheck(stage, mReferencables.getBooks(), messages);
-        CheckPerformed = true;
-    }
-
-    if (CheckPerformed)
-    {
         return;
     }
+
     stage -= mBooksSize;
-    
-    if ((stage) <= mActivatorsSize)
+
+    if (stage <= mActivatorsSize)
     {
         activatorCheck(stage, mReferencables.getActivators(), messages);
-        CheckPerformed = true;
-    }
-
-    if (CheckPerformed)
-    {
         return;
     }
+
     stage -= mActivatorsSize;
+
+    if (stage <= mPotionsSize)
+    {
+        potionsCheck(stage, mReferencables.getPotions(), messages);
+        return;
+    }
+
+    stage -= mPotionsSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -112,6 +111,50 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(int stage, const CSMWorld
     {
         messages.push_back(id.toString() + "|" + Activator.mId + " has no model");
     }
+}
+
+void CSMTools::ReferenceableCheckStage::potionsCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Potion >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Potion& Potion = (static_cast<const CSMWorld::Record<ESM::Potion>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, Potion.mId);
+
+    //Checking for name
+    if (Potion.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Potion.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (Potion.mData.mWeight < 0)
+    {
+        messages.push_back(id.toString() + "|" + Potion.mId + " has a negative weight");
+    }
+
+    //Checking for value
+    if (Potion.mData.mValue < 0)
+    {
+        messages.push_back(id.toString() + "|" + Potion.mId + " has a negative value");
+    }
+
+//checking for model
+    if (Potion.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Potion.mId + " has no model");
+    }
+
+    //checking for icon
+    if (Potion.mIcon.empty())
+    {
+        messages.push_back(id.toString() + "|" + Potion.mId + " has no icon");
+    }
+    //IIRC potion can have empty effects list just fine.
 }
 
 void CSMTools::ReferenceableCheckStage::setSizeVariables()
