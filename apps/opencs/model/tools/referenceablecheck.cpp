@@ -37,7 +37,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     if ((stage - PrevSum) <= mActivatorsSize)
     {
-        activatorCheck(stage - PrevSum, mReferencables.getActivator(), messages);
+        activatorCheck(stage - PrevSum, mReferencables.getActivators(), messages);
         CheckPerformed = true;
     }
 
