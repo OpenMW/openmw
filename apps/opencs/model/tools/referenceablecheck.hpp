@@ -23,6 +23,7 @@ namespace CSMTools
             const CSMWorld::RefIdData mReferencables;
 	    int mBooksSize;
 	    int mActivatorsSize;
+	    int mPotionsSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

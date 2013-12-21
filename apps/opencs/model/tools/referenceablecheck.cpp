@@ -11,7 +11,8 @@
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable) :
     mReferencables(referenceable),
     mBooksSize(0),
-    mActivatorsSize(0)
+    mActivatorsSize(0),
+    mPotionsSize(0)
 {
     setSizeVariables();
 }
@@ -116,5 +117,6 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(int stage, const CSMWorld
 void CSMTools::ReferenceableCheckStage::setSizeVariables()
 {
     mBooksSize = mReferencables.getBooks().getSize();
-    mActivatorsSize = mReferencables.getActivator().getSize();
+    mActivatorsSize = mReferencables.getActivators().getSize();
+    mPotionsSize = mReferencables.getPotions().getSize();
 }
