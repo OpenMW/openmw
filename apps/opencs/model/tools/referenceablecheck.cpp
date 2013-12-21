@@ -12,9 +12,18 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mReferencables(referenceable),
     mBooksSize(0),
     mActivatorsSize(0),
-    mPotionsSize(0)
+    mPotionsSize(0),
+    mApparatiSize(0)
 {
     setSizeVariables();
+}
+
+void CSMTools::ReferenceableCheckStage::setSizeVariables()
+{
+    mBooksSize = mReferencables.getBooks().getSize();
+    mActivatorsSize = mReferencables.getActivators().getSize();
+    mPotionsSize = mReferencables.getPotions().getSize();
+    mApparatiSize = mReferencables.getApparati().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
@@ -24,6 +33,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     if (stage <= mBooksSize)
     {
         bookCheck(stage, mReferencables.getBooks(), messages);
+	std::cout<<"Book checking \n";
         return;
     }
 
@@ -39,11 +49,19 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     if (stage <= mPotionsSize)
     {
-        potionsCheck(stage, mReferencables.getPotions(), messages);
+        potionCheck(stage, mReferencables.getPotions(), messages);
         return;
     }
 
     stage -= mPotionsSize;
+    
+    if (stage <= mApparatiSize)
+    {
+      apparatusCheck(stage, mReferencables.getApparati(), messages);
+      return;
+    }
+    
+    stage -= mApparatiSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -72,13 +90,13 @@ void CSMTools::ReferenceableCheckStage::bookCheck(int stage, const CSMWorld::Ref
     //Checking for weight
     if (Book.mData.mWeight < 0)
     {
-        messages.push_back(id.toString() + "|" + Book.mId + " has a negative weight");
+        messages.push_back(id.toString() + "|" + Book.mId + " has negative weight");
     }
 
     //Checking for value
     if (Book.mData.mValue < 0)
     {
-        messages.push_back(id.toString() + "|" + Book.mId + " has a negative value");
+        messages.push_back(id.toString() + "|" + Book.mId + " has negative value");
     }
 
 //checking for model
@@ -91,6 +109,12 @@ void CSMTools::ReferenceableCheckStage::bookCheck(int stage, const CSMWorld::Ref
     if (Book.mIcon.empty())
     {
         messages.push_back(id.toString() + "|" + Book.mId + " has no icon");
+    }
+    
+    //checking for enchantment points
+    if (Book.mData.mEnchant < 0)
+    {
+      messages.push_back(id.toString() + "|" + Book.mId + " has negative enchantment");
     }
 }
 
@@ -113,7 +137,7 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(int stage, const CSMWorld
     }
 }
 
-void CSMTools::ReferenceableCheckStage::potionsCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Potion >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::potionCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Potion >& records, std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -134,13 +158,13 @@ void CSMTools::ReferenceableCheckStage::potionsCheck(int stage, const CSMWorld::
     //Checking for weight
     if (Potion.mData.mWeight < 0)
     {
-        messages.push_back(id.toString() + "|" + Potion.mId + " has a negative weight");
+        messages.push_back(id.toString() + "|" + Potion.mId + " has negative weight");
     }
 
     //Checking for value
     if (Potion.mData.mValue < 0)
     {
-        messages.push_back(id.toString() + "|" + Potion.mId + " has a negative value");
+        messages.push_back(id.toString() + "|" + Potion.mId + " has negative value");
     }
 
 //checking for model
@@ -157,9 +181,46 @@ void CSMTools::ReferenceableCheckStage::potionsCheck(int stage, const CSMWorld::
     //IIRC potion can have empty effects list just fine.
 }
 
-void CSMTools::ReferenceableCheckStage::setSizeVariables()
+
+void CSMTools::ReferenceableCheckStage::apparatusCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Apparatus >& records, std::vector< std::string >& messages)
 {
-    mBooksSize = mReferencables.getBooks().getSize();
-    mActivatorsSize = mReferencables.getActivators().getSize();
-    mPotionsSize = mReferencables.getPotions().getSize();
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Apparatus& Apparatus = (static_cast<const CSMWorld::Record<ESM::Apparatus>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Apparatus, Apparatus.mId);
+
+    //Checking for name
+    if (Apparatus.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Apparatus.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (Apparatus.mData.mWeight < 0)
+    {
+        messages.push_back(id.toString() + "|" + Apparatus.mId + " has negative weight");
+    }
+
+    //Checking for value
+    if (Apparatus.mData.mValue < 0)
+    {
+        messages.push_back(id.toString() + "|" + Apparatus.mId + " has negative value");
+    }
+
+//checking for model
+    if (Apparatus.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Apparatus.mId + " has no model");
+    }
+
+    //checking for icon
+    if (Apparatus.mIcon.empty())
+    {
+        messages.push_back(id.toString() + "|" + Apparatus.mId + " has no icon");
+    }
 }

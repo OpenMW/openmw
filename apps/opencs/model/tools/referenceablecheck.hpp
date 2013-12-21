@@ -16,16 +16,21 @@ namespace CSMTools
             virtual int setup();
 
         private:
+	  //CONCRETE CHECKS
             void bookCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Book >& records, std::vector< std::string >& messages);
             void activatorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Activator >& records, std::vector< std::string >& messages);
-            void potionsCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Potion>& records, std::vector<std::string>& messages);
+            void potionCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Potion>& records, std::vector<std::string>& messages);
+            void apparatusCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Apparatus>& records, std::vector<std::string>& messages);
 
             void setSizeVariables();
 
             const CSMWorld::RefIdData mReferencables;
+	    
+	    //SIZES OF CONCRETE TYPES
             int mBooksSize;
             int mActivatorsSize;
             int mPotionsSize;
+	    int mApparatiSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

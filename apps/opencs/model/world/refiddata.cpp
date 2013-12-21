@@ -246,3 +246,8 @@ const CSMWorld::RefIdDataContainer< ESM::Potion >& CSMWorld::RefIdData::getPotio
 {
     return mPotions;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Apparatus >& CSMWorld::RefIdData::getApparati() const
+{
+    return mApparati;
+}
