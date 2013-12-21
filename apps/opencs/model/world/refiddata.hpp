@@ -223,6 +223,7 @@ namespace CSMWorld
 	    //RECORD CONTAINERS ACCESS METHODS
 	    const RefIdDataContainer<ESM::Book>& getBooks() const;
 	    const RefIdDataContainer<ESM::Activator>& getActivator() const;
+	    const RefIdDataContainer<ESM::Potion>& getPotions() const;
     };
 }
 

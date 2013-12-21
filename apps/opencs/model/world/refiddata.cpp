@@ -241,3 +241,8 @@ const CSMWorld::RefIdDataContainer< ESM::Activator >& CSMWorld::RefIdData::getAc
 {
     return mActivators;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Potion >& CSMWorld::RefIdData::getPotions() const
+{
+    return mPotions;
+}
