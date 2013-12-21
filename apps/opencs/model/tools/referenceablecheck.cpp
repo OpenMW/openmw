@@ -30,16 +30,15 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 {
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
 
-    if (stage <= mBooksSize)
+    if (stage < mBooksSize)
     {
         bookCheck(stage, mReferencables.getBooks(), messages);
-	std::cout<<"Book checking \n";
         return;
     }
 
     stage -= mBooksSize;
 
-    if (stage <= mActivatorsSize)
+    if (stage < mActivatorsSize)
     {
         activatorCheck(stage, mReferencables.getActivators(), messages);
         return;
@@ -47,7 +46,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     stage -= mActivatorsSize;
 
-    if (stage <= mPotionsSize)
+    if (stage < mPotionsSize)
     {
         potionCheck(stage, mReferencables.getPotions(), messages);
         return;
@@ -55,7 +54,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     stage -= mPotionsSize;
     
-    if (stage <= mApparatiSize)
+    if (stage < mApparatiSize)
     {
       apparatusCheck(stage, mReferencables.getApparati(), messages);
       return;
