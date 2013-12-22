@@ -16,7 +16,8 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mApparatiSize(0),
     mArmorsSzie(0),
     mClothingSize(0),
-    mContainersSize(0)
+    mContainersSize(0),
+    mCreaturesSize(0)
 {
     setSizeVariables();
 }
@@ -30,6 +31,7 @@ void CSMTools::ReferenceableCheckStage::setSizeVariables()
     mArmorsSzie = mReferencables.getArmors().getSize();
     mClothingSize = mReferencables.getClothing().getSize();
     mContainersSize = mReferencables.getContainers().getSize();
+    mCreaturesSize = mReferencables.getCreatures().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)

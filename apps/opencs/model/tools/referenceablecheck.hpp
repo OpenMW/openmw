@@ -37,6 +37,7 @@ namespace CSMTools
 	    int mArmorsSzie;
 	    int mClothingSize;
 	    int mContainersSize;
+	    int mCreaturesSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H
