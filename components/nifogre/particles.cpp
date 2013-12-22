@@ -189,23 +189,36 @@ public:
         xOff = Ogre::Math::SymmetricRandom() * mXRange;
         yOff = Ogre::Math::SymmetricRandom() * mYRange;
         zOff = Ogre::Math::SymmetricRandom() * mZRange;
- 
-        particle->position = mBone->_getDerivedPosition() + xOff + yOff + zOff;
+
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        Ogre::Vector3& position = particle->mPosition;
+        Ogre::Vector3& direction = particle->mDirection;
+        Ogre::ColourValue& colour = particle->mColour;
+        Ogre::Real& totalTimeToLive = particle->mTotalTimeToLive;
+        Ogre::Real& timeToLive = particle->mTimeToLive;
+#else
+        Ogre::Vector3& position = particle->position;
+        Ogre::Vector3& direction = particle->direction;
+        Ogre::ColourValue& colour = particle->colour;
+        Ogre::Real& totalTimeToLive = particle->totalTimeToLive;
+        Ogre::Real& timeToLive = particle->timeToLive;
+#endif
+        position = mBone->_getDerivedPosition() + xOff + yOff + zOff;
 
         // Generate complex data by reference
-        genEmissionColour(particle->colour);
+        genEmissionColour(colour);
 
         // NOTE: We do not use mDirection/mAngle for the initial direction.
         Ogre::Radian hdir = mHorizontalDir + mHorizontalAngle*Ogre::Math::SymmetricRandom();
         Ogre::Radian vdir = mVerticalDir + mVerticalAngle*Ogre::Math::SymmetricRandom();
-        particle->direction = (mBone->_getDerivedOrientation() * Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
+        direction = (mBone->_getDerivedOrientation() * Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
                                Ogre::Quaternion(vdir, Ogre::Vector3::UNIT_X)) *
                               Ogre::Vector3::UNIT_Z;
 
-        genEmissionVelocity(particle->direction);
+        genEmissionVelocity(direction);
 
         // Generate simpler data
-        particle->timeToLive = particle->totalTimeToLive = genEmissionTTL();
+        timeToLive = totalTimeToLive = genEmissionTTL();
     }
 
     /** Overloaded to update the trans. matrix */
@@ -466,9 +479,13 @@ public:
     /** See Ogre::ParticleAffector. */
     void _initParticle(Ogre::Particle *particle)
     {
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        const Ogre::Real life_time     = particle->mTotalTimeToLive;
+        Ogre::Real       particle_time = particle->mTimeToLive;
+#else
         const Ogre::Real life_time     = particle->totalTimeToLive;
         Ogre::Real       particle_time = particle->timeToLive;
-
+#endif
         Ogre::Real width = mParent->getDefaultWidth();
         Ogre::Real height = mParent->getDefaultHeight();
         if(life_time-particle_time < mGrowTime)
@@ -493,9 +510,13 @@ public:
         while (!pi.end())
         {
             Ogre::Particle *p = pi.getNext();
-            const Ogre::Real life_time     = p->totalTimeToLive;
-            Ogre::Real       particle_time = p->timeToLive;
-
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        const Ogre::Real life_time     = p->mTotalTimeToLive;
+        Ogre::Real       particle_time = p->mTimeToLive;
+#else
+        const Ogre::Real life_time     = p->totalTimeToLive;
+        Ogre::Real       particle_time = p->timeToLive;
+#endif
             Ogre::Real width = mParent->getDefaultWidth();
             Ogre::Real height = mParent->getDefaultHeight();
             if(life_time-particle_time < mGrowTime)
@@ -772,7 +793,11 @@ protected:
         while (!pi.end())
         {
             Ogre::Particle *p = pi.getNext();
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            p->mDirection += vec;
+#else
             p->direction += vec;
+#endif
         }
     }
 
@@ -783,9 +808,18 @@ protected:
         while (!pi.end())
         {
             Ogre::Particle *p = pi.getNext();
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            Ogre::Vector3 position = p->mPosition;
+#else
+            Ogre::Vector3 position = p->position;
+#endif
             const Ogre::Vector3 vec = (
-                (mBone->_getDerivedOrientation() * mPosition + mBone->_getDerivedPosition()) - p->position).normalisedCopy() * force;
+                (mBone->_getDerivedOrientation() * mPosition + mBone->_getDerivedPosition()) - position).normalisedCopy() * force;
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            p->mDirection += vec;
+#else
             p->direction += vec;
+#endif
         }
     }
 
