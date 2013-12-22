@@ -14,7 +14,8 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mActivatorsSize(0),
     mPotionsSize(0),
     mApparatiSize(0),
-    mArmorsSzie(0)
+    mArmorsSzie(0),
+    mClothingSize(0)
 {
     setSizeVariables();
 }
@@ -26,6 +27,7 @@ void CSMTools::ReferenceableCheckStage::setSizeVariables()
     mPotionsSize = mReferencables.getPotions().getSize();
     mApparatiSize = mReferencables.getApparati().getSize();
     mArmorsSzie = mReferencables.getArmors().getSize();
+    mClothingSize = mReferencables.getClothing().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
@@ -68,8 +70,16 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
         armorCheck(stage, mReferencables.getArmors(), messages);
         return;
     }
-    
+
     stage -= mArmorsSzie;
+
+    if (stage < mClothingSize)
+    {
+        clothingCheck(stage, mReferencables.getClothing(), messages);
+        return;
+    }
+
+    stage -= mClothingSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -281,22 +291,71 @@ void CSMTools::ReferenceableCheckStage::armorCheck(int stage, const CSMWorld::Re
     {
         messages.push_back(id.toString() + "|" + Armor.mId + " has no icon");
     }
-    
-        //checking for enchantment points
+
+    //checking for enchantment points
     if (Armor.mData.mEnchant < 0)
     {
         messages.push_back(id.toString() + "|" + Armor.mId + " has negative enchantment");
     }
-    
+
     //checking for armor class, armor should have poistive armor class, but 0 is considered legal
     if (Armor.mData.mArmor < 0)
     {
-	messages.push_back(id.toString() + "|" + Armor.mId + " has negative armor class");
+        messages.push_back(id.toString() + "|" + Armor.mId + " has negative armor class");
     }
-    
+
     //checking for health. Only positive numbers are allowed, and 0 is illegal
     if (Armor.mData.mHealth <= 0)
     {
-	messages.push_back(id.toString() + "|" + Armor.mId + " has non positive health");
+        messages.push_back(id.toString() + "|" + Armor.mId + " has non positive health");
+    }
+}
+
+void CSMTools::ReferenceableCheckStage::clothingCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Clothing >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Clothing& Clothing = (static_cast<const CSMWorld::Record<ESM::Clothing>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Clothing, Clothing.mId);
+
+    //Checking for name
+    if (Clothing.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Clothing.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (Clothing.mData.mWeight < 0)
+    {
+        messages.push_back(id.toString() + "|" + Clothing.mId + " has negative weight");
+    }
+
+    //Checking for value
+    if (Clothing.mData.mValue < 0)
+    {
+        messages.push_back(id.toString() + "|" + Clothing.mId + " has negative value");
+    }
+
+//checking for model
+    if (Clothing.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Clothing.mId + " has no model");
+    }
+
+    //checking for icon
+    if (Clothing.mIcon.empty())
+    {
+        messages.push_back(id.toString() + "|" + Clothing.mId + " has no icon");
+    }
+
+    //checking for enchantment points
+    if (Clothing.mData.mEnchant < 0)
+    {
+        messages.push_back(id.toString() + "|" + Clothing.mId + " has negative enchantment");
     }
 }

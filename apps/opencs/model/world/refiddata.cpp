@@ -256,3 +256,8 @@ const CSMWorld::RefIdDataContainer< ESM::Armor >& CSMWorld::RefIdData::getArmors
 {
     return mArmors;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Clothing >& CSMWorld::RefIdData::getClothing() const
+{
+    return mClothing;
+}

@@ -22,6 +22,7 @@ namespace CSMTools
             void potionCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Potion>& records, std::vector<std::string>& messages);
             void apparatusCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Apparatus>& records, std::vector<std::string>& messages);
             void armorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Armor>& records, std::vector<std::string>& messages);
+            void clothingCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Clothing>& records, std::vector<std::string>& messages);
 
             void setSizeVariables();
 
@@ -33,6 +34,7 @@ namespace CSMTools
             int mPotionsSize;
 	    int mApparatiSize;
 	    int mArmorsSzie;
+	    int mClothingSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H
