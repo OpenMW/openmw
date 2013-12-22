@@ -29,7 +29,6 @@ void CSMTools::ReferenceableCheckStage::setSizeVariables()
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
 {
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
-
     if (stage < mBooksSize)
     {
         bookCheck(stage, mReferencables.getBooks(), messages);
@@ -221,5 +220,11 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(int stage, const CSMWorld
     if (Apparatus.mIcon.empty())
     {
         messages.push_back(id.toString() + "|" + Apparatus.mId + " has no icon");
+    }
+    
+    //checking for quality, 0 → apparatus is basicly useless, any negative → apparatus is harmfull instead of helpfull
+    if (Apparatus.mData.mQuality <= 0)
+    {
+      messages.push_back(id.toString() + "|" + Apparatus.mId + " has non-positive quality");
     }
 }
