@@ -228,6 +228,7 @@ namespace CSMWorld
 	    const RefIdDataContainer<ESM::Armor>& getArmors() const;
 	    const RefIdDataContainer<ESM::Clothing>& getClothing() const;
 	    const RefIdDataContainer<ESM::Container>& getContainers() const;
+	    const RefIdDataContainer<ESM::Creature>& getCreatures() const;
     };
 }
 

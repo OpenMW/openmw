@@ -266,3 +266,8 @@ const CSMWorld::RefIdDataContainer< ESM::Container >& CSMWorld::RefIdData::getCo
 {
     return mContainers;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Creature >& CSMWorld::RefIdData::getCreatures() const
+{
+    return mCreatures;
+}
