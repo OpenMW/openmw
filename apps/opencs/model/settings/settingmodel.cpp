@@ -113,7 +113,7 @@ bool CSMSettings::SettingModel::setData(const QModelIndex &index, const QVariant
     }
 
     if (value.toBool())
-    setting->addValue (value.toString());
+        setting->addValue (value.toString());
 
 qDebug() << "setting data index: " << index << "; value: " << value.toString();
 
