@@ -82,6 +82,14 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mClothingSize;
+    
+    if (stage < mContainersSize)
+    {
+      containerCheck(stage, mReferencables.getContainers(), messages);
+      return;
+    }
+    
+    stage -= mContainersSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -359,5 +367,36 @@ void CSMTools::ReferenceableCheckStage::clothingCheck(int stage, const CSMWorld:
     if (Clothing.mData.mEnchant < 0)
     {
         messages.push_back(id.toString() + "|" + Clothing.mId + " has negative enchantment");
+    }
+}
+
+void CSMTools::ReferenceableCheckStage::containerCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Container >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Container& Container = (static_cast<const CSMWorld::Record<ESM::Container>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Container, Container.mId);
+
+    //Checking for model, IIRC all containers should have a model
+    if (Container.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Container.mId + " has no model");
+    }
+
+    //Checking for capacity (weight)
+    if (Container.mWeight < 0) //0 is allowed
+    {
+        messages.push_back(id.toString() + "|" + Container.mId + " has negative weight (capacity)");
+    }
+
+    //checking for name
+    if (Container.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Container.mId + " has an empty name");
     }
 }
