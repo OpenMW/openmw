@@ -225,6 +225,7 @@ namespace CSMWorld
 	    const RefIdDataContainer<ESM::Activator>& getActivators() const;
 	    const RefIdDataContainer<ESM::Potion>& getPotions() const;
 	    const RefIdDataContainer<ESM::Apparatus>& getApparati() const;
+	    const RefIdDataContainer<ESM::Armor>& getArmors() const;
     };
 }
 

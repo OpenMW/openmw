@@ -251,3 +251,8 @@ const CSMWorld::RefIdDataContainer< ESM::Apparatus >& CSMWorld::RefIdData::getAp
 {
     return mApparati;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Armor >& CSMWorld::RefIdData::getArmors() const
+{
+    return mArmors;
+}
