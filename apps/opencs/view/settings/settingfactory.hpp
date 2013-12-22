@@ -34,10 +34,12 @@ namespace CSVSettings
         public:
 
             template <typename T>
-            static Setting* create(const QString &name, QWidget *parent)
+            static Setting* create(const QString &name,
+                                QSortFilterProxyModel *model, QWidget *parent)
             {
                 Setting *setting = new Setting(parent);
-                setting->configure(name, new T(parent));
+                setting->configureView(name, new T(parent));
+                setting->configureModel(model);
 
                 return setting;
             }
@@ -46,28 +48,21 @@ namespace CSVSettings
             inline bool isBinary() const { return mIsBinary; }
 
         private:
+
             explicit Setting (QWidget *parent = 0);
-            void configure(const QString &name, QWidget *widget);
+
+            void configureView(const QString &name, QWidget *widget);
+            void configureModel(QSortFilterProxyModel *model);
         };
 
     public:
 
         explicit SettingFactory (QWidget *parent  = 0)
-            : QObject (parent)
+            : QObject (parent), mParent(parent)
         {}
 
         Setting *createSetting(WidgetType type, QSortFilterProxyModel *model,
                                const QString &settingFieldName);
-
-
-    private:
-
-        QWidget *createWidget (const QString &name,
-                               CSVSettings::WidgetType widgetType);
-
-        void buildSettingMap (QWidget *widget, QSortFilterProxyModel *filter);
-
-        QSortFilterProxyModel *buildModel (QWidget *widget);
 
         // need support functions for:
         //

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QVariant>
+#include <QStringListModel>
 #include "apps/opencs/view/settings/support.hpp"
 
 namespace CSMSettings
@@ -14,8 +15,8 @@ namespace CSMSettings
     {
         Q_OBJECT
 
-        /// current value of the setting
-        QStringList mValues;
+        /// value model
+        QStringListModel mValueModel;
 
         /// list of values for setting validation / list widgets
         QStringList mValueList;
@@ -51,10 +52,11 @@ namespace CSMSettings
         explicit Setting(const QString &name, const QString &section,
                          const QString &defaultValue, QObject *parent = 0);
 
+        void clearValues();
+
         ///getter functions
-        QString value (int index = 0) const     { return mValues.at(index); }
-        const QStringList &values() const       { return mValues; }
-        QStringList &values()                   { return mValues; }
+        QStringListModel &valueModel()          { return mValueModel; }
+        QStringList values() const              { return mValueModel.stringList(); }
         const QStringList &valueList() const    { return mValueList; }
         QStringList &valueList()                { return mValueList; }
         QString inputMask() const               { return mInputMask; }
@@ -70,11 +72,10 @@ namespace CSMSettings
         static int columnCount () { return sColumnCount; }
 
         ///setter functions
-        void setValue (const QString &value, int index = 0);
+        void addValue (const QString &value);
         void setName (const QString &name)                  { setObjectName (name); }
         void setSectionName (const QString &sectionName)    { mSectionName = sectionName; }
         void setDefaultValue (const QString &defaultValue)  { mDefaultValue = defaultValue; }
-        void setValues (const QStringList &values)          { mValues = values; }
         void setValueList (const QStringList &valueList)    { mValueList = valueList; }
         void setInputMask (const QString &mask)             { mInputMask = mask; }
         void setProxyMap (const ProxyMap &proxyMap)         { mProxyMap = proxyMap; }

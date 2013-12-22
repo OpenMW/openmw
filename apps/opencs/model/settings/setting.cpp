@@ -1,6 +1,8 @@
 #include "setting.hpp"
 #include <QStringList>
 
+#include <QDebug>
+
 int CSMSettings::Setting::sColumnCount = 9;
 QStringList CSMSettings::Setting::sColumnNames;
 
@@ -15,6 +17,15 @@ CSMSettings::Setting::Setting (const QString &name, const QString &section,
                       << "Input Mask" << "Widget Type" << "IsHorizontal";
 
     setObjectName (name);
+
+    QStringList values;
+    values << mDefaultValue;
+    mValueModel.setStringList(values);
+}
+
+void CSMSettings::Setting::clearValues()
+{
+    mValueModel.setStringList(QStringList());
 }
 
 QVariant CSMSettings::Setting::item (int index) const
@@ -29,8 +40,8 @@ QVariant CSMSettings::Setting::item (int index) const
         return sectionName();
         break;
 
-    case 2:     // setting value
-        return values();
+    case 2:     // value model returned as a StringList
+        return  mValueModel.stringList();
         break;
 
     case 3:     // setting default value
@@ -64,13 +75,11 @@ QVariant CSMSettings::Setting::item (int index) const
     return 0;
 }
 
-void CSMSettings::Setting::setValue (const QString &value, int index)
+void CSMSettings::Setting::addValue (const QString &value)
 {
-    //if index exceeds the size of the list, append to the end of the list
-    if (index < mValues.size())
-        mValues.replace (index,value);
-    else
-        mValues.append(value);
+    QStringList modelList = mValueModel.stringList();
+    modelList << value;
+    mValueModel.setStringList(modelList);
 }
 
 void CSMSettings::Setting::setItem (int index, QVariant value)
@@ -86,7 +95,7 @@ void CSMSettings::Setting::setItem (int index, QVariant value)
         break;
 
     case 2:
-        setValues       (value.toStringList());
+        addValue       (value.toString());
         break;
 
     case 3:

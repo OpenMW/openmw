@@ -13,6 +13,7 @@ namespace CSVSettings
 
     enum WidgetType
     {
+        Widget_Undefined,
         Widget_CheckBox,
         Widget_ComboBox,
         Widget_LineEdit,

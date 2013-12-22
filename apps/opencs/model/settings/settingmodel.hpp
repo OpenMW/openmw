@@ -28,6 +28,7 @@ namespace CSMSettings
 
         bool setData (const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
         bool setDataByName (const QString &sectionName, const QString &settingName, const QVariant &value);
+        bool addDataByName (const QString &sectionName, const QString &settingName, const QVariant &value);
 
         Qt::ItemFlags flags (const QModelIndex &index) const;
 
@@ -38,6 +39,7 @@ namespace CSMSettings
 
         Setting *createSetting (const QString &name, const QString &section = "", const QString &defaultValue = "");
         const Setting *getSetting (int row) const;
+        Setting *getSetting (const QString &sectionName, const QString &settingName);
 
     signals:
 

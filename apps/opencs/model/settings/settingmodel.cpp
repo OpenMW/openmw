@@ -57,8 +57,6 @@ QVariant CSMSettings::SettingModel::data(const QModelIndex &index, int role) con
 bool CSMSettings::SettingModel::setDataByName
     (const QString &sectionName, const QString &settingName, const QVariant &value)
 {
-    bool success = false;
-
     for (int i = 0; i < rowCount(); ++i)
     {
         Setting *setting = mSettings.at(i);
@@ -67,30 +65,57 @@ bool CSMSettings::SettingModel::setDataByName
         {
             if (setting->name() == settingName)
             {
-                success = true;
-                setData (index(i, 0, QModelIndex()), value);
-                break;
+                setting->clearValues();
+                setting->addValue(value.toString());
+                return true;
             }
         }
     }
-    return success;
+    return false;
+}
+
+bool CSMSettings::SettingModel::addDataByName
+    (const QString &sectionName, const QString &settingName, const QVariant &value)
+{
+    for (int i = 0; i < rowCount(); ++i)
+    {
+        Setting *setting = mSettings.at(i);
+
+        if (setting->sectionName() == sectionName)
+        {
+            if (setting->name() == settingName)
+            {
+                setting->addValue(value.toString());
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool CSMSettings::SettingModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+
     if (!index.isValid())
         return false;
 
     Setting *setting = mSettings.at(index.row());
-    QString qValue = value.toString();
+
+    if (!setting)
+        return false;
+
+    if (value.toString().startsWith("-"))
 
     if (setting->valueList().size() > 0)
     {
-        if (!(setting->valueList().contains(qValue)))
+        if (!(setting->valueList().contains(value.toString())))
             return false;
     }
 
-    setting->setValue (qValue);
+    if (value.toBool())
+    setting->addValue (value.toString());
+
+qDebug() << "setting data index: " << index << "; value: " << value.toString();
 
     emit dataChanged(index, index);
 
@@ -130,6 +155,19 @@ const CSMSettings::Setting *CSMSettings::SettingModel::getSetting (int row) cons
 {
     if (row < mSettings.size())
         return mSettings.at(row);
+
+    return 0;
+}
+
+CSMSettings::Setting *CSMSettings::SettingModel::getSetting (const QString &sectionName,
+                                                                   const QString &settingName)
+{
+    foreach (CSMSettings::Setting *setting, mSettings)
+    {
+        if (setting->sectionName() == sectionName)
+            if (setting->name() == settingName)
+                return setting;
+    }
 
     return 0;
 }

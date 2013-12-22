@@ -83,19 +83,14 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
-    abstractblock
     usersettingsdialog
-    windowpage
     settingpage
     settingview
+    settingfactory
     )
 
 opencs_units_noqt (view/settings
-    abstractpage
-    groupblock
     settingbox
-    itemblock
-    widgetfactory
     support
     )
 

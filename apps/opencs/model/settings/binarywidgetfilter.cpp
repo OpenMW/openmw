@@ -1,25 +1,62 @@
 #include "binarywidgetfilter.hpp"
+#include <QStringList>
 
-BinaryWidgetFilter::BinaryWidgetFilter(QObject *parent) :
-    QSortFilterProxyModel(parent)
+#include <QDebug>
+
+CSMSettings::BinaryWidgetFilter::BinaryWidgetFilter(const QString &matchValue,
+                                                    QObject *parent) :
+    QSortFilterProxyModel(parent), mMatchValue(matchValue)
 {}
 
-int BinaryWidgetFilter::rowCount (const QModelIndex &parent) const
+int CSMSettings::BinaryWidgetFilter::rowCount (const QModelIndex &parent) const
 {
     return 1;
 }
 
-QVariant CSMSettings::BinaryWidgetFilter::data (const QModelIndex &index, int role) const
+QVariant CSMSettings::BinaryWidgetFilter::data (const QModelIndex &index,
+                                                                int role) const
 {
-    //return data (index, role);
+    QModelIndex sourceIndex = mapToSource(index);
+    QStringList values = sourceModel()->data(sourceIndex, role).toStringList();
+    qDebug() << "binFilter::data()::value: " << values << "; match: " << mMatchValue << "; index: " << index;
+    if (values.contains(mMatchValue))
+        return true;
+
+    return false;
 }
 
-Qt::ItemFlags CSMSettings::BinaryWidgetFilter::flags (const QModelIndex &index) const
+Qt::ItemFlags CSMSettings::BinaryWidgetFilter::flags
+                                                (const QModelIndex &index) const
 {
-    //return flags (index);
+    QModelIndex sourceIndex = mapToSource(index);
+    return sourceModel()->flags (sourceIndex);
 }
 
-bool CSMSettings::BinaryWidgetFilter::setData (const QModelIndex &index, const QVariant &value, int role)
+bool CSMSettings::BinaryWidgetFilter::setData (const QModelIndex &index,
+                                               const QVariant &value, int role)
 {
-    //return setData (index, value, role);
+    qDebug() << "binFilter::setData()::" << mMatchValue << " = " << value.toBool();
+
+    if (!index.isValid())
+        return false;
+
+    QModelIndex sourceIndex = mapToSource(index);
+
+    if (!sourceIndex.isValid())
+        return false;
+
+    if (value.toBool())
+    {
+        qDebug() << "binFilter::setData()::adding value: " << mMatchValue;
+        return sourceModel()->setData (sourceIndex, mMatchValue, role);
+    }
+    else
+    {
+        if (value.toString() == sourceModel()->data(sourceIndex, role).toStringList().at(sourceIndex.row()))
+        {
+            qDebug() << "binFilter::setData()::removing value: " << mMatchValue << " from row " << sourceIndex.row();
+            return sourceModel()->removeRow(sourceIndex.row(), QModelIndex());
+        }
+    }
+    return false;
 }

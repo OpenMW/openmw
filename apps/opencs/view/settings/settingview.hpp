@@ -2,9 +2,20 @@
 #define SETTINGVIEW_HPP
 
 #include <QGroupBox>
+#include <QAbstractButton>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QRadioButton>
+#include <QListWidget>
+#include <QMetaObject>
+#include <QMetaMethod>
 
 #include "support.hpp"
 #include "../../model/settings/setting.hpp"
+
+#include <QDebug>
 
 //--------------------------
 //  TODO
@@ -28,7 +39,29 @@ class QDataWidgetMapper;
 
 namespace CSVSettings
 {
-    class WidgetFactory;
+    class SettingViewComponent
+    {
+        QWidget *mWidget;
+        QAbstractButton *mAbstractButton;
+
+    public:
+
+        SettingViewComponent()
+            : mWidget (0), mAbstractButton(0)
+        {}
+
+        template <typename T>
+        void create(QWidget *parent)
+        {
+            T *widget = new T(parent);
+
+            mWidget = widget;
+            mAbstractButton = dynamic_cast<QAbstractButton *>(widget);
+        }
+
+        inline QWidget* widget() const { return mWidget; }
+        inline QAbstractButton *abstractButton() const {return mAbstractButton;}
+    };
 
     class SettingView : public QGroupBox
     {
@@ -36,27 +69,25 @@ namespace CSVSettings
 
         QSortFilterProxyModel *mSettingFilter;
         static const QString INVISIBLE_BOX_STYLE;
-        QString mVisibleBoxStyle;
-        WidgetFactory *mWidgetFactory;
         QList <QWidget *> mViewWidgets;
-        QDataWidgetMapper *mDataAdapter;
+        const CSMSettings::Setting *mSetting;
 
     public:
 
-        explicit SettingView (const QString &name, WidgetType widgetType, bool ishorizontal, QWidget *parent);
+        explicit SettingView (const CSMSettings::Setting *setting, QWidget *parent = 0);
 
         void setModel (QSortFilterProxyModel *settingModel);
-
         void setTitle (const QString &title);
-        void setBorderVisibility (bool value);
-        bool borderVisibile() const;
 
     private:
 
-        void setupView(bool isHorizontal = false);
-        void setMinimumWidth();
+        void setupView(bool isHorizontal);
         void buildWidgets();
-        void makeFactory(WidgetType widgetType);
+        SettingViewComponent createWidget(WidgetType type);
+        void installWidget(SettingViewComponent &component, const QString &text);
+        void installWidgetMapper(SettingViewComponent &component,
+                                 const QString &settingName,
+                                 QSortFilterProxyModel *model);
     };
 }
 #endif // SETTINGVIEW_HPP

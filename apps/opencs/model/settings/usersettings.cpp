@@ -52,6 +52,8 @@ CSMSettings::UserSettings::UserSettings()
     mSettingModel = new SettingModel (this);
 
     buildSettingModelDefaults();
+
+            qDebug() << "user settings done";
 }
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
@@ -95,7 +97,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         recordStatusDisplay->setWidgetType (CSVSettings::Widget_RadioButton);
         refIdDisplay->setWidgetType (CSVSettings::Widget_RadioButton);
-
     }
 }
 
@@ -121,8 +122,6 @@ QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath,
 
     if (stream)
         stream->setCodec(QTextCodec::codecForName("UTF-8"));
-    else
-        destroyStream (stream);
 
     return stream;
 }
@@ -199,7 +198,11 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
     //regExp for setting definitions (name / value pair separated by '=')
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
-    QString section = "none";
+    QString sectionName = "none";
+
+    //list of settings which have had their
+    //values set.
+    QList <QString> settingHasValue;
 
     while (!stream->atEnd())
     {
@@ -213,13 +216,13 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
         if (sectionRe.exactMatch(line))
         {
             //save section name and set filter proxy
-            section = sectionRe.cap(1).simplified();
-            sectionFilter->setFilterFixedString (section);
+            sectionName = sectionRe.cap(1).simplified();
+            sectionFilter->setFilterFixedString (sectionName);
             continue;
         }
 
         // parse setting definition, assuming valid section
-        if ( (keyRe.indexIn(line) != -1) && (section != "none"))
+        if ( (keyRe.indexIn(line) != -1) && (sectionName != "none"))
         {
             QString settingName = keyRe.cap(1).simplified();
             QString settingValue = keyRe.cap(2).simplified();
@@ -230,16 +233,44 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
                 bool success = (settingFilter->rowCount() != 0);
 
                 if (success)
-                    success = mSettingModel->setDataByName(section, settingName, settingValue);
+                {
+                    //force a clearing of the value list, in case values were set by
+                    //a previously loaded config file
+                    if (!settingHasValue.contains(sectionName + "." + settingName))
+                    {
+                        qDebug() << "loadSettingsFromFile()::clearing setting " << settingName;
+                        success = mSettingModel->setDataByName(sectionName,
+                                                               settingName,
+                                                               settingValue);
+
+                        if (success)
+                            settingHasValue.append(sectionName + "." + settingName);
+                    }
+                    //add to the existing list, don't clear existing values
+                    else
+                    {
+                        qDebug() << "loadSettingsFromFile()::adding to setting " << settingName;
+                        success = mSettingModel->addDataByName(sectionName,
+                                                               settingName,
+                                                               settingValue);
+                    }
+                    qDebug() << "loadSettingsFromFile()::setting " << settingName << " value list updated to: " <<
+                                mSettingModel->getSetting(sectionName, settingName)->values();
+                }
 
                 if (!success)
                 {
                     qDebug ("\nUndefined setting found.\n    File: %s\n    Section: %s\n    Definition: %s = %s",
-                            filePath.toStdString().c_str(), section.toStdString().c_str(),
-                            settingName.toStdString().c_str(), settingValue.toStdString().c_str());
+                            filePath.toStdString().c_str(),
+                            sectionName.toStdString().c_str(),
+                            settingName.toStdString().c_str(),
+                            settingValue.toStdString().c_str());
                 }
-                else
-                    qDebug ("\nSetting %s value set to %s\n", settingName.toStdString().c_str(), settingValue.toStdString().c_str());
+                else {
+                    qDebug ("\nSetting %s value set to %s\n",
+                            settingName.toStdString().c_str(),
+                            settingValue.toStdString().c_str());
+                }
             }
          }
     }

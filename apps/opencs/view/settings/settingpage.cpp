@@ -8,6 +8,8 @@
 #include "settingview.hpp"
 #include "../../model/settings/setting.hpp"
 
+#include <QDataWidgetMapper>
+
 CSVSettings::SettingPage::SettingPage(const QString &pageName, CSMSettings::SettingModel *model,
                                       bool isHorizontal, QWidget *parent) :
     QWidget(parent), mBox (new SettingBox (Orient_Horizontal, false, this))
@@ -15,10 +17,10 @@ CSVSettings::SettingPage::SettingPage(const QString &pageName, CSMSettings::Sett
     setObjectName(pageName);
 
     mSectionFilter = new CSMSettings::SectionFilter (this);
-    mSectionFilter->setDynamicSortFilter (true);
     mSectionFilter->setSourceModel(model);
     mSectionFilter->setFilterRegExp(pageName);
     mSectionFilter->setFilterKeyColumn (1);
+    mSectionFilter->setDynamicSortFilter (true);
 
     CSVSettings::Orientation orientation = Orient_Horizontal;
 
@@ -29,18 +31,17 @@ CSVSettings::SettingPage::SettingPage(const QString &pageName, CSMSettings::Sett
 
     for (int i = 0; i < mSectionFilter->rowCount(); ++i)
     {
-        const CSMSettings::Setting *setting = mSectionFilter->getSetting (i);
-        addView (setting->widgetType(), setting->name(), setting->isHorizontal());
+        addView (mSectionFilter->getSetting (i));
     }
 }
 
-void CSVSettings::SettingPage::addView (WidgetType widgetType, const QString &viewName, bool isHorizontal)
+void CSVSettings::SettingPage::addView (const CSMSettings::Setting *setting)
 {
     SettingView *view = 0;
 
     QWidget *parentWidget = static_cast<QWidget *>(parent());
 
-    view = new SettingView(viewName, widgetType, isHorizontal, parentWidget);
+    view = new SettingView(setting, this);
 
     if (!view)
         return;

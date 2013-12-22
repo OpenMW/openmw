@@ -31,7 +31,7 @@ namespace CSVSettings
         explicit SettingPage(const QString &pageName, CSMSettings::SettingModel *model,
                              bool isHoriztonal, QWidget *parent = 0);
 
-        void addView (WidgetType widgetType, const QString &viewName, bool isHorizontal);
+        void addView (const CSMSettings::Setting *setting);
         QGroupBox *pageFrame() { return mBox; }
     };
 }
