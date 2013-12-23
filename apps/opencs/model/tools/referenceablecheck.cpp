@@ -84,13 +84,13 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mClothingSize;
-    
+
     if (stage < mContainersSize)
     {
-      containerCheck(stage, mReferencables.getContainers(), messages);
-      return;
+        containerCheck(stage, mReferencables.getContainers(), messages);
+        return;
     }
-    
+
     stage -= mContainersSize;
 }
 
@@ -401,4 +401,100 @@ void CSMTools::ReferenceableCheckStage::containerCheck(int stage, const CSMWorld
     {
         messages.push_back(id.toString() + "|" + Container.mId + " has an empty name");
     }
+}
+
+void CSMTools::ReferenceableCheckStage::creatureCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Creature >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Creature& Creature = (static_cast<const CSMWorld::Record<ESM::Creature>&>(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Creature, Creature.mId);
+
+    if (Creature.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has no model");
+    }
+
+    if (Creature.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has an empty name");
+    }
+
+    //stats checks
+    if (Creature.mData.mLevel < 1)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has non-postive level");
+    }
+
+    if (Creature.mData.mStrength < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative strength");
+    }
+
+    if (Creature.mData.mIntelligence < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative intelligence");
+    }
+
+    if (Creature.mData.mWillpower < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative willpower");
+    }
+
+    if (Creature.mData.mAgility < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative agility");
+    }
+
+    if (Creature.mData.mSpeed < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative speed");
+    }
+
+    if (Creature.mData.mEndurance < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative endurance");
+    }
+
+    if (Creature.mData.mPersonality < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative personality");
+    }
+
+    if (Creature.mData.mLuck < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative luck");
+    }
+
+    if (Creature.mData.mHealth < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative health");
+    }
+
+    if (Creature.mData.mSoul < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative soul value");
+    }
+
+    for (int i = 0; i < 6; ++i)
+    {
+        if (Creature.mData.mAttack[i] < 0)
+        {
+            messages.push_back(id.toString() + "|" + Creature.mId + " has negative attack strength");
+            break;
+        }
+    }
+
+    //TODO, find meaning of other values
+    /* 
+    if (Creature.mData.mGold < 0)
+    {
+        messages.push_back(id.toString() + "|" + Creature.mId + " has negative gold ");
+    }
+    */
 }

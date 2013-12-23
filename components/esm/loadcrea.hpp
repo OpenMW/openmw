@@ -66,7 +66,7 @@ struct Creature
         int mCombat, mMagic, mStealth; // Don't know yet.
         int mAttack[6]; // AttackMin1, AttackMax1, ditto2, ditto3
         int mGold;
-    }; // 96 bytes
+    }; // 96 byte
 
     NPDTstruct mData;
 
