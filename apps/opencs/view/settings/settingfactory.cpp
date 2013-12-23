@@ -19,7 +19,7 @@
 #include "settingfactory.hpp"
 #include "../../model/settings/setting.hpp"
 #include "../../model/settings/settingmodel.hpp"
-#include "../../model/settings/binarywidgetfilter.hpp"
+//#include "../../model/settings/binarywidgetfilter.hpp"
 
 CSVSettings::SettingFactory::Setting::Setting(QWidget *parent)
     : mHasLabel (false), mIsBinary (false), QWidget (parent)

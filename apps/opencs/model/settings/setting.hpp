@@ -15,8 +15,8 @@ namespace CSMSettings
     {
         Q_OBJECT
 
-        /// value model
-        QStringListModel mValueModel;
+        /// value stringlist
+        QStringList mValues;
 
         /// list of values for setting validation / list widgets
         QStringList mValueList;
@@ -55,8 +55,8 @@ namespace CSMSettings
         void clearValues();
 
         ///getter functions
-        QStringListModel &valueModel()          { return mValueModel; }
-        QStringList values() const              { return mValueModel.stringList(); }
+        const QStringList &values() const       { return mValues; }
+        QStringList &values()                   { return mValues; }
         const QStringList &valueList() const    { return mValueList; }
         QStringList &valueList()                { return mValueList; }
         QString inputMask() const               { return mInputMask; }

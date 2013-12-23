@@ -1,62 +1,31 @@
-#include "binarywidgetfilter.hpp"
+#include "binarywidgetmodel.hpp"
 #include <QStringList>
 
 #include <QDebug>
 
-CSMSettings::BinaryWidgetFilter::BinaryWidgetFilter(const QString &matchValue,
-                                                    QObject *parent) :
-    QSortFilterProxyModel(parent), mMatchValue(matchValue)
+CSMSettings::BinaryWidgetModel::BinaryWidgetModel(QStringList &values, QObject *parent) :
+    mValueList(values), QObject (parent)
 {}
 
-int CSMSettings::BinaryWidgetFilter::rowCount (const QModelIndex &parent) const
+bool CSMSettings::BinaryWidgetModel::insertItem(const QString &item)
 {
-    return 1;
-}
-
-QVariant CSMSettings::BinaryWidgetFilter::data (const QModelIndex &index,
-                                                                int role) const
-{
-    QModelIndex sourceIndex = mapToSource(index);
-    QStringList values = sourceModel()->data(sourceIndex, role).toStringList();
-    qDebug() << "binFilter::data()::value: " << values << "; match: " << mMatchValue << "; index: " << index;
-    if (values.contains(mMatchValue))
-        return true;
-
-    return false;
-}
-
-Qt::ItemFlags CSMSettings::BinaryWidgetFilter::flags
-                                                (const QModelIndex &index) const
-{
-    QModelIndex sourceIndex = mapToSource(index);
-    return sourceModel()->flags (sourceIndex);
-}
-
-bool CSMSettings::BinaryWidgetFilter::setData (const QModelIndex &index,
-                                               const QVariant &value, int role)
-{
-    qDebug() << "binFilter::setData()::" << mMatchValue << " = " << value.toBool();
-
-    if (!index.isValid())
+    qDebug() << "BinaryWidgetModel::insertItem()::item selected for insertion: " << item;
+    if (mValueList.contains(item))
         return false;
 
-    QModelIndex sourceIndex = mapToSource(index);
+    mValueList.append(item);
 
-    if (!sourceIndex.isValid())
+    qDebug() << "BinaryWidgetModel::insertItem()::inserting item " << item;
+    return true;
+}
+
+bool CSMSettings::BinaryWidgetModel::removeItem(const QString &item)
+{
+    qDebug() << "BinaryWidgetModel::removeItem()::item selected for removal: " << item;
+    if (!mValueList.contains(item))
         return false;
 
-    if (value.toBool())
-    {
-        qDebug() << "binFilter::setData()::adding value: " << mMatchValue;
-        return sourceModel()->setData (sourceIndex, mMatchValue, role);
-    }
-    else
-    {
-        if (value.toString() == sourceModel()->data(sourceIndex, role).toStringList().at(sourceIndex.row()))
-        {
-            qDebug() << "binFilter::setData()::removing value: " << mMatchValue << " from row " << sourceIndex.row();
-            return sourceModel()->removeRow(sourceIndex.row(), QModelIndex());
-        }
-    }
-    return false;
+    qDebug() << "BinaryWidgetModel::removeItem()::removing item: " << item;
+
+    return (mValueList.removeAll(item) > 0);
 }

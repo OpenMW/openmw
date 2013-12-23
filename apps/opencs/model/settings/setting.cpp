@@ -18,14 +18,12 @@ CSMSettings::Setting::Setting (const QString &name, const QString &section,
 
     setObjectName (name);
 
-    QStringList values;
-    values << mDefaultValue;
-    mValueModel.setStringList(values);
+    mValues << mDefaultValue;
 }
 
 void CSMSettings::Setting::clearValues()
 {
-    mValueModel.setStringList(QStringList());
+    mValues.clear();
 }
 
 QVariant CSMSettings::Setting::item (int index) const
@@ -41,7 +39,7 @@ QVariant CSMSettings::Setting::item (int index) const
         break;
 
     case 2:     // value model returned as a StringList
-        return  mValueModel.stringList();
+        return  mValues;
         break;
 
     case 3:     // setting default value
@@ -77,9 +75,7 @@ QVariant CSMSettings::Setting::item (int index) const
 
 void CSMSettings::Setting::addValue (const QString &value)
 {
-    QStringList modelList = mValueModel.stringList();
-    modelList << value;
-    mValueModel.setStringList(modelList);
+    mValues.append(value);
 }
 
 void CSMSettings::Setting::setItem (int index, QVariant value)

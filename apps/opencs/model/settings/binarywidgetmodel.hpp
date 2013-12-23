@@ -1,24 +1,33 @@
-#ifndef BINARYWIDGETFILTER_HPP
-#define BINARYWIDGETFILTER_HPP
+#ifndef BINARYWIDGETMODEL_HPP
+#define BINARYWIDGETMODEL_HPP
 
-#include <QSortFilterProxyModel>
+#include <QStringList>
+#include <QObject>
 
 namespace CSMSettings
 {
-    class BinaryWidgetFilter : public QSortFilterProxyModel
+    class BinaryWidgetModel : public QObject
     {
         Q_OBJECT
+
         QString mMatchValue;
+        QStringList &mValueList;
 
     public:
 
-        explicit BinaryWidgetFilter(const QString &matchValue, QObject *parent = 0);
+        explicit BinaryWidgetModel(QStringList &values, QObject *parent = 0);
 
-        int rowCount        (const QModelIndex &parent = QModelIndex()) const;
-        QVariant data       (const QModelIndex &index, int role) const;
-        Qt::ItemFlags flags (const QModelIndex &index) const;
-        bool setData        (const QModelIndex &index, const QVariant &value,
-                             int role = Qt::EditRole);
+        void setMatchValue  (const QString &value)
+            { mMatchValue = value; }
+
+        int rowCount () const
+            { return mValueList.count(); }
+
+        QStringList values () const
+            { return mValueList; }
+
+        bool insertItem     (const QString &item);
+        bool removeItem     (const QString &item);
     };
 }
-#endif // BINARYWIDGETFILTER_HPP
+#endif // BINARYWIDGETMODEL_HPP

@@ -5,7 +5,7 @@
 #include "settingview.hpp"
 #include "settingfactory.hpp"
 #include "apps/opencs/model/settings/setting.hpp"
-#include "apps/opencs/model/settings/binarywidgetfilter.hpp"
+//#include "apps/opencs/model/settings/binarywidgetmodel.hpp"
 #include "support.hpp"
 
 #include <QDebug>
@@ -118,11 +118,11 @@ void CSVSettings::SettingView::installWidget(SettingViewComponent &component,
 void CSVSettings::SettingView::installWidgetMapper(SettingViewComponent &component,
                                                    const QString &settingName,
                                                    QSortFilterProxyModel *model)
-{
+{/*
     QSortFilterProxyModel *filter = 0;
 
     if (component.abstractButton())
-        filter = new CSMSettings::BinaryWidgetFilter
+        filter = new CSMSettings::BinaryWidgetModel
                 (component.widget()->objectName(), this);
 
     else
@@ -137,7 +137,7 @@ void CSVSettings::SettingView::installWidgetMapper(SettingViewComponent &compone
     mapper->setModel (filter);
     mapper->addMapping (component.widget(), 2);
     mapper->toFirst();
-
+*/
 }
 //view layout code
 

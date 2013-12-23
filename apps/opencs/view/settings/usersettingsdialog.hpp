@@ -14,38 +14,10 @@ class QStackedWidget;
 class QListWidget;
 class QDataWidgetMapper;
 
+namespace CSMSettings { class BinaryWidgetModel; }
 namespace CSVSettings {
 
     class AbstractPage;
-
-    class UsdWidget : public QWidget
-    {
-        QWidget *mWidget;
-        QDataWidgetMapper *mMapper;
-
-        Q_OBJECT
-    public:
-
-        explicit UsdWidget (QWidget *parent = 0):
-            QWidget (parent)
-        {
-
-        }
-
-        void setMapper (QDataWidgetMapper *mapper)
-        { mMapper = mapper; }
-
-        QDataWidgetMapper *mapper() { return mMapper; }
-
-        void setWidget (QWidget *widget) { mWidget = widget;
-                                                     connect (mWidget, SIGNAL (toggled(bool)), this, SIGNAL (toggled(bool)));}
-        QWidget *widget() { return mWidget; }
-
-        int index;
-
-    signals:
-        void toggled (bool state);
-    };
 
     class UserSettingsDialog : public QMainWindow
     {
@@ -53,6 +25,7 @@ namespace CSVSettings {
 
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
+        CSMSettings::BinaryWidgetModel *mBinModel;
 
         void testMapperRadioButton();
         void testMapperCheckBox();

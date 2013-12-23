@@ -18,7 +18,7 @@
 #include <QTextEdit>
 
 #include "../../model/settings/support.hpp"
-#include "../../model/settings/binarywidgetfilter.hpp"
+#include "../../model/settings/binarywidgetmodel.hpp"
 #include "../../model/settings/usersettings.hpp"
 
 #include "settingpage.hpp"
@@ -106,7 +106,7 @@ void CSVSettings::UserSettingsDialog::show()
     setWindowTitle(QString::fromUtf8 ("User Settings"));
     setupStack();
 
-    testMapperCheckBox();
+    testMapperRadioButton();
 
     QWidget::show();
 }
@@ -118,52 +118,24 @@ void CSVSettings::UserSettingsDialog::testMapperCheckBox()
             CSMSettings::UserSettings::instance().settingModel()->getSetting
                             ("Display Format", "Referenceable ID Type Display");
 
+    mBinModel = new CSMSettings::BinaryWidgetModel(setting->values(), this);
+
     QGroupBox *widgetBox = new QGroupBox(this);
     QTextEdit *textEdit = new QTextEdit(this);
     widgetBox->setLayout (new QVBoxLayout());
 
+    qDebug() << "UserSettingsDialog::testMapperCheckBox()::mBinModel values: " << setting->values();
+
     foreach (const QString &item, setting->valueList())
     {
-        UsdWidget *button = new UsdWidget (this);
-        button->setWidget(new QCheckBox(item, this));
+        QCheckBox *widget  = new QCheckBox(item, this);
+        widget->setObjectName(item);
 
-        widgetBox->layout()->addWidget (button->widget());
+        widgetBox->layout()->addWidget (widget);
 
-        CSMSettings::BinaryWidgetFilter *binFilter =
-                new CSMSettings::BinaryWidgetFilter(item, button->widget());
+        widget->setChecked(mBinModel->values().contains(item));
 
-        binFilter->setSourceModel(&setting->valueModel());
-
-        int mapperIndex = -1;
-
-        for (int i=0; i < binFilter->rowCount(); ++i)
-        {
-            QModelIndex idx = binFilter->index(i, 0, QModelIndex());
-            if (binFilter->data(idx, Qt::DisplayRole).toBool())
-            {
-                mapperIndex = i;
-                break;
-            }
-        }
-
-        qDebug() << "index for item: " << item << " = " << mapperIndex;
-
-        QDataWidgetMapper *mapper = new QDataWidgetMapper(button->widget());
-        button->setMapper(mapper);
-        mapper->setObjectName(item + "_mapper");
-
-        mapper->setModel(binFilter);
-        mapper->addMapping(button->widget(), 0);
-        mapper->toFirst();
-
-        for (int i = 0; i < mapperIndex; i++)
-            mapper->toNext();
-
-        mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
-
-        button->index = mapperIndex;
-
-        connect (button, SIGNAL (toggled(bool)), this, SLOT (slotReadout(bool)));
+        connect (widget, SIGNAL (toggled(bool)), this, SLOT (slotReadout(bool)));
     }
 
     widgetBox->layout()->addWidget(textEdit);
@@ -173,58 +145,44 @@ void CSVSettings::UserSettingsDialog::testMapperCheckBox()
 
 void CSVSettings::UserSettingsDialog::slotReadout (bool toggled)
 {
-    QStringList vals = CSMSettings::UserSettings::instance().settingModel()->
+    QStringList &vals = CSMSettings::UserSettings::instance().settingModel()->
             getSetting("Display Format", "Referenceable ID Type Display")->values();
 
-    UsdWidget *widg = static_cast<UsdWidget *>(QObject::sender());
-
-    QDataWidgetMapper *mapper = widg->mapper();
+    QWidget *widg = static_cast<QWidget *>(QObject::sender());
 
     if (toggled)
-        widg->index = vals.count();
+        mBinModel->insertItem(widg->objectName());
     else
-        widg->index = -1;
-
-    mapper->setCurrentIndex(widg->index);
-    mapper->submit();
-
+        mBinModel->removeItem(widg->objectName());
 
     qDebug() << "slotReadOut()::widget toggled to " << toggled;
     qDebug() << "slotReadOut()::value list: " << vals;
-    qDebug() << "slotReadOut()::mapper index: " << widg->index;
 }
 
 void CSVSettings::UserSettingsDialog::testMapperRadioButton()
 {
+    CSMSettings::Setting *setting =
+            CSMSettings::UserSettings::instance().settingModel()->getSetting
+                ("Display Format","Referenceable ID Type Display");
 
-    QSortFilterProxyModel *filter = 0; //testMapperModelSetup("Display Format",
-                                     //                   "Referenceable ID Type Display");
-
-    QStringList valueList = filter->data(filter->index(0,4,QModelIndex())).toStringList();
+    mBinModel = new CSMSettings::BinaryWidgetModel(setting->values(), this);
 
     QGroupBox *widgetBox = new QGroupBox(this);
     widgetBox->setLayout (new QVBoxLayout());
 
-    for (int i = 0; i < valueList.count(); ++i)
+    qDebug() << "UserSettingsDialog::testMapperRadioButton()::mBinModel values: " << setting->values();
+
+
+    foreach (const QString &item, setting->valueList())
     {
-        QString text = valueList.at(i);
+        QRadioButton *widget = new QRadioButton(item, this);
+        widget->setObjectName(item);
 
-        QRadioButton * button = new QRadioButton(text);
+        widgetBox->layout()->addWidget (widget);
 
-        widgetBox->layout()->addWidget (button);
+        widget->setChecked(mBinModel->values().contains(item));
 
-        CSMSettings::BinaryWidgetFilter *binFilter =
-                new CSMSettings::BinaryWidgetFilter(text, button);
-
-        binFilter->setSourceModel(filter);
-
-        QDataWidgetMapper *mapper = new QDataWidgetMapper(button);
-        mapper->setModel(binFilter);
-        mapper->addMapping(button, 2);
-        mapper->toFirst();
-        mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
-
-        connect (button, SIGNAL (released()), mapper, SLOT (submit()));
+        connect (widget, SIGNAL (toggled(bool)), this, SLOT (slotReadout(bool)));
     }
 
     mStackedWidget->addWidget(widgetBox);
