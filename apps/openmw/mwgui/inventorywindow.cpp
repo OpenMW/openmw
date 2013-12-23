@@ -120,10 +120,13 @@ namespace MWGui
                              Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height);
         MyGUI::IntSize size (Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width,
                              Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
+
+        if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
+            mPreviewDirty = true;
+
         mMainWidget->setPosition(pos);
         mMainWidget->setSize(size);
         adjustPanes();
-        mPreviewDirty = true;
     }
 
     TradeItemModel* InventoryWindow::getTradeModel()
