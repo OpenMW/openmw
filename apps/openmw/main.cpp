@@ -168,8 +168,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    cfgMgr.readConfiguration(variables, desc);
-
     bool run = true;
 
     if (variables.count ("help"))
@@ -186,6 +184,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    cfgMgr.readConfiguration(variables, desc);
 
     engine.setGrabMouse(!variables.count("no-grab"));
 
