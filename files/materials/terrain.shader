@@ -345,6 +345,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 #endif
 
 @shForeach(@shPropertyString(num_layers))
+        thisLayerUV = layerUV;
 #if @shPropertyBool(use_normal_map_@shIterator)
         normalTex = shSample(normalMap@shIterator, thisLayerUV);
 #if @shIterator == 0 && IS_FIRST_PASS
@@ -354,7 +355,6 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 #endif
 #endif
 
-        thisLayerUV = layerUV;
 #if @shPropertyBool(use_parallax_@shIterator)
         thisLayerUV += TSeyeDir.xy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS );
 #endif
