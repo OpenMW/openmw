@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
-    <height>298</height>
+    <width>396</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,48 +69,13 @@
       </spacer>
      </item>
      <item>
-      <widget class="QComboBox" name="languagesComboBox">
+      <widget class="QComboBox" name="languageComboBox">
        <property name="minimumSize">
         <size>
          <width>250</width>
          <height>0</height>
         </size>
        </property>
-       <item>
-        <property name="text">
-         <string>English</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>French</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Russian</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Polish</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Italian</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Spanish</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>German</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -143,8 +108,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../wizard/wizard.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

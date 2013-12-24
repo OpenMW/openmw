@@ -17,6 +17,7 @@ namespace Wizard
 
         int nextId() const;
         virtual bool isComplete() const;
+        virtual bool validatePage();
 
     private slots:
         void on_browseButton_clicked();
@@ -28,7 +29,6 @@ namespace Wizard
 
     protected:
         void initializePage();
-
     };
 
 }

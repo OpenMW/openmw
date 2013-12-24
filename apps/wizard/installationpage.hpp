@@ -20,8 +20,11 @@ namespace Wizard
     private:
         MainWizard *mWizard;
 
+        void setupSettings();
+
     protected:
         void initializePage();
+
 
     };
 

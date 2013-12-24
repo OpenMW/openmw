@@ -38,21 +38,41 @@ void Wizard::MainWizard::setupInstallations()
 {
     // TODO: detect existing installations
     QStringList paths;
-    paths << QString("/home/pvdk/.wine/drive_c/Program Files/Bethesda Softworks/Morrowind");
+    paths << QString("/home/pvdk/.wine/drive_c/Program Files/Bethesda Softworks/Morrowind/Data Files");
     paths << QString("/home/pvdk/openmw/Data Files");
     paths << QString("/usr/games/morrowind");
 
     foreach (const QString &path, paths)
     {
-        Installation* install = new Installation();
-
-        install->hasMorrowind = (findFiles(QString("Morrowind"), path));
-        install->hasTribunal = true;
-        install->hasBloodmoon = false;
-
-        mInstallations.insert(QDir::toNativeSeparators(path), install);
+        addInstallation(path);
     }
 
+}
+
+void Wizard::MainWizard::addInstallation(const QString &path)
+{
+    qDebug() << "add installation in: " << path;
+    Installation* install = new Installation();
+
+    install->hasMorrowind = findFiles(QLatin1String("Morrowind"), path);
+    install->hasTribunal = findFiles(QLatin1String("Tribunal"), path);
+    install->hasBloodmoon = findFiles(QLatin1String("Bloodmoon"), path);
+
+    // Try to autodetect the Morrowind.ini location
+    QDir dir(path);
+    QFile file(dir.filePath("Morrowind.ini"));
+
+    // Try the parent directory
+    // In normal Morrowind installations that's where Morrowind.ini is
+    if (!file.exists()) {
+        dir.cdUp();
+        file.setFileName(dir.filePath(QLatin1String("Morrowind.ini")));
+    }
+
+    if (file.exists())
+        install->iniPath = file.fileName();
+
+    mInstallations.insert(QDir::toNativeSeparators(path), install);
 }
 
 void Wizard::MainWizard::setupPages()
@@ -76,16 +96,13 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
     if (!dir.exists())
         return false;
 
-    if (!dir.cd(QString("Data Files")))
-        return false;
-
-    qDebug() << "name: " << name +  QString(".esm") << dir.absolutePath();
-
     // TODO: add MIME handling to make sure the files are real
-    if (dir.exists(name + QString(".esm")) && dir.exists(name + QString(".bsa")))
+    if (dir.exists(name + QLatin1String(".esm")) && dir.exists(name + QLatin1String(".bsa")))
     {
+        qDebug() << name << " exists!";
         return true;
     } else {
+        qDebug() << name << " doesn't exist!";
         return false;
     }
 

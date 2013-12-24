@@ -31,7 +31,7 @@ bool Wizard::IniSettings::readFile(QTextStream &stream)
 
     while (!stream.atEnd())
     {
-        const QString &line = stream.readLine();
+        QString line(stream.readLine());
 
         if (line.isEmpty() || line.startsWith(";"))
                 continue;

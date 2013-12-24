@@ -16,6 +16,8 @@ namespace Wizard
             bool hasMorrowind;
             bool hasTribunal;
             bool hasBloodmoon;
+
+            QString iniPath;
         };
 
         enum {
@@ -32,7 +34,9 @@ namespace Wizard
 
         MainWizard(QWidget *parent = 0);
 
-        static bool findFiles(const QString &name, const QString &path);
+        bool findFiles(const QString &name, const QString &path);
+        void addInstallation(const QString &path);
+
         QMap<QString, Installation*> mInstallations;
 
     private:

@@ -21,11 +21,6 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(MainWizard *wizard) :
 
 }
 
-void Wizard::ComponentSelectionPage::debugMe(QString &text)
-{
-    qDebug() << "Debug Me" << text;
-}
-
 void Wizard::ComponentSelectionPage::updateButton(QListWidgetItem *item)
 {
     if (field("installation.new").toBool() == true)

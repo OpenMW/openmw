@@ -1,7 +1,9 @@
 #include "installationpage.hpp"
 
 #include <QDebug>
+#include <QFileInfo>
 #include <QFile>
+#include <QDir>
 #include <QTextCodec>
 #include <QMessageBox>
 
@@ -17,8 +19,8 @@ Wizard::InstallationPage::InstallationPage(MainWizard *wizard) :
 
 void Wizard::InstallationPage::initializePage()
 {
-    QString path = field("installation.path").toString();
-    QStringList components = field("installation.components").toStringList();
+    QString path(field("installation.path").toString());
+    QStringList components(field("installation.components").toStringList());
 
     logTextEdit->append(QString("Installing to %1").arg(path));
     logTextEdit->append(QString("Installing %1.").arg(components.join(", ")));
@@ -44,45 +46,48 @@ void Wizard::InstallationPage::initializePage()
 
     installProgressBar->setValue(100);
 
+    if (field("installation.new").toBool() == false)
+        setupSettings();
+}
+
+void Wizard::InstallationPage::setupSettings()
+{
     // Test settings
     IniSettings iniSettings;
 
-    QFile file("/home/pvdk/.wine/drive_c/Program Files/Bethesda Softworks/Morrowind/Morrowind.ini");
+    QString path(field("installation.path").toString());
+    QFile file(mWizard->mInstallations[path]->iniPath);
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+        msgBox.setWindowTitle(tr("Error opening Morrowind configuration file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
                                    Please make sure you have the right permissions \
                                    and try again.<br>").arg(file.fileName()));
                                    msgBox.exec();
+        mWizard->close();
+        return;
     }
 
     QTextStream stream(&file);
 
-    QString language = field("installation.language").toString();
+    QString language(field("installation.language").toString());
 
-    if (language == QLatin1String("English") ||
-            language == QLatin1String("German") ||
-            language == QLatin1String("French"))
-    {
-        stream.setCodec(QTextCodec::codecForName("windows-1252"));
+    if (language == QLatin1String("Polish")) {
+        stream.setCodec(QTextCodec::codecForName("windows-1250"));
     }
-    else if (language == QLatin1String("Russian"))
-    {
+    else if (language == QLatin1String("Russian")) {
         stream.setCodec(QTextCodec::codecForName("windows-1251"));
     }
-    else if (language == QLatin1String("Polish"))
-    {
-        stream.setCodec(QTextCodec::codecForName("windows-1250"));
+    else {
+        stream.setCodec(QTextCodec::codecForName("windows-1252"));
     }
 
     iniSettings.readFile(stream);
 
     qDebug() << iniSettings.value("Game Files/GameFile0");
-
 }
 
 int Wizard::InstallationPage::nextId() const
