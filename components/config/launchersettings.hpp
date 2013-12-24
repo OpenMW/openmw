@@ -3,7 +3,7 @@
 
 #include "settingsbase.hpp"
 
-namespace Launcher
+namespace Config
 {
     class LauncherSettings : public SettingsBase<QMap<QString, QString> >
     {

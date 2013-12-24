@@ -6,9 +6,7 @@ set(LAUNCHER
     playpage.cpp
     textslotmsgbox.cpp
 
-    settings/gamesettings.cpp
     settings/graphicssettings.cpp
-    settings/launchersettings.cpp
 
     utils/checkablemessagebox.cpp
     utils/profilescombobox.cpp
@@ -28,10 +26,7 @@ set(LAUNCHER_HEADER
     playpage.hpp
     textslotmsgbox.hpp
 
-    settings/gamesettings.hpp
     settings/graphicssettings.hpp
-    settings/launchersettings.hpp
-    settings/settingsbase.hpp
 
     utils/checkablemessagebox.hpp
     utils/profilescombobox.hpp

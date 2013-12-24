@@ -5,9 +5,10 @@
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
-#include "settings/gamesettings.hpp"
+#include <components/config/gamesettings.hpp>
+#include <components/config/launchersettings.hpp>
+
 #include "settings/graphicssettings.hpp"
-#include "settings/launchersettings.hpp"
 
 #include "ui_mainwindow.h"
 
@@ -60,9 +61,9 @@ namespace Launcher
 
         Files::ConfigurationManager mCfgMgr;
 
-        GameSettings mGameSettings;
+        Config::GameSettings mGameSettings;
         GraphicsSettings mGraphicsSettings;
-        LauncherSettings mLauncherSettings;
+        Config::LauncherSettings mLauncherSettings;
 
     };
 }

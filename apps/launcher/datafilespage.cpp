@@ -9,18 +9,16 @@
 #include <components/files/configurationmanager.hpp>
 
 #include <components/contentselector/model/esmfile.hpp>
-
 #include <components/contentselector/model/naturalsort.hpp>
+#include <components/contentselector/view/contentselector.hpp>
+
+#include <components/config/gamesettings.hpp>
+#include <components/config/launchersettings.hpp>
 
 #include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"
 
-#include "settings/gamesettings.hpp"
-#include "settings/launchersettings.hpp"
-
-#include "components/contentselector/view/contentselector.hpp"
-
-Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
+Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings, Config::LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)

@@ -7,7 +7,7 @@
 #include <QRegExp>
 #include <QMap>
 
-namespace Launcher
+namespace Config
 {
     template <class Map>
     class SettingsBase

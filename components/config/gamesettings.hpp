@@ -14,7 +14,7 @@ namespace Files
   struct ConfigurationManager;
 }
 
-namespace Launcher
+namespace Config
 {
     class GameSettings
     {

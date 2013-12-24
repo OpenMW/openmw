@@ -14,12 +14,12 @@ class QMenu;
 
 namespace Files { struct ConfigurationManager; }
 namespace ContentSelectorView { class ContentSelector; }
+namespace Config { class GameSettings;
+                   class LauncherSettings; }
 
 namespace Launcher
 {
     class TextInputDialog;
-    class GameSettings;
-    class LauncherSettings;
     class ProfilesComboBox;
 
     class DataFilesPage : public QWidget
@@ -30,8 +30,8 @@ namespace Launcher
         Ui::DataFilesPage ui;
 
     public:
-        explicit DataFilesPage (Files::ConfigurationManager &cfg, GameSettings &gameSettings,
-                                LauncherSettings &launcherSettings, QWidget *parent = 0);
+        explicit DataFilesPage (Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
+                                Config::LauncherSettings &launcherSettings, QWidget *parent = 0);
 
         QAbstractItemModel* profilesModel() const;
 
@@ -62,8 +62,8 @@ namespace Launcher
 
         Files::ConfigurationManager &mCfgMgr;
 
-        GameSettings &mGameSettings;
-        LauncherSettings &mLauncherSettings;
+        Config::GameSettings &mGameSettings;
+        Config::LauncherSettings &mLauncherSettings;
 
         QString mDataLocal;
 
