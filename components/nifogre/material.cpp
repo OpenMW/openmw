@@ -324,6 +324,11 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture]));
     instance->setProperty("detailMap", sh::makeProperty(texName[Nif::NiTexturingProperty::DetailTexture]));
     instance->setProperty("emissiveMap", sh::makeProperty(texName[Nif::NiTexturingProperty::GlowTexture]));
+    if (!texName[Nif::NiTexturingProperty::BaseTexture].empty())
+    {
+        instance->setProperty("use_diffuse_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("diffuseMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::BaseTexture].uvSet)));
+    }
     if (!texName[Nif::NiTexturingProperty::GlowTexture].empty())
     {
         instance->setProperty("use_emissive_map", sh::makeProperty(new sh::BooleanValue(true)));
@@ -347,7 +352,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
            i == Nif::NiTexturingProperty::GlowTexture)
             continue;
         if(!texName[i].empty())
-            warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i));
+            warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i) + " in " + name);
     }
 
     if (vertexColour)

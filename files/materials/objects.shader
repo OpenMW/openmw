@@ -17,13 +17,14 @@
 #define NORMAL_MAP @shPropertyHasValue(normalMap)
 #define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
 #define DETAIL_MAP @shPropertyHasValue(detailMap)
+#define DIFFUSE_MAP @shPropertyHasValue(diffuseMap)
 
 #define PARALLAX @shPropertyBool(use_parallax)
 #define PARALLAX_SCALE 0.04
 #define PARALLAX_BIAS -0.02
 
 // right now we support 2 UV sets max. implementing them is tedious, and we're probably not going to need more
-#define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet))
+#define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet) || @shPropertyString(diffuseMapUVSet))
 
 // if normal mapping is enabled, we force pixel lighting
 #define VERTEX_LIGHTING (!@shPropertyHasValue(normalMap))
@@ -246,7 +247,9 @@
 #endif
 
     SH_BEGIN_PROGRAM
+#if DIFFUSE_MAP
         shSampler2D(diffuseMap)
+#endif
 
 #if NORMAL_MAP
         shSampler2D(normalMap)
@@ -376,7 +379,15 @@
         newUV += (TSeyeDir.xyxy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS )).xyxy;
 #endif
 
+#if DIFFUSE_MAP
+    #if @shPropertyString(diffuseMapUVSet)
+        float4 diffuse = shSample(diffuseMap, newUV.zw);
+    #else
         float4 diffuse = shSample(diffuseMap, newUV.xy);
+    #endif
+#else
+        float4 diffuse = float4(1,1,1,1);
+#endif
         shOutputColour(0) = diffuse;
 
 #if DETAIL_MAP
