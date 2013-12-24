@@ -18,13 +18,14 @@
 #define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
 #define DETAIL_MAP @shPropertyHasValue(detailMap)
 #define DIFFUSE_MAP @shPropertyHasValue(diffuseMap)
+#define DARK_MAP @shPropertyHasValue(darkMap)
 
 #define PARALLAX @shPropertyBool(use_parallax)
 #define PARALLAX_SCALE 0.04
 #define PARALLAX_BIAS -0.02
 
 // right now we support 2 UV sets max. implementing them is tedious, and we're probably not going to need more
-#define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet) || @shPropertyString(diffuseMapUVSet))
+#define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet) || @shPropertyString(diffuseMapUVSet) || @shPropertyString(darkMapUVSet))
 
 // if normal mapping is enabled, we force pixel lighting
 #define VERTEX_LIGHTING (!@shPropertyHasValue(normalMap))
@@ -255,12 +256,16 @@
         shSampler2D(normalMap)
 #endif
 
-#if EMISSIVE_MAP
-        shSampler2D(emissiveMap)
+#if DARK_MAP
+        shSampler2D(darkMap)
 #endif
 
 #if DETAIL_MAP
         shSampler2D(detailMap)
+#endif
+
+#if EMISSIVE_MAP
+        shSampler2D(emissiveMap)
 #endif
 
 #if ENV_MAP
@@ -388,16 +393,24 @@
 #else
         float4 diffuse = float4(1,1,1,1);
 #endif
-        shOutputColour(0) = diffuse;
 
 #if DETAIL_MAP
 #if @shPropertyString(detailMapUVSet)
-        shOutputColour(0) *= shSample(detailMap, newUV.zw)*2;
+        diffuse *= shSample(detailMap, newUV.zw)*2;
 #else
-        shOutputColour(0) *= shSample(detailMap, newUV.xy)*2;
+        diffuse *= shSample(detailMap, newUV.xy)*2;
 #endif
 #endif
 
+#if DARK_MAP
+#if @shPropertyString(darkMapUVSet)
+        diffuse *= shSample(darkMap, newUV.zw);
+#else
+        diffuse *= shSample(darkMap, newUV.xy);
+#endif
+#endif
+
+        shOutputColour(0) = diffuse;
 
 #if !VERTEX_LIGHTING
         float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough.xyz,1)).xyz;
