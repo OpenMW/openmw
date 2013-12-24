@@ -14,10 +14,10 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(MainWizard *wizard) :
 {
     setupUi(this);
 
-    connect(detectedList, SIGNAL(currentTextChanged(QString)),
+    connect(installationsList, SIGNAL(currentTextChanged(QString)),
             this, SLOT(textChanged(QString)));
 
-    connect(detectedList,SIGNAL(itemSelectionChanged()),
+    connect(installationsList,SIGNAL(itemSelectionChanged()),
             this, SIGNAL(completeChanged()));
 }
 
@@ -36,7 +36,7 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         return;
 
     QString path(QDir::toNativeSeparators(info.absolutePath()));
-    QList<QListWidgetItem*> items = detectedList->findItems(path, Qt::MatchExactly);
+    QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);
 
     if (items.isEmpty())
     {
@@ -44,10 +44,10 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         mWizard->addInstallation(path);
 
         QListWidgetItem *item = new QListWidgetItem(path);
-        detectedList->addItem(item);
-        detectedList->setCurrentItem(item); // Select it too
+        installationsList->addItem(item);
+        installationsList->setCurrentItem(item); // Select it too
     } else {
-        detectedList->setCurrentItem(items.first());
+        installationsList->setCurrentItem(items.first());
     }
 
 }
@@ -55,6 +55,7 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
 void Wizard::ExistingInstallationPage::textChanged(const QString &text)
 {
     // Set the installation path manually, as registerField doesn't work
+    // Because it doesn't accept two widgets operating on a single field
     if (!text.isEmpty())
         mWizard->setField("installation.path", text);
 }
@@ -67,11 +68,11 @@ void Wizard::ExistingInstallationPage::initializePage()
     if (paths.isEmpty())
         return;
 
-    detectedList->clear();
+    installationsList->clear();
 
     foreach (const QString &path, paths) {
         QListWidgetItem *item = new QListWidgetItem(path);
-        detectedList->addItem(item);
+        installationsList->addItem(item);
     }
 
 }
@@ -122,7 +123,7 @@ bool Wizard::ExistingInstallationPage::validatePage()
 
 bool Wizard::ExistingInstallationPage::isComplete() const
 {
-    if (detectedList->selectionModel()->hasSelection()) {
+    if (installationsList->selectionModel()->hasSelection()) {
         return true;
     } else {
         return false;

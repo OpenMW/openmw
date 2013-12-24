@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
-    <height>296</height>
+    <width>394</width>
+    <height>294</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,14 +21,14 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="detectedLabel">
+    <widget class="QLabel" name="installationsLabel">
      <property name="text">
       <string>Detected installations:</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="detectedList">
+    <widget class="QListWidget" name="installationsList">
      <item>
       <property name="text">
        <string>No existing installations detected</string>

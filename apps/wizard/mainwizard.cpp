@@ -29,6 +29,7 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
 
     setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
+    setDefaultProperty("InstallationListWidget", "mCurrentText", "currentTextChanged");
 
     setupInstallations();
     setupPages();

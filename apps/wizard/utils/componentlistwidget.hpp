@@ -24,6 +24,4 @@ private slots:
     void updateCheckedItems(QListWidgetItem *item);
 };
 
-
-
 #endif // COMPONENTLISTWIDGET_HPP
