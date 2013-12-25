@@ -48,8 +48,8 @@ struct FixedPath
      */
     FixedPath(const std::string& application_name)
         : mPath(application_name + "/")
-        , mUserPath(mPath.getUserPath())
-        , mGlobalPath(mPath.getGlobalPath())
+        , mUserPath(mPath.getUserConfigPath())
+        , mGlobalConfigPath(mPath.getGlobalConfigPath())
         , mLocalPath(mPath.getLocalPath())
         , mGlobalDataPath(mPath.getGlobalDataPath())
         , mInstallPath(mPath.getInstallPath())
@@ -62,7 +62,7 @@ struct FixedPath
      *
      * \return boost::filesystem::path
      */
-    const boost::filesystem::path& getUserPath() const
+    const boost::filesystem::path& getUserConfigPath() const
     {
         return mUserPath;
     }
@@ -72,9 +72,9 @@ struct FixedPath
      *
      * \return boost::filesystem::path
      */
-    const boost::filesystem::path& getGlobalPath() const
+    const boost::filesystem::path& getGlobalConfigPath() const
     {
-        return mGlobalPath;
+        return mGlobalConfigPath;
     }
 
     /**
@@ -106,7 +106,7 @@ struct FixedPath
         PathType mPath;
 
         boost::filesystem::path mUserPath;       /**< User path  */
-        boost::filesystem::path mGlobalPath;     /**< Global path */
+        boost::filesystem::path mGlobalConfigPath;     /**< Global path */
         boost::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
 
         boost::filesystem::path mGlobalDataPath;        /**< Global application data path */

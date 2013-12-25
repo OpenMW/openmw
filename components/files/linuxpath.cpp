@@ -19,7 +19,7 @@ LinuxPath::LinuxPath(const std::string& application_name)
 {
 }
 
-boost::filesystem::path LinuxPath::getUserPath() const
+boost::filesystem::path LinuxPath::getUserConfigPath() const
 {
     boost::filesystem::path userPath(".");
 
@@ -63,7 +63,7 @@ boost::filesystem::path LinuxPath::getCachePath() const
     return userPath / ".cache" / mName;
 }
 
-boost::filesystem::path LinuxPath::getGlobalPath() const
+boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
     boost::filesystem::path globalPath("/etc/");
     return globalPath / mName;
