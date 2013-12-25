@@ -1,6 +1,10 @@
 #include "mainwizard.hpp"
 
 #include <QDebug>
+
+#include <QCloseEvent>
+#include <QMessageBox>
+#include <QTextCodec>
 #include <QDir>
 
 #include "intropage.hpp"
@@ -14,6 +18,7 @@
 #include "conclusionpage.hpp"
 
 Wizard::MainWizard::MainWizard(QWidget *parent) :
+    mGameSettings(mCfgMgr),
     QWizard(parent)
 {
 
@@ -29,7 +34,6 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
 
     setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
-    setDefaultProperty("InstallationListWidget", "mCurrentText", "currentTextChanged");
 
     setupInstallations();
     setupPages();
@@ -37,15 +41,47 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 
 void Wizard::MainWizard::setupInstallations()
 {
-    // TODO: detect existing installations
-    QStringList paths;
-    paths << QString("/home/pvdk/.wine/drive_c/Program Files/Bethesda Softworks/Morrowind/Data Files");
-    paths << QString("/home/pvdk/openmw/Data Files");
-    paths << QString("/usr/games/morrowind");
+    QString userPath(QFile::decodeName(mCfgMgr.getUserPath().string().c_str()));
+    QString globalPath(QFile::decodeName(mCfgMgr.getGlobalPath().string().c_str()));
 
-    foreach (const QString &path, paths)
-    {
-        addInstallation(path);
+    QStringList paths;
+    paths.append(userPath + QLatin1String("openmw.cfg"));
+    paths.append(QLatin1String("openmw.cfg"));
+    paths.append(globalPath + QLatin1String("openmw.cfg"));
+
+    foreach (const QString &path, paths) {
+        qDebug() << "Loading config file:" << qPrintable(path);
+
+        QFile file(path);
+        if (file.exists()) {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                           Please make sure you have the right permissions \
+                                           and try again.<br>").arg(file.fileName()));
+                                           msgBox.exec();
+                return qApp->quit();
+            }
+            QTextStream stream(&file);
+            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+            mGameSettings.readFile(stream);
+        }
+        file.close();
+    }
+
+    // Check if the paths actually contain data files
+    foreach (const QString path, mGameSettings.getDataDirs()) {
+        QDir dir(path);
+        QStringList filters;
+        filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
+
+        // Add to Wizard installations
+        if (!dir.entryList(filters).isEmpty())
+            addInstallation(path);
     }
 
 }
@@ -74,6 +110,10 @@ void Wizard::MainWizard::addInstallation(const QString &path)
         install->iniPath = file.fileName();
 
     mInstallations.insert(QDir::toNativeSeparators(path), install);
+
+    // Add it to the openmw.cfg too
+    mGameSettings.setMultiValue(QString("data"), path);
+    mGameSettings.addDataDir(path);
 }
 
 void Wizard::MainWizard::setupPages()
@@ -89,6 +129,36 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_Conclusion, new ConclusionPage(this));
     setStartId(Page_Intro);
 }
+void Wizard::MainWizard::accept()
+{
+    writeSettings();
+    QWizard::accept();
+}
+
+void Wizard::MainWizard::writeSettings()
+{
+    QString userPath(QFile::decodeName(mCfgMgr.getUserPath().string().c_str()));
+    QFile file(userPath + QLatin1String("openmw.cfg"));
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+        // File cannot be opened or created
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                          Please make sure you have the right permissions \
+                          and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+        return qApp->quit();
+    }
+
+    QTextStream stream(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+    mGameSettings.writeFile(stream);
+    file.close();
+}
 
 bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
 {
@@ -100,10 +170,8 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
     // TODO: add MIME handling to make sure the files are real
     if (dir.exists(name + QLatin1String(".esm")) && dir.exists(name + QLatin1String(".bsa")))
     {
-        qDebug() << name << " exists!";
         return true;
     } else {
-        qDebug() << name << " doesn't exist!";
         return false;
     }
 

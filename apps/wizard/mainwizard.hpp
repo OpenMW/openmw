@@ -4,6 +4,9 @@
 #include <QWizard>
 #include <QMap>
 
+#include <components/files/configurationmanager.hpp>
+#include <components/config/gamesettings.hpp>
+
 namespace Wizard
 {
 
@@ -39,10 +42,19 @@ namespace Wizard
 
         QMap<QString, Installation*> mInstallations;
 
+        Files::ConfigurationManager mCfgMgr;
+
     private:
+
         void setupInstallations();
         void setupPages();
 
+        void writeSettings();
+
+        Config::GameSettings mGameSettings;
+
+    private slots:
+        void accept();
 
     };
 

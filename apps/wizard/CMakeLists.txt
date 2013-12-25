@@ -94,6 +94,7 @@ target_link_libraries(openmw-wizard
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}
     ${LIBUNSHIELD_LIBRARY}
+    components
 )
 
 if(DPKG_PROGRAM)
