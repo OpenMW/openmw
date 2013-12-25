@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
-    <height>423</height>
+    <width>516</width>
+    <height>421</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="InstallProgressLabel">
+    <widget class="QLabel" name="installProgressLabel">
      <property name="text">
       <string>Extracting: %1</string>
      </property>
