@@ -4,10 +4,12 @@
 #include <QWizardPage>
 
 #include "ui_installationpage.h"
+#include "inisettings.hpp"
 
 namespace Wizard
 {
     class MainWizard;
+    class IniSettings;
 
     class InstallationPage : public QWizardPage, private Ui::InstallationPage
     {
@@ -22,7 +24,6 @@ namespace Wizard
         MainWizard *mWizard;
         bool mFinished;
 
-        void setupSettings();
         void startInstallation();
 
     private slots:

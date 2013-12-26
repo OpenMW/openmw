@@ -5,6 +5,10 @@
 
 #include <libunshield.h>
 
+#include "inisettings.hpp"
+
+class QTextCodec;
+
 namespace Wizard
 {
 
@@ -19,26 +23,36 @@ namespace Wizard
         void setInstallBloodmoon(bool install);
 
         void setPath(const QString &path);
+        void setIniPath(const QString &path);
+
+        void setIniCodec(QTextCodec *codec);
 
     private:
+
+        void setupSettings();
         void extract();
 
-        void extractCab(const QString &cabFile,
-                        const QString &outputDir, bool extractIni);
-        //void extractFile(Unshield *unshield,
-        //                 )
+        void extractCab(const QString &cabFile, const QString &outputDir);
+        bool extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter);
+
 
         bool mInstallMorrowind;
         bool mInstallTribunal;
         bool mInstallBloodmoon;
 
         QString mPath;
+        QString mIniPath;
+
+        IniSettings mIniSettings;
+
+        QTextCodec *mIniCodec;
 
     protected:
         virtual void run();
 
     signals:
         void textChanged(const QString &text);
+        void progressChanged(int progress);
 
     };
 
