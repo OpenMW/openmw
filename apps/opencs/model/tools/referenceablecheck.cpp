@@ -106,14 +106,22 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mDoorsSize;
-    
+
     if (stage < mIngredientsSize)
     {
-      ingredientCheck(stage, mReferencables.getIngredients(), messages);
-      return;
+        ingredientCheck(stage, mReferencables.getIngredients(), messages);
+        return;
     }
-    
+
     stage -= mIngredientsSize;
+
+    if (stage < mCreaturesLevListsSize)
+    {
+        creaturesLevListCheck(stage, mReferencables.getCreatureLevelledLists(), messages);
+        return;
+    }
+
+    stage -= mCreaturesLevListsSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -590,7 +598,7 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(int stage, const CSMWorl
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& records, std::vector< std::string >& messages)
 {
-      const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
     if (baserecord.isDeleted())
     {
@@ -598,7 +606,25 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const C
     }
 
     const ESM::CreatureLevList& CreatureLevList = (static_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baserecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevList, CreatureLevList.mId);
-    
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList, CreatureLevList.mId); //CreatureLevList but Type_CreatureLevelledList :/
+
+    for (int i = 0; i < CreatureLevList.mList.size(); ++i)
+    {
+        if (CreatureLevList.mList[i].mId.empty())
+        {
+            messages.push_back(id.toString() + "|" + CreatureLevList.mId + " contains item with empty Id");
+        }
+
+        if (CreatureLevList.mList[i].mLevel < 1)
+        {
+            messages.push_back(id.toString() + "|" + CreatureLevList.mId + " contains item with non-positive level");
+        }
+    }
+
+    if (CreatureLevList.mChanceNone < 0 or CreatureLevList.mChanceNone > 100)
+    {
+        messages.push_back(id.toString() + "|" + CreatureLevList.mId + " chance to be empty is not beetween 0 and 100");
+    }
+
     //TODO(!)
 }
