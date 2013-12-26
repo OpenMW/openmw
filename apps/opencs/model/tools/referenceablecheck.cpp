@@ -18,7 +18,8 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mClothingSize(0),
     mContainersSize(0),
     mCreaturesSize(0),
-    mDoorsSize(0)
+    mDoorsSize(0),
+    mIngredientsSize(0)
 {
     setSizeVariables();
 }
@@ -34,6 +35,7 @@ void CSMTools::ReferenceableCheckStage::setSizeVariables()
     mContainersSize = mReferencables.getContainers().getSize();
     mCreaturesSize = mReferencables.getCreatures().getSize();
     mDoorsSize = mReferencables.getDoors().getSize();
+    mIngredientsSize = mReferencables.getIngredients().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
@@ -94,13 +96,13 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mContainersSize;
-    
+
     if (stage < mDoorsSize)
     {
-      doorCheck(stage, mReferencables.getDoors(), messages);
-      return;
+        doorCheck(stage, mReferencables.getDoors(), messages);
+        return;
     }
-    
+
     stage -= mDoorsSize;
 }
 
@@ -516,9 +518,9 @@ void CSMTools::ReferenceableCheckStage::doorCheck(int stage, const CSMWorld::Ref
         return;
     }
 
-    const ESM::Door& Door= (static_cast<const CSMWorld::Record<ESM::Door>&>(baserecord)).get();
+    const ESM::Door& Door = (static_cast<const CSMWorld::Record<ESM::Door>&>(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Door, Door.mId);
-    
+
     //usual, name and model
     if (Door.mName.empty())
     {
@@ -528,5 +530,50 @@ void CSMTools::ReferenceableCheckStage::doorCheck(int stage, const CSMWorld::Ref
     if (Door.mModel.empty())
     {
         messages.push_back(id.toString() + "|" + Door.mId + " has no model");
+    }
+
+    //TODO, check what static unsigned int sRecordId; is for
+}
+
+void CSMTools::ReferenceableCheckStage::ingredientCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Ingredient >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Ingredient& Ingredient = (static_cast<const CSMWorld::Record<ESM::Ingredient>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Ingredient, Ingredient.mId);
+
+    //Checking for name
+    if (Ingredient.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Ingredient.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (Ingredient.mData.mWeight < 0)
+    {
+        messages.push_back(id.toString() + "|" + Ingredient.mId + " has negative weight");
+    }
+
+    //Checking for value
+    if (Ingredient.mData.mValue < 0)
+    {
+        messages.push_back(id.toString() + "|" + Ingredient.mId + " has negative value");
+    }
+
+//checking for model
+    if (Ingredient.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Ingredient.mId + " has no model");
+    }
+
+    //checking for icon
+    if (Ingredient.mIcon.empty())
+    {
+        messages.push_back(id.toString() + "|" + Ingredient.mId + " has no icon");
     }
 }

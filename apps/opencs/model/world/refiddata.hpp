@@ -230,6 +230,7 @@ namespace CSMWorld
 	    const RefIdDataContainer<ESM::Container>& getContainers() const;
 	    const RefIdDataContainer<ESM::Creature>& getCreatures() const;
 	    const RefIdDataContainer<ESM::Door>& getDoors() const;
+	    const RefIdDataContainer<ESM::Ingredient>& getIngredients() const;
     };
 }
 

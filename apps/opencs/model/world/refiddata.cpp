@@ -277,3 +277,7 @@ const CSMWorld::RefIdDataContainer< ESM::Door >& CSMWorld::RefIdData::getDoors()
     return mDoors;
 }
 
+const CSMWorld::RefIdDataContainer< ESM::Ingredient >& CSMWorld::RefIdData::getIngredients() const
+{
+    return mIngredients;
+}
