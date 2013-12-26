@@ -41,6 +41,12 @@ boost::filesystem::path WindowsPath::getUserConfigPath() const
     return userPath / mName;
 }
 
+boost::filesystem::path WindowsPath::getUserDataPath() const
+{
+    // Have some chaos, windows people!
+    return getUserConfigPath();
+}
+
 boost::filesystem::path WindowsPath::getGlobalConfigPath() const
 {
     boost::filesystem::path globalPath(".");

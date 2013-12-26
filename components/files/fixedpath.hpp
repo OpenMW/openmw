@@ -48,7 +48,8 @@ struct FixedPath
      */
     FixedPath(const std::string& application_name)
         : mPath(application_name + "/")
-        , mUserPath(mPath.getUserConfigPath())
+        , mUserConfigPath(mPath.getUserConfigPath())
+        , mUserDataPath(mPath.getUserDataPath())
         , mGlobalConfigPath(mPath.getGlobalConfigPath())
         , mLocalPath(mPath.getLocalPath())
         , mGlobalDataPath(mPath.getGlobalDataPath())
@@ -59,18 +60,19 @@ struct FixedPath
 
     /**
      * \brief Return path pointing to the user local configuration directory.
-     *
-     * \return boost::filesystem::path
      */
     const boost::filesystem::path& getUserConfigPath() const
     {
-        return mUserPath;
+        return mUserConfigPath;
+    }
+
+    const boost::filesystem::path& getUserDataPath() const
+    {
+        return mUserDataPath;
     }
 
     /**
      * \brief Return path pointing to the global (system) configuration directory.
-     *
-     * \return boost::filesystem::path
      */
     const boost::filesystem::path& getGlobalConfigPath() const
     {
@@ -79,8 +81,6 @@ struct FixedPath
 
     /**
      * \brief Return path pointing to the directory where application was started.
-     *
-     * \return boost::filesystem::path
      */
     const boost::filesystem::path& getLocalPath() const
     {
@@ -105,7 +105,8 @@ struct FixedPath
     private:
         PathType mPath;
 
-        boost::filesystem::path mUserPath;       /**< User path  */
+        boost::filesystem::path mUserConfigPath;       /**< User path  */
+        boost::filesystem::path mUserDataPath;
         boost::filesystem::path mGlobalConfigPath;     /**< Global path */
         boost::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
 

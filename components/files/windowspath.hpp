@@ -31,6 +31,8 @@ struct WindowsPath
      */
     boost::filesystem::path getUserConfigPath() const;
 
+    boost::filesystem::path getUserDataPath() const;
+
     /**
      * \brief Returns "X:\Program Files\"
      *

@@ -86,10 +86,6 @@ void CS::Editor::setupDataFiles()
         return;
     }
 
-    // Set the charset for reading the esm/esp files
-    // QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
-    //mFileDialog.setEncoding(encoding);
-
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     mDocumentManager.setResourceDir (variables["resources"].as<std::string>());

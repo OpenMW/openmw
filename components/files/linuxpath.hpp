@@ -23,6 +23,8 @@ struct LinuxPath
      */
     boost::filesystem::path getUserConfigPath() const;
 
+    boost::filesystem::path getUserDataPath() const;
+
     /**
      * \brief Return path to the global (system) directory where config files can be placed.
      */

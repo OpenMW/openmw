@@ -219,7 +219,7 @@ bool Launcher::MainDialog::showFirstRunDialog()
         }
 
         // Create the file if it doesn't already exist, else the importer will fail
-        QString path = QString::fromStdString(mCfgMgr.getUserPath().string()) + QString("openmw.cfg");
+        QString path = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + QString("openmw.cfg");
         QFile file(path);
 
         if (!file.exists()) {
@@ -334,7 +334,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
 
     QStringList paths;
     paths.append(QString("launcher.cfg"));
@@ -440,7 +440,7 @@ bool Launcher::expansions(Launcher::UnshieldThread& cd)
 
 bool Launcher::MainDialog::setupGameSettings()
 {
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
     // Load the user config file first, separately
@@ -591,7 +591,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
 {
     mGraphicsSettings.setMultiValueEnabled(false);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
     QFile localDefault(QString("settings-default.cfg"));
@@ -678,7 +678,7 @@ bool Launcher::MainDialog::writeSettings()
     mGraphicsPage->saveSettings();
     mDataFilesPage->saveSettings();
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QDir dir(userPath);
 
     if (!dir.exists()) {

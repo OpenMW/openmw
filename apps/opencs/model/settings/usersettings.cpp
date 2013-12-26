@@ -251,7 +251,7 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     bool localOk = loadFromFile(localFilePath);
 
     //user
-    mUserFilePath = QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName;
+    mUserFilePath = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + fileName;
     loadFromFile(mUserFilePath);
 
     if (!(localOk || globalOk))

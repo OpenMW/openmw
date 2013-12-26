@@ -27,6 +27,7 @@ ConfigurationManager::ConfigurationManager()
     setupTokensMapping();
 
     boost::filesystem::create_directories(mFixedPath.getUserConfigPath());
+    boost::filesystem::create_directories(mFixedPath.getUserDataPath());
 
     mLogPath = mFixedPath.getUserConfigPath();
 }
@@ -144,9 +145,14 @@ const boost::filesystem::path& ConfigurationManager::getGlobalPath() const
     return mFixedPath.getGlobalConfigPath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getUserPath() const
+const boost::filesystem::path& ConfigurationManager::getUserConfigPath() const
 {
     return mFixedPath.getUserConfigPath();
+}
+
+const boost::filesystem::path& ConfigurationManager::getUserDataPath() const
+{
+    return mFixedPath.getUserDataPath();
 }
 
 const boost::filesystem::path& ConfigurationManager::getLocalPath() const
