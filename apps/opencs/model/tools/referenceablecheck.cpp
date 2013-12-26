@@ -20,7 +20,8 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mCreaturesSize(0),
     mDoorsSize(0),
     mIngredientsSize(0),
-    mCreaturesLevListsSize(0)
+    mCreaturesLevListsSize(0),
+    mItemLevelledListsSize(0)
 {
     setSizeVariables();
 }
@@ -38,6 +39,7 @@ void CSMTools::ReferenceableCheckStage::setSizeVariables()
     mDoorsSize = mReferencables.getDoors().getSize();
     mIngredientsSize = mReferencables.getIngredients().getSize();
     mCreaturesLevListsSize = mReferencables.getCreatureLevelledLists().getSize();
+    mItemLevelledListsSize = mReferencables.getItemLevelledList().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
@@ -122,6 +124,14 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mCreaturesLevListsSize;
+    
+    if (stage < mItemLevelledListsSize)
+    {
+      mItemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
+      return;
+    }
+    
+    stage -= mItemLevelledListsSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -625,6 +635,35 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const C
     {
         messages.push_back(id.toString() + "|" + CreatureLevList.mId + " chance to be empty is not beetween 0 and 100");
     }
+}
 
-    //TODO(!)
+void CSMTools::ReferenceableCheckStage::mItemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::ItemLevList& ItemLevList = (static_cast<const CSMWorld::Record<ESM::ItemLevList>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, CreatureLevList.mId);
+
+    for (int i = 0; i < ItemLevList.mList.size(); ++i)
+    {
+        if (ItemLevList.mList[i].mId.empty())
+        {
+            messages.push_back(id.toString() + "|" + ItemLevList.mId + " contains item with empty Id");
+        }
+
+        if (ItemLevList.mList[i].mLevel < 1)
+        {
+            messages.push_back(id.toString() + "|" + ItemLevList.mId + " contains item with non-positive level");
+        }
+    }
+
+    if (ItemLevList.mChanceNone < 0 or ItemLevList.mChanceNone > 100)
+    {
+        messages.push_back(id.toString() + "|" + ItemLevList.mId + " chance to be empty is not beetween 0 and 100");
+    }
 }
