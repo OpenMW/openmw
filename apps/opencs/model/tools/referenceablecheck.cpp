@@ -19,7 +19,8 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mContainersSize(0),
     mCreaturesSize(0),
     mDoorsSize(0),
-    mIngredientsSize(0)
+    mIngredientsSize(0),
+    mCreaturesLevListsSize(0)
 {
     setSizeVariables();
 }
@@ -36,6 +37,7 @@ void CSMTools::ReferenceableCheckStage::setSizeVariables()
     mCreaturesSize = mReferencables.getCreatures().getSize();
     mDoorsSize = mReferencables.getDoors().getSize();
     mIngredientsSize = mReferencables.getIngredients().getSize();
+    mCreaturesLevListsSize = mReferencables.getCreatureLevelledLists().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
@@ -104,6 +106,14 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mDoorsSize;
+    
+    if (stage < mIngredientsSize)
+    {
+      ingredientCheck(stage, mReferencables.getIngredients(), messages);
+      return;
+    }
+    
+    stage -= mIngredientsSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -576,4 +586,19 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(int stage, const CSMWorl
     {
         messages.push_back(id.toString() + "|" + Ingredient.mId + " has no icon");
     }
+}
+
+void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& records, std::vector< std::string >& messages)
+{
+      const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::CreatureLevList& CreatureLevList = (static_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevList, CreatureLevList.mId);
+    
+    //TODO(!)
 }

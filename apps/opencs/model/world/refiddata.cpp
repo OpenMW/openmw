@@ -281,3 +281,8 @@ const CSMWorld::RefIdDataContainer< ESM::Ingredient >& CSMWorld::RefIdData::getI
 {
     return mIngredients;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& CSMWorld::RefIdData::getCreatureLevelledLists() const
+{
+    return mCreatureLevelledLists;
+}
