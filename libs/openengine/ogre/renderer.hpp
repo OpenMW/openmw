@@ -9,8 +9,6 @@
 
 #include <OgreTexture.h>
 
-#include <components/ogreinit/ogreinit.hpp>
-
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -24,6 +22,11 @@ namespace Ogre
     class Viewport;
     class ParticleEmitterFactory;
     class ParticleAffectorFactory;
+}
+
+namespace OgreInit
+{
+    class OgreInit;
 }
 
 namespace OEngine
@@ -57,7 +60,7 @@ namespace OEngine
             Ogre::Camera *mCamera;
             Ogre::Viewport *mView;
 
-            OgreInit::OgreInit mOgreInit;
+            OgreInit::OgreInit* mOgreInit;
 
             Fader* mFader;
 
