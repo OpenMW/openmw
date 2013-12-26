@@ -25,6 +25,7 @@ namespace CSMTools
             void clothingCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Clothing>& records, std::vector<std::string>& messages);
             void containerCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Container>& records, std::vector<std::string>& messages);
             void creatureCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Creature>& records, std::vector<std::string>& messages);
+            void doorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Door>& records, std::vector<std::string>& messages);
 
             void setSizeVariables();
 
@@ -39,6 +40,7 @@ namespace CSMTools
 	    int mClothingSize;
 	    int mContainersSize;
 	    int mCreaturesSize;
+	    int mDoorsSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

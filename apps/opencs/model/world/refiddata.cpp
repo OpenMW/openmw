@@ -271,3 +271,9 @@ const CSMWorld::RefIdDataContainer< ESM::Creature >& CSMWorld::RefIdData::getCre
 {
     return mCreatures;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Door >& CSMWorld::RefIdData::getDoors() const
+{
+    return mDoors;
+}
+

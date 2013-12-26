@@ -17,7 +17,8 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mArmorsSzie(0),
     mClothingSize(0),
     mContainersSize(0),
-    mCreaturesSize(0)
+    mCreaturesSize(0),
+    mDoorsSize(0)
 {
     setSizeVariables();
 }
@@ -32,6 +33,7 @@ void CSMTools::ReferenceableCheckStage::setSizeVariables()
     mClothingSize = mReferencables.getClothing().getSize();
     mContainersSize = mReferencables.getContainers().getSize();
     mCreaturesSize = mReferencables.getCreatures().getSize();
+    mDoorsSize = mReferencables.getDoors().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
@@ -92,6 +94,14 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mContainersSize;
+    
+    if (stage < mDoorsSize)
+    {
+      doorCheck(stage, mReferencables.getDoors(), messages);
+      return;
+    }
+    
+    stage -= mDoorsSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -491,10 +501,32 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(int stage, const CSMWorld:
     }
 
     //TODO, find meaning of other values
-    /* 
-    if (Creature.mData.mGold < 0)
+    if (Creature.mData.mGold < 0) //It seems that this is for gold in merchant creatures
     {
         messages.push_back(id.toString() + "|" + Creature.mId + " has negative gold ");
     }
-    */
+}
+
+void CSMTools::ReferenceableCheckStage::doorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Door >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Door& Door= (static_cast<const CSMWorld::Record<ESM::Door>&>(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Door, Door.mId);
+    
+    //usual, name and model
+    if (Door.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Door.mId + " has an empty name");
+    }
+
+    if (Door.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Door.mId + " has no model");
+    }
 }
