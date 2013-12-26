@@ -65,10 +65,6 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::setAnimationVerbose(bool animverbose)
-{
-}
-
 bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
     bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();

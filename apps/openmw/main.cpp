@@ -121,9 +121,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
-        ("anim-verbose", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "output animation indices files")
-
         ("nosound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
@@ -240,7 +237,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
-    engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
