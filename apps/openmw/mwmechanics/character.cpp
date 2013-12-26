@@ -505,10 +505,14 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
             mAttackType.clear();
             if(mWeaponType == WeapType_Spell)
             {
+                // Unset casting flag, otherwise pressing the mouse button down would
+                // continue casting every frame if there is no animation
+                mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(false);
+
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
                 const std::string spellid = stats.getSpells().getSelectedSpell();
-                if(!spellid.empty())
+                if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
                     static const std::string schools[] = {
                         "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
