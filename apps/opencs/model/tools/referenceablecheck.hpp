@@ -30,23 +30,22 @@ namespace CSMTools
 	    void creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::CreatureLevList>& records, std::vector<std::string>& messages);
 	    void mItemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::ItemLevList>& records, std::vector<std::string>& messages);
 
-            void setSizeVariables();
-
             const CSMWorld::RefIdData mReferencables;
 	    
 	    //SIZES OF CONCRETE TYPES
-            int mBooksSize;
-            int mActivatorsSize;
-            int mPotionsSize;
-	    int mApparatiSize;
-	    int mArmorsSzie;
-	    int mClothingSize;
-	    int mContainersSize;
-	    int mCreaturesSize;
-	    int mDoorsSize;
-	    int mIngredientsSize;
-	    int mCreaturesLevListsSize;
-	    int mItemLevelledListsSize;
+            const int mBooksSize;
+            const int mActivatorsSize;
+            const int mPotionsSize;
+	    const int mApparatiSize;
+	    const int mArmorsSzie;
+	    const int mClothingSize;
+	    const int mContainersSize;
+	    const int mCreaturesSize;
+	    const int mDoorsSize;
+	    const int mIngredientsSize;
+	    const int mCreaturesLevListsSize;
+	    const int mItemLevelledListsSize;
+	    const int mLightsSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

@@ -233,6 +233,7 @@ namespace CSMWorld
 	    const RefIdDataContainer<ESM::Ingredient>& getIngredients() const;
 	    const RefIdDataContainer<ESM::CreatureLevList>& getCreatureLevelledLists() const;
 	    const RefIdDataContainer<ESM::ItemLevList>& getItemLevelledList() const;
+	    const RefIdDataContainer<ESM::Light>& getLights() const;
     };
 }
 

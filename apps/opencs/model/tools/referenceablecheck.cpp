@@ -10,36 +10,20 @@
 
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable) :
     mReferencables(referenceable),
-    mBooksSize(0),
-    mActivatorsSize(0),
-    mPotionsSize(0),
-    mApparatiSize(0),
-    mArmorsSzie(0),
-    mClothingSize(0),
-    mContainersSize(0),
-    mCreaturesSize(0),
-    mDoorsSize(0),
-    mIngredientsSize(0),
-    mCreaturesLevListsSize(0),
-    mItemLevelledListsSize(0)
+    mBooksSize(mReferencables.getBooks().getSize()),
+    mActivatorsSize(mReferencables.getActivators().getSize()),
+    mPotionsSize(mReferencables.getPotions().getSize()),
+    mApparatiSize(mReferencables.getApparati().getSize()),
+    mArmorsSzie(mReferencables.getArmors().getSize()),
+    mClothingSize(mReferencables.getClothing().getSize()),
+    mContainersSize(mReferencables.getContainers().getSize()),
+    mCreaturesSize(mReferencables.getCreatures().getSize()),
+    mDoorsSize(mReferencables.getDoors().getSize()),
+    mIngredientsSize(mReferencables.getIngredients().getSize()),
+    mCreaturesLevListsSize(mReferencables.getCreatureLevelledLists().getSize()),
+    mItemLevelledListsSize(mReferencables.getItemLevelledList().getSize()),
+    mLightsSize(mReferencables.getLights().getSize())
 {
-    setSizeVariables();
-}
-
-void CSMTools::ReferenceableCheckStage::setSizeVariables()
-{
-    mBooksSize = mReferencables.getBooks().getSize();
-    mActivatorsSize = mReferencables.getActivators().getSize();
-    mPotionsSize = mReferencables.getPotions().getSize();
-    mApparatiSize = mReferencables.getApparati().getSize();
-    mArmorsSzie = mReferencables.getArmors().getSize();
-    mClothingSize = mReferencables.getClothing().getSize();
-    mContainersSize = mReferencables.getContainers().getSize();
-    mCreaturesSize = mReferencables.getCreatures().getSize();
-    mDoorsSize = mReferencables.getDoors().getSize();
-    mIngredientsSize = mReferencables.getIngredients().getSize();
-    mCreaturesLevListsSize = mReferencables.getCreatureLevelledLists().getSize();
-    mItemLevelledListsSize = mReferencables.getItemLevelledList().getSize();
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
@@ -124,13 +108,13 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mCreaturesLevListsSize;
-    
+
     if (stage < mItemLevelledListsSize)
     {
-      mItemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
-      return;
+        mItemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
+        return;
     }
-    
+
     stage -= mItemLevelledListsSize;
 }
 
@@ -647,7 +631,7 @@ void CSMTools::ReferenceableCheckStage::mItemLevelledListCheck(int stage, const 
     }
 
     const ESM::ItemLevList& ItemLevList = (static_cast<const CSMWorld::Record<ESM::ItemLevList>& >(baserecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, CreatureLevList.mId);
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, ItemLevList.mId);
 
     for (int i = 0; i < ItemLevList.mList.size(); ++i)
     {

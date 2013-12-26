@@ -291,3 +291,8 @@ const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& CSMWorld::RefIdData::get
 {
     return mItemLevelledLists;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Light >& CSMWorld::RefIdData::getLights() const
+{
+    return mLights;
+}
