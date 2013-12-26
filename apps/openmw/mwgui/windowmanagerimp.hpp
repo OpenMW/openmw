@@ -200,6 +200,7 @@ namespace MWGui
 
     virtual void activateQuickKey  (int index);
 
+    virtual std::string getSelectedSpell() { return mSelectedSpell; }
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
     virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
     virtual void setSelectedWeapon(const MWWorld::Ptr& item);
@@ -287,6 +288,8 @@ namespace MWGui
     std::map<MyGUI::Window*, std::string> mTrackedWindows;
     void trackWindow(OEngine::GUI::Layout* layout, const std::string& name);
     void onWindowChangeCoord(MyGUI::Window* _sender);
+
+    std::string mSelectedSpell;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;

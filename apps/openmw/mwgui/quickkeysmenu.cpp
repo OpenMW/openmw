@@ -275,7 +275,6 @@ namespace MWGui
         if (type == Type_Magic)
         {
             std::string spellId = button->getChildAt(0)->getUserString("Spell");
-            spells.setSelectedSpell(spellId);
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
         }
@@ -342,7 +341,6 @@ namespace MWGui
             }
 
             store.setSelectedEnchantItem(it);
-            spells.setSelectedSpell("");
             MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item);
         }
     }

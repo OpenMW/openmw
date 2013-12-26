@@ -204,6 +204,7 @@ namespace MWBase
 
             virtual void activateQuickKey  (int index) = 0;
 
+            virtual std::string getSelectedSpell() = 0;
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
             virtual void setSelectedEnchantItem(const MWWorld::Ptr& item) = 0;
             virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;

@@ -511,7 +511,14 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                const std::string spellid = stats.getSpells().getSelectedSpell();
+                // For the player, set the spell we want to cast
+                // This has to be done at the start of the casting animation,
+                // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
+                if (mPtr.getRefData().getHandle() == "player")
+                    stats.getSpells().setSelectedSpell(MWBase::Environment::get().getWindowManager()->getSelectedSpell());
+
+                std::string spellid = stats.getSpells().getSelectedSpell();
+
                 if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
                     static const std::string schools[] = {
