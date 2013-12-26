@@ -178,6 +178,7 @@ public:
                         if ((texture->getName() == "diffuseMap" && mTexSlot == Nif::NiTexturingProperty::BaseTexture)
                                 || (texture->getName() == "normalMap" && mTexSlot == Nif::NiTexturingProperty::BumpTexture)
                                 || (texture->getName() == "detailMap" && mTexSlot == Nif::NiTexturingProperty::DetailTexture)
+                                || (texture->getName() == "darkMap" && mTexSlot == Nif::NiTexturingProperty::DarkTexture)
                                 || (texture->getName() == "emissiveMap" && mTexSlot == Nif::NiTexturingProperty::GlowTexture))
                             texture->setTextureName(mTextures[curTexture]);
                     }
@@ -306,9 +307,6 @@ public:
             return mData.back().isSet;
         }
 
-        // FIXME: We are not getting all objects here. Skinned meshes get
-        // attached to the object's root node, and won't be connected via a
-        // TagPoint.
         static void setVisible(Ogre::Node *node, int vis)
         {
             Ogre::Node::ChildNodeIterator iter = node->getChildIterator();
@@ -316,6 +314,12 @@ public:
             {
                 node = iter.getNext();
                 setVisible(node, vis);
+
+                // Skinned meshes and particle systems are attached to the scene node, not the bone.
+                // We use the Node's user data to connect it with the mesh / particle system.
+                Ogre::Any customData = node->getUserObjectBindings().getUserAny();
+                if (!customData.isEmpty())
+                    Ogre::any_cast<Ogre::MovableObject*>(customData)->setVisible(vis);
 
                 Ogre::TagPoint *tag = dynamic_cast<Ogre::TagPoint*>(node);
                 if(tag != NULL)
@@ -659,6 +663,7 @@ class NIFObjectLoader
             {
                 int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, shape->recIndex);
                 Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+                trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(entity)));
                 scene->mSkelBase->attachObjectToBone(trgtbone->getName(), entity);
             }
         }
@@ -892,6 +897,7 @@ class NIFObjectLoader
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
                     createParticleEmitterAffectors(partsys, partctrl, trgtbone, scene->mSkelBase->getName());
+                    trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(partsys)));
                 }
 
                 Ogre::ControllerValueRealPtr srcval((partflags&Nif::NiNode::ParticleFlag_AutoPlay) ?
