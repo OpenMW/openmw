@@ -996,6 +996,16 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
+bool Animation::isPlaying(Group group) const
+{
+    for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
+    {
+        if(stateiter->second.mGroups == group)
+            return true;
+    }
+    return false;
+}
+
 void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)
 {
     // Early out if we already have this effect
