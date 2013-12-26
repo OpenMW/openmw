@@ -216,6 +216,9 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
 
+    /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
+    virtual void preRender (Ogre::Camera* camera);
+
     virtual void setAlpha(float alpha) {}
 private:
     void updateEffects(float duration);

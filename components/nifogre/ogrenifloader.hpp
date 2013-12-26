@@ -61,6 +61,9 @@ struct ObjectScene {
     std::vector<Ogre::ParticleSystem*> mParticles;
     std::vector<Ogre::Light*> mLights;
 
+    // Nodes that should always face the camera when rendering
+    std::vector<Ogre::Node*> mBillboardNodes;
+
     Ogre::SceneManager* mSceneMgr;
 
     // The maximum length on any of the controllers. For animations with controllers, but no text keys, consider this the animation length.
@@ -76,6 +79,9 @@ struct ObjectScene {
     { }
 
     ~ObjectScene();
+
+    // Rotate nodes in mBillboardNodes so they face the given camera
+    void rotateBillboardNodes(Ogre::Camera* camera);
 };
 
 typedef Ogre::SharedPtr<ObjectScene> ObjectScenePtr;

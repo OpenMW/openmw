@@ -730,6 +730,17 @@ void NpcAnimation::setAlpha(float alpha)
     }
 }
 
+void NpcAnimation::preRender(Ogre::Camera *camera)
+{
+    Animation::preRender(camera);
+    for (int i=0; i<ESM::PRT_Count; ++i)
+    {
+        if (mObjectParts[i].isNull())
+            continue;
+        mObjectParts[i]->rotateBillboardNodes(camera);
+    }
+}
+
 void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectScenePtr scene)
 {
     ent->getSubEntity(0)->setRenderQueueGroup(alpha != 1.f || ent->getSubEntity(0)->getMaterial()->isTransparent()

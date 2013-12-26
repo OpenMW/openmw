@@ -48,7 +48,7 @@ public:
     void enableLights();
     void disableLights();
 
-    void update (const float dt);
+    void update (float dt, Ogre::Camera* camera);
     ///< per-frame update
 
     Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);

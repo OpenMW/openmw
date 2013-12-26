@@ -110,6 +110,17 @@ ObjectScene::~ObjectScene()
     mSkelBase = NULL;
 }
 
+void ObjectScene::rotateBillboardNodes(Ogre::Camera *camera)
+{
+    for (std::vector<Ogre::Node*>::iterator it = mBillboardNodes.begin(); it != mBillboardNodes.end(); ++it)
+    {
+        assert(mSkelBase);
+        Ogre::Node* node = *it;
+        node->_setDerivedOrientation(mSkelBase->getParentNode()->_getDerivedOrientation().Inverse() *
+                                     camera->getRealOrientation());
+    }
+}
+
 // Animates a texture
 class FlipController
 {
@@ -1006,6 +1017,17 @@ class NIFObjectLoader
             partflags |= node->flags;
         else
             flags |= node->flags;
+
+        if (node->recType == Nif::RC_NiBillboardNode)
+        {
+            // TODO: figure out what the flags mean.
+            // NifSkope has names for them, but doesn't implement them.
+            // Change mBillboardNodes to map <Bone, billboard type>
+            int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
+            Ogre::Bone* bone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+            bone->setManuallyControlled(true);
+            scene->mBillboardNodes.push_back(bone);
+        }
 
         Nif::ExtraPtr e = node->extra;
         while(!e.empty())

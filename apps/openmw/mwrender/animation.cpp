@@ -1117,6 +1117,16 @@ void Animation::updateEffects(float duration)
     }
 }
 
+void Animation::preRender(Ogre::Camera *camera)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        NifOgre::ObjectScenePtr objects = it->mObjects;
+        objects->rotateBillboardNodes(camera);
+    }
+    mObjectRoot->rotateBillboardNodes(camera);
+}
+
 // TODO: Should not be here
 Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
 {
@@ -1179,6 +1189,8 @@ public:
 bool ObjectAnimation::canBatch() const
 {
     if(!mObjectRoot->mParticles.empty() || !mObjectRoot->mLights.empty() || !mObjectRoot->mControllers.empty())
+        return false;
+    if (!mObjectRoot->mBillboardNodes.empty())
         return false;
     return std::find_if(mObjectRoot->mEntities.begin(), mObjectRoot->mEntities.end(),
                         FindEntityTransparency()) == mObjectRoot->mEntities.end();
