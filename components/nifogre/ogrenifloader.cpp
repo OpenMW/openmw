@@ -885,6 +885,10 @@ class NIFObjectLoader
 
         sceneNode->attachObject(partsys);
 
+        int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partnode->recIndex);
+        Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+        trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(partsys)));
+
         Nif::ControllerPtr ctrl = partnode->controller;
         while(!ctrl.empty())
         {
@@ -897,7 +901,6 @@ class NIFObjectLoader
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
                     createParticleEmitterAffectors(partsys, partctrl, trgtbone, scene->mSkelBase->getName());
-                    trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(partsys)));
                 }
 
                 Ogre::ControllerValueRealPtr srcval((partflags&Nif::NiNode::ParticleFlag_AutoPlay) ?
