@@ -989,9 +989,12 @@ void VideoState::deinit()
     this->audioq.cond.notify_one();
     this->videoq.cond.notify_one();
 
-    this->parse_thread.join();
-    this->video_thread.join();
-    this->refresh_thread.join();
+    if (this->parse_thread.joinable())
+        this->parse_thread.join();
+    if (this->video_thread.joinable())
+        this->video_thread.join();
+    if (this->refresh_thread.joinable())
+        this->refresh_thread.join();
 
     if(this->audio_st)
         avcodec_close((*this->audio_st)->codec);
