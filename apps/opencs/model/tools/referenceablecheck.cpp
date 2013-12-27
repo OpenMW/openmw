@@ -835,7 +835,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
     if (NPC.mNpdtType == 12)
     {
-        if (NPC.mFlags ^ ESM::NPC::Flags::Autocalc)
+        if (NPC.mFlags ^ 0x0008)
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType and flags mismatch!"); //should not happend?
             return;
