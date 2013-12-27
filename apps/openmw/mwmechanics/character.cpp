@@ -425,10 +425,10 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     {
         forcestateupdate = true;
 
-        // Shields shouldn't be visible during spellcasting
+        // Shields/torches shouldn't be visible during spellcasting or hand-to-hand
         // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
         // but they are also present in weapon drawing animation.
-        mAnimation->showShield(weaptype != WeapType_Spell);
+        mAnimation->showCarriedLeft(weaptype != WeapType_Spell && weaptype != WeapType_HandToHand);
 
         std::string weapgroup;
         if(weaptype == WeapType_None)
@@ -719,7 +719,8 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
 
 
     MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
+            && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
     {
         if(!mAnimation->isPlaying("torch"))
             mAnimation->play("torch", Priority_Torch,

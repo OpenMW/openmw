@@ -279,7 +279,7 @@ public:
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showShield(bool show) {}
+    virtual void showCarriedLeft(bool show) {}
 
     void enableLights(bool enable);
 

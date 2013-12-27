@@ -53,7 +53,7 @@ private:
     std::string    mHairModel;
     ViewMode       mViewMode;
     bool mShowWeapons;
-    bool mShowShield;
+    bool mShowCarriedLeft;
 
     int mVisibilityFlags;
 
@@ -100,7 +100,7 @@ public:
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showShield(bool showShield);
+    virtual void showCarriedLeft(bool showa);
 
     void setViewMode(ViewMode viewMode);
 
