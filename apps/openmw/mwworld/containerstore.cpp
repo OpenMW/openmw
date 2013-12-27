@@ -130,6 +130,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
 {
     MWWorld::ContainerStoreIterator it = addImp(itemPtr);
     MWWorld::Ptr item = *it;
+    item.getRefData().setBaseNode(NULL);
 
     std::string script = MWWorld::Class::get(item).getScript(item);
     if(script != "")
