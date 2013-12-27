@@ -28,7 +28,11 @@ namespace CSMTools
             void doorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Door>& records, std::vector<std::string>& messages);
 	    void ingredientCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Ingredient>& records, std::vector<std::string>& messages);
 	    void creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::CreatureLevList>& records, std::vector<std::string>& messages);
-	    void mItemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::ItemLevList>& records, std::vector<std::string>& messages);
+	    void itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::ItemLevList>& records, std::vector<std::string>& messages);
+	    void lightCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Light>& records, std::vector<std::string>& messages);
+	    void lockpickCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Lockpick>& records, std::vector<std::string>& messages);
+	    void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, std::vector<std::string>& messages);
+	    void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, std::vector<std::string>& messages);
 
             const CSMWorld::RefIdData mReferencables;
 	    
@@ -46,6 +50,9 @@ namespace CSMTools
 	    const int mCreaturesLevListsSize;
 	    const int mItemLevelledListsSize;
 	    const int mLightsSize;
+	    const int mLockpicksSize;
+	    const int mMiscellaneousSize;
+	    const int mNPCsSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

@@ -234,7 +234,11 @@ namespace CSMWorld
 	    const RefIdDataContainer<ESM::CreatureLevList>& getCreatureLevelledLists() const;
 	    const RefIdDataContainer<ESM::ItemLevList>& getItemLevelledList() const;
 	    const RefIdDataContainer<ESM::Light>& getLights() const;
+	    const RefIdDataContainer<ESM::Lockpick>& getLocpicks() const;
+	    const RefIdDataContainer<ESM::Miscellaneous>& getMiscellaneous() const;
+	    const RefIdDataContainer<ESM::NPC>& getNPCs() const;
     };
 }
 
 #endif
+

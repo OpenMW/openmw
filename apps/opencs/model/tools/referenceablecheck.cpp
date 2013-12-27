@@ -3,6 +3,7 @@
 #include <sstream>
 #include <map>
 #include <cassert>
+#include <boost/graph/graph_concepts.hpp>
 
 #include "../world/record.hpp"
 
@@ -22,7 +23,10 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefId
     mIngredientsSize(mReferencables.getIngredients().getSize()),
     mCreaturesLevListsSize(mReferencables.getCreatureLevelledLists().getSize()),
     mItemLevelledListsSize(mReferencables.getItemLevelledList().getSize()),
-    mLightsSize(mReferencables.getLights().getSize())
+    mLightsSize(mReferencables.getLights().getSize()),
+    mLockpicksSize(mReferencables.getLocpicks().getSize()),
+    mMiscellaneousSize(mReferencables.getMiscellaneous().getSize()),
+    mNPCsSize(mReferencables.getNPCs().getSize())
 {
 }
 
@@ -111,11 +115,35 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     if (stage < mItemLevelledListsSize)
     {
-        mItemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
+        itemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
         return;
     }
 
     stage -= mItemLevelledListsSize;
+
+    if (stage < mLightsSize)
+    {
+        lightCheck(stage, mReferencables.getLights(), messages);
+        return;
+    }
+
+    stage -= mLightsSize;
+
+    if (stage < mLockpicksSize)
+    {
+        lockpickCheck(stage, mReferencables.getLocpicks(), messages);
+        return;
+    }
+
+    stage -= mLockpicksSize;
+
+    if (stage < mMiscellaneousSize)
+    {
+        miscCheck(stage, mReferencables.getMiscellaneous(), messages);
+        return;
+    }
+
+    stage -= mMiscellaneousSize;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -602,7 +630,7 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const C
     const ESM::CreatureLevList& CreatureLevList = (static_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList, CreatureLevList.mId); //CreatureLevList but Type_CreatureLevelledList :/
 
-    for (int i = 0; i < CreatureLevList.mList.size(); ++i)
+    for (unsigned i = 0; i < CreatureLevList.mList.size(); ++i)
     {
         if (CreatureLevList.mList[i].mId.empty())
         {
@@ -614,14 +642,9 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const C
             messages.push_back(id.toString() + "|" + CreatureLevList.mId + " contains item with non-positive level");
         }
     }
-
-    if (CreatureLevList.mChanceNone < 0 or CreatureLevList.mChanceNone > 100)
-    {
-        messages.push_back(id.toString() + "|" + CreatureLevList.mId + " chance to be empty is not beetween 0 and 100");
-    }
 }
 
-void CSMTools::ReferenceableCheckStage::mItemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& records, std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -633,7 +656,7 @@ void CSMTools::ReferenceableCheckStage::mItemLevelledListCheck(int stage, const 
     const ESM::ItemLevList& ItemLevList = (static_cast<const CSMWorld::Record<ESM::ItemLevList>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, ItemLevList.mId);
 
-    for (int i = 0; i < ItemLevList.mList.size(); ++i)
+    for (unsigned i = 0; i < ItemLevList.mList.size(); ++i)
     {
         if (ItemLevList.mList[i].mId.empty())
         {
@@ -645,9 +668,222 @@ void CSMTools::ReferenceableCheckStage::mItemLevelledListCheck(int stage, const 
             messages.push_back(id.toString() + "|" + ItemLevList.mId + " contains item with non-positive level");
         }
     }
+}
 
-    if (ItemLevList.mChanceNone < 0 or ItemLevList.mChanceNone > 100)
+void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Light >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
     {
-        messages.push_back(id.toString() + "|" + ItemLevList.mId + " chance to be empty is not beetween 0 and 100");
+        return;
     }
+
+    const ESM::Light& Light = (static_cast<const CSMWorld::Record<ESM::Light>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Light, Light.mId);
+
+    if (Light.mData.mRadius < 0)
+    {
+        messages.push_back(id.toString() + "|" + Light.mId + " has negative light radius");
+    }
+
+    if (Light.mData.mFlags & ESM::Light::Carry)
+    {
+        if (Light.mIcon.empty()) //Needs to be checked with carrable flag
+        {
+            messages.push_back(id.toString() + "|" + Light.mId + " has no icon");
+        }
+
+        if (Light.mData.mWeight < 0) //probabbly needs to be checked only for carrable lights TODO
+        {
+            messages.push_back(id.toString() + "|" + Light.mId + " has negative weight");
+        }
+
+        if (Light.mData.mValue < 0) //probabbly needs to be checked only for carrable lights TODO
+        {
+            messages.push_back(id.toString() + "|" + Light.mId + " has negative value");
+        }
+
+        if (Light.mModel.empty())
+        {
+            messages.push_back(id.toString() + "|" + Light.mId + " has no model");
+        }
+
+        if (Light.mData.mTime < 0)
+        {
+            messages.push_back(id.toString() + "|" + Light.mId + " has negative duration");
+        }
+    }
+}
+
+void CSMTools::ReferenceableCheckStage::lockpickCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Lockpick >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Lockpick& Lockpick = (static_cast<const CSMWorld::Record<ESM::Lockpick>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Lockpick, Lockpick.mId);
+
+    //Checking for name
+    if (Lockpick.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Lockpick.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (Lockpick.mData.mWeight < 0)
+    {
+        messages.push_back(id.toString() + "|" + Lockpick.mId + " has negative weight");
+    }
+
+    //Checking for value
+    if (Lockpick.mData.mValue < 0)
+    {
+        messages.push_back(id.toString() + "|" + Lockpick.mId + " has negative value");
+    }
+
+//checking for model
+    if (Lockpick.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Lockpick.mId + " has no model");
+    }
+
+    //checking for icon
+    if (Lockpick.mIcon.empty())
+    {
+        messages.push_back(id.toString() + "|" + Lockpick.mId + " has no icon");
+    }
+
+    if (Lockpick.mData.mQuality <= 0)
+    {
+        messages.push_back(id.toString() + "|" + Lockpick.mId + " has non-positive quality");
+    }
+
+    if (Lockpick.mData.mUses <= 0)
+    {
+        messages.push_back(id.toString() + "|" + Lockpick.mId + " has no uses left");
+    }
+}
+
+void CSMTools::ReferenceableCheckStage::miscCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Miscellaneous >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Miscellaneous& Miscellaneous = (static_cast<const CSMWorld::Record<ESM::Miscellaneous>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Miscellaneous, Miscellaneous.mId);
+
+    //Checking for name
+    if (Miscellaneous.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (Miscellaneous.mData.mWeight < 0)
+    {
+        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has negative weight");
+    }
+
+    //Checking for value
+    if (Miscellaneous.mData.mValue < 0)
+    {
+        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has negative value");
+    }
+
+//checking for model
+    if (Miscellaneous.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has no model");
+    }
+
+    //checking for icon
+    if (Miscellaneous.mIcon.empty())
+    {
+        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has no icon");
+    }
+}
+
+void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::NPC >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::NPC& NPC = (static_cast<const CSMWorld::Record<ESM::NPC>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, NPC.mId);
+
+
+
+    short level(NPC.mNpdt52.mLevel);
+    char Disposition(NPC.mNpdt52.mDisposition);
+    char Reputation(NPC.mNpdt52.mReputation);
+    char Rank(NPC.mNpdt52.mRank);
+    //Don't know what unknown is for
+    int Gold(NPC.mNpdt52.mGold);
+
+    if (NPC.mNpdtType == 12)
+    {
+        if (NPC.mFlags ^ ESM::NPC::Flags::Autocalc)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType and flags mismatch!"); //should not happend?
+            return;
+        }
+
+        level = NPC.mNpdt12.mLevel;
+        Disposition = NPC.mNpdt12.mDisposition;
+        Reputation = NPC.mNpdt12.mReputation;
+        Rank = NPC.mNpdt12.mRank;
+        Gold = NPC.mNpdt12.mGold;
+    }
+    else
+    {
+        if (NPC.mNpdt52.mHealth < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " health is negative value");
+        }
+
+        if (NPC.mNpdt52.mMana < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " mana is negative value");
+        }
+
+        if (NPC.mNpdt52.mFatigue < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " fatigue is negative value");
+        }
+    }
+
+    if (level < 1)
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " level is non positive");
+    }
+
+    if (Gold < 0)
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " gold is negative value");
+    }
+
+    if (NPC.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " has any empty name");
+    }
+
+    if (NPC.mClass.empty())
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " has any empty class");
+    }
+
+    //TODO: reputation, Disposition, rank, everything else
 }

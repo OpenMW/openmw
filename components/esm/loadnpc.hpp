@@ -105,7 +105,7 @@ struct NPC
 
     char mNpdtType;
     NPDTstruct52 mNpdt52;
-    NPDTstruct12 mNpdt12; // Use this if npdt52.gold == -10
+    NPDTstruct12 mNpdt12; //for autocalculated characters
 
     int mFlags;
 
