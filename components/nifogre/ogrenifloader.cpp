@@ -789,8 +789,6 @@ class NIFObjectLoader
         emitter->setParameter("vertical_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->verticalAngle).valueDegrees()));
         emitter->setParameter("horizontal_direction", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalDir).valueDegrees()));
         emitter->setParameter("horizontal_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalAngle).valueDegrees()));
-        emitter->setParameter("skelbase", skelBaseName);
-        emitter->setParameter("bone", bone->getName());
 
         Nif::ExtraPtr e = partctrl->extra;
         while(!e.empty())
@@ -883,11 +881,9 @@ class NIFObjectLoader
         partsys->setParticleQuota(particledata->numParticles);
         partsys->setKeepParticlesInLocalSpace(partflags & (Nif::NiNode::ParticleFlag_LocalSpace));
 
-        sceneNode->attachObject(partsys);
-
         int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partnode->recIndex);
         Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
-        trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(partsys)));
+        scene->mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
 
         Nif::ControllerPtr ctrl = partnode->controller;
         while(!ctrl.empty())
@@ -900,6 +896,9 @@ class NIFObjectLoader
                 {
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+                    // Set the emitter bone as user data on the particle system
+                    // so the emitters/affectors can access it easily.
+                    partsys->getUserObjectBindings().setUserAny(Ogre::Any(trgtbone));
                     createParticleEmitterAffectors(partsys, partctrl, trgtbone, scene->mSkelBase->getName());
                 }
 
@@ -1272,17 +1271,6 @@ ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bo
                 tag->setScale(scale);
             }
         }
-    }
-
-    for(size_t i = 0;i < scene->mParticles.size();i++)
-    {
-        Ogre::ParticleSystem *partsys = scene->mParticles[i];
-        if(partsys->isAttached())
-            partsys->detachFromParent();
-
-        Ogre::TagPoint *tag = scene->mSkelBase->attachObjectToBone(
-                    scene->mSkelBase->getSkeleton()->getRootBone()->getName(), partsys);
-        tag->setScale(scale);
     }
 
     return scene;
