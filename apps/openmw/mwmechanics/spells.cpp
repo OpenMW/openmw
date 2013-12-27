@@ -125,7 +125,7 @@ namespace MWMechanics
             const ESM::Spell *spell =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
 
-            if (spell->mData.mType & ESM::Spell::ST_Disease)
+            if (spell->mData.mType == ESM::Spell::ST_Disease)
                 mSpells.erase(iter++);
             else
                 iter++;
@@ -139,7 +139,7 @@ namespace MWMechanics
             const ESM::Spell *spell =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
 
-            if (spell->mData.mType & ESM::Spell::ST_Blight)
+            if (spell->mData.mType == ESM::Spell::ST_Blight)
                 mSpells.erase(iter++);
             else
                 iter++;
