@@ -1046,17 +1046,12 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         for(size_t i = 0;i < params.mObjects->mParticles.size(); ++i)
         {
             Ogre::ParticleSystem* partSys = params.mObjects->mParticles[i];
-            sh::Factory::getInstance()._ensureMaterial(partSys->getMaterialName(), "Default");
-            Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
-            static int count = 0;
-            Ogre::String materialName = "openmw/" + Ogre::StringConverter::toString(count++);
-            // TODO: destroy when effect is removed
-            Ogre::MaterialPtr newMat = mat->clone(materialName);
-            partSys->setMaterialName(materialName);
 
-            for (int t=0; t<newMat->getNumTechniques(); ++t)
+            Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(partSys);
+
+            for (int t=0; t<mat->getNumTechniques(); ++t)
             {
-                Ogre::Technique* tech = newMat->getTechnique(t);
+                Ogre::Technique* tech = mat->getTechnique(t);
                 for (int p=0; p<tech->getNumPasses(); ++p)
                 {
                     Ogre::Pass* pass = tech->getPass(p);
