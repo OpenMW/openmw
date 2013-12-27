@@ -94,6 +94,8 @@ namespace MWWorld
             ContainerStoreIterator addNewStack (const Ptr& ptr);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
+            virtual void flagAsModified();
+
         public:
 
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
@@ -104,10 +106,6 @@ namespace MWWorld
 
             void clear();
             ///< Empty container.
-
-            virtual void flagAsModified();
-            ///< \attention This function is internal to the world model and should not be called from
-            /// outside.
 
             float getWeight() const;
             ///< Return total weight of the items contained in *this.
