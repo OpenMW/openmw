@@ -1,3 +1,9 @@
+openmw (0.27.0-2) UNRELEASED; urgency=low
+
+  * Updated Vcs-Git and Vcs-Browser
+
+ -- Scott Howard <showard@debian.org>  Fri, 27 Dec 2013 14:01:15 -0500
+
 openmw (0.27.0-1) experimental; urgency=low
 
   * First release to Debian. (Closes: #727195)

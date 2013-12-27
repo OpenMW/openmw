@@ -13,8 +13,8 @@ Build-Depends: debhelper (>= 9~), cmake, libbullet-dev,
  libunshield-dev
 Standards-Version: 3.9.4
 Homepage: http://openmw.org
-Vcs-Git: git://github.com/zinnschlag/openmw.git
-Vcs-Browser: https://github.com/zinnschlag/openmw
+Vcs-Git: git://git.debian.org/git/pkg-games/openmw.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-games/openmw.git
 
 Package: openmw
 Architecture: any
