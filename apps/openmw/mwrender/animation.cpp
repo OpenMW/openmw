@@ -1027,6 +1027,10 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     else
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+
+    setRenderProperties(params.mObjects, RV_Misc,
+                        RQG_Main, RQG_Alpha, 0.f, false, NULL);
+
     params.mLoop = loop;
     params.mEffectId = effectId;
     params.mBoneName = bonename;
