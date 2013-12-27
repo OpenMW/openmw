@@ -18,6 +18,8 @@
 #include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include <components/esm/loadgmst.hpp>
 #include "../mwworld/esmstore.hpp"
 
@@ -573,9 +575,17 @@ namespace MWWorld
                 if(cell->hasWater())
                     waterlevel = cell->mWater;
 
+                float oldHeight = iter->first.getRefData().getPosition().pos[2];
+
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
                                                             waterlevel, mEngine);
+
+                float heightDiff = newpos.z - oldHeight;
+
+                if (heightDiff < 0)
+                    iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
+
                 mMovementResults.push_back(std::make_pair(iter->first, newpos));
             }
 

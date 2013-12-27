@@ -350,7 +350,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
-    , mFallHeight(0)
 {
     if(!mAnimation)
         return;
@@ -800,10 +799,7 @@ void CharacterController::update(float duration)
         }
 
         if(sneak || inwater || flying)
-        {
             vec.z = 0.0f;
-            mFallHeight = mPtr.getRefData().getPosition().pos[2];
-        }
 
         if(!onground && !flying && !inwater)
         {
@@ -812,11 +808,7 @@ void CharacterController::update(float duration)
             if (world->isSlowFalling(mPtr))
             {
                 // SlowFalling spell effect is active, do not keep previous fall height
-                mFallHeight = mPtr.getRefData().getPosition().pos[2];
-            }
-            else
-            {
-                mFallHeight = std::max(mFallHeight, mPtr.getRefData().getPosition().pos[2]);
+                cls.getCreatureStats(mPtr).land();
             }
 
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -872,7 +864,8 @@ void CharacterController::update(float duration)
             mJumpState = JumpState_Landing;
             vec.z = 0.0f;
 
-            float healthLost = cls.getFallDamage(mPtr, mFallHeight - mPtr.getRefData().getPosition().pos[2]);
+            float height = cls.getCreatureStats(mPtr).land();
+            float healthLost = cls.getFallDamage(mPtr, height);
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
@@ -893,8 +886,6 @@ void CharacterController::update(float duration)
                     //TODO: actor falls over
                 }
             }
-
-            mFallHeight = mPtr.getRefData().getPosition().pos[2];
         }
         else
         {
@@ -932,6 +923,9 @@ void CharacterController::update(float duration)
                     movestate = CharState_TurnLeft;
             }
         }
+
+        if (onground || inwater || flying)
+            cls.getCreatureStats(mPtr).land();
 
         if(movestate != CharState_None)
             clearAnimQueue();

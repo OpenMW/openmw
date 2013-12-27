@@ -36,6 +36,8 @@ namespace MWMechanics
         bool mHostile;
         bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
 
+        float mFallHeight;
+
         int mAttackType;
 
         std::string mLastHitObject; // The last object to hit this actor
@@ -48,6 +50,12 @@ namespace MWMechanics
 
     public:
         CreatureStats();
+
+        void addToFallHeight(float height);
+
+        /// Reset the fall height
+        /// @return total fall height
+        float land();
 
         bool canUsePower (const std::string& power) const;
         void usePower (const std::string& power);
