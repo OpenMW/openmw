@@ -78,7 +78,6 @@
 #endif
         
         shVertexInput(float2, uv0)
-        shVertexInput(float2, uv1) // lodDelta, lodThreshold
 
 #if LIGHTING
         shNormalInput(float4)
