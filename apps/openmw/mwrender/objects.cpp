@@ -245,11 +245,16 @@ void Objects::disableLights()
         it->second->enableLights(false);
 }
 
-void Objects::update(const float dt)
+void Objects::update(float dt, Ogre::Camera* camera)
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
     for(;it != mObjects.end();it++)
         it->second->runAnimation(dt);
+
+    it = mObjects.begin();
+    for(;it != mObjects.end();it++)
+        it->second->preRender(camera);
+
 }
 
 void Objects::rebuildStaticGeometry()

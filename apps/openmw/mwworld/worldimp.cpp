@@ -2049,14 +2049,55 @@ namespace MWWorld
         }
     }
 
+    bool World::startSpellCast(const Ptr &actor)
+    {
+        MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+        std::string message;
+        bool fail = false;
+        bool isPlayer = (actor == getPlayer().getPlayer());
+
+        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+
+        if (!selectedSpell.empty())
+        {
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+
+            // Check mana
+            MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
+            if (magicka.getCurrent() < spell->mData.mCost)
+            {
+                message = "#{sMagicInsufficientSP}";
+                fail = true;
+            }
+
+            // If this is a power, check if it was already used in the last 24h
+            if (!fail && spell->mData.mType == ESM::Spell::ST_Power)
+            {
+                if (stats.canUsePower(spell->mId))
+                    stats.usePower(spell->mId);
+                else
+                {
+                    message = "#{sPowerAlreadyUsed}";
+                    fail = true;
+                }
+            }
+
+            // Reduce mana
+            magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+            stats.setMagicka(magicka);
+        }
+
+        if (isPlayer && fail)
+            MWBase::Environment::get().getWindowManager()->messageBox(message);
+
+        return !fail;
+    }
+
     void World::castSpell(const Ptr &actor)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         InventoryStore& inv = actor.getClass().getInventoryStore(actor);
-
-        // Unset casting flag, otherwise pressing the mouse button down would continue casting every frame if using an enchantment
-        // (which casts instantly without an animation)
-        stats.setAttackingOrSpell(false);
 
         MWWorld::Ptr target = getFacedObject();
 

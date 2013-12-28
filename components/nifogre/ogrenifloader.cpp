@@ -110,6 +110,17 @@ ObjectScene::~ObjectScene()
     mSkelBase = NULL;
 }
 
+void ObjectScene::rotateBillboardNodes(Ogre::Camera *camera)
+{
+    for (std::vector<Ogre::Node*>::iterator it = mBillboardNodes.begin(); it != mBillboardNodes.end(); ++it)
+    {
+        assert(mSkelBase);
+        Ogre::Node* node = *it;
+        node->_setDerivedOrientation(mSkelBase->getParentNode()->_getDerivedOrientation().Inverse() *
+                                     camera->getRealOrientation());
+    }
+}
+
 // Animates a texture
 class FlipController
 {
@@ -167,6 +178,7 @@ public:
                         if ((texture->getName() == "diffuseMap" && mTexSlot == Nif::NiTexturingProperty::BaseTexture)
                                 || (texture->getName() == "normalMap" && mTexSlot == Nif::NiTexturingProperty::BumpTexture)
                                 || (texture->getName() == "detailMap" && mTexSlot == Nif::NiTexturingProperty::DetailTexture)
+                                || (texture->getName() == "darkMap" && mTexSlot == Nif::NiTexturingProperty::DarkTexture)
                                 || (texture->getName() == "emissiveMap" && mTexSlot == Nif::NiTexturingProperty::GlowTexture))
                             texture->setTextureName(mTextures[curTexture]);
                     }
@@ -295,9 +307,6 @@ public:
             return mData.back().isSet;
         }
 
-        // FIXME: We are not getting all objects here. Skinned meshes get
-        // attached to the object's root node, and won't be connected via a
-        // TagPoint.
         static void setVisible(Ogre::Node *node, int vis)
         {
             Ogre::Node::ChildNodeIterator iter = node->getChildIterator();
@@ -305,6 +314,12 @@ public:
             {
                 node = iter.getNext();
                 setVisible(node, vis);
+
+                // Skinned meshes and particle systems are attached to the scene node, not the bone.
+                // We use the Node's user data to connect it with the mesh / particle system.
+                Ogre::Any customData = node->getUserObjectBindings().getUserAny();
+                if (!customData.isEmpty())
+                    Ogre::any_cast<Ogre::MovableObject*>(customData)->setVisible(vis);
 
                 Ogre::TagPoint *tag = dynamic_cast<Ogre::TagPoint*>(node);
                 if(tag != NULL)
@@ -519,18 +534,18 @@ public:
     class Value : public Ogre::ControllerValue<Ogre::Real>, public ValueInterpolator
     {
     private:
-        Ogre::SubEntity *mSubEntity;
+        Ogre::Entity *mEntity;
         std::vector<Nif::NiMorphData::MorphData> mMorphs;
-        std::vector<float> mValues;
+        size_t mControllerIndex;
 
         std::vector<Ogre::Vector3> mVertices;
 
     public:
-        Value(Ogre::SubEntity *subent, const Nif::NiMorphData *data)
-          : mSubEntity(subent)
+        Value(Ogre::Entity *ent, const Nif::NiMorphData *data, size_t controllerIndex)
+          : mEntity(ent)
           , mMorphs(data->mMorphs)
+          , mControllerIndex(controllerIndex)
         {
-            mValues.resize(mMorphs.size()-1, 0.f);
         }
 
         virtual Ogre::Real getValue() const
@@ -543,21 +558,7 @@ public:
         {
             if (mMorphs.size() <= 1)
                 return;
-
-#if OGRE_DOUBLE_PRECISION
-#error "This code needs to be rewritten for double precision mode"
-#endif
-
-            Ogre::VertexData* data = mSubEntity->_getSoftwareVertexAnimVertexData();
-
-            const Ogre::VertexElement* posElem =
-                            data->vertexDeclaration->findElementBySemantic(Ogre::VES_POSITION);
-
-            Ogre::HardwareVertexBufferSharedPtr vbuf =
-                data->vertexBufferBinding->getBuffer(posElem->getSource());
-
-            bool needToUpdate = false;
-            int i=0;
+            int i = 1;
             for (std::vector<Nif::NiMorphData::MorphData>::iterator it = mMorphs.begin()+1; it != mMorphs.end(); ++it,++i)
             {
                 float val = 0;
@@ -565,37 +566,13 @@ public:
                     val = interpKey(it->mData.mKeys, time);
                 val = std::max(0.f, std::min(1.f, val));
 
-                if (val != mValues[i])
-                    needToUpdate = true;
-                mValues[i] = val;
+                Ogre::String animationID = Ogre::StringConverter::toString(mControllerIndex)
+                        + "_" + Ogre::StringConverter::toString(i);
+
+                Ogre::AnimationState* state = mEntity->getAnimationState(animationID);
+                state->setEnabled(val > 0);
+                state->setWeight(val);
             }
-            if (!needToUpdate)
-                return;
-
-            // The first morph key always contains the original positions
-            mVertices = mMorphs[0].mVertices;
-
-            i = 0;
-            for (std::vector<Nif::NiMorphData::MorphData>::iterator it = mMorphs.begin()+1; it != mMorphs.end(); ++it,++i)
-            {
-                float val = mValues[i];
-
-                if (it->mVertices.size() != mMorphs[0].mVertices.size())
-                    continue;
-
-                if (val != 0)
-                {
-                    for (unsigned int v=0; v<mVertices.size(); ++v)
-                        mVertices[v] += it->mVertices[v] * val;
-                }
-            }
-
-            if (mVertices.size() * sizeof(float)*3 != vbuf->getSizeInBytes())
-                return;
-
-            vbuf->writeData(0, vbuf->getSizeInBytes(), &mVertices[0]);
-
-            mSubEntity->_markBuffersUsedForAnimation();
         }
     };
 
@@ -613,13 +590,6 @@ class NIFObjectLoader
     {
         std::cerr << "NIFObjectLoader: Warn: " << msg << std::endl;
     }
-
-    static void fail(const std::string &msg)
-    {
-        std::cerr << "NIFObjectLoader: Fail: "<< msg << std::endl;
-        abort();
-    }
-
 
     static void createEntity(const std::string &name, const std::string &group,
                              Ogre::SceneManager *sceneMgr, ObjectScenePtr scene,
@@ -648,6 +618,7 @@ class NIFObjectLoader
             {
                 int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, shape->recIndex);
                 Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+                trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(entity)));
                 scene->mSkelBase->attachObjectToBone(trgtbone->getName(), entity);
             }
         }
@@ -677,7 +648,8 @@ class NIFObjectLoader
                 Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(entity->getSubEntity(0), geom->data.getPtr()));
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(
+                    entity, geom->data.getPtr(), geom->recIndex));
 
                 GeomMorpherController::Function* function = OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                 scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
@@ -773,8 +745,6 @@ class NIFObjectLoader
         emitter->setParameter("vertical_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->verticalAngle).valueDegrees()));
         emitter->setParameter("horizontal_direction", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalDir).valueDegrees()));
         emitter->setParameter("horizontal_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalAngle).valueDegrees()));
-        emitter->setParameter("skelbase", skelBaseName);
-        emitter->setParameter("bone", bone->getName());
 
         Nif::ExtraPtr e = partctrl->extra;
         while(!e.empty())
@@ -867,7 +837,9 @@ class NIFObjectLoader
         partsys->setParticleQuota(particledata->numParticles);
         partsys->setKeepParticlesInLocalSpace(partflags & (Nif::NiNode::ParticleFlag_LocalSpace));
 
-        sceneNode->attachObject(partsys);
+        int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partnode->recIndex);
+        Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+        scene->mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
 
         Nif::ControllerPtr ctrl = partnode->controller;
         while(!ctrl.empty())
@@ -880,6 +852,9 @@ class NIFObjectLoader
                 {
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+                    // Set the emitter bone as user data on the particle system
+                    // so the emitters/affectors can access it easily.
+                    partsys->getUserObjectBindings().setUserAny(Ogre::Any(trgtbone));
                     createParticleEmitterAffectors(partsys, partctrl, trgtbone, scene->mSkelBase->getName());
                 }
 
@@ -1006,6 +981,17 @@ class NIFObjectLoader
             partflags |= node->flags;
         else
             flags |= node->flags;
+
+        if (node->recType == Nif::RC_NiBillboardNode)
+        {
+            // TODO: figure out what the flags mean.
+            // NifSkope has names for them, but doesn't implement them.
+            // Change mBillboardNodes to map <Bone, billboard type>
+            int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
+            Ogre::Bone* bone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+            bone->setManuallyControlled(true);
+            scene->mBillboardNodes.push_back(bone);
+        }
 
         Nif::ExtraPtr e = node->extra;
         while(!e.empty())
@@ -1241,17 +1227,6 @@ ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bo
                 tag->setScale(scale);
             }
         }
-    }
-
-    for(size_t i = 0;i < scene->mParticles.size();i++)
-    {
-        Ogre::ParticleSystem *partsys = scene->mParticles[i];
-        if(partsys->isAttached())
-            partsys->detachFromParent();
-
-        Ogre::TagPoint *tag = scene->mSkelBase->attachObjectToBone(
-                    scene->mSkelBase->getSkeleton()->getRootBone()->getName(), partsys);
-        tag->setScale(scale);
     }
 
     return scene;

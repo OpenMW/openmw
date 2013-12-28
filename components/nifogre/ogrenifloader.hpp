@@ -45,6 +45,8 @@ class MaterialControllerManager
 {
 public:
     ~MaterialControllerManager();
+
+    /// @attention if \a movable is an Entity, it needs to have *one* SubEntity
     Ogre::MaterialPtr getWritableMaterial (Ogre::MovableObject* movable);
 
 private:
@@ -58,6 +60,9 @@ struct ObjectScene {
     std::vector<Ogre::Entity*> mEntities;
     std::vector<Ogre::ParticleSystem*> mParticles;
     std::vector<Ogre::Light*> mLights;
+
+    // Nodes that should always face the camera when rendering
+    std::vector<Ogre::Node*> mBillboardNodes;
 
     Ogre::SceneManager* mSceneMgr;
 
@@ -74,6 +79,9 @@ struct ObjectScene {
     { }
 
     ~ObjectScene();
+
+    // Rotate nodes in mBillboardNodes so they face the given camera
+    void rotateBillboardNodes(Ogre::Camera* camera);
 };
 
 typedef Ogre::SharedPtr<ObjectScene> ObjectScenePtr;

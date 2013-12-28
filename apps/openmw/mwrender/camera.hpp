@@ -47,6 +47,9 @@ namespace MWRender
 
         bool mDistanceAdjusted;
 
+        bool mVanityToggleQueued;
+        bool mViewModeToggleQueued;
+
         /// Updates sound manager listener data
         void updateListener();
 
@@ -77,6 +80,7 @@ namespace MWRender
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
 
+        /// @note this may be ignored if an important animation is currently playing
         void togglePreviewMode(bool enable);
 
         /// \brief Lowers the camera for sneak.

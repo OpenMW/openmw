@@ -378,10 +378,9 @@ namespace MWInput
                         MWBase::Environment::get().getWorld()->togglePreviewMode(true);
                     }
                 } else {
-                    if (mPreviewPOVDelay > 0.5) {
-                        //disable preview mode
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    } else if (mPreviewPOVDelay > 0.f) {
+                    //disable preview mode
+                    MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5) {
                         MWBase::Environment::get().getWorld()->togglePOV();
                     }
                     mPreviewPOVDelay = 0.f;

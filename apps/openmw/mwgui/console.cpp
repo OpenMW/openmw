@@ -406,13 +406,14 @@ namespace MWGui
                 setTitle("#{sConsoleTitle} (" + object.getCellRef().mRefID + ")");
                 mPtr = object;
             }
+            // User clicked on an object. Restore focus to the console command line.
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
         }
         else
         {
             setTitle("#{sConsoleTitle}");
             mPtr = MWWorld::Ptr();
         }
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
     }
 
     void Console::onReferenceUnavailable()

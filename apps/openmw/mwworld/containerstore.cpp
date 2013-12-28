@@ -131,6 +131,15 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     MWWorld::ContainerStoreIterator it = addImp(itemPtr);
     MWWorld::Ptr item = *it;
 
+    // we may have copied an item from the world, so reset a few things first
+    item.getRefData().setBaseNode(NULL);
+    item.getCellRef().mPos.rot[0] = 0;
+    item.getCellRef().mPos.rot[1] = 0;
+    item.getCellRef().mPos.rot[2] = 0;
+    item.getCellRef().mPos.pos[0] = 0;
+    item.getCellRef().mPos.pos[1] = 0;
+    item.getCellRef().mPos.pos[2] = 0;
+
     std::string script = MWWorld::Class::get(item).getScript(item);
     if(script != "")
     {

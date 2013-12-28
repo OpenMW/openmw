@@ -180,6 +180,29 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         std::pair<std::vector<int>, bool> itemsSlots =
             MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
 
+        // Skip items that have *only* harmful permanent effects
+        if (!test.getClass().getEnchantment(test).empty())
+        {
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Enchantment* enchantment = store.get<ESM::Enchantment>().find(test.getClass().getEnchantment(test));
+            bool harmfulEffect = false;
+            bool usefulEffect = false;
+            if (enchantment->mData.mType == ESM::Enchantment::ConstantEffect)
+            {
+                for (std::vector<ESM::ENAMstruct>::const_iterator it = enchantment->mEffects.mList.begin();
+                     it != enchantment->mEffects.mList.end(); ++it)
+                {
+                    const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(it->mEffectID);
+                    if (effect->mData.mFlags & ESM::MagicEffect::Harmful)
+                        harmfulEffect = true;
+                    else
+                        usefulEffect = true;
+                }
+            }
+            if (harmfulEffect && !usefulEffect)
+                continue;
+        }
+
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {

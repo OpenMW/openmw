@@ -324,6 +324,12 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture]));
     instance->setProperty("detailMap", sh::makeProperty(texName[Nif::NiTexturingProperty::DetailTexture]));
     instance->setProperty("emissiveMap", sh::makeProperty(texName[Nif::NiTexturingProperty::GlowTexture]));
+    instance->setProperty("darkMap", sh::makeProperty(texName[Nif::NiTexturingProperty::DarkTexture]));
+    if (!texName[Nif::NiTexturingProperty::BaseTexture].empty())
+    {
+        instance->setProperty("use_diffuse_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("diffuseMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::BaseTexture].uvSet)));
+    }
     if (!texName[Nif::NiTexturingProperty::GlowTexture].empty())
     {
         instance->setProperty("use_emissive_map", sh::makeProperty(new sh::BooleanValue(true)));
@@ -334,6 +340,11 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("use_detail_map", sh::makeProperty(new sh::BooleanValue(true)));
         instance->setProperty("detailMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DetailTexture].uvSet)));
     }
+    if (!texName[Nif::NiTexturingProperty::DarkTexture].empty())
+    {
+        instance->setProperty("use_dark_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("darkMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DarkTexture].uvSet)));
+    }
 
     bool useParallax = !texName[Nif::NiTexturingProperty::BumpTexture].empty()
             && texName[Nif::NiTexturingProperty::BumpTexture].find("_nh.") != std::string::npos;
@@ -343,25 +354,30 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     {
         if(i == Nif::NiTexturingProperty::BaseTexture ||
            i == Nif::NiTexturingProperty::DetailTexture ||
+           i == Nif::NiTexturingProperty::DarkTexture ||
            i == Nif::NiTexturingProperty::BumpTexture ||
            i == Nif::NiTexturingProperty::GlowTexture)
             continue;
         if(!texName[i].empty())
-            warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i));
+            warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i) + " in " + name);
     }
 
     if (vertexColour)
         instance->setProperty("has_vertex_colour", sh::makeProperty(new sh::BooleanValue(true)));
 
-    // Add transparency if NiAlphaProperty was present
-    NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName[0]);
-    if (result.first)
+    // Override alpha flags based on our override list (transparency-overrides.cfg)
+    if (!texName[0].empty())
     {
-        alphaFlags = (1<<9) | (6<<10); /* alpha_rejection enabled, greater_equal */
-        alphaTest = result.second;
-        depthFlags = (1<<0) | (1<<1); // depth_write on, depth_check on
+        NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName[0]);
+        if (result.first)
+        {
+            alphaFlags = (1<<9) | (6<<10); /* alpha_rejection enabled, greater_equal */
+            alphaTest = result.second;
+            depthFlags = (1<<0) | (1<<1); // depth_write on, depth_check on
+        }
     }
 
+    // Add transparency if NiAlphaProperty was present
     if((alphaFlags&1))
     {
         std::string blend_mode;
@@ -390,7 +406,6 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue(((depthFlags>>1)&1) ? "on" : "off")));
     // depth_func???
 
-    sh::Factory::getInstance()._ensureMaterial(name, "Default");
     return name;
 }
 

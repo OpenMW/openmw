@@ -29,7 +29,9 @@ namespace MWRender
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
-      mIsFurthest(false)
+      mIsFurthest(false),
+      mVanityToggleQueued(false),
+      mViewModeToggleQueued(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -103,6 +105,23 @@ namespace MWRender
 
     void Camera::update(float duration, bool paused)
     {
+        if (!mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+        {
+            // Now process the view changes we queued earlier
+            if (mVanityToggleQueued)
+            {
+                toggleVanityMode(!mVanity.enabled);
+                mVanityToggleQueued = false;
+            }
+            if (mViewModeToggleQueued)
+            {
+
+                togglePreviewMode(false);
+                toggleViewMode();
+                mViewModeToggleQueued = false;
+            }
+        }
+
         updateListener();
         if (paused)
             return;
@@ -121,6 +140,14 @@ namespace MWRender
 
     void Camera::toggleViewMode()
     {
+        // Changing the view will stop all playing animations, so if we are playing
+        // anything important, queue the view change for later
+        if (mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+        {
+            mViewModeToggleQueued = true;
+            return;
+        }
+
         mFirstPersonView = !mFirstPersonView;
         processViewChange();
 
@@ -140,6 +167,14 @@ namespace MWRender
 
     bool Camera::toggleVanityMode(bool enable)
     {
+        // Changing the view will stop all playing animations, so if we are playing
+        // anything important, queue the view change for later
+        if (mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+        {
+            mVanityToggleQueued = true;
+            return false;
+        }
+
         if(!mVanity.allowed && enable)
             return false;
 
@@ -168,6 +203,9 @@ namespace MWRender
 
     void Camera::togglePreviewMode(bool enable)
     {
+        if (mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+            return;
+
         if(mPreviewMode == enable)
             return;
 
@@ -184,7 +222,6 @@ namespace MWRender
         }
 
         mCamera->setPosition(0.f, 0.f, offset);
-        rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
     void Camera::setSneakOffset()
@@ -319,6 +356,7 @@ namespace MWRender
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
             mCameraNode->attachObject(mCamera);
         }
+        rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
     void Camera::getPosition(Ogre::Vector3 &focal, Ogre::Vector3 &camera)

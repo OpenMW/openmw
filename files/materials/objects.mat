@@ -8,10 +8,15 @@ material openmw_objects_base
     diffuseMap black.png
     normalMap
     emissiveMap
+    darkMap
     use_emissive_map false
     use_detail_map false
+    use_diffuse_map false
+    use_dark_map false
     emissiveMapUVSet 0
     detailMapUVSet 0
+    diffuseMapUVSet 0
+    darkMapUVSet 0
     use_parallax false
 
     scene_blend default
@@ -34,8 +39,12 @@ material openmw_objects_base
             normalMap $normalMap
             emissiveMapUVSet $emissiveMapUVSet
             detailMapUVSet $detailMapUVSet
+            diffuseMapUVSet $diffuseMapUVSet
+            darkMapUVSet $darkMapUVSet
             emissiveMap $emissiveMap
             detailMap $detailMap
+            diffuseMap $diffuseMap
+            darkMap $darkMap
             env_map $env_map
             env_map_color $env_map_color
             use_parallax $use_parallax
@@ -55,8 +64,8 @@ material openmw_objects_base
         texture_unit diffuseMap
         {
             direct_texture $diffuseMap
-            create_in_ffp true
-            tex_coord_set $emissiveMapUVSet
+            create_in_ffp $use_diffuse_map
+            tex_coord_set $diffuseMapUVSet
         }
 
         texture_unit normalMap
@@ -66,12 +75,13 @@ material openmw_objects_base
             num_mipmaps 4
         }
 
-        texture_unit emissiveMap
+        texture_unit darkMap
         {
-            create_in_ffp $use_emissive_map
-            colour_op add
-            direct_texture $emissiveMap
-            tex_coord_set $emissiveMapUVSet
+            create_in_ffp $use_dark_map
+            colour_op_ex modulate src_current src_texture
+            alpha_op_ex modulate src_current src_texture
+            direct_texture $darkMap
+            tex_coord_set $darkMapUVSet
         }
 
         texture_unit detailMap
@@ -80,6 +90,14 @@ material openmw_objects_base
             colour_op_ex modulate_x2 src_current src_texture
             direct_texture $detailMap
             tex_coord_set $detailMapUVSet
+        }
+
+        texture_unit emissiveMap
+        {
+            create_in_ffp $use_emissive_map
+            colour_op add
+            direct_texture $emissiveMap
+            tex_coord_set $emissiveMapUVSet
         }
 
         texture_unit envMap

@@ -47,7 +47,7 @@ namespace MWRender
 
         void removeCell(MWWorld::CellStore* store);
 
-        void update (float duration);
+        void update (Ogre::Camera* camera);
 
         /// Updates containing cell for object rendering data
         void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);

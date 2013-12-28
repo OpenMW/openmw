@@ -1010,6 +1010,7 @@ namespace MWGui
 
     void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
     {
+        mSelectedSpell = spellId;
         mHud->setSelectedSpell(spellId, successChancePercent);
 
         const ESM::Spell* spell =
@@ -1020,6 +1021,7 @@ namespace MWGui
 
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
+        mSelectedSpell = "";
         const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
                 .find(MWWorld::Class::get(item).getEnchantment(item));
 
@@ -1039,6 +1041,7 @@ namespace MWGui
 
     void WindowManager::unsetSelectedSpell()
     {
+        mSelectedSpell = "";
         mHud->unsetSelectedSpell();
         mSpellWindow->setTitle("#{sNone}");
     }

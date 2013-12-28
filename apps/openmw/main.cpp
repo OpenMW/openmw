@@ -121,10 +121,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
-        ("anim-verbose", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "output animation indices files")
-
-        ("nosound", bpo::value<bool>()->implicit_value(true)
+        ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
         ("script-verbose", bpo::value<bool>()->implicit_value(true)
@@ -168,8 +165,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    cfgMgr.readConfiguration(variables, desc);
-
     bool run = true;
 
     if (variables.count ("help"))
@@ -186,6 +181,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    cfgMgr.readConfiguration(variables, desc);
 
     engine.setGrabMouse(!variables.count("no-grab"));
 
@@ -237,10 +234,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    engine.setSoundUsage(!variables["nosound"].as<bool>());
+    engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
-    engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());

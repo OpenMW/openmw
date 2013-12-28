@@ -146,29 +146,21 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 struct AddGlow
 {
     Ogre::Vector3* mColor;
-    AddGlow(Ogre::Vector3* col) : mColor(col) {}
+    NifOgre::MaterialControllerManager* mMaterialControllerMgr;
+    AddGlow(Ogre::Vector3* col, NifOgre::MaterialControllerManager* materialControllerMgr)
+        : mColor(col)
+        , mMaterialControllerMgr(materialControllerMgr)
+    {}
 
-    // TODO: integrate this with material controllers?
     void operator()(Ogre::Entity* entity) const
     {
-        unsigned int numsubs = entity->getNumSubEntities();
-        for(unsigned int i = 0;i < numsubs;++i)
-        {
-            unsigned int numsubs = entity->getNumSubEntities();
-            for(unsigned int i = 0;i < numsubs;++i)
-            {
-                Ogre::SubEntity* subEnt = entity->getSubEntity(i);
-                std::string newName = subEnt->getMaterialName() + "@fx";
-                if (sh::Factory::getInstance().searchInstance(newName) == NULL)
-                {
-                    sh::MaterialInstance* instance =
-                        sh::Factory::getInstance().createMaterialInstance(newName, subEnt->getMaterialName());
-                    instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
-                    instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
-                }
-                subEnt->setMaterialName(newName);
-            }
-        }
+        if (!entity->getNumSubEntities())
+            return;
+        Ogre::MaterialPtr writableMaterial = mMaterialControllerMgr->getWritableMaterial(entity);
+        sh::MaterialInstance* instance = sh::Factory::getInstance().getMaterialInstance(writableMaterial->getName());
+
+        instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
     }
 };
 
@@ -216,7 +208,7 @@ void Animation::setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint3
 
     if (enchantedGlow)
         std::for_each(objlist->mEntities.begin(), objlist->mEntities.end(),
-                  AddGlow(glowColor));
+                  AddGlow(glowColor, &objlist->mMaterialControllerMgr));
 }
 
 
@@ -1004,6 +996,16 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
+bool Animation::isPlaying(Group group) const
+{
+    for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
+    {
+        if(stateiter->second.mGroups == group)
+            return true;
+    }
+    return false;
+}
+
 void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)
 {
     // Early out if we already have this effect
@@ -1025,6 +1027,10 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     else
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+
+    setRenderProperties(params.mObjects, RV_Misc,
+                        RQG_Main, RQG_Alpha, 0.f, false, NULL);
+
     params.mLoop = loop;
     params.mEffectId = effectId;
     params.mBoneName = bonename;
@@ -1040,17 +1046,12 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         for(size_t i = 0;i < params.mObjects->mParticles.size(); ++i)
         {
             Ogre::ParticleSystem* partSys = params.mObjects->mParticles[i];
-            sh::Factory::getInstance()._ensureMaterial(partSys->getMaterialName(), "Default");
-            Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
-            static int count = 0;
-            Ogre::String materialName = "openmw/" + Ogre::StringConverter::toString(count++);
-            // TODO: destroy when effect is removed
-            Ogre::MaterialPtr newMat = mat->clone(materialName);
-            partSys->setMaterialName(materialName);
 
-            for (int t=0; t<newMat->getNumTechniques(); ++t)
+            Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(partSys);
+
+            for (int t=0; t<mat->getNumTechniques(); ++t)
             {
-                Ogre::Technique* tech = newMat->getTechnique(t);
+                Ogre::Technique* tech = mat->getTechnique(t);
                 for (int p=0; p<tech->getNumPasses(); ++p)
                 {
                     Ogre::Pass* pass = tech->getPass(p);
@@ -1125,6 +1126,16 @@ void Animation::updateEffects(float duration)
     }
 }
 
+void Animation::preRender(Ogre::Camera *camera)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        NifOgre::ObjectScenePtr objects = it->mObjects;
+        objects->rotateBillboardNodes(camera);
+    }
+    mObjectRoot->rotateBillboardNodes(camera);
+}
+
 // TODO: Should not be here
 Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
 {
@@ -1187,6 +1198,8 @@ public:
 bool ObjectAnimation::canBatch() const
 {
     if(!mObjectRoot->mParticles.empty() || !mObjectRoot->mLights.empty() || !mObjectRoot->mControllers.empty())
+        return false;
+    if (!mObjectRoot->mBillboardNodes.empty())
         return false;
     return std::find_if(mObjectRoot->mEntities.begin(), mObjectRoot->mEntities.end(),
                         FindEntityTransparency()) == mObjectRoot->mEntities.end();

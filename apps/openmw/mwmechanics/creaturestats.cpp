@@ -14,7 +14,8 @@ namespace MWMechanics
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false), mAttackType(AT_Chop),
-          mIsWerewolf(false)
+          mIsWerewolf(false),
+          mFallHeight(0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -355,5 +356,17 @@ namespace MWMechanics
     void CreatureStats::usePower(const std::string &power)
     {
         mUsedPowers[power] = MWBase::Environment::get().getWorld()->getTimeStamp();
+    }
+
+    void CreatureStats::addToFallHeight(float height)
+    {
+        mFallHeight += height;
+    }
+
+    float CreatureStats::land()
+    {
+        float height = mFallHeight;
+        mFallHeight = 0;
+        return height;
     }
 }
