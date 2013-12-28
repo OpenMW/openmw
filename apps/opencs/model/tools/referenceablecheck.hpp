@@ -11,7 +11,7 @@ namespace CSMTools
     class ReferenceableCheckStage : public CSMDoc::Stage
     {
         public:
-            ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable);
+            ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race>& races, const CSMWorld::IdCollection<ESM::Class>& classes);
             virtual void perform(int stage, std::vector< std::string >& messages);
             virtual int setup();
 
@@ -34,7 +34,9 @@ namespace CSMTools
 	    void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, std::vector<std::string>& messages);
 	    void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, std::vector<std::string>& messages);
 
-            const CSMWorld::RefIdData mReferencables;
+            const CSMWorld::RefIdData& mReferencables;
+	    const CSMWorld::IdCollection<ESM::Race> mRaces;
+	    const CSMWorld::IdCollection<ESM::Class> mClasses;
 	    
 	    //SIZES OF CONCRETE TYPES
             const int mBooksSize;

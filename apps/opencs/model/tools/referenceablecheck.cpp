@@ -9,8 +9,10 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable) :
+CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::ace >& races, const CSMWorld::IdCollection<ESM::Class>& classes) :
     mReferencables(referenceable),
+    mClasses(classes),
+    mRaces(races),
     mBooksSize(mReferencables.getBooks().getSize()),
     mActivatorsSize(mReferencables.getActivators().getSize()),
     mPotionsSize(mReferencables.getPotions().getSize()),
@@ -913,7 +915,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
     if (Gold < 0)
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " gold is negative value");
+        messages.push_back(id.toString() + "|" + NPC.mId + " gold has negative value");
     }
 
     if (NPC.mName.empty())
