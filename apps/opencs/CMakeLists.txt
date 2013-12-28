@@ -96,7 +96,7 @@ opencs_units_noqt (view/settings
 
 opencs_units (model/settings
     usersettings
-    binarywidgetmodel
+    binarywidgetadapter
     settingmodel
     setting
     )
