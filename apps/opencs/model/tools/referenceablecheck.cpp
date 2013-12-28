@@ -694,12 +694,12 @@ void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::Re
             messages.push_back(id.toString() + "|" + Light.mId + " has no icon");
         }
 
-        if (Light.mData.mWeight < 0) //probabbly needs to be checked only for carrable lights TODO
+        if (Light.mData.mWeight < 0)
         {
             messages.push_back(id.toString() + "|" + Light.mId + " has negative weight");
         }
 
-        if (Light.mData.mValue < 0) //probabbly needs to be checked only for carrable lights TODO
+        if (Light.mData.mValue < 0)
         {
             messages.push_back(id.toString() + "|" + Light.mId + " has negative value");
         }
@@ -709,9 +709,9 @@ void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::Re
             messages.push_back(id.toString() + "|" + Light.mId + " has no model");
         }
 
-        if (Light.mData.mTime < 0)
+        if (Light.mData.mTime == 0)
         {
-            messages.push_back(id.toString() + "|" + Light.mId + " has negative duration");
+            messages.push_back(id.toString() + "|" + Light.mId + " has zero duration");
         }
     }
 }
@@ -930,5 +930,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     {
         messages.push_back(id.toString() + "|" + NPC.mId + " has any empty race");
     }
+    
     //TODO: reputation, Disposition, rank, everything else
 }
