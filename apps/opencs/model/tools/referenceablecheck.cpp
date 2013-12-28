@@ -833,9 +833,9 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     //Don't know what unknown is for
     int Gold(NPC.mNpdt52.mGold);
 
-    if (NPC.mNpdtType == 12)
+    if (NPC.mNpdtType == 12) //12 = autocalculated
     {
-        if (NPC.mFlags ^ 0x0008)
+        if (NPC.mFlags ^ 0x0008) //0x0008 = autocalculated flag
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType and flags mismatch!"); //should not happend?
             return;
@@ -851,18 +851,64 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     {
         if (NPC.mNpdt52.mHealth < 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " health is negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " health has negative value");
         }
 
         if (NPC.mNpdt52.mMana < 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " mana is negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " mana has negative value");
         }
 
         if (NPC.mNpdt52.mFatigue < 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " fatigue is negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " fatigue has negative value");
         }
+
+        if (NPC.mNpdt52.mAgility < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " agility has negative value");
+        }
+
+        if (NPC.mNpdt52.mEndurance < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " endurance has negative value");
+        }
+
+        if (NPC.mNpdt52.mIntelligence < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " intelligence has negative value");
+        }
+
+        if (NPC.mNpdt52.mLuck < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " luck has negative value");
+        }
+
+        if (NPC.mNpdt52.mPersonality < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " personality has negative value");
+        }
+
+        if (NPC.mNpdt52.mStrength < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " strength has negative value");
+        }
+
+        if (NPC.mNpdt52.mSpeed < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " speed has negative value");
+        }
+
+        if (NPC.mNpdt52.mAgility < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " agility has negative value");
+        }
+
+        if (NPC.mNpdt52.mWillpower < 0)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " willpower has negative value");
+        }
+
     }
 
     if (level < 1)
@@ -884,6 +930,10 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     {
         messages.push_back(id.toString() + "|" + NPC.mId + " has any empty class");
     }
-
+    
+    if (NPC.mRace.empty())
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " has any empty race");
+    }
     //TODO: reputation, Disposition, rank, everything else
 }
