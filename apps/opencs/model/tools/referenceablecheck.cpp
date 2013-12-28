@@ -864,49 +864,44 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
             messages.push_back(id.toString() + "|" + NPC.mId + " fatigue has negative value");
         }
 
-        if (NPC.mNpdt52.mAgility < 0)
+        if (NPC.mNpdt52.mAgility == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " agility has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " agility has zero value");
         }
 
-        if (NPC.mNpdt52.mEndurance < 0)
+        if (NPC.mNpdt52.mEndurance == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " endurance has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " endurance has zero value");
         }
 
-        if (NPC.mNpdt52.mIntelligence < 0)
+        if (NPC.mNpdt52.mIntelligence == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " intelligence has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " intelligence has zero value");
         }
 
-        if (NPC.mNpdt52.mLuck < 0)
+        if (NPC.mNpdt52.mLuck == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " luck has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " luck has zero value");
         }
 
-        if (NPC.mNpdt52.mPersonality < 0)
+        if (NPC.mNpdt52.mPersonality == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " personality has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " personality has zero value");
         }
 
-        if (NPC.mNpdt52.mStrength < 0)
+        if (NPC.mNpdt52.mStrength == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " strength has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " strength has zero value");
         }
 
-        if (NPC.mNpdt52.mSpeed < 0)
+        if (NPC.mNpdt52.mSpeed == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " speed has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " speed has zero value");
         }
 
-        if (NPC.mNpdt52.mAgility < 0)
+        if (NPC.mNpdt52.mWillpower == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " agility has negative value");
-        }
-
-        if (NPC.mNpdt52.mWillpower < 0)
-        {
-            messages.push_back(id.toString() + "|" + NPC.mId + " willpower has negative value");
+            messages.push_back(id.toString() + "|" + NPC.mId + " willpower has zero value");
         }
 
     }
