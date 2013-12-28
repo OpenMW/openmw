@@ -66,7 +66,7 @@ namespace
         for (int i=0; i<ESM::Attribute::Length; ++i)
         {
             const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
-            creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
+            creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
         }
 
         // class bonus
@@ -78,7 +78,7 @@ namespace
             int attribute = class_->mData.mAttribute[i];
             if (attribute>=0 && attribute<8)
             {
-                creatureStats.getAttribute(attribute).setBase (
+                creatureStats.setAttribute(attribute,
                     creatureStats.getAttribute(attribute).getBase() + 10);
             }
         }
@@ -109,7 +109,7 @@ namespace
                 }
                 modifierSum += add;
             }
-            creatureStats.getAttribute(attribute).setBase ( std::min(creatureStats.getAttribute(attribute).getBase()
+            creatureStats.setAttribute(attribute, std::min(creatureStats.getAttribute(attribute).getBase()
                 + static_cast<int>((level-1) * modifierSum+0.5), 100) );
         }
 
@@ -274,14 +274,15 @@ namespace MWClass
                 for (unsigned int i=0; i< ESM::Skill::Length; ++i)
                     data->mNpcStats.getSkill (i).setBase (ref->mBase->mNpdt52.mSkills[i]);
 
-                data->mNpcStats.getAttribute(0).set (ref->mBase->mNpdt52.mStrength);
-                data->mNpcStats.getAttribute(1).set (ref->mBase->mNpdt52.mIntelligence);
-                data->mNpcStats.getAttribute(2).set (ref->mBase->mNpdt52.mWillpower);
-                data->mNpcStats.getAttribute(3).set (ref->mBase->mNpdt52.mAgility);
-                data->mNpcStats.getAttribute(4).set (ref->mBase->mNpdt52.mSpeed);
-                data->mNpcStats.getAttribute(5).set (ref->mBase->mNpdt52.mEndurance);
-                data->mNpcStats.getAttribute(6).set (ref->mBase->mNpdt52.mPersonality);
-                data->mNpcStats.getAttribute(7).set (ref->mBase->mNpdt52.mLuck);
+                data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt52.mStrength);
+                data->mNpcStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mNpdt52.mIntelligence);
+                data->mNpcStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mNpdt52.mWillpower);
+                data->mNpcStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mNpdt52.mAgility);
+                data->mNpcStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mNpdt52.mSpeed);
+                data->mNpcStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mNpdt52.mEndurance);
+                data->mNpcStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mNpdt52.mPersonality);
+                data->mNpcStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mNpdt52.mLuck);
+
                 data->mNpcStats.setHealth (ref->mBase->mNpdt52.mHealth);
                 data->mNpcStats.setMagicka (ref->mBase->mNpdt52.mMana);
                 data->mNpcStats.setFatigue (ref->mBase->mNpdt52.mFatigue);

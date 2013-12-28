@@ -42,6 +42,9 @@ namespace MWMechanics
 
         std::string mLastHitObject; // The last object to hit this actor
 
+        // Do we need to recalculate stats derived from attributes or other factors?
+        bool mRecalcDynamicStats;
+
         std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
 
     protected:
@@ -50,6 +53,8 @@ namespace MWMechanics
 
     public:
         CreatureStats();
+
+        bool needToRecalcDynamicStats();
 
         void addToFallHeight(float height);
 
@@ -83,8 +88,6 @@ namespace MWMechanics
         int getAiSetting (int index) const;
         ///< 0: hello, 1 fight, 2 flee, 3 alarm
 
-        Stat<int> & getAttribute(int index);
-
         Spells & getSpells();
 
         ActiveSpells & getActiveSpells();
@@ -92,6 +95,8 @@ namespace MWMechanics
         MagicEffects & getMagicEffects();
 
         void setAttribute(int index, const Stat<int> &value);
+        // Shortcut to set only the base
+        void setAttribute(int index, int base);
 
         void setHealth(const DynamicStat<float> &value);
 

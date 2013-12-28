@@ -68,14 +68,14 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
             // creature stats
-            data->mCreatureStats.getAttribute(0).set (ref->mBase->mData.mStrength);
-            data->mCreatureStats.getAttribute(1).set (ref->mBase->mData.mIntelligence);
-            data->mCreatureStats.getAttribute(2).set (ref->mBase->mData.mWillpower);
-            data->mCreatureStats.getAttribute(3).set (ref->mBase->mData.mAgility);
-            data->mCreatureStats.getAttribute(4).set (ref->mBase->mData.mSpeed);
-            data->mCreatureStats.getAttribute(5).set (ref->mBase->mData.mEndurance);
-            data->mCreatureStats.getAttribute(6).set (ref->mBase->mData.mPersonality);
-            data->mCreatureStats.getAttribute(7).set (ref->mBase->mData.mLuck);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mData.mStrength);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mData.mIntelligence);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mData.mWillpower);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mData.mAgility);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mData.mSpeed);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mData.mEndurance);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mData.mPersonality);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mData.mLuck);
             data->mCreatureStats.setHealth (ref->mBase->mData.mHealth);
             data->mCreatureStats.setMagicka (ref->mBase->mData.mMana);
             data->mCreatureStats.setFatigue (ref->mBase->mData.mFatigue);
