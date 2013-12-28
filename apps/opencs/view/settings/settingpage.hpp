@@ -24,14 +24,14 @@ namespace CSVSettings
         Q_OBJECT
 
         QList<SettingView *> mViews;
-        CSMSettings::SectionFilter *mSectionFilter;
+        //SectionFilter *mSectionFilter;
         SettingBox *mBox;
 
     public:
         explicit SettingPage(const QString &pageName, CSMSettings::SettingModel *model,
                              bool isHoriztonal, QWidget *parent = 0);
 
-        void addView (const CSMSettings::Setting *setting);
+       // void addView (const CSMSettings::SettingData *setting);
         QGroupBox *pageFrame() { return mBox; }
     };
 }

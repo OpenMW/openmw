@@ -13,14 +13,10 @@
 CSVSettings::SettingPage::SettingPage(const QString &pageName, CSMSettings::SettingModel *model,
                                       bool isHorizontal, QWidget *parent) :
     QWidget(parent), mBox (new SettingBox (Orient_Horizontal, false, this))
-{
+{/*
     setObjectName(pageName);
 
-    mSectionFilter = new CSMSettings::SectionFilter (this);
-    mSectionFilter->setSourceModel(model);
-    mSectionFilter->setFilterRegExp(pageName);
-    mSectionFilter->setFilterKeyColumn (1);
-    mSectionFilter->setDynamicSortFilter (true);
+    //mSectionFilter = new SectionFilter (this);
 
     CSVSettings::Orientation orientation = Orient_Horizontal;
 
@@ -31,11 +27,11 @@ CSVSettings::SettingPage::SettingPage(const QString &pageName, CSMSettings::Sett
 
     for (int i = 0; i < mSectionFilter->rowCount(); ++i)
     {
-        addView (mSectionFilter->getSetting (i));
-    }
+       // addView (mSectionFilter->getSetting (i));
+    }*/
 }
-
-void CSVSettings::SettingPage::addView (const CSMSettings::Setting *setting)
+/*
+void CSVSettings::SettingPage::addView (const CSMSettings::SettingData *setting)
 {
     SettingView *view = 0;
 
@@ -50,3 +46,4 @@ void CSVSettings::SettingPage::addView (const CSMSettings::Setting *setting)
     mViews.append (view);
     mBox->layout()->addWidget (view);
 }
+*/

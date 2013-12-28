@@ -29,12 +29,17 @@ namespace CSMSettings {
         Q_OBJECT
 
         SettingModel *mSettingModel;
-
+        QMap <QString, Setting *> mSettingDeclarations;
+        QMap <QString, QStringList> mSettingDefinitions;
         static UserSettings *mUserSettingsInstance;
         QString mUserFilePath;
         Files::ConfigurationManager mCfgMgr;
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
+
+        struct SettingData {
+            QStringList values;
+        };
 
     public:
 
@@ -58,6 +63,8 @@ namespace CSMSettings {
 
         SettingModel *settingModel()  { return mSettingModel; }
 
+        Setting *getSettingDeclaration(const QString &key)
+                                    { return mSettingDeclarations.value(key); }
     private:
 
 
@@ -72,7 +79,7 @@ namespace CSMSettings {
 
         void destroyStream (QTextStream *stream) const;
 
-        QSortFilterProxyModel *createProxyFilter (int column, QAbstractItemModel *model = 0);
+        Setting *createSetting (const QString &name, const QString &section = "", const QString &defaultValue = "");
 
     signals:
 

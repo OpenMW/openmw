@@ -2,30 +2,49 @@
 #define BINARYWIDGETMODEL_HPP
 
 #include <QStringList>
-#include <QObject>
-
+#include <QSortFilterProxyModel>
+#include "usersettings.hpp"
 namespace CSMSettings
 {
-    class BinaryWidgetModel : public QObject
+    class SectionFilter : public QSortFilterProxyModel
     {
         Q_OBJECT
 
-        QString mMatchValue;
-        QStringList &mValueList;
+    public:
+        explicit SectionFilter (const QString &sectionName, QObject *parent)
+            : QSortFilterProxyModel (parent)
+        {
+            setSourceModel(CSMSettings::UserSettings::instance().settingModel());
+            setFilterRegExp(sectionName);
+            setFilterKeyColumn(1);
+            setDynamicSortFilter(true);
+        }
+
+        void createSetting (const QString &name, const QString &value, const QStringList &valueList)
+        {
+            CSMSettings::UserSettings::instance().settingModel()->
+                    createSetting(name, filterRegExp().pattern(), value, valueList);
+        }
+    };
+
+    class BinaryWidgetAdapter : public QSortFilterProxyModel
+    {
+        Q_OBJECT
+
+        QString mSection;
+        QString mSetting;
+        QStringList mValueList;
+        SectionFilter *mFilter;
 
     public:
 
-        explicit BinaryWidgetModel(QStringList &values, QObject *parent = 0);
+        explicit BinaryWidgetAdapter(SectionFilter *filter,
+                                   const QString &settingName,
+                                   QObject *parent = 0);
 
-        void setMatchValue  (const QString &value)
-            { mMatchValue = value; }
+        QStringList valueList () const              { return mValueList; }
 
-        int rowCount () const
-            { return mValueList.count(); }
-
-        QStringList values () const
-            { return mValueList; }
-
+        QModelIndex itemIndex      (const QString &item);
         bool insertItem     (const QString &item);
         bool removeItem     (const QString &item);
     };

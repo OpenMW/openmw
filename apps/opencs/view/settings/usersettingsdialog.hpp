@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QCheckBox>
 
+#include "../../model/settings/settingmodel.hpp"
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/support.hpp"
 
@@ -57,6 +58,5 @@ namespace CSVSettings {
     void slotReadout (bool toggled);
 
     };
-
 }
 #endif // USERSETTINGSDIALOG_H

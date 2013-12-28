@@ -1,31 +1,69 @@
-#include "binarywidgetmodel.hpp"
 #include <QStringList>
 
-#include <QDebug>
+#include "settingmodel.hpp"
+#include "binarywidgetadapter.hpp"
+#include "usersettings.hpp"
 
-CSMSettings::BinaryWidgetModel::BinaryWidgetModel(QStringList &values, QObject *parent) :
-    mValueList(values), QObject (parent)
-{}
-
-bool CSMSettings::BinaryWidgetModel::insertItem(const QString &item)
+CSMSettings::BinaryWidgetAdapter::BinaryWidgetAdapter(SectionFilter *filter,
+                                                  const QString &settingName,
+                                                  QObject *parent) :
+    mValueList(0), mFilter(0), QSortFilterProxyModel(parent)
 {
-    qDebug() << "BinaryWidgetModel::insertItem()::item selected for insertion: " << item;
-    if (mValueList.contains(item))
+    mFilter = filter;
+
+    setSourceModel(mFilter);
+    setFilterKeyColumn(0);
+    setFilterRegExp(settingName);
+    setDynamicSortFilter(true);
+
+    mSetting = settingName;
+
+    QModelIndex sourceIndex = index(0, 3, QModelIndex());
+    mValueList = data(sourceIndex).toStringList();
+}
+
+bool CSMSettings::BinaryWidgetAdapter::insertItem(const QString &item)
+{
+    //if the item isn't found in a pre-defined list (if available), abort
+    if (mValueList.size()>0)
+    {
+        if (!mValueList.contains(item))
+            return false;
+    }
+
+    //if the item already exists in the model, abort
+    if (itemIndex(item).isValid())
         return false;
 
-    mValueList.append(item);
+    mFilter->createSetting(mSetting, item, mValueList);
 
-    qDebug() << "BinaryWidgetModel::insertItem()::inserting item " << item;
     return true;
 }
 
-bool CSMSettings::BinaryWidgetModel::removeItem(const QString &item)
+bool CSMSettings::BinaryWidgetAdapter::removeItem(const QString &item)
 {
-    qDebug() << "BinaryWidgetModel::removeItem()::item selected for removal: " << item;
-    if (!mValueList.contains(item))
-        return false;
+    QModelIndex idx = itemIndex(item);
 
-    qDebug() << "BinaryWidgetModel::removeItem()::removing item: " << item;
+    while (idx.isValid())
+    {
+        removeRow(idx.row());
+        idx = itemIndex(item);
+    }
 
-    return (mValueList.removeAll(item) > 0);
+    return true;
+}
+
+QModelIndex CSMSettings::BinaryWidgetAdapter::itemIndex(const QString &item)
+{
+    for (int i = 0; i < rowCount(); i++)
+    {
+        QModelIndex idx2 = index(i, 2, QModelIndex());
+        QModelIndex idx0 = index(i, 0, QModelIndex());
+        QModelIndex idx1 = index (i, 1, QModelIndex());
+
+        if (data(idx2).toString() == item)
+            return idx2;
+    }
+
+    return QModelIndex();
 }

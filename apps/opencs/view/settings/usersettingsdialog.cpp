@@ -93,7 +93,6 @@ void CSVSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
 
 void CSVSettings::UserSettingsDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
-    qDebug() << "page change!";
     if (!current)
         current = previous;
 
@@ -113,74 +112,57 @@ void CSVSettings::UserSettingsDialog::show()
 
 void CSVSettings::UserSettingsDialog::testMapperCheckBox()
 {
+    CSMSettings::SectionFilter *filter  =
+            new CSMSettings::SectionFilter ("Display Format", this);
 
-    CSMSettings::Setting *setting =
-            CSMSettings::UserSettings::instance().settingModel()->getSetting
-                            ("Display Format", "Referenceable ID Type Display");
-
-    mBinModel = new CSMSettings::BinaryWidgetModel(setting->values(), this);
-
+    mBinModel = new CSMSettings::BinaryWidgetModel(filter,
+                                                   "Record Status Display",
+                                                   this);
     QGroupBox *widgetBox = new QGroupBox(this);
-    QTextEdit *textEdit = new QTextEdit(this);
     widgetBox->setLayout (new QVBoxLayout());
+    QStringList valueList = mBinModel->valueList();
 
-    qDebug() << "UserSettingsDialog::testMapperCheckBox()::mBinModel values: " << setting->values();
-
-    foreach (const QString &item, setting->valueList())
+    foreach (const QString &item, valueList)
     {
         QCheckBox *widget  = new QCheckBox(item, this);
         widget->setObjectName(item);
-
         widgetBox->layout()->addWidget (widget);
-
-        widget->setChecked(mBinModel->values().contains(item));
+        widget->setChecked(mBinModel->itemIndex(item).isValid());
 
         connect (widget, SIGNAL (toggled(bool)), this, SLOT (slotReadout(bool)));
     }
 
-    widgetBox->layout()->addWidget(textEdit);
     mStackedWidget->addWidget(widgetBox);
-
 }
 
 void CSVSettings::UserSettingsDialog::slotReadout (bool toggled)
 {
-    QStringList &vals = CSMSettings::UserSettings::instance().settingModel()->
-            getSetting("Display Format", "Referenceable ID Type Display")->values();
-
     QWidget *widg = static_cast<QWidget *>(QObject::sender());
 
     if (toggled)
         mBinModel->insertItem(widg->objectName());
     else
         mBinModel->removeItem(widg->objectName());
-
-    qDebug() << "slotReadOut()::widget toggled to " << toggled;
-    qDebug() << "slotReadOut()::value list: " << vals;
 }
 
 void CSVSettings::UserSettingsDialog::testMapperRadioButton()
 {
-    CSMSettings::Setting *setting =
-            CSMSettings::UserSettings::instance().settingModel()->getSetting
-                ("Display Format","Referenceable ID Type Display");
+    CSMSettings::SectionFilter *filter =
+            new CSMSettings::SectionFilter ("Display Format", this);
 
-    mBinModel = new CSMSettings::BinaryWidgetModel(setting->values(), this);
-
+    mBinModel = new CSMSettings::BinaryWidgetModel(filter,
+                                                   "Record Status Display",
+                                                   this);
     QGroupBox *widgetBox = new QGroupBox(this);
     widgetBox->setLayout (new QVBoxLayout());
+    QStringList valueList = mBinModel->valueList();
 
-    qDebug() << "UserSettingsDialog::testMapperRadioButton()::mBinModel values: " << setting->values();
-
-
-    foreach (const QString &item, setting->valueList())
+    foreach (const QString &item, valueList)
     {
         QRadioButton *widget = new QRadioButton(item, this);
         widget->setObjectName(item);
-
         widgetBox->layout()->addWidget (widget);
-
-        widget->setChecked(mBinModel->values().contains(item));
+        widget->setChecked(mBinModel->itemIndex(item).isValid());
 
         connect (widget, SIGNAL (toggled(bool)), this, SLOT (slotReadout(bool)));
     }

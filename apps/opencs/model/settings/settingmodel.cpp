@@ -6,19 +6,9 @@ CSMSettings::SettingModel::SettingModel(QObject *parent) :
     QAbstractItemModel(parent)
 {}
 
-CSMSettings::SettingModel::~SettingModel()
-{
-    while (mSettings.size() > 0)
-    {
-        Setting *setting = mSettings.first();
-        mSettings.removeFirst();
-        delete setting;
-    }
-}
-
 int CSMSettings::SettingModel::columnCount(const QModelIndex &parent) const
 {
-    return Setting::columnCount();
+    return 4;
 }
 
 int CSMSettings::SettingModel::rowCount(const QModelIndex &parent) const
@@ -31,66 +21,39 @@ QVariant CSMSettings::SettingModel::data(const QModelIndex &index, int role) con
     if (!index.isValid())
         return QVariant();
 
-    Setting *setting = 0;
+    SettingData *setting = mSettings.at(index.row());
+
     switch (role)
     {
     case Qt::EditRole:
     case Qt::DisplayRole:
 
-        setting = mSettings.at(index.row());
-
-        return setting->item(index.column());
+        switch (index.column())
+        {
+        case 0:
+            return setting->name();
         break;
 
-    case Qt::UserRole:
+        case 1:
+            return setting->section();
+        break;
 
-        return Setting::columnNames().at(index.column());
+        case 2:
+            return setting->value();
+        break;
+
+        case 3:
+            return setting->valueList();
+
+        default:
+        break;
+        }
 
     default:
-
-        break;
+    break;
     }
 
     return QVariant();
-}
-
-bool CSMSettings::SettingModel::setDataByName
-    (const QString &sectionName, const QString &settingName, const QVariant &value)
-{
-    for (int i = 0; i < rowCount(); ++i)
-    {
-        Setting *setting = mSettings.at(i);
-
-        if (setting->sectionName() == sectionName)
-        {
-            if (setting->name() == settingName)
-            {
-                setting->clearValues();
-                setting->addValue(value.toString());
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-bool CSMSettings::SettingModel::addDataByName
-    (const QString &sectionName, const QString &settingName, const QVariant &value)
-{
-    for (int i = 0; i < rowCount(); ++i)
-    {
-        Setting *setting = mSettings.at(i);
-
-        if (setting->sectionName() == sectionName)
-        {
-            if (setting->name() == settingName)
-            {
-                setting->addValue(value.toString());
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 bool CSMSettings::SettingModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -99,23 +62,10 @@ bool CSMSettings::SettingModel::setData(const QModelIndex &index, const QVariant
     if (!index.isValid())
         return false;
 
-    Setting *setting = mSettings.at(index.row());
-
-    if (!setting)
-        return false;
-
-    if (value.toString().startsWith("-"))
-
-    if (setting->valueList().size() > 0)
-    {
-        if (!(setting->valueList().contains(value.toString())))
+    if (index.row() > mSettings.count())
             return false;
-    }
 
-    if (value.toBool())
-        setting->addValue (value.toString());
-
-qDebug() << "setting data index: " << index << "; value: " << value.toString();
+    mSettings.at(index.row())->setValue (value.toString());
 
     emit dataChanged(index, index);
 
@@ -129,29 +79,34 @@ Qt::ItemFlags CSMSettings::SettingModel::flags(const QModelIndex &index) const
 
     Qt::ItemFlags defaultFlags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-    if (index.column() == 2)
+    if (index.column() == 1)
         return defaultFlags | Qt::ItemIsEditable;
 
     return defaultFlags;
 }
 
-CSMSettings::Setting *CSMSettings::SettingModel::createSetting(const QString &name,
-                                                               const QString &section,
-                                                               const QString &defaultValue)
+CSMSettings::SettingData *CSMSettings::SettingModel::createSetting (
+                                            const QString &name,
+                                            const QString &section,
+                                            const QString &value,
+                                            const QStringList &valueList)
 {
-    Setting *setting = new Setting (name, section, defaultValue);
+    SettingData *setting = new SettingData(section, name, valueList, this);
+    setting->setValue(value);
 
-    beginInsertRows(QModelIndex(), mSettings.size(), mSettings.size());
-    {
-        mSettings.append(setting);
-    } endInsertRows();
+    int settingRow = rowCount();
 
-    emit dataChanged(index(mSettings.size() - 1, 0, QModelIndex()), index(mSettings.size() - 1, 0, QModelIndex()));
+    insertRow(settingRow);
+    mSettings.replace(settingRow, setting);
+
+    QModelIndex idx = index(settingRow, 0, QModelIndex());
+
+    emit dataChanged(idx, idx);
 
     return setting;
 }
 
-const CSMSettings::Setting *CSMSettings::SettingModel::getSetting (int row) const
+const CSMSettings::SettingData *CSMSettings::SettingModel::getSetting (int row) const
 {
     if (row < mSettings.size())
         return mSettings.at(row);
@@ -159,12 +114,12 @@ const CSMSettings::Setting *CSMSettings::SettingModel::getSetting (int row) cons
     return 0;
 }
 
-CSMSettings::Setting *CSMSettings::SettingModel::getSetting (const QString &sectionName,
+CSMSettings::SettingData *CSMSettings::SettingModel::getSetting (const QString &sectionName,
                                                                    const QString &settingName)
 {
-    foreach (CSMSettings::Setting *setting, mSettings)
+    foreach (CSMSettings::SettingData *setting, mSettings)
     {
-        if (setting->sectionName() == sectionName)
+        if (setting->section() == sectionName)
             if (setting->name() == settingName)
                 return setting;
     }
@@ -181,4 +136,30 @@ QModelIndex CSMSettings::SettingModel::index(int row, int column, const QModelIn
         return createIndex (row, column);
 
     return QModelIndex();
+}
+
+bool CSMSettings::SettingModel::insertRows(int row, int count, const QModelIndex &parent)
+{
+    if (row > mSettings.size())
+        return false;
+
+    for (int i = row; i < row + count; i++)
+        mSettings.insert(row, new SettingData("", "", QStringList(),this));
+
+    emit layoutChanged();
+
+    return true;
+}
+
+bool CSMSettings::SettingModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    if (row >= mSettings.count())
+        return false;
+
+    for (int i = row; i < row + count; i++)
+        mSettings.removeAt(row);
+
+    emit layoutChanged();
+
+    return true;
 }
