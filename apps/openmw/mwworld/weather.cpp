@@ -195,7 +195,22 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         }
 
         mNextWeather = weather;
-        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600;
+
+        /**
+         * Issue #417:
+         *
+         * Change speed of weather transition from blight to other (twice fast as normal)
+         * and from other to blight (four times faster than normal)
+         */
+        mRemainingTransitionTime = (mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600.f);
+        if (mCurrentWeather == "blight" && mNextWeather != "")
+        {
+          mRemainingTransitionTime *= 0.25f;
+        }
+        else if (mNextWeather == "blight")
+        {
+          mRemainingTransitionTime *= 0.5f;
+        }
     }
     mFirstUpdate = false;
 }
