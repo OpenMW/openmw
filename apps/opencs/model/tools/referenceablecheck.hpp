@@ -35,8 +35,8 @@ namespace CSMTools
 	    void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, std::vector<std::string>& messages);
 
             const CSMWorld::RefIdData& mReferencables;
-	    const CSMWorld::IdCollection<ESM::Race> mRaces;
-	    const CSMWorld::IdCollection<ESM::Class> mClasses;
+	    const CSMWorld::IdCollection<ESM::Race>& mRaces;
+	    const CSMWorld::IdCollection<ESM::Class>& mClasses;
 	    
 	    //SIZES OF CONCRETE TYPES
             const int mBooksSize;

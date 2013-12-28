@@ -9,7 +9,7 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::ace >& races, const CSMWorld::IdCollection<ESM::Class>& classes) :
+CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races, const CSMWorld::IdCollection<ESM::Class>& classes) :
     mReferencables(referenceable),
     mClasses(classes),
     mRaces(races),
@@ -146,6 +146,12 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= mMiscellaneousSize;
+    
+    if (stage < mNPCsSize)
+    {
+      npcCheck(stage, mReferencables.getNPCs(), messages);
+      return;
+    }
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -837,7 +843,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
     if (NPC.mNpdtType == 12) //12 = autocalculated
     {
-        if (NPC.mFlags ^ 0x0008) //0x0008 = autocalculated flag
+        if (! NPC.mFlags & 0x0008) //0x0008 = autocalculated flag
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType and flags mismatch!"); //should not happend?
             return;
@@ -851,11 +857,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     }
     else
     {
-        if (NPC.mNpdt52.mHealth < 0)
-        {
-            messages.push_back(id.toString() + "|" + NPC.mId + " health has negative value");
-        }
-
         if (NPC.mNpdt52.mMana < 0)
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " mana has negative value");
@@ -927,11 +928,46 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     {
         messages.push_back(id.toString() + "|" + NPC.mId + " has any empty class");
     }
-    
+    else //checking if there is such class
+    {
+        bool nosuchclass(true);
+
+        for (int i = 0; i < mClasses.getSize(); ++i)
+        {
+            if (mClasses.getRecord(i).get().mName == NPC.mClass)
+            {
+                nosuchclass = false;
+                break;
+            }
+        }
+
+        if (nosuchclass)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid class");
+        }
+    }
+
     if (NPC.mRace.empty())
     {
         messages.push_back(id.toString() + "|" + NPC.mId + " has any empty race");
     }
-    
+    else //checking if there is a such race
+    {
+        bool nosuchrace(true);
+
+        for (int i = 0; i < mRaces.getSize(); ++i)
+        {
+            if (mRaces.getRecord(i).get().mName == NPC.mRace)
+            {
+                nosuchrace = false;
+                break;
+            }
+        }
+        if (nosuchrace)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid race");
+        }
+    }
+
     //TODO: reputation, Disposition, rank, everything else
 }
