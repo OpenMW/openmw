@@ -9,10 +9,11 @@
 
 #include "../world/universalid.hpp"
 
-CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races, const CSMWorld::IdCollection<ESM::Class>& classes) :
+CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races, const CSMWorld::IdCollection<ESM::Class>& classes, const CSMWorld::IdCollection<ESM::Faction>& faction) :
     mReferencables(referenceable),
     mClasses(classes),
-    mRaces(races)
+    mRaces(races),
+    mFactions(faction)
 {
 }
 
@@ -857,7 +858,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
     if (NPC.mNpdtType == 12) //12 = autocalculated
     {
-        if (! NPC.mFlags & 0x0008) //0x0008 = autocalculated flag
+        if (NPC.mFlags & 0x0008 == 0) //0x0008 = autocalculated flag
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType and flags mismatch!"); //should not happend?
             return;
@@ -984,5 +985,33 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
         }
     }
 
+    if (Disposition < 0)
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " has negative disposition");
+    }
+
+    if (Reputation < 0)
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " has negative reputation");
+    }
+
+    if(!NPC.mFaction.empty())
+    {
+          bool nosuchfaction(true);
+
+        for (int i = 0; i < mRaces.getSize(); ++i)
+        {
+            if (mFactions.getRecord(i).get().mName == NPC.mFaction)
+            {
+                nosuchfaction = false;
+                break;
+            }
+        }
+
+        if (nosuchfaction)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid faction");
+        }
+    }
     //TODO: reputation, Disposition, rank, everything else
 }

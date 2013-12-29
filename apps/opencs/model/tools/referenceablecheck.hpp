@@ -11,7 +11,7 @@ namespace CSMTools
     class ReferenceableCheckStage : public CSMDoc::Stage
     {
         public:
-            ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race>& races, const CSMWorld::IdCollection<ESM::Class>& classes);
+            ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race>& races, const CSMWorld::IdCollection<ESM::Class>& classes, const CSMWorld::IdCollection<ESM::Faction>& factions);
             virtual void perform(int stage, std::vector< std::string >& messages);
             virtual int setup();
 
@@ -37,6 +37,7 @@ namespace CSMTools
             const CSMWorld::RefIdData& mReferencables;
 	    const CSMWorld::IdCollection<ESM::Race>& mRaces;
 	    const CSMWorld::IdCollection<ESM::Class>& mClasses;
+	    const CSMWorld::IdCollection<ESM::Faction>& mFactions;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

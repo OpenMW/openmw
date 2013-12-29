@@ -76,7 +76,7 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
 
         mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
 	
-	mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses()));
+	mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
     }
 
     return mVerifier;
