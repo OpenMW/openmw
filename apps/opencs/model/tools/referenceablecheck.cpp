@@ -183,7 +183,7 @@ void CSMTools::ReferenceableCheckStage::bookCheck(int stage, const CSMWorld::Ref
         return;
     }
 
-    const ESM::Book& Book = (static_cast<const CSMWorld::Record<ESM::Book>& >(baserecord)).get();
+    const ESM::Book& Book = (dynamic_cast<const CSMWorld::Record<ESM::Book>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Book, Book.mId);
 
     //Checking for name
@@ -232,7 +232,7 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(int stage, const CSMWorld
         return;
     }
 
-    const ESM::Activator& Activator = (static_cast<const CSMWorld::Record<ESM::Activator>& >(baserecord)).get();
+    const ESM::Activator& Activator = (dynamic_cast<const CSMWorld::Record<ESM::Activator>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Activator, Activator.mId);
 
     //Checking for model, IIRC all activators should have a model
@@ -251,7 +251,7 @@ void CSMTools::ReferenceableCheckStage::potionCheck(int stage, const CSMWorld::R
         return;
     }
 
-    const ESM::Potion& Potion = (static_cast<const CSMWorld::Record<ESM::Potion>& >(baserecord)).get();
+    const ESM::Potion& Potion = (dynamic_cast<const CSMWorld::Record<ESM::Potion>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, Potion.mId);
 
     //Checking for name
@@ -297,7 +297,7 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(int stage, const CSMWorld
         return;
     }
 
-    const ESM::Apparatus& Apparatus = (static_cast<const CSMWorld::Record<ESM::Apparatus>& >(baserecord)).get();
+    const ESM::Apparatus& Apparatus = (dynamic_cast<const CSMWorld::Record<ESM::Apparatus>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Apparatus, Apparatus.mId);
 
     //Checking for name
@@ -346,7 +346,7 @@ void CSMTools::ReferenceableCheckStage::armorCheck(int stage, const CSMWorld::Re
         return;
     }
 
-    const ESM::Armor& Armor = (static_cast<const CSMWorld::Record<ESM::Armor>& >(baserecord)).get();
+    const ESM::Armor& Armor = (dynamic_cast<const CSMWorld::Record<ESM::Armor>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Armor, Armor.mId);
 
     //Checking for name
@@ -407,7 +407,7 @@ void CSMTools::ReferenceableCheckStage::clothingCheck(int stage, const CSMWorld:
         return;
     }
 
-    const ESM::Clothing& Clothing = (static_cast<const CSMWorld::Record<ESM::Clothing>& >(baserecord)).get();
+    const ESM::Clothing& Clothing = (dynamic_cast<const CSMWorld::Record<ESM::Clothing>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Clothing, Clothing.mId);
 
     //Checking for name
@@ -456,7 +456,7 @@ void CSMTools::ReferenceableCheckStage::containerCheck(int stage, const CSMWorld
         return;
     }
 
-    const ESM::Container& Container = (static_cast<const CSMWorld::Record<ESM::Container>& >(baserecord)).get();
+    const ESM::Container& Container = (dynamic_cast<const CSMWorld::Record<ESM::Container>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Container, Container.mId);
 
     //Checking for model, IIRC all containers should have a model
@@ -487,7 +487,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(int stage, const CSMWorld:
         return;
     }
 
-    const ESM::Creature& Creature = (static_cast<const CSMWorld::Record<ESM::Creature>&>(baserecord)).get();
+    const ESM::Creature& Creature = (dynamic_cast<const CSMWorld::Record<ESM::Creature>&>(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Creature, Creature.mId);
 
     if (Creature.mModel.empty())
@@ -581,7 +581,7 @@ void CSMTools::ReferenceableCheckStage::doorCheck(int stage, const CSMWorld::Ref
         return;
     }
 
-    const ESM::Door& Door = (static_cast<const CSMWorld::Record<ESM::Door>&>(baserecord)).get();
+    const ESM::Door& Door = (dynamic_cast<const CSMWorld::Record<ESM::Door>&>(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Door, Door.mId);
 
     //usual, name and model
@@ -607,7 +607,7 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(int stage, const CSMWorl
         return;
     }
 
-    const ESM::Ingredient& Ingredient = (static_cast<const CSMWorld::Record<ESM::Ingredient>& >(baserecord)).get();
+    const ESM::Ingredient& Ingredient = (dynamic_cast<const CSMWorld::Record<ESM::Ingredient>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Ingredient, Ingredient.mId);
 
     //Checking for name
@@ -650,7 +650,7 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const C
         return;
     }
 
-    const ESM::CreatureLevList& CreatureLevList = (static_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baserecord)).get();
+    const ESM::CreatureLevList& CreatureLevList = (dynamic_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList, CreatureLevList.mId); //CreatureLevList but Type_CreatureLevelledList :/
 
     for (unsigned i = 0; i < CreatureLevList.mList.size(); ++i)
@@ -676,7 +676,7 @@ void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(int stage, const C
         return;
     }
 
-    const ESM::ItemLevList& ItemLevList = (static_cast<const CSMWorld::Record<ESM::ItemLevList>& >(baserecord)).get();
+    const ESM::ItemLevList& ItemLevList = (dynamic_cast<const CSMWorld::Record<ESM::ItemLevList>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, ItemLevList.mId);
 
     for (unsigned i = 0; i < ItemLevList.mList.size(); ++i)
@@ -702,7 +702,7 @@ void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::Re
         return;
     }
 
-    const ESM::Light& Light = (static_cast<const CSMWorld::Record<ESM::Light>& >(baserecord)).get();
+    const ESM::Light& Light = (dynamic_cast<const CSMWorld::Record<ESM::Light>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Light, Light.mId);
 
     if (Light.mData.mRadius < 0)
@@ -748,7 +748,7 @@ void CSMTools::ReferenceableCheckStage::lockpickCheck(int stage, const CSMWorld:
         return;
     }
 
-    const ESM::Lockpick& Lockpick = (static_cast<const CSMWorld::Record<ESM::Lockpick>& >(baserecord)).get();
+    const ESM::Lockpick& Lockpick = (dynamic_cast<const CSMWorld::Record<ESM::Lockpick>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Lockpick, Lockpick.mId);
 
     //Checking for name
@@ -801,7 +801,7 @@ void CSMTools::ReferenceableCheckStage::miscCheck(int stage, const CSMWorld::Ref
         return;
     }
 
-    const ESM::Miscellaneous& Miscellaneous = (static_cast<const CSMWorld::Record<ESM::Miscellaneous>& >(baserecord)).get();
+    const ESM::Miscellaneous& Miscellaneous = (dynamic_cast<const CSMWorld::Record<ESM::Miscellaneous>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Miscellaneous, Miscellaneous.mId);
 
     //Checking for name
@@ -844,7 +844,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
         return;
     }
 
-    const ESM::NPC& NPC = (static_cast<const CSMWorld::Record<ESM::NPC>& >(baserecord)).get();
+    const ESM::NPC& NPC = (dynamic_cast<const CSMWorld::Record<ESM::NPC>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, NPC.mId);
 
 
@@ -858,7 +858,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
     if (NPC.mNpdtType == 12) //12 = autocalculated
     {
-        if (NPC.mFlags & 0x0008 == 0) //0x0008 = autocalculated flag
+        if ((NPC.mFlags & 0x0008) == 0) //0x0008 = autocalculated flag
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType and flags mismatch!"); //should not happend?
             return;
@@ -949,7 +949,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
         for (int i = 0; i < mClasses.getSize(); ++i)
         {
-            if (mClasses.getRecord(i).get().mName == NPC.mClass)
+            if (dynamic_cast<const ESM::Class&>(mClasses.getRecord(i).get()).mId == NPC.mClass)
             {
                 nosuchclass = false;
                 break;
@@ -972,7 +972,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
         for (int i = 0; i < mRaces.getSize(); ++i)
         {
-            if (mRaces.getRecord(i).get().mName == NPC.mRace)
+            if (dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mName == NPC.mRace)
             {
                 nosuchrace = false;
                 break;
@@ -995,23 +995,31 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
         messages.push_back(id.toString() + "|" + NPC.mId + " has negative reputation");
     }
 
-    if(!NPC.mFaction.empty())
+    if (!NPC.mFaction.empty())
     {
-          bool nosuchfaction(true);
-
-        for (int i = 0; i < mRaces.getSize(); ++i)
+        if (Rank < 0)
         {
-            if (mFactions.getRecord(i).get().mName == NPC.mFaction)
-            {
-                nosuchfaction = false;
-                break;
-            }
+            messages.push_back(id.toString() + "|" + NPC.mId + " has negative rank");
         }
 
-        if (nosuchfaction)
-        {
-            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid faction");
-        }
+        //This code does not work at the moment. nosuchfaction is true for every npc record
+        /*
+                  bool nosuchfaction(true);
+                for (int i = 0; i < mRaces.getSize(); ++i)
+                {
+                    if (dynamic_cast<const ESM::Faction &>(mFactions.getRecord(i).get()).mName == NPC.mFaction)
+                    {
+                        nosuchfaction = false;
+                        break;
+                    }
+                }
+
+                if (nosuchfaction)
+                {
+                    messages.push_back(id.toString() + "|" + NPC.mId + " has invalid faction");
+                }
+                */
     }
+
     //TODO: reputation, Disposition, rank, everything else
 }
