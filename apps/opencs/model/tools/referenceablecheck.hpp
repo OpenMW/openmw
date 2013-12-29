@@ -37,24 +37,6 @@ namespace CSMTools
             const CSMWorld::RefIdData& mReferencables;
 	    const CSMWorld::IdCollection<ESM::Race>& mRaces;
 	    const CSMWorld::IdCollection<ESM::Class>& mClasses;
-	    
-	    //SIZES OF CONCRETE TYPES
-            const int mBooksSize;
-            const int mActivatorsSize;
-            const int mPotionsSize;
-	    const int mApparatiSize;
-	    const int mArmorsSzie;
-	    const int mClothingSize;
-	    const int mContainersSize;
-	    const int mCreaturesSize;
-	    const int mDoorsSize;
-	    const int mIngredientsSize;
-	    const int mCreaturesLevListsSize;
-	    const int mItemLevelledListsSize;
-	    const int mLightsSize;
-	    const int mLockpicksSize;
-	    const int mMiscellaneousSize;
-	    const int mNPCsSize;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

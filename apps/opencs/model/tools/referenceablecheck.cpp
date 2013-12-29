@@ -12,145 +12,159 @@
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races, const CSMWorld::IdCollection<ESM::Class>& classes) :
     mReferencables(referenceable),
     mClasses(classes),
-    mRaces(races),
-    mBooksSize(mReferencables.getBooks().getSize()),
-    mActivatorsSize(mReferencables.getActivators().getSize()),
-    mPotionsSize(mReferencables.getPotions().getSize()),
-    mApparatiSize(mReferencables.getApparati().getSize()),
-    mArmorsSzie(mReferencables.getArmors().getSize()),
-    mClothingSize(mReferencables.getClothing().getSize()),
-    mContainersSize(mReferencables.getContainers().getSize()),
-    mCreaturesSize(mReferencables.getCreatures().getSize()),
-    mDoorsSize(mReferencables.getDoors().getSize()),
-    mIngredientsSize(mReferencables.getIngredients().getSize()),
-    mCreaturesLevListsSize(mReferencables.getCreatureLevelledLists().getSize()),
-    mItemLevelledListsSize(mReferencables.getItemLevelledList().getSize()),
-    mLightsSize(mReferencables.getLights().getSize()),
-    mLockpicksSize(mReferencables.getLocpicks().getSize()),
-    mMiscellaneousSize(mReferencables.getMiscellaneous().getSize()),
-    mNPCsSize(mReferencables.getNPCs().getSize())
+    mRaces(races)
 {
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
 {
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
-    if (stage < mBooksSize)
+    const int BookSize(mReferencables.getBooks().getSize());
+
+    if (stage < BookSize)
     {
         bookCheck(stage, mReferencables.getBooks(), messages);
         return;
     }
 
-    stage -= mBooksSize;
+    stage -= BookSize;
 
-    if (stage < mActivatorsSize)
+    const int ActivatorSize(mReferencables.getActivators().getSize());
+
+    if (stage < ActivatorSize)
     {
         activatorCheck(stage, mReferencables.getActivators(), messages);
         return;
     }
 
-    stage -= mActivatorsSize;
+    stage -= ActivatorSize;
 
-    if (stage < mPotionsSize)
+    const int PotionSize(mReferencables.getActivators().getSize());
+
+    if (stage < PotionSize)
     {
         potionCheck(stage, mReferencables.getPotions(), messages);
         return;
     }
 
-    stage -= mPotionsSize;
+    stage -= PotionSize;
 
-    if (stage < mApparatiSize)
+    const int ApparatusSize(mReferencables.getApparati().getSize());
+
+    if (stage < ApparatusSize)
     {
         apparatusCheck(stage, mReferencables.getApparati(), messages);
         return;
     }
 
-    stage -= mApparatiSize;
+    stage -= ApparatusSize;
 
-    if (stage < mArmorsSzie)
+    const int ArmorSize(mReferencables.getArmors().getSize());
+
+    if (stage < ArmorSize)
     {
         armorCheck(stage, mReferencables.getArmors(), messages);
         return;
     }
 
-    stage -= mArmorsSzie;
+    stage -= ArmorSize;
 
-    if (stage < mClothingSize)
+    const int ClothingSize(mReferencables.getClothing().getSize());
+
+    if (stage < ClothingSize)
     {
         clothingCheck(stage, mReferencables.getClothing(), messages);
         return;
     }
 
-    stage -= mClothingSize;
+    stage -= ClothingSize;
 
-    if (stage < mContainersSize)
+    const int ContainerSize(mReferencables.getContainers().getSize());
+
+    if (stage < ContainerSize)
     {
         containerCheck(stage, mReferencables.getContainers(), messages);
         return;
     }
 
-    stage -= mContainersSize;
+    stage -= ContainerSize;
 
-    if (stage < mDoorsSize)
+    const int DoorSize(mReferencables.getDoors().getSize());
+
+    if (stage < DoorSize)
     {
         doorCheck(stage, mReferencables.getDoors(), messages);
         return;
     }
 
-    stage -= mDoorsSize;
+    stage -= DoorSize;
 
-    if (stage < mIngredientsSize)
+    const int IngredientSize(mReferencables.getIngredients().getSize());
+
+    if (stage < IngredientSize)
     {
         ingredientCheck(stage, mReferencables.getIngredients(), messages);
         return;
     }
 
-    stage -= mIngredientsSize;
+    stage -= IngredientSize;
 
-    if (stage < mCreaturesLevListsSize)
+    const int CreatureLevListSize(mReferencables.getCreatureLevelledLists().getSize());
+
+    if (stage < CreatureLevListSize)
     {
         creaturesLevListCheck(stage, mReferencables.getCreatureLevelledLists(), messages);
         return;
     }
 
-    stage -= mCreaturesLevListsSize;
+    stage -= CreatureLevListSize;
 
-    if (stage < mItemLevelledListsSize)
+    const int ItemLevelledListSize(mReferencables.getItemLevelledList().getSize());
+
+    if (stage < ItemLevelledListSize)
     {
         itemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
         return;
     }
 
-    stage -= mItemLevelledListsSize;
+    stage -= ItemLevelledListSize;
 
-    if (stage < mLightsSize)
+    const int LightSize(mReferencables.getLights().getSize());
+
+    if (stage < LightSize)
     {
         lightCheck(stage, mReferencables.getLights(), messages);
         return;
     }
 
-    stage -= mLightsSize;
+    stage -= LightSize;
 
-    if (stage < mLockpicksSize)
+    const int LockpickSize(mReferencables.getLocpicks().getSize());
+
+    if (stage < LockpickSize)
     {
         lockpickCheck(stage, mReferencables.getLocpicks(), messages);
         return;
     }
 
-    stage -= mLockpicksSize;
+    stage -= LockpickSize;
 
-    if (stage < mMiscellaneousSize)
+    const int MiscSize(mReferencables.getMiscellaneous().getSize());
+
+    if (stage < MiscSize)
     {
         miscCheck(stage, mReferencables.getMiscellaneous(), messages);
         return;
     }
 
-    stage -= mMiscellaneousSize;
-    
-    if (stage < mNPCsSize)
+    stage -= MiscSize;
+
+    const int NPCSize(mReferencables.getNPCs().getSize());
+
+    if (stage < NPCSize)
     {
-      npcCheck(stage, mReferencables.getNPCs(), messages);
-      return;
+        npcCheck(stage, mReferencables.getNPCs(), messages);
+        return;
     }
 }
 
@@ -963,6 +977,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
                 break;
             }
         }
+
         if (nosuchrace)
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " has invalid race");
