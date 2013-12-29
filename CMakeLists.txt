@@ -212,7 +212,7 @@ if (HAVE_UNORDERED_MAP)
 endif ()
 
 
-set(BOOST_COMPONENTS system filesystem program_options thread date_time wave)
+set(BOOST_COMPONENTS system filesystem program_options)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
