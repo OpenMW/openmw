@@ -414,12 +414,21 @@ namespace MWBase
 
             virtual bool toggleGodMode() = 0;
 
+            /**
+             * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
+             * @param actor
+             * @return true if the spell can be casted (i.e. the animation should start)
+             */
+            virtual bool startSpellCast (const MWWorld::Ptr& actor) = 0;
+
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
 
             virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
 
             virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
+
+            virtual bool isNight() const = 0;
     };
 }
 

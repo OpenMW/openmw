@@ -138,6 +138,8 @@ namespace MWInput
 
         bool mDragDrop;
 
+        bool mGrabCursor;
+
         bool mInvertY;
 
         float mCameraSensitivity;

@@ -36,6 +36,8 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/actionequip.hpp"
+#include "../mwworld/actiontake.hpp"
 
 namespace
 {
@@ -350,7 +352,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
-    , mFallHeight(0)
 {
     if(!mAnimation)
         return;
@@ -426,10 +427,10 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     {
         forcestateupdate = true;
 
-        // Shields shouldn't be visible during spellcasting
+        // Shields/torches shouldn't be visible during spellcasting or hand-to-hand
         // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
         // but they are also present in weapon drawing animation.
-        mAnimation->showShield(weaptype != WeapType_Spell);
+        mAnimation->showCarriedLeft(weaptype != WeapType_Spell && weaptype != WeapType_HandToHand);
 
         std::string weapgroup;
         if(weaptype == WeapType_None)
@@ -505,10 +506,21 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
             mAttackType.clear();
             if(mWeaponType == WeapType_Spell)
             {
+                // Unset casting flag, otherwise pressing the mouse button down would
+                // continue casting every frame if there is no animation
+                mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(false);
+
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                const std::string spellid = stats.getSpells().getSelectedSpell();
-                if(!spellid.empty())
+                // For the player, set the spell we want to cast
+                // This has to be done at the start of the casting animation,
+                // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
+                if (mPtr.getRefData().getHandle() == "player")
+                    stats.getSpells().setSelectedSpell(MWBase::Environment::get().getWindowManager()->getSelectedSpell());
+
+                std::string spellid = stats.getSpells().getSelectedSpell();
+
+                if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
                     static const std::string schools[] = {
                         "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
@@ -707,17 +719,18 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
         }
     }
 
-
     MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
+            && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
+
     {
-        if(!mAnimation->isPlaying("torch"))
-            mAnimation->play("torch", Priority_Torch,
-                             MWRender::Animation::Group_LeftArm, false,
-                             1.0f, "start", "stop", 0.0f, (~(size_t)0));
+      mAnimation->play("torch", Priority_Torch, MWRender::Animation::Group_LeftArm,
+        false, 1.0f, "start", "stop", 0.0f, (~(size_t)0));
     }
-    else if(mAnimation->isPlaying("torch"))
-        mAnimation->disable("torch");
+    else if (mAnimation->isPlaying("torch"))
+    {
+      mAnimation->disable("torch");
+    }
 
     return forcestateupdate;
 }
@@ -789,10 +802,10 @@ void CharacterController::update(float duration)
         }
 
         if(sneak || inwater || flying)
-        {
             vec.z = 0.0f;
-            mFallHeight = mPtr.getRefData().getPosition().pos[2];
-        }
+
+        if (inwater || flying)
+            cls.getCreatureStats(mPtr).land();
 
         if(!onground && !flying && !inwater)
         {
@@ -801,11 +814,7 @@ void CharacterController::update(float duration)
             if (world->isSlowFalling(mPtr))
             {
                 // SlowFalling spell effect is active, do not keep previous fall height
-                mFallHeight = mPtr.getRefData().getPosition().pos[2];
-            }
-            else
-            {
-                mFallHeight = std::max(mFallHeight, mPtr.getRefData().getPosition().pos[2]);
+                cls.getCreatureStats(mPtr).land();
             }
 
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -861,7 +870,8 @@ void CharacterController::update(float duration)
             mJumpState = JumpState_Landing;
             vec.z = 0.0f;
 
-            float healthLost = cls.getFallDamage(mPtr, mFallHeight - mPtr.getRefData().getPosition().pos[2]);
+            float height = cls.getCreatureStats(mPtr).land();
+            float healthLost = cls.getFallDamage(mPtr, height);
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
@@ -882,8 +892,6 @@ void CharacterController::update(float duration)
                     //TODO: actor falls over
                 }
             }
-
-            mFallHeight = mPtr.getRefData().getPosition().pos[2];
         }
         else
         {
@@ -921,6 +929,9 @@ void CharacterController::update(float duration)
                     movestate = CharState_TurnLeft;
             }
         }
+
+        if (onground)
+            cls.getCreatureStats(mPtr).land();
 
         if(movestate != CharState_None)
             clearAnimQueue();

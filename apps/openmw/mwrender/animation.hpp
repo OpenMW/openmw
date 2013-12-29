@@ -216,6 +216,9 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
 
+    /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
+    virtual void preRender (Ogre::Camera* camera);
+
     virtual void setAlpha(float alpha) {}
 private:
     void updateEffects(float duration);
@@ -255,6 +258,8 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
+    bool isPlaying(Group group) const;
+
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
      * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
@@ -274,7 +279,7 @@ public:
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showShield(bool show) {}
+    virtual void showCarriedLeft(bool show) {}
 
     void enableLights(bool enable);
 

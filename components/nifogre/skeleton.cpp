@@ -30,6 +30,7 @@ void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, 
          node->recType == Nif::RC_RootCollisionNode || /* handled in nifbullet (hopefully) */
          node->recType == Nif::RC_NiTriShape || /* Handled in the mesh loader */
          node->recType == Nif::RC_NiBSAnimationNode || /* Handled in the object loader */
+         node->recType == Nif::RC_NiBillboardNode || /* Handled in the object loader */
          node->recType == Nif::RC_NiBSParticleNode ||
          node->recType == Nif::RC_NiCamera ||
          node->recType == Nif::RC_NiAutoNormalParticles ||

@@ -300,10 +300,11 @@ namespace MWMechanics
             if (item.getCellRef().mEnchantmentCharge == -1)
                 item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
 
-            if (mCaster.getRefData().getHandle() == "player" && item.getCellRef().mEnchantmentCharge < castCost)
+            if (item.getCellRef().mEnchantmentCharge < castCost)
             {
                 // TODO: Should there be a sound here?
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                if (mCaster.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
                 return false;
             }
 
@@ -370,33 +371,7 @@ namespace MWMechanics
             fatigue.setCurrent(std::max(0.f, fatigue.getCurrent() - fatigueLoss));
             stats.setFatigue(fatigue);
 
-            // Check mana
             bool fail = false;
-            DynamicStat<float> magicka = stats.getMagicka();
-            if (magicka.getCurrent() < spell->mData.mCost)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientSP}");
-                fail = true;
-            }
-
-            // Reduce mana
-            if (!fail)
-            {
-                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
-                stats.setMagicka(magicka);
-            }
-
-            // If this is a power, check if it was already used in last 24h
-            if (!fail && spell->mData.mType & ESM::Spell::ST_Power)
-            {
-                if (stats.canUsePower(spell->mId))
-                    stats.usePower(spell->mId);
-                else
-                {
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sPowerAlreadyUsed}");
-                    fail = true;
-                }
-            }
 
             // Check success
             int successChance = getSpellSuccessChance(spell, mCaster);

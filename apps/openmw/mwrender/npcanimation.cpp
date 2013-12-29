@@ -117,7 +117,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
-    mShowShield(true),
+    mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f)
 {
@@ -319,7 +319,7 @@ void NpcAnimation::updateParts()
     }
 
     showWeapons(mShowWeapons);
-    showShield(mShowShield);
+    showCarriedLeft(mShowCarriedLeft);
 
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
@@ -654,32 +654,24 @@ void NpcAnimation::showWeapons(bool showWeapon)
     mAlpha = 1.f;
 }
 
-void NpcAnimation::showShield(bool show)
+void NpcAnimation::showCarriedLeft(bool show)
 {
-    mShowShield = show;
+    mShowCarriedLeft = show;
     MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
-    if (shield != inv.end() && shield->getTypeName() == typeid(ESM::Light).name())
+    if(show && iter != inv.end())
     {
-        // ... Except for lights, which are still shown during spellcasting since they
-        // have their own (one-handed) casting animations
-        show = true;
-    }
-    if(show && shield != inv.end())
-    {
-        Ogre::Vector3 glowColor = getEnchantmentColor(*shield);
-        std::string mesh = MWWorld::Class::get(*shield).getModel(*shield);
+        Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
+        std::string mesh = MWWorld::Class::get(*iter).getModel(*iter);
         addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                                   mesh, !shield->getClass().getEnchantment(*shield).empty(), &glowColor);
+                                   mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor);
 
-        if (shield->getTypeName() == typeid(ESM::Light).name())
-            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], shield->get<ESM::Light>()->mBase);
+        if (iter->getTypeName() == typeid(ESM::Light).name())
+            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], iter->get<ESM::Light>()->mBase);
     }
     else
-    {
         removeIndividualPart(ESM::PRT_Shield);
-    }
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
@@ -727,6 +719,17 @@ void NpcAnimation::setAlpha(float alpha)
             if (ent != mObjectParts[i]->mSkelBase)
                 applyAlpha(alpha, ent, mObjectParts[i]);
         }
+    }
+}
+
+void NpcAnimation::preRender(Ogre::Camera *camera)
+{
+    Animation::preRender(camera);
+    for (int i=0; i<ESM::PRT_Count; ++i)
+    {
+        if (mObjectParts[i].isNull())
+            continue;
+        mObjectParts[i]->rotateBillboardNodes(camera);
     }
 }
 

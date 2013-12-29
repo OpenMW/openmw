@@ -124,10 +124,9 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get(ptr)
-                        .getCreatureStats(ptr)
-                        .getAttribute(mIndex)
-                        .setModified (value, 0);
+                    MWMechanics::Stat<int> attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
+                    attribute.setModified (value, 0);
+                    ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
 
@@ -147,16 +146,16 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    value +=
-                        MWWorld::Class::get(ptr)
-                            .getCreatureStats(ptr)
-                            .getAttribute(mIndex)
-                            .getModified();
-
-                    MWWorld::Class::get(ptr)
+                    MWMechanics::Stat<int> attribute = MWWorld::Class::get(ptr)
                         .getCreatureStats(ptr)
-                        .getAttribute(mIndex)
+                        .getAttribute(mIndex);
+
+                    value +=
+                            attribute.getModified();
+
+                    attribute
                         .setModified (value, 0, 100);
+                    ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
 

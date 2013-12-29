@@ -372,9 +372,9 @@ void RenderingManager::update (float duration, bool paused)
     if(paused)
         return;
 
-    mActors->update (duration);
-    mObjects->update (duration);
-
+    mActors->update (mRendering.getCamera());
+    mPlayerAnimation->preRender(mRendering.getCamera());
+    mObjects->update (duration, mRendering.getCamera());
 
     mSkyManager->update(duration);
 
