@@ -25,14 +25,13 @@ namespace MWMechanics
 {
     class Actors
     {
-        typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
-        PtrControllerMap mActors;
+            typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
+            PtrControllerMap mActors;
 
-        std::map<std::string, int> mDeathCount;
+            std::map<std::string, int> mDeathCount;
+            MWWorld::Ptr mTorchPtr;
 
-        void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
-
-
+            void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 

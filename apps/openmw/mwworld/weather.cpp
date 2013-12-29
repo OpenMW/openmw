@@ -707,3 +707,8 @@ float WeatherManager::getWindSpeed() const
 {
     return mWindSpeed;
 }
+
+bool WeatherManager::isNight() const
+{
+  return (mHour < mSunriseTime || mHour > mNightStart - 1);
+}
