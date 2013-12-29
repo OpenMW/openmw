@@ -1287,7 +1287,7 @@ namespace MWWorld
                 mRendering->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
         }
 
-        mWeatherManager->update (duration);
+        updateWeather(duration);
 
         mWorldScene->update (duration, paused);
 
@@ -2243,5 +2243,23 @@ namespace MWWorld
     {
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
         actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+    }
+
+    void World::updateWeather(float duration)
+    {
+      static const float TELEPORTATION_STEP_THRESHOLD = 256.f;
+      static ESM::Position lastPlayerPos;
+      ESM::Position currentPos = mPlayer->getPlayer().getRefData().getPosition();
+
+      if (fabs(fabs(lastPlayerPos.pos[0]) - fabs(currentPos.pos[0])) >= TELEPORTATION_STEP_THRESHOLD
+          || fabs(fabs(lastPlayerPos.pos[1]) - fabs(currentPos.pos[1])) >= TELEPORTATION_STEP_THRESHOLD)
+      {
+        lastPlayerPos = currentPos;
+        mWeatherManager->switchToNextWeather(true);
+      }
+      else
+      {
+        mWeatherManager->update (duration);
+      }
     }
 }

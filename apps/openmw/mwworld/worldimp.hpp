@@ -106,7 +106,7 @@ namespace MWWorld
             };
 
             std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
-
+            void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);

@@ -128,6 +128,7 @@ namespace MWWorld
          * @param ID of the weather setting to shift to
          */
         void changeWeather(const std::string& region, const unsigned int id);
+        void switchToNextWeather(bool instantly = true);
 
         /**
          * Per-frame update
