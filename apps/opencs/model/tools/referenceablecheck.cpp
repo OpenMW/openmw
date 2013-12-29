@@ -972,7 +972,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
         for (int i = 0; i < mRaces.getSize(); ++i)
         {
-            if (dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mName == NPC.mRace)
+            if (dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mName == NPC.mRace) //mId in class, mName for race. Stupid.
             {
                 nosuchrace = false;
                 break;
@@ -990,7 +990,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
         messages.push_back(id.toString() + "|" + NPC.mId + " has negative disposition");
     }
 
-    if (Reputation < 0)
+    if (Reputation < 0) //It seems that no character in Morrowind.esm have negative reputation. I'm assuming that negative reputation is invalid
     {
         messages.push_back(id.toString() + "|" + NPC.mId + " has negative reputation");
     }
