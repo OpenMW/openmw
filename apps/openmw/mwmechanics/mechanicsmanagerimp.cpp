@@ -31,15 +31,14 @@ namespace MWMechanics
         for (int i=0; i<27; ++i)
             npcStats.getSkill (i).setBase (player->mNpdt52.mSkills[i]);
 
-        creatureStats.getAttribute(0).setBase (player->mNpdt52.mStrength);
-        creatureStats.getAttribute(1).setBase (player->mNpdt52.mIntelligence);
-        creatureStats.getAttribute(2).setBase (player->mNpdt52.mWillpower);
-        creatureStats.getAttribute(3).setBase (player->mNpdt52.mAgility);
-        creatureStats.getAttribute(4).setBase (player->mNpdt52.mSpeed);
-        creatureStats.getAttribute(5).setBase (player->mNpdt52.mEndurance);
-        creatureStats.getAttribute(6).setBase (player->mNpdt52.mPersonality);
-        creatureStats.getAttribute(7).setBase (player->mNpdt52.mLuck);
-
+        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt52.mStrength);
+        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt52.mIntelligence);
+        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt52.mWillpower);
+        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt52.mAgility);
+        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt52.mSpeed);
+        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt52.mEndurance);
+        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt52.mPersonality);
+        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt52.mLuck);
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
@@ -55,7 +54,7 @@ namespace MWMechanics
             {
                 const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
-                creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
+                creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
             }
 
             for (int i=0; i<27; ++i)
@@ -106,7 +105,7 @@ namespace MWMechanics
                 int attribute = class_->mData.mAttribute[i];
                 if (attribute>=0 && attribute<8)
                 {
-                    creatureStats.getAttribute(attribute).setBase (
+                    creatureStats.setAttribute(attribute,
                         creatureStats.getAttribute(attribute).getBase() + 10);
                 }
             }

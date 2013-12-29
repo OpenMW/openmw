@@ -103,6 +103,7 @@ namespace MWInput
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
+        , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
@@ -287,7 +288,7 @@ namespace MWInput
         mInputManager->setMouseRelative(is_relative);
 
         //we let the mouse escape in the main menu
-        mInputManager->setGrabPointer(grab);
+        mInputManager->setGrabPointer(grab && (mGrabCursor || is_relative));
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
@@ -429,6 +430,9 @@ namespace MWInput
 
             if (it->first == "Input" && it->second == "ui sensitivity")
                 mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
+
+            if (it->first == "Input" && it->second == "grab cursor")
+                mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
 
         }
     }

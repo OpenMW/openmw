@@ -15,7 +15,7 @@ namespace MWMechanics
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false), mAttackType(AT_Chop),
           mIsWerewolf(false),
-          mFallHeight(0)
+          mFallHeight(0), mRecalcDynamicStats(false)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -128,14 +128,6 @@ namespace MWMechanics
         return mAiSettings[index];
     }
 
-    Stat<int> &CreatureStats::getAttribute(int index)
-    {
-        if (index < 0 || index > 7) {
-            throw std::runtime_error("attribute index is out of range");
-        }
-        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
-    }
-
     const DynamicStat<float> &CreatureStats::getDynamic(int index) const
     {
         if (index < 0 || index > 2) {
@@ -164,11 +156,29 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
+    void CreatureStats::setAttribute(int index, int base)
+    {
+        MWMechanics::Stat<int> current = getAttribute(index);
+        current.setBase(base);
+        setAttribute(index, current);
+    }
+
     void CreatureStats::setAttribute(int index, const Stat<int> &value)
     {
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
+
+        const Stat<int>& currentValue = !mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index];
+
+        if (value.getModified() != currentValue.getModified())
+        {
+            if (index != ESM::Attribute::Luck
+                    && index != ESM::Attribute::Personality
+                    && index != ESM::Attribute::Speed)
+                mRecalcDynamicStats = true;
+        }
+
         if(!mIsWerewolf)
             mAttributes[index] = value;
         else
@@ -218,6 +228,10 @@ namespace MWMechanics
 
     void CreatureStats::setMagicEffects(const MagicEffects &effects)
     {
+        if (effects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude
+                != mMagicEffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude)
+            mRecalcDynamicStats = true;
+
         mMagicEffects = effects;
     }
 
@@ -368,5 +382,15 @@ namespace MWMechanics
         float height = mFallHeight;
         mFallHeight = 0;
         return height;
+    }
+
+    bool CreatureStats::needToRecalcDynamicStats()
+    {
+         if (mRecalcDynamicStats)
+         {
+             mRecalcDynamicStats = false;
+             return true;
+         }
+         return false;
     }
 }

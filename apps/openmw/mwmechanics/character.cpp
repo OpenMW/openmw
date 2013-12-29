@@ -802,6 +802,9 @@ void CharacterController::update(float duration)
         if(sneak || inwater || flying)
             vec.z = 0.0f;
 
+        if (inwater || flying)
+            cls.getCreatureStats(mPtr).land();
+
         if(!onground && !flying && !inwater)
         {
             // In the air (either getting up —ascending part of jump— or falling).
@@ -925,7 +928,7 @@ void CharacterController::update(float duration)
             }
         }
 
-        if (onground || inwater || flying)
+        if (onground)
             cls.getCreatureStats(mPtr).land();
 
         if(movestate != CharState_None)

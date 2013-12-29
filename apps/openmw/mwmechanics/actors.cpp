@@ -54,7 +54,8 @@ namespace MWMechanics
     {
         // magic effects
         adjustMagicEffects (ptr);
-        calculateDynamicStats (ptr);
+        if (ptr.getClass().getCreatureStats(ptr).needToRecalcDynamicStats())
+            calculateDynamicStats (ptr);
         calculateCreatureStatModifiers (ptr, duration);
 
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
