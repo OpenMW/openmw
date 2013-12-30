@@ -160,7 +160,12 @@ void FFmpeg_Decoder::open(const std::string &fname)
     {
         if (mFormatCtx->pb != NULL)
         {
-          avio_close(mFormatCtx->pb);
+          if (mFormatCtx->pb->buffer != NULL)
+          {
+            av_free(mFormatCtx->pb->buffer);
+            mFormatCtx->pb->buffer = NULL;
+          }
+          av_free(mFormatCtx->pb);
           mFormatCtx->pb = NULL;
         }
         avformat_free_context(mFormatCtx);
@@ -200,7 +205,12 @@ void FFmpeg_Decoder::open(const std::string &fname)
     }
     catch(std::exception &e)
     {
-        avio_close(mFormatCtx->pb);
+        if (mFormatCtx->pb->buffer != NULL)
+        {
+          av_free(mFormatCtx->pb->buffer);
+          mFormatCtx->pb->buffer = NULL;
+        }
+        av_free(mFormatCtx->pb);
         mFormatCtx->pb = NULL;
 
         avformat_close_input(&mFormatCtx);
@@ -221,16 +231,16 @@ void FFmpeg_Decoder::close()
     {
         if (mFormatCtx->pb != NULL)
         {
-          avio_flush(mFormatCtx->pb);
-
+          // valgrind shows memleak near mFormatCtx->pb
           //
-          // avio-close() gives segfault, but with av_free valgrind shows memleak
-          // near mFormatCtx->pb
+          // As scrawl pointed, memleak could be related to this ffmpeg ticket:
+          // https://trac.ffmpeg.org/ticket/1357
           //
-          // to be checked!
-          //
-          // avio_close(mFormatCtx->pb);
-          //
+          if (mFormatCtx->pb->buffer != NULL)
+          {
+            av_free(mFormatCtx->pb->buffer);
+            mFormatCtx->pb->buffer = NULL;
+          }
           av_free(mFormatCtx->pb);
           mFormatCtx->pb = NULL;
         }
