@@ -109,10 +109,13 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mFactory->loadAllFiles();
 
-    // Set default mipmap level (NB some APIs ignore this)
-    // Mipmap generation is currently disabled because it causes issues on Intel/AMD
-    //TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
+    // Compressed textures with 0 mip maps are bugged in 1.8, so disable mipmap generator in that case
+    // ( https://ogre3d.atlassian.net/browse/OGRE-259 )
+#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
+    TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
+#else
     TextureManager::getSingleton().setDefaultNumMipmaps(0);
+#endif
 
     // Set default texture filtering options
     TextureFilterOptions tfo;
