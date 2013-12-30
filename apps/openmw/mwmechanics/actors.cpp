@@ -448,35 +448,56 @@ namespace MWMechanics
         /**
          * Automatically equip NPCs torches at night and unequip them at day
          */
-        if (!isPlayer && !MWWorld::Class::get (ptr).getCreatureStats (ptr).isHostile())
+        if (!isPlayer)
         {
-          if (mTorchPtr.isEmpty())
-          {
-            mTorchPtr = inventoryStore.search("torch_infinite_time");
-          }
+            MWWorld::ContainerStoreIterator torch = inventoryStore.end();
+            for (MWWorld::ContainerStoreIterator it = inventoryStore.begin(); it != inventoryStore.end(); ++it)
+            {
+                if (it->getTypeName() == typeid(ESM::Light).name())
+                {
+                    torch = it;
+                    break;
+                }
+            }
 
-          if (MWBase::Environment::get().getWorld()->isNight())
-          {
-            if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
+            if (MWBase::Environment::get().getWorld()->isDark())
             {
-              inventoryStore.unequipItem(*heldIter, ptr);
+                if (torch != inventoryStore.end())
+                {
+                    if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isHostile())
+                    {
+                        // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
+                        if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
+                            inventoryStore.unequipItem(*heldIter, ptr);
+
+                        // Also unequip twohanded weapons which conflict with anything in CarriedLeft
+                        if (torch->getClass().canBeEquipped(*torch, ptr).first == 3)
+                            inventoryStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, ptr);
+                    }
+
+                    heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
+                    // If we have a torch and can equip it (left slot free, no
+                    // twohanded weapon in right slot), then equip it now.
+                    if (heldIter == inventoryStore.end()
+                            && torch->getClass().canBeEquipped(*torch, ptr).first == 1)
+                    {
+                        inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torch, ptr);
+                    }
+                }
             }
-            else if (heldIter == inventoryStore.end() && !mTorchPtr.isEmpty())
+            else
             {
-              heldIter = inventoryStore.add(mTorchPtr, ptr);
-              inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, heldIter, ptr);
+                if (heldIter != inventoryStore.end() && heldIter->getTypeName() == typeid(ESM::Light).name())
+                {
+                    // At day, unequip lights and auto equip shields or other suitable items
+                    // (Note: autoEquip will ignore lights)
+                    inventoryStore.autoEquip(ptr);
+                }
             }
-          }
-          else
-          {
-            if (heldIter != inventoryStore.end() && heldIter->getTypeName() == typeid(ESM::Light).name())
-            {
-              inventoryStore.unequipItem(*heldIter, ptr);
-              inventoryStore.add(*heldIter, ptr);
-              inventoryStore.autoEquip(ptr);
-            }
-          }
         }
+
+        heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
         //If holding a light...
         if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)

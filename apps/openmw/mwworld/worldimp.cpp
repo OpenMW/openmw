@@ -2286,8 +2286,8 @@ namespace MWWorld
         actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
     }
 
-    bool World::isNight() const
+    bool World::isDark() const
     {
-      return mWeatherManager->isNight();
+      return mWeatherManager->isDark();
     }
 }

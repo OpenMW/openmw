@@ -179,7 +179,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         // Don't autoEquip lights
         if (test.getTypeName() == typeid(ESM::Light).name())
         {
-          continue;
+            continue;
         }
 
         int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);

@@ -36,8 +36,6 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/actionequip.hpp"
-#include "../mwworld/actiontake.hpp"
 
 namespace
 {
@@ -724,12 +722,12 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
             && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
 
     {
-      mAnimation->play("torch", Priority_Torch, MWRender::Animation::Group_LeftArm,
-        false, 1.0f, "start", "stop", 0.0f, (~(size_t)0));
+        mAnimation->play("torch", Priority_Torch, MWRender::Animation::Group_LeftArm,
+            false, 1.0f, "start", "stop", 0.0f, (~(size_t)0));
     }
     else if (mAnimation->isPlaying("torch"))
     {
-      mAnimation->disable("torch");
+        mAnimation->disable("torch");
     }
 
     return forcestateupdate;

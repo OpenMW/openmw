@@ -708,7 +708,9 @@ float WeatherManager::getWindSpeed() const
     return mWindSpeed;
 }
 
-bool WeatherManager::isNight() const
+bool WeatherManager::isDark() const
 {
-  return (mHour < mSunriseTime || mHour > mNightStart - 1);
+    bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
+                     || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
+    return exterior && (mHour < mSunriseTime || mHour > mNightStart - 1);
 }

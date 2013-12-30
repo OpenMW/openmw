@@ -29,7 +29,6 @@ namespace MWMechanics
             PtrControllerMap mActors;
 
             std::map<std::string, int> mDeathCount;
-            MWWorld::Ptr mTorchPtr;
 
             void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 

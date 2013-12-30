@@ -152,7 +152,8 @@ namespace MWWorld
 
         void modRegion(const std::string &regionid, const std::vector<char> &chances);
 
-        bool isNight() const;
+        /// @see World::isDark
+        bool isDark() const;
 
     private:
         float mHour;
