@@ -16,7 +16,7 @@ namespace CSMTools
             virtual int setup();
 
         private:
-	  //CONCRETE CHECKS
+            //CONCRETE CHECKS
             void bookCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Book >& records, std::vector< std::string >& messages);
             void activatorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Activator >& records, std::vector< std::string >& messages);
             void potionCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Potion>& records, std::vector<std::string>& messages);
@@ -26,18 +26,18 @@ namespace CSMTools
             void containerCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Container>& records, std::vector<std::string>& messages);
             void creatureCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Creature>& records, std::vector<std::string>& messages);
             void doorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Door>& records, std::vector<std::string>& messages);
-	    void ingredientCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Ingredient>& records, std::vector<std::string>& messages);
-	    void creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::CreatureLevList>& records, std::vector<std::string>& messages);
-	    void itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::ItemLevList>& records, std::vector<std::string>& messages);
-	    void lightCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Light>& records, std::vector<std::string>& messages);
-	    void lockpickCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Lockpick>& records, std::vector<std::string>& messages);
-	    void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, std::vector<std::string>& messages);
-	    void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, std::vector<std::string>& messages);
+            void ingredientCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Ingredient>& records, std::vector<std::string>& messages);
+            void creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::CreatureLevList>& records, std::vector<std::string>& messages);
+            void itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::ItemLevList>& records, std::vector<std::string>& messages);
+            void lightCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Light>& records, std::vector<std::string>& messages);
+            void lockpickCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Lockpick>& records, std::vector<std::string>& messages);
+            void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, std::vector<std::string>& messages);
+            void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, std::vector<std::string>& messages);
 
             const CSMWorld::RefIdData& mReferencables;
-	    const CSMWorld::IdCollection<ESM::Race>& mRaces;
-	    const CSMWorld::IdCollection<ESM::Class>& mClasses;
-	    const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+            const CSMWorld::IdCollection<ESM::Race>& mRaces;
+            const CSMWorld::IdCollection<ESM::Class>& mClasses;
+            const CSMWorld::IdCollection<ESM::Faction>& mFactions;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

@@ -25,9 +25,9 @@ namespace CSMWorld
 
         public:
 
-            RefIdColumn (int columnId, Display displayType,
-                int flag = Flag_Table | Flag_Dialogue, bool editable = true,
-                bool userEditable = true);
+            RefIdColumn(int columnId, Display displayType,
+                        int flag = Flag_Table | Flag_Dialogue, bool editable = true,
+                        bool userEditable = true);
 
             virtual bool isEditable() const;
 
@@ -40,11 +40,11 @@ namespace CSMWorld
 
             RefIdData mData;
             std::deque<RefIdColumn> mColumns;
-            std::map<UniversalId::Type, RefIdAdapter *> mAdapters;
+            std::map<UniversalId::Type, RefIdAdapter*> mAdapters;
 
         private:
 
-            const RefIdAdapter& findAdaptor (UniversalId::Type) const;
+            const RefIdAdapter& findAdaptor(UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
 
         public:
@@ -55,60 +55,60 @@ namespace CSMWorld
 
             virtual int getSize() const;
 
-            virtual std::string getId (int index) const;
+            virtual std::string getId(int index) const;
 
-            virtual int getIndex (const std::string& id) const;
+            virtual int getIndex(const std::string& id) const;
 
             virtual int getColumns() const;
 
-            virtual const ColumnBase& getColumn (int column) const;
+            virtual const ColumnBase& getColumn(int column) const;
 
-            virtual QVariant getData (int index, int column) const;
+            virtual QVariant getData(int index, int column) const;
 
-            virtual void setData (int index, int column, const QVariant& data);
+            virtual void setData(int index, int column, const QVariant& data);
 
-            virtual void removeRows (int index, int count);
+            virtual void removeRows(int index, int count);
 
-            virtual void appendBlankRecord (const std::string& id, UniversalId::Type type);
+            virtual void appendBlankRecord(const std::string& id, UniversalId::Type type);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual int searchId (const std::string& id) const;
+            virtual int searchId(const std::string& id) const;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 
-            virtual void replace (int index, const RecordBase& record);
+            virtual void replace(int index, const RecordBase& record);
             ///< If the record type does not match, an exception is thrown.
             ///
             /// \attention \a record must not change the ID.
 
-            virtual void appendRecord (const RecordBase& record, UniversalId::Type type);
+            virtual void appendRecord(const RecordBase& record, UniversalId::Type type);
             ///< If the record type does not match, an exception is thrown.
             ///
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual const RecordBase& getRecord (const std::string& id) const;
+            virtual const RecordBase& getRecord(const std::string& id) const;
 
-            virtual const RecordBase& getRecord (int index) const;
+            virtual const RecordBase& getRecord(int index) const;
 
-            void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
+            void load(ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
-            virtual int getAppendIndex (const std::string& id, UniversalId::Type type) const;
+            virtual int getAppendIndex(const std::string& id, UniversalId::Type type) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual std::vector<std::string> getIds (bool listDeleted) const;
+            virtual std::vector<std::string> getIds(bool listDeleted) const;
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
 
-            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            virtual bool reorderRows(int baseIndex, const std::vector<int>& newOrder);
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///
             /// \return Success?
 
-            void save (int index, ESM::ESMWriter& writer) const;
-	    
-	    const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
+            void save(int index, ESM::ESMWriter& writer) const;
+
+            const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
     };
 }
 
