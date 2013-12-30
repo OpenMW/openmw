@@ -87,6 +87,7 @@ opencs_units (view/settings
     settingpage
     settingview
     settingfactory
+    optiongroup
     )
 
 opencs_units_noqt (view/settings
@@ -97,6 +98,7 @@ opencs_units_noqt (view/settings
 opencs_units (model/settings
     usersettings
     binarywidgetadapter
+    sectionfilter
     settingmodel
     setting
     )

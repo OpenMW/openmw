@@ -15,7 +15,7 @@ class QStackedWidget;
 class QListWidget;
 class QDataWidgetMapper;
 
-namespace CSMSettings { class BinaryWidgetModel; }
+namespace CSMSettings { class BinaryWidgetAdapter; }
 namespace CSVSettings {
 
     class AbstractPage;
@@ -26,7 +26,7 @@ namespace CSVSettings {
 
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
-        CSMSettings::BinaryWidgetModel *mBinModel;
+        CSMSettings::BinaryWidgetAdapter *mBinAdapter;
 
         void testMapperRadioButton();
         void testMapperCheckBox();
@@ -55,8 +55,7 @@ namespace CSVSettings {
 
     private slots:
 
-    void slotReadout (bool toggled);
-
+        void slotRadioToggle(bool state);
     };
 }
 #endif // USERSETTINGSDIALOG_H

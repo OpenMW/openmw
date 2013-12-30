@@ -1,40 +1,24 @@
 #ifndef BINARYWIDGETMODEL_HPP
 #define BINARYWIDGETMODEL_HPP
 
-#include <QStringList>
+#include <QList>
+#include <QPair>
 #include <QSortFilterProxyModel>
 #include "usersettings.hpp"
+
 namespace CSMSettings
 {
-    class SectionFilter : public QSortFilterProxyModel
+    class SectionFilter;
+
+    class BinaryWidgetAdapter : public QAbstractItemModel
     {
         Q_OBJECT
 
-    public:
-        explicit SectionFilter (const QString &sectionName, QObject *parent)
-            : QSortFilterProxyModel (parent)
-        {
-            setSourceModel(CSMSettings::UserSettings::instance().settingModel());
-            setFilterRegExp(sectionName);
-            setFilterKeyColumn(1);
-            setDynamicSortFilter(true);
-        }
-
-        void createSetting (const QString &name, const QString &value, const QStringList &valueList)
-        {
-            CSMSettings::UserSettings::instance().settingModel()->
-                    createSetting(name, filterRegExp().pattern(), value, valueList);
-        }
-    };
-
-    class BinaryWidgetAdapter : public QSortFilterProxyModel
-    {
-        Q_OBJECT
-
-        QString mSection;
-        QString mSetting;
         QStringList mValueList;
+        QString mSettingName;
         SectionFilter *mFilter;
+        QSortFilterProxyModel mSettingFilter;
+        QList<QPair<QString, QBool *> > mSettings;
 
     public:
 
@@ -42,11 +26,28 @@ namespace CSMSettings
                                    const QString &settingName,
                                    QObject *parent = 0);
 
-        QStringList valueList () const              { return mValueList; }
+        int rowCount(const QModelIndex &parent = QModelIndex()) const;
+        int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-        QModelIndex itemIndex      (const QString &item);
-        bool insertItem     (const QString &item);
-        bool removeItem     (const QString &item);
+        const QStringList &valueList() const    { return mValueList; }
+        bool insertItem         (const QString &item);
+        bool removeItem         (const QString &item);
+
+        QVariant data           (const QModelIndex &index,
+                                 int role = Qt::DisplayRole) const;
+
+        bool setData            (const QModelIndex &index,
+                                 const QVariant &value,
+                                 int role = Qt::EditRole);
+
+        Qt::ItemFlags flags     (const QModelIndex &index) const;
+
+        QModelIndex index(int row, int column, const QModelIndex &parent) const;
+
+        QModelIndex parent(const QModelIndex &child) const  { return QModelIndex(); }
+
+    private:
+        QModelIndex sourceModelIndex (const QString &item) const;
     };
 }
 #endif // BINARYWIDGETMODEL_HPP

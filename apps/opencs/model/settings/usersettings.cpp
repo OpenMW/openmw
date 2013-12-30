@@ -52,8 +52,6 @@ CSMSettings::UserSettings::UserSettings()
     mSettingModel = new SettingModel (this);
 
     buildSettingModelDefaults();
-
-            qDebug() << "user settings done";
 }
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
@@ -245,7 +243,6 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
 
         settings.clear();
     }
-    qDebug() << mSettingDefinitions;
     return true;
 }
 
@@ -299,8 +296,6 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
             mSettingModel->createSetting (settingName, sectionName, value, valueList);
         }
     }
-
-    qDebug() << "setting model has " << mSettingModel->rowCount() << " settings";
 }
 
 CSMSettings::Setting *CSMSettings::UserSettings::createSetting(const QString &name,

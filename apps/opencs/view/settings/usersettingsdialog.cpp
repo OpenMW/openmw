@@ -18,8 +18,9 @@
 #include <QTextEdit>
 
 #include "../../model/settings/support.hpp"
-#include "../../model/settings/binarywidgetmodel.hpp"
+#include "../../model/settings/binarywidgetadapter.hpp"
 #include "../../model/settings/usersettings.hpp"
+#include "../../model/settings/sectionfilter.hpp"
 
 #include "settingpage.hpp"
 
@@ -110,39 +111,46 @@ void CSVSettings::UserSettingsDialog::show()
     QWidget::show();
 }
 
+void testLineEditWidget()
+{
+
+}
+
 void CSVSettings::UserSettingsDialog::testMapperCheckBox()
 {
     CSMSettings::SectionFilter *filter  =
             new CSMSettings::SectionFilter ("Display Format", this);
 
-    mBinModel = new CSMSettings::BinaryWidgetModel(filter,
+    mBinAdapter = new CSMSettings::BinaryWidgetAdapter(filter,
                                                    "Record Status Display",
                                                    this);
     QGroupBox *widgetBox = new QGroupBox(this);
     widgetBox->setLayout (new QVBoxLayout());
-    QStringList valueList = mBinModel->valueList();
+    QStringList valueList = mBinAdapter->valueList();
+    int j  = 0;
+    qDebug() << valueList;
+    qDebug() << "adapater rowcount: " << mBinAdapter->rowCount();
 
     foreach (const QString &item, valueList)
     {
+        qDebug() << "building widget: " << item;
         QCheckBox *widget  = new QCheckBox(item, this);
         widget->setObjectName(item);
         widgetBox->layout()->addWidget (widget);
-        widget->setChecked(mBinModel->itemIndex(item).isValid());
-
-        connect (widget, SIGNAL (toggled(bool)), this, SLOT (slotReadout(bool)));
+        QDataWidgetMapper *mapper = new QDataWidgetMapper(widget);
+        mapper->setModel(mBinAdapter);
+        mapper->addMapping(widget, 1);
+        mapper->setCurrentIndex(j);
+qDebug() << "mapper current index: " << mapper->currentIndex();
+        j++;
     }
 
     mStackedWidget->addWidget(widgetBox);
 }
 
-void CSVSettings::UserSettingsDialog::slotReadout (bool toggled)
+void CSVSettings::UserSettingsDialog::slotRadioToggle(bool state)
 {
-    QWidget *widg = static_cast<QWidget *>(QObject::sender());
-
-    if (toggled)
-        mBinModel->insertItem(widg->objectName());
-    else
-        mBinModel->removeItem(widg->objectName());
+    qDebug() <<"state: " << state;
 }
 
 void CSVSettings::UserSettingsDialog::testMapperRadioButton()
@@ -150,21 +158,25 @@ void CSVSettings::UserSettingsDialog::testMapperRadioButton()
     CSMSettings::SectionFilter *filter =
             new CSMSettings::SectionFilter ("Display Format", this);
 
-    mBinModel = new CSMSettings::BinaryWidgetModel(filter,
+    mBinAdapter = new CSMSettings::BinaryWidgetAdapter(filter,
                                                    "Record Status Display",
                                                    this);
     QGroupBox *widgetBox = new QGroupBox(this);
     widgetBox->setLayout (new QVBoxLayout());
-    QStringList valueList = mBinModel->valueList();
+    QStringList valueList = mBinAdapter->valueList();
 
+    int j = 0;
     foreach (const QString &item, valueList)
     {
         QRadioButton *widget = new QRadioButton(item, this);
         widget->setObjectName(item);
         widgetBox->layout()->addWidget (widget);
-        widget->setChecked(mBinModel->itemIndex(item).isValid());
-
-        connect (widget, SIGNAL (toggled(bool)), this, SLOT (slotReadout(bool)));
+        QDataWidgetMapper *mapper = new QDataWidgetMapper(widget);
+        mapper->setModel(mBinAdapter);
+        mapper->addMapping(widget, 1);
+        mapper->setCurrentIndex(j);
+        connect (widget, SIGNAL(toggled(bool)), this, SLOT(slotRadioToggle(bool)));
+        j++;
     }
 
     mStackedWidget->addWidget(widgetBox);
