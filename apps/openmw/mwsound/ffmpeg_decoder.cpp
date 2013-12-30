@@ -158,6 +158,11 @@ void FFmpeg_Decoder::open(const std::string &fname)
     mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
     if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
     {
+        if (mFormatCtx->pb != NULL)
+        {
+          avio_close(mFormatCtx->pb);
+          mFormatCtx->pb = NULL;
+        }
         avformat_free_context(mFormatCtx);
         mFormatCtx = NULL;
         fail("Failed to allocate input stream");
@@ -195,6 +200,9 @@ void FFmpeg_Decoder::open(const std::string &fname)
     }
     catch(std::exception &e)
     {
+        avio_close(mFormatCtx->pb);
+        mFormatCtx->pb = NULL;
+
         avformat_close_input(&mFormatCtx);
         throw;
     }
@@ -211,9 +219,22 @@ void FFmpeg_Decoder::close()
 
     if(mFormatCtx)
     {
-        AVIOContext* context = mFormatCtx->pb;
+        if (mFormatCtx->pb != NULL)
+        {
+          avio_flush(mFormatCtx->pb);
+
+          //
+          // avio-close() gives segfault, but with av_free valgrind shows memleak
+          // near mFormatCtx->pb
+          //
+          // to be checked!
+          //
+          // avio_close(mFormatCtx->pb);
+          //
+          av_free(mFormatCtx->pb);
+          mFormatCtx->pb = NULL;
+        }
         avformat_close_input(&mFormatCtx);
-        av_free(context);
     }
 
     mDataStream.setNull();
