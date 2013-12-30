@@ -995,30 +995,38 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
         messages.push_back(id.toString() + "|" + NPC.mId + " has negative reputation");
     }
 
-    if (!NPC.mFaction.empty())
+    if (NPC.mFaction.empty() == false)
     {
         if (Rank < 0)
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " has negative rank");
         }
 
-        //This code does not work at the moment. nosuchfaction is true for every npc record
-        /*
-                  bool nosuchfaction(true);
-                for (int i = 0; i < mRaces.getSize(); ++i)
-                {
-                    if (dynamic_cast<const ESM::Faction &>(mFactions.getRecord(i).get()).mName == NPC.mFaction)
-                    {
-                        nosuchfaction = false;
-                        break;
-                    }
-                }
+        bool nosuchfaction(true);
 
-                if (nosuchfaction)
-                {
-                    messages.push_back(id.toString() + "|" + NPC.mId + " has invalid faction");
-                }
-                */
+        for (int i = 0; i < mFactions.getSize(); ++i)
+        {
+            if (dynamic_cast<const ESM::Faction&>(mFactions.getRecord(i).get()).mId == NPC.mFaction)
+            {
+                nosuchfaction = false;
+                break;
+            }
+        }
+
+        if (nosuchfaction)
+        {
+            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid faction");
+        }
+    }
+
+    if (NPC.mHead.empty())
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " has no head");
+    }
+
+    if (NPC.mHair.empty())
+    {
+        messages.push_back(id.toString() + "|" + NPC.mId + " has no har");
     }
 
     //TODO: reputation, Disposition, rank, everything else
