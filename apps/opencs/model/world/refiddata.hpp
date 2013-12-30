@@ -41,19 +41,19 @@ namespace CSMWorld
 
         virtual int getSize() const = 0;
 
-        virtual const RecordBase& getRecord(int index) const = 0;
+        virtual const RecordBase& getRecord (int index) const = 0;
 
-        virtual RecordBase& getRecord(int index) = 0;
+        virtual RecordBase& getRecord (int index)= 0;
 
-        virtual void appendRecord(const std::string& id) = 0;
+        virtual void appendRecord (const std::string& id) = 0;
 
-        virtual void load(int index,  ESM::ESMReader& reader, bool base) = 0;
+        virtual void load (int index,  ESM::ESMReader& reader, bool base) = 0;
 
-        virtual void erase(int index, int count) = 0;
+        virtual void erase (int index, int count) = 0;
 
-        virtual std::string getId(int index) const = 0;
+        virtual std::string getId (int index) const = 0;
 
-        virtual void save(int index, ESM::ESMWriter& writer) const = 0;
+        virtual void save (int index, ESM::ESMWriter& writer) const = 0;
     };
 
     template<typename RecordT>
@@ -63,91 +63,90 @@ namespace CSMWorld
 
         virtual int getSize() const;
 
-        virtual const RecordBase& getRecord(int index) const;
+        virtual const RecordBase& getRecord (int index) const;
 
-        virtual RecordBase& getRecord(int index);
+        virtual RecordBase& getRecord (int index);
 
-        virtual void appendRecord(const std::string& id);
+        virtual void appendRecord (const std::string& id);
 
-        virtual void load(int index,  ESM::ESMReader& reader, bool base);
+        virtual void load (int index,  ESM::ESMReader& reader, bool base);
 
-        virtual void erase(int index, int count);
+        virtual void erase (int index, int count);
 
-        virtual std::string getId(int index) const;
+        virtual std::string getId (int index) const;
 
-        virtual void save(int index, ESM::ESMWriter& writer) const;
+        virtual void save (int index, ESM::ESMWriter& writer) const;
     };
 
     template<typename RecordT>
     int RefIdDataContainer<RecordT>::getSize() const
     {
-        return static_cast<int>(mContainer.size());
+        return static_cast<int> (mContainer.size());
     }
 
     template<typename RecordT>
-    const RecordBase& RefIdDataContainer<RecordT>::getRecord(int index) const
+    const RecordBase& RefIdDataContainer<RecordT>::getRecord (int index) const
     {
-        return mContainer.at(index);
+        return mContainer.at (index);
     }
 
     template<typename RecordT>
-    RecordBase& RefIdDataContainer<RecordT>::getRecord(int index)
+    RecordBase& RefIdDataContainer<RecordT>::getRecord (int index)
     {
-        return mContainer.at(index);
+        return mContainer.at (index);
     }
 
     template<typename RecordT>
-    void RefIdDataContainer<RecordT>::appendRecord(const std::string& id)
+    void RefIdDataContainer<RecordT>::appendRecord (const std::string& id)
     {
         Record<RecordT> record;
         record.mModified.mId = id;
         record.mModified.blank();
         record.mState = RecordBase::State_ModifiedOnly;
 
-        mContainer.push_back(record);
+        mContainer.push_back (record);
     }
 
     template<typename RecordT>
-    void RefIdDataContainer<RecordT>::load(int index,  ESM::ESMReader& reader, bool base)
+    void RefIdDataContainer<RecordT>::load (int index,  ESM::ESMReader& reader, bool base)
     {
-        (base ? mContainer.at(index).mBase : mContainer.at(index).mModified).load(reader);
+        (base ? mContainer.at (index).mBase : mContainer.at (index).mModified).load (reader);
     }
 
     template<typename RecordT>
-    void RefIdDataContainer<RecordT>::erase(int index, int count)
+    void RefIdDataContainer<RecordT>::erase (int index, int count)
     {
-        if (index < 0 || index + count >= getSize())
-            throw std::runtime_error("invalid RefIdDataContainer index");
+        if (index<0 || index+count>=getSize())
+            throw std::runtime_error ("invalid RefIdDataContainer index");
 
-        mContainer.erase(mContainer.begin() + index, mContainer.begin() + index + count);
+        mContainer.erase (mContainer.begin()+index, mContainer.begin()+index+count);
     }
 
     template<typename RecordT>
-    std::string RefIdDataContainer<RecordT>::getId(int index) const
+    std::string RefIdDataContainer<RecordT>::getId (int index) const
     {
-        return mContainer.at(index).get().mId;
+        return mContainer.at (index).get().mId;
     }
 
     template<typename RecordT>
-    void RefIdDataContainer<RecordT>::save(int index, ESM::ESMWriter& writer) const
+    void RefIdDataContainer<RecordT>::save (int index, ESM::ESMWriter& writer) const
     {
-        CSMWorld::RecordBase::State state = mContainer.at(index).mState;
+        CSMWorld::RecordBase::State state = mContainer.at (index).mState;
 
-        if (state == CSMWorld::RecordBase::State_Modified ||
-                state == CSMWorld::RecordBase::State_ModifiedOnly)
+        if (state==CSMWorld::RecordBase::State_Modified ||
+            state==CSMWorld::RecordBase::State_ModifiedOnly)
         {
             std::string type;
-
-            for (int i = 0; i < 4; ++i)
+            for (int i=0; i<4; ++i)
                 /// \todo make endianess agnostic (change ESMWriter interface?)
-                type += reinterpret_cast<const char*>(&mContainer.at(index).mModified.sRecordId)[i];
+                type += reinterpret_cast<const char *> (&mContainer.at (index).mModified.sRecordId)[i];
 
-            writer.startRecord(type);
-            writer.writeHNCString("NAME", getId(index));
-            mContainer.at(index).mModified.save(writer);
-            writer.endRecord(type);
+            writer.startRecord (type);
+            writer.writeHNCString ("NAME", getId (index));
+            mContainer.at (index).mModified.save (writer);
+            writer.endRecord (type);
         }
-        else if (state == CSMWorld::RecordBase::State_Deleted)
+        else if (state==CSMWorld::RecordBase::State_Deleted)
         {
             /// \todo write record with delete flag
         }
@@ -185,63 +184,64 @@ namespace CSMWorld
 
             std::map<std::string, LocalIndex> mIndex;
 
-            std::map<UniversalId::Type, RefIdDataContainerBase*> mRecordContainers;
+            std::map<UniversalId::Type, RefIdDataContainerBase *> mRecordContainers;
 
-            void erase(const LocalIndex& index, int count);
+            void erase (const LocalIndex& index, int count);
             ///< Must not spill over into another type.
 
         public:
 
             RefIdData();
 
-            LocalIndex globalToLocalIndex(int index) const;
+            LocalIndex globalToLocalIndex (int index) const;
 
-            int localToGlobalIndex(const LocalIndex& index) const;
+            int localToGlobalIndex (const LocalIndex& index) const;
 
-            LocalIndex searchId(const std::string& id) const;
+            LocalIndex searchId (const std::string& id) const;
 
-            void erase(int index, int count);
+            void erase (int index, int count);
 
-            const RecordBase& getRecord(const LocalIndex& index) const;
+            const RecordBase& getRecord (const LocalIndex& index) const;
 
-            RecordBase& getRecord(const LocalIndex& index);
+            RecordBase& getRecord (const LocalIndex& index);
 
-            void appendRecord(UniversalId::Type type, const std::string& id);
+            void appendRecord (UniversalId::Type type, const std::string& id);
 
-            int getAppendIndex(UniversalId::Type type) const;
+            int getAppendIndex (UniversalId::Type type) const;
 
-            void load(const LocalIndex& index, ESM::ESMReader& reader, bool base);
+            void load (const LocalIndex& index, ESM::ESMReader& reader, bool base);
 
             int getSize() const;
 
-            std::vector<std::string> getIds(bool listDeleted = true) const;
+            std::vector<std::string> getIds (bool listDeleted = true) const;
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
 
-            void save(int index, ESM::ESMWriter& writer) const;
+            void save (int index, ESM::ESMWriter& writer) const;
 
-            //RECORD CONTAINERS ACCESS METHODS
-            const RefIdDataContainer<ESM::Book>& getBooks() const;
-            const RefIdDataContainer<ESM::Activator>& getActivators() const;
-            const RefIdDataContainer<ESM::Potion>& getPotions() const;
-            const RefIdDataContainer<ESM::Apparatus>& getApparati() const;
-            const RefIdDataContainer<ESM::Armor>& getArmors() const;
-            const RefIdDataContainer<ESM::Clothing>& getClothing() const;
-            const RefIdDataContainer<ESM::Container>& getContainers() const;
-            const RefIdDataContainer<ESM::Creature>& getCreatures() const;
-            const RefIdDataContainer<ESM::Door>& getDoors() const;
-            const RefIdDataContainer<ESM::Ingredient>& getIngredients() const;
-            const RefIdDataContainer<ESM::CreatureLevList>& getCreatureLevelledLists() const;
-            const RefIdDataContainer<ESM::ItemLevList>& getItemLevelledList() const;
-            const RefIdDataContainer<ESM::Light>& getLights() const;
-            const RefIdDataContainer<ESM::Lockpick>& getLocpicks() const;
-            const RefIdDataContainer<ESM::Miscellaneous>& getMiscellaneous() const;
-            const RefIdDataContainer<ESM::NPC>& getNPCs() const;
+	    //RECORD CONTAINERS ACCESS METHODS
+	    const RefIdDataContainer<ESM::Book>& getBooks() const;
+	    const RefIdDataContainer<ESM::Activator>& getActivators() const;
+	    const RefIdDataContainer<ESM::Potion>& getPotions() const;
+	    const RefIdDataContainer<ESM::Apparatus>& getApparati() const;
+	    const RefIdDataContainer<ESM::Armor>& getArmors() const;
+	    const RefIdDataContainer<ESM::Clothing>& getClothing() const;
+	    const RefIdDataContainer<ESM::Container>& getContainers() const;
+	    const RefIdDataContainer<ESM::Creature>& getCreatures() const;
+	    const RefIdDataContainer<ESM::Door>& getDoors() const;
+	    const RefIdDataContainer<ESM::Ingredient>& getIngredients() const;
+	    const RefIdDataContainer<ESM::CreatureLevList>& getCreatureLevelledLists() const;
+	    const RefIdDataContainer<ESM::ItemLevList>& getItemLevelledList() const;
+	    const RefIdDataContainer<ESM::Light>& getLights() const;
+	    const RefIdDataContainer<ESM::Lockpick>& getLocpicks() const;
+	    const RefIdDataContainer<ESM::Miscellaneous>& getMiscellaneous() const;
+	    const RefIdDataContainer<ESM::NPC>& getNPCs() const;
     };
 }
 
 #endif
+
 
 
 
