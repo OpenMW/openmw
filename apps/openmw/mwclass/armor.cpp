@@ -294,41 +294,30 @@ namespace MWClass
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
+        if (slots_.first.empty())
+            return std::make_pair(0, "");
+
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+
+        // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+        if(race->mData.mFlags & ESM::Race::Beast)
+        {
+            std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
+
+            for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+            {
+                if((*itr).mPart == ESM::PRT_Head)
+                    return std::make_pair(0, "#{sNotifyMessage13}");
+                if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                    return std::make_pair(0, "#{sNotifyMessage14}");
+            }
+        }
 
         for (std::vector<int>::const_iterator slot=slots_.first.begin();
             slot!=slots_.first.end(); ++slot)
         {
-
-            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
-            if(race->mData.mFlags & ESM::Race::Beast)
-            {
-                std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
-
-                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_Head)
-                        {
-                            return std::make_pair(0, "#{sNotifyMessage13}");
-                        }
-                    }
-                }
-
-                if (*slot == MWWorld::InventoryStore::Slot_Boots)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                        {
-                            return std::make_pair(0, "#{sNotifyMessage14}");
-                        }
-                    }
-                }
-            }
-
+            // If equipping a shield, check if there's a twohanded weapon conflicting with it
             if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
             {
                 MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
