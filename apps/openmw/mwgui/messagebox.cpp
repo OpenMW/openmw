@@ -16,6 +16,15 @@ namespace MWGui
         mLastButtonPressed = -1;
     }
 
+    MessageBoxManager::~MessageBoxManager ()
+    {
+        std::vector<MessageBox*>::iterator it(mMessageBoxes.begin());
+        for (; it != mMessageBoxes.end(); ++it)
+        {
+            delete *it;
+        }
+    }
+
     void MessageBoxManager::onFrame (float frameDuration)
     {
         std::vector<MessageBox*>::iterator it;

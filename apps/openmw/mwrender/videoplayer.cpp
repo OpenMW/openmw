@@ -950,8 +950,22 @@ void VideoState::init(const std::string& resourceName)
 
     // Open video file
     /// \todo leak here, ffmpeg or valgrind bug ?
+    ///
+    /// https://trac.ffmpeg.org/ticket/1357
+    ///
     if(!this->format_ctx || avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
     {
+        if (this->format_ctx != NULL)
+        {
+          if (this->format_ctx->pb != NULL)
+          {
+              av_free(this->format_ctx->pb->buffer);
+              this->format_ctx->pb->buffer = NULL;
+
+              av_free(this->format_ctx->pb);
+              this->format_ctx->pb = NULL;
+          }
+        }
         // "Note that a user-supplied AVFormatContext will be freed on failure."
         this->format_ctx = NULL;
         av_free(ioCtx);
@@ -1009,9 +1023,20 @@ void VideoState::deinit()
 
     if(this->format_ctx)
     {
-        AVIOContext *ioContext = this->format_ctx->pb;
+        // valgrind shows memleak near format_ctx->pb
+        //
+        // As scrawl pointed, memleak could be related to this ffmpeg ticket:
+        // https://trac.ffmpeg.org/ticket/1357
+        //
+        if (this->format_ctx->pb != NULL)
+        {
+            av_free(this->format_ctx->pb->buffer);
+            this->format_ctx->pb->buffer = NULL;
+
+            av_free(this->format_ctx->pb);
+            this->format_ctx->pb = NULL;;
+        }
         avformat_close_input(&this->format_ctx);
-        av_free(ioContext);
     }
 }
 

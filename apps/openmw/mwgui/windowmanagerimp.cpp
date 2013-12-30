@@ -322,6 +322,7 @@ namespace MWGui
         delete mSoulgemDialog;
         delete mCursorManager;
         delete mRecharge;
+        delete mCompanionWindow;
 
         cleanupGarbage();
 

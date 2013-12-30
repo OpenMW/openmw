@@ -23,6 +23,7 @@ namespace MWGui
     {
         public:
             MessageBoxManager ();
+            ~MessageBoxManager ();
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message, bool stat = false);
             void removeStaticMessageBox ();
