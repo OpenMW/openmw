@@ -945,7 +945,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     }
     else //checking if there is such class
     {
-        if (mClasses.searchId(NPC.mClass))
+        if (mClasses.searchId(NPC.mClass) == -1)
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " has invalid class");
         }
