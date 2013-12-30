@@ -945,18 +945,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     }
     else //checking if there is such class
     {
-        bool nosuchclass(true);
-
-        for (int i = 0; i < mClasses.getSize(); ++i)
-        {
-            if (dynamic_cast<const ESM::Class&>(mClasses.getRecord(i).get()).mId == NPC.mClass)
-            {
-                nosuchclass = false;
-                break;
-            }
-        }
-
-        if (nosuchclass)
+        if (mClasses.searchId(NPC.mClass))
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " has invalid class");
         }
@@ -1002,18 +991,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
             messages.push_back(id.toString() + "|" + NPC.mId + " has negative rank");
         }
 
-        bool nosuchfaction(true);
-
-        for (int i = 0; i < mFactions.getSize(); ++i)
-        {
-            if (dynamic_cast<const ESM::Faction&>(mFactions.getRecord(i).get()).mId == NPC.mFaction)
-            {
-                nosuchfaction = false;
-                break;
-            }
-        }
-
-        if (nosuchfaction)
+        if (mFactions.searchId(NPC.mFaction) == -1)
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " has invalid faction");
         }
@@ -1026,7 +1004,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
 
     if (NPC.mHair.empty())
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has no har");
+        messages.push_back(id.toString() + "|" + NPC.mId + " has no hair");
     }
 
     //TODO: reputation, Disposition, rank, everything else
