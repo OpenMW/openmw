@@ -2247,19 +2247,14 @@ namespace MWWorld
 
     void World::updateWeather(float duration)
     {
-      static const float teleportationStepTreshold = 256.f;
-      static ESM::Position lastPlayerPos;
-      ESM::Position currentPos = mPlayer->getPlayer().getRefData().getPosition();
-
-      if (fabs(fabs(lastPlayerPos.pos[0]) - fabs(currentPos.pos[0])) >= teleportationStepTreshold
-          || fabs(fabs(lastPlayerPos.pos[1]) - fabs(currentPos.pos[1])) >= teleportationStepTreshold)
-      {
-        lastPlayerPos = currentPos;
-        mWeatherManager->switchToNextWeather(true);
-      }
-      else
-      {
-        mWeatherManager->update (duration);
-      }
+        if (mPlayer->wasTeleported())
+        {
+            mPlayer->setTeleported(false);
+            mWeatherManager->switchToNextWeather(true);
+        }
+        else
+        {
+            mWeatherManager->update (duration);
+        }
     }
 }

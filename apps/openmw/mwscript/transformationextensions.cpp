@@ -207,6 +207,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -271,6 +275,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
@@ -328,6 +336,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();

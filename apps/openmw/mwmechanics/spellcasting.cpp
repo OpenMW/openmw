@@ -7,6 +7,7 @@
 
 
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -240,11 +241,15 @@ namespace MWMechanics
 
             else if (effectId == ESM::MagicEffect::DivineIntervention)
             {
+                MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+
                 // We need to be able to get the world location of an interior cell before implementing this
                 // or alternatively, the last known exterior location of the player, which is how vanilla does it.
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
+                MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+
                 // Same as above
             }
 
@@ -254,6 +259,8 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Recall)
             {
+                MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+
                 // TODO
             }
         }

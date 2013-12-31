@@ -3,6 +3,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "player.hpp"
 
 namespace MWWorld
 {
@@ -14,9 +15,12 @@ namespace MWWorld
 
     void ActionTeleport::executeImp (const Ptr& actor)
     {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        world->getPlayer().setTeleported(true);
+
         if (mCellName.empty())
-            MWBase::Environment::get().getWorld()->changeToExteriorCell (mPosition);
+            world->changeToExteriorCell (mPosition);
         else
-            MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, mPosition);
+            world->changeToInteriorCell (mCellName, mPosition);
     }
 }

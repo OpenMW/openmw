@@ -30,7 +30,7 @@ namespace MWWorld
 
         bool                    mAutoMove;
         int                     mForwardBackward;
-
+        bool                    mTeleported;
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);
@@ -64,6 +64,9 @@ namespace MWWorld
         void yaw(float yaw);
         void pitch(float pitch);
         void roll(float roll);
+
+        bool wasTeleported() const;
+        void setTeleported(bool teleported);
     };
 }
 #endif
