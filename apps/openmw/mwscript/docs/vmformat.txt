@@ -127,7 +127,6 @@ op 0x200007e-0x2000084: Enable Controls
 op 0x2000085-0x200008b: Disable Controls
 op 0x200008c: Unlock
 op 0x200008d: Unlock, explicit reference
-op 0x200008e: COE
 op 0x200008e-0x20000a8: GetSkill
 op 0x20000a9-0x20000c3: GetSkill, explicit reference
 op 0x20000c4-0x20000de: SetSkill
@@ -358,5 +357,6 @@ op 0x2000222: GetLineOfSight
 op 0x2000223: GetLineOfSightExplicit
 op 0x2000224: ToggleAI
 op 0x2000225: ToggleAIExplicit
+op 0x2000226: COE
 
-opcodes 0x2000226-0x3ffffff unused
+opcodes 0x2000227-0x3ffffff unused

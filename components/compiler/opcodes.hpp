@@ -25,9 +25,9 @@ namespace Compiler
         const int opcodeAiFollowExplicit = 0x20023;
         const int opcodeAiFollowCell = 0x20024;
         const int opcodeAiFollowCellExplicit = 0x20025;
-        const int opcodeSetHello = 0x200015e;  // Same id as opcodeSetFight
+        const int opcodeSetHello = 0x200015c;
         const int opcodeSetHelloExplicit = 0x200015d;
-        const int opcodeSetFight = 0x200015e;  // Same id as opcodeSetHello
+        const int opcodeSetFight = 0x200015e;
         const int opcodeSetFightExplicit = 0x200015f;
         const int opcodeSetFlee = 0x2000160;
         const int opcodeSetFleeExplicit = 0x2000161;
@@ -69,7 +69,7 @@ namespace Compiler
     {
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
-        const int opcodeCOE = 0x200008e; // Same ID as opcodeGetSkill
+        const int opcodeCOE = 0x2000226;
         const int opcodeGetInterior = 0x2000131;
         const int opcodeGetPCCell = 0x2000136;
         const int opcodeGetWaterLevel = 0x2000141;
@@ -290,7 +290,7 @@ namespace Compiler
         const int opcodeGetDynamicGetRatio = 0x200006f;
         const int opcodeGetDynamicGetRatioExplicit = 0x2000072;
 
-        const int opcodeGetSkill = 0x200008e; // Same ID as opcodeCOE
+        const int opcodeGetSkill = 0x200008e;
         const int opcodeGetSkillExplicit = 0x20000a9;
         const int opcodeSetSkill = 0x20000c4;
         const int opcodeSetSkillExplicit = 0x20000df;
