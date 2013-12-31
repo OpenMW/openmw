@@ -2252,9 +2252,7 @@ namespace MWWorld
             mPlayer->setTeleported(false);
             mWeatherManager->switchToNextWeather(true);
         }
-        else
-        {
-            mWeatherManager->update (duration);
-        }
+
+        mWeatherManager->update(duration);
     }
 }
