@@ -1211,7 +1211,8 @@ void ObjectAnimation::fillBatch(Ogre::StaticGeometry *sg)
     for(;iter != mObjectRoot->mEntities.rend();++iter)
     {
         Ogre::Node *node = (*iter)->getParentNode();
-        sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
+        if ((*iter)->isVisible())
+            sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
     }
 }
 
