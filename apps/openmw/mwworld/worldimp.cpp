@@ -1297,6 +1297,12 @@ namespace MWWorld
         performUpdateSceneQueries ();
 
         updateWindowManager ();
+
+        if (mPlayer->getPlayer().getCell()->isExterior())
+        {
+            ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
+            mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]));
+        }
     }
 
     void World::updateWindowManager ()

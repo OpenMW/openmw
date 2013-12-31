@@ -18,6 +18,7 @@ namespace MWWorld
 {
     Player::Player (const ESM::NPC *player, const MWBase::World& world)
       : mCellStore(0),
+        mLastKnownExteriorPosition(0,0,0),
         mAutoMove(false),
         mForwardBackward (0)
     {

@@ -6,6 +6,8 @@
 
 #include "../mwmechanics/drawstate.hpp"
 
+#include <OgreVector3.h>
+
 namespace ESM
 {
     struct NPC;
@@ -28,12 +30,21 @@ namespace MWWorld
         MWWorld::CellStore      *mCellStore;
         std::string             mSign;
 
+        Ogre::Vector3 mLastKnownExteriorPosition;
+
         bool                    mAutoMove;
         int                     mForwardBackward;
 
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);
+
+        /// Interiors can not always be mapped to a world position. However
+        /// world position is still required for divine / almsivi magic effects
+        /// and the player arrow on the global map.
+        /// TODO: This should be stored in the savegame, too.
+        void setLastKnownExteriorPosition (const Ogre::Vector3& position) { mLastKnownExteriorPosition = position; }
+        Ogre::Vector3 getLastKnownExteriorPosition() const { return mLastKnownExteriorPosition; }
 
         void set (const ESM::NPC *player);
 
