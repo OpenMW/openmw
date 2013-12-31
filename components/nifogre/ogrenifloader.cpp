@@ -607,6 +607,14 @@ class NIFObjectLoader
             NIFMeshLoader::createMesh(name, fullname, group, shape->recIndex);
 
         Ogre::Entity *entity = sceneMgr->createEntity(fullname);
+
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        // Enable skeleton-based bounding boxes. With the static bounding box,
+        // the animation may cause parts to go outside the box and cause culling problems.
+        if (entity->hasSkeleton())
+            entity->setUpdateBoundingBoxFromSkeleton(true);
+#endif
+
         entity->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
 
         scene->mEntities.push_back(entity);
