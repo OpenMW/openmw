@@ -166,7 +166,6 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         
         if(!mAnimation->isPlaying(mCurrentHit))
         {
-            mAnimation->disable(mCurrentHit);
             if(mJumpState != JumpState_None && !MWBase::Environment::get().getWorld()->isFlying(mPtr) 
                     && !MWBase::Environment::get().getWorld()->isSwimming(mPtr) )
                 mCurrentHit = "knockdown";
@@ -175,20 +174,13 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 int iHit = rand() % sHitListSize;
                 mCurrentHit = sHitList[iHit];
             }
-            mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, false, 1, "start", "stop", 0.0f, 0);
-            if(mUpperBodyState == UpperCharState_WeapEquiped)
-                mUpdateAfterHit = false;
-            else
-                mUpdateAfterHit = true;
+            mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
         }
-        return;
     }
     else if(!mAnimation->isPlaying(mCurrentHit))
     {
-        mAnimation->disable(mCurrentHit);
         mCurrentHit.erase();
         mHitState = CharState_None;
-        mUpdateAfterHit = true;
     }
 
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
@@ -405,7 +397,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mMovementSpeed(0.0f)
     , mDeathState(CharState_None)
     , mHitState(CharState_None)
-    , mUpdateAfterHit(true)
     , mUpperBodyState(UpperCharState_Nothing)
     , mJumpState(JumpState_None)
     , mWeaponType(WeapType_None)
@@ -554,7 +545,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     bool animPlaying;
     if(stats.getAttackingOrSpell())
     {
-        if(mUpperBodyState == UpperCharState_WeapEquiped)
+        if(mUpperBodyState == UpperCharState_WeapEquiped && mHitState == CharState_None)
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
             mAttackType.clear();
@@ -718,9 +709,18 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
         if(mUpperBodyState == UpperCharState_EquipingWeap ||
            mUpperBodyState == UpperCharState_FollowStartToFollowStop ||
            mUpperBodyState == UpperCharState_CastingSpell)
+        {
             mUpperBodyState = UpperCharState_WeapEquiped;
+            //don't allow to continue playing hit animation after actor had attacked during it
+            if(mHitState != CharState_None) 
+            {
+                mAnimation->disable(mCurrentHit);
+                mCurrentHit.clear();
+                mHitState = CharState_None;
+            }
+        }
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
-            mUpperBodyState = UpperCharState_Nothing;
+            mUpperBodyState = UpperCharState_Nothing;        
     }
     else if(complete >= 1.0f)
     {
@@ -938,6 +938,7 @@ void CharacterController::update(float duration)
                 int realHealthLost = healthLost * (1.0f - 0.25 * fatigueTerm);
                 health.setCurrent(health.getCurrent() - realHealthLost);
                 cls.getCreatureStats(mPtr).setHealth(health);
+                cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), true);
 
                 // report acrobatics progression
                 if (mPtr.getRefData().getHandle() == "player")
@@ -1008,7 +1009,7 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(cls.isNpc() && mUpdateAfterHit)
+        if(cls.isNpc())
             forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak) || forcestateupdate;
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);

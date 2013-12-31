@@ -147,7 +147,6 @@ class CharacterController
 
     CharacterState mHitState;
     std::string mCurrentHit;
-    bool mUpdateAfterHit;//don't allow attack if it hadn't been started before actor got hit
 
     UpperBodyCharacterState mUpperBodyState;
 
