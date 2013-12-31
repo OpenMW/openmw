@@ -2288,6 +2288,27 @@ namespace MWWorld
 
     bool World::isDark() const
     {
-      return mWeatherManager->isDark();
+        return mWeatherManager->isDark();
+    }
+
+    bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
+    {
+        MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
+        CellRefList<ESM::Door>::List& refList = doors.mList;
+
+        // Check if any door in the cell leads to an exterior directly
+        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
+        {
+            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+            if (ref.mRef.mTeleport && ref.mRef.mDestCell.empty())
+            {
+                ESM::Position pos = ref.mRef.mDoorDest;
+                result = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+                return true;
+            }
+        }
+
+        // No luck :(
+        return false;
     }
 }

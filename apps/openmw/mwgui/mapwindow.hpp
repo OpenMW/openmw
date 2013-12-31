@@ -81,6 +81,8 @@ namespace MWGui
         void addVisitedLocation(const std::string& name, int x, int y); // adds the marker to the global map
         void cellExplored(int x, int y);
 
+        void setGlobalMapPlayerPosition (float worldX, float worldY);
+
         virtual void open();
 
     private:

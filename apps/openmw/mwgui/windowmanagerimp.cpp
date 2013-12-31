@@ -774,6 +774,11 @@ namespace MWGui
             mHud->setCellName( cell->mCell->mName );
             mMap->setCellPrefix( cell->mCell->mName );
             mHud->setCellPrefix( cell->mCell->mName );
+
+            Ogre::Vector3 worldPos;
+            if (MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
+                mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
+
         }
 
     }

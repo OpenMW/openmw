@@ -430,6 +430,8 @@ namespace MWBase
 
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const = 0;
+
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result) = 0;
     };
 }
 

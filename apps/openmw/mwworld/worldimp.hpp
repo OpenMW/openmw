@@ -518,6 +518,8 @@ namespace MWWorld
             virtual void breakInvisibility (const MWWorld::Ptr& actor);
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const;
+
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result);
     };
 }
 
