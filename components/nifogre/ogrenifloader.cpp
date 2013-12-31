@@ -839,8 +839,6 @@ class NIFObjectLoader
                                                                 vertprop, zprop, specprop,
                                                                 wireprop, needTangents));
 
-        partsys->setDefaultDimensions(particledata->particleRadius*2.0f,
-                                        particledata->particleRadius*2.0f);
         partsys->setCullIndividually(false);
         partsys->setParticleQuota(particledata->numParticles);
         partsys->setKeepParticlesInLocalSpace(partflags & (Nif::NiNode::ParticleFlag_LocalSpace));
@@ -855,6 +853,8 @@ class NIFObjectLoader
             if(ctrl->recType == Nif::RC_NiParticleSystemController)
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
+
+                partsys->setDefaultDimensions(partctrl->size, partctrl->size);
 
                 if(!partctrl->emitter.empty())
                 {
