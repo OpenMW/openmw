@@ -174,10 +174,10 @@ namespace MWGui
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
-        mCursorManager->setEnabled(true);
-
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
         SDL_ShowCursor(false);
+
+        mCursorManager->setEnabled(true);
 
         // hide mygui's pointer
         MyGUI::PointerManager::getInstance().setVisible(false);
