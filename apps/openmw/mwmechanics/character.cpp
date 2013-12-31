@@ -65,15 +65,24 @@ struct StateInfo {
     const char groupname[32];
 };
 
-static const StateInfo sDeathList[] = {
-    { CharState_Death1, "death1" },
-    { CharState_Death2, "death2" },
-    { CharState_Death3, "death3" },
-    { CharState_Death4, "death4" },
-    { CharState_Death5, "death5" },
-    { CharState_SwimDeath, "swimdeath" },
+static const std::string sDeathList[] = {
+    "death1" ,
+    "death2" ,
+    "death3" ,
+    "death4" ,
+    "death5" ,
+    "swimdeath",
 };
-static const StateInfo *sDeathListEnd = &sDeathList[sizeof(sDeathList)/sizeof(sDeathList[0])];
+static const int sDeathListSize = sizeof(sDeathList)/sizeof(sDeathList[0]);
+
+static const std::string sHitList[] = {
+    "hit1" ,
+    "hit2" ,
+    "hit3" ,
+    "hit4" ,
+    "hit5" ,
+};
+static const int sHitListSize = sizeof(sHitList)/sizeof(sHitList[0]);
 
 static const StateInfo sMovementList[] = {
     { CharState_WalkForward, "walkforward" },
@@ -150,6 +159,38 @@ public:
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
 {
+    if(MWWorld::Class::get(mPtr).getCreatureStats(mPtr).getAttacked())
+    {
+        mHitState = CharState_Hit;
+        MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setAttacked(false);
+        
+        if(!mAnimation->isPlaying(mCurrentHit))
+        {
+            mAnimation->disable(mCurrentHit);
+            if(mJumpState != JumpState_None && !MWBase::Environment::get().getWorld()->isFlying(mPtr) 
+                    && !MWBase::Environment::get().getWorld()->isSwimming(mPtr) )
+                mCurrentHit = "knockdown";
+            else
+            {
+                int iHit = rand() % sHitListSize;
+                mCurrentHit = sHitList[iHit];
+            }
+            mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, false, 1, "start", "stop", 0.0f, 0);
+            if(mUpperBodyState == UpperCharState_WeapEquiped)
+                mUpdateAfterHit = false;
+            else
+                mUpdateAfterHit = true;
+        }
+        return;
+    }
+    else if(!mAnimation->isPlaying(mCurrentHit))
+    {
+        mAnimation->disable(mCurrentHit);
+        mCurrentHit.erase();
+        mHitState = CharState_None;
+        mUpdateAfterHit = true;
+    }
+
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
 
     if(force || idle != mIdleState)
@@ -338,6 +379,23 @@ MWWorld::ContainerStoreIterator CharacterController::getActiveWeapon(NpcStats &s
     return inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 }
 
+void CharacterController::playRandomDeath(float startpoint)
+{
+    if(MWBase::Environment::get().getWorld()->isSwimming(mPtr))
+    {
+        mDeathState = CharState_SwimDeath;
+        mCurrentDeath = sDeathList[sDeathListSize-1];   //last in the list is 'swimdeath'
+    }
+    else
+    {
+        int num = rand() % (sDeathListSize-1);
+        mDeathState = static_cast<CharacterState>(CharState_Death1 + num);
+        mCurrentDeath = sDeathList[num];
+    }
+
+    mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
+                    false, 1.0f, "start", "stop", 0.0f, 0);
+}
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
     : mPtr(ptr)
@@ -346,6 +404,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mMovementState(CharState_None)
     , mMovementSpeed(0.0f)
     , mDeathState(CharState_None)
+    , mHitState(CharState_None)
+    , mUpdateAfterHit(true)
     , mUpperBodyState(UpperCharState_Nothing)
     , mJumpState(JumpState_None)
     , mWeaponType(WeapType_None)
@@ -392,13 +452,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     refreshCurrentAnims(mIdleState, mMovementState, true);
     if(mDeathState != CharState_None)
     {
-        const StateInfo *state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
-        if(state == sDeathListEnd)
-            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
-
-        mCurrentDeath = state->groupname;
-        mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                         false, 1.0f, "start", "stop", 1.0f, 0);
+        playRandomDeath(1.0f);
     }
 }
 
@@ -766,6 +820,8 @@ void CharacterController::update(float duration)
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
         bool flying = world->isFlying(mPtr);
         Ogre::Vector3 vec = cls.getMovementVector(mPtr);
+        if(mHitState != CharState_None && mJumpState == JumpState_None)
+            vec = Ogre::Vector3(0.0f);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
         mMovementSpeed = cls.getSpeed(mPtr);
 
@@ -777,6 +833,7 @@ void CharacterController::update(float duration)
         bool forcestateupdate = false;
 
         isrunning = isrunning && std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
+
 
         // advance athletics
         if(std::abs(vec[0])+std::abs(vec[1]) > 0.0f && mPtr.getRefData().getHandle() == "player")
@@ -951,7 +1008,7 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(cls.isNpc())
+        if(cls.isNpc() && mUpdateAfterHit)
             forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak) || forcestateupdate;
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
@@ -1055,14 +1112,7 @@ void CharacterController::forceStateUpdate()
     refreshCurrentAnims(mIdleState, mMovementState, true);
     if(mDeathState != CharState_None)
     {
-        const StateInfo *state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
-        if(state == sDeathListEnd)
-            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
-
-        mCurrentDeath = state->groupname;
-        if(!mAnimation->getInfo(mCurrentDeath))
-            mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                             false, 1.0f, "start", "stop", 0.0f, 0);
+        playRandomDeath(0.0f);
     }
 }
 
@@ -1071,44 +1121,10 @@ void CharacterController::kill()
     if(mDeathState != CharState_None)
         return;
 
-    if(mPtr.getTypeName() == typeid(ESM::NPC).name())
-    {
-        const StateInfo *state = NULL;
-        if(MWBase::Environment::get().getWorld()->isSwimming(mPtr))
-        {
-            mDeathState = CharState_SwimDeath;
-            state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
-            if(state == sDeathListEnd)
-                throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
-        }
-
-        static const CharacterState deathstates[5] = {
-            CharState_Death1, CharState_Death2, CharState_Death3, CharState_Death4, CharState_Death5
-        };
-        std::vector<CharacterState> states(&deathstates[0], &deathstates[5]);
-
-        while(states.size() > 1 && (!state || !mAnimation->hasAnimation(state->groupname)))
-        {
-            int pos = (int)(rand()/((double)RAND_MAX+1.0)*states.size());
-            mDeathState = states[pos];
-            states.erase(states.begin()+pos);
-
-            state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
-            if(state == sDeathListEnd)
-                throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
-        }
-        mCurrentDeath = state->groupname;
-    }
-    else
-    {
-        mDeathState = CharState_Death1;
-        mCurrentDeath = "death1";
-    }
+    playRandomDeath(0.0f);
 
     if(mAnimation)
     {
-        mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                         false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->disable(mCurrentIdle);
     }
 
