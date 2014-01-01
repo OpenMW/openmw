@@ -814,7 +814,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     }
 
     //if playing combat animation and lowerbody is not busy switch to whole body animation
-    if(weaptype != WeaponType::WeapType_None && complete>0.0f)
+    if(weaptype != WeapType_None && complete>0.0f)
     {
         if(  mMovementState != CharState_None || 
              mJumpState != JumpState_None || 
