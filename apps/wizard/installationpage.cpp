@@ -5,7 +5,7 @@
 
 #include "mainwizard.hpp"
 #include "inisettings.hpp"
-#include "unshieldthread.hpp"
+#include "unshield/unshieldworker.hpp"
 
 Wizard::InstallationPage::InstallationPage(MainWizard *wizard) :
     QWizardPage(wizard),
@@ -55,10 +55,22 @@ void Wizard::InstallationPage::startInstallation()
     QStringList components(field("installation.components").toStringList());
     QString path(field("installation.path").toString());
 
-    UnshieldThread *unshield = new UnshieldThread();
+    QThread* thread = new QThread();
+    UnshieldWorker* unshield = new UnshieldWorker();
+
+    unshield->moveToThread(thread);
+
+    connect(thread, SIGNAL(started()),
+            unshield, SLOT(extract()));
+
+    connect(unshield, SIGNAL(finished()),
+            thread, SLOT(quit()));
 
     connect(unshield, SIGNAL(finished()),
             unshield, SLOT(deleteLater()));
+
+    connect(unshield, SIGNAL(finished()),
+            thread, SLOT(deleteLater()));
 
     connect(unshield, SIGNAL(finished()),
             this, SLOT(installationFinished()));
@@ -114,12 +126,13 @@ void Wizard::InstallationPage::startInstallation()
         unshield->setIniCodec(QTextCodec::codecForName("windows-1252"));
     }
 
-    unshield->start();
+    thread->start();
 
 }
 
 void Wizard::InstallationPage::installationFinished()
 {
+    qDebug() << "finished!";
     mFinished = true;
     emit completeChanged();
 }

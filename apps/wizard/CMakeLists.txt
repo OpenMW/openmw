@@ -11,7 +11,8 @@ set(WIZARD
     main.cpp
     mainwizard.cpp
     methodselectionpage.cpp
-    unshieldthread.cpp
+
+    unshield/unshieldworker.cpp
 
     utils/componentlistwidget.cpp
 )
@@ -28,7 +29,8 @@ set(WIZARD_HEADER
     languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
-    unshieldthread.hpp
+
+    unshield/unshieldworker.hpp
 
     utils/componentlistwidget.hpp
 )
@@ -45,7 +47,8 @@ set(WIZARD_HEADER_MOC
     languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
-    unshieldthread.hpp
+
+    unshield/unshieldworker.hpp
 
     utils/componentlistwidget.hpp
 )

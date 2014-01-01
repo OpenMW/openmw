@@ -1,22 +1,22 @@
-#ifndef UNSHIELDTHREAD_HPP
-#define UNSHIELDTHREAD_HPP
+#ifndef UNSHIELDWORKER_HPP
+#define UNSHIELDWORKER_HPP
 
+#include <QObject>
 #include <QThread>
 
 #include <libunshield.h>
 
-#include "inisettings.hpp"
-
-class QTextCodec;
+#include "../inisettings.hpp"
 
 namespace Wizard
 {
-
-    class UnshieldThread : public QThread
+    class UnshieldWorker : public QObject
     {
         Q_OBJECT
+
     public:
-        explicit UnshieldThread(QObject *parent = 0);
+        UnshieldWorker(QObject *parent = 0);
+        ~UnshieldWorker();
 
         void setInstallMorrowind(bool install);
         void setInstallTribunal(bool install);
@@ -35,7 +35,6 @@ namespace Wizard
         bool moveDirectory(const QString &source, const QString &destination);
 
         void setupSettings();
-        void extract();
 
         void extractCab(const QString &cabFile, const QString &outputDir);
         bool extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter);
@@ -52,15 +51,18 @@ namespace Wizard
 
         QTextCodec *mIniCodec;
 
-    protected:
-        virtual void run();
+
+    public slots:
+        void extract();
 
     signals:
+        void finished();
         void textChanged(const QString &text);
+        void error(const QString &text);
         void progressChanged(int progress);
 
-    };
 
+    };
 }
 
-#endif // UNSHIELDTHREAD_HPP
+#endif // UNSHIELDWORKER_HPP

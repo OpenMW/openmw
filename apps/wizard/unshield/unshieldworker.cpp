@@ -1,4 +1,4 @@
-#include "unshieldthread.hpp"
+#include "unshieldworker.hpp"
 
 #include <QDebug>
 
@@ -10,11 +10,12 @@
 #include <QTextCodec>
 #include <QFile>
 #include <QDir>
+#include <QDirIterator>
 
 #include <qmath.h>
 
-Wizard::UnshieldThread::UnshieldThread(QObject *parent) :
-    QThread(parent),
+Wizard::UnshieldWorker::UnshieldWorker(QObject *parent) :
+    QObject(parent),
     mIniSettings()
 {
     unshield_set_log_level(0);
@@ -28,40 +29,44 @@ Wizard::UnshieldThread::UnshieldThread(QObject *parent) :
     mInstallMorrowind = false;
     mInstallTribunal = false;
     mInstallBloodmoon = false;
+}
+
+Wizard::UnshieldWorker::~UnshieldWorker()
+{
 
 }
 
-void Wizard::UnshieldThread::setInstallMorrowind(bool install)
+void Wizard::UnshieldWorker::setInstallMorrowind(bool install)
 {
     mInstallMorrowind = install;
 }
 
-void Wizard::UnshieldThread::setInstallTribunal(bool install)
+void Wizard::UnshieldWorker::setInstallTribunal(bool install)
 {
     mInstallTribunal = install;
 }
 
-void Wizard::UnshieldThread::setInstallBloodmoon(bool install)
+void Wizard::UnshieldWorker::setInstallBloodmoon(bool install)
 {
     mInstallBloodmoon = install;
 }
 
-void Wizard::UnshieldThread::setPath(const QString &path)
+void Wizard::UnshieldWorker::setPath(const QString &path)
 {
     mPath = path;
 }
 
-void Wizard::UnshieldThread::setIniPath(const QString &path)
+void Wizard::UnshieldWorker::setIniPath(const QString &path)
 {
     mIniPath = path;
 }
 
-void Wizard::UnshieldThread::setIniCodec(QTextCodec *codec)
+void Wizard::UnshieldWorker::setIniCodec(QTextCodec *codec)
 {
     mIniCodec = codec;
 }
 
-void Wizard::UnshieldThread::setupSettings()
+void Wizard::UnshieldWorker::setupSettings()
 {
     // Create Morrowind.ini settings map
     if (mIniPath.isEmpty())
@@ -88,7 +93,7 @@ void Wizard::UnshieldThread::setupSettings()
     mIniSettings.readFile(stream);
 }
 
-bool Wizard::UnshieldThread::removeDirectory(const QString &dirName)
+bool Wizard::UnshieldWorker::removeDirectory(const QString &dirName)
 {
     bool result = true;
     QDir dir(dirName);
@@ -114,7 +119,7 @@ bool Wizard::UnshieldThread::removeDirectory(const QString &dirName)
     return result;
 }
 
-bool Wizard::UnshieldThread::moveFile(const QString &source, const QString &destination)
+bool Wizard::UnshieldWorker::moveFile(const QString &source, const QString &destination)
 {
     QDir dir;
     QFile file;
@@ -132,7 +137,7 @@ bool Wizard::UnshieldThread::moveFile(const QString &source, const QString &dest
     return false;
 }
 
-bool Wizard::UnshieldThread::moveDirectory(const QString &source, const QString &destination)
+bool Wizard::UnshieldWorker::moveDirectory(const QString &source, const QString &destination)
 {
     QDir sourceDir(source);
     QDir destDir(destination);
@@ -173,7 +178,7 @@ bool Wizard::UnshieldThread::moveDirectory(const QString &source, const QString 
     return result && removeDirectory(sourceDir.absolutePath());
 }
 
-void Wizard::UnshieldThread::extract()
+void Wizard::UnshieldWorker::extract()
 {
     emit textChanged(QLatin1String("Starting installation"));
     emit textChanged(QLatin1String("Installation target: ") + mPath);
@@ -211,22 +216,23 @@ void Wizard::UnshieldThread::extract()
         QString morrowindTempPath(tempPath + QLatin1String("/morrowind"));
         QString morrowindCab(QLatin1String("/mnt/cdrom/data1.hdr"));
 
-        extractCab(morrowindCab, morrowindTempPath);
+        //extractCab(morrowindCab, morrowindTempPath);
 
         // TODO: Throw error;
         // Move the files from the temporary path to the destination folder
 
         //qDebug() << "rename: " << morrowindTempPath << " to: " << mPath;
         morrowindTempPath.append(QDir::separator() + QLatin1String("Data Files"));
-        if (!moveDirectory(morrowindTempPath, mPath))
-            qDebug() << "failed!";
+//        if (!moveDirectory(morrowindTempPath, mPath))
+//            qDebug() << "failed!";
 
-        QDir source(QLatin1String("/mnt/cdrom/"));
+        QDir sourceDir(QLatin1String("/mnt/cdrom/"));
         QStringList directories;
         directories << QLatin1String("Fonts")
                     << QLatin1String("Music")
                     << QLatin1String("Sound")
-                    << QLatin1String("Splash");
+                    << QLatin1String("Splash")
+                    << QLatin1String("Video");
 
         QFileInfoList list(sourceDir.entryInfoList(QDir::NoDotAndDotDot |
                                                    QDir::System | QDir::Hidden |
@@ -237,26 +243,12 @@ void Wizard::UnshieldThread::extract()
             if (info.isSymLink())
                 continue;
 
+            qDebug() << "not found " << info.fileName();
+
             if (directories.contains(info.fileName()))
-                copyDirectory(info.absoluteFilePath(), mPath);
+                qDebug() << "found " << info.fileName();
+//                copyDirectory(info.absoluteFilePath(), mPath);
         }
-
-
-        bfs::path fonts = findFile(from, "fonts", false);
-        if(fonts.string() != "")
-            installToPath(fonts, dFiles / "Fonts");
-
-        bfs::path music = findFile(from, "music", false);
-        if(music.string() != "")
-            installToPath(music, dFiles / "Music");
-
-        bfs::path sound = findFile(from, "sound", false);
-        if(sound.string() != "")
-            installToPath(sound, dFiles / "Sound");
-
-        bfs::path splash = findFile(from, "splash", false);
-        if(splash.string() != "")
-            installToPath(splash, dFiles / "Splash");
 
     }
 
@@ -299,10 +291,11 @@ void Wizard::UnshieldThread::extract()
 
 
     ///
+    emit finished();
 
 }
 
-bool Wizard::UnshieldThread::extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter)
+bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter)
 {
     bool success;
     QString path(outputDir);
@@ -344,7 +337,7 @@ bool Wizard::UnshieldThread::extractFile(Unshield *unshield, const QString &outp
     return success;
 }
 
-void Wizard::UnshieldThread::extractCab(const QString &cabFile, const QString &outputDir)
+void Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &outputDir)
 {
     Unshield *unshield;
     unshield = unshield_open(cabFile.toLatin1().constData());
@@ -365,12 +358,4 @@ void Wizard::UnshieldThread::extractCab(const QString &cabFile, const QString &o
     }
 
     unshield_close(unshield);
-}
-
-void Wizard::UnshieldThread::run()
-{
-    qDebug() << "From worker thread: " << currentThreadId();
-
-    setupSettings();
-    extract();
 }
