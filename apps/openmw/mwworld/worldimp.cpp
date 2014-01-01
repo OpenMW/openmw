@@ -1442,10 +1442,8 @@ namespace MWWorld
         return d;
     }
 
-    std::vector<World::DoorMarker> World::getDoorMarkers (CellStore* cell)
+    void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
     {
-        std::vector<World::DoorMarker> result;
-
         MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
         CellRefList<ESM::Door>::List& refList = doors.mList;
         for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
@@ -1461,11 +1459,9 @@ namespace MWWorld
 
                 newMarker.x = pos.pos[0];
                 newMarker.y = pos.pos[1];
-                result.push_back(newMarker);
+                out.push_back(newMarker);
             }
         }
-
-        return result;
     }
 
     void World::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
@@ -1829,9 +1825,9 @@ namespace MWWorld
     {
         std::vector<std::string> mHandles;
 
-        bool operator() (ESM::CellRef& ref, RefData& data)
+        bool operator() (Ptr ptr)
         {
-            Ogre::SceneNode* handle = data.getBaseNode();
+            Ogre::SceneNode* handle = ptr.getRefData().getBaseNode();
             if (handle)
                 mHandles.push_back(handle->getName());
             return true;
@@ -2347,5 +2343,86 @@ namespace MWWorld
         }
 
         mWeatherManager->update(duration);
+    }
+
+    struct AddDetectedReference
+    {
+        AddDetectedReference(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
+            : mOut(out), mDetector(detector), mType(type), mSquaredDist(squaredDist)
+        {
+        }
+
+        std::vector<Ptr>& mOut;
+        Ptr mDetector;
+        float mSquaredDist;
+        World::DetectionType mType;
+        bool operator() (MWWorld::Ptr ptr)
+        {
+            if (Ogre::Vector3(ptr.getRefData().getPosition().pos).squaredDistance(
+                        Ogre::Vector3(mDetector.getRefData().getPosition().pos)) >= mSquaredDist)
+                return true;
+
+            if (!ptr.getRefData().isEnabled())
+                return true;
+
+            // Consider references inside containers as well
+            if (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name())
+            {
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                {
+                    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                    {
+                        if (needToAdd(*it))
+                        {
+                            mOut.push_back(ptr);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            if (needToAdd(ptr))
+                mOut.push_back(ptr);
+
+            return true;
+        }
+
+        bool needToAdd (MWWorld::Ptr ptr)
+        {
+            if (mType == World::Detect_Creature && ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                return false;
+            if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
+                return false;
+            if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
+                return false;
+            return true;
+        }
+    };
+
+    void World::listDetectedReferences(const Ptr &ptr, std::vector<Ptr> &out, DetectionType type)
+    {
+        const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+        float dist=0;
+        if (type == World::Detect_Creature)
+            dist = effects.get(MWMechanics::EffectKey(ESM::MagicEffect::DetectAnimal)).mMagnitude;
+        else if (type == World::Detect_Key)
+            dist = effects.get(MWMechanics::EffectKey(ESM::MagicEffect::DetectKey)).mMagnitude;
+        else if (type == World::Detect_Enchantment)
+            dist = effects.get(MWMechanics::EffectKey(ESM::MagicEffect::DetectEnchantment)).mMagnitude;
+
+        if (!dist)
+            return;
+
+        // TODO: "1 foot" = 20 game units?
+        dist *= 20;
+
+        AddDetectedReference functor (out, ptr, type, dist*dist);
+
+        const Scene::CellStoreCollection& active = mWorldScene->getActiveCells();
+        for (Scene::CellStoreCollection::const_iterator it = active.begin(); it != active.end(); ++it)
+        {
+            MWWorld::CellStore* cellStore = *it;
+            cellStore->forEach(functor);
+        }
     }
 }
