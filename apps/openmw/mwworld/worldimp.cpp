@@ -1063,7 +1063,7 @@ namespace MWWorld
 
     void World::adjustPosition(const Ptr &ptr)
     {
-        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos[0], ptr.getRefData().getPosition().pos[1], ptr.getRefData().getPosition().pos[2]);
+        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
 
         if(!ptr.getRefData().getBaseNode())
         {
@@ -1304,7 +1304,7 @@ namespace MWWorld
         if (mPlayer->getPlayer().getCell()->isExterior())
         {
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
-            mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]));
+            mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
         }
     }
 
@@ -1584,7 +1584,7 @@ namespace MWWorld
         pos.rot[1] = 0;
 
         Ogre::Vector3 orig =
-            Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+            Ogre::Vector3(pos.pos);
         Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
 
         float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
@@ -2299,7 +2299,7 @@ namespace MWWorld
             if (ref.mRef.mTeleport && ref.mRef.mDestCell.empty())
             {
                 ESM::Position pos = ref.mRef.mDoorDest;
-                result = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+                result = Ogre::Vector3(pos.pos);
                 return true;
             }
         }
@@ -2320,7 +2320,7 @@ namespace MWWorld
         for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
         {
             ESM::Position pos = it->getRefData().getPosition();
-            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos);
             float distance = worldPos.squaredDistance(markerPos);
             if (distance < closestDistance)
             {
