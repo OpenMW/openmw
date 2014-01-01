@@ -272,6 +272,7 @@ public:
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
+    void changeGroups(const std::string &groupname, int group);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
