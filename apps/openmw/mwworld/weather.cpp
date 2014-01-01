@@ -324,6 +324,17 @@ void WeatherManager::update(float duration)
 
     mWeatherUpdateTime -= timePassed;
 
+    MWBase::World* world = MWBase::Environment::get().getWorld();
+    const bool exterior = (world->isCellExterior() || world->isCellQuasiExterior());
+    if (!exterior)
+    {
+        mRendering->sunDisable(false);
+        mRendering->skyDisable();
+        mRendering->getSkyManager()->setLightningStrength(0.f);
+        stopSounds(true);
+        return;
+    }
+
     switchToNextWeather(false);
 
     if (mNextWeather != "")
@@ -683,41 +694,33 @@ bool WeatherManager::isDark() const
 void WeatherManager::switchToNextWeather(bool instantly)
 {
     MWBase::World* world = MWBase::Environment::get().getWorld();
-    const bool exterior = (world->isCellExterior() || world->isCellQuasiExterior());
-    if (!exterior)
+    if (world->isCellExterior() || world->isCellQuasiExterior())
     {
-        mRendering->sunDisable(false);
-        mRendering->skyDisable();
-        mRendering->getSkyManager()->setLightningStrength(0.f);
-        stopSounds(true);
-        return;
-    }
+        std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayer().getPlayer().getCell()->mCell->mRegion);
 
-    // Exterior
-    std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayer().getPlayer().getCell()->mCell->mRegion);
-
-    if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
-    {
-        mCurrentRegion = regionstr;
-        mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
-
-        std::string weatherType = "clear";
-
-        if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
+        if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
-            weatherType = mRegionOverrides[regionstr];
-        }
-        else
-        {
-            // get weather probabilities for the current region
-            const ESM::Region *region = world->getStore().get<ESM::Region>().search (regionstr);
+            mCurrentRegion = regionstr;
+            mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
 
-            if (region != 0)
+            std::string weatherType = "clear";
+
+            if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
             {
-                weatherType = nextWeather(region);
+                weatherType = mRegionOverrides[regionstr];
             }
-        }
+            else
+            {
+                // get weather probabilities for the current region
+                const ESM::Region *region = world->getStore().get<ESM::Region>().search (regionstr);
 
-        setWeather(weatherType, instantly);
+                if (region != 0)
+                {
+                    weatherType = nextWeather(region);
+                }
+            }
+
+            setWeather(weatherType, instantly);
+        }
     }
 }
