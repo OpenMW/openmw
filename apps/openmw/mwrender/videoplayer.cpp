@@ -949,7 +949,9 @@ void VideoState::init(const std::string& resourceName)
         this->format_ctx->pb = ioCtx;
 
     // Open video file
-    /// \todo leak here, ffmpeg or valgrind bug ?
+    ///
+    /// format_ctx->pb->buffer must be freed by hand,
+    /// if not, valgrind will show memleak, see:
     ///
     /// https://trac.ffmpeg.org/ticket/1357
     ///
@@ -1023,11 +1025,12 @@ void VideoState::deinit()
 
     if(this->format_ctx)
     {
-        // valgrind shows memleak near format_ctx->pb
-        //
-        // As scrawl pointed, memleak could be related to this ffmpeg ticket:
-        // https://trac.ffmpeg.org/ticket/1357
-        //
+        ///
+        /// format_ctx->pb->buffer must be freed by hand,
+        /// if not, valgrind will show memleak, see:
+        ///
+        /// https://trac.ffmpeg.org/ticket/1357
+        ///
         if (this->format_ctx->pb != NULL)
         {
             av_free(this->format_ctx->pb->buffer);

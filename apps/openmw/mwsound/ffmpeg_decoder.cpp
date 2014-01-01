@@ -231,9 +231,9 @@ void FFmpeg_Decoder::close()
     {
         if (mFormatCtx->pb != NULL)
         {
-          // valgrind shows memleak near mFormatCtx->pb
+          // mFormatCtx->pb->buffer must be freed by hand,
+          // if not, valgrind will show memleak, see:
           //
-          // As scrawl pointed, memleak could be related to this ffmpeg ticket:
           // https://trac.ffmpeg.org/ticket/1357
           //
           if (mFormatCtx->pb->buffer != NULL)
