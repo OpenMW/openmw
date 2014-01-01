@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+#include <QFileInfo>
+#include <QFileInfoListIterator>
 #include <QMessageBox>
 #include <QStringList>
 #include <QTextStream>
@@ -86,6 +88,91 @@ void Wizard::UnshieldThread::setupSettings()
     mIniSettings.readFile(stream);
 }
 
+bool Wizard::UnshieldThread::removeDirectory(const QString &dirName)
+{
+    bool result = true;
+    QDir dir(dirName);
+
+    if (dir.exists(dirName))
+    {
+        QFileInfoList list(dir.entryInfoList(QDir::NoDotAndDotDot |
+                                               QDir::System | QDir::Hidden |
+                                               QDir::AllDirs | QDir::Files, QDir::DirsFirst));
+        foreach(QFileInfo info, list) {
+            if (info.isDir()) {
+                result = removeDirectory(info.absoluteFilePath());
+            } else {
+                result = QFile::remove(info.absoluteFilePath());
+            }
+
+            if (!result)
+                return result;
+        }
+
+        result = dir.rmdir(dirName);
+    }
+    return result;
+}
+
+bool Wizard::UnshieldThread::moveFile(const QString &source, const QString &destination)
+{
+    QDir dir;
+    QFile file;
+
+    if (dir.rename(source, destination)) {
+        return true;
+    } else {
+        if (file.copy(source, destination)) {
+            return file.remove(source);
+        } else {
+            qDebug() << "copy failed! " << file.errorString();
+        }
+    }
+
+    return false;
+}
+
+bool Wizard::UnshieldThread::moveDirectory(const QString &source, const QString &destination)
+{
+    QDir sourceDir(source);
+    QDir destDir(destination);
+
+    if (!destDir.exists()) {
+        sourceDir.mkpath(destination);
+        destDir.refresh();
+    }
+
+    if (!destDir.exists())
+        return false;
+
+    bool result = true;
+
+    QFileInfoList list(sourceDir.entryInfoList(QDir::NoDotAndDotDot |
+                                                 QDir::System | QDir::Hidden |
+                                                 QDir::AllDirs | QDir::Files, QDir::DirsFirst));
+
+    foreach (const QFileInfo &info, list) {
+        QString relativePath(info.absoluteFilePath());
+        relativePath.remove(source);
+
+        if (info.isSymLink())
+            continue;
+
+        if (info.isDir()) {
+            result = moveDirectory(info.absoluteFilePath(), destDir.absolutePath() + relativePath);
+        } else {
+             qDebug() << "moving: " << info.absoluteFilePath() <<  " to: " << destDir.absolutePath() + relativePath;
+
+            result = moveFile(info.absoluteFilePath(), destDir.absolutePath() + relativePath);
+        }
+
+        //if (!result)
+        //    return result;
+    }
+
+    return result && removeDirectory(sourceDir.absolutePath());
+}
+
 void Wizard::UnshieldThread::extract()
 {
     emit textChanged(QLatin1String("Starting installation"));
@@ -129,9 +216,47 @@ void Wizard::UnshieldThread::extract()
         // TODO: Throw error;
         // Move the files from the temporary path to the destination folder
 
-        qDebug() << "rename: " << morrowindTempPath << " to: " << mPath;
-        if (!dir.rename(morrowindTempPath, mPath))
+        //qDebug() << "rename: " << morrowindTempPath << " to: " << mPath;
+        morrowindTempPath.append(QDir::separator() + QLatin1String("Data Files"));
+        if (!moveDirectory(morrowindTempPath, mPath))
             qDebug() << "failed!";
+
+        QDir source(QLatin1String("/mnt/cdrom/"));
+        QStringList directories;
+        directories << QLatin1String("Fonts")
+                    << QLatin1String("Music")
+                    << QLatin1String("Sound")
+                    << QLatin1String("Splash");
+
+        QFileInfoList list(sourceDir.entryInfoList(QDir::NoDotAndDotDot |
+                                                   QDir::System | QDir::Hidden |
+                                                   QDir::AllDirs));
+
+
+        foreach(QFileInfo info, list) {
+            if (info.isSymLink())
+                continue;
+
+            if (directories.contains(info.fileName()))
+                copyDirectory(info.absoluteFilePath(), mPath);
+        }
+
+
+        bfs::path fonts = findFile(from, "fonts", false);
+        if(fonts.string() != "")
+            installToPath(fonts, dFiles / "Fonts");
+
+        bfs::path music = findFile(from, "music", false);
+        if(music.string() != "")
+            installToPath(music, dFiles / "Music");
+
+        bfs::path sound = findFile(from, "sound", false);
+        if(sound.string() != "")
+            installToPath(sound, dFiles / "Sound");
+
+        bfs::path splash = findFile(from, "splash", false);
+        if(splash.string() != "")
+            installToPath(splash, dFiles / "Splash");
 
     }
 
@@ -181,16 +306,21 @@ bool Wizard::UnshieldThread::extractFile(Unshield *unshield, const QString &outp
 {
     bool success;
     QString path(outputDir);
-    path.append('/');
+    path.append(QDir::separator());
 
     int directory = unshield_file_directory(unshield, index);
 
     if (!prefix.isEmpty())
-        path.append(prefix + QLatin1Char('/'));
+        path.append(prefix + QDir::separator());
 
     if (directory >= 0)
-        path.append(QString::fromLatin1(unshield_directory_name(unshield, directory)) + QLatin1Char('/'));
+        path.append(QString::fromLatin1(unshield_directory_name(unshield, directory)) + QDir::separator());
 
+    // Ensure the path has the right separators
+    path.replace(QLatin1Char('\\'), QDir::separator());
+    path = QDir::toNativeSeparators(path);
+
+    qDebug() << "path is: " << path << QString::fromLatin1(unshield_directory_name(unshield, directory)) + QLatin1Char('/');
     // Ensure the target path exists
     QDir dir;
     dir.mkpath(path);

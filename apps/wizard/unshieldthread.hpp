@@ -29,6 +29,11 @@ namespace Wizard
 
     private:
 
+        bool removeDirectory(const QString &dirName);
+
+        bool moveFile(const QString &source, const QString &destination);
+        bool moveDirectory(const QString &source, const QString &destination);
+
         void setupSettings();
         void extract();
 
