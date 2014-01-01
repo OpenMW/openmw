@@ -1325,7 +1325,8 @@ namespace MWWorld
     {
         float telekinesisRangeBonus =
                 mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                .get(ESM::MagicEffect::Telekinesis).mMagnitude * 22;
+                .get(ESM::MagicEffect::Telekinesis).mMagnitude;
+        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 
         float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
 
@@ -2396,8 +2397,7 @@ namespace MWWorld
         if (!dist)
             return;
 
-        // TODO: "1 foot" = 20 game units?
-        dist *= 20;
+        dist = feetToGameUnits(dist);
 
         AddDetectedReference functor (out, ptr, type, dist*dist);
 
@@ -2407,5 +2407,12 @@ namespace MWWorld
             MWWorld::CellStore* cellStore = *it;
             cellStore->forEach(functor);
         }
+    }
+
+    float World::feetToGameUnits(float feet)
+    {
+        // Looks like there is no GMST for this. This factor was determined in experiments
+        // with the Telekinesis effect.
+        return feet * 22;
     }
 }

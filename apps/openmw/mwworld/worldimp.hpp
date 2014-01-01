@@ -155,6 +155,8 @@ namespace MWWorld
             /// Called when \a object is moved to an inactive cell
             void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
 
+            float feetToGameUnits(float feet);
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
