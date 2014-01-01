@@ -518,6 +518,14 @@ namespace MWWorld
             virtual void breakInvisibility (const MWWorld::Ptr& actor);
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const;
+
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result);
+
+            /// Teleports \a ptr to the reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
+            /// closest to \a worldPos.
+            /// @note id must be lower case
+            virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
+                                                  const std::string& id, Ogre::Vector3 worldPos);
     };
 }
 

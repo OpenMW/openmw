@@ -16,6 +16,7 @@
 #include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -774,6 +775,13 @@ namespace MWGui
             mHud->setCellName( cell->mCell->mName );
             mMap->setCellPrefix( cell->mCell->mName );
             mHud->setCellPrefix( cell->mCell->mName );
+
+            Ogre::Vector3 worldPos;
+            if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
+                worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
+            else
+                MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
+            mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
         }
 
     }

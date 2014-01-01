@@ -396,20 +396,18 @@ namespace MWGui
 
     void MapWindow::globalMapUpdatePlayer ()
     {
-        Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedPosition ();
-        Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedOrientation ();
-        Ogre::Vector2 dir (orient.yAxis ().x, orient.yAxis().y);
-
-        float worldX, worldY;
-        mGlobalMapRender->worldPosToImageSpace (pos.x, pos.y, worldX, worldY);
-        worldX *= mGlobalMapRender->getWidth();
-        worldY *= mGlobalMapRender->getHeight();
-
-
-        // for interiors, we have no choice other than using the last position & direction.
-        /// \todo save this last position in the savegame?
+        // For interiors, position is set by WindowManager via setGlobalMapPlayerPosition
         if (MWBase::Environment::get().getWorld ()->isCellExterior ())
         {
+            Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedPosition ();
+            Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedOrientation ();
+            Ogre::Vector2 dir (orient.yAxis ().x, orient.yAxis().y);
+
+            float worldX, worldY;
+            mGlobalMapRender->worldPosToImageSpace (pos.x, pos.y, worldX, worldY);
+            worldX *= mGlobalMapRender->getWidth();
+            worldY *= mGlobalMapRender->getHeight();
+
             mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(worldX - 16, worldY - 16));
 
             MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
@@ -442,6 +440,21 @@ namespace MWGui
         mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
         mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
                 "#{sWorld}");
+    }
+
+    void MapWindow::setGlobalMapPlayerPosition(float worldX, float worldY)
+    {
+        float x, y;
+        mGlobalMapRender->worldPosToImageSpace (worldX, worldY, x, y);
+        x *= mGlobalMapRender->getWidth();
+        y *= mGlobalMapRender->getHeight();
+
+        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(x - 16, y - 16));
+
+        // set the view offset so that player is in the center
+        MyGUI::IntSize viewsize = mGlobalMap->getSize();
+        MyGUI::IntPoint viewoffs(0.5*viewsize.width - x, 0.5*viewsize.height - y);
+        mGlobalMap->setViewOffset(viewoffs);
     }
 
 }

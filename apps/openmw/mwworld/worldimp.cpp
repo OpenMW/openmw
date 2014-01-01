@@ -39,6 +39,7 @@
 #include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
+#include "actionteleport.hpp"
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
@@ -498,12 +499,14 @@ namespace MWWorld
         if (!ptr.isEmpty())
             return ptr;
 
+        std::string lowerCaseName = Misc::StringUtils::lowerCase(name);
+
         // active cells
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr::CellStore* cellstore = *iter;
-            Ptr ptr = mCells.getPtr (name, *cellstore, true);
+            Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, true);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -511,7 +514,7 @@ namespace MWWorld
 
         if (!activeOnly)
         {
-            Ptr ptr = mCells.getPtr (name);
+            Ptr ptr = mCells.getPtr (lowerCaseName);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -1297,6 +1300,12 @@ namespace MWWorld
         performUpdateSceneQueries ();
 
         updateWindowManager ();
+
+        if (mPlayer->getPlayer().getCell()->isExterior())
+        {
+            ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
+            mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]));
+        }
     }
 
     void World::updateWindowManager ()
@@ -2288,7 +2297,54 @@ namespace MWWorld
 
     bool World::isDark() const
     {
-      return mWeatherManager->isDark();
+        return mWeatherManager->isDark();
+    }
+
+    bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
+    {
+        MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
+        CellRefList<ESM::Door>::List& refList = doors.mList;
+
+        // Check if any door in the cell leads to an exterior directly
+        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
+        {
+            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+            if (ref.mRef.mTeleport && ref.mRef.mDestCell.empty())
+            {
+                ESM::Position pos = ref.mRef.mDoorDest;
+                result = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+                return true;
+            }
+        }
+
+        // No luck :(
+        return false;
+    }
+
+    void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
+                                          const std::string& id, Ogre::Vector3 worldPos)
+    {
+        MWWorld::Ptr closestMarker;
+        float closestDistance = FLT_MAX;
+
+        std::vector<MWWorld::Ptr> markers;
+        mCells.getExteriorPtrs(id, markers);
+
+        for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
+        {
+            ESM::Position pos = it->getRefData().getPosition();
+            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+            float distance = worldPos.squaredDistance(markerPos);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestMarker = *it;
+            }
+
+        }
+
+        MWWorld::ActionTeleport action("", closestMarker.getRefData().getPosition());
+        action.execute(ptr);
     }
 
     void World::updateWeather(float duration)

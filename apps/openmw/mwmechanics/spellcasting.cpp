@@ -132,7 +132,7 @@ namespace MWMechanics
             {
                 float random = std::rand() / static_cast<float>(RAND_MAX);
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
-                magnitude *= magnitudeMult;                    
+                magnitude *= magnitudeMult;
 
                 if (target.getClass().isActor() && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
                 {
@@ -239,18 +239,26 @@ namespace MWMechanics
             else if (effectId == ESM::MagicEffect::RemoveCurse)
                 target.getClass().getCreatureStats(target).getSpells().purgeCurses();
 
-            else if (effectId == ESM::MagicEffect::DivineIntervention)
+            if (target.getRefData().getHandle() != "player")
+                return;
+            if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled())
+                return;
+
+            Ogre::Vector3 worldPos;
+            if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(target.getCell(), worldPos))
+                worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
+
+            if (effectId == ESM::MagicEffect::DivineIntervention)
             {
                 MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
 
-                // We need to be able to get the world location of an interior cell before implementing this
-                // or alternatively, the last known exterior location of the player, which is how vanilla does it.
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker",                                                                               worldPos);
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
                 MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
 
-                // Same as above
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker", worldPos);
             }
 
             else if (effectId == ESM::MagicEffect::Mark)
