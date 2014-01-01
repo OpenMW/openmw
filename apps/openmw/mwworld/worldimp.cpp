@@ -796,32 +796,9 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject()
     {
-        std::pair<float, std::string> result;
-
-        if (!mRendering->occlusionQuerySupported())
-            result = mPhysics->getFacedHandle (getMaxActivationDistance ());
-        else
-            result = std::make_pair (mFacedDistance, mFacedHandle);
-
-        if (result.second.empty())
-            return MWWorld::Ptr ();
-
-        MWWorld::Ptr object = searchPtrViaHandle (result.second);
-        if (object.isEmpty())
-            return object;
-        float ActivationDistance;
-
-        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            ActivationDistance = getObjectActivationDistance ()*50;
-        else if (object.getTypeName ().find("NPC") != std::string::npos)
-            ActivationDistance = getNpcActivationDistance ();
-        else
-            ActivationDistance = getObjectActivationDistance ();
-
-        if (result.first > ActivationDistance)
-            return MWWorld::Ptr ();
-
-        return object;
+        if (mFacedHandle.empty())
+            return MWWorld::Ptr();
+        return searchPtrViaHandle(mFacedHandle);
     }
 
     std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
@@ -1346,6 +1323,12 @@ namespace MWWorld
 
     void World::updateFacedHandle ()
     {
+        float telekinesisRangeBonus =
+                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
+                .get(ESM::MagicEffect::Telekinesis).mMagnitude * 22;
+
+        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+
         // send new query
         // figure out which object we want to test against
         std::vector < std::pair < float, std::string > > results;
@@ -1353,13 +1336,13 @@ namespace MWWorld
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ());
+            results = mPhysics->getFacedHandles(x, y, activationDistance);
             if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
                 results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ()*50);
         }
         else
         {
-            results = mPhysics->getFacedHandles(getMaxActivationDistance ());
+            results = mPhysics->getFacedHandles(activationDistance);
         }
 
         // ignore the player and other things we're not interested in
