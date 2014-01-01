@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.27.0
+Version: 0.28.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -48,42 +48,42 @@ Allowed options:
   --version                             print version information and quit
   --data arg (=data)                    set data directories (later directories
                                         have higher priority)
-  --data-local arg                      set local data directory (highest 
+  --data-local arg                      set local data directory (highest
                                         priority)
   --fallback-archive arg (=fallback-archive)
-                                        set fallback BSA archives (later 
+                                        set fallback BSA archives (later
                                         archives have higher priority)
   --resources arg (=resources)          set resources directory
   --start arg (=Beshara)                set initial cell
-  --content arg                         content file(s): esm/esp, or 
+  --content arg                         content file(s): esm/esp, or
                                         omwgame/omwaddon
   --anim-verbose [=arg(=1)] (=0)        output animation indices files
   --no-sound [=arg(=1)] (=0)            disable all sounds
   --script-verbose [=arg(=1)] (=0)      verbose script output
   --script-all [=arg(=1)] (=0)          compile all scripts (excluding dialogue
                                         scripts) at startup
-  --script-console [=arg(=1)] (=0)      enable console-only script 
+  --script-console [=arg(=1)] (=0)      enable console-only script
                                         functionality
-  --script-run arg                      select a file containing a list of 
-                                        console commands that is executed on 
+  --script-run arg                      select a file containing a list of
+                                        console commands that is executed on
                                         startup
   --new-game [=arg(=1)] (=0)            activate char gen/new game mechanics
-  --fs-strict [=arg(=1)] (=0)           strict file system handling (no case 
+  --fs-strict [=arg(=1)] (=0)           strict file system handling (no case
                                         folding)
-  --encoding arg (=win1252)             Character encoding used in OpenMW game 
+  --encoding arg (=win1252)             Character encoding used in OpenMW game
                                         messages:
-                                        
-                                        win1250 - Central and Eastern European 
-                                        such as Polish, Czech, Slovak, 
-                                        Hungarian, Slovene, Bosnian, Croatian, 
-                                        Serbian (Latin script), Romanian and 
+
+                                        win1250 - Central and Eastern European
+                                        such as Polish, Czech, Slovak,
+                                        Hungarian, Slovene, Bosnian, Croatian,
+                                        Serbian (Latin script), Romanian and
                                         Albanian languages
-                                        
-                                        win1251 - Cyrillic alphabet such as 
-                                        Russian, Bulgarian, Serbian Cyrillic 
+
+                                        win1251 - Cyrillic alphabet such as
+                                        Russian, Bulgarian, Serbian Cyrillic
                                         and other languages
-                                        
-                                        win1252 - Western European (Latin) 
+
+                                        win1252 - Western European (Latin)
                                         alphabet, used by default
   --fallback arg                        fallback values
   --no-grab                             Don't grab mouse cursor

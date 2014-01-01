@@ -19,7 +19,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 27)
+set (OPENMW_VERSION_MINOR 28)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -323,7 +323,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
     "${OpenMW_BINARY_DIR}/opencs.cfg")
-    
+
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
 
