@@ -210,6 +210,8 @@ int CS::Editor::run()
     if (mLocal.empty())
         return 1;
 
+// temporarily disable OGRE-integration (need to fix path problem first)
+#if 0
     // TODO: setting
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName("OpenGL Rendering Subsystem"));
 
@@ -223,6 +225,7 @@ int CS::Editor::run()
     params.insert(std::make_pair("hidden", "true"));
     Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
     hiddenWindow->setActive(false);
+#endif
 
     mStartup.show();
 
