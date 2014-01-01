@@ -8,6 +8,7 @@
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/actionteleport.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -259,13 +260,21 @@ namespace MWMechanics
 
             else if (effectId == ESM::MagicEffect::Mark)
             {
-                // TODO
+                MWBase::Environment::get().getWorld()->getPlayer().markPosition(
+                            target.getCell(), target.getRefData().getPosition());
             }
             else if (effectId == ESM::MagicEffect::Recall)
             {
-                MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                MWWorld::CellStore* markedCell = NULL;
+                ESM::Position markedPosition;
 
-                // TODO
+                MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
+                if (markedCell)
+                {
+                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->mCell->mName,
+                                            markedPosition);
+                    action.execute(target);
+                }
             }
         }
     }

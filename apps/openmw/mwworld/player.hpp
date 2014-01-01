@@ -32,12 +32,20 @@ namespace MWWorld
 
         Ogre::Vector3 mLastKnownExteriorPosition;
 
+        ESM::Position           mMarkedPosition;
+        // If no position was marked, this is NULL
+        CellStore*              mMarkedCell;
+
         bool                    mAutoMove;
         int                     mForwardBackward;
         bool                    mTeleported;
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);
+
+        // For mark/recall magic effects
+        void markPosition (CellStore* markedCell, ESM::Position markedPosition);
+        void getMarkedPosition (CellStore*& markedCell, ESM::Position& markedPosition) const;
 
         /// Interiors can not always be mapped to a world position. However
         /// world position is still required for divine / almsivi magic effects
