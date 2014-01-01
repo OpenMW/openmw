@@ -1940,17 +1940,8 @@ namespace MWWorld
             int y = ext->getGridY();
             indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
 
-            ESM::Land* land = getStore().get<ESM::Land>().search(x, y);
-            if (land) {
-                if (!land->isDataLoaded(ESM::Land::DATA_VHGT)) {
-                    land->loadData(ESM::Land::DATA_VHGT);
-                }
-                pos.pos[2] = land->mLandData->mHeights[ESM::Land::LAND_NUM_VERTS / 2 + 1];
-            }
-            else {
-                std::cerr << "Land data for cell at (" << x << ", " << y << ") not found\n";
-                pos.pos[2] = 0;
-            }
+            // Note: Z pos will be adjusted by adjustPosition later
+            pos.pos[2] = 0;
 
             return true;
         }
