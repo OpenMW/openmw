@@ -250,14 +250,10 @@ namespace MWMechanics
 
             if (effectId == ESM::MagicEffect::DivineIntervention)
             {
-                MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
-
                 MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker",                                                                               worldPos);
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
-                MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
-
                 MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker", worldPos);
             }
 
