@@ -1287,7 +1287,7 @@ namespace MWWorld
                 mRendering->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
         }
 
-        mWeatherManager->update (duration);
+        updateWeather(duration);
 
         mWorldScene->update (duration, paused);
 
@@ -2289,5 +2289,16 @@ namespace MWWorld
     bool World::isDark() const
     {
       return mWeatherManager->isDark();
+    }
+
+    void World::updateWeather(float duration)
+    {
+        if (mPlayer->wasTeleported())
+        {
+            mPlayer->setTeleported(false);
+            mWeatherManager->switchToNextWeather(true);
+        }
+
+        mWeatherManager->update(duration);
     }
 }
