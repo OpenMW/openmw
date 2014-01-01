@@ -48,6 +48,7 @@ namespace MWMechanics
         public:
 
             Actors();
+            ~Actors();
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)

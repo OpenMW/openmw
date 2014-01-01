@@ -19,25 +19,27 @@ namespace MWRender
     Camera::Camera (Ogre::Camera *camera)
     : mCamera(camera),
       mCameraNode(NULL),
+      mAnimation(NULL),
       mFirstPersonView(true),
       mPreviewMode(false),
       mFreeLook(true),
-      mHeight(128.f),
-      mCameraDistance(300.f),
-      mDistanceAdjusted(false),
-      mAnimation(NULL),
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
       mIsFurthest(false),
+      mHeight(128.f),
+      mCameraDistance(300.f),
+      mDistanceAdjusted(false),
       mVanityToggleQueued(false),
       mViewModeToggleQueued(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
 
+        mPreviewCam.pitch = 0.f;
         mPreviewCam.yaw = 0.f;
         mPreviewCam.offset = 400.f;
+        mMainCam.pitch = 0.f;
         mMainCam.yaw = 0.f;
         mMainCam.offset = 400.f;
     }

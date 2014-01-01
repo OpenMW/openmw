@@ -537,6 +537,16 @@ namespace MWMechanics
 
     Actors::Actors() {}
 
+    Actors::~Actors()
+    {
+      PtrControllerMap::iterator it(mActors.begin());
+      for (; it != mActors.end(); ++it)
+      {
+        delete it->second;
+        it->second = NULL;
+      }
+    }
+
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
         // erase previous death events since we are currently only tracking them while in an active cell
