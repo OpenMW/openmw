@@ -278,6 +278,11 @@ namespace MWRender
         }
     }
 
+    float Camera::getCameraDistance() const
+    {
+        return mCamera->getPosition().z;
+    }
+
     void Camera::setCameraDistance(float dist, bool adjust, bool override)
     {
         if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)

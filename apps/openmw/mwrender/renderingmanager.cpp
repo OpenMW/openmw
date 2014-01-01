@@ -1026,4 +1026,9 @@ void RenderingManager::enableTerrain(bool enable)
             mTerrain->setVisible(false);
 }
 
+float RenderingManager::getCameraDistance() const
+{
+    return mCamera->getCameraDistance();
+}
+
 } // namespace

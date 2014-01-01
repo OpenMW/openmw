@@ -1329,6 +1329,7 @@ namespace MWWorld
         telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 
         float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+        activationDistance += mRendering->getCameraDistance();
 
         // send new query
         // figure out which object we want to test against
