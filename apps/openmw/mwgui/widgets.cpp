@@ -528,14 +528,9 @@ namespace MWGui
 
             if (mBarTextWidget)
             {
-                if (mValue >= 0 && mMax > 0)
-                {
-                    std::stringstream out;
-                    out << mValue << "/" << mMax;
-                    static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption(out.str().c_str());
-                }
-                else
-                    static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption("");
+                std::stringstream out;
+                out << mValue << "/" << mMax;
+                static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption(out.str().c_str());
             }
         }
         void MWDynamicStat::setTitle(const std::string& text)
