@@ -186,35 +186,7 @@ void CSMTools::ReferenceableCheckStage::bookCheck(int stage, const CSMWorld::Ref
     const ESM::Book& Book = (dynamic_cast<const CSMWorld::Record<ESM::Book>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Book, Book.mId);
 
-    //Checking for name
-    if (Book.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Book.mId + " has an empty name");
-    }
-
-    //Checking for weight
-    if (Book.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Book.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Book.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Book.mId + " has negative value");
-    }
-
-//checking for model
-    if (Book.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Book.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Book.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Book.mId + " has no icon");
-    }
+    inventoryItemCheck<ESM::Book>(Book, messages);
 
     //checking for enchantment points
     if (Book.mData.mEnchant < 0)
@@ -1008,4 +980,38 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     }
 
     //TODO: reputation, Disposition, rank, everything else
+}
+
+//Templates begins here
+
+void CSMTools::ReferenceableCheckStage::inventoryItemCheck(const item& item, std::vector< std::string >& messages)
+{
+    if (item.mName.empty())
+    {
+        messages.push_back(id.toString() + "|" + item.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (item.mData.mWeight < 0)
+    {
+        messages.push_back(id.toString() + "|" + item.mId + " has negative weight");
+    }
+
+    //Checking for value
+    if (item.mData.mValue < 0)
+    {
+        messages.push_back(id.toString() + "|" + item.mId + " has negative value");
+    }
+
+//checking for model
+    if (item.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + item.mId + " has no model");
+    }
+
+    //checking for icon
+    if (item.mIcon.empty())
+    {
+        messages.push_back(id.toString() + "|" + item.mId + " has no icon");
+    }
 }

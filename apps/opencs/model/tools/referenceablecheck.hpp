@@ -34,6 +34,9 @@ namespace CSMTools
             void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, std::vector<std::string>& messages);
             void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, std::vector<std::string>& messages);
 
+	    //TEMPLATE CHECKS
+	    template<typename item> void inventoryItemCheck(const item& item, std::vector<std::string>& messages); //for all inventory items.
+	    
             const CSMWorld::RefIdData& mReferencables;
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
             const CSMWorld::IdCollection<ESM::Class>& mClasses;
