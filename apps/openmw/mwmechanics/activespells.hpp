@@ -82,8 +82,8 @@ namespace MWMechanics
             /// Remove all active effects with this id
             void purgeEffect (short effectId);
 
-            /// Remove all active effects
-            void purgeAll ();
+            /// Remove all active effects, if roll succeeds (for each effect)
+            void purgeAll (float chance);
 
             bool isSpellActive (std::string id) const;
             ///< case insensitive

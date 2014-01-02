@@ -169,9 +169,17 @@ namespace MWMechanics
         }
     }
 
-    void ActiveSpells::purgeAll()
+    void ActiveSpells::purgeAll(float chance)
     {
-        mSpells.clear();
+        for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); )
+        {
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (roll < chance)
+                mSpells.erase(it++);
+            else
+                ++it;
+        }
+        mSpellsChanged = true;
     }
 
     void ActiveSpells::purgeEffect(short effectId)
@@ -187,6 +195,6 @@ namespace MWMechanics
                     effectIt++;
             }
         }
-
+        mSpellsChanged = true;
     }
 }
