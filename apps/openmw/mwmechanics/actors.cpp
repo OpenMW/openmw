@@ -278,7 +278,7 @@ namespace MWMechanics
         {
             // the actor is sleeping, restore health and magicka
 
-            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
+            bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0;
 
             DynamicStat<float> health = stats.getHealth();
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
@@ -329,23 +329,23 @@ namespace MWMechanics
         for(int i = 0;i < 3;++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyHealth+i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
+            stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).mMagnitude -
+                             effects.get(ESM::MagicEffect::DrainHealth+i).mMagnitude);
 
 
-            float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::AbsorbHealth+i)).mMagnitude;
+            float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).mMagnitude
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth+i).mMagnitude
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth+i).mMagnitude;
             stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
         }
 
         // Apply disintegration (reduces item health)
-        float disintegrateWeapon = effects.get(EffectKey(ESM::MagicEffect::DisintegrateWeapon)).mMagnitude;
+        float disintegrateWeapon = effects.get(ESM::MagicEffect::DisintegrateWeapon).mMagnitude;
         if (disintegrateWeapon > 0)
             disintegrateSlot(ptr, MWWorld::InventoryStore::Slot_CarriedRight, disintegrateWeapon*duration);
-        float disintegrateArmor = effects.get(EffectKey(ESM::MagicEffect::DisintegrateArmor)).mMagnitude;
+        float disintegrateArmor = effects.get(ESM::MagicEffect::DisintegrateArmor).mMagnitude;
         if (disintegrateArmor > 0)
         {
             // According to UESP
@@ -377,7 +377,7 @@ namespace MWMechanics
         DynamicStat<float> health = creatureStats.getHealth();
         for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
         {
-            float magnitude = creatureStats.getMagicEffects().get(EffectKey(damageEffects[i])).mMagnitude;
+            float magnitude = creatureStats.getMagicEffects().get(damageEffects[i]).mMagnitude;
 
             if (damageEffects[i] == ESM::MagicEffect::SunDamage)
             {
@@ -424,7 +424,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
         {
             bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
-            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
                 std::string item = "bound_" + it->second;
@@ -472,7 +472,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
         {
             bool found = creatureStats.mSummonedCreatures.find(it->first) != creatureStats.mSummonedCreatures.end();
-            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
                 if (magnitude > 0)

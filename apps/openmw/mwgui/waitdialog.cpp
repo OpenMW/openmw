@@ -154,7 +154,7 @@ namespace MWGui
 
         float hourlyHealthDelta  = stats.getAttribute(ESM::Attribute::Endurance).getModified() * 0.1;
 
-        bool stunted = (stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0);
+        bool stunted = (stats.getMagicEffects().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0);
         float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat();
         float hourlyMagickaDelta = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
