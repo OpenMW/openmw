@@ -90,7 +90,8 @@ enum CharacterState {
     CharState_Death5,
     CharState_SwimDeath,
 
-    CharState_Hit
+    CharState_Hit,
+    CharState_KnockDown
 };
 
 enum WeaponType {
@@ -114,7 +115,6 @@ enum UpperBodyCharacterState {
     UpperCharState_UnEquipingWeap,
     UpperCharState_WeapEquiped,
     UpperCharState_StartToMinAttack,
-    UpperCharState_StartToAttach,
     UpperCharState_MinAttackToMaxAttack,
     UpperCharState_MaxAttackToMinHit,
     UpperCharState_MinHitToHit,
@@ -176,12 +176,10 @@ class CharacterController
     void clearAnimQueue();
 
     bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
-    void playWeaponAnim(const std::string& start, const std::string& stop, 
-                        float speed = 1.0f, bool autoDisable = true, bool disablePrevious = false, float startpoint = 0.0f, bool currentWeapon = true);
 
     void updateVisibility();
 
-    void playRandomDeath(float startpoint);
+    void playRandomDeath(float startpoint = 0.0f);
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
