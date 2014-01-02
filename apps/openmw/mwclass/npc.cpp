@@ -848,7 +848,8 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
+        else if(mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0 &&
+                world->isLevitationEnabled())
         {
             float flySpeed = 0.01f*(npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified() +
                                     mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude);
