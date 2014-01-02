@@ -236,7 +236,7 @@ namespace MWMechanics
             else if (effectId == ESM::MagicEffect::CureCorprusDisease)
                 target.getClass().getCreatureStats(target).getSpells().purgeCorprusDisease();
             else if (effectId == ESM::MagicEffect::Dispel)
-                target.getClass().getCreatureStats(target).getActiveSpells().purgeAll();
+                target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
             else if (effectId == ESM::MagicEffect::RemoveCurse)
                 target.getClass().getCreatureStats(target).getSpells().purgeCurses();
 
