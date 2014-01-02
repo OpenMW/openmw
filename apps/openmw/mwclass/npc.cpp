@@ -493,6 +493,11 @@ namespace MWClass
                 if (!MWBase::Environment::get().getWorld()->getGodModeState())
                     weapon.getCellRef().mCharge -= std::min(std::max(1,
                         (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
+
+                // Weapon broken? unequip it
+                if (weapon.getCellRef().mCharge == 0)
+                    weapon = *inv.unequipItem(weapon, ptr);
+
             }
             healthdmg = true;
         }
@@ -644,6 +649,11 @@ namespace MWClass
                         armorref.mCharge = armor.get<ESM::Armor>()->mBase->mData.mHealth;
                     armorref.mCharge -= std::min(std::max(1, (int)damagediff),
                                                  armorref.mCharge);
+
+                    // Armor broken? unequip it
+                    if (armorref.mCharge == 0)
+                        inv.unequipItem(armor, ptr);
+
                     switch(get(armor).getEquipmentSkill(armor))
                     {
                         case ESM::Skill::LightArmor:
