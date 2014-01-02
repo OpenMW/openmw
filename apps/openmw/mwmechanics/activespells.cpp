@@ -172,6 +172,7 @@ namespace MWMechanics
     void ActiveSpells::purgeAll()
     {
         mSpells.clear();
+        mSpellsChanged = true;
     }
 
     void ActiveSpells::purgeEffect(short effectId)
@@ -187,6 +188,6 @@ namespace MWMechanics
                     effectIt++;
             }
         }
-
+        mSpellsChanged = true;
     }
 }
