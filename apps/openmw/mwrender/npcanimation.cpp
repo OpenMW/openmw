@@ -664,11 +664,12 @@ void NpcAnimation::showCarriedLeft(bool show)
     {
         Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
         std::string mesh = MWWorld::Class::get(*iter).getModel(*iter);
-        addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                                   mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor);
-
-        if (iter->getTypeName() == typeid(ESM::Light).name())
-            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], iter->get<ESM::Light>()->mBase);
+        if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
+                                   mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
+        {
+            if (iter->getTypeName() == typeid(ESM::Light).name())
+                addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], iter->get<ESM::Light>()->mBase);
+        }
     }
     else
         removeIndividualPart(ESM::PRT_Shield);
