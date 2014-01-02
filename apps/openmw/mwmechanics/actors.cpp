@@ -695,6 +695,11 @@ namespace MWMechanics
 
                 iter->second->kill();
 
+                // Reset magic effects and recalculate derived effects
+                // One case where we need this is to make sure bound items are removed upon death
+                stats.setMagicEffects(MWMechanics::MagicEffects());
+                calculateCreatureStatModifiers(iter->first, 0);
+
                 ++mDeathCount[cls.getId(iter->first)];
 
                 if(cls.isEssential(iter->first))
