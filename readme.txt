@@ -154,6 +154,8 @@ Bug #1059: Cure disease potion removes all effects from player, even your race b
 Bug #1063: Crash upon checking out game start ship area in Seyda Neen
 Bug #1064: openmw binaries link to unnecessary libraries
 Bug #1065: Landing from a high place in water still causes fall damage
+Bug #1072: Drawing weapon increases torch brightness
+Bug #1073: Merchants sell stacks of gold
 Feature #43: Visuals for Magic Effects
 Feature #51: Ranged Magic
 Feature #52: Touch Range Magic
