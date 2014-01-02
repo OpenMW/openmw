@@ -46,6 +46,44 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
     }
 }
 
+bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
+{
+    // TODO: remove this check once creatures support inventory store
+    if (ptr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator item =
+                inv.getSlot(slot);
+        if (item != inv.end())
+        {
+            if (!item->getClass().hasItemHealth(*item))
+                return false;
+            if (item->getCellRef().mCharge == -1)
+                item->getCellRef().mCharge = item->getClass().getItemMaxHealth(*item);
+
+            if (item->getCellRef().mCharge == 0)
+                return false;
+
+            item->getCellRef().mCharge -=
+                    std::min(disintegrate,
+                             static_cast<float>(item->getCellRef().mCharge));
+
+            if (item->getCellRef().mCharge == 0)
+            {
+                // Will unequip the broken item and try to find a replacement
+                if (ptr.getRefData().getHandle() != "player")
+                    inv.autoEquip(ptr);
+                else
+                    inv.unequipItem(*item, ptr);
+            }
+
+            return true;
+        }
+    }
+    return true;
+}
+
+
 }
 
 namespace MWMechanics
@@ -239,6 +277,33 @@ namespace MWMechanics
             stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
+        }
+
+        // Apply disintegration (reduces item health)
+        float disintegrateWeapon = effects.get(EffectKey(ESM::MagicEffect::DisintegrateWeapon)).mMagnitude;
+        if (disintegrateWeapon > 0)
+            disintegrateSlot(ptr, MWWorld::InventoryStore::Slot_CarriedRight, disintegrateWeapon*duration);
+        float disintegrateArmor = effects.get(EffectKey(ESM::MagicEffect::DisintegrateArmor)).mMagnitude;
+        if (disintegrateArmor > 0)
+        {
+            // According to UESP
+            int priorities[] = {
+                MWWorld::InventoryStore::Slot_CarriedLeft,
+                MWWorld::InventoryStore::Slot_Cuirass,
+                MWWorld::InventoryStore::Slot_LeftPauldron,
+                MWWorld::InventoryStore::Slot_RightPauldron,
+                MWWorld::InventoryStore::Slot_LeftGauntlet,
+                MWWorld::InventoryStore::Slot_RightGauntlet,
+                MWWorld::InventoryStore::Slot_Helmet,
+                MWWorld::InventoryStore::Slot_Greaves,
+                MWWorld::InventoryStore::Slot_Boots
+            };
+
+            for (unsigned int i=0; i<sizeof(priorities)/sizeof(int); ++i)
+            {
+                if (disintegrateSlot(ptr, priorities[i], disintegrateArmor*duration))
+                    break;
+            }
         }
 
         // Apply damage ticks
@@ -639,6 +704,11 @@ namespace MWMechanics
                     continue;
 
                 iter->second->kill();
+
+                // Reset magic effects and recalculate derived effects
+                // One case where we need this is to make sure bound items are removed upon death
+                stats.setMagicEffects(MWMechanics::MagicEffects());
+                calculateCreatureStatModifiers(iter->first, 0);
 
                 ++mDeathCount[cls.getId(iter->first)];
 

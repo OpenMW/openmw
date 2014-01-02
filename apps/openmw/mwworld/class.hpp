@@ -290,6 +290,8 @@ namespace MWWorld
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
+            virtual bool isKey (const MWWorld::Ptr& ptr) const { return false; }
+
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 

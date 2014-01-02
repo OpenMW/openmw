@@ -130,7 +130,7 @@ namespace MWBase
             virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
             ///< get north vector (OGRE coordinates) for given interior cell
 
-            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell) = 0;
+            virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
             virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
@@ -438,6 +438,18 @@ namespace MWBase
             /// @note id must be lower case
             virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
                                                   const std::string& id, Ogre::Vector3 worldPos) = 0;
+
+            enum DetectionType
+            {
+                Detect_Enchantment,
+                Detect_Key,
+                Detect_Creature
+            };
+            /// List all references (filtered by \a type) detected by \a ptr. The range
+            /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
+            /// @note This also works for references in containers.
+            virtual void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
+                                                  DetectionType type) = 0;
     };
 }
 
