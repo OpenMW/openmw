@@ -192,7 +192,7 @@ namespace MWMechanics
                  effectIt != list.mList.end(); ++effectIt, ++i)
             {
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * it->second[i];
-                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, magnitude);
+                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, "", magnitude);
             }
         }
     }

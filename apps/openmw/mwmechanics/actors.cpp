@@ -88,6 +88,68 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
 
 namespace MWMechanics
 {
+
+    class SoulTrap : public MWMechanics::EffectSourceVisitor
+    {
+        MWWorld::Ptr mCreature;
+        MWWorld::Ptr mActor;
+    public:
+        SoulTrap(MWWorld::Ptr trappedCreature)
+            : mCreature(trappedCreature) {}
+
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, const std::string& casterHandle,
+                            float magnitude, float remainingTime = -1)
+        {
+            if (key.mId != ESM::MagicEffect::Soultrap)
+                return;
+            if (magnitude <= 0)
+                return;
+
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+
+            MWWorld::Ptr caster = world->searchPtrViaHandle(casterHandle);
+            if (caster.isEmpty() || !caster.getClass().isActor())
+                return;
+
+            static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->getFloat();
+
+            float creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
+
+            // Use the smallest soulgem that is large enough to hold the soul
+            MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
+            MWWorld::ContainerStoreIterator gem = container.end();
+            float gemCapacity = std::numeric_limits<float>().max();
+            std::string soulgemFilter = "misc_soulgem"; // no other way to check for soulgems? :/
+            for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
+                 it != container.end(); ++it)
+            {
+                const std::string& id = it->getCellRef().mRefID;
+                if (id.size() >= soulgemFilter.size()
+                        && id.substr(0,soulgemFilter.size()) == soulgemFilter)
+                {
+                    float thisGemCapacity = it->get<ESM::Miscellaneous>()->mBase->mData.mValue * fSoulgemMult;
+                    if (thisGemCapacity >= creatureSoulValue && thisGemCapacity < gemCapacity
+                            && it->getCellRef().mSoul.empty())
+                    {
+                        gem = it;
+                        gemCapacity = thisGemCapacity;
+                    }
+                }
+            }
+
+            if (gem == container.end())
+                return;
+
+            // Set the soul on just one of the gems, not the whole stack
+            gem->getContainerStore()->unstack(*gem, caster);
+            gem->getCellRef().mSoul = mCreature.getCellRef().mRefID;
+
+            if (caster.getRefData().getHandle() == "player")
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
+        }
+    };
+
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
     {
         // magic effects
@@ -705,6 +767,13 @@ namespace MWMechanics
 
                 iter->second->kill();
 
+                // Apply soultrap
+                if (iter->first.getTypeName() == typeid(ESM::Creature).name())
+                {
+                    SoulTrap soulTrap (iter->first);
+                    stats.getActiveSpells().visitEffectSources(soulTrap);
+                }
+
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
                 stats.setMagicEffects(MWMechanics::MagicEffects());
@@ -714,6 +783,7 @@ namespace MWMechanics
 
                 if(cls.isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+
             }
         }
 
