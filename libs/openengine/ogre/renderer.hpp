@@ -74,8 +74,9 @@ namespace OEngine
             , mScene(NULL)
             , mCamera(NULL)
             , mView(NULL)
-            , mWindowListener(NULL)
+            , mOgreInit(NULL)
             , mFader(NULL)
+            , mWindowListener(NULL)
             {
             }
 

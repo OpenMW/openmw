@@ -90,6 +90,7 @@ public:
 
     bool vanityRotateCamera(const float *rot);
     void setCameraDistance(float dist, bool adjust = false, bool override = true);
+    float getCameraDistance() const;
 
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);

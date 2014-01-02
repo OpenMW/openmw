@@ -103,27 +103,80 @@ namespace MWGui
 
     void LocalMapBase::onMarkerFocused (MyGUI::Widget* w1, MyGUI::Widget* w2)
     {
+        // Workaround to not make the marker visible if it's under fog of war
         applyFogOfWar ();
     }
 
     void LocalMapBase::onMarkerUnfocused (MyGUI::Widget* w1, MyGUI::Widget* w2)
     {
+        // Workaround to not make the marker visible if it's under fog of war
         applyFogOfWar ();
+    }
+
+    MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerPosition& markerPos)
+    {
+        MyGUI::IntPoint widgetPos;
+        // normalized cell coordinates
+        float nX,nY;
+
+        markerPos.interior = mInterior;
+
+        if (!mInterior)
+        {
+            int cellX, cellY;
+            MWBase::Environment::get().getWorld()->positionToIndex(worldX, worldY, cellX, cellY);
+            const int cellSize = 8192;
+            nX = (worldX - cellSize * cellX) / cellSize;
+            // Image space is -Y up, cells are Y up
+            nY = 1 - (worldY - cellSize * cellY) / cellSize;
+
+            float cellDx = cellX - mCurX;
+            float cellDy = cellY - mCurY;
+
+            markerPos.cellX = cellX;
+            markerPos.cellY = cellY;
+
+            widgetPos = MyGUI::IntPoint(nX * 512 + (1+cellDx) * 512,
+                                        nY * 512 - (cellDy-1) * 512);
+        }
+        else
+        {
+            int cellX, cellY;
+            Ogre::Vector2 worldPos (worldX, worldY);
+            MWBase::Environment::get().getWorld ()->getInteriorMapPosition (worldPos, nX, nY, cellX, cellY);
+
+            markerPos.cellX = cellX;
+            markerPos.cellY = cellY;
+
+            widgetPos = MyGUI::IntPoint(nX * 512 + (1+cellX-mCurX) * 512,
+                                        nY * 512 + (1+cellY-mCurY) * 512);
+        }
+
+        markerPos.nX = nX;
+        markerPos.nY = nY;
+        return widgetPos;
     }
 
     void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
     {
-        if (x==mCurX && y==mCurY && mInterior==interior && !mChanged) return; // don't do anything if we're still in the same cell
+        if (x==mCurX && y==mCurY && mInterior==interior && !mChanged)
+            return; // don't do anything if we're still in the same cell
+
+        mCurX = x;
+        mCurY = y;
+        mInterior = interior;
+        mChanged = false;
 
         // clear all previous markers
         for (unsigned int i=0; i< mLocalMap->getChildCount(); ++i)
         {
-            if (mLocalMap->getChildAt(i)->getName ().substr (0, 6) == "Marker")
+            if (mLocalMap->getChildAt(i)->getName ().substr (0, 4) == "Door")
             {
                 MyGUI::Gui::getInstance ().destroyWidget (mLocalMap->getChildAt(i));
             }
         }
 
+        // Update the map textures
         for (int mx=0; mx<3; ++mx)
         {
             for (int my=0; my<3; ++my)
@@ -138,78 +191,57 @@ namespace MWGui
                     box->setImageTexture(image);
                 else
                     box->setImageTexture("black.png");
-
-
-                // door markers
-
-                // interior map only consists of one cell, so handle the markers only once
-                if (interior && (mx != 2 || my != 2))
-                    continue;
-
-                MWWorld::CellStore* cell;
-                if (interior)
-                    cell = MWBase::Environment::get().getWorld ()->getInterior (mPrefix);
-                else
-                    cell = MWBase::Environment::get().getWorld ()->getExterior (x+mx-1, y-(my-1));
-
-                std::vector<MWBase::World::DoorMarker> doors = MWBase::Environment::get().getWorld ()->getDoorMarkers (cell);
-
-                for (std::vector<MWBase::World::DoorMarker>::iterator it = doors.begin(); it != doors.end(); ++it)
-                {
-                    MWBase::World::DoorMarker marker = *it;
-
-                    // convert world coordinates to normalized cell coordinates
-                    MyGUI::IntCoord widgetCoord;
-                    float nX,nY;
-                    int cellDx, cellDy;
-                    if (!interior)
-                    {
-                        const int cellSize = 8192;
-
-                        nX = (marker.x - cellSize * (x+mx-1)) / cellSize;
-                        nY = 1 - (marker.y - cellSize * (y-(my-1))) / cellSize;
-
-                        widgetCoord = MyGUI::IntCoord(nX * 512 - 4 + mx * 512, nY * 512 - 4 + my * 512, 8, 8);
-                    }
-                    else
-                    {
-                        Ogre::Vector2 position (marker.x, marker.y);
-                        MWBase::Environment::get().getWorld ()->getInteriorMapPosition (position, nX, nY, cellDx, cellDy);
-
-                        widgetCoord = MyGUI::IntCoord(nX * 512 - 4 + (1+cellDx-x) * 512, nY * 512 - 4 + (1+cellDy-y) * 512, 8, 8);
-                    }
-
-                    static int counter = 0;
-                    ++counter;
-                    MyGUI::Button* markerWidget = mLocalMap->createWidget<MyGUI::Button>("ButtonImage",
-                        widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(counter));
-                    markerWidget->setImageResource("DoorMarker");
-                    markerWidget->setUserString("ToolTipType", "Layout");
-                    markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-                    markerWidget->setUserString("Caption_TextOneLine", marker.name);
-                    markerWidget->setUserString("IsMarker", "true");
-                    markerWidget->eventMouseSetFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerFocused);
-                    markerWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerUnfocused);
-
-                    MarkerPosition markerPos;
-                    markerPos.interior = interior;
-                    markerPos.cellX = interior ? cellDx : x + mx - 1;
-                    markerPos.cellY = interior ? cellDy : y + ((my - 1)*-1);
-                    markerPos.nX = nX;
-                    markerPos.nY = nY;
-
-                    markerWidget->setUserData(markerPos);
-                }
-
-
             }
         }
-        mInterior = interior;
-        mCurX = x;
-        mCurY = y;
-        mChanged = false;
 
-        // fog of war
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        // Retrieve the door markers we want to show
+        std::vector<MWBase::World::DoorMarker> doors;
+        if (interior)
+        {
+            MWWorld::CellStore* cell = world->getInterior (mPrefix);
+            world->getDoorMarkers(cell, doors);
+        }
+        else
+        {
+            for (int dX=-1; dX<2; ++dX)
+            {
+                for (int dY=-1; dY<2; ++dY)
+                {
+                    MWWorld::CellStore* cell = world->getExterior (mCurX+dX, mCurY+dY);
+                    world->getDoorMarkers(cell, doors);
+                }
+            }
+        }
+
+        // Create a widget for each marker
+        int counter = 0;
+        for (std::vector<MWBase::World::DoorMarker>::iterator it = doors.begin(); it != doors.end(); ++it)
+        {
+            MWBase::World::DoorMarker marker = *it;
+
+            MarkerPosition markerPos;
+            MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, markerPos);
+            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
+                                        widgetPos.top - 4,
+                                        8, 8);
+            ++counter;
+            MyGUI::Button* markerWidget = mLocalMap->createWidget<MyGUI::Button>("ButtonImage",
+                widgetCoord, MyGUI::Align::Default, "Door" + boost::lexical_cast<std::string>(counter));
+            markerWidget->setImageResource("DoorMarker");
+            markerWidget->setUserString("ToolTipType", "Layout");
+            markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+            markerWidget->setUserString("Caption_TextOneLine", marker.name);
+            markerWidget->eventMouseSetFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerFocused);
+            markerWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerUnfocused);
+            // Used by tooltips to not show the tooltip if marker is hidden by fog of war
+            markerWidget->setUserString("IsMarker", "true");
+            markerWidget->setUserData(markerPos);
+        }
+
+        updateMarkers();
+
         applyFogOfWar();
 
         // set the compass texture again, because MyGUI determines sorting of ImageBox widgets
@@ -222,6 +254,8 @@ namespace MWGui
 
     void LocalMapBase::setPlayerPos(const float x, const float y)
     {
+        updateMarkers();
+
         if (x == mLastPositionX && y == mLastPositionY)
             return;
 
@@ -253,6 +287,88 @@ namespace MWGui
 
         mLastDirectionX = x;
         mLastDirectionY = y;
+    }
+
+    void LocalMapBase::addDetectionMarkers(int type)
+    {
+        std::vector<MWWorld::Ptr> markers;
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        world->listDetectedReferences(
+                    world->getPlayer().getPlayer(),
+                    markers, MWBase::World::DetectionType(type));
+        if (markers.empty())
+            return;
+
+        std::string markerTexture;
+        MyGUI::Colour markerColour;
+        if (type == MWBase::World::Detect_Creature)
+        {
+            markerTexture = "textures\\menu_map_dcreature.dds";
+            markerColour = MyGUI::Colour(1,0,0,1);
+        }
+        if (type == MWBase::World::Detect_Key)
+        {
+            markerTexture = "textures\\menu_map_dkey.dds";
+            markerColour = MyGUI::Colour(0,1,0,1);
+        }
+        if (type == MWBase::World::Detect_Enchantment)
+        {
+            markerTexture = "textures\\menu_map_dmagic.dds";
+            markerColour = MyGUI::Colour(0,0,1,1);
+        }
+
+        int counter = 0;
+        for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
+        {
+            const ESM::Position& worldPos = it->getRefData().getPosition();
+            MarkerPosition markerPos;
+            MyGUI::IntPoint widgetPos = getMarkerPosition(worldPos.pos[0], worldPos.pos[1], markerPos);
+            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
+                                        widgetPos.top - 4,
+                                        8, 8);
+            ++counter;
+            MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
+                widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(counter));
+            markerWidget->setImageTexture(markerTexture);
+            markerWidget->setUserString("IsMarker", "true");
+            markerWidget->setUserData(markerPos);
+            markerWidget->setColour(markerColour);
+        }
+    }
+
+    void LocalMapBase::updateMarkers()
+    {
+        // clear all previous markers
+        for (unsigned int i=0; i< mLocalMap->getChildCount(); ++i)
+        {
+            if (mLocalMap->getChildAt(i)->getName ().substr (0, 6) == "Marker")
+            {
+                MyGUI::Gui::getInstance ().destroyWidget (mLocalMap->getChildAt(i));
+            }
+        }
+
+        addDetectionMarkers(MWBase::World::Detect_Creature);
+        addDetectionMarkers(MWBase::World::Detect_Key);
+        addDetectionMarkers(MWBase::World::Detect_Enchantment);
+
+        // Add marker for the spot marked with Mark magic effect
+        MWWorld::CellStore* markedCell = NULL;
+        ESM::Position markedPosition;
+        MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
+        if (markedCell && markedCell->isExterior() == !mInterior
+                && (!mInterior || Misc::StringUtils::ciEqual(markedCell->mCell->mName, mPrefix)))
+        {
+            MarkerPosition markerPos;
+            MyGUI::IntPoint widgetPos = getMarkerPosition(markedPosition.pos[0], markedPosition.pos[1], markerPos);
+            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
+                                        widgetPos.top - 4,
+                                        8, 8);
+            MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
+                widgetCoord, MyGUI::Align::Default, "MarkerMarked");
+            markerWidget->setImageTexture("textures\\menu_map_smark.dds");
+            markerWidget->setUserString("IsMarker", "true");
+            markerWidget->setUserData(markerPos);
+        }
     }
 
     // ------------------------------------------------------------------------------------------
@@ -319,7 +435,7 @@ namespace MWGui
 
         static int _counter=0;
         MyGUI::Button* markerWidget = mGlobalMapImage->createWidget<MyGUI::Button>("ButtonImage",
-            widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(_counter));
+            widgetCoord, MyGUI::Align::Default, "Door" + boost::lexical_cast<std::string>(_counter));
         markerWidget->setImageResource("DoorMarker");
         markerWidget->setUserString("ToolTipType", "Layout");
         markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
@@ -385,7 +501,7 @@ namespace MWGui
 
         for (unsigned int i=0; i<mGlobalMapImage->getChildCount (); ++i)
         {
-            if (mGlobalMapImage->getChildAt (i)->getName().substr(0,6) == "Marker")
+            if (mGlobalMapImage->getChildAt (i)->getName().substr(0,4) == "Door")
                 mGlobalMapImage->getChildAt (i)->castType<MyGUI::Button>()->setImageResource("DoorMarker");
         }
 

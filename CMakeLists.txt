@@ -99,8 +99,6 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/BtOgreExtras.h
     ${LIBDIR}/openengine/bullet/BtOgreGP.h
     ${LIBDIR}/openengine/bullet/BtOgrePG.h
-    ${LIBDIR}/openengine/bullet/CMotionState.cpp
-    ${LIBDIR}/openengine/bullet/CMotionState.h
     ${LIBDIR}/openengine/bullet/physic.cpp
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp

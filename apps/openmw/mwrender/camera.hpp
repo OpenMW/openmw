@@ -105,6 +105,8 @@ namespace MWRender
         /// Restore default camera distance for current mode.
         void setCameraDistance();
 
+        float getCameraDistance() const;
+
         void setAnimation(NpcAnimation *anim);
 
         /// Stores focal and camera world positions in passed arguments

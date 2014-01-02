@@ -25,7 +25,8 @@ void OgreRenderer::cleanup()
     delete mFader;
     mFader = NULL;
 
-    Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
+    if (mWindow)
+        Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
     mWindow = NULL;
 
     delete mOgreInit;

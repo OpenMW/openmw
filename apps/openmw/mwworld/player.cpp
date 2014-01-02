@@ -21,7 +21,8 @@ namespace MWWorld
         mLastKnownExteriorPosition(0,0,0),
         mAutoMove(false),
         mForwardBackward (0),
-        mTeleported(false)
+        mTeleported(false),
+        mMarkedCell(NULL)
     {
         mPlayer.mBase = player;
         mPlayer.mRef.mRefID = "player";
@@ -156,5 +157,18 @@ namespace MWWorld
     void Player::setTeleported(bool teleported)
     {
         mTeleported = teleported;
+    }
+
+    void Player::markPosition(CellStore *markedCell, ESM::Position markedPosition)
+    {
+        mMarkedCell = markedCell;
+        mMarkedPosition = markedPosition;
+    }
+
+    void Player::getMarkedPosition(CellStore*& markedCell, ESM::Position &markedPosition) const
+    {
+        markedCell = mMarkedCell;
+        if (mMarkedCell)
+            markedPosition = mMarkedPosition;
     }
 }
