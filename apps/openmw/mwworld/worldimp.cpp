@@ -911,7 +911,7 @@ namespace MWWorld
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove)
+        if (haveToMove && ptr.getRefData().getBaseNode())
         {
             mRendering->moveObject(ptr, vec);
             mPhysics->moveObject (ptr);
