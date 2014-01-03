@@ -358,5 +358,14 @@ op 0x2000223: GetLineOfSightExplicit
 op 0x2000224: ToggleAI
 op 0x2000225: ToggleAIExplicit
 op 0x2000226: COE
-
-opcodes 0x2000227-0x3ffffff unused
+op 0x2000227: Cast
+op 0x2000228: Cast, explicit
+op 0x2000229: ExplodeSpell
+op 0x200022a: ExplodeSpell, explicit
+op 0x200022b: RemoveSpellEffects
+op 0x200022c: RemoveSpellEffects, explicit
+op 0x200022d: RemoveEffects
+op 0x200022e: RemoveEffects, explicit
+op 0x200022f: Resurrect
+op 0x2000230: Resurrect, explicit
+opcodes 0x200022f-0x3ffffff unused

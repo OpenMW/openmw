@@ -166,7 +166,7 @@ namespace MWGui
             // increase attributes
             for (int i=0; i<3; ++i)
             {
-                MWMechanics::Stat<int> attribute = creatureStats.getAttribute(mSpentAttributes[i]);
+                MWMechanics::AttributeValue attribute = creatureStats.getAttribute(mSpentAttributes[i]);
                 attribute.setBase (attribute.getBase () + pcStats.getLevelupAttributeMultiplier (mSpentAttributes[i]));
 
                 if (attribute.getBase() >= 100)

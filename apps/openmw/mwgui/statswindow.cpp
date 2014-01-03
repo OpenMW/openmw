@@ -61,7 +61,7 @@ namespace MWGui
 
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            mSkillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
+            mSkillValues.insert(std::pair<int, MWMechanics::SkillValue >(i, MWMechanics::SkillValue()));
             mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, (MyGUI::TextBox*)NULL));
         }
 
@@ -102,7 +102,7 @@ namespace MWGui
         adjustWindowCaption();
     }
 
-    void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void StatsWindow::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         static const char *ids[] =
         {
@@ -179,7 +179,7 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+    void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         mSkillValues[parSkill] = value;
         MyGUI::TextBox* widget = mSkillWidgetMap[(int)parSkill];
@@ -358,22 +358,20 @@ namespace MWGui
                 continue;
             assert(skillId >= 0 && skillId < ESM::Skill::Length);
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
-            const MWMechanics::Stat<float> &stat = mSkillValues.find(skillId)->second;
-            float base = stat.getBase();
-            float modified = stat.getModified();
-            int progressPercent = (modified - float(static_cast<int>(modified))) * 100;
+            const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
+            int base = stat.getBase();
+            int modified = stat.getModified();
+            int progressPercent = stat.getProgress() * 100;
 
             const MWWorld::ESMStore &esmStore =
                 MWBase::Environment::get().getWorld()->getStore();
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
-            assert(skill);
 
             std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
 
             const ESM::Attribute* attr =
                 esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
-            assert(attr);
 
             std::string state = "normal";
             if (modified > base)
@@ -484,7 +482,6 @@ namespace MWGui
                         ESM::RankData rankData = faction->mData.mRankData[it->second+1];
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
-                        assert(attr1 && attr2);
 
                         text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
                                 + ", #{" + attr2->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute2);

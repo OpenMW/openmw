@@ -249,12 +249,12 @@ namespace MWGui
         // Setup player stats
         for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
-            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::Stat<int>()));
+            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue()));
         }
 
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::Stat<float>()));
+            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue()));
         }
 
         // Set up visibility
@@ -544,7 +544,7 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void WindowManager::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         mStatsWindow->setValue (id, value);
         mCharGen->setValue(id, value);
@@ -575,7 +575,7 @@ namespace MWGui
     }
 
 
-    void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& value)
+    void WindowManager::setValue (int parSkill, const MWMechanics::SkillValue& value)
     {
         /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
         /// allow custom skills.
@@ -1178,12 +1178,12 @@ namespace MWGui
         return mGuiModes.back();
     }
 
-    std::map<int, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
+    std::map<int, MWMechanics::SkillValue > WindowManager::getPlayerSkillValues()
     {
         return mPlayerSkillValues;
     }
 
-    std::map<int, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
+    std::map<int, MWMechanics::AttributeValue > WindowManager::getPlayerAttributeValues()
     {
         return mPlayerAttributes;
     }

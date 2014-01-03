@@ -328,7 +328,7 @@ void RenderingManager::update (float duration, bool paused)
 
     MWWorld::Ptr player = world->getPlayer().getPlayer();
 
-    int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
+    int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
     mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
@@ -593,7 +593,7 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     mAmbientColor = colour;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-    int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::NightEye)).mMagnitude;
+    int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
     Ogre::ColourValue final = colour;
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 

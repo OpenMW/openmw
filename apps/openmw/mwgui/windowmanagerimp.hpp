@@ -152,8 +152,8 @@ namespace MWGui
     virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
     ///< Set value for the given ID.
-    virtual void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
-    virtual void setValue (int parSkill, const MWMechanics::Stat<float>& value);
+    virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
+    virtual void setValue (int parSkill, const MWMechanics::SkillValue& value);
     virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
     virtual void setValue (const std::string& id, const std::string& value);
     virtual void setValue (const std::string& id, int value);
@@ -229,8 +229,8 @@ namespace MWGui
     virtual void onFrame (float frameDuration);
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-    virtual std::map<int, MWMechanics::Stat<float> > getPlayerSkillValues();
-    virtual std::map<int, MWMechanics::Stat<int> > getPlayerAttributeValues();
+    virtual std::map<int, MWMechanics::SkillValue > getPlayerSkillValues();
+    virtual std::map<int, MWMechanics::AttributeValue > getPlayerAttributeValues();
     virtual SkillList getPlayerMinorSkills();
     virtual SkillList getPlayerMajorSkills();
 
@@ -346,9 +346,9 @@ namespace MWGui
     // Various stats about player as needed by window manager
     std::string mPlayerName;
     std::string mPlayerRaceId;
-    std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;
+    std::map<int, MWMechanics::AttributeValue > mPlayerAttributes;
     SkillList mPlayerMajorSkills, mPlayerMinorSkills;
-    std::map<int, MWMechanics::Stat<float> > mPlayerSkillValues;
+    std::map<int, MWMechanics::SkillValue > mPlayerSkillValues;
 
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;

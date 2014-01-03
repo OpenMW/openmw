@@ -135,7 +135,8 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
-                if (target.getClass().isActor() && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                if (target.getClass().isActor() && hasDuration)
                 {
                     ActiveSpells::Effect effect;
                     effect.mKey = MWMechanics::EffectKey(*effectIt);
@@ -154,12 +155,23 @@ namespace MWMechanics
                             ActiveSpells::Effect effect_ = effect;
                             effect_.mMagnitude *= -1;
                             effects.push_back(effect_);
-                            caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true, effects, mSourceName);
+                            caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
+                                        effects, mSourceName, caster.getRefData().getHandle());
                         }
                     }
                 }
                 else
-                    applyInstantEffect(target, effectIt->mEffectID, magnitude);
+                    applyInstantEffect(target, EffectKey(*effectIt), magnitude);
+
+                // HACK: Damage attribute/skill actually has a duration, even though the actual effect is instant and permanent.
+                // This was probably just done to have the effect visible in the magic menu for a while
+                // to notify the player they've been damaged?
+                if (effectIt->mEffectID == ESM::MagicEffect::DamageAttribute
+                        || effectIt->mEffectID == ESM::MagicEffect::DamageSkill
+                        || effectIt->mEffectID == ESM::MagicEffect::RestoreAttribute
+                        || effectIt->mEffectID == ESM::MagicEffect::RestoreSkill
+                        )
+                    applyInstantEffect(target, EffectKey(*effectIt), magnitude);
 
                 if (target.getClass().isActor() || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
                 {
@@ -198,11 +210,13 @@ namespace MWMechanics
             inflict(caster, target, reflectedEffects, range, true);
 
         if (appliedLastingEffects.size())
-            target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects, mSourceName);
+            target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
+                                                                                  mSourceName, caster.getRefData().getHandle());
     }
 
-    void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, short effectId, float magnitude)
+    void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, MWMechanics::EffectKey effect, float magnitude)
     {
+        short effectId = effect.mId;
         if (!target.getClass().isActor())
         {
             if (effectId == ESM::MagicEffect::Lock)
@@ -225,6 +239,28 @@ namespace MWMechanics
         }
         else
         {
+            if (effectId == ESM::MagicEffect::DamageAttribute || effectId == ESM::MagicEffect::RestoreAttribute)
+            {
+                int attribute = effect.mArg;
+                AttributeValue value = target.getClass().getCreatureStats(target).getAttribute(attribute);
+                if (effectId == ESM::MagicEffect::DamageAttribute)
+                    value.damage(magnitude);
+                else
+                    value.restore(magnitude);
+                target.getClass().getCreatureStats(target).setAttribute(attribute, value);
+            }
+            else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
+            {
+                if (target.getTypeName() != typeid(ESM::NPC).name())
+                    return;
+                int skill = effect.mArg;
+                SkillValue& value = target.getClass().getNpcStats(target).getSkill(skill);
+                if (effectId == ESM::MagicEffect::DamageSkill)
+                    value.damage(magnitude);
+                else
+                    value.restore(magnitude);
+            }
+
             if (effectId == ESM::MagicEffect::CurePoison)
                 target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
             else if (effectId == ESM::MagicEffect::CureParalyzation)
@@ -236,7 +272,7 @@ namespace MWMechanics
             else if (effectId == ESM::MagicEffect::CureCorprusDisease)
                 target.getClass().getCreatureStats(target).getSpells().purgeCorprusDisease();
             else if (effectId == ESM::MagicEffect::Dispel)
-                target.getClass().getCreatureStats(target).getActiveSpells().purgeAll();
+                target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
             else if (effectId == ESM::MagicEffect::RemoveCurse)
                 target.getClass().getCreatureStats(target).getSpells().purgeCurses();
 
@@ -398,7 +434,8 @@ namespace MWMechanics
             int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
             if (!fail && roll >= successChance)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                if (mCaster.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
                 fail = true;
             }
 

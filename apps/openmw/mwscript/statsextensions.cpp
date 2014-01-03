@@ -124,8 +124,8 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWMechanics::Stat<int> attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
-                    attribute.setModified (value, 0);
+                    MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
+                    attribute.setBase (value - (attribute.getModified() - attribute.getBase()));
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -146,15 +146,11 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWMechanics::Stat<int> attribute = MWWorld::Class::get(ptr)
+                    MWMechanics::AttributeValue attribute = MWWorld::Class::get(ptr)
                         .getCreatureStats(ptr)
                         .getAttribute(mIndex);
 
-                    value +=
-                            attribute.getModified();
-
-                    attribute
-                        .setModified (value, 0, 100);
+                    attribute.setBase (std::min(100, attribute.getBase() + value));
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -346,12 +342,10 @@ namespace MWScript
                     const ESM::Class& class_ =
                         *MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (ref->mBase->mClass);
 
-                    float level = 0;
-                    float progress = std::modf (stats.getSkill (mIndex).getBase(), &level);
+                    float level = stats.getSkill(mIndex).getBase();
+                    float progress = stats.getSkill(mIndex).getProgress();
 
-                    float modifier = stats.getSkill (mIndex).getModifier();
-
-                    int newLevel = static_cast<int> (value-modifier);
+                    int newLevel = value - (stats.getSkill(mIndex).getModified() - stats.getSkill(mIndex).getBase());
 
                     if (newLevel<0)
                         newLevel = 0;
@@ -362,8 +356,8 @@ namespace MWScript
                     if (progress>=1)
                         progress = 0.999999999;
 
-                    stats.getSkill (mIndex).set (newLevel + progress);
-                    stats.getSkill (mIndex).setModifier (modifier);
+                    stats.getSkill (mIndex).setBase (newLevel);
+                    stats.getSkill (mIndex).setProgress(progress);
                 }
         };
 
@@ -383,11 +377,10 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    value += MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
-                        getModified();
+                    MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats(ptr);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
-                        setModified (value, 0, 100);
+                    stats.getSkill(mIndex).
+                        setBase (std::min(100, stats.getSkill(mIndex).getBase() + value));
                 }
         };
 
@@ -463,6 +456,38 @@ namespace MWScript
                     runtime.pop();
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().remove (id);
+                }
+        };
+
+        template<class R>
+        class OpRemoveSpellEffects : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string spellid = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
+                }
+        };
+
+        template<class R>
+        class OpRemoveEffects : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer effectId = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getActiveSpells().purgeEffect(effectId);
                 }
         };
 
@@ -1079,6 +1104,18 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpResurrect : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    ptr.getClass().getCreatureStats(ptr).resurrect();
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
@@ -1142,6 +1179,15 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellExplicit,
                 new OpRemoveSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffects, new OpRemoveSpellEffects<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffectsExplicit,
+                new OpRemoveSpellEffects<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeResurrect, new OpResurrect<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeResurrectExplicit,
+                new OpResurrect<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffects, new OpRemoveEffects<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffectsExplicit,
+                new OpRemoveEffects<ExplicitRef>);
 
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpell, new OpGetSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);

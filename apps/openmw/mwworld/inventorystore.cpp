@@ -607,7 +607,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
             float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
-            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), magnitude);
+            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), "", magnitude);
 
             ++i;
         }

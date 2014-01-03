@@ -222,6 +222,8 @@ namespace Compiler
             extensions.registerInstruction ("activate", "", opcodeActivate);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);
+            extensions.registerInstruction ("cast", "SS", opcodeCast, opcodeCastExplicit);
+            extensions.registerInstruction ("explodespell", "S", opcodeExplodeSpell, opcodeExplodeSpellExplicit);
             extensions.registerInstruction ("togglecollisionboxes", "", opcodeToggleCollisionBoxes);
             extensions.registerInstruction ("togglecollisiongrid", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("tcb", "", opcodeToggleCollisionBoxes);
@@ -389,6 +391,12 @@ namespace Compiler
             extensions.registerInstruction ("addspell", "c", opcodeAddSpell, opcodeAddSpellExplicit);
             extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
                 opcodeRemoveSpellExplicit);
+            extensions.registerInstruction ("removespelleffects", "c", opcodeRemoveSpellEffects,
+                opcodeRemoveSpellEffectsExplicit);
+            extensions.registerInstruction ("removeeffects", "l", opcodeRemoveEffects,
+                opcodeRemoveEffectsExplicit);
+            extensions.registerInstruction ("resurrect", "", opcodeResurrect,
+                opcodeResurrectExplicit);
             extensions.registerFunction ("getspell", 'l', "c", opcodeGetSpell, opcodeGetSpellExplicit);
 
             extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);

@@ -34,13 +34,14 @@ namespace MWMechanics
             random.resize(spell->mEffects.mList.size());
             for (unsigned int i=0; i<random.size();++i)
                 random[i] = static_cast<float> (std::rand()) / RAND_MAX;
-            mSpells.insert (std::make_pair (spellId, random));
+            mSpells.insert (std::make_pair (Misc::StringUtils::lowerCase(spellId), random));
         }
     }
 
     void Spells::remove (const std::string& spellId)
     {
-        TContainer::iterator iter = mSpells.find (spellId);
+        std::string lower = Misc::StringUtils::lowerCase(spellId);
+        TContainer::iterator iter = mSpells.find (lower);
 
         if (iter!=mSpells.end())
             mSpells.erase (iter);
@@ -192,7 +193,7 @@ namespace MWMechanics
                  effectIt != list.mList.end(); ++effectIt, ++i)
             {
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * it->second[i];
-                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, magnitude);
+                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, "", magnitude);
             }
         }
     }

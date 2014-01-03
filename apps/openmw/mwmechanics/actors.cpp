@@ -88,6 +88,68 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
 
 namespace MWMechanics
 {
+
+    class SoulTrap : public MWMechanics::EffectSourceVisitor
+    {
+        MWWorld::Ptr mCreature;
+        MWWorld::Ptr mActor;
+    public:
+        SoulTrap(MWWorld::Ptr trappedCreature)
+            : mCreature(trappedCreature) {}
+
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, const std::string& casterHandle,
+                            float magnitude, float remainingTime = -1)
+        {
+            if (key.mId != ESM::MagicEffect::Soultrap)
+                return;
+            if (magnitude <= 0)
+                return;
+
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+
+            MWWorld::Ptr caster = world->searchPtrViaHandle(casterHandle);
+            if (caster.isEmpty() || !caster.getClass().isActor())
+                return;
+
+            static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->getFloat();
+
+            float creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
+
+            // Use the smallest soulgem that is large enough to hold the soul
+            MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
+            MWWorld::ContainerStoreIterator gem = container.end();
+            float gemCapacity = std::numeric_limits<float>().max();
+            std::string soulgemFilter = "misc_soulgem"; // no other way to check for soulgems? :/
+            for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
+                 it != container.end(); ++it)
+            {
+                const std::string& id = it->getCellRef().mRefID;
+                if (id.size() >= soulgemFilter.size()
+                        && id.substr(0,soulgemFilter.size()) == soulgemFilter)
+                {
+                    float thisGemCapacity = it->get<ESM::Miscellaneous>()->mBase->mData.mValue * fSoulgemMult;
+                    if (thisGemCapacity >= creatureSoulValue && thisGemCapacity < gemCapacity
+                            && it->getCellRef().mSoul.empty())
+                    {
+                        gem = it;
+                        gemCapacity = thisGemCapacity;
+                    }
+                }
+            }
+
+            if (gem == container.end())
+                return;
+
+            // Set the soul on just one of the gems, not the whole stack
+            gem->getContainerStore()->unstack(*gem, caster);
+            gem->getCellRef().mSoul = mCreature.getCellRef().mRefID;
+
+            if (caster.getRefData().getHandle() == "player")
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
+        }
+    };
+
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
     {
         // magic effects
@@ -216,7 +278,7 @@ namespace MWMechanics
         {
             // the actor is sleeping, restore health and magicka
 
-            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
+            bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0;
 
             DynamicStat<float> health = stats.getHealth();
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
@@ -255,7 +317,7 @@ namespace MWMechanics
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
-            Stat<int> stat = creatureStats.getAttribute(i);
+            AttributeValue stat = creatureStats.getAttribute(i);
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).mMagnitude);
@@ -267,23 +329,23 @@ namespace MWMechanics
         for(int i = 0;i < 3;++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyHealth+i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
+            stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).mMagnitude -
+                             effects.get(ESM::MagicEffect::DrainHealth+i).mMagnitude);
 
 
-            float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::AbsorbHealth+i)).mMagnitude;
+            float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).mMagnitude
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth+i).mMagnitude
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth+i).mMagnitude;
             stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
         }
 
         // Apply disintegration (reduces item health)
-        float disintegrateWeapon = effects.get(EffectKey(ESM::MagicEffect::DisintegrateWeapon)).mMagnitude;
+        float disintegrateWeapon = effects.get(ESM::MagicEffect::DisintegrateWeapon).mMagnitude;
         if (disintegrateWeapon > 0)
             disintegrateSlot(ptr, MWWorld::InventoryStore::Slot_CarriedRight, disintegrateWeapon*duration);
-        float disintegrateArmor = effects.get(EffectKey(ESM::MagicEffect::DisintegrateArmor)).mMagnitude;
+        float disintegrateArmor = effects.get(ESM::MagicEffect::DisintegrateArmor).mMagnitude;
         if (disintegrateArmor > 0)
         {
             // According to UESP
@@ -315,7 +377,7 @@ namespace MWMechanics
         DynamicStat<float> health = creatureStats.getHealth();
         for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
         {
-            float magnitude = creatureStats.getMagicEffects().get(EffectKey(damageEffects[i])).mMagnitude;
+            float magnitude = creatureStats.getMagicEffects().get(damageEffects[i]).mMagnitude;
 
             if (damageEffects[i] == ESM::MagicEffect::SunDamage)
             {
@@ -362,7 +424,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
         {
             bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
-            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
                 std::string item = "bound_" + it->second;
@@ -410,7 +472,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
         {
             bool found = creatureStats.mSummonedCreatures.find(it->first) != creatureStats.mSummonedCreatures.end();
-            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
                 if (magnitude > 0)
@@ -461,7 +523,7 @@ namespace MWMechanics
         // skills
         for(int i = 0;i < ESM::Skill::Length;++i)
         {
-            Stat<float>& skill = npcStats.getSkill(i);
+            SkillValue& skill = npcStats.getSkill(i);
             skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).mMagnitude);
@@ -705,6 +767,13 @@ namespace MWMechanics
 
                 iter->second->kill();
 
+                // Apply soultrap
+                if (iter->first.getTypeName() == typeid(ESM::Creature).name())
+                {
+                    SoulTrap soulTrap (iter->first);
+                    stats.getActiveSpells().visitEffectSources(soulTrap);
+                }
+
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
                 stats.setMagicEffects(MWMechanics::MagicEffects());
@@ -714,6 +783,7 @@ namespace MWMechanics
 
                 if(cls.isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+
             }
         }
 

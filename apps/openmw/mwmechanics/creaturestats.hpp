@@ -18,7 +18,7 @@ namespace MWMechanics
     ///
     class CreatureStats
     {
-        Stat<int> mAttributes[8];
+        AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         int mLevel;
         Spells mSpells;
@@ -49,7 +49,7 @@ namespace MWMechanics
 
     protected:
         bool mIsWerewolf;
-        Stat<int> mWerewolfAttributes[8];
+        AttributeValue mWerewolfAttributes[8];
 
     public:
         CreatureStats();
@@ -65,7 +65,7 @@ namespace MWMechanics
         bool canUsePower (const std::string& power) const;
         void usePower (const std::string& power);
 
-        const Stat<int> & getAttribute(int index) const;
+        const AttributeValue & getAttribute(int index) const;
 
         const DynamicStat<float> & getHealth() const;
 
@@ -94,7 +94,7 @@ namespace MWMechanics
 
         MagicEffects & getMagicEffects();
 
-        void setAttribute(int index, const Stat<int> &value);
+        void setAttribute(int index, const AttributeValue &value);
         // Shortcut to set only the base
         void setAttribute(int index, int base);
 

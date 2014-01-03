@@ -205,6 +205,46 @@ namespace MWMechanics
     {
         return !(left==right);
     }
+
+    class AttributeValue
+    {
+        int mBase;
+        int mModifier;
+        int mDamage;
+
+    public:
+        AttributeValue() : mBase(0), mModifier(0), mDamage(0) {}
+
+        int getModified() const { return std::max(0, mBase - mDamage + mModifier); }
+        int getBase() const { return mBase; }
+        int getModifier() const {  return mModifier; }
+
+        void setBase(int base) { mBase = std::max(0, base); }
+        void setModifier(int mod) { mModifier = mod; }
+
+        void damage(int damage) { mDamage += damage; }
+        void restore(int amount) { mDamage -= std::min(mDamage, amount); }
+        int getDamage() const { return mDamage; }
+    };
+
+    class SkillValue : public AttributeValue
+    {
+        float mProgress;
+    public:
+        float getProgress() const { return mProgress; }
+        void setProgress(float progress) { mProgress = progress; }
+    };
+
+    inline bool operator== (const AttributeValue& left, const AttributeValue& right)
+    {
+        return left.getBase() == right.getBase()
+                && left.getModifier() == right.getModifier()
+                && left.getDamage() == right.getDamage();
+    }
+    inline bool operator!= (const AttributeValue& left, const AttributeValue& right)
+    {
+        return !(left == right);
+    }
 }
 
 #endif

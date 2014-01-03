@@ -23,6 +23,7 @@
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -700,6 +701,42 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpCast : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral (runtime[0].mInteger));
+                runtime.pop();
+
+                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
+
+                MWMechanics::CastSpell cast(ptr, target);
+                cast.cast(spell);
+            }
+        };
+
+        template <class R>
+        class OpExplodeSpell : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                MWMechanics::CastSpell cast(ptr, ptr);
+                cast.cast(spell);
+            }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -761,6 +798,10 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeCast, new OpCast<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeCastExplicit, new OpCast<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpell, new OpExplodeSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
         }
     }
 }

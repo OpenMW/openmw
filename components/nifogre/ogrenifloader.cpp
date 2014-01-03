@@ -854,7 +854,7 @@ class NIFObjectLoader
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
 
-                partsys->setDefaultDimensions(partctrl->size, partctrl->size);
+                partsys->setDefaultDimensions(partctrl->size*2, partctrl->size*2);
 
                 if(!partctrl->emitter.empty())
                 {

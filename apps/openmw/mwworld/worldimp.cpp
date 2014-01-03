@@ -1606,7 +1606,8 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Levitate)).mMagnitude > 0)
+        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
+                && isLevitationEnabled())
             return true;
 
         // TODO: Check if flying creature
@@ -1625,7 +1626,7 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::SlowFall)).mMagnitude > 0)
+        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).mMagnitude > 0)
             return true;
 
         return false;
@@ -1999,7 +2000,7 @@ namespace MWWorld
         const Store<ESM::GameSetting> &gmst = getStore().get<ESM::GameSetting>();
         MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
 
-        stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
+        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getFloat());
     }
 
     bool World::getGodModeState()
@@ -2389,11 +2390,11 @@ namespace MWWorld
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
         float dist=0;
         if (type == World::Detect_Creature)
-            dist = effects.get(MWMechanics::EffectKey(ESM::MagicEffect::DetectAnimal)).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectAnimal).mMagnitude;
         else if (type == World::Detect_Key)
-            dist = effects.get(MWMechanics::EffectKey(ESM::MagicEffect::DetectKey)).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectKey).mMagnitude;
         else if (type == World::Detect_Enchantment)
-            dist = effects.get(MWMechanics::EffectKey(ESM::MagicEffect::DetectEnchantment)).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectEnchantment).mMagnitude;
 
         if (!dist)
             return;
