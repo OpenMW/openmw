@@ -779,29 +779,22 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(int stage, const CSMWorld::R
     {
         inventoryItemCheck<ESM::Weapon>(Weapon, messages, id.toString(), true);
 
-        if (Weapon.mData.mType == ESM::Weapon::MarksmanBow or Weapon.mData.mType == ESM::Weapon::MarksmanCrossbow or Weapon.mData.mType == ESM::Weapon::MarksmanThrown or Weapon.mData.mType == ESM::Weapon::Arrow or Weapon.mData.mType == ESM::Weapon::Bolt)
-        {
-            if (Weapon.mData.mChop[0] > Weapon.mData.mChop[1])
-            {
-                messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum chop damage higher than maximum");
-            }
-        }
-        else
+        if (!(Weapon.mData.mType == ESM::Weapon::MarksmanBow or Weapon.mData.mType == ESM::Weapon::MarksmanCrossbow or Weapon.mData.mType == ESM::Weapon::MarksmanThrown or Weapon.mData.mType == ESM::Weapon::Arrow or Weapon.mData.mType == ESM::Weapon::Bolt))
         {
             if (Weapon.mData.mSlash[0] > Weapon.mData.mSlash[1])
             {
                 messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum slash damage higher than maximum");
             }
 
-            if (Weapon.mData.mChop[0] > Weapon.mData.mChop[1])
-            {
-                messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum chop damage higher than maximum");
-            }
-
             if (Weapon.mData.mThrust[0] > Weapon.mData.mThrust[1])
             {
                 messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum thrust damage higher than maximum");
             }
+        }
+
+        if (Weapon.mData.mChop[0] > Weapon.mData.mChop[1])
+        {
+            messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum chop damage higher than maximum");
         }
 
         if (!(Weapon.mData.mType == ESM::Weapon::Arrow or Weapon.mData.mType == ESM::Weapon::Bolt or Weapon.mData.mType == ESM::Weapon::MarksmanThrown))
