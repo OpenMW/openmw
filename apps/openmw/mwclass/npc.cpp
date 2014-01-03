@@ -517,7 +517,8 @@ namespace MWClass
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
 
-            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f);
+            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f)
+                    || (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
             if(stats.isWerewolf())
             {
                 healthdmg = true;

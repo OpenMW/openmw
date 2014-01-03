@@ -797,7 +797,12 @@ namespace MWMechanics
                 iter->second->updateContinuousVfx();
 
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
+                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                    iter->second->skipAnim();
                 iter->second->update(duration);
+            }
         }
     }
     void Actors::restoreDynamicStats()
