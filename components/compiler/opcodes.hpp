@@ -205,6 +205,8 @@ namespace Compiler
         const int opcodeGetAttackedExplicit = 0x20001d4;
         const int opcodeGetWeaponDrawn = 0x20001d7;
         const int opcodeGetWeaponDrawnExplicit = 0x20001d8;
+        const int opcodeGetSpellReadied = 0x2000231;
+        const int opcodeGetSpellReadiedExplicit = 0x2000232;
         const int opcodeGetSpellEffects = 0x20001db;
         const int opcodeGetSpellEffectsExplicit = 0x20001dc;
         const int opcodeGetCurrentTime = 0x20001dd;

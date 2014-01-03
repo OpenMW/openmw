@@ -251,6 +251,7 @@ namespace Compiler
             extensions.registerInstruction ("dropsoulgem", "c", opcodeDropSoulGem, opcodeDropSoulGemExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
+            extensions.registerFunction ("getspellreadied", 'l', "", opcodeGetSpellReadied, opcodeGetSpellReadiedExplicit);
             extensions.registerFunction ("getspelleffects", 'l', "c", opcodeGetSpellEffects, opcodeGetSpellEffectsExplicit);
             extensions.registerFunction ("getcurrenttime", 'f', "", opcodeGetCurrentTime);
             extensions.registerInstruction ("setdelete", "l", opcodeSetDelete, opcodeSetDeleteExplicit);
