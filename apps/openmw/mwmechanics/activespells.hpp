@@ -81,7 +81,10 @@ namespace MWMechanics
             void addSpell (const std::string& id, bool stack, std::vector<Effect> effects,
                            const std::string& displayName, const std::string& casterHandle);
 
-            /// Remove all active effects with this id
+            /// Removes the active effects from this spell/potion/.. with \a id
+            void removeEffects (const std::string& id);
+
+            /// Remove all active effects with this effect id
             void purgeEffect (short effectId);
 
             /// Remove all active effects, if roll succeeds (for each effect)

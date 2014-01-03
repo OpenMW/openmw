@@ -150,6 +150,12 @@ namespace MWMechanics
         mSpellsChanged = true;
     }
 
+    void ActiveSpells::removeEffects(const std::string &id)
+    {
+        mSpells.erase(Misc::StringUtils::lowerCase(id));
+        mSpellsChanged = true;
+    }
+
     void ActiveSpells::visitEffectSources(EffectSourceVisitor &visitor) const
     {
         for (TContainer::const_iterator it = begin(); it != end(); ++it)

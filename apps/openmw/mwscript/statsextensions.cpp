@@ -460,6 +460,22 @@ namespace MWScript
         };
 
         template<class R>
+        class OpRemoveSpellEffects : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string spellid = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
+                }
+        };
+
+        template<class R>
         class OpGetSpell : public Interpreter::Opcode0
         {
             public:
@@ -1135,6 +1151,9 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellExplicit,
                 new OpRemoveSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffects, new OpRemoveSpellEffects<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffectsExplicit,
+                new OpRemoveSpellEffects<ExplicitRef>);
 
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpell, new OpGetSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);

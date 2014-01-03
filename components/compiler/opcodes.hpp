@@ -369,6 +369,9 @@ namespace Compiler
         const int opcodeIsWerewolfExplicit = 0x20001fe;
 
         const int opcodeGetWerewolfKills = 0x20001e2;
+
+        const int opcodeRemoveSpellEffects = 0x200022b;
+        const int opcodeRemoveSpellEffectsExplicit = 0x200022c;
     }
 
     namespace Transformation

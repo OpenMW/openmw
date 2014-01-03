@@ -391,6 +391,8 @@ namespace Compiler
             extensions.registerInstruction ("addspell", "c", opcodeAddSpell, opcodeAddSpellExplicit);
             extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
                 opcodeRemoveSpellExplicit);
+            extensions.registerInstruction ("removespelleffects", "c", opcodeRemoveSpellEffects,
+                opcodeRemoveSpellEffectsExplicit);
             extensions.registerFunction ("getspell", 'l', "c", opcodeGetSpell, opcodeGetSpellExplicit);
 
             extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
