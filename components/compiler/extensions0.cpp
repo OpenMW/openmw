@@ -222,6 +222,7 @@ namespace Compiler
             extensions.registerInstruction ("activate", "", opcodeActivate);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);
+            extensions.registerInstruction ("cast", "SS", opcodeCast, opcodeCastExplicit);
             extensions.registerInstruction ("togglecollisionboxes", "", opcodeToggleCollisionBoxes);
             extensions.registerInstruction ("togglecollisiongrid", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("tcb", "", opcodeToggleCollisionBoxes);

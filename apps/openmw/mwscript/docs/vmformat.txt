@@ -358,5 +358,6 @@ op 0x2000223: GetLineOfSightExplicit
 op 0x2000224: ToggleAI
 op 0x2000225: ToggleAIExplicit
 op 0x2000226: COE
-
-opcodes 0x2000227-0x3ffffff unused
+op 0x2000227: Cast
+op 0x2000228: Cast, explicit
+opcodes 0x2000229-0x3ffffff unused
