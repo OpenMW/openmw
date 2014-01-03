@@ -676,7 +676,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the magic window is accessible
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Magic))
+        if (!mControlSwitch["playermagic"])
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
@@ -691,7 +691,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the inventory window is accessible
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+        if (!mControlSwitch["playerfighting"])
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
