@@ -9,9 +9,9 @@ Build-Depends: debhelper (>= 9~), cmake, libbullet-dev,
  libopenal-dev, libsm-dev, uuid-dev, libqt4-dev, libtinyxml-dev,
  libx11-dev, libxaw7-dev, libxrandr-dev, libxt-dev, libzzip-dev, libz-dev,
  libpng12-dev, libavcodec-dev, libavformat-dev, libavdevice-dev, libavutil-dev,
- libswscale-dev, libpostproc-dev, libsdl2-dev, libogre-1.8-dev,  libmygui-dev,
+ libswscale-dev, libpostproc-dev, libsdl2-dev, libogre-1.9-dev,  libmygui-dev (>= 3.2.0-5),
  libunshield-dev
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: http://openmw.org
 Vcs-Git: git://anonscm.debian.org/pkg-games/openmw.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-games/openmw.git

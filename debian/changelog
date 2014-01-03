@@ -1,3 +1,11 @@
+openmw (0.27.1-1) experimental; urgency=low
+
+  * Bumping for re-tag
+  * Rebuild against Ogre 1.9
+  * Rebuild against new libmygui (depends on Ogre 1.9)
+
+ -- Bret Curtis <psi29a@gmail.com>  Fri, 03 Jan 2014 08:13:09 +0200
+
 openmw (0.27.0-2) UNRELEASED; urgency=low
 
   * Updated Vcs-Git and Vcs-Browser
