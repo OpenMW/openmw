@@ -499,10 +499,10 @@ namespace MWMechanics
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
         int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr)
             + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
-        float a = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float a = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-        float d = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float d = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 

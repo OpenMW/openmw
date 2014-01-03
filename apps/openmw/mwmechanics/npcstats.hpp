@@ -45,8 +45,8 @@ namespace MWMechanics
             DrawState_ mDrawState;
             int mDisposition;
             unsigned int mMovementFlags;
-            Stat<float> mSkill[27];
-            Stat<float> mWerewolfSkill[27];
+            SkillValue mSkill[27];
+            SkillValue mWerewolfSkill[27];
             int mBounty;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;

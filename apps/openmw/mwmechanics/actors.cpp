@@ -523,7 +523,7 @@ namespace MWMechanics
         // skills
         for(int i = 0;i < ESM::Skill::Length;++i)
         {
-            Stat<float>& skill = npcStats.getSkill(i);
+            SkillValue& skill = npcStats.getSkill(i);
             skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).mMagnitude);

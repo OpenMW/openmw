@@ -179,29 +179,29 @@ namespace
 
             for (int raceSkillIndex = 0; raceSkillIndex < 7; ++raceSkillIndex)
             {
-              if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
-              {
-                  raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
-                  break;
-              }
+                if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
+                {
+                    raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
+                    break;
+                }
             }
 
             for (int k = 0; k < 5; ++k)
             {
-              // is this a minor or major skill?
-              if ((class_->mData.mSkills[k][0] == skillIndex) || (class_->mData.mSkills[k][1] == skillIndex))
-              {
-                majorMultiplier = 1.0f;
-                break;
-              }
+                // is this a minor or major skill?
+                if ((class_->mData.mSkills[k][0] == skillIndex) || (class_->mData.mSkills[k][1] == skillIndex))
+                {
+                    majorMultiplier = 1.0f;
+                    break;
+                }
             }
 
             // is this skill in the same Specialization as the class?
             const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skillIndex);
             if (skill->mData.mSpecialization == class_->mData.mSpecialization)
             {
-              specMultiplier = 0.5f;
-              specBonus = 5;
+                specMultiplier = 0.5f;
+                specBonus = 5;
             }
 
             npcStats.getSkill(skillIndex).setBase(
@@ -210,7 +210,7 @@ namespace
                     + 5
                     + raceBonus
                     + specBonus
-                    + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100.0f));
+                    + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100));
         }
     }
 }

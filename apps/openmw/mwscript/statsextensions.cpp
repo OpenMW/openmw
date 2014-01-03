@@ -125,7 +125,7 @@ namespace MWScript
                     runtime.pop();
 
                     MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
-                    attribute.setModified (value, 0);
+                    attribute.setBase (value - (attribute.getModified() - attribute.getBase()));
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -150,11 +150,7 @@ namespace MWScript
                         .getCreatureStats(ptr)
                         .getAttribute(mIndex);
 
-                    value +=
-                            attribute.getModified();
-
-                    attribute
-                        .setModified (value, 0, 100);
+                    attribute.setBase (std::min(100, attribute.getBase() + value));
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
@@ -346,12 +342,10 @@ namespace MWScript
                     const ESM::Class& class_ =
                         *MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (ref->mBase->mClass);
 
-                    float level = 0;
-                    float progress = std::modf (stats.getSkill (mIndex).getBase(), &level);
+                    float level = stats.getSkill(mIndex).getBase();
+                    float progress = stats.getSkill(mIndex).getProgress();
 
-                    float modifier = stats.getSkill (mIndex).getModifier();
-
-                    int newLevel = static_cast<int> (value-modifier);
+                    int newLevel = value - (stats.getSkill(mIndex).getModified() - stats.getSkill(mIndex).getBase());
 
                     if (newLevel<0)
                         newLevel = 0;
@@ -362,8 +356,8 @@ namespace MWScript
                     if (progress>=1)
                         progress = 0.999999999;
 
-                    stats.getSkill (mIndex).set (newLevel + progress);
-                    stats.getSkill (mIndex).setModifier (modifier);
+                    stats.getSkill (mIndex).setBase (newLevel);
+                    stats.getSkill (mIndex).setProgress(progress);
                 }
         };
 
@@ -383,11 +377,10 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    value += MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
-                        getModified();
+                    MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats(ptr);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
-                        setModified (value, 0, 100);
+                    stats.getSkill(mIndex).
+                        setBase (std::min(100, stats.getSkill(mIndex).getBase() + value));
                 }
         };
 

@@ -65,7 +65,7 @@ namespace MWGui
             getWidget(attribute, std::string("Attribute") + boost::lexical_cast<std::string>(idx));
             mAttributeWidgets.insert(std::make_pair(static_cast<int>(ESM::Attribute::sAttributeIds[idx]), attribute));
             attribute->setAttributeId(ESM::Attribute::sAttributeIds[idx]);
-            attribute->setAttributeValue(Widgets::MWAttribute::AttributeValue(0, 0));
+            attribute->setAttributeValue(Widgets::MWAttribute::AttributeValue());
         }
 
         // Setup skills
@@ -280,8 +280,8 @@ namespace MWGui
             assert(skillId >= 0 && skillId < ESM::Skill::Length);
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
             const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
-            float base = stat.getBase();
-            float modified = stat.getModified();
+            int base = stat.getBase();
+            int modified = stat.getModified();
 
             std::string state = "normal";
             if (modified > base)

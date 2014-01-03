@@ -2000,7 +2000,7 @@ namespace MWWorld
         const Store<ESM::GameSetting> &gmst = getStore().get<ESM::GameSetting>();
         MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
 
-        stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
+        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getFloat());
     }
 
     bool World::getGodModeState()

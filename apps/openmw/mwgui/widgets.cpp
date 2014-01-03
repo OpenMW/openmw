@@ -178,7 +178,7 @@ namespace MWGui
             }
             if (mAttributeValueWidget)
             {
-                AttributeValue::Type modified = mValue.getModified(), base = mValue.getBase();
+                int modified = mValue.getModified(), base = mValue.getBase();
                 static_cast<MyGUI::TextBox*>(mAttributeValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
                 if (modified > base)
                     mAttributeValueWidget->_setWidgetState("increased");
