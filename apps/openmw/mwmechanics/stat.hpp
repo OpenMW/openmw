@@ -205,6 +205,9 @@ namespace MWMechanics
     {
         return !(left==right);
     }
+
+    typedef Stat<int> AttributeValue;
+    typedef Stat<float> SkillValue;
 }
 
 #endif

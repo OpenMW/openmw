@@ -74,7 +74,7 @@ namespace MWGui
 
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            mSkillValues.insert(std::make_pair(i, MWMechanics::Stat<float>()));
+            mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
             mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (0)));
         }
 
@@ -152,7 +152,7 @@ namespace MWGui
         mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
     }
 
-    void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::Stat<int>& value)
+    void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value)
     {
         std::map<int, Widgets::MWAttributePtr>::iterator attr = mAttributeWidgets.find(static_cast<int>(attributeId));
         if (attr == mAttributeWidgets.end())
@@ -161,7 +161,7 @@ namespace MWGui
         attr->second->setAttributeValue(value);
     }
 
-    void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::Stat<float>& value)
+    void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value)
     {
         mSkillValues[skillId] = value;
         MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
@@ -279,7 +279,7 @@ namespace MWGui
                 continue;
             assert(skillId >= 0 && skillId < ESM::Skill::Length);
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
-            const MWMechanics::Stat<float> &stat = mSkillValues.find(skillId)->second;
+            const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
             float base = stat.getBase();
             float modified = stat.getModified();
 

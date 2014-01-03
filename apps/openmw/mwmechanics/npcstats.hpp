@@ -94,8 +94,8 @@ namespace MWMechanics
 
             void setMovementFlag (Flag flag, bool state);
 
-            const Stat<float>& getSkill (int index) const;
-            Stat<float>& getSkill (int index);
+            const SkillValue& getSkill (int index) const;
+            SkillValue& getSkill (int index);
 
             const std::map<std::string, int>& getFactionRanks() const;
             std::map<std::string, int>& getFactionRanks();

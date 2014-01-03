@@ -61,7 +61,7 @@ namespace MWGui
 
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            mSkillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
+            mSkillValues.insert(std::pair<int, MWMechanics::SkillValue >(i, MWMechanics::SkillValue()));
             mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, (MyGUI::TextBox*)NULL));
         }
 
@@ -102,7 +102,7 @@ namespace MWGui
         adjustWindowCaption();
     }
 
-    void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void StatsWindow::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         static const char *ids[] =
         {
@@ -179,7 +179,7 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+    void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         mSkillValues[parSkill] = value;
         MyGUI::TextBox* widget = mSkillWidgetMap[(int)parSkill];
@@ -358,7 +358,7 @@ namespace MWGui
                 continue;
             assert(skillId >= 0 && skillId < ESM::Skill::Length);
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
-            const MWMechanics::Stat<float> &stat = mSkillValues.find(skillId)->second;
+            const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
             float base = stat.getBase();
             float modified = stat.getModified();
             int progressPercent = (modified - float(static_cast<int>(modified))) * 100;

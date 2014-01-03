@@ -317,7 +317,7 @@ namespace MWMechanics
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
-            Stat<int> stat = creatureStats.getAttribute(i);
+            AttributeValue stat = creatureStats.getAttribute(i);
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).mMagnitude);

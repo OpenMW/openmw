@@ -124,7 +124,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWMechanics::Stat<int> attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
+                    MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
                     attribute.setModified (value, 0);
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
@@ -146,7 +146,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWMechanics::Stat<int> attribute = MWWorld::Class::get(ptr)
+                    MWMechanics::AttributeValue attribute = MWWorld::Class::get(ptr)
                         .getCreatureStats(ptr)
                         .getAttribute(mIndex);
 
