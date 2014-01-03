@@ -58,9 +58,6 @@ void CSMSettings::BinaryWidgetAdapter::slotDataChanged(const QModelIndex &topLef
 
 void CSMSettings::BinaryWidgetAdapter::slotUpdateData()
 {
-    QString objId = "BinaryWidgetAdapter." + objectName() + "::slotUpdateData()";
-    qDebug() << objId << " data: ";
-
     for (int i = 0; i < mSettings.count(); i++)
     {
         QPair <QString, QBool *> data = mSettings.at(i);
@@ -75,7 +72,6 @@ void CSMSettings::BinaryWidgetAdapter::slotUpdateData()
 
             settingFound = (mSettingFilter->data(idx).toString() == settingValue);
 
-            qDebug() << objId << "index: " << i << "; setting found? " << settingFound;
             if (settingFound)
             {
                 if ((*data.second) == QBool(false))
@@ -90,18 +86,10 @@ void CSMSettings::BinaryWidgetAdapter::slotUpdateData()
                 data.second = new QBool (false);
         }
 
-        qDebug() << objId << " replacing setting with " << data.first << " = " << *data.second;
         mSettings.replace(i, data);
         QModelIndex idx = index(i, 1, QModelIndex());
         emit dataChanged (idx, idx);
     }
-
-    for (int i = 0; i < mSettings.count(); i++)
-    {
-        qDebug() << "\t" << mSettings.at(i).first << " = " << *(mSettings.at(i).second);
-    }
-
-    //emit dataChanged(index(0,0,QModelIndex()), index(rowCount() - 1, 4, QModelIndex()));
 }
 
 bool CSMSettings::BinaryWidgetAdapter::insertItem(const QString &item)

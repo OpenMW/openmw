@@ -130,9 +130,6 @@ void testLineEditWidget()
 
 void CSVSettings::UserSettingsDialog::testMapperCheckBox(QGroupBox *gb)
 {
-    CSMSettings::SectionFilter *filter  =
-            new CSMSettings::SectionFilter ("Display Format", this);
-
     CSMSettings::BinaryWidgetAdapter *bin =
             new CSMSettings::BinaryWidgetAdapter("Display Format",
                                                    "Record Status Display",
@@ -173,9 +170,6 @@ void CSVSettings::UserSettingsDialog::testMapperCheckBox(QGroupBox *gb)
 
 void CSVSettings::UserSettingsDialog::testMapperRadioButton(QGroupBox *gb)
 {
-    CSMSettings::SectionFilter *filter =
-            new CSMSettings::SectionFilter ("Display Format", this);
-
     CSMSettings::BinaryWidgetAdapter *bin =
             new CSMSettings::BinaryWidgetAdapter("Display Format",
                                                    "Record Status Display",
