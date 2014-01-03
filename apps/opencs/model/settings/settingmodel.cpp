@@ -8,12 +8,12 @@ CSMSettings::SettingModel::SettingModel(QObject *parent) :
 
 int CSMSettings::SettingModel::columnCount(const QModelIndex &parent) const
 {
-    return 4;
+    return 5;
 }
 
 int CSMSettings::SettingModel::rowCount(const QModelIndex &parent) const
 {
-    return mSettings.size();
+    return mSettingValues.size();
 }
 
 QVariant CSMSettings::SettingModel::data(const QModelIndex &index, int role) const
@@ -21,7 +21,8 @@ QVariant CSMSettings::SettingModel::data(const QModelIndex &index, int role) con
     if (!index.isValid())
         return QVariant();
 
-    SettingData *setting = mSettings.at(index.row());
+    SectionSettingPair dataPair = mSettingValues.at(index.row());
+    QString key = dataPair.first + "." + dataPair.second.first;
 
     switch (role)
     {
@@ -31,19 +32,23 @@ QVariant CSMSettings::SettingModel::data(const QModelIndex &index, int role) con
         switch (index.column())
         {
         case 0:
-            return setting->name();
+            return dataPair.second.first;
         break;
 
         case 1:
-            return setting->section();
+            return dataPair.first;
         break;
 
         case 2:
-            return setting->value();
+            return dataPair.second.second;
         break;
 
         case 3:
-            return setting->valueList();
+            return mSettings.value(key)->valueList();
+        break;
+        case 4:
+            return key;
+            break;
 
         default:
         break;
@@ -59,13 +64,18 @@ QVariant CSMSettings::SettingModel::data(const QModelIndex &index, int role) con
 bool CSMSettings::SettingModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
 
+    int row = index.row();
+
     if (!index.isValid())
         return false;
 
-    if (index.row() > mSettings.count())
+    if (row > rowCount())
             return false;
 
-    mSettings.at(index.row())->setValue (value.toString());
+    SectionSettingPair dataPair = mSettingValues.at(row);
+    dataPair.second.second = value.toString();
+
+    mSettingValues.replace(row, dataPair);
 
     emit dataChanged(index, index);
 
@@ -85,46 +95,65 @@ Qt::ItemFlags CSMSettings::SettingModel::flags(const QModelIndex &index) const
     return defaultFlags;
 }
 
-CSMSettings::SettingData *CSMSettings::SettingModel::createSetting (
-                                            const QString &name,
-                                            const QString &section,
-                                            const QString &value,
-                                            const QStringList &valueList)
+//a created setting is a declared setting
+//setting definitions occur later in the model creation process
+//declared settings are accessed by key section.setting
+//defined settings are accessed by index
+//after loading setting definitions, setting defaults need to be applied
+//where no definitions are found for a corresponding declaration.
+
+CSMSettings::Setting *CSMSettings::SettingModel::declareSetting (
+                                        const QString &settingName,
+                                        const QString &settingSection,
+                                        const QString &defaultValue)
 {
-    SettingData *setting = new SettingData(section, name, valueList, this);
-    setting->setValue(value);
+    Setting *setting = new Setting(settingName, settingSection, defaultValue, this);
+    mSettings[settingSection + "." + settingName] = setting;
+    return setting;
+}
+
+QModelIndex CSMSettings::SettingModel::defineSetting (
+                                            const QString &settingName,
+                                            const QString &sectionName,
+                                            const QString &value)
+{
+    SectionSettingPair dataPair;
+
+    dataPair.first = sectionName;
+    dataPair.second.first = settingName;
+    dataPair.second.second = value;
 
     int settingRow = rowCount();
 
     insertRow(settingRow);
-    mSettings.replace(settingRow, setting);
+    mSettingValues.replace(settingRow, dataPair);
 
     QModelIndex idx = index(settingRow, 0, QModelIndex());
 
-    emit dataChanged(idx, idx);
+    emit layoutChanged();
 
-    return setting;
+    return idx;
 }
 
-const CSMSettings::SettingData *CSMSettings::SettingModel::getSetting (int row) const
+QString CSMSettings::SettingModel::getSettingValue (int row) const
 {
-    if (row < mSettings.size())
-        return mSettings.at(row);
+    if (row < mSettingValues.size())
+        return mSettingValues.at(row).second.second;
 
-    return 0;
+    return QString("");
 }
 
-CSMSettings::SettingData *CSMSettings::SettingModel::getSetting (const QString &sectionName,
-                                                                   const QString &settingName)
+QString CSMSettings::SettingModel::getSettingValue (const QString &sectionName,
+                                               const QString &settingName) const
 {
-    foreach (CSMSettings::SettingData *setting, mSettings)
+    foreach (const SectionSettingPair &dataPair, mSettingValues)
     {
-        if (setting->section() == sectionName)
-            if (setting->name() == settingName)
-                return setting;
+        if (dataPair.first == sectionName)
+            if (dataPair.second.first == settingName)
+                return dataPair.second.second;
     }
 
-    return 0;
+    return QString("");
 }
 
 QModelIndex CSMSettings::SettingModel::index(int row, int column, const QModelIndex &parent) const
@@ -140,26 +169,117 @@ QModelIndex CSMSettings::SettingModel::index(int row, int column, const QModelIn
 
 bool CSMSettings::SettingModel::insertRows(int row, int count, const QModelIndex &parent)
 {
-    if (row > mSettings.size())
+    if (row > rowCount())
         return false;
 
-    for (int i = row; i < row + count; i++)
-        mSettings.insert(row, new SettingData("", "", QStringList(),this));
+    SectionSettingPair ssPair;
+    SettingValuePair svPair;
 
-    emit layoutChanged();
+    ssPair.second = svPair;
+
+    for (int i = row; i < row + count; i++)
+    {
+        beginInsertRows(parent, i, i);
+        {
+            mSettingValues.insert(row, ssPair);
+        } endInsertRows();
+    }
 
     return true;
 }
 
 bool CSMSettings::SettingModel::removeRows(int row, int count, const QModelIndex &parent)
 {
-    if (row >= mSettings.count())
+    if (row >= rowCount())
         return false;
 
     for (int i = row; i < row + count; i++)
-        mSettings.removeAt(row);
+    {
+        beginRemoveRows (parent, i, i);
+        {
+            mSettingValues.removeAt(row);
+        } endRemoveRows();
+    }
 
     emit layoutChanged();
-
+    qDebug() << "CSMSettings::SettingModel::removeRows() complete";
     return true;
+}
+
+QStringList CSMSettings::SettingModel::getSettingValueList
+                                        (const QString &sectionName,
+                                            const QString &settingName) const
+{
+    QString key = sectionName + "." + settingName;
+
+    if (mSettings.keys().contains(key))
+        return mSettings.value(key)->valueList();
+
+    return QStringList();
+}
+
+CSMSettings::SectionSettingPair CSMSettings::SettingModel::
+                                        getSectionSettingPair(int index) const
+{
+    if (index >= 0 && index < rowCount())
+        return mSettingValues.at(index);
+
+    return SectionSettingPair();
+}
+
+bool CSMSettings::SettingModel::hasDeclaredSetting(const QString &key) const
+{
+    return mSettings.keys().contains(key);
+}
+
+void CSMSettings::SettingModel::validate()
+{
+    QStringList settingKeys = mSettings.keys();
+
+    //iterate each declared setting, verifying:
+    //1. All definitions match against the value list (if defined)
+    //2. Undefined settings are given the default value as a definition (if defined)
+    foreach (const QString &key, settingKeys)
+    {
+        Setting *setting = mSettings.value(key);
+
+        QString sectionName = setting->section();
+        QString settingName = setting->name();
+
+        bool isUndefined = true;
+        bool hasValueList = setting->valueList().size() > 0;
+
+        SettingDefinitionList::Iterator it = mSettingValues.begin();
+
+        while (it != mSettingValues.end())
+        {
+            if ((*it).first == sectionName)
+            {
+                if ((*it).second.first == settingName)
+                {
+                    //indicate the setting has values
+                    //to avoid adding a default value later
+                    if (isUndefined)
+                        isUndefined = false;
+
+                    //if the valuelist is non-zero, ensure all loaded
+                    //values are found in the list.  Delete the ones that
+                    //aren't found from the model.
+                    if (hasValueList)
+                    {
+
+                        if (!setting->valueList().contains((*it).second.second))
+                            it = mSettingValues.erase(it, it);
+                    }
+                }
+            }
+            it++;
+        }
+
+        if (isUndefined)
+        {
+            if (setting->defaultValue() != "")
+                defineSetting (settingName, sectionName, setting->defaultValue());
+        }
+    }
 }

@@ -16,14 +16,17 @@ namespace CSMSettings
 
         QStringList mValueList;
         QString mSettingName;
-        SectionFilter *mFilter;
-        QSortFilterProxyModel mSettingFilter;
+        QString mSectionName;
+       // SectionFilter *mFilter;
+        QSortFilterProxyModel *mSettingFilter;
         QList<QPair<QString, QBool *> > mSettings;
+        bool mSingleValueMode;
 
     public:
 
-        explicit BinaryWidgetAdapter(SectionFilter *filter,
-                                   const QString &settingName,
+        explicit BinaryWidgetAdapter(
+                                   const QString &sectionName,
+                                    const QString &settingName,
                                    QObject *parent = 0);
 
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -46,8 +49,21 @@ namespace CSMSettings
 
         QModelIndex parent(const QModelIndex &child) const  { return QModelIndex(); }
 
+        void setSingleValueMode (bool state)                { mSingleValueMode = state; }
+        bool singleValueMode () const                       {return mSingleValueMode; }
+        QSortFilterProxyModel *filter()         {return mSettingFilter; }
+
     private:
+
         QModelIndex sourceModelIndex (const QString &item) const;
+
+        bool setSingleValue(const QString &item);
+        bool setMultiValue(bool value, const QString &item);
+
+    private slots:
+        void slotUpdateData();
+        void slotDataChanged (const QModelIndex &, const QModelIndex &);
+
     };
 }
 #endif // BINARYWIDGETMODEL_HPP

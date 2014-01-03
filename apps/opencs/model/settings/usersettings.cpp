@@ -17,6 +17,7 @@
 #include "settingmodel.hpp"
 #include "setting.hpp"
 
+
 #include <QDebug>
 
 
@@ -58,9 +59,9 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
     {
-        Setting *width = createSetting ("Width", section, "1024");
-        Setting *height = createSetting ("Height", section, "768");
-        Setting *preDefined = createSetting ("Pre-Defined", section, "1024 x 768");
+        Setting *width = mSettingModel->declareSetting ("Width", section, "1024");
+        Setting *height = mSettingModel->declareSetting ("Height", section, "768");
+        Setting *preDefined = mSettingModel->declareSetting ("Pre-Defined", section, "1024 x 768");
 
         preDefined->valueList() << "640 x 480" << "800 x 600" << "1024 x 768" << "1440 x 900";
 
@@ -84,8 +85,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     section = "Display Format";
     {
         QString defaultValue = "Icon and Text";
-        Setting *recordStatusDisplay = createSetting("Record Status Display", section, defaultValue);
-        Setting *refIdDisplay = createSetting("Referenceable ID Type Display", section, defaultValue);
+        Setting *recordStatusDisplay = mSettingModel->declareSetting("Record Status Display", section, defaultValue);
+        Setting *refIdDisplay = mSettingModel->declareSetting("Referenceable ID Type Display", section, defaultValue);
 
         QStringList values;
         values << defaultValue << "Icon Only" << "Text Only";
@@ -139,15 +140,16 @@ bool CSMSettings::UserSettings::writeSettings()
 
     for (int i =0; i < mSettingModel->rowCount(); ++i)
     {
-        const CSMSettings::SettingData *setting = mSettingModel->getSetting(i);
+        SectionSettingPair dataPair = mSettingModel->getSectionSettingPair(i);
 
-        if (section != setting->section())
+        if (section != dataPair.first)
         {
-            section = setting->section();
-            *stream << "[" << section << "]" << "\n";
+            section = dataPair.first;
+            *stream << "[" << dataPair.first << "]" << "\n";
         }
 
-        *stream << setting->name() << " = " << setting->value() << "\n";
+        *stream << dataPair.second.first << " = "
+                << dataPair.second.second << "\n";
     }
 
     destroyStream (stream);
@@ -177,8 +179,12 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
     //regExp for setting definitions (name / value pair separated by '=')
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
+    //temporary storage for the section currently being parsed
     QString sectionName = "none";
 
+    //temporary storage map for setting values
+    //values are merged across config files, with final map state
+    //providing the data for the setting model
     QMap <QString, QStringList> settings;
 
     while (!stream->atEnd())
@@ -192,17 +198,7 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
         // save the section name and skip
         if (sectionRe.exactMatch(line))
         {
-            if (settings.count()>0)
-            {
-                //merge (overwrite) settings from the file to
-                //the class member.  This ensures duplicate setting
-                //definitions in later cfg files will overwrite earlier
-                //entries.
-                foreach (const QString &key, settings.keys())
-                    mSettingDefinitions.insert(key, settings.value(key));
-
-                settings.clear();
-            }
+            mergeSettings (settings);
             sectionName = sectionRe.cap(1).simplified();
             continue;
         }
@@ -215,7 +211,7 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
             QString mapKey = sectionName + "." + settingName;
 
             // test for missing setting...
-            if (!(mSettingDeclarations.contains(mapKey)))
+            if (!(mSettingModel->hasDeclaredSetting(mapKey)))
             {
                 qDebug ("\nUndefined setting found.\n    File: %s\n    Section: %s\n    Definition: %s = %s",
                         filePath.toStdString().c_str(),
@@ -232,18 +228,24 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
                     settingValue.toStdString().c_str());
          }
     }
-    if (settings.count()>0)
-    {
-        //merge (overwrite) settings from the file to
-        //the class member.  This ensures duplicate setting
-        //definitions in later cfg files will overwrite earlier
-        //entries.
-        foreach (const QString &key, settings.keys())
-            mSettingDefinitions.insert(key, settings.value(key));
+    mergeSettings (settings);
 
-        settings.clear();
-    }
     return true;
+}
+
+void CSMSettings::UserSettings::mergeSettings (QMap <QString, QStringList> &settings)
+{
+    if (settings.count() == 0)
+        return;
+
+    //merge (overwrite) settings from the file to
+    //the class member.  This ensures duplicate setting
+    //definitions in later cfg files will overwrite earlier
+    //entries.
+    foreach (const QString &key, settings.keys())
+        mSettingDefinitions.insert(key, settings.value(key));
+
+    settings.clear();
 }
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
@@ -291,21 +293,9 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
         QString settingName = key.mid(delimiter + 1);
 
         foreach (const QString &value, mSettingDefinitions.value(key))
-        {
-            const QStringList &valueList = mSettingDeclarations.value(key)->valueList();
-            mSettingModel->createSetting (settingName, sectionName, value, valueList);
-        }
+            mSettingModel->defineSetting (settingName, sectionName, value);
     }
-}
-
-CSMSettings::Setting *CSMSettings::UserSettings::createSetting(const QString &name,
-                                                               const QString &section,
-                                                               const QString &defaultValue)
-{
-    Setting *setting = new Setting (name, section, defaultValue);
-    mSettingDeclarations[section + "." + name] = setting;
-
-    return setting;
+    mSettingModel->validate();
 }
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()

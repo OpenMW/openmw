@@ -21,9 +21,9 @@ void OptionGroup::setCurrentSelection(int selection)
 
     if (iter == mButtonMap.end() || selection < 0)
     {
-        currentSelection_ = -1;
+        mCurrentSelection = -1;
 
-        for (iter = mButtonMap.begin(); iter != mBbuttonMap.end(); ++iter)
+        for (iter = mButtonMap.begin(); iter != mButtonMap.end(); ++iter)
             iter.value()->setChecked(false);
 
     }

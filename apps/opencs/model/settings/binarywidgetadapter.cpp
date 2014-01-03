@@ -6,18 +6,23 @@
 #include "sectionfilter.hpp"
 
 #include <QDebug>
-CSMSettings::BinaryWidgetAdapter::BinaryWidgetAdapter(SectionFilter *filter,
+CSMSettings::BinaryWidgetAdapter::BinaryWidgetAdapter(
+                                                  const QString &sectionName,
                                                   const QString &settingName,
                                                   QObject *parent) :
-    mSettingName(settingName), mFilter(filter), QAbstractItemModel(parent)
+    mSettingName(settingName), mSectionName(sectionName),
+    mSingleValueMode(false), QAbstractItemModel(parent)
 {
-    mSettingFilter.setSourceModel(filter);
-    mSettingFilter.setFilterKeyColumn(0);
-    mSettingFilter.setFilterRegExp(settingName);
-    mSettingFilter.setDynamicSortFilter(true);
+    mSettingFilter = new QSortFilterProxyModel(this);
 
-    QModelIndex sourceIndex = mSettingFilter.index(0, 3);
-    mValueList = mSettingFilter.data(sourceIndex).toStringList();
+    mSettingFilter->setSourceModel(CSMSettings::UserSettings
+                                   ::instance()
+                                   .settingModel());
+    mSettingFilter->setFilterKeyColumn(4);
+    mSettingFilter->setFilterRegExp(sectionName + "." + settingName);
+
+    QModelIndex sourceIndex = mSettingFilter->index(0, 3);
+    mValueList = mSettingFilter->data(sourceIndex).toStringList();
 
     //create a list of QString pairs which represent the setting values and
     //whether or not they are set (true / false)
@@ -25,9 +30,9 @@ CSMSettings::BinaryWidgetAdapter::BinaryWidgetAdapter(SectionFilter *filter,
     {
         QPair<QString, QBool *> settingPair(listValue, new QBool(false));
 
-        for (int i = 0; i < mSettingFilter.rowCount(); i++)
+        for (int i = 0; i < mSettingFilter->rowCount(); i++)
         {
-            QString modelValue = mSettingFilter.data(mSettingFilter.index(i, 2, QModelIndex())).toString();
+            QString modelValue = mSettingFilter->data(mSettingFilter->index(i, 2, QModelIndex())).toString();
 
             if (modelValue == listValue)
             {
@@ -38,15 +43,69 @@ CSMSettings::BinaryWidgetAdapter::BinaryWidgetAdapter(SectionFilter *filter,
         mSettings.append(settingPair);
     }
 
-    connect (&mSettingFilter, SIGNAL(dataChanged(QModelIndex &, QModelIndex &)),
-             this, SIGNAL(dataChanged(QModelIndex &, QModelIndex &)));
+    connect (mSettingFilter, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+             this, SLOT(slotDataChanged(const QModelIndex &, const QModelIndex &)));
 
-    connect (&mSettingFilter, SIGNAL(layoutChanged()), this, SIGNAL(layoutChanged()));
+    connect (mSettingFilter,
+             SIGNAL(layoutChanged()),
+             this, SLOT(slotUpdateData()));
+}
+
+void CSMSettings::BinaryWidgetAdapter::slotDataChanged(const QModelIndex &topLeft, const QModelIndex &botRight)
+{
+    qDebug() << "received dataChanged()!";
+}
+
+void CSMSettings::BinaryWidgetAdapter::slotUpdateData()
+{
+    QString objId = "BinaryWidgetAdapter." + objectName() + "::slotUpdateData()";
+    qDebug() << objId << " data: ";
+
+    for (int i = 0; i < mSettings.count(); i++)
+    {
+        QPair <QString, QBool *> data = mSettings.at(i);
+
+        QString settingValue = data.first;
+
+        bool settingFound = false;
+
+        for (int j = 0; j < mSettingFilter->rowCount(); j++)
+        {
+            QModelIndex idx = mSettingFilter->index(j, 2, QModelIndex());
+
+            settingFound = (mSettingFilter->data(idx).toString() == settingValue);
+
+            qDebug() << objId << "index: " << i << "; setting found? " << settingFound;
+            if (settingFound)
+            {
+                if ((*data.second) == QBool(false))
+                    data.second = new QBool(true);
+                break;
+            }
+        }
+
+        if (!settingFound)
+        {
+            if (*data.second == QBool(true))
+                data.second = new QBool (false);
+        }
+
+        qDebug() << objId << " replacing setting with " << data.first << " = " << *data.second;
+        mSettings.replace(i, data);
+        QModelIndex idx = index(i, 1, QModelIndex());
+        emit dataChanged (idx, idx);
+    }
+
+    for (int i = 0; i < mSettings.count(); i++)
+    {
+        qDebug() << "\t" << mSettings.at(i).first << " = " << *(mSettings.at(i).second);
+    }
+
+    //emit dataChanged(index(0,0,QModelIndex()), index(rowCount() - 1, 4, QModelIndex()));
 }
 
 bool CSMSettings::BinaryWidgetAdapter::insertItem(const QString &item)
 {
-    qDebug() << "inserting item: " << item;
     //if the item isn't found in the local model, abort
     bool success = false;
 
@@ -65,33 +124,28 @@ bool CSMSettings::BinaryWidgetAdapter::insertItem(const QString &item)
     if (sourceModelIndex(item).isValid())
         return false;
 
-    mFilter->createSetting(mSettingName, item, mValueList);
+    CSMSettings::UserSettings::instance().settingModel()->defineSetting(mSettingName, mSectionName, item);
 
     return true;
 }
 
 bool CSMSettings::BinaryWidgetAdapter::removeItem(const QString &item)
 {
-    qDebug() << "removing item: " << item;
     while (sourceModelIndex(item).isValid())
-        removeRow(sourceModelIndex(item).row());
+        mSettingFilter->removeRow(sourceModelIndex(item).row());
 
     return true;
 }
 
 QVariant CSMSettings::BinaryWidgetAdapter::data(const QModelIndex &index, int role) const
 {
-    qDebug () << "BinaryWidgetAdapter::data()";
-
     if (!index.isValid())
         return QVariant();
 
     int row = index.row();
-    qDebug () << "BinaryWidgetAdapter::data() row";
+
     if (row < 0 || row >= mSettings.size())
         return QVariant();
-
-    qDebug() << "BinaryWidgetAdapter::data index row: " << row;
 
     switch (role)
     {
@@ -101,14 +155,10 @@ QVariant CSMSettings::BinaryWidgetAdapter::data(const QModelIndex &index, int ro
         switch (index.column())
         {
         case 0: // setting value
-
-            qDebug() << "setting value column: " << mSettings.at(row).first;
             return mSettings.at(row).first;
         break;
 
         case 1: // value state (true / false)
-            qDebug() << "setting: " << mSettings.at(row).first;
-            qDebug() << "setting state column: " << *(mSettings.at(row).second);
             return QVariant(*(mSettings.at(row).second));
         break;
         }
@@ -133,8 +183,6 @@ int CSMSettings::BinaryWidgetAdapter::columnCount(const QModelIndex &parent) con
 bool CSMSettings::BinaryWidgetAdapter::setData(const QModelIndex &index,
                                                 const QVariant &value, int role)
 {
-    qDebug () << "BinaryWidgetAdapter::setData()";
-
     if (!index.isValid())
         return false;
 
@@ -143,17 +191,32 @@ bool CSMSettings::BinaryWidgetAdapter::setData(const QModelIndex &index,
     if (row < 0 || row >= rowCount())
         return false;
 
-    qDebug () << "BinaryWidgetAdapter::setData() row " << row << "; col: " << index.column() << "; value: " << value.toBool();
-
-    QVariant val = QVariant(value);
-    const QBool retVal = QBool(val.toBool() == true);
+    //QVariant val = QVariant(value);
+    const QBool retVal = QBool(value.toBool() == true);
     *(mSettings.at(row).second) = retVal;
     QString item = mSettings.at(row).first;
 
+    bool success = false;
+
+    if (mSingleValueMode)
+        success = setSingleValue(item);
+    else
+        success = setMultiValue(value.toBool(), item);
+
+    if (!success)
+        return false;
+
+    emit dataChanged(index, index);
+
+    return true;
+}
+
+bool CSMSettings::BinaryWidgetAdapter::setMultiValue (bool value, const QString &item)
+{
     QModelIndex sourceIndex = sourceModelIndex(item);
 
     //add to source model
-    if (value.toBool())
+    if (value)
     {
         if (sourceIndex.isValid())
             return false;
@@ -168,25 +231,32 @@ bool CSMSettings::BinaryWidgetAdapter::setData(const QModelIndex &index,
         removeItem(item);
     }
 
-    emit dataChanged(index, index);
+    return true;
+}
 
-    qDebug() << "SETTING DUMP";
-    for (int i = 0; i< mSettingFilter.rowCount(); i++)
+bool CSMSettings::BinaryWidgetAdapter::setSingleValue (const QString &item)
+{
+    QPair<QString, QBool *> settingPair;
+    //search for any values with a true state in the sub model
+    foreach (settingPair, mSettings)
     {
-        QModelIndex sIndx2 = mSettingFilter.index(i, 0);
-        QModelIndex sIndx = mSettingFilter.index(i, 2);
+        if (settingPair.first == item)
+            continue;
 
-        QString stngNam = mSettingFilter.data(sIndx2).toString();
-        QString stngVal = mSettingFilter.data(sIndx).toString();
-
-        qDebug() << "setting: " << stngNam << " = " << stngVal;
-
+        if (*(settingPair.second) == QBool(true))
+        {
+            removeItem(settingPair.first);
+            *(settingPair.second) = QBool(false);
+        }
     }
+    insertItem(item);
+
     return true;
 }
 
 Qt::ItemFlags CSMSettings::BinaryWidgetAdapter::flags(const QModelIndex &index) const
 {
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     if (!index.isValid())
         return Qt::NoItemFlags;
 
@@ -200,7 +270,6 @@ Qt::ItemFlags CSMSettings::BinaryWidgetAdapter::flags(const QModelIndex &index) 
 
 QModelIndex CSMSettings::BinaryWidgetAdapter::index(int row, int column, const QModelIndex &parent) const
 {
-    qDebug() << "BinaryWidgetAdapter::index row: " << row << "; column: " << column;
     if ((row >= 0 && row < rowCount()) && ( column >= 0 && column < columnCount()))
         return createIndex (row, column);
 
@@ -209,10 +278,11 @@ QModelIndex CSMSettings::BinaryWidgetAdapter::index(int row, int column, const Q
 
 QModelIndex CSMSettings::BinaryWidgetAdapter::sourceModelIndex(const QString &item) const
 {
-    for (int i = 0; i < mSettingFilter.rowCount(); i++)
+    for (int i = 0; i < mSettingFilter->rowCount(); i++)
     {
-        QModelIndex sourceIndex = mSettingFilter.index(i, 0);
-        if (mSettingFilter.data(sourceIndex).toString() == item)
+        QModelIndex sourceIndex = mSettingFilter->index(i, 2);
+
+        if (mSettingFilter->data(sourceIndex).toString() == item)
             return sourceIndex;
     }
     return QModelIndex();

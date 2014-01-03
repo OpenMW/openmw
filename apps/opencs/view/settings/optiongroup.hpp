@@ -8,7 +8,7 @@ class QRadioButton;
 
 class OptionGroup : public QWidget
 {
-    int mCcurrentSelection;
+    int mCurrentSelection;
     QMap<int, QRadioButton*> mButtonMap;
     QMap<QRadioButton*, int> mRevButtonMap;
 

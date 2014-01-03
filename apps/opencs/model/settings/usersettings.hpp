@@ -29,7 +29,6 @@ namespace CSMSettings {
         Q_OBJECT
 
         SettingModel *mSettingModel;
-        QMap <QString, Setting *> mSettingDeclarations;
         QMap <QString, QStringList> mSettingDefinitions;
         static UserSettings *mUserSettingsInstance;
         QString mUserFilePath;
@@ -63,8 +62,8 @@ namespace CSMSettings {
 
         SettingModel *settingModel()  { return mSettingModel; }
 
-        Setting *getSettingDeclaration(const QString &key)
-                                    { return mSettingDeclarations.value(key); }
+      //  Setting *getSettingDeclaration(const QString &key)
+         //                           { return mSettingModel->hasDeclaredSetting(key); }
     private:
 
 
@@ -80,6 +79,8 @@ namespace CSMSettings {
         void destroyStream (QTextStream *stream) const;
 
         Setting *createSetting (const QString &name, const QString &section = "", const QString &defaultValue = "");
+
+        void mergeSettings (QMap <QString, QStringList> &settings);
 
     signals:
 

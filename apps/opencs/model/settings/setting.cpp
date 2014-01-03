@@ -9,6 +9,4 @@ CSMSettings::Setting::Setting (const QString &name, const QString &section,
       mIsHorizontal (true)
 {
     setObjectName (name);
-
-    mValues << mDefaultValue;
 }

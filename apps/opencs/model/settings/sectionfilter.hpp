@@ -12,8 +12,9 @@ namespace CSMSettings
     public:
         explicit SectionFilter (const QString &sectionName, QObject *parent);
 
-        void createSetting (const QString &name, const QString &value,
-                            const QStringList &valueList);
+        void createSetting (const QString &name, const QString &value);
+
+        QStringList valueList (const QString &settingName);
     };
 }
 #endif // SECTIONFILTER_HPP

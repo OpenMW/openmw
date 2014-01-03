@@ -6,14 +6,19 @@ CSMSettings::SectionFilter::SectionFilter (const QString &sectionName,
 {
     setSourceModel(CSMSettings::UserSettings::instance().settingModel());
     setFilterRegExp(sectionName);
-    setFilterKeyColumn(1);
+    setFilterKeyColumn(4);
     setDynamicSortFilter(true);
 }
 
 void CSMSettings::SectionFilter::createSetting (const QString &name,
-                                                const QString &value,
-                                                const QStringList &valueList)
+                                                const QString &value)
 {
     CSMSettings::UserSettings::instance().settingModel()->
-            createSetting(name, filterRegExp().pattern(), value, valueList);
+            defineSetting(name, filterRegExp().pattern(), value);
+}
+
+QStringList CSMSettings::SectionFilter::valueList (const QString &settingName)
+{
+    return CSMSettings::UserSettings::instance().settingModel()->
+            getSettingValueList(settingName, filterRegExp().pattern());
 }

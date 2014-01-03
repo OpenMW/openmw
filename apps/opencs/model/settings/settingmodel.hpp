@@ -13,14 +13,13 @@ namespace CSMSettings
     {
         QString mSection;
         QString mValue;
-        const QStringList &mValueList;
 
         Q_OBJECT
 
     public:
         SettingData (const QString &section, const QString &name,
-                     const QStringList &valueList, QObject *parent = 0)
-            : mSection (section), mValueList(valueList), QObject(parent)
+                     QObject *parent = 0)
+            : mSection (section), QObject(parent)
         { setObjectName(name); }
 
         void setValue (const QString &value)    { mValue = value; }
@@ -29,17 +28,24 @@ namespace CSMSettings
 
         QString section() const                 { return mSection; }
         QString name() const                    { return objectName(); }
-        const QStringList &valueList() const    { return mValueList; }
     };
+
+    //pair of setting name and setting value
+    typedef QPair <QString, QString>        SettingValuePair;
+
+    //pair of section name and setting name / value pair
+    typedef QPair <QString, SettingValuePair>   SectionSettingPair;
+
+    typedef QList <SectionSettingPair>          SettingDefinitionList;
+    typedef QMap <QString, Setting *>           SettingDeclarationList;
 
     class SettingModel : public QAbstractItemModel
     {
 
         Q_OBJECT
 
-        //need to put add / remove functionality in user settings class
-        //and remove all storage devices from the model.
-        QList<SettingData *> mSettings;
+        SettingDeclarationList mSettings;
+        SettingDefinitionList mSettingValues;
 
     public:
 
@@ -51,9 +57,6 @@ namespace CSMSettings
 
         bool setData (const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
-        bool setDataByName (const QString &sectionName, const QString &settingName, const QVariant &value);
-        bool addDataByName (const QString &sectionName, const QString &settingName, const QVariant &value);
-
         Qt::ItemFlags flags (const QModelIndex &index) const;
 
         QModelIndex index(int row, int column, const QModelIndex &parent) const;
@@ -64,11 +67,31 @@ namespace CSMSettings
         bool insertRows(int row, int count, const QModelIndex &parent);
         bool removeRows(int row, int count, const QModelIndex &parent);
 
-        SettingData *createSetting (const QString &name, const QString &section,
-                                    const QString &value, const QStringList &valueList);
+        Setting *declareSetting (const QString &settingName,
+                                 const QString &sectionName,
+                                 const QString &value);
 
-        const SettingData *getSetting (int row) const;
-        SettingData *getSetting (const QString &sectionName, const QString &settingName);
+        QModelIndex defineSetting ( const QString &settingName,
+                                    const QString &sectionName,
+                                    const QString &value);
+
+        QModelIndex createSetting (const QString &name, const QString &section,
+                                   const QString &value, const Setting *settingS);
+
+        bool hasDeclaredSetting (const QString &key) const;
+        QString getSettingValue (int row) const;
+
+        QString getSettingValue (const QString &sectionName, const QString &settingName) const;
+
+        QStringList getSettingValueList
+                (const QString &sectionName, const QString &settingName) const;
+
+        SectionSettingPair getSectionSettingPair(int index) const;
+
+        void validate();
+
+    private:
+
 
     signals:
 

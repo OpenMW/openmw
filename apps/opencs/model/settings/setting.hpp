@@ -15,9 +15,6 @@ namespace CSMSettings
     {
         Q_OBJECT
 
-        /// value stringlist
-        QStringList mValues;
-
         /// list of values for setting validation / list widgets
         QStringList mValueList;
 
@@ -50,8 +47,8 @@ namespace CSMSettings
                          const QString &defaultValue, QObject *parent = 0);
 
         ///getter functions
-        const QStringList &valueList() const    { return mValueList; }
-        QStringList &valueList()                { return mValueList; }
+        QString section() const                 { return mSectionName; }
+        QStringList valueList() const           { return mValueList; }
         QString inputMask() const               { return mInputMask; }
         QString name() const                    { return objectName(); }
         const ProxyMap &proxyMap() const        { return mProxyMap; }

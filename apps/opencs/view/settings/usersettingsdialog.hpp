@@ -12,8 +12,9 @@
 #include "../../model/settings/support.hpp"
 
 class QStackedWidget;
-class QListWidget;
+class QListView;
 class QDataWidgetMapper;
+class QGroupBox;
 
 namespace CSMSettings { class BinaryWidgetAdapter; }
 namespace CSVSettings {
@@ -24,12 +25,12 @@ namespace CSVSettings {
     {
         Q_OBJECT
 
-        QListWidget *mListWidget;
+        QListView *mListView;
         QStackedWidget *mStackedWidget;
         CSMSettings::BinaryWidgetAdapter *mBinAdapter;
 
-        void testMapperRadioButton();
-        void testMapperCheckBox();
+        void testMapperRadioButton(QGroupBox *gb);
+        void testMapperCheckBox(QGroupBox *gb);
 
     public:
         explicit UserSettingsDialog(QMainWindow *parent = 0);
@@ -52,10 +53,6 @@ namespace CSVSettings {
         void slotChangePage (QListWidgetItem*, QListWidgetItem*);
 
         void show();
-
-    private slots:
-
-        void slotRadioToggle(bool state);
     };
 }
 #endif // USERSETTINGSDIALOG_H
