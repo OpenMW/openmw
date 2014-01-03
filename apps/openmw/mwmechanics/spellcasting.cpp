@@ -434,7 +434,8 @@ namespace MWMechanics
             int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
             if (!fail && roll >= successChance)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                if (mCaster.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
                 fail = true;
             }
 

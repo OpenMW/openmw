@@ -230,6 +230,8 @@ namespace Compiler
         const int opcodeEnableLevitation = 0x2000221;
         const int opcodeCast = 0x2000227;
         const int opcodeCastExplicit = 0x2000228;
+        const int opcodeExplodeSpell = 0x2000229;
+        const int opcodeExplodeSpellExplicit = 0x200022a;
     }
 
     namespace Sky

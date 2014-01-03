@@ -360,4 +360,6 @@ op 0x2000225: ToggleAIExplicit
 op 0x2000226: COE
 op 0x2000227: Cast
 op 0x2000228: Cast, explicit
-opcodes 0x2000229-0x3ffffff unused
+op 0x2000229: ExplodeSpell
+op 0x200022a: ExplodeSpell, explicit
+opcodes 0x200022b-0x3ffffff unused

@@ -722,6 +722,22 @@ namespace MWScript
             }
         };
 
+        template <class R>
+        class OpExplodeSpell : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                MWMechanics::CastSpell cast(ptr, ptr);
+                cast.cast(spell);
+            }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -784,6 +800,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
             interpreter.installSegment5 (Compiler::Misc::opcodeCast, new OpCast<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeCastExplicit, new OpCast<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpell, new OpExplodeSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
         }
     }
 }
