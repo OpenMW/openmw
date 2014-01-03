@@ -372,6 +372,8 @@ namespace Compiler
 
         const int opcodeRemoveSpellEffects = 0x200022b;
         const int opcodeRemoveSpellEffectsExplicit = 0x200022c;
+        const int opcodeRemoveEffects = 0x200022d;
+        const int opcodeRemoveEffectsExplicit = 0x200022e;
     }
 
     namespace Transformation

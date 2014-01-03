@@ -364,4 +364,6 @@ op 0x2000229: ExplodeSpell
 op 0x200022a: ExplodeSpell, explicit
 op 0x200022b: RemoveSpellEffects
 op 0x200022c: RemoveSpellEffects, explicit
-opcodes 0x200022d-0x3ffffff unused
+op 0x200022d: RemoveEffects
+op 0x200022e: RemoveEffects, explicit
+opcodes 0x200022f-0x3ffffff unused
