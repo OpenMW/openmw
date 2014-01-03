@@ -33,9 +33,17 @@ namespace CSMTools
             void lockpickCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Lockpick>& records, std::vector<std::string>& messages);
             void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, std::vector<std::string>& messages);
             void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, std::vector<std::string>& messages);
+            void weaponCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Weapon>& records, std::vector<std::string>& messages);
+            void probeCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Probe>& records, std::vector<std::string>& messages);
+            void repairCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Repair>& records, std::vector<std::string>& messages);
+            void staticCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Static>& records, std::vector<std::string>& messages);
 
 	    //TEMPLATE CHECKS
-	    template<typename item> void inventoryItemCheck(const item& item, std::vector<std::string>& messages); //for all inventory items.
+	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem, std::vector<std::string>& messages, const std::string& someid, bool enchantable); //for all enchantable items.
+	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem, std::vector<std::string>& messages, const std::string& someid); //for non-enchantable items.
+	    template<typename TOOL> void toolCheck(const TOOL& sometool, std::vector<std::string>& messages, const std::string& someid, bool canbebroken); //for tools with uses.
+	    template<typename TOOL> void toolCheck(const TOOL& sometool, std::vector<std::string>& messages, const std::string& someid); //for tools without uses.
+	    template<typename LIST> void listCheck(const LIST& some, std::vector< std::string >& messages, const std::string& someid);
 	    
             const CSMWorld::RefIdData& mReferencables;
             const CSMWorld::IdCollection<ESM::Race>& mRaces;

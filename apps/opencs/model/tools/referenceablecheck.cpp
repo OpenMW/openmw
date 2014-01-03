@@ -167,6 +167,46 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
         npcCheck(stage, mReferencables.getNPCs(), messages);
         return;
     }
+
+    stage -= NPCSize;
+
+    const int WeaponSize(mReferencables.getWeapons().getSize());
+
+    if (stage < WeaponSize)
+    {
+        weaponCheck(stage, mReferencables.getWeapons(), messages);
+        return;
+    }
+
+    stage -= WeaponSize;
+
+    const int ProbeSize(mReferencables.getProbes().getSize());
+
+    if (stage < ProbeSize)
+    {
+        probeCheck(stage, mReferencables.getProbes(), messages);
+        return;
+    }
+
+    stage -= ProbeSize;
+
+    const int RepairSize(mReferencables.getRepairs().getSize());
+
+    if (stage < RepairSize)
+    {
+        repairCheck(stage, mReferencables.getRepairs(), messages);
+        return;
+    }
+
+    stage -= RepairSize;
+
+    const int StaticSize(mReferencables.getStatics().getSize());
+
+    if (stage < StaticSize)
+    {
+        staticCheck(stage, mReferencables.getStatics(), messages);
+        return;
+    }
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
@@ -186,13 +226,7 @@ void CSMTools::ReferenceableCheckStage::bookCheck(int stage, const CSMWorld::Ref
     const ESM::Book& Book = (dynamic_cast<const CSMWorld::Record<ESM::Book>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Book, Book.mId);
 
-    inventoryItemCheck<ESM::Book>(Book, messages);
-
-    //checking for enchantment points
-    if (Book.mData.mEnchant < 0)
-    {
-        messages.push_back(id.toString() + "|" + Book.mId + " has negative enchantment");
-    }
+    inventoryItemCheck<ESM::Book>(Book, messages, id.toString(), true);
 }
 
 void CSMTools::ReferenceableCheckStage::activatorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Activator >& records, std::vector< std::string >& messages)
@@ -226,36 +260,7 @@ void CSMTools::ReferenceableCheckStage::potionCheck(int stage, const CSMWorld::R
     const ESM::Potion& Potion = (dynamic_cast<const CSMWorld::Record<ESM::Potion>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, Potion.mId);
 
-    //Checking for name
-    if (Potion.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Potion.mId + " has an empty name");
-    }
-
-    //Checking for weight
-    if (Potion.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Potion.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Potion.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Potion.mId + " has negative value");
-    }
-
-//checking for model
-    if (Potion.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Potion.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Potion.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Potion.mId + " has no icon");
-    }
-
+    inventoryItemCheck<ESM::Potion>(Potion, messages, id.toString());
     //IIRC potion can have empty effects list just fine.
 }
 
@@ -272,41 +277,10 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(int stage, const CSMWorld
     const ESM::Apparatus& Apparatus = (dynamic_cast<const CSMWorld::Record<ESM::Apparatus>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Apparatus, Apparatus.mId);
 
-    //Checking for name
-    if (Apparatus.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Apparatus.mId + " has an empty name");
-    }
-
-    //Checking for weight
-    if (Apparatus.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Apparatus.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Apparatus.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Apparatus.mId + " has negative value");
-    }
-
-//checking for model
-    if (Apparatus.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Apparatus.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Apparatus.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Apparatus.mId + " has no icon");
-    }
+    inventoryItemCheck<ESM::Apparatus>(Apparatus, messages, id.toString());
 
     //checking for quality, 0 → apparatus is basicly useless, any negative → apparatus is harmfull instead of helpfull
-    if (Apparatus.mData.mQuality <= 0)
-    {
-        messages.push_back(id.toString() + "|" + Apparatus.mId + " has non-positive quality");
-    }
+    toolCheck<ESM::Apparatus>(Apparatus, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::armorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Armor >& records, std::vector< std::string >& messages)
@@ -321,41 +295,7 @@ void CSMTools::ReferenceableCheckStage::armorCheck(int stage, const CSMWorld::Re
     const ESM::Armor& Armor = (dynamic_cast<const CSMWorld::Record<ESM::Armor>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Armor, Armor.mId);
 
-    //Checking for name
-    if (Armor.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Armor.mId + " has an empty name");
-    }
-
-    //Checking for weight
-    if (Armor.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Armor.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Armor.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Armor.mId + " has negative value");
-    }
-
-//checking for model
-    if (Armor.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Armor.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Armor.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Armor.mId + " has no icon");
-    }
-
-    //checking for enchantment points
-    if (Armor.mData.mEnchant < 0)
-    {
-        messages.push_back(id.toString() + "|" + Armor.mId + " has negative enchantment");
-    }
+    inventoryItemCheck<ESM::Armor>(Armor, messages, id.toString(), true);
 
     //checking for armor class, armor should have poistive armor class, but 0 is considered legal
     if (Armor.mData.mArmor < 0)
@@ -363,7 +303,7 @@ void CSMTools::ReferenceableCheckStage::armorCheck(int stage, const CSMWorld::Re
         messages.push_back(id.toString() + "|" + Armor.mId + " has negative armor class");
     }
 
-    //checking for health. Only positive numbers are allowed, and 0 is illegal
+    //checking for health. Only positive numbers are allowed, or 0 is illegal
     if (Armor.mData.mHealth <= 0)
     {
         messages.push_back(id.toString() + "|" + Armor.mId + " has non positive health");
@@ -381,42 +321,7 @@ void CSMTools::ReferenceableCheckStage::clothingCheck(int stage, const CSMWorld:
 
     const ESM::Clothing& Clothing = (dynamic_cast<const CSMWorld::Record<ESM::Clothing>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Clothing, Clothing.mId);
-
-    //Checking for name
-    if (Clothing.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Clothing.mId + " has an empty name");
-    }
-
-    //Checking for weight
-    if (Clothing.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Clothing.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Clothing.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Clothing.mId + " has negative value");
-    }
-
-//checking for model
-    if (Clothing.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Clothing.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Clothing.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Clothing.mId + " has no icon");
-    }
-
-    //checking for enchantment points
-    if (Clothing.mData.mEnchant < 0)
-    {
-        messages.push_back(id.toString() + "|" + Clothing.mId + " has negative enchantment");
-    }
+    inventoryItemCheck<ESM::Clothing>(Clothing, messages, id.toString(), true);
 }
 
 void CSMTools::ReferenceableCheckStage::containerCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Container >& records, std::vector< std::string >& messages)
@@ -556,7 +461,7 @@ void CSMTools::ReferenceableCheckStage::doorCheck(int stage, const CSMWorld::Ref
     const ESM::Door& Door = (dynamic_cast<const CSMWorld::Record<ESM::Door>&>(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Door, Door.mId);
 
-    //usual, name and model
+    //usual, name or model
     if (Door.mName.empty())
     {
         messages.push_back(id.toString() + "|" + Door.mId + " has an empty name");
@@ -582,35 +487,7 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(int stage, const CSMWorl
     const ESM::Ingredient& Ingredient = (dynamic_cast<const CSMWorld::Record<ESM::Ingredient>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Ingredient, Ingredient.mId);
 
-    //Checking for name
-    if (Ingredient.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Ingredient.mId + " has an empty name");
-    }
-
-    //Checking for weight
-    if (Ingredient.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Ingredient.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Ingredient.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Ingredient.mId + " has negative value");
-    }
-
-//checking for model
-    if (Ingredient.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Ingredient.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Ingredient.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Ingredient.mId + " has no icon");
-    }
+    inventoryItemCheck<ESM::Ingredient>(Ingredient, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& records, std::vector< std::string >& messages)
@@ -625,18 +502,8 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const C
     const ESM::CreatureLevList& CreatureLevList = (dynamic_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList, CreatureLevList.mId); //CreatureLevList but Type_CreatureLevelledList :/
 
-    for (unsigned i = 0; i < CreatureLevList.mList.size(); ++i)
-    {
-        if (CreatureLevList.mList[i].mId.empty())
-        {
-            messages.push_back(id.toString() + "|" + CreatureLevList.mId + " contains item with empty Id");
-        }
 
-        if (CreatureLevList.mList[i].mLevel < 1)
-        {
-            messages.push_back(id.toString() + "|" + CreatureLevList.mId + " contains item with non-positive level");
-        }
-    }
+    listCheck<ESM::CreatureLevList>(CreatureLevList, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& records, std::vector< std::string >& messages)
@@ -651,18 +518,7 @@ void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(int stage, const C
     const ESM::ItemLevList& ItemLevList = (dynamic_cast<const CSMWorld::Record<ESM::ItemLevList>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, ItemLevList.mId);
 
-    for (unsigned i = 0; i < ItemLevList.mList.size(); ++i)
-    {
-        if (ItemLevList.mList[i].mId.empty())
-        {
-            messages.push_back(id.toString() + "|" + ItemLevList.mId + " contains item with empty Id");
-        }
-
-        if (ItemLevList.mList[i].mLevel < 1)
-        {
-            messages.push_back(id.toString() + "|" + ItemLevList.mId + " contains item with non-positive level");
-        }
-    }
+    listCheck<ESM::ItemLevList>(ItemLevList, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Light >& records, std::vector< std::string >& messages)
@@ -686,31 +542,15 @@ void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::Re
     {
         if (Light.mIcon.empty()) //Needs to be checked with carrable flag
         {
-            messages.push_back(id.toString() + "|" + Light.mId + " has no icon");
-        }
+            inventoryItemCheck<ESM::Light>(Light, messages, id.toString());
 
-        if (Light.mData.mWeight < 0)
-        {
-            messages.push_back(id.toString() + "|" + Light.mId + " has negative weight");
-        }
-
-        if (Light.mData.mValue < 0)
-        {
-            messages.push_back(id.toString() + "|" + Light.mId + " has negative value");
-        }
-
-        if (Light.mModel.empty())
-        {
-            messages.push_back(id.toString() + "|" + Light.mId + " has no model");
-        }
-
-        if (Light.mData.mTime == 0)
-        {
-            messages.push_back(id.toString() + "|" + Light.mId + " has zero duration");
+            if (Light.mData.mTime == 0)
+            {
+                messages.push_back(id.toString() + "|" + Light.mId + " has zero duration");
+            }
         }
     }
 }
-
 void CSMTools::ReferenceableCheckStage::lockpickCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Lockpick >& records, std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
@@ -723,45 +563,9 @@ void CSMTools::ReferenceableCheckStage::lockpickCheck(int stage, const CSMWorld:
     const ESM::Lockpick& Lockpick = (dynamic_cast<const CSMWorld::Record<ESM::Lockpick>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Lockpick, Lockpick.mId);
 
-    //Checking for name
-    if (Lockpick.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Lockpick.mId + " has an empty name");
-    }
+    inventoryItemCheck<ESM::Lockpick>(Lockpick, messages, id.toString());
 
-    //Checking for weight
-    if (Lockpick.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Lockpick.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Lockpick.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Lockpick.mId + " has negative value");
-    }
-
-//checking for model
-    if (Lockpick.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Lockpick.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Lockpick.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Lockpick.mId + " has no icon");
-    }
-
-    if (Lockpick.mData.mQuality <= 0)
-    {
-        messages.push_back(id.toString() + "|" + Lockpick.mId + " has non-positive quality");
-    }
-
-    if (Lockpick.mData.mUses <= 0)
-    {
-        messages.push_back(id.toString() + "|" + Lockpick.mId + " has no uses left");
-    }
+    toolCheck<ESM::Lockpick>(Lockpick, messages, id.toString(), true);
 }
 
 void CSMTools::ReferenceableCheckStage::miscCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Miscellaneous >& records, std::vector< std::string >& messages)
@@ -776,35 +580,7 @@ void CSMTools::ReferenceableCheckStage::miscCheck(int stage, const CSMWorld::Ref
     const ESM::Miscellaneous& Miscellaneous = (dynamic_cast<const CSMWorld::Record<ESM::Miscellaneous>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Miscellaneous, Miscellaneous.mId);
 
-    //Checking for name
-    if (Miscellaneous.mName.empty())
-    {
-        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has an empty name");
-    }
-
-    //Checking for weight
-    if (Miscellaneous.mData.mWeight < 0)
-    {
-        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has negative weight");
-    }
-
-    //Checking for value
-    if (Miscellaneous.mData.mValue < 0)
-    {
-        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has negative value");
-    }
-
-//checking for model
-    if (Miscellaneous.mModel.empty())
-    {
-        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has no model");
-    }
-
-    //checking for icon
-    if (Miscellaneous.mIcon.empty())
-    {
-        messages.push_back(id.toString() + "|" + Miscellaneous.mId + " has no icon");
-    }
+    inventoryItemCheck<ESM::Miscellaneous>(Miscellaneous, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::NPC >& records, std::vector< std::string >& messages)
@@ -819,8 +595,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     const ESM::NPC& NPC = (dynamic_cast<const CSMWorld::Record<ESM::NPC>& >(baserecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, NPC.mId);
 
-
-
     short level(NPC.mNpdt52.mLevel);
     char Disposition(NPC.mNpdt52.mDisposition);
     char Reputation(NPC.mNpdt52.mReputation);
@@ -832,7 +606,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     {
         if ((NPC.mFlags & 0x0008) == 0) //0x0008 = autocalculated flag
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType and flags mismatch!"); //should not happend?
+            messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType or flags mismatch!"); //should not happend?
             return;
         }
 
@@ -982,36 +756,233 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     //TODO: reputation, Disposition, rank, everything else
 }
 
+void CSMTools::ReferenceableCheckStage::weaponCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Weapon >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Weapon& Weapon = (dynamic_cast<const CSMWorld::Record<ESM::Weapon>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Weapon, Weapon.mId);
+
+    //TODO, It seems that this stuff for spellcasting is obligatory and In fact We should check if records are present
+    if
+    (
+        Weapon.mId.find("VFX_") == std::string::npos
+        and Weapon.mId != "magic_bolt"
+        and Weapon.mId != "shield_bolt"
+        and Weapon.mId != "shock_bolt"
+    )
+    {
+        inventoryItemCheck<ESM::Weapon>(Weapon, messages, id.toString(), true);
+
+        if (Weapon.mData.mType == ESM::Weapon::MarksmanBow or Weapon.mData.mType == ESM::Weapon::MarksmanCrossbow or Weapon.mData.mType == ESM::Weapon::MarksmanThrown or Weapon.mData.mType == ESM::Weapon::Arrow or Weapon.mData.mType == ESM::Weapon::Bolt)
+        {
+            if (Weapon.mData.mChop[0] > Weapon.mData.mChop[1])
+            {
+                messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum chop damage higher than maximum");
+            }
+        }
+        else
+        {
+            if (Weapon.mData.mSlash[0] > Weapon.mData.mSlash[1])
+            {
+                messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum slash damage higher than maximum");
+            }
+
+            if (Weapon.mData.mChop[0] > Weapon.mData.mChop[1])
+            {
+                messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum chop damage higher than maximum");
+            }
+
+            if (Weapon.mData.mThrust[0] > Weapon.mData.mThrust[1])
+            {
+                messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum thrust damage higher than maximum");
+            }
+        }
+
+        if (!(Weapon.mData.mType == ESM::Weapon::Arrow or Weapon.mData.mType == ESM::Weapon::Bolt or Weapon.mData.mType == ESM::Weapon::MarksmanThrown))
+        {
+            //checking of health
+            if (Weapon.mData.mHealth <= 0)
+            {
+                messages.push_back(id.toString() + "|" + Weapon.mId + " has non-positivie health");
+            }
+
+            if (Weapon.mData.mReach < 0)
+            {
+                messages.push_back(id.toString() + "|" + Weapon.mId + " has negative reach");
+            }
+        }
+    }
+}
+
+void CSMTools::ReferenceableCheckStage::probeCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Probe >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Probe& Probe = (dynamic_cast<const CSMWorld::Record<ESM::Probe>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Probe, Probe.mId);
+
+    inventoryItemCheck<ESM::Probe>(Probe, messages, id.toString());
+    toolCheck<ESM::Probe>(Probe, messages, id.toString(), true);
+}
+
+void CSMTools::ReferenceableCheckStage::repairCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Repair >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Repair& Repair = (dynamic_cast<const CSMWorld::Record<ESM::Repair>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Repair, Repair.mId);
+
+    inventoryItemCheck<ESM::Repair>(Repair, messages, id.toString());
+    toolCheck<ESM::Repair>(Repair, messages, id.toString(), true);
+}
+
+void CSMTools::ReferenceableCheckStage::staticCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Static >& records, std::vector< std::string >& messages)
+{
+    const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
+
+    if (baserecord.isDeleted())
+    {
+        return;
+    }
+
+    const ESM::Static& Static = (dynamic_cast<const CSMWorld::Record<ESM::Static>& >(baserecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Static, Static.mId);
+
+    if (Static.mModel.empty())
+    {
+        messages.push_back(id.toString() + "|" + Static.mId + " has no model");
+    }
+}
+
+
 //Templates begins here
 
-void CSMTools::ReferenceableCheckStage::inventoryItemCheck(const item& item, std::vector< std::string >& messages)
+template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemCheck(const ITEM& someitem, std::vector< std::string >& messages, const std::string& someid, bool enchantable)
 {
-    if (item.mName.empty())
+    if (someitem.mName.empty())
     {
-        messages.push_back(id.toString() + "|" + item.mId + " has an empty name");
+        messages.push_back(someid + "|" + someitem.mId + " has an empty name");
     }
 
     //Checking for weight
-    if (item.mData.mWeight < 0)
+    if (someitem.mData.mWeight < 0)
     {
-        messages.push_back(id.toString() + "|" + item.mId + " has negative weight");
+        messages.push_back(someid + "|" + someitem.mId + " has negative weight");
     }
 
     //Checking for value
-    if (item.mData.mValue < 0)
+    if (someitem.mData.mValue < 0)
     {
-        messages.push_back(id.toString() + "|" + item.mId + " has negative value");
+        messages.push_back(someid + "|" + someitem.mId + " has negative value");
     }
 
 //checking for model
-    if (item.mModel.empty())
+    if (someitem.mModel.empty())
     {
-        messages.push_back(id.toString() + "|" + item.mId + " has no model");
+        messages.push_back(someid + "|" + someitem.mId + " has no model");
     }
 
     //checking for icon
-    if (item.mIcon.empty())
+    if (someitem.mIcon.empty())
     {
-        messages.push_back(id.toString() + "|" + item.mId + " has no icon");
+        messages.push_back(someid + "|" + someitem.mId + " has no icon");
+    }
+
+    if (enchantable)
+    {
+        if (someitem.mData.mEnchant < 0)
+        {
+            messages.push_back(someid + "|" + someitem.mId + " has negative enchantment");
+        }
     }
 }
+
+template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemCheck(const ITEM& someitem, std::vector< std::string >& messages, const std::string& someid)
+{
+    if (someitem.mName.empty())
+    {
+        messages.push_back(someid + "|" + someitem.mId + " has an empty name");
+    }
+
+    //Checking for weight
+    if (someitem.mData.mWeight < 0)
+    {
+        messages.push_back(someid + "|" + someitem.mId + " has negative weight");
+    }
+
+    //Checking for value
+    if (someitem.mData.mValue < 0)
+    {
+        messages.push_back(someid + "|" + someitem.mId + " has negative value");
+    }
+
+//checking for model
+    if (someitem.mModel.empty())
+    {
+        messages.push_back(someid + "|" + someitem.mId + " has no model");
+    }
+
+    //checking for icon
+    if (someitem.mIcon.empty())
+    {
+        messages.push_back(someid + "|" + someitem.mId + " has no icon");
+    }
+}
+
+template<typename TOOL> void CSMTools::ReferenceableCheckStage::toolCheck(const TOOL& sometool, std::vector< std::string >& messages, const std::string& someid, bool canbebroken)
+{
+    if (sometool.mData.mQuality <= 0)
+    {
+        messages.push_back(someid + "|" + sometool.mId + " has non-positive quality");
+    }
+
+    if (canbebroken)
+    {
+        if (sometool.mData.mUses <= 0)
+        {
+            messages.push_back(someid + "|" + sometool.mId + " has non-positive uses count");
+        }
+    }
+}
+
+template<typename TOOL> void CSMTools::ReferenceableCheckStage::toolCheck(const TOOL& sometool, std::vector< std::string >& messages, const std::string& someid)
+{
+    if (sometool.mData.mQuality <= 0)
+    {
+        messages.push_back(someid + "|" + sometool.mId + " has non-positive quality");
+    }
+
+}
+
+template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(const LIST& somelist, std::vector< std::string >& messages, const std::string& someid)
+{
+    for (unsigned i = 0; i < somelist.mList.size(); ++i)
+    {
+        if (somelist.mList[i].mId.empty())
+        {
+            messages.push_back(someid + "|" + somelist.mId + " contains item with empty Id");
+        }
+
+        if (somelist.mList[i].mLevel < 1)
+        {
+            messages.push_back(someid + "|" + somelist.mId + " contains item with non-positive level");
+        }
+    }
+}
+

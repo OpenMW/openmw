@@ -237,6 +237,10 @@ namespace CSMWorld
 	    const RefIdDataContainer<ESM::Lockpick>& getLocpicks() const;
 	    const RefIdDataContainer<ESM::Miscellaneous>& getMiscellaneous() const;
 	    const RefIdDataContainer<ESM::NPC>& getNPCs() const;
+	    const RefIdDataContainer< ESM::Weapon >& getWeapons() const;
+	    const RefIdDataContainer< ESM::Probe >& getProbes() const;
+	    const RefIdDataContainer< ESM::Repair>& getRepairs() const;
+	    const RefIdDataContainer< ESM::Static>& getStatics() const;
     };
 }
 

@@ -311,3 +311,23 @@ const CSMWorld::RefIdDataContainer< ESM::NPC >& CSMWorld::RefIdData::getNPCs() c
 {
     return mNpcs;
 }
+
+const CSMWorld::RefIdDataContainer< ESM::Weapon >& CSMWorld::RefIdData::getWeapons() const
+{
+    return mWeapons;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Probe >& CSMWorld::RefIdData::getProbes() const
+{
+    return mProbes;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Repair >& CSMWorld::RefIdData::getRepairs() const
+{
+    return mRepairs;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Static >& CSMWorld::RefIdData::getStatics() const
+{
+    return mStatics;
+}
