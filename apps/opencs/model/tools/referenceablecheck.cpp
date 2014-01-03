@@ -8,6 +8,7 @@
 #include "../world/record.hpp"
 
 #include "../world/universalid.hpp"
+#include <components/esm/loadmgef.hpp>
 
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races, const CSMWorld::IdCollection<ESM::Class>& classes, const CSMWorld::IdCollection<ESM::Faction>& faction) :
     mReferencables(referenceable),
@@ -551,6 +552,7 @@ void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::Re
         }
     }
 }
+
 void CSMTools::ReferenceableCheckStage::lockpickCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Lockpick >& records, std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
@@ -667,7 +669,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " willpower has zero value");
         }
-
     }
 
     if (level < 1)
@@ -771,10 +772,13 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(int stage, const CSMWorld::R
     //TODO, It seems that this stuff for spellcasting is obligatory and In fact We should check if records are present
     if
     (
-        Weapon.mId.find("VFX_") == std::string::npos
-        and Weapon.mId != "magic_bolt"
-        and Weapon.mId != "shield_bolt"
-        and Weapon.mId != "shock_bolt"
+	//THOSE ARE HARDCODED!
+        Weapon.mId != "VFX_Hands"
+        and Weapon.mId != "VFX_Absorb"
+        and Weapon.mId != "VFX_Reflect"
+        and Weapon.mId != "VFX_DefaultBolt"
+	//THIS ONE IS NOT, but it thas to be ignored as well
+	//TODO I don't know how to get full list of effects :/
     )
     {
         inventoryItemCheck<ESM::Weapon>(Weapon, messages, id.toString(), true);
@@ -978,4 +982,3 @@ template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(const 
         }
     }
 }
-
