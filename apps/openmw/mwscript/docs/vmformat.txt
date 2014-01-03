@@ -366,4 +366,6 @@ op 0x200022b: RemoveSpellEffects
 op 0x200022c: RemoveSpellEffects, explicit
 op 0x200022d: RemoveEffects
 op 0x200022e: RemoveEffects, explicit
+op 0x200022f: Resurrect
+op 0x2000230: Resurrect, explicit
 opcodes 0x200022f-0x3ffffff unused

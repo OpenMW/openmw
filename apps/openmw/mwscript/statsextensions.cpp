@@ -1104,6 +1104,18 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpResurrect : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    ptr.getClass().getCreatureStats(ptr).resurrect();
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
@@ -1170,7 +1182,9 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffects, new OpRemoveSpellEffects<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffectsExplicit,
                 new OpRemoveSpellEffects<ExplicitRef>);
-
+            interpreter.installSegment5 (Compiler::Stats::opcodeResurrect, new OpResurrect<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeResurrectExplicit,
+                new OpResurrect<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffects, new OpRemoveEffects<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffectsExplicit,
                 new OpRemoveEffects<ExplicitRef>);
