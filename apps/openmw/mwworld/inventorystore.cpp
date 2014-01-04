@@ -179,7 +179,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         // Don't autoEquip lights
         if (test.getTypeName() == typeid(ESM::Light).name())
         {
-          continue;
+            continue;
         }
 
         int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
@@ -607,7 +607,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
             float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
-            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), magnitude);
+            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), "", magnitude);
 
             ++i;
         }

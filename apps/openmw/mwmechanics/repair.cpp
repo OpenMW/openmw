@@ -24,20 +24,12 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     MWWorld::LiveCellRef<ESM::Repair> *ref =
         mTool.get<ESM::Repair>();
 
+    // unstack tool if required
+    player.getClass().getContainerStore(player).unstack(mTool, player);
+
     // reduce number of uses left
     int uses = (mTool.getCellRef().mCharge != -1) ? mTool.getCellRef().mCharge : ref->mBase->mData.mUses;
     mTool.getCellRef().mCharge = uses-1;
-
-    // unstack tool if required
-    if (mTool.getRefData().getCount() > 1 && uses == ref->mBase->mData.mUses)
-    {
-        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
-        MWWorld::ContainerStoreIterator it = store.add(mTool, player);
-        it->getRefData().setCount(mTool.getRefData().getCount()-1);
-        it->getCellRef().mCharge = -1;
-
-        mTool.getRefData().setCount(1);
-    }
 
     MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
     MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats(player);

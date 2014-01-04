@@ -106,7 +106,7 @@ namespace MWWorld
             };
 
             std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
-
+            void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
@@ -155,6 +155,8 @@ namespace MWWorld
             /// Called when \a object is moved to an inactive cell
             void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
 
+            float feetToGameUnits(float feet);
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
@@ -202,7 +204,7 @@ namespace MWWorld
             virtual Ogre::Vector2 getNorthVector (CellStore* cell);
             ///< get north vector (OGRE coordinates) for given interior cell
 
-            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell);
+            virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
             virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
@@ -516,7 +518,22 @@ namespace MWWorld
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
 
             virtual void breakInvisibility (const MWWorld::Ptr& actor);
-            virtual bool isNight() const;
+            // Are we in an exterior or pseudo-exterior cell and it's night?
+            virtual bool isDark() const;
+
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result);
+
+            /// Teleports \a ptr to the reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
+            /// closest to \a worldPos.
+            /// @note id must be lower case
+            virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
+                                                  const std::string& id, Ogre::Vector3 worldPos);
+
+            /// List all references (filtered by \a type) detected by \a ptr. The range
+            /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
+            /// @note This also works for references in containers.
+            virtual void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
+                                                  DetectionType type);
     };
 }
 

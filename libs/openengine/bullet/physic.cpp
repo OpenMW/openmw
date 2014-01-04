@@ -3,7 +3,6 @@
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bulletnifloader.hpp>
-#include "CMotionState.h"
 #include "OgreRoot.h"
 #include "btKinematicCharacterController.h"
 #include "BtOgrePG.h"
@@ -318,9 +317,7 @@ namespace Physic
         btVector3 scl(triSize, triSize, 1);
         hfShape->setLocalScaling(scl);
 
-        CMotionState* newMotionState = new CMotionState(this,name);
-
-        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,hfShape);
+        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,0,hfShape);
         RigidBody* body = new RigidBody(CI,name);
         body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
 
@@ -401,12 +398,9 @@ namespace Physic
         else
             shape->mRaycastingShape->setLocalScaling( btVector3(scale,scale,scale));
 
-        //create the motionState
-        CMotionState* newMotionState = new CMotionState(this,name);
-
         //create the real body
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
-                (0,newMotionState, raycasting ? shape->mRaycastingShape : shape->mCollisionShape);
+                (0,0, raycasting ? shape->mRaycastingShape : shape->mCollisionShape);
         RigidBody* body = new RigidBody(CI,name);
         body->mPlaceable = placeable;
 

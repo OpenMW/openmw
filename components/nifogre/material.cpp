@@ -152,7 +152,8 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         Nif::ControllerPtr ctrls = texprop->controller;
         while(!ctrls.empty())
         {
-            warn("Unhandled texture controller "+ctrls->recName+" in "+name);
+            if (ctrls->recType != Nif::RC_NiFlipController) // Handled in ogrenifloader
+                warn("Unhandled texture controller "+ctrls->recName+" in "+name);
             ctrls = ctrls->next;
         }
     }

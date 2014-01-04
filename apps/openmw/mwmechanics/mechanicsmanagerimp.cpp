@@ -12,6 +12,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include "spellcasting.hpp"
+
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
@@ -122,6 +124,19 @@ namespace MWMechanics
                     {
                         npcStats.getSkill (index).setBase (
                             npcStats.getSkill (index).getBase() + bonus);
+                    }
+
+                    if (i==1)
+                    {
+                        // Major skill - add starting spells for this skill if existing
+                        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                        MWWorld::Store<ESM::Spell>::iterator it = store.get<ESM::Spell>().begin();
+                        for (; it != store.get<ESM::Spell>().end(); ++it)
+                        {
+                            if (it->mData.mFlags & ESM::Spell::F_PCStart
+                                    && spellSchoolToSkill(getSpellSchool(&*it, ptr)) == index)
+                                creatureStats.getSpells().add(it->mId);
+                        }
                     }
                 }
             }
@@ -484,10 +499,10 @@ namespace MWMechanics
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
         int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr)
             + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
-        float a = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float a = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-        float d = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float d = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 

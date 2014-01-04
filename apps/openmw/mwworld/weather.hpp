@@ -128,6 +128,7 @@ namespace MWWorld
          * @param ID of the weather setting to shift to
          */
         void changeWeather(const std::string& region, const unsigned int id);
+        void switchToNextWeather(bool instantly = true);
 
         /**
          * Per-frame update
@@ -152,7 +153,8 @@ namespace MWWorld
 
         void modRegion(const std::string &regionid, const std::vector<char> &chances);
 
-        bool isNight() const;
+        /// @see World::isDark
+        bool isDark() const;
 
     private:
         float mHour;

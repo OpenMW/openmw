@@ -74,7 +74,7 @@ namespace MWMechanics
             - gmst.find ("fFatigueMult")->getFloat() * (1-normalised);
     }
 
-    const Stat<int> &CreatureStats::getAttribute(int index) const
+    const AttributeValue &CreatureStats::getAttribute(int index) const
     {
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
@@ -158,20 +158,20 @@ namespace MWMechanics
 
     void CreatureStats::setAttribute(int index, int base)
     {
-        MWMechanics::Stat<int> current = getAttribute(index);
+        AttributeValue current = getAttribute(index);
         current.setBase(base);
         setAttribute(index, current);
     }
 
-    void CreatureStats::setAttribute(int index, const Stat<int> &value)
+    void CreatureStats::setAttribute(int index, const AttributeValue &value)
     {
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
 
-        const Stat<int>& currentValue = !mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index];
+        const AttributeValue& currentValue = !mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index];
 
-        if (value.getModified() != currentValue.getModified())
+        if (value != currentValue)
         {
             if (index != ESM::Attribute::Luck
                     && index != ESM::Attribute::Personality
@@ -228,8 +228,8 @@ namespace MWMechanics
 
     void CreatureStats::setMagicEffects(const MagicEffects &effects)
     {
-        if (effects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude
-                != mMagicEffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude)
+        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude
+                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude)
             mRecalcDynamicStats = true;
 
         mMagicEffects = effects;
@@ -266,8 +266,10 @@ namespace MWMechanics
         if (mDead)
         {
             if (mDynamic[0].getCurrent()<1)
-                mDynamic[0].setCurrent (1);
-
+            {
+                mDynamic[0].setModified(mDynamic[0].getModified(), 1);
+                mDynamic[0].setCurrent(1);
+            }
             if (mDynamic[0].getCurrent()>=1)
                 mDead = false;
         }
@@ -343,7 +345,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += mMagicEffects.get(EffectKey(ESM::MagicEffect::Sanctuary)).mMagnitude;
+        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).mMagnitude;
 
         return evasion;
     }

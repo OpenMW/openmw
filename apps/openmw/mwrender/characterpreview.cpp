@@ -128,7 +128,7 @@ namespace MWRender
 
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
-        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
+        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 62, -200), Ogre::Vector3(0, 62, 0))
         , mSelectionBuffer(NULL)
     {
     }

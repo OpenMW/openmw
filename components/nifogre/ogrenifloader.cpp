@@ -607,6 +607,14 @@ class NIFObjectLoader
             NIFMeshLoader::createMesh(name, fullname, group, shape->recIndex);
 
         Ogre::Entity *entity = sceneMgr->createEntity(fullname);
+
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        // Enable skeleton-based bounding boxes. With the static bounding box,
+        // the animation may cause parts to go outside the box and cause culling problems.
+        if (entity->hasSkeleton())
+            entity->setUpdateBoundingBoxFromSkeleton(true);
+#endif
+
         entity->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
 
         scene->mEntities.push_back(entity);
@@ -831,8 +839,6 @@ class NIFObjectLoader
                                                                 vertprop, zprop, specprop,
                                                                 wireprop, needTangents));
 
-        partsys->setDefaultDimensions(particledata->particleRadius*2.0f,
-                                        particledata->particleRadius*2.0f);
         partsys->setCullIndividually(false);
         partsys->setParticleQuota(particledata->numParticles);
         partsys->setKeepParticlesInLocalSpace(partflags & (Nif::NiNode::ParticleFlag_LocalSpace));
@@ -847,6 +853,8 @@ class NIFObjectLoader
             if(ctrl->recType == Nif::RC_NiParticleSystemController)
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
+
+                partsys->setDefaultDimensions(partctrl->size*2, partctrl->size*2);
 
                 if(!partctrl->emitter.empty())
                 {

@@ -38,10 +38,10 @@ namespace MWGui
         void setMagicka(const MWMechanics::DynamicStat<float>& value);
         void setFatigue(const MWMechanics::DynamicStat<float>& value);
 
-        void setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::Stat<int>& value);
+        void setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value);
 
         void configureSkills(const SkillList& major, const SkillList& minor);
-        void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::Stat<float>& value);
+        void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value);
 
         virtual void open();
 
@@ -85,7 +85,7 @@ namespace MWGui
         std::map<int, Widgets::MWAttributePtr> mAttributeWidgets;
 
         SkillList mMajorSkills, mMinorSkills, mMiscSkills;
-        std::map<int, MWMechanics::Stat<float> > mSkillValues;
+        std::map<int, MWMechanics::SkillValue > mSkillValues;
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
         std::string mName, mRaceId, mBirthSignId;
         ESM::Class mKlass;

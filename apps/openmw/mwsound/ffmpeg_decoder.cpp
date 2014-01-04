@@ -158,6 +158,16 @@ void FFmpeg_Decoder::open(const std::string &fname)
     mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
     if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
     {
+        if (mFormatCtx->pb != NULL)
+        {
+          if (mFormatCtx->pb->buffer != NULL)
+          {
+            av_free(mFormatCtx->pb->buffer);
+            mFormatCtx->pb->buffer = NULL;
+          }
+          av_free(mFormatCtx->pb);
+          mFormatCtx->pb = NULL;
+        }
         avformat_free_context(mFormatCtx);
         mFormatCtx = NULL;
         fail("Failed to allocate input stream");
@@ -195,6 +205,14 @@ void FFmpeg_Decoder::open(const std::string &fname)
     }
     catch(std::exception &e)
     {
+        if (mFormatCtx->pb->buffer != NULL)
+        {
+          av_free(mFormatCtx->pb->buffer);
+          mFormatCtx->pb->buffer = NULL;
+        }
+        av_free(mFormatCtx->pb);
+        mFormatCtx->pb = NULL;
+
         avformat_close_input(&mFormatCtx);
         throw;
     }
@@ -211,9 +229,22 @@ void FFmpeg_Decoder::close()
 
     if(mFormatCtx)
     {
-        AVIOContext* context = mFormatCtx->pb;
+        if (mFormatCtx->pb != NULL)
+        {
+          // mFormatCtx->pb->buffer must be freed by hand,
+          // if not, valgrind will show memleak, see:
+          //
+          // https://trac.ffmpeg.org/ticket/1357
+          //
+          if (mFormatCtx->pb->buffer != NULL)
+          {
+            av_free(mFormatCtx->pb->buffer);
+            mFormatCtx->pb->buffer = NULL;
+          }
+          av_free(mFormatCtx->pb);
+          mFormatCtx->pb = NULL;
+        }
         avformat_close_input(&mFormatCtx);
-        av_free(context);
     }
 
     mDataStream.setNull();

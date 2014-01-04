@@ -39,6 +39,7 @@
 #include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
+#include "actionteleport.hpp"
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
@@ -498,12 +499,14 @@ namespace MWWorld
         if (!ptr.isEmpty())
             return ptr;
 
+        std::string lowerCaseName = Misc::StringUtils::lowerCase(name);
+
         // active cells
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr::CellStore* cellstore = *iter;
-            Ptr ptr = mCells.getPtr (name, *cellstore, true);
+            Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, true);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -511,7 +514,7 @@ namespace MWWorld
 
         if (!activeOnly)
         {
-            Ptr ptr = mCells.getPtr (name);
+            Ptr ptr = mCells.getPtr (lowerCaseName);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -793,32 +796,9 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject()
     {
-        std::pair<float, std::string> result;
-
-        if (!mRendering->occlusionQuerySupported())
-            result = mPhysics->getFacedHandle (getMaxActivationDistance ());
-        else
-            result = std::make_pair (mFacedDistance, mFacedHandle);
-
-        if (result.second.empty())
-            return MWWorld::Ptr ();
-
-        MWWorld::Ptr object = searchPtrViaHandle (result.second);
-        if (object.isEmpty())
-            return object;
-        float ActivationDistance;
-
-        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            ActivationDistance = getObjectActivationDistance ()*50;
-        else if (object.getTypeName ().find("NPC") != std::string::npos)
-            ActivationDistance = getNpcActivationDistance ();
-        else
-            ActivationDistance = getObjectActivationDistance ();
-
-        if (result.first > ActivationDistance)
-            return MWWorld::Ptr ();
-
-        return object;
+        if (mFacedHandle.empty())
+            return MWWorld::Ptr();
+        return searchPtrViaHandle(mFacedHandle);
     }
 
     std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
@@ -931,7 +911,7 @@ namespace MWWorld
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove)
+        if (haveToMove && ptr.getRefData().getBaseNode())
         {
             mRendering->moveObject(ptr, vec);
             mPhysics->moveObject (ptr);
@@ -1060,7 +1040,7 @@ namespace MWWorld
 
     void World::adjustPosition(const Ptr &ptr)
     {
-        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos[0], ptr.getRefData().getPosition().pos[1], ptr.getRefData().getPosition().pos[2]);
+        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
 
         if(!ptr.getRefData().getBaseNode())
         {
@@ -1287,7 +1267,7 @@ namespace MWWorld
                 mRendering->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
         }
 
-        mWeatherManager->update (duration);
+        updateWeather(duration);
 
         mWorldScene->update (duration, paused);
 
@@ -1297,6 +1277,12 @@ namespace MWWorld
         performUpdateSceneQueries ();
 
         updateWindowManager ();
+
+        if (mPlayer->getPlayer().getCell()->isExterior())
+        {
+            ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
+            mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
+        }
     }
 
     void World::updateWindowManager ()
@@ -1337,6 +1323,14 @@ namespace MWWorld
 
     void World::updateFacedHandle ()
     {
+        float telekinesisRangeBonus =
+                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
+                .get(ESM::MagicEffect::Telekinesis).mMagnitude;
+        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
+
+        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+        activationDistance += mRendering->getCameraDistance();
+
         // send new query
         // figure out which object we want to test against
         std::vector < std::pair < float, std::string > > results;
@@ -1344,13 +1338,13 @@ namespace MWWorld
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ());
+            results = mPhysics->getFacedHandles(x, y, activationDistance);
             if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
                 results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ()*50);
         }
         else
         {
-            results = mPhysics->getFacedHandles(getMaxActivationDistance ());
+            results = mPhysics->getFacedHandles(activationDistance);
         }
 
         // ignore the player and other things we're not interested in
@@ -1433,10 +1427,8 @@ namespace MWWorld
         return d;
     }
 
-    std::vector<World::DoorMarker> World::getDoorMarkers (CellStore* cell)
+    void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
     {
-        std::vector<World::DoorMarker> result;
-
         MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
         CellRefList<ESM::Door>::List& refList = doors.mList;
         for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
@@ -1452,11 +1444,9 @@ namespace MWWorld
 
                 newMarker.x = pos.pos[0];
                 newMarker.y = pos.pos[1];
-                result.push_back(newMarker);
+                out.push_back(newMarker);
             }
         }
-
-        return result;
     }
 
     void World::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
@@ -1579,7 +1569,7 @@ namespace MWWorld
         pos.rot[1] = 0;
 
         Ogre::Vector3 orig =
-            Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+            Ogre::Vector3(pos.pos);
         Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
 
         float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
@@ -1616,7 +1606,8 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Levitate)).mMagnitude > 0)
+        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
+                && isLevitationEnabled())
             return true;
 
         // TODO: Check if flying creature
@@ -1635,7 +1626,7 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::SlowFall)).mMagnitude > 0)
+        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).mMagnitude > 0)
             return true;
 
         return false;
@@ -1820,9 +1811,9 @@ namespace MWWorld
     {
         std::vector<std::string> mHandles;
 
-        bool operator() (ESM::CellRef& ref, RefData& data)
+        bool operator() (Ptr ptr)
         {
-            Ogre::SceneNode* handle = data.getBaseNode();
+            Ogre::SceneNode* handle = ptr.getRefData().getBaseNode();
             if (handle)
                 mHandles.push_back(handle->getName());
             return true;
@@ -1931,17 +1922,8 @@ namespace MWWorld
             int y = ext->getGridY();
             indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
 
-            ESM::Land* land = getStore().get<ESM::Land>().search(x, y);
-            if (land) {
-                if (!land->isDataLoaded(ESM::Land::DATA_VHGT)) {
-                    land->loadData(ESM::Land::DATA_VHGT);
-                }
-                pos.pos[2] = land->mLandData->mHeights[ESM::Land::LAND_NUM_VERTS / 2 + 1];
-            }
-            else {
-                std::cerr << "Land data for cell at (" << x << ", " << y << ") not found\n";
-                pos.pos[2] = 0;
-            }
+            // Note: Z pos will be adjusted by adjustPosition later
+            pos.pos[2] = 0;
 
             return true;
         }
@@ -1985,11 +1967,11 @@ namespace MWWorld
         {
             InventoryStore &inv = actor.getClass().getInventoryStore(actor);
 
-            inv.equip(InventoryStore::Slot_Robe, inv.ContainerStore::add("WerewolfRobe", 1, actor), actor);
+            inv.equip(InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
         }
         else
         {
-            actor.getClass().getContainerStore(actor).remove("WerewolfRobe", 1, actor);
+            actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
         }
 
         if(actor.getRefData().getHandle() == "player")
@@ -2018,7 +2000,7 @@ namespace MWWorld
         const Store<ESM::GameSetting> &gmst = getStore().get<ESM::GameSetting>();
         MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
 
-        stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
+        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getFloat());
     }
 
     bool World::getGodModeState()
@@ -2286,8 +2268,153 @@ namespace MWWorld
         actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
     }
 
-    bool World::isNight() const
+    bool World::isDark() const
     {
-      return mWeatherManager->isNight();
+        return mWeatherManager->isDark();
+    }
+
+    bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
+    {
+        MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
+        CellRefList<ESM::Door>::List& refList = doors.mList;
+
+        // Check if any door in the cell leads to an exterior directly
+        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
+        {
+            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+            if (ref.mRef.mTeleport && ref.mRef.mDestCell.empty())
+            {
+                ESM::Position pos = ref.mRef.mDoorDest;
+                result = Ogre::Vector3(pos.pos);
+                return true;
+            }
+        }
+
+        // No luck :(
+        return false;
+    }
+
+    void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
+                                          const std::string& id, Ogre::Vector3 worldPos)
+    {
+        MWWorld::Ptr closestMarker;
+        float closestDistance = FLT_MAX;
+
+        std::vector<MWWorld::Ptr> markers;
+        mCells.getExteriorPtrs(id, markers);
+
+        for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
+        {
+            ESM::Position pos = it->getRefData().getPosition();
+            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos);
+            float distance = worldPos.squaredDistance(markerPos);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestMarker = *it;
+            }
+
+        }
+
+        MWWorld::ActionTeleport action("", closestMarker.getRefData().getPosition());
+        action.execute(ptr);
+    }
+
+    void World::updateWeather(float duration)
+    {
+        if (mPlayer->wasTeleported())
+        {
+            mPlayer->setTeleported(false);
+            mWeatherManager->switchToNextWeather(true);
+        }
+
+        mWeatherManager->update(duration);
+    }
+
+    struct AddDetectedReference
+    {
+        AddDetectedReference(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
+            : mOut(out), mDetector(detector), mType(type), mSquaredDist(squaredDist)
+        {
+        }
+
+        std::vector<Ptr>& mOut;
+        Ptr mDetector;
+        float mSquaredDist;
+        World::DetectionType mType;
+        bool operator() (MWWorld::Ptr ptr)
+        {
+            if (Ogre::Vector3(ptr.getRefData().getPosition().pos).squaredDistance(
+                        Ogre::Vector3(mDetector.getRefData().getPosition().pos)) >= mSquaredDist)
+                return true;
+
+            if (!ptr.getRefData().isEnabled())
+                return true;
+
+            // Consider references inside containers as well
+            if (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name())
+            {
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                {
+                    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                    {
+                        if (needToAdd(*it))
+                        {
+                            mOut.push_back(ptr);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            if (needToAdd(ptr))
+                mOut.push_back(ptr);
+
+            return true;
+        }
+
+        bool needToAdd (MWWorld::Ptr ptr)
+        {
+            if (mType == World::Detect_Creature && ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                return false;
+            if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
+                return false;
+            if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
+                return false;
+            return true;
+        }
+    };
+
+    void World::listDetectedReferences(const Ptr &ptr, std::vector<Ptr> &out, DetectionType type)
+    {
+        const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+        float dist=0;
+        if (type == World::Detect_Creature)
+            dist = effects.get(ESM::MagicEffect::DetectAnimal).mMagnitude;
+        else if (type == World::Detect_Key)
+            dist = effects.get(ESM::MagicEffect::DetectKey).mMagnitude;
+        else if (type == World::Detect_Enchantment)
+            dist = effects.get(ESM::MagicEffect::DetectEnchantment).mMagnitude;
+
+        if (!dist)
+            return;
+
+        dist = feetToGameUnits(dist);
+
+        AddDetectedReference functor (out, ptr, type, dist*dist);
+
+        const Scene::CellStoreCollection& active = mWorldScene->getActiveCells();
+        for (Scene::CellStoreCollection::const_iterator it = active.begin(); it != active.end(); ++it)
+        {
+            MWWorld::CellStore* cellStore = *it;
+            cellStore->forEach(functor);
+        }
+    }
+
+    float World::feetToGameUnits(float feet)
+    {
+        // Looks like there is no GMST for this. This factor was determined in experiments
+        // with the Telekinesis effect.
+        return feet * 22;
     }
 }

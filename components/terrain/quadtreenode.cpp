@@ -140,17 +140,19 @@ namespace
 }
 
 QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
-    : mSize(size)
-    , mCenter(center)
-    , mParent(parent)
-    , mDirection(dir)
+    : mMaterialGenerator(NULL)
+    , mIsActive(false)
     , mIsDummy(false)
-    , mSceneNode(NULL)
-    , mTerrain(terrain)
-    , mChunk(NULL)
-    , mMaterialGenerator(NULL)
+    , mSize(size)
+    , mLodLevel(Log2(mSize))
     , mBounds(Ogre::AxisAlignedBox::BOX_NULL)
     , mWorldBounds(Ogre::AxisAlignedBox::BOX_NULL)
+    , mDirection(dir)
+    , mCenter(center)
+    , mSceneNode(NULL)
+    , mParent(parent)
+    , mTerrain(terrain)
+    , mChunk(NULL)
 {
     mBounds.setNull();
     for (int i=0; i<4; ++i)
@@ -167,8 +169,6 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
         pos = mParent->getCenter();
     pos = mCenter - pos;
     mSceneNode->setPosition(Ogre::Vector3(pos.x*8192, pos.y*8192, 0));
-
-    mLodLevel = Log2(mSize);
 
     mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
 }

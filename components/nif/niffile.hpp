@@ -200,7 +200,7 @@ struct KeyListT {
             }
         }
         else
-            nif->file->warn("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+            nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
     }
 };
 typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;

@@ -126,7 +126,8 @@ namespace MWMechanics
         return mSpells;
     }
 
-    void ActiveSpells::addSpell(const std::string &id, bool stack, std::vector<Effect> effects, const std::string &displayName)
+    void ActiveSpells::addSpell(const std::string &id, bool stack, std::vector<Effect> effects,
+                                const std::string &displayName, const std::string& casterHandle)
     {
         bool exists = false;
         for (TContainer::const_iterator it = begin(); it != end(); ++it)
@@ -139,12 +140,19 @@ namespace MWMechanics
         params.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp();
         params.mEffects = effects;
         params.mDisplayName = displayName;
+        params.mCasterHandle = casterHandle;
 
         if (!exists || stack)
             mSpells.insert (std::make_pair(id, params));
         else
             mSpells.find(id)->second = params;
 
+        mSpellsChanged = true;
+    }
+
+    void ActiveSpells::removeEffects(const std::string &id)
+    {
+        mSpells.erase(Misc::StringUtils::lowerCase(id));
         mSpellsChanged = true;
     }
 
@@ -164,14 +172,22 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnitude;
 
                 if (magnitude)
-                    visitor.visit(effectIt->mKey, name, magnitude, remainingTime);
+                    visitor.visit(effectIt->mKey, name, it->second.mCasterHandle, magnitude, remainingTime);
             }
         }
     }
 
-    void ActiveSpells::purgeAll()
+    void ActiveSpells::purgeAll(float chance)
     {
-        mSpells.clear();
+        for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); )
+        {
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (roll < chance)
+                mSpells.erase(it++);
+            else
+                ++it;
+        }
+        mSpellsChanged = true;
     }
 
     void ActiveSpells::purgeEffect(short effectId)
@@ -187,6 +203,6 @@ namespace MWMechanics
                     effectIt++;
             }
         }
-
+        mSpellsChanged = true;
     }
 }

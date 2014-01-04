@@ -55,6 +55,8 @@ namespace MWGui
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(0)
         , mIsDrowning(false)
+        , mWeaponSpellTimer(0.f)
+        , mDrowningFlashTheta(0.f)
     {
         setCoord(0,0, width, height);
 

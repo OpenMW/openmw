@@ -56,7 +56,8 @@ namespace MWMechanics
     struct EffectSourceVisitor
     {
         virtual void visit (MWMechanics::EffectKey key,
-                                 const std::string& sourceName, float magnitude, float remainingTime = -1) = 0;
+                                 const std::string& sourceName, const std::string& casterHandle,
+                            float magnitude, float remainingTime = -1) = 0;
     };
 
     /// \brief Effects currently affecting a NPC or creature

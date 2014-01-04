@@ -21,6 +21,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/disease.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -179,29 +180,29 @@ namespace
 
             for (int raceSkillIndex = 0; raceSkillIndex < 7; ++raceSkillIndex)
             {
-              if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
-              {
-                  raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
-                  break;
-              }
+                if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
+                {
+                    raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
+                    break;
+                }
             }
 
             for (int k = 0; k < 5; ++k)
             {
-              // is this a minor or major skill?
-              if ((class_->mData.mSkills[k][0] == skillIndex) || (class_->mData.mSkills[k][1] == skillIndex))
-              {
-                majorMultiplier = 1.0f;
-                break;
-              }
+                // is this a minor or major skill?
+                if ((class_->mData.mSkills[k][0] == skillIndex) || (class_->mData.mSkills[k][1] == skillIndex))
+                {
+                    majorMultiplier = 1.0f;
+                    break;
+                }
             }
 
             // is this skill in the same Specialization as the class?
             const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skillIndex);
             if (skill->mData.mSpecialization == class_->mData.mSpecialization)
             {
-              specMultiplier = 0.5f;
-              specBonus = 5;
+                specMultiplier = 0.5f;
+                specBonus = 5;
             }
 
             npcStats.getSkill(skillIndex).setBase(
@@ -210,7 +211,7 @@ namespace
                     + 5
                     + raceBonus
                     + specBonus
-                    + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100.0f));
+                    + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100));
         }
     }
 }
@@ -450,8 +451,8 @@ namespace MWClass
                           (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                           (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyAttack)).mMagnitude -
-                     mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
+        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
+                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
         hitchance -= otherstats.getEvasion();
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
@@ -493,6 +494,11 @@ namespace MWClass
                 if (!MWBase::Environment::get().getWorld()->getGodModeState())
                     weapon.getCellRef().mCharge -= std::min(std::max(1,
                         (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
+
+                // Weapon broken? unequip it
+                if (weapon.getCellRef().mCharge == 0)
+                    weapon = *inv.unequipItem(weapon, ptr);
+
             }
             healthdmg = true;
         }
@@ -512,7 +518,8 @@ namespace MWClass
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
 
-            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f);
+            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f)
+                    || (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
             if(stats.isWerewolf())
             {
                 healthdmg = true;
@@ -598,6 +605,9 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
+        if (!attacker.isEmpty())
+            MWMechanics::diseaseContact(ptr, attacker);
+
         if(damage > 0.0f)
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
@@ -645,6 +655,11 @@ namespace MWClass
                         armorref.mCharge = armor.get<ESM::Armor>()->mBase->mData.mHealth;
                     armorref.mCharge -= std::min(std::max(1, (int)damagediff),
                                                  armorref.mCharge);
+
+                    // Armor broken? unequip it
+                    if (armorref.mCharge == 0)
+                        inv.unequipItem(armor, ptr);
+
                     switch(get(armor).getEquipmentSkill(armor))
                     {
                         case ESM::Skill::LightArmor:
@@ -839,10 +854,11 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
+        else if(mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+                world->isLevitationEnabled())
         {
             float flySpeed = 0.01f*(npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified() +
-                                    mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude);
+                                    mageffects.get(ESM::MagicEffect::Levitate).mMagnitude);
             flySpeed = fMinFlySpeed->getFloat() + flySpeed*(fMaxFlySpeed->getFloat() - fMinFlySpeed->getFloat());
             flySpeed *= 1.0f - fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
@@ -853,7 +869,7 @@ namespace MWClass
             float swimSpeed = walkSpeed;
             if(Npc::getStance(ptr, Run, false))
                 swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(MWMechanics::EffectKey(1/*swift swim*/)).mMagnitude;
+            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).mMagnitude;
             swimSpeed *= fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
                                                     fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
@@ -887,7 +903,7 @@ namespace MWClass
         float x = fJumpAcrobaticsBase->getFloat() +
                   std::pow(a / 15.0f, fJumpAcroMultiplier->getFloat());
         x += 3.0f * b * fJumpAcroMultiplier->getFloat();
-        x += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Jump)).mMagnitude * 64;
+        x += mageffects.get(ESM::MagicEffect::Jump).mMagnitude * 64;
         x *= encumbranceTerm;
 
         if(Npc::getStance(ptr, Run, false))
@@ -910,7 +926,7 @@ namespace MWClass
         {
             const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
             const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
-            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Jump)).mMagnitude;
+            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).mMagnitude;
             const float fallAcroBase = gmst.find("fFallAcroBase")->getFloat();
             const float fallAcroMult = gmst.find("fFallAcroMult")->getFloat();
             const float fallDistanceBase = gmst.find("fFallDistanceBase")->getFloat();
@@ -1015,8 +1031,8 @@ namespace MWClass
         if(!stats.isWerewolf())
         {
             weight  = getContainerStore(ptr).getWeight();
-            weight -= stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Feather)).mMagnitude;
-            weight += stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Burden)).mMagnitude;
+            weight -= stats.getMagicEffects().get(ESM::MagicEffect::Feather).mMagnitude;
+            weight += stats.getMagicEffects().get(ESM::MagicEffect::Burden).mMagnitude;
             if(weight < 0.0f)
                 weight = 0.0f;
         }

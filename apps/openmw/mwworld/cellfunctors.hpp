@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "refdata.hpp"
+#include "ptr.hpp"
 
 namespace ESM
 {
@@ -18,13 +18,13 @@ namespace MWWorld
     {
         std::vector<Ogre::SceneNode*> mHandles;
 
-        bool operator() (ESM::CellRef& ref, RefData& data)
+        bool operator() (MWWorld::Ptr ptr)
         {
-            Ogre::SceneNode* handle = data.getBaseNode();
+            Ogre::SceneNode* handle = ptr.getRefData().getBaseNode();
             if (handle)
                 mHandles.push_back (handle);
 
-            data.setBaseNode(0);
+            ptr.getRefData().setBaseNode(0);
             return true;
         }
     };

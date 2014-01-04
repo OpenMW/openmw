@@ -36,8 +36,6 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/actionequip.hpp"
-#include "../mwworld/actiontake.hpp"
 
 namespace
 {
@@ -1063,15 +1061,19 @@ void CharacterController::update(float duration)
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
 
-        if(mHitState != CharState_KnockDown)
+        if (!mSkipAnim)
         {
-            rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
-            world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
-        }
-        else
-            world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
+            if(mHitState != CharState_KnockDown)
+            {
+                rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
+                world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
+            }
+            else
+                world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
 
-        world->queueMovement(mPtr, vec);
+            world->queueMovement(mPtr, vec);
+        }
+
         movement = vec;
     }
     else if(cls.getCreatureStats(mPtr).isDead())

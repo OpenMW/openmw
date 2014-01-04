@@ -143,7 +143,7 @@ namespace MWWorld
         {
             if (!iter->mData.getCount())
                 continue;
-            if (!functor (iter->mRef, iter->mData))
+            if (!functor (MWWorld::Ptr(&*iter, this)))
                 return false;
         }
         return true;

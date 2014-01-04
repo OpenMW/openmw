@@ -137,8 +137,8 @@ namespace MWBase
             virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
 
             /// Set value for the given ID.
-            virtual void setValue (const std::string& id, const MWMechanics::Stat<int>& value) = 0;
-            virtual void setValue (int parSkill, const MWMechanics::Stat<float>& value) = 0;
+            virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value) = 0;
+            virtual void setValue (int parSkill, const MWMechanics::SkillValue& value) = 0;
             virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) = 0;
             virtual void setValue (const std::string& id, const std::string& value) = 0;
             virtual void setValue (const std::string& id, int value) = 0;
@@ -236,8 +236,8 @@ namespace MWBase
             virtual void onFrame (float frameDuration) = 0;
 
             /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-            virtual std::map<int, MWMechanics::Stat<float> > getPlayerSkillValues() = 0;
-            virtual std::map<int, MWMechanics::Stat<int> > getPlayerAttributeValues() = 0;
+            virtual std::map<int, MWMechanics::SkillValue > getPlayerSkillValues() = 0;
+            virtual std::map<int, MWMechanics::AttributeValue > getPlayerAttributeValues() = 0;
             virtual SkillList getPlayerMinorSkills() = 0;
             virtual SkillList getPlayerMajorSkills() = 0;
 

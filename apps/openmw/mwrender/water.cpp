@@ -292,6 +292,7 @@ Water::~Water()
 
     delete mReflection;
     delete mRefraction;
+    delete mSimulation;
 }
 
 void Water::changeCell(const ESM::Cell* cell)
