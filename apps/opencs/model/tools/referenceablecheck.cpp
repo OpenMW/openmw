@@ -837,7 +837,11 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
     {
         inventoryItemCheck<ESM::Weapon>(Weapon, messages, id.toString(), true);
 
-        if (!(Weapon.mData.mType == ESM::Weapon::MarksmanBow or Weapon.mData.mType == ESM::Weapon::MarksmanCrossbow or Weapon.mData.mType == ESM::Weapon::MarksmanThrown or Weapon.mData.mType == ESM::Weapon::Arrow or Weapon.mData.mType == ESM::Weapon::Bolt))
+        if ( !(Weapon.mData.mType == ESM::Weapon::MarksmanBow || 
+            Weapon.mData.mType == ESM::Weapon::MarksmanCrossbow || 
+            Weapon.mData.mType == ESM::Weapon::MarksmanThrown ||
+            Weapon.mData.mType == ESM::Weapon::Arrow ||
+            Weapon.mData.mType == ESM::Weapon::Bolt) )
         {
             if (Weapon.mData.mSlash[0] > Weapon.mData.mSlash[1])
             {
