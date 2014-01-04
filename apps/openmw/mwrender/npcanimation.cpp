@@ -750,6 +750,7 @@ void NpcAnimation::preRender(Ogre::Camera *camera)
 
 void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectScenePtr scene)
 {
+    sh::Factory::getInstance()._ensureMaterial(ent->getSubEntity(0)->getMaterial()->getName(), "Default");
     ent->getSubEntity(0)->setRenderQueueGroup(alpha != 1.f || ent->getSubEntity(0)->getMaterial()->isTransparent()
             ? RQG_Alpha : RQG_Main);
 
