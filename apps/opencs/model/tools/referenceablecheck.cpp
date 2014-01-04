@@ -826,22 +826,40 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
 
     //TODO, It seems that this stuff for spellcasting is obligatory and In fact We should check if records are present
     if
-    (
-        //THOSE ARE HARDCODED!
-        Weapon.mId != "VFX_Hands"
-        && Weapon.mId != "VFX_Absorb"
-        && Weapon.mId != "VFX_Reflect"
-        && Weapon.mId != "VFX_DefaultBolt"
-        //TODO I don't know how to get full list of effects :/
-    )
+    (   //THOSE ARE HARDCODED!
+        !(Weapon.mId == "VFX_Hands" ||
+          Weapon.mId == "VFX_Absorb" ||
+          Weapon.mId == "VFX_Reflect" ||
+          Weapon.mId == "VFX_DefaultBolt" ||
+          //TODO I don't know how to get full list of effects :/
+          //DANGER!, ACHTUNG! FIXME! The following is the list of the magical bolts, valid for Morrowind.esm. However those are not hardcoded.
+          Weapon.mId == "magic_bolt" ||
+          Weapon.mId == "shock_bolt" ||
+          Weapon.mId == "shield_bolt" ||
+          Weapon.mId == "VFX_DestructBolt" ||
+          Weapon.mId == "VFX_PoisonBolt" ||
+          Weapon.mId == "VFX_RestoreBolt" ||
+          Weapon.mId == "VFX_AlterationBolt" ||
+          Weapon.mId == "VFX_ConjureBolt" ||
+          Weapon.mId == "VFX_FrostBolt" ||
+          Weapon.mId == "VFX_MysticismBolt" ||
+          Weapon.mId == "VFX_IllusionBolt" ||
+          Weapon.mId == "VFX_Multiple2" ||
+          Weapon.mId == "VFX_Multiple3" ||
+          Weapon.mId == "VFX_Multiple4" ||
+          Weapon.mId == "VFX_Multiple5" ||
+          Weapon.mId == "VFX_Multiple6" ||
+          Weapon.mId == "VFX_Multiple7" ||
+          Weapon.mId == "VFX_Multiple8" ||
+          Weapon.mId == "VFX_Multiple9"))
     {
         inventoryItemCheck<ESM::Weapon>(Weapon, messages, id.toString(), true);
 
-        if ( !(Weapon.mData.mType == ESM::Weapon::MarksmanBow || 
-            Weapon.mData.mType == ESM::Weapon::MarksmanCrossbow || 
-            Weapon.mData.mType == ESM::Weapon::MarksmanThrown ||
-            Weapon.mData.mType == ESM::Weapon::Arrow ||
-            Weapon.mData.mType == ESM::Weapon::Bolt) )
+        if (!(Weapon.mData.mType == ESM::Weapon::MarksmanBow ||
+                Weapon.mData.mType == ESM::Weapon::MarksmanCrossbow ||
+                Weapon.mData.mType == ESM::Weapon::MarksmanThrown ||
+                Weapon.mData.mType == ESM::Weapon::Arrow ||
+                Weapon.mData.mType == ESM::Weapon::Bolt))
         {
             if (Weapon.mData.mSlash[0] > Weapon.mData.mSlash[1])
             {
@@ -859,7 +877,9 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
             messages.push_back(id.toString() + "|" + Weapon.mId + " has minimum chop damage higher than maximum");
         }
 
-        if (!(Weapon.mData.mType == ESM::Weapon::Arrow or Weapon.mData.mType == ESM::Weapon::Bolt or Weapon.mData.mType == ESM::Weapon::MarksmanThrown))
+        if (!(Weapon.mData.mType == ESM::Weapon::Arrow ||
+                Weapon.mData.mType == ESM::Weapon::Bolt ||
+                Weapon.mData.mType == ESM::Weapon::MarksmanThrown))
         {
             //checking of health
             if (Weapon.mData.mHealth <= 0)
@@ -894,7 +914,10 @@ void CSMTools::ReferenceableCheckStage::probeCheck(
     toolCheck<ESM::Probe>(Probe, messages, id.toString(), true);
 }
 
-void CSMTools::ReferenceableCheckStage::repairCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Repair >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::repairCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Repair >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -910,7 +933,10 @@ void CSMTools::ReferenceableCheckStage::repairCheck(int stage, const CSMWorld::R
     toolCheck<ESM::Repair>(Repair, messages, id.toString(), true);
 }
 
-void CSMTools::ReferenceableCheckStage::staticCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Static >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::staticCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Static >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
