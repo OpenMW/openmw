@@ -119,8 +119,6 @@ namespace MWGui
 
         // Set up the log window
         mHistory->setOverflowToTheLeft(true);
-        mHistory->setEditStatic(true);
-        mHistory->setVisibleVScroll(true);
 
         // compiler
         Compiler::registerExtensions (mExtensions, mConsoleOnlyScripts);

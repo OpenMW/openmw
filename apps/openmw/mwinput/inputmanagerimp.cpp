@@ -497,6 +497,9 @@ namespace MWInput
                         edit->deleteTextSelection();
                     }
                 }
+            }
+            if (edit && !edit->getEditStatic())
+            {
                 if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
                     std::string text = edit->getTextSelection();
