@@ -55,6 +55,14 @@ private:
     bool mShowWeapons;
     bool mShowCarriedLeft;
 
+    enum NpcType
+    {
+        Type_Normal,
+        Type_Werewolf,
+        Type_Vampire
+    };
+    NpcType mNpcType;
+
     int mVisibilityFlags;
 
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty

@@ -139,8 +139,13 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 {
+    // Only *one* change event should be fired
+    mUpdatesEnabled = false;
     for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         unequipSlot(slot, actor);
+    mUpdatesEnabled = true;
+    fireEquipmentChangedEvent();
+    updateMagicEffects(actor);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
