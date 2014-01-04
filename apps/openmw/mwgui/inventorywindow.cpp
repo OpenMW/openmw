@@ -425,7 +425,7 @@ namespace MWGui
             // NOTE: Don't allow users to select WerewolfRobe objects in the inventory. Vanilla
             // likely uses a hack like this since there's no other way to prevent it from being
             // taken.
-            if(item.getCellRef().mRefID == "WerewolfRobe")
+            if(item.getCellRef().mRefID == "werewolfrobe")
                 return MWWorld::Ptr();
             return item;
         }

@@ -1967,11 +1967,11 @@ namespace MWWorld
         {
             InventoryStore &inv = actor.getClass().getInventoryStore(actor);
 
-            inv.equip(InventoryStore::Slot_Robe, inv.ContainerStore::add("WerewolfRobe", 1, actor), actor);
+            inv.equip(InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
         }
         else
         {
-            actor.getClass().getContainerStore(actor).remove("WerewolfRobe", 1, actor);
+            actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
         }
 
         if(actor.getRefData().getHandle() == "player")
