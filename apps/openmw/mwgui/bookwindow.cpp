@@ -44,6 +44,11 @@ namespace MWGui
         adjustButton(mNextPageButton);
         adjustButton(mPrevPageButton);
 
+        mLeftPage->setNeedMouseFocus(true);
+        mLeftPage->eventMouseWheel += MyGUI::newDelegate(this, &BookWindow::onMouseWheel);
+        mRightPage->setNeedMouseFocus(true);
+        mRightPage->eventMouseWheel += MyGUI::newDelegate(this, &BookWindow::onMouseWheel);
+
         if (mNextPageButton->getSize().width == 64)
         {
             // english button has a 7 pixel wide strip of garbage on its right edge
@@ -52,6 +57,14 @@ namespace MWGui
         }
 
         center();
+    }
+
+    void BookWindow::onMouseWheel(MyGUI::Widget *_sender, int _rel)
+    {
+        if (_rel < 0)
+            nextPage();
+        else
+            prevPage();
     }
 
     void BookWindow::clearPages()
@@ -89,6 +102,7 @@ namespace MWGui
                 parent = mRightPage;
 
             MyGUI::Widget* pageWidget = parent->createWidgetReal<MyGUI::Widget>("", MyGUI::FloatCoord(0.0,0.0,1.0,1.0), MyGUI::Align::Default, "BookPage" + boost::lexical_cast<std::string>(i));
+            pageWidget->setNeedMouseFocus(false);
             parser.parsePage(*it, pageWidget, mLeftPage->getSize().width);
             mPages.push_back(pageWidget);
             ++i;
