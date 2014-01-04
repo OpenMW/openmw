@@ -183,6 +183,9 @@ if (WIN32)
     set(Boost_USE_STATIC_LIBS   ON)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
+
+    # Suppress WinMain(), provided by SDL
+    add_definitions(-DSDL_MAIN_HANDLED)
 else (WIN32)
     set(PLATFORM_INCLUDE_DIR "")
     find_path (UUID_INCLUDE_DIR uuid/uuid.h)
