@@ -514,7 +514,8 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_PcVampire:
 
-            return MWWorld::Class::get (player).getNpcStats (player).isVampire();
+            return MWWorld::Class::get (player).getCreatureStats(player).getMagicEffects().
+                    get(ESM::MagicEffect::Vampirism).mMagnitude > 0;
 
         case SelectWrapper::Function_TalkedToPc:
 
