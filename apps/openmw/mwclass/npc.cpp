@@ -21,6 +21,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/disease.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -517,7 +518,8 @@ namespace MWClass
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
 
-            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f);
+            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f)
+                    || (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
             if(stats.isWerewolf())
             {
                 healthdmg = true;
@@ -602,6 +604,9 @@ namespace MWClass
             if(!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
+
+        if (!attacker.isEmpty())
+            MWMechanics::diseaseContact(ptr, attacker);
 
         if(damage > 0.0f)
         {

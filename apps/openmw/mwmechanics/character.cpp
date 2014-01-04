@@ -955,9 +955,12 @@ void CharacterController::update(float duration)
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
 
         rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
-        world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
 
-        world->queueMovement(mPtr, vec);
+        if (!mSkipAnim)
+        {
+            world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
+            world->queueMovement(mPtr, vec);
+        }
         movement = vec;
     }
     else if(cls.getCreatureStats(mPtr).isDead())

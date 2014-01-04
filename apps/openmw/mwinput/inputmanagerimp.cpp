@@ -9,6 +9,7 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Widget.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
 
 #include <openengine/ogre/renderer.hpp>
 
@@ -19,7 +20,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwgui/bookwindow.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 using namespace ICS;
@@ -497,6 +497,9 @@ namespace MWInput
                         edit->deleteTextSelection();
                     }
                 }
+            }
+            if (edit && !edit->getEditStatic())
+            {
                 if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
                     std::string text = edit->getTextSelection();
@@ -591,15 +594,6 @@ namespace MWInput
             mMouseWheel = int(arg.z);
 
             MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
-
-            //if the player is reading a book and flicking the mouse wheel
-            if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Book && arg.zrel)
-            {
-                if (arg.zrel < 0)
-                    MWBase::Environment::get().getWindowManager()->getBookWindow()->nextPage();
-                else
-                    MWBase::Environment::get().getWindowManager()->getBookWindow()->prevPage();
-            }
         }
 
         if (mMouseLookEnabled)
@@ -676,7 +670,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the magic window is accessible
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Magic))
+        if (!mControlSwitch["playermagic"])
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
@@ -691,7 +685,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the inventory window is accessible
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+        if (!mControlSwitch["playerfighting"])
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();

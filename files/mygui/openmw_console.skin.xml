@@ -2,19 +2,6 @@
 
 <MyGUI type="Skin">
 
-    <!-- Console Output -->
-
-    <Skin name="MW_LogClient" size="10 10">
-        <Property key="FontName" value="MonoFont"/>
-        <Property key="TextAlign" value="Left Top"/>
-        <Property key="TextColour" value="1 1 1"/>
-        <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
-    </Skin>
-
-    <Skin name="MW_ConsoleLog" size="0 0 50 50">
-        <Property key="WordWrap" value="true"/>
-        <Child type="TextBox" skin="MW_LogClient" offset="0 0 35 10" align="Stretch" name="Client"/>
-    </Skin>
 
     <!-- Console Input -->
 

@@ -24,6 +24,7 @@
 #include "containeritemmodel.hpp"
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
+#include "dialogue.hpp"
 
 namespace MWGui
 {
@@ -339,6 +340,9 @@ namespace MWGui
             addOrRemoveGold(mCurrentBalance, playerPtr);
             addOrRemoveGold(-mCurrentBalance, mPtr);
         }
+
+        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
 
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);

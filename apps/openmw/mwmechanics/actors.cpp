@@ -408,17 +408,17 @@ namespace MWMechanics
         static std::map<int, std::string> boundItemsMap;
         if (boundItemsMap.empty())
         {
-            boundItemsMap[ESM::MagicEffect::BoundBattleAxe] = "battle_axe";
-            boundItemsMap[ESM::MagicEffect::BoundBoots] = "boots";
-            boundItemsMap[ESM::MagicEffect::BoundCuirass] = "cuirass";
-            boundItemsMap[ESM::MagicEffect::BoundDagger] = "dagger";
-            boundItemsMap[ESM::MagicEffect::BoundGloves] = "gauntlet"; // Note: needs both _left and _right variants, see below
-            boundItemsMap[ESM::MagicEffect::BoundHelm] = "helm";
-            boundItemsMap[ESM::MagicEffect::BoundLongbow] = "longbow";
-            boundItemsMap[ESM::MagicEffect::BoundLongsword] = "longsword";
-            boundItemsMap[ESM::MagicEffect::BoundMace] = "mace";
-            boundItemsMap[ESM::MagicEffect::BoundShield] = "shield";
-            boundItemsMap[ESM::MagicEffect::BoundSpear] = "spear";
+            boundItemsMap[ESM::MagicEffect::BoundBattleAxe] = "sMagicBoundBattleAxeID";
+            boundItemsMap[ESM::MagicEffect::BoundBoots] = "sMagicBoundBootsID";
+            boundItemsMap[ESM::MagicEffect::BoundCuirass] = "sMagicBoundCuirassID";
+            boundItemsMap[ESM::MagicEffect::BoundDagger] = "sMagicBoundDaggerID";
+            boundItemsMap[ESM::MagicEffect::BoundGloves] = "sMagicBoundLeftGauntletID"; // Note: needs RightGauntlet variant too (see below)
+            boundItemsMap[ESM::MagicEffect::BoundHelm] = "sMagicBoundHelmID";
+            boundItemsMap[ESM::MagicEffect::BoundLongbow] = "sMagicBoundLongbowID";
+            boundItemsMap[ESM::MagicEffect::BoundLongsword] = "sMagicBoundLongswordID";
+            boundItemsMap[ESM::MagicEffect::BoundMace] = "sMagicBoundMaceID";
+            boundItemsMap[ESM::MagicEffect::BoundShield] = "sMagicBoundShieldID";
+            boundItemsMap[ESM::MagicEffect::BoundSpear] = "sMagicBoundSpearID";
         }
 
         for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
@@ -427,11 +427,13 @@ namespace MWMechanics
             int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
-                std::string item = "bound_" + it->second;
+                std::string itemGmst = it->second;
+                std::string item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                            itemGmst)->getString();
                 if (it->first == ESM::MagicEffect::BoundGloves)
                 {
-                    adjustBoundItem(item + "_left", magnitude > 0, ptr);
-                    adjustBoundItem(item + "_right", magnitude > 0, ptr);
+                    adjustBoundItem("sMagicBoundLeftGauntletID", magnitude > 0, ptr);
+                    adjustBoundItem("sMagicBoundRightGauntletID", magnitude > 0, ptr);
                 }
                 else
                     adjustBoundItem(item, magnitude > 0, ptr);
@@ -447,26 +449,28 @@ namespace MWMechanics
         static std::map<int, std::string> summonMap;
         if (summonMap.empty())
         {
-            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "ancestor_ghost_summon";
-            summonMap[ESM::MagicEffect::SummonBear] = "BM_bear_black_summon";
-            summonMap[ESM::MagicEffect::SummonBonelord] = "bonelord_summon";
-            summonMap[ESM::MagicEffect::SummonBonewalker] = "bonewalker_summon";
-            summonMap[ESM::MagicEffect::SummonBonewolf] = "BM_wolf_bone_summon";
-            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "centurion_sphere_summon";
-            summonMap[ESM::MagicEffect::SummonClannfear] = "clannfear_summon";
-            summonMap[ESM::MagicEffect::SummonDaedroth] = "daedroth_summon";
-            summonMap[ESM::MagicEffect::SummonDremora] = "dremora_summon";
-            summonMap[ESM::MagicEffect::SummonFabricant] = "fabricant_summon";
-            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "atronach_flame_summon";
-            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "atronach_frost_summon";
-            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "golden saint_summon";
-            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "bonewalker_greater_summ";
-            summonMap[ESM::MagicEffect::SummonHunger] = "hunger_summon";
-            summonMap[ESM::MagicEffect::SummonScamp] = "scamp_summon";
-            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "skeleton_summon";
-            summonMap[ESM::MagicEffect::SummonStormAtronach] = "atronach_storm_summon";
-            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "winged twilight_summon";
-            summonMap[ESM::MagicEffect::SummonWolf] = "BM_wolf_grey_summon";
+            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "sMagicAncestralGhostID";
+            summonMap[ESM::MagicEffect::SummonBonelord] = "sMagicBonelordID";
+            summonMap[ESM::MagicEffect::SummonBonewalker] = "sMagicLeastBonewalkerID";
+            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "sMagicCenturionSphereID";
+            summonMap[ESM::MagicEffect::SummonClannfear] = "sMagicClannfearID";
+            summonMap[ESM::MagicEffect::SummonDaedroth] = "sMagicDaedrothID";
+            summonMap[ESM::MagicEffect::SummonDremora] = "sMagicDremoraID";
+            summonMap[ESM::MagicEffect::SummonFabricant] = "sMagicFabricantID";
+            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "sMagicFlameAtronachID";
+            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "sMagicFrostAtronachID";
+            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "sMagicGoldenSaintID";
+            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "sMagicGreaterBonewalkerID";
+            summonMap[ESM::MagicEffect::SummonHunger] = "sMagicHungerID";
+            summonMap[ESM::MagicEffect::SummonScamp] = "sMagicScampID";
+            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "sMagicSkeletalMinionID";
+            summonMap[ESM::MagicEffect::SummonStormAtronach] = "sMagicStormAtronachID";
+            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "sMagicWingedTwilightID";
+            summonMap[ESM::MagicEffect::SummonWolf] = "sMagicCreature01ID";
+            summonMap[ESM::MagicEffect::SummonBear] = "sMagicCreature02ID";
+            summonMap[ESM::MagicEffect::SummonBonewolf] = "sMagicCreature03ID";
+            summonMap[ESM::MagicEffect::SummonCreature04] = "sMagicCreature04ID";
+            summonMap[ESM::MagicEffect::SummonCreature05] = "sMagicCreature05ID";
         }
 
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
@@ -489,15 +493,20 @@ namespace MWMechanics
                     ipos.rot[1] = 0;
                     ipos.rot[2] = 0;
 
-                    MWWorld::CellStore* store = ptr.getCell();
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), it->second, 1);
-                    ref.getPtr().getCellRef().mPos = ipos;
+                    std::string creatureID =
+                            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(it->second)->getString();
 
-                    // TODO: Add AI to follow player and fight for him
+                    if (!creatureID.empty())
+                    {
+                        MWWorld::CellStore* store = ptr.getCell();
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
+                        ref.getPtr().getCellRef().mPos = ipos;
 
-                    creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
+                        // TODO: Add AI to follow player and fight for him
 
+                        creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
+                            MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
+                    }
                 }
                 else
                 {
@@ -797,7 +806,12 @@ namespace MWMechanics
                 iter->second->updateContinuousVfx();
 
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
+                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                    iter->second->skipAnim();
                 iter->second->update(duration);
+            }
         }
     }
     void Actors::restoreDynamicStats()

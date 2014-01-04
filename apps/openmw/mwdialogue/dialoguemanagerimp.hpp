@@ -44,7 +44,7 @@ namespace MWDialogue
             bool compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code);
             void executeScript (const std::string& script);
 
-            void executeTopic (const std::string& topic, bool randomResponse=false);
+            void executeTopic (const std::string& topic);
 
         public:
 

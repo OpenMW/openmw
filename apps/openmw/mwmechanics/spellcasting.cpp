@@ -68,6 +68,12 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effectIt->mEffectID);
 
+            // If player is healing someone, show the target's HP bar
+            if (caster.getRefData().getHandle() == "player" && target != caster
+                    && effectIt->mEffectID == ESM::MagicEffect::RestoreHealth
+                    && target.getClass().isActor())
+                MWBase::Environment::get().getWindowManager()->setEnemy(target);
+
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
             {

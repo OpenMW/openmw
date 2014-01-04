@@ -465,7 +465,20 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(MWWorld::Class::get(ptr).getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                    runtime.push(ptr.getClass().getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                }
+        };
+
+        template <class R>
+        class OpGetSpellReadied : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push(ptr.getClass().getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Spell);
                 }
         };
 
@@ -776,6 +789,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetAttackedExplicit, new OpGetAttacked<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetWeaponDrawn, new OpGetWeaponDrawn<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellReadied, new OpGetSpellReadied<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellReadiedExplicit, new OpGetSpellReadied<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellEffects, new OpGetSpellEffects<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellEffectsExplicit, new OpGetSpellEffects<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetCurrentTime, new OpGetCurrentTime);

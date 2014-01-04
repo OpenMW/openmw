@@ -236,6 +236,7 @@ namespace MWMechanics
         if(mWalking)
         {
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+            // TODO: use movement settings instead of rotating directly
             world->rotateObject(actor, 0, 0, zAngle, false);
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
