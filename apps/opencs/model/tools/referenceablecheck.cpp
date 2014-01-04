@@ -10,7 +10,11 @@
 #include "../world/universalid.hpp"
 #include <components/esm/loadmgef.hpp>
 
-CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races, const CSMWorld::IdCollection<ESM::Class>& classes, const CSMWorld::IdCollection<ESM::Faction>& faction) :
+CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
+    const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
+    const CSMWorld::IdCollection<ESM::Class>& classes,
+    const CSMWorld::IdCollection<ESM::Faction>& faction)
+    :
     mReferencables(referenceable),
     mClasses(classes),
     mRaces(races),
@@ -215,7 +219,10 @@ int CSMTools::ReferenceableCheckStage::setup()
     return mReferencables.getSize();
 }
 
-void CSMTools::ReferenceableCheckStage::bookCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Book >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::bookCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Book >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -230,7 +237,10 @@ void CSMTools::ReferenceableCheckStage::bookCheck(int stage, const CSMWorld::Ref
     inventoryItemCheck<ESM::Book>(Book, messages, id.toString(), true);
 }
 
-void CSMTools::ReferenceableCheckStage::activatorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Activator >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::activatorCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Activator >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -249,7 +259,10 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(int stage, const CSMWorld
     }
 }
 
-void CSMTools::ReferenceableCheckStage::potionCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Potion >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::potionCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Potion >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -266,7 +279,10 @@ void CSMTools::ReferenceableCheckStage::potionCheck(int stage, const CSMWorld::R
 }
 
 
-void CSMTools::ReferenceableCheckStage::apparatusCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Apparatus >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::apparatusCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Apparatus >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -284,7 +300,10 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(int stage, const CSMWorld
     toolCheck<ESM::Apparatus>(Apparatus, messages, id.toString());
 }
 
-void CSMTools::ReferenceableCheckStage::armorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Armor >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::armorCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Armor >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -311,7 +330,10 @@ void CSMTools::ReferenceableCheckStage::armorCheck(int stage, const CSMWorld::Re
     }
 }
 
-void CSMTools::ReferenceableCheckStage::clothingCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Clothing >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::clothingCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Clothing >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -325,7 +347,10 @@ void CSMTools::ReferenceableCheckStage::clothingCheck(int stage, const CSMWorld:
     inventoryItemCheck<ESM::Clothing>(Clothing, messages, id.toString(), true);
 }
 
-void CSMTools::ReferenceableCheckStage::containerCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Container >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::containerCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Container >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -356,7 +381,10 @@ void CSMTools::ReferenceableCheckStage::containerCheck(int stage, const CSMWorld
     }
 }
 
-void CSMTools::ReferenceableCheckStage::creatureCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Creature >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::creatureCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Creature >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -450,7 +478,10 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(int stage, const CSMWorld:
     }
 }
 
-void CSMTools::ReferenceableCheckStage::doorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Door >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::doorCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Door >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -476,7 +507,10 @@ void CSMTools::ReferenceableCheckStage::doorCheck(int stage, const CSMWorld::Ref
     //TODO, check what static unsigned int sRecordId; is for
 }
 
-void CSMTools::ReferenceableCheckStage::ingredientCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Ingredient >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::ingredientCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Ingredient >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -491,7 +525,10 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(int stage, const CSMWorl
     inventoryItemCheck<ESM::Ingredient>(Ingredient, messages, id.toString());
 }
 
-void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -507,7 +544,10 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(int stage, const C
     listCheck<ESM::CreatureLevList>(CreatureLevList, messages, id.toString());
 }
 
-void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -522,7 +562,10 @@ void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(int stage, const C
     listCheck<ESM::ItemLevList>(ItemLevList, messages, id.toString());
 }
 
-void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Light >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::lightCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Light >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -553,7 +596,10 @@ void CSMTools::ReferenceableCheckStage::lightCheck(int stage, const CSMWorld::Re
     }
 }
 
-void CSMTools::ReferenceableCheckStage::lockpickCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Lockpick >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::lockpickCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Lockpick >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -570,7 +616,10 @@ void CSMTools::ReferenceableCheckStage::lockpickCheck(int stage, const CSMWorld:
     toolCheck<ESM::Lockpick>(Lockpick, messages, id.toString(), true);
 }
 
-void CSMTools::ReferenceableCheckStage::miscCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Miscellaneous >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::miscCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Miscellaneous >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -585,7 +634,10 @@ void CSMTools::ReferenceableCheckStage::miscCheck(int stage, const CSMWorld::Ref
     inventoryItemCheck<ESM::Miscellaneous>(Miscellaneous, messages, id.toString());
 }
 
-void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::NPC >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::npcCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::NPC >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -757,7 +809,10 @@ void CSMTools::ReferenceableCheckStage::npcCheck(int stage, const CSMWorld::RefI
     //TODO: reputation, Disposition, rank, everything else
 }
 
-void CSMTools::ReferenceableCheckStage::weaponCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Weapon >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::weaponCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Weapon >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -772,13 +827,12 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(int stage, const CSMWorld::R
     //TODO, It seems that this stuff for spellcasting is obligatory and In fact We should check if records are present
     if
     (
-	//THOSE ARE HARDCODED!
+        //THOSE ARE HARDCODED!
         Weapon.mId != "VFX_Hands"
-        and Weapon.mId != "VFX_Absorb"
-        and Weapon.mId != "VFX_Reflect"
-        and Weapon.mId != "VFX_DefaultBolt"
-	//THIS ONE IS NOT, but it thas to be ignored as well
-	//TODO I don't know how to get full list of effects :/
+        && Weapon.mId != "VFX_Absorb"
+        && Weapon.mId != "VFX_Reflect"
+        && Weapon.mId != "VFX_DefaultBolt"
+        //TODO I don't know how to get full list of effects :/
     )
     {
         inventoryItemCheck<ESM::Weapon>(Weapon, messages, id.toString(), true);
@@ -817,7 +871,10 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(int stage, const CSMWorld::R
     }
 }
 
-void CSMTools::ReferenceableCheckStage::probeCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Probe >& records, std::vector< std::string >& messages)
+void CSMTools::ReferenceableCheckStage::probeCheck(
+    int stage,
+    const CSMWorld::RefIdDataContainer< ESM::Probe >& records,
+    std::vector< std::string >& messages)
 {
     const CSMWorld::RecordBase& baserecord = records.getRecord(stage);
 
@@ -870,7 +927,10 @@ void CSMTools::ReferenceableCheckStage::staticCheck(int stage, const CSMWorld::R
 
 //Templates begins here
 
-template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemCheck(const ITEM& someitem, std::vector< std::string >& messages, const std::string& someid, bool enchantable)
+template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemCheck(
+    const ITEM& someitem,
+    std::vector< std::string >& messages,
+    const std::string& someid, bool enchantable)
 {
     if (someitem.mName.empty())
     {
@@ -910,7 +970,10 @@ template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemChe
     }
 }
 
-template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemCheck(const ITEM& someitem, std::vector< std::string >& messages, const std::string& someid)
+template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemCheck(
+    const ITEM& someitem,
+    std::vector< std::string >& messages,
+    const std::string& someid)
 {
     if (someitem.mName.empty())
     {
@@ -942,7 +1005,10 @@ template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemChe
     }
 }
 
-template<typename TOOL> void CSMTools::ReferenceableCheckStage::toolCheck(const TOOL& sometool, std::vector< std::string >& messages, const std::string& someid, bool canbebroken)
+template<typename TOOL> void CSMTools::ReferenceableCheckStage::toolCheck(
+    const TOOL& sometool,
+    std::vector< std::string >& messages,
+    const std::string& someid, bool canbebroken)
 {
     if (sometool.mData.mQuality <= 0)
     {
@@ -958,16 +1024,21 @@ template<typename TOOL> void CSMTools::ReferenceableCheckStage::toolCheck(const 
     }
 }
 
-template<typename TOOL> void CSMTools::ReferenceableCheckStage::toolCheck(const TOOL& sometool, std::vector< std::string >& messages, const std::string& someid)
+template<typename TOOL> void CSMTools::ReferenceableCheckStage::toolCheck(
+    const TOOL& sometool,
+    std::vector< std::string >& messages,
+    const std::string& someid)
 {
     if (sometool.mData.mQuality <= 0)
     {
         messages.push_back(someid + "|" + sometool.mId + " has non-positive quality");
     }
-
 }
 
-template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(const LIST& somelist, std::vector< std::string >& messages, const std::string& someid)
+template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(
+    const LIST& somelist,
+    std::vector< std::string >& messages,
+    const std::string& someid)
 {
     for (unsigned i = 0; i < somelist.mList.size(); ++i)
     {
@@ -982,3 +1053,4 @@ template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(const 
         }
     }
 }
+// kate: indent-mode cstyle; indent-width 4; replace-tabs on; 
