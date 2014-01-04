@@ -656,9 +656,9 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     //Don't know what unknown is for
     int Gold(NPC.mNpdt52.mGold);
 
-    if (NPC.mNpdtType == 12) //12 = autocalculated
+    if (NPC.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
     {
-        if ((NPC.mFlags & 0x0008) == 0) //0x0008 = autocalculated flag
+        if ((NPC.mFlags & ESM::NPC::Autocalc) == 0) //0x0008 = autocalculated flag
         {
             messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType or flags mismatch!"); //should not happend?
             return;
