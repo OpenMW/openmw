@@ -122,7 +122,7 @@ namespace MWMechanics
         return mLevel;
     }
 
-    int CreatureStats::getAiSetting (int index) const
+    Stat<int> CreatureStats::getAiSetting (AiSetting index) const
     {
         assert (index>=0 && index<4);
         return mAiSettings[index];
@@ -240,10 +240,16 @@ namespace MWMechanics
         mAttackingOrSpell = attackingOrSpell;
     }
 
-    void CreatureStats::setAiSetting (int index, int value)
+    void CreatureStats::setAiSetting (AiSetting index, Stat<int> value)
     {
         assert (index>=0 && index<4);
         mAiSettings[index] = value;
+    }
+
+    void CreatureStats::setAiSetting (AiSetting index, int base)
+    {
+        Stat<int> stat(base);
+        setAiSetting(index, stat);
     }
 
     bool CreatureStats::isDead() const

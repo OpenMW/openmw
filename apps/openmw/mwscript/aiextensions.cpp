@@ -225,7 +225,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (mIndex));
+                    runtime.push(MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (
+                                     (MWMechanics::CreatureStats::AiSetting)mIndex).getModified());
                 }
         };
         template<class R>
@@ -241,8 +242,11 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (mIndex,
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (mIndex) + value);
+                    MWMechanics::CreatureStats::AiSetting setting
+                            = MWMechanics::CreatureStats::AiSetting(mIndex);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (setting,
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (setting).getBase() + value);
                 }
         };
         template<class R>
@@ -258,8 +262,11 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (mIndex,
-                        value);
+                    MWMechanics::CreatureStats::AiSetting setting = (MWMechanics::CreatureStats::AiSetting)mIndex;
+
+                    MWMechanics::Stat<int> stat = ptr.getClass().getCreatureStats(ptr).getAiSetting(setting);
+                    stat.setModified(value, 0);
+                    ptr.getClass().getCreatureStats(ptr).setAiSetting(setting, stat);
                 }
         };
 

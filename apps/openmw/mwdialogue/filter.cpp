@@ -279,7 +279,8 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_AiSetting:
 
-            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getAiSetting (select.getArgument());
+            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getAiSetting (
+                        (MWMechanics::CreatureStats::AiSetting)select.getArgument()).getModified();
 
         case SelectWrapper::Function_PcAttribute:
 
