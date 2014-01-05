@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_ANIMATION_H
-#define _GAME_RENDER_ANIMATION_H
+#ifndef GAME_RENDER_ANIMATION_H
+#define GAME_RENDER_ANIMATION_H
 
 #include <OgreController.h>
 #include <OgreVector3.h>
@@ -112,7 +112,7 @@ protected:
     struct EffectParams
     {
         std::string mModelName; // Just here so we don't add the same effect twice
-        NifOgre::ObjectList mObjects;
+        NifOgre::ObjectScenePtr mObjects;
         int mEffectId;
         bool mLoop;
         std::string mBoneName;
@@ -125,7 +125,7 @@ protected:
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
-    NifOgre::ObjectList mObjectRoot;
+    NifOgre::ObjectScenePtr mObjectRoot;
     AnimSourceList mAnimSources;
     Ogre::Node *mAccumRoot;
     Ogre::Node *mNonAccumRoot;
@@ -187,11 +187,9 @@ protected:
     void addAnimSource(const std::string &model);
 
     /** Adds an additional light to the given object list using the specified ESM record. */
-    void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light);
+    void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light);
 
-    static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
-
-    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
+    static void setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
                                     Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
                                     bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
 
@@ -217,6 +215,11 @@ public:
     void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
+
+    /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
+    virtual void preRender (Ogre::Camera* camera);
+
+    virtual void setAlpha(float alpha) {}
 private:
     void updateEffects(float duration);
 
@@ -255,6 +258,8 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
+    bool isPlaying(Group group) const;
+
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
      * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
@@ -274,7 +279,7 @@ public:
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showShield(bool show) {}
+    virtual void showCarriedLeft(bool show) {}
 
     void enableLights(bool enable);
 

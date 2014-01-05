@@ -133,7 +133,7 @@ namespace MWGui
         public:
             MWAttribute();
 
-            typedef MWMechanics::Stat<int> AttributeValue;
+            typedef MWMechanics::AttributeValue AttributeValue;
 
             void setAttributeId(int attributeId);
             void setAttributeValue(const AttributeValue& value);

@@ -36,49 +36,58 @@ https://wiki.openmw.org/index.php?title=Development_Environment_Setup
 
 THE DATA PATH
 
-The data path tells OpenMW where to find your Morrowind files. From 0.12.0 on OpenMW should be able to
+The data path tells OpenMW where to find your Morrowind files. If you run the launcher, OpenMW should be able to
 pick up the location of these files on its own, if both Morrowind and OpenMW are installed properly
 (installing Morrowind under WINE is considered a proper install).
-
-If that does not work for you, please check if you have any leftover openmw.cfg files from versions earlier than 0.12.0. These can interfere with the configuration process, so try to remove then.
-
-If you are running OpenMW without installing it, you still need to manually adjust the data path. Create a text file named openmw.cfg in the location of the binary and enter the following line:
-
-data=path to your data directory
-
-(where you replace "path to your data directory" with the actual location of your data directory)
-
 
 COMMAND LINE OPTIONS
 
 Syntax: openmw <options>
 Allowed options:
-  --help                           print help message
-  --version                        print version information and quit
-  --data arg (=data)               set data directories (later directories have higher priority)
-  --data-local arg                 set local data directory (highest priority)
-  --resources arg (=resources)     set resources directory
-  --start arg (=Beshara)           set initial cell
-  --master arg                     master file(s)
-  --plugin arg                     plugin file(s)
-  --anim-verbose [=arg(=1)] (=0)   output animation indices files
-  --debug [=arg(=1)] (=0)          debug mode
-  --nosound [=arg(=1)] (=0)        disable all sounds
-  --script-verbose [=arg(=1)] (=0) verbose script output
-  --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scripts) at startup
-  --script-console [=arg(=1)] (=0) enable console-only script functionality
-  --script-run arg                 select a file containing a list of console commands that is executed on startup
-  --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
-  --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding)
-  --encoding arg (=win1252)        Character encoding used in OpenMW game messages:
-
-                                   win1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages
-
-                                   win1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
-
-                                   win1252 - Western European (Latin) alphabet, used by default
-
-  --fallback arg                   fallback values
+  --help                                print help message
+  --version                             print version information and quit
+  --data arg (=data)                    set data directories (later directories
+                                        have higher priority)
+  --data-local arg                      set local data directory (highest 
+                                        priority)
+  --fallback-archive arg (=fallback-archive)
+                                        set fallback BSA archives (later 
+                                        archives have higher priority)
+  --resources arg (=resources)          set resources directory
+  --start arg (=Beshara)                set initial cell
+  --content arg                         content file(s): esm/esp, or 
+                                        omwgame/omwaddon
+  --anim-verbose [=arg(=1)] (=0)        output animation indices files
+  --no-sound [=arg(=1)] (=0)            disable all sounds
+  --script-verbose [=arg(=1)] (=0)      verbose script output
+  --script-all [=arg(=1)] (=0)          compile all scripts (excluding dialogue
+                                        scripts) at startup
+  --script-console [=arg(=1)] (=0)      enable console-only script 
+                                        functionality
+  --script-run arg                      select a file containing a list of 
+                                        console commands that is executed on 
+                                        startup
+  --new-game [=arg(=1)] (=0)            activate char gen/new game mechanics
+  --fs-strict [=arg(=1)] (=0)           strict file system handling (no case 
+                                        folding)
+  --encoding arg (=win1252)             Character encoding used in OpenMW game 
+                                        messages:
+                                        
+                                        win1250 - Central and Eastern European 
+                                        such as Polish, Czech, Slovak, 
+                                        Hungarian, Slovene, Bosnian, Croatian, 
+                                        Serbian (Latin script), Romanian and 
+                                        Albanian languages
+                                        
+                                        win1251 - Cyrillic alphabet such as 
+                                        Russian, Bulgarian, Serbian Cyrillic 
+                                        and other languages
+                                        
+                                        win1252 - Western European (Latin) 
+                                        alphabet, used by default
+  --fallback arg                        fallback values
+  --no-grab                             Don't grab mouse cursor
+  --activate-dist arg (=-1)             activation distance override
 
 CHANGELOG
 

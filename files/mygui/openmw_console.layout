@@ -7,9 +7,12 @@
     <Property key="Visible" value="false"/>
 
     <!-- Log window -->
-    <Widget type="EditBox" skin="MW_ConsoleLog" position="5 5 380 328" align="Stretch" name="list_History">
+    <Widget type="EditBox" skin="MW_TextBoxEdit" position="5 5 380 328" align="Stretch" name="list_History">
         <Property key="MultiLine" value="1"/>
         <Property key="ReadOnly" value="true"/>
+        <Property key="FontName" value="MonoFont"/>
+        <Property key="TextAlign" value="Left Top"/>
+        <Property key="TextColour" value="1 1 1"/>
     </Widget>
 
     <!-- Command line -->

@@ -1,5 +1,5 @@
-#ifndef _GAME_OCCLUSION_QUERY_H
-#define _GAME_OCCLUSION_QUERY_H
+#ifndef GAME_OCCLUSION_QUERY_H
+#define GAME_OCCLUSION_QUERY_H
 
 #include <OgreRenderObjectListener.h>
 #include <OgreRenderQueueListener.h>

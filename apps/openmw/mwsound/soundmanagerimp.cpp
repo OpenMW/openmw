@@ -252,7 +252,7 @@ namespace MWSound
             float basevol = volumeFromType(Play_TypeVoice);
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getRefData().getPosition();
-            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+            const Ogre::Vector3 objpos(pos.pos);
 
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
                                                           20.0f, 12750.0f, Play_Normal|Play_TypeVoice, 0);
@@ -354,7 +354,7 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();
-            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+            const Ogre::Vector3 objpos(pos.pos);
 
             sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|type, offset);
             if((mode&Play_NoTrack))
@@ -584,7 +584,7 @@ namespace MWSound
                 if(!ptr.isEmpty())
                 {
                     const ESM::Position &pos = ptr.getRefData().getPosition();
-                    const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+                    const Ogre::Vector3 objpos(pos.pos);
                     snditer->first->setPosition(objpos);
                 }
                 //update fade out

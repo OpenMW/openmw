@@ -12,6 +12,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include "spellcasting.hpp"
+
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
@@ -31,15 +33,14 @@ namespace MWMechanics
         for (int i=0; i<27; ++i)
             npcStats.getSkill (i).setBase (player->mNpdt52.mSkills[i]);
 
-        creatureStats.getAttribute(0).setBase (player->mNpdt52.mStrength);
-        creatureStats.getAttribute(1).setBase (player->mNpdt52.mIntelligence);
-        creatureStats.getAttribute(2).setBase (player->mNpdt52.mWillpower);
-        creatureStats.getAttribute(3).setBase (player->mNpdt52.mAgility);
-        creatureStats.getAttribute(4).setBase (player->mNpdt52.mSpeed);
-        creatureStats.getAttribute(5).setBase (player->mNpdt52.mEndurance);
-        creatureStats.getAttribute(6).setBase (player->mNpdt52.mPersonality);
-        creatureStats.getAttribute(7).setBase (player->mNpdt52.mLuck);
-
+        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt52.mStrength);
+        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt52.mIntelligence);
+        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt52.mWillpower);
+        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt52.mAgility);
+        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt52.mSpeed);
+        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt52.mEndurance);
+        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt52.mPersonality);
+        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt52.mLuck);
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
@@ -55,7 +56,7 @@ namespace MWMechanics
             {
                 const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
-                creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
+                creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
             }
 
             for (int i=0; i<27; ++i)
@@ -106,7 +107,7 @@ namespace MWMechanics
                 int attribute = class_->mData.mAttribute[i];
                 if (attribute>=0 && attribute<8)
                 {
-                    creatureStats.getAttribute(attribute).setBase (
+                    creatureStats.setAttribute(attribute,
                         creatureStats.getAttribute(attribute).getBase() + 10);
                 }
             }
@@ -123,6 +124,19 @@ namespace MWMechanics
                     {
                         npcStats.getSkill (index).setBase (
                             npcStats.getSkill (index).getBase() + bonus);
+                    }
+
+                    if (i==1)
+                    {
+                        // Major skill - add starting spells for this skill if existing
+                        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                        MWWorld::Store<ESM::Spell>::iterator it = store.get<ESM::Spell>().begin();
+                        for (; it != store.get<ESM::Spell>().end(); ++it)
+                        {
+                            if (it->mData.mFlags & ESM::Spell::F_PCStart
+                                    && spellSchoolToSkill(getSpellSchool(&*it, ptr)) == index)
+                                creatureStats.getSpells().add(it->mId);
+                        }
                     }
                 }
             }
@@ -467,6 +481,8 @@ namespace MWMechanics
         if (playerStats.getDrawState() == MWMechanics::DrawState_Weapon)
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
 
+        x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).mMagnitude;
+
         int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
         return effective_disposition;
     }
@@ -485,10 +501,10 @@ namespace MWMechanics
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
         int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr)
             + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
-        float a = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float a = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-        float d = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float d = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 
@@ -591,8 +607,12 @@ namespace MWMechanics
             {
                 float s = int(r * fPerDieRollMult * fPerTempMult);
 
-                npcStats.setAiSetting (2, std::max(0, std::min(100, npcStats.getAiSetting (2) + int(std::max(iPerMinChange, s)))));
-                npcStats.setAiSetting (1, std::max(0, std::min(100, npcStats.getAiSetting (1) + int(std::min(-iPerMinChange, -s)))));
+                int flee = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Flee).getBase();
+                int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
+                npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
+                                       std::max(0, std::min(100, flee + int(std::max(iPerMinChange, s)))));
+                npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
+                                       std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
             }
 
             float c = -std::abs(int(r * fPerDieRollMult));
@@ -626,8 +646,12 @@ namespace MWMechanics
             {
                 float s = c * fPerDieRollMult * fPerTempMult;
 
-                npcStats.setAiSetting (2, std::max(0, std::min(100, npcStats.getAiSetting (2) + std::min(-int(iPerMinChange), int(-s)))));
-                npcStats.setAiSetting (1, std::max(0, std::min(100, npcStats.getAiSetting (1) + std::max(int(iPerMinChange), int(s)))));
+                int flee = npcStats.getAiSetting (CreatureStats::AI_Flee).getBase();
+                int fight = npcStats.getAiSetting (CreatureStats::AI_Fight).getBase();
+                npcStats.setAiSetting (CreatureStats::AI_Flee,
+                                       std::max(0, std::min(100, flee + std::min(-int(iPerMinChange), int(-s)))));
+                npcStats.setAiSetting (CreatureStats::AI_Fight,
+                                       std::max(0, std::min(100, fight + std::max(int(iPerMinChange), int(s)))));
             }
             x = int(-c * fPerDieRollMult);
 

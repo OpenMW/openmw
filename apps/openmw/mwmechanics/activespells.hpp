@@ -37,8 +37,8 @@ namespace MWMechanics
                 MWWorld::TimeStamp mTimeStamp;
                 std::string mDisplayName;
 
-                // TODO: To handle CASTER_LINKED flag (spell is purged when caster dies),
-                // we should probably store a handle to the caster here.
+                // Handle to the caster that that inflicted this spell on us
+                std::string mCasterHandle;
             };
 
             typedef std::multimap<std::string, ActiveSpellParams > TContainer;
@@ -76,14 +76,19 @@ namespace MWMechanics
             /// \param stack If false, the spell is not added if one with the same ID exists already.
             /// \param effects
             /// \param displayName Name for display in magic menu.
+            /// \param casterHandle
             ///
-            void addSpell (const std::string& id, bool stack, std::vector<Effect> effects, const std::string& displayName);
+            void addSpell (const std::string& id, bool stack, std::vector<Effect> effects,
+                           const std::string& displayName, const std::string& casterHandle);
 
-            /// Remove all active effects with this id
+            /// Removes the active effects from this spell/potion/.. with \a id
+            void removeEffects (const std::string& id);
+
+            /// Remove all active effects with this effect id
             void purgeEffect (short effectId);
 
-            /// Remove all active effects
-            void purgeAll ();
+            /// Remove all active effects, if roll succeeds (for each effect)
+            void purgeAll (float chance);
 
             bool isSpellActive (std::string id) const;
             ///< case insensitive

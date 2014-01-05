@@ -26,11 +26,11 @@ namespace MWGui
             void setPlayerName(const std::string& playerName);
 
             /// Set value for the given ID.
-            void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
+            void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
             void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
             void setValue (const std::string& id, const std::string& value);
             void setValue (const std::string& id, int value);
-            void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
+            void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
             void setReputation (int reputation) { if (reputation != mReputation) mChanged = true; this->mReputation = reputation; }
@@ -61,7 +61,7 @@ namespace MWGui
             MyGUI::ScrollView* mSkillView;
 
             SkillList mMajorSkills, mMinorSkills, mMiscSkills;
-            std::map<int, MWMechanics::Stat<float> > mSkillValues;
+            std::map<int, MWMechanics::SkillValue > mSkillValues;
             std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
             std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;
             FactionList mFactions; ///< Stores a list of factions and the current rank

@@ -25,14 +25,12 @@ namespace MWMechanics
 {
     class Actors
     {
-        typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
-        PtrControllerMap mActors;
+            typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
+            PtrControllerMap mActors;
 
-        std::map<std::string, int> mDeathCount;
+            std::map<std::string, int> mDeathCount;
 
-        void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
-
-
+            void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
@@ -50,6 +48,7 @@ namespace MWMechanics
         public:
 
             Actors();
+            ~Actors();
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)

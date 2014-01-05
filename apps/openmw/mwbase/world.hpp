@@ -81,7 +81,6 @@ namespace MWBase
                 Render_CollisionDebug,
                 Render_Wireframe,
                 Render_Pathgrid,
-                Render_Compositors,
                 Render_BoundingBoxes
             };
 
@@ -142,7 +141,7 @@ namespace MWBase
             virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
             ///< get north vector (OGRE coordinates) for given interior cell
 
-            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell) = 0;
+            virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
             virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
@@ -440,12 +439,44 @@ namespace MWBase
 
             virtual bool toggleGodMode() = 0;
 
+            /**
+             * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
+             * @param actor
+             * @return true if the spell can be casted (i.e. the animation should start)
+             */
+            virtual bool startSpellCast (const MWWorld::Ptr& actor) = 0;
+
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
 
             virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
+
+            virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
+
+            // Are we in an exterior or pseudo-exterior cell and it's night?
+            virtual bool isDark() const = 0;
+
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result) = 0;
+
+            /// Teleports \a ptr to the reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
+            /// closest to \a worldPos.
+            /// @note id must be lower case
+            virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
+                                                  const std::string& id, Ogre::Vector3 worldPos) = 0;
+
+            enum DetectionType
+            {
+                Detect_Enchantment,
+                Detect_Key,
+                Detect_Creature
+            };
+            /// List all references (filtered by \a type) detected by \a ptr. The range
+            /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
+            /// @note This also works for references in containers.
+            virtual void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
+                                                  DetectionType type) = 0;
     };
 }
 

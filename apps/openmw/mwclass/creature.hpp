@@ -99,6 +99,8 @@ namespace MWClass
             isActor() const {
                 return true;
             }
+
+            virtual bool isFlying (const MWWorld::Ptr &ptr) const;
     };
 }
 

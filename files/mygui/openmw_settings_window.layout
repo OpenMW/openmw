@@ -65,6 +65,12 @@
                     </Widget>
                 </Widget>
 
+                <Widget type="HBox" skin="" position="4 260 260 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="GrabCursorButton"/>
+                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                        <Property key="Caption" value="Grab cursor"/>
+                    </Widget>
+                </Widget>
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sAudio}  "/>

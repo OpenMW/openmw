@@ -14,6 +14,16 @@ Objects::Objects()
 {
 }
 
+Objects::~Objects()
+{
+  PtrControllerMap::iterator it(mObjects.begin());
+  for (; it != mObjects.end();++it)
+  {
+    delete it->second;
+    it->second = NULL;
+  }
+}
+
 void Objects::addObject(const MWWorld::Ptr& ptr)
 {
     removeObject(ptr);

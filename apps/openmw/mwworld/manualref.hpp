@@ -64,7 +64,7 @@ namespace MWWorld
 
                 // initialise
                 ESM::CellRef& cellRef = mPtr.getCellRef();
-                cellRef.mRefID = name;
+                cellRef.mRefID = Misc::StringUtils::lowerCase(name);
                 cellRef.mRefnum = -1;
                 cellRef.mScale = 1;
                 cellRef.mFactIndex = 0;

@@ -43,10 +43,13 @@ namespace MWScript
                     ESM::Position pos;
                     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-                    if (world->findExteriorPosition(cell, pos)) {
+                    world->getPlayer().setTeleported(true);
+                    if (world->findExteriorPosition(cell, pos))
+                    {
                         world->changeToExteriorCell(pos);
                     }
-                    else {
+                    else
+                    {
                         // Change to interior even if findInteriorPosition()
                         // yields false. In this case position will be zero-point.
                         world->findInteriorPosition(cell, pos);
@@ -68,13 +71,14 @@ namespace MWScript
                     runtime.pop();
 
                     ESM::Position pos;
-
-                    MWBase::Environment::get().getWorld()->indexToPosition (x, y, pos.pos[0], pos.pos[1], true);
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    world->getPlayer().setTeleported(true);
+                    world->indexToPosition (x, y, pos.pos[0], pos.pos[1], true);
                     pos.pos[2] = 0;
 
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-                    MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+                    world->changeToExteriorCell (pos);
                 }
         };
 

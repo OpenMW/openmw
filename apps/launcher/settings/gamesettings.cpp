@@ -91,6 +91,16 @@ QStringList Launcher::GameSettings::values(const QString &key, const QStringList
 
 bool Launcher::GameSettings::readFile(QTextStream &stream)
 {
+    return readFile(stream, mSettings);
+}
+
+bool Launcher::GameSettings::readUserFile(QTextStream &stream)
+{
+    return readFile(stream, mUserSettings);
+}
+
+bool Launcher::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> &settings)
+{
     QMap<QString, QString> cache;
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
@@ -107,10 +117,10 @@ bool Launcher::GameSettings::readFile(QTextStream &stream)
 
             // Don't remove existing data entries
             if (key != QLatin1String("data"))
-                mSettings.remove(key);
+                settings.remove(key);
 
             QStringList values = cache.values(key);
-            values.append(mSettings.values(key));
+            values.append(settings.values(key));
 
             if (!values.contains(value)) {
                 cache.insertMulti(key, value);
@@ -118,23 +128,24 @@ bool Launcher::GameSettings::readFile(QTextStream &stream)
         }
     }
 
-    if (mSettings.isEmpty()) {
-        mSettings = cache; // This is the first time we read a file
+    if (settings.isEmpty()) {
+        settings = cache; // This is the first time we read a file
         validatePaths();
         return true;
     }
 
     // Merge the changed keys with those which didn't
-    mSettings.unite(cache);
+    settings.unite(cache);
     validatePaths();
 
     return true;
 }
 
+
 bool Launcher::GameSettings::writeFile(QTextStream &stream)
 {
     // Iterate in reverse order to preserve insertion order
-    QMapIterator<QString, QString> i(mSettings);
+    QMapIterator<QString, QString> i(mUserSettings);
     i.toBack();
 
     while (i.hasPrevious()) {
@@ -162,7 +173,7 @@ bool Launcher::GameSettings::writeFile(QTextStream &stream)
 
     }
 
-    QStringList content = mSettings.values(QString("content"));
+    QStringList content = mUserSettings.values(QString("content"));
     for (int i = content.count(); i--;) {
         stream << "content=" << content.at(i) << "\n";
     }
@@ -172,14 +183,14 @@ bool Launcher::GameSettings::writeFile(QTextStream &stream)
 
 bool Launcher::GameSettings::hasMaster()
 {
-  bool result = false;
-  QStringList content = mSettings.values(QString("content"));
-  for (int i = 0; i < content.count(); ++i) {
-    if (content.at(i).contains(".omwgame") || content.at(i).contains(".esm")) {
-        result = true;
-        break;
+    bool result = false;
+    QStringList content = mSettings.values(QString("content"));
+    for (int i = 0; i < content.count(); ++i) {
+        if (content.at(i).contains(".omwgame") || content.at(i).contains(".esm")) {
+            result = true;
+            break;
+        }
     }
-  }
 
-  return result;
+    return result;
 }

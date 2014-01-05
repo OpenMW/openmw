@@ -14,7 +14,8 @@ namespace MWMechanics
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false), mAttackType(AT_Chop),
-          mIsWerewolf(false)
+          mIsWerewolf(false),
+          mFallHeight(0), mRecalcDynamicStats(false)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -73,7 +74,7 @@ namespace MWMechanics
             - gmst.find ("fFatigueMult")->getFloat() * (1-normalised);
     }
 
-    const Stat<int> &CreatureStats::getAttribute(int index) const
+    const AttributeValue &CreatureStats::getAttribute(int index) const
     {
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
@@ -121,18 +122,10 @@ namespace MWMechanics
         return mLevel;
     }
 
-    int CreatureStats::getAiSetting (int index) const
+    Stat<int> CreatureStats::getAiSetting (AiSetting index) const
     {
         assert (index>=0 && index<4);
         return mAiSettings[index];
-    }
-
-    Stat<int> &CreatureStats::getAttribute(int index)
-    {
-        if (index < 0 || index > 7) {
-            throw std::runtime_error("attribute index is out of range");
-        }
-        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
     }
 
     const DynamicStat<float> &CreatureStats::getDynamic(int index) const
@@ -163,11 +156,29 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
-    void CreatureStats::setAttribute(int index, const Stat<int> &value)
+    void CreatureStats::setAttribute(int index, int base)
+    {
+        AttributeValue current = getAttribute(index);
+        current.setBase(base);
+        setAttribute(index, current);
+    }
+
+    void CreatureStats::setAttribute(int index, const AttributeValue &value)
     {
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
+
+        const AttributeValue& currentValue = !mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index];
+
+        if (value != currentValue)
+        {
+            if (index != ESM::Attribute::Luck
+                    && index != ESM::Attribute::Personality
+                    && index != ESM::Attribute::Speed)
+                mRecalcDynamicStats = true;
+        }
+
         if(!mIsWerewolf)
             mAttributes[index] = value;
         else
@@ -217,6 +228,10 @@ namespace MWMechanics
 
     void CreatureStats::setMagicEffects(const MagicEffects &effects)
     {
+        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude
+                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude)
+            mRecalcDynamicStats = true;
+
         mMagicEffects = effects;
     }
 
@@ -225,10 +240,16 @@ namespace MWMechanics
         mAttackingOrSpell = attackingOrSpell;
     }
 
-    void CreatureStats::setAiSetting (int index, int value)
+    void CreatureStats::setAiSetting (AiSetting index, Stat<int> value)
     {
         assert (index>=0 && index<4);
         mAiSettings[index] = value;
+    }
+
+    void CreatureStats::setAiSetting (AiSetting index, int base)
+    {
+        Stat<int> stat(base);
+        setAiSetting(index, stat);
     }
 
     bool CreatureStats::isDead() const
@@ -251,8 +272,10 @@ namespace MWMechanics
         if (mDead)
         {
             if (mDynamic[0].getCurrent()<1)
-                mDynamic[0].setCurrent (1);
-
+            {
+                mDynamic[0].setModified(mDynamic[0].getModified(), 1);
+                mDynamic[0].setCurrent(1);
+            }
             if (mDynamic[0].getCurrent()>=1)
                 mDead = false;
         }
@@ -328,7 +351,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += mMagicEffects.get(EffectKey(ESM::MagicEffect::Sanctuary)).mMagnitude;
+        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).mMagnitude;
 
         return evasion;
     }
@@ -355,5 +378,27 @@ namespace MWMechanics
     void CreatureStats::usePower(const std::string &power)
     {
         mUsedPowers[power] = MWBase::Environment::get().getWorld()->getTimeStamp();
+    }
+
+    void CreatureStats::addToFallHeight(float height)
+    {
+        mFallHeight += height;
+    }
+
+    float CreatureStats::land()
+    {
+        float height = mFallHeight;
+        mFallHeight = 0;
+        return height;
+    }
+
+    bool CreatureStats::needToRecalcDynamicStats()
+    {
+         if (mRecalcDynamicStats)
+         {
+             mRecalcDynamicStats = false;
+             return true;
+         }
+         return false;
     }
 }

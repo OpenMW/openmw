@@ -71,8 +71,6 @@ namespace MWWorld
             void loadCell (CellStore *cell, Loading::Listener* loadingListener);
 
             void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
-            ///< Move from exterior to interior or from interior cell to a different
-            /// interior cell.
 
             CellStore* getCurrentCell ();
 

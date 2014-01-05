@@ -66,10 +66,6 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::setAnimationVerbose(bool animverbose)
-{
-}
-
 bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
     bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
@@ -316,7 +312,7 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
     // load user settings if they exist, otherwise just load the default settings as user settings
-    const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
+    const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
     else if (boost::filesystem::exists(localdefault))
@@ -328,12 +324,16 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 
     // load nif overrides
     NifOverrides::Overrides nifOverrides;
-    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg"))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
-    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
-
-    settings.setBool("hardware cursors", "GUI", true);
+    std::string transparencyOverrides = "/transparency-overrides.cfg";
+    std::string materialOverrides = "/material-overrides.cfg";
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + transparencyOverrides))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + transparencyOverrides);
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + transparencyOverrides))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + transparencyOverrides);
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + materialOverrides))
+        nifOverrides.loadMaterialOverrides(mCfgMgr.getLocalPath().string() + materialOverrides);
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + materialOverrides))
+        nifOverrides.loadMaterialOverrides(mCfgMgr.getGlobalPath().string() + materialOverrides);
 
     return settingspath;
 }
@@ -341,7 +341,7 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
     mEnvironment.setStateManager (
-        new MWState::StateManager (mCfgMgr.getUserPath() / "saves", mContentFiles.at (0)));
+        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
 
     Nif::NIFFile::CacheLock cachelock;
 
@@ -391,7 +391,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
     MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
@@ -540,6 +540,8 @@ void OMW::Engine::activate()
 
     std::string script = MWWorld::Class::get (ptr).getScript (ptr);
 
+    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
     if (!script.empty())
     {
         MWBase::Environment::get().getWorld()->getLocalScripts().setIgnore (ptr);
@@ -557,7 +559,7 @@ void OMW::Engine::screenshot()
     // Count screenshots.
     int shotCount = 0;
 
-    const std::string screenshotPath = mCfgMgr.getUserPath().string();
+    const std::string& screenshotPath = mCfgMgr.getUserDataPath().string();
 
     // Find the first unused filename with a do-while
     std::ostringstream stream;

@@ -1,8 +1,6 @@
 #include "loadingscreen.hpp"
 
 #include <OgreRenderWindow.h>
-#include <OgreCompositorManager.h>
-#include <OgreCompositorChain.h>
 
 #include <openengine/ogre/fader.hpp>
 
@@ -199,28 +197,7 @@ namespace MWGui
 
             MWBase::Environment::get().getInputManager()->update(0, true);
 
-            Ogre::CompositorChain* chain = Ogre::CompositorManager::getSingleton().getCompositorChain(mWindow->getViewport(0));
-
-            bool hasCompositor = chain->getCompositor ("gbufferFinalizer");
-
-
-            if (!hasCompositor)
-            {
-                mWindow->getViewport(0)->setClearEveryFrame(false);
-            }
-            else
-            {
-                if (!mFirstLoad)
-                {
-                    mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
-                    mRectangle->setVisible(true);
-                }
-
-                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
-                {
-                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), false);
-                }
-            }
+            mWindow->getViewport(0)->setClearEveryFrame(false);
 
             // First, swap buffers from last draw, then, queue an update of the
             // window contents, but don't swap buffers (which would have
@@ -231,15 +208,8 @@ namespace MWGui
 
             mWindow->update(false);
 
-            if (!hasCompositor)
-                mWindow->getViewport(0)->setClearEveryFrame(true);
-            else
-            {
-                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
-                {
-                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), true);
-                }
-            }
+            mWindow->getViewport(0)->setClearEveryFrame(true);
+
 
             mRectangle->setVisible(false);
 

@@ -150,9 +150,12 @@ void Actors::removeCell(MWWorld::CellStore* store)
     }
 }
 
-void Actors::update (float duration)
+void Actors::update (Ogre::Camera* camera)
 {
-    // Nothing to do
+    for(PtrAnimationMap::iterator iter = mAllActors.begin();iter != mAllActors.end(); ++iter)
+    {
+        iter->second->preRender(camera);
+    }
 }
 
 Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)

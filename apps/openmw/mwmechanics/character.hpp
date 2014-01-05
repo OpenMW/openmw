@@ -156,9 +156,6 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    // used for acrobatics progress and fall damages
-    float mFallHeight;
-
     std::string mAttackType; // slash, chop or thrust
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
@@ -172,6 +169,8 @@ class CharacterController
     void clearAnimQueue();
 
     bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
+
+    void updateVisibility();
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);

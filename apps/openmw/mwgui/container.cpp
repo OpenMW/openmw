@@ -61,8 +61,9 @@ namespace MWGui
         mDraggedWidget = baseWidget;
         MyGUI::ImageBox* image = baseWidget->createWidget<MyGUI::ImageBox>("ImageBox",
             MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
-        int pos = path.rfind(".");
-        path.erase(pos);
+        size_t pos = path.rfind(".");
+        if (pos != std::string::npos)
+            path.erase(pos);
         path.append(".dds");
         image->setImageTexture(path);
         image->setNeedMouseFocus(false);

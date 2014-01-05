@@ -3,8 +3,7 @@
 
 #include <components/files/configurationmanager.hpp>
 
-#include <SDL_messagebox.h>
-#include <SDL_main.h>
+#include <SDL.h>
 #include "engine.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
@@ -122,10 +121,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
-        ("anim-verbose", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "output animation indices files")
-
-        ("nosound", bpo::value<bool>()->implicit_value(true)
+        ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
         ("script-verbose", bpo::value<bool>()->implicit_value(true)
@@ -169,8 +165,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    cfgMgr.readConfiguration(variables, desc);
-
     bool run = true;
 
     if (variables.count ("help"))
@@ -187,6 +181,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    cfgMgr.readConfiguration(variables, desc);
 
     engine.setGrabMouse(!variables.count("no-grab"));
 
@@ -238,10 +234,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setSkipMenu (variables["skip-menu"].as<bool>());
 
     // other settings
-    engine.setSoundUsage(!variables["nosound"].as<bool>());
+    engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
-    engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
@@ -283,7 +278,7 @@ int main(int argc, char**argv)
     catch (std::exception &e)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        if (isatty(fileno(stdin)))
+        if (isatty(fileno(stdin)) || !SDL_WasInit(SDL_INIT_VIDEO))
             std::cerr << "\nERROR: " << e.what() << std::endl;
         else
 #endif

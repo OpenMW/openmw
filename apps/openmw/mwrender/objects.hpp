@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_OBJECTS_H
-#define _GAME_RENDER_OBJECTS_H
+#ifndef GAME_RENDER_OBJECTS_H
+#define GAME_RENDER_OBJECTS_H
 
 #include <OgreColourValue.h>
 #include <OgreAxisAlignedBox.h>
@@ -48,7 +48,7 @@ public:
     void enableLights();
     void disableLights();
 
-    void update (const float dt);
+    void update (float dt, Ogre::Camera* camera);
     ///< per-frame update
 
     Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);

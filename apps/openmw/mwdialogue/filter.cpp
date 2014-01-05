@@ -5,6 +5,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -133,7 +134,8 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
     if (isCreature)
         return true;
 
-    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
+    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor)
+            + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange();
     // For service refusal, the disposition check is inverted. However, a value of 0 still means "always succeed".
     return invert ? (info.mData.mDisposition == 0 || actorDisposition < info.mData.mDisposition)
                   : (actorDisposition >= info.mData.mDisposition);
@@ -277,7 +279,8 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_AiSetting:
 
-            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getAiSetting (select.getArgument());
+            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getAiSetting (
+                        (MWMechanics::CreatureStats::AiSetting)select.getArgument()).getModified();
 
         case SelectWrapper::Function_PcAttribute:
 
@@ -512,7 +515,8 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_PcVampire:
 
-            return MWWorld::Class::get (player).getNpcStats (player).isVampire();
+            return MWWorld::Class::get (player).getCreatureStats(player).getMagicEffects().
+                    get(ESM::MagicEffect::Vampirism).mMagnitude > 0;
 
         case SelectWrapper::Function_TalkedToPc:
 
