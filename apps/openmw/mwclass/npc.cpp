@@ -309,10 +309,10 @@ namespace MWClass
 
             data->mNpcStats.getAiSequence().fill(ref->mBase->mAiPackage);
 
-            data->mNpcStats.setAiSetting (0, ref->mBase->mAiData.mHello);
-            data->mNpcStats.setAiSetting (1, ref->mBase->mAiData.mFight);
-            data->mNpcStats.setAiSetting (2, ref->mBase->mAiData.mFlee);
-            data->mNpcStats.setAiSetting (3, ref->mBase->mAiData.mAlarm);
+            data->mNpcStats.setAiSetting (MWMechanics::CreatureStats::AI_Hello, ref->mBase->mAiData.mHello);
+            data->mNpcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight, ref->mBase->mAiData.mFight);
+            data->mNpcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee, ref->mBase->mAiData.mFlee);
+            data->mNpcStats.setAiSetting (MWMechanics::CreatureStats::AI_Alarm, ref->mBase->mAiData.mAlarm);
 
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
@@ -613,7 +613,7 @@ namespace MWClass
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
 
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "thief");
 
             if(object.isEmpty())
             {

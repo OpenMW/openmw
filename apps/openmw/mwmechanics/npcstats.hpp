@@ -50,7 +50,6 @@ namespace MWMechanics
             int mBounty;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
-            bool mVampire;
             int mReputation;
             int mWerewolfKills;
             int mProfit;
@@ -134,10 +133,6 @@ namespace MWMechanics
             int getFactionReputation (const std::string& faction) const;
 
             void setFactionReputation (const std::string& faction, int value);
-
-            bool isVampire() const;
-
-            void setVampire (bool set);
 
             bool hasSkillsForRank (const std::string& factionId, int rank) const;
 

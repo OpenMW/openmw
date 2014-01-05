@@ -372,4 +372,10 @@ namespace MWWorld
 
         return newPtr;
     }
+
+    bool Class::isFlying(const Ptr &ptr) const
+    {
+        return false;
+    }
+
 }

@@ -350,6 +350,7 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        Nif::NIFFile::CacheLock lock;
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
 
         mRendering.enableTerrain(false);

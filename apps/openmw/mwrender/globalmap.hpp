@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_GLOBALMAP_H
-#define _GAME_RENDER_GLOBALMAP_H
+#ifndef GAME_RENDER_GLOBALMAP_H
+#define GAME_RENDER_GLOBALMAP_H
 
 #include <string>
 

@@ -119,7 +119,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mShowWeapons(false),
     mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
-    mAlpha(1.f)
+    mAlpha(1.f),
+    mNpcType(Type_Normal)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -157,8 +158,8 @@ void NpcAnimation::updateNpcBase()
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-    bool isWerewolf = mPtr.getClass().getNpcStats(mPtr).isWerewolf();
-    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).mMagnitude;
+    bool isWerewolf = (mNpcType == Type_Werewolf);
+    bool isVampire = (mNpcType == Type_Vampire);
 
     if (isWerewolf)
     {
@@ -167,7 +168,7 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
-        if (vampire)
+        if (isVampire)
             mHeadModel = getVampireHead(mNpc->mRace, mNpc->mFlags & ESM::NPC::Female);
         else
             mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
@@ -221,10 +222,23 @@ void NpcAnimation::updateNpcBase()
 }
 
 void NpcAnimation::updateParts()
-{
+{    
     mAlpha = 1.f;
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+
+    NpcType curType = Type_Normal;
+    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).mMagnitude > 0)
+        curType = Type_Vampire;
+    if (cls.getNpcStats(mPtr).isWerewolf())
+        curType = Type_Werewolf;
+
+    if (curType != mNpcType)
+    {
+        mNpcType = curType;
+        rebuild();
+        return;
+    }
 
     static const struct {
         int mSlot;
@@ -329,7 +343,7 @@ void NpcAnimation::updateParts()
     static const int Flag_Female      = 1<<0;
     static const int Flag_FirstPerson = 1<<1;
 
-    bool isWerewolf = cls.getNpcStats(mPtr).isWerewolf();
+    bool isWerewolf = (mNpcType == Type_Werewolf);
     int flags = (isWerewolf ? -1 : 0);
     if(!mNpc->isMale())
         flags |= Flag_Female;
@@ -736,6 +750,7 @@ void NpcAnimation::preRender(Ogre::Camera *camera)
 
 void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectScenePtr scene)
 {
+    sh::Factory::getInstance()._ensureMaterial(ent->getSubEntity(0)->getMaterial()->getName(), "Default");
     ent->getSubEntity(0)->setRenderQueueGroup(alpha != 1.f || ent->getSubEntity(0)->getMaterial()->isTransparent()
             ? RQG_Alpha : RQG_Main);
 

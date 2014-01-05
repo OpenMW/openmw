@@ -28,7 +28,6 @@ MWMechanics::NpcStats::NpcStats()
 , mBounty (0)
 , mLevelProgress(0)
 , mDisposition(0)
-, mVampire (0)
 , mReputation(0)
 , mWerewolfKills (0)
 , mProfit(0)
@@ -316,16 +315,6 @@ int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) con
 void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, int value)
 {
     mFactionReputation[faction] = value;
-}
-
-bool MWMechanics::NpcStats::isVampire() const
-{
-    return mVampire;
-}
-
-void MWMechanics::NpcStats::setVampire (bool set)
-{
-    mVampire = set;
 }
 
 int MWMechanics::NpcStats::getReputation() const

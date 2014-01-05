@@ -81,7 +81,7 @@ void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
 {
     if (ptr.getRefData().getCount() <= 1)
         return;
-    addNewStack(ptr)->getRefData().setCount(ptr.getRefData().getCount()-1);
+    addNewStack(ptr, ptr.getRefData().getCount()-1);
     remove(ptr, ptr.getRefData().getCount()-1, container);
 }
 
@@ -123,12 +123,12 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    return add(ref.getPtr(), actorPtr);
+    return add(ref.getPtr(), count, actorPtr);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, const Ptr& actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr)
 {
-    MWWorld::ContainerStoreIterator it = addImp(itemPtr);
+    MWWorld::ContainerStoreIterator it = addImp(itemPtr, count);
     MWWorld::Ptr item = *it;
 
     // we may have copied an item from the world, so reset a few things first
@@ -165,7 +165,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     return it;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr, int count)
 {
     int type = getType(ptr);
 
@@ -180,20 +180,20 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
+        int realCount = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
             if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
             {
-                iter->getRefData().setCount(iter->getRefData().getCount() + count);
+                iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
                 return iter;
             }
         }
 
         MWWorld::ManualRef ref(esmStore, "Gold_001", count);
-        return addNewStack(ref.getPtr());
+        return addNewStack(ref.getPtr(), count);
     }
 
     // determine whether to stack or not
@@ -202,17 +202,17 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         if (stacks(*iter, ptr))
         {
             // stack
-            iter->getRefData().setCount( iter->getRefData().getCount() + ptr.getRefData().getCount() );
+            iter->getRefData().setCount( iter->getRefData().getCount() + count );
 
             flagAsModified();
             return iter;
         }
     }
     // if we got here, this means no stacking
-    return addNewStack(ptr);
+    return addNewStack(ptr, count);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr, int count)
 {
     ContainerStoreIterator it = begin();
 
@@ -231,6 +231,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr&
         case Type_Repair: repairs.mList.push_back (*ptr.get<ESM::Repair>()); it = ContainerStoreIterator(this, --repairs.mList.end()); break;
         case Type_Weapon: weapons.mList.push_back (*ptr.get<ESM::Weapon>()); it = ContainerStoreIterator(this, --weapons.mList.end()); break;
     }
+
+    it->getRefData().setCount(count);
 
     flagAsModified();
     return it;
@@ -343,7 +345,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         else
         {
             ref.getPtr().getCellRef().mOwner = owner;
-            addImp (ref.getPtr());
+            addImp (ref.getPtr(), count);
         }
     }
     catch (std::logic_error& e)

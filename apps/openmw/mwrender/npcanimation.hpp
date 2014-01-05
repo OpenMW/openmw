@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_NPCANIMATION_H
-#define _GAME_RENDER_NPCANIMATION_H
+#ifndef GAME_RENDER_NPCANIMATION_H
+#define GAME_RENDER_NPCANIMATION_H
 
 #include "animation.hpp"
 
@@ -54,6 +54,14 @@ private:
     ViewMode       mViewMode;
     bool mShowWeapons;
     bool mShowCarriedLeft;
+
+    enum NpcType
+    {
+        Type_Normal,
+        Type_Werewolf,
+        Type_Vampire
+    };
+    NpcType mNpcType;
 
     int mVisibilityFlags;
 

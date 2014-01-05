@@ -263,7 +263,7 @@ namespace
 
     static const char *sCreatureTypes[] =
     {
-        "Creature", "Deadra", "Undead", "Humanoid", 0
+        "Creature", "Daedra", "Undead", "Humanoid", 0
     };
 
     static const char *sWeaponTypes[] =

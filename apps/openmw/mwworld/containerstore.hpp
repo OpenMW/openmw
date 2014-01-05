@@ -51,7 +51,7 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Weapon>            weapons;
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
-            ContainerStoreIterator addImp (const Ptr& ptr);
+            ContainerStoreIterator addImp (const Ptr& ptr, int count);
             void addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance=0, bool topLevel=true);
 
         public:
@@ -64,7 +64,7 @@ namespace MWWorld
 
             ContainerStoreIterator end();
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
@@ -91,7 +91,7 @@ namespace MWWorld
             ///< Unstack an item in this container. The item's count will be set to 1, then a new stack will be added with (origCount-1).
 
         protected:
-            ContainerStoreIterator addNewStack (const Ptr& ptr);
+            ContainerStoreIterator addNewStack (const Ptr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();

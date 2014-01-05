@@ -306,6 +306,8 @@ namespace MWWorld
                 return false;
             }
 
+            virtual bool isFlying(const MWWorld::Ptr& ptr) const;
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 

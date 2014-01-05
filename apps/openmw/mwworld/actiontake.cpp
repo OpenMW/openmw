@@ -14,10 +14,7 @@ namespace MWWorld
 
     void ActionTake::executeImp (const Ptr& actor)
     {
-        // insert into player's inventory
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPtr ("player", true);
-
-        MWWorld::Class::get (player).getContainerStore (player).add (getTarget(), player);
+        actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
 
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
     }

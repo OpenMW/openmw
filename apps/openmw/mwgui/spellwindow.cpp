@@ -393,7 +393,7 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
-        if (spells.getSelectedSpell() == mSpellToDelete)
+        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == mSpellToDelete)
             MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
 
         spells.remove(mSpellToDelete);

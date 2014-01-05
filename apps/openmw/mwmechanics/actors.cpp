@@ -172,7 +172,7 @@ namespace MWMechanics
                     float d = sqrt((actorpos.pos[0] - playerpos.pos[0])*(actorpos.pos[0] - playerpos.pos[0])
                         +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
                         +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
-                    float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(1);
+                    float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified();
                     float disp = 100; //creatures don't have disposition, so set it to 100 by default
                     if(ptr.getTypeName() == typeid(ESM::NPC).name())
                     {
@@ -228,7 +228,7 @@ namespace MWMechanics
 
         now += creatureStats.getActiveSpells().getMagicEffects();
 
-        MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
+        //MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
 
         creatureStats.setMagicEffects(now);
 
@@ -339,6 +339,30 @@ namespace MWMechanics
             stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
+        }
+
+        // AI setting modifiers
+        int creature = !ptr.getClass().isNpc();
+        if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Humanoid)
+            creature = false;
+        // Note: the Creature variants only work on normal creatures, not on daedra or undead creatures.
+        if (!creature || ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Creatures)
+        {
+            Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::FrenzyHumanoid+creature).mMagnitude
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid+creature).mMagnitude);
+            creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
+
+            stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::DemoralizeHumanoid+creature).mMagnitude
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::RallyHumanoid+creature).mMagnitude);
+            creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
+        }
+        if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
+        {
+            Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::TurnUndead).mMagnitude);
+            creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
 
         // Apply disintegration (reduces item health)

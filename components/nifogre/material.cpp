@@ -157,7 +157,6 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
             ctrls = ctrls->next;
         }
     }
-    needTangents = !texName[Nif::NiTexturingProperty::BumpTexture].empty();
 
     // Alpha modifiers
     if(alphaprop)
@@ -406,6 +405,12 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     instance->setProperty("depth_check", sh::makeProperty(new sh::StringValue((depthFlags&1) ? "on" : "off")));
     instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue(((depthFlags>>1)&1) ? "on" : "off")));
     // depth_func???
+
+    if (!texName[0].empty())
+        NifOverrides::Overrides::getMaterialOverrides(texName[0], instance);
+
+    // Don't use texName, as it may be overridden
+    needTangents = !sh::retrieveValue<sh::StringValue>(instance->getProperty("normalMap"), instance).get().empty();
 
     return name;
 }

@@ -309,12 +309,16 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 
     // load nif overrides
     NifOverrides::Overrides nifOverrides;
-    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg"))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
-    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
-
-    settings.setBool("hardware cursors", "GUI", true);
+    std::string transparencyOverrides = "/transparency-overrides.cfg";
+    std::string materialOverrides = "/material-overrides.cfg";
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + transparencyOverrides))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + transparencyOverrides);
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + transparencyOverrides))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + transparencyOverrides);
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + materialOverrides))
+        nifOverrides.loadMaterialOverrides(mCfgMgr.getLocalPath().string() + materialOverrides);
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + materialOverrides))
+        nifOverrides.loadMaterialOverrides(mCfgMgr.getGlobalPath().string() + materialOverrides);
 
     return settingspath;
 }

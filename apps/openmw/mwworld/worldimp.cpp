@@ -1605,12 +1605,16 @@ namespace MWWorld
         if(!ptr.getClass().isActor())
             return false;
 
+        if (ptr.getClass().getCreatureStats(ptr).isDead())
+            return false;
+
+        if (ptr.getClass().isFlying(ptr))
+            return true;
+
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
         if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
                 && isLevitationEnabled())
             return true;
-
-        // TODO: Check if flying creature
 
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(ptr.getRefData().getHandle());
         if(!actor || !actor->getCollisionMode())
@@ -1960,6 +1964,10 @@ namespace MWWorld
 
         npcStats.setWerewolf(werewolf);
 
+        // This is a bit dangerous. Equipped items other than WerewolfRobe may reference
+        // bones that do not even exist with the werewolf object root.
+        // Therefore, make sure to unequip everything at once, and only fire the change event
+        // (which will rebuild the animation parts) afterwards. unequipAll will do this for us.
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
         invStore.unequipAll(actor);
 
@@ -1973,6 +1981,10 @@ namespace MWWorld
         {
             actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
         }
+
+        // NpcAnimation::updateParts will already rebuild the animation when it detects change of Npc type.
+        // the following is just for reattaching the camera properly.
+        mRendering->rebuildPtr(actor);
 
         if(actor.getRefData().getHandle() == "player")
         {
@@ -1991,8 +2003,6 @@ namespace MWWorld
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }
         }
-
-        mRendering->rebuildPtr(actor);
     }
 
     void World::applyWerewolfAcrobatics(const Ptr &actor)

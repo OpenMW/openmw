@@ -58,6 +58,18 @@ namespace MWScript
             }
         };
 
+        class OpGetPcJumping : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                MWWorld::Ptr player = world->getPlayer().getPlayer();
+                runtime.push (!world->isOnGround(player) && !world->isFlying(player));
+            }
+        };
+
         class OpWakeUpPc : public Interpreter::Opcode0
         {
         public:
@@ -771,6 +783,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeDontSaveObject, new OpDontSaveObject);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcSleep, new OpGetPcSleep);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcJumping, new OpGetPcJumping);
             interpreter.installSegment5 (Compiler::Misc::opcodeWakeUpPc, new OpWakeUpPc);
             interpreter.installSegment5 (Compiler::Misc::opcodePlayBink, new OpPlayBink);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetLocked, new OpGetLocked<ImplicitRef>);

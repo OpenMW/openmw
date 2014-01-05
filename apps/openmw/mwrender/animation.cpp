@@ -185,6 +185,7 @@ public:
         for(unsigned int i = 0;i < numsubs;++i)
         {
             Ogre::SubEntity* subEnt = entity->getSubEntity(i);
+            sh::Factory::getInstance()._ensureMaterial(subEnt->getMaterial()->getName(), "Default");
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? mTransQueue : mSolidQueue);
         }
     }
@@ -1188,6 +1189,7 @@ public:
         unsigned int numsubs = ent->getNumSubEntities();
         for(unsigned int i = 0;i < numsubs;++i)
         {
+            sh::Factory::getInstance()._ensureMaterial(ent->getSubEntity(i)->getMaterial()->getName(), "Default");
             if(ent->getSubEntity(i)->getMaterial()->isTransparent())
                 return true;
         }

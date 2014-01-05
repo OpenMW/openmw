@@ -24,8 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------- */
 
-#ifndef _InputControlSystem_H_
-#define _InputControlSystem_H_
+#ifndef OICS_InputControlSystem_H_
+#define OICS_InputControlSystem_H_
 
 #include "ICSPrerequisites.h"
 
