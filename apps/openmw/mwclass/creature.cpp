@@ -413,6 +413,14 @@ namespace MWClass
         return MWWorld::Ptr(&cell.mCreatures.insert(*ref), &cell);
     }
 
+    bool Creature::isFlying(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Flies;
+    }
+
     int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)
     {
         if(name == "left")

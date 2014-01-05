@@ -1605,12 +1605,16 @@ namespace MWWorld
         if(!ptr.getClass().isActor())
             return false;
 
+        if (ptr.getClass().getCreatureStats(ptr).isDead())
+            return false;
+
+        if (ptr.getClass().isFlying(ptr))
+            return true;
+
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
         if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
                 && isLevitationEnabled())
             return true;
-
-        // TODO: Check if flying creature
 
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(ptr.getRefData().getHandle());
         if(!actor || !actor->getCollisionMode())
