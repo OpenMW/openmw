@@ -188,6 +188,7 @@ namespace Compiler
         const int opcodeDontSaveObject = 0x2000153;
         const int opcodeToggleVanityMode = 0x2000174;
         const int opcodeGetPcSleep = 0x200019f;
+        const int opcodeGetPcJumping = 0x2000233;
         const int opcodeWakeUpPc = 0x20001a2;
         const int opcodeGetLocked = 0x20001c7;
         const int opcodeGetLockedExplicit = 0x20001c8;
