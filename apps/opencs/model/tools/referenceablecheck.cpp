@@ -1072,6 +1072,11 @@ template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(
 {
     for (unsigned i = 0; i < somelist.mList.size(); ++i)
     {
+        if (mReferencables.searchId(somelist.mList[i].mId).first == -1)
+        {
+            messages.push_back(someid + "|" + somelist.mId + " contains item without referencable");
+        }
+            
         if (somelist.mList[i].mLevel < 1)
         {
             messages.push_back(someid + "|" + somelist.mId + " contains item with non-positive level");
