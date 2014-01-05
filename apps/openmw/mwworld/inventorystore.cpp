@@ -75,9 +75,9 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, const Ptr& actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr)
 {
-    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, actorPtr);
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr);
 
     // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
     if ((actorPtr.getRefData().getHandle() != "player")
@@ -118,11 +118,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     // unstack item pointed to by iterator if required
     if (iterator!=end() && !slots_.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
     {
-        // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
-        int count = iterator->getRefData().getCount();
-        iterator->getRefData().setCount(count-1);
-        addNewStack(*iterator);
-        iterator->getRefData().setCount(1);
+        unstack(*iterator, actor);
     }
 
     mSlots[slot] = iterator;
@@ -274,11 +270,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 // unstack item pointed to by iterator if required
                 if (iter->getRefData().getCount() > 1)
                 {
-                    // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
-                    int count = iter->getRefData().getCount();
-                    iter->getRefData().setCount(count-1);
-                    addNewStack(*iter);
-                    iter->getRefData().setCount(1);
+                    unstack(*iter, actor);
                 }
             }
 

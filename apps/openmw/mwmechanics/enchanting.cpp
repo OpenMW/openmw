@@ -90,7 +90,7 @@ namespace MWMechanics
 
         // Add the new item to player inventory and remove the old one
         store.remove(mOldItemPtr, 1, player);
-        store.add(newItemPtr, player);
+        store.add(newItemPtr, 1, player);
 
         if(!mSelfEnchanting)
             payForEnchantment();

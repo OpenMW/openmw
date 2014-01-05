@@ -42,10 +42,7 @@ void InventoryItemModel::copyItem (const ItemStack& item, size_t count)
 {
     if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    int origCount = item.mBase.getRefData().getCount();
-    item.mBase.getRefData().setCount(count);
-    mActor.getClass().getContainerStore(mActor).add(item.mBase, mActor);
-    item.mBase.getRefData().setCount(origCount);
+    mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor);
 }
 
 
