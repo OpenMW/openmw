@@ -165,15 +165,15 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     stage -= miscSize;
 
-    const int NPCSize(mReferencables.getNPCs().getSize());
+    const int npcSize(mReferencables.getNPCs().getSize());
 
-    if (stage < NPCSize)
+    if (stage < npcSize)
     {
         npcCheck(stage, mReferencables.getNPCs(), messages);
         return;
     }
 
-    stage -= NPCSize;
+    stage -= npcSize;
 
     const int weaponSize(mReferencables.getWeapons().getSize());
 
@@ -646,113 +646,113 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
         return;
     }
 
-    const ESM::NPC& NPC = (dynamic_cast<const CSMWorld::Record<ESM::NPC>& >(baseRecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, NPC.mId);
+    const ESM::NPC& npc = (dynamic_cast<const CSMWorld::Record<ESM::NPC>& >(baseRecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, npc.mId);
 
-    short level(NPC.mNpdt52.mLevel);
-    char disposition(NPC.mNpdt52.mDisposition);
-    char reputation(NPC.mNpdt52.mReputation);
-    char rank(NPC.mNpdt52.mRank);
+    short level(npc.mNpdt52.mLevel);
+    char disposition(npc.mNpdt52.mDisposition);
+    char reputation(npc.mNpdt52.mReputation);
+    char rank(npc.mNpdt52.mRank);
     //Don't know what unknown is for
-    int gold(NPC.mNpdt52.mGold);
+    int gold(npc.mNpdt52.mGold);
 
-    if (NPC.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
+    if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
     {
-        if ((NPC.mFlags & ESM::NPC::Autocalc) == 0) //0x0008 = autocalculated flag
+        if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0008 = autocalculated flag
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " mNpdtType or flags mismatch!"); //should not happend?
+            messages.push_back(id.toString() + "|" + npc.mId + " mNpdtType or flags mismatch!"); //should not happend?
             return;
         }
 
-        level = NPC.mNpdt12.mLevel;
-        disposition = NPC.mNpdt12.mDisposition;
-        reputation = NPC.mNpdt12.mReputation;
-        rank = NPC.mNpdt12.mRank;
-        gold = NPC.mNpdt12.mGold;
+        level = npc.mNpdt12.mLevel;
+        disposition = npc.mNpdt12.mDisposition;
+        reputation = npc.mNpdt12.mReputation;
+        rank = npc.mNpdt12.mRank;
+        gold = npc.mNpdt12.mGold;
     }
     else
     {
-        if (NPC.mNpdt52.mMana < 0)
+        if (npc.mNpdt52.mMana < 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " mana has negative value");
+            messages.push_back(id.toString() + "|" + npc.mId + " mana has negative value");
         }
 
-        if (NPC.mNpdt52.mFatigue < 0)
+        if (npc.mNpdt52.mFatigue < 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " fatigue has negative value");
+            messages.push_back(id.toString() + "|" + npc.mId + " fatigue has negative value");
         }
 
-        if (NPC.mNpdt52.mAgility == 0)
+        if (npc.mNpdt52.mAgility == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " agility has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " agility has zero value");
         }
 
-        if (NPC.mNpdt52.mEndurance == 0)
+        if (npc.mNpdt52.mEndurance == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " endurance has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " endurance has zero value");
         }
 
-        if (NPC.mNpdt52.mIntelligence == 0)
+        if (npc.mNpdt52.mIntelligence == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " intelligence has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " intelligence has zero value");
         }
 
-        if (NPC.mNpdt52.mLuck == 0)
+        if (npc.mNpdt52.mLuck == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " luck has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " luck has zero value");
         }
 
-        if (NPC.mNpdt52.mPersonality == 0)
+        if (npc.mNpdt52.mPersonality == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " personality has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " personality has zero value");
         }
 
-        if (NPC.mNpdt52.mStrength == 0)
+        if (npc.mNpdt52.mStrength == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " strength has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " strength has zero value");
         }
 
-        if (NPC.mNpdt52.mSpeed == 0)
+        if (npc.mNpdt52.mSpeed == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " speed has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " speed has zero value");
         }
 
-        if (NPC.mNpdt52.mWillpower == 0)
+        if (npc.mNpdt52.mWillpower == 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " willpower has zero value");
+            messages.push_back(id.toString() + "|" + npc.mId + " willpower has zero value");
         }
     }
 
     if (level < 1)
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " level is non positive");
+        messages.push_back(id.toString() + "|" + npc.mId + " level is non positive");
     }
 
     if (gold < 0)
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " gold has negative value");
+        messages.push_back(id.toString() + "|" + npc.mId + " gold has negative value");
     }
 
-    if (NPC.mName.empty())
+    if (npc.mName.empty())
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has any empty name");
+        messages.push_back(id.toString() + "|" + npc.mId + " has any empty name");
     }
 
-    if (NPC.mClass.empty())
+    if (npc.mClass.empty())
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has any empty class");
+        messages.push_back(id.toString() + "|" + npc.mId + " has any empty class");
     }
     else //checking if there is such class
     {
-        if (mClasses.searchId(NPC.mClass) == -1)
+        if (mClasses.searchId(npc.mClass) == -1)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid class");
+            messages.push_back(id.toString() + "|" + npc.mId + " has invalid class");
         }
     }
 
-    if (NPC.mRace.empty())
+    if (npc.mRace.empty())
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has any empty race");
+        messages.push_back(id.toString() + "|" + npc.mId + " has any empty race");
     }
     else //checking if there is a such race
     {
@@ -760,7 +760,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
 
         for (int i = 0; i < mRaces.getSize(); ++i)
         {
-            if (dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mName == NPC.mRace) //mId in class, mName for race. Stupid.
+            if (dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mName == npc.mRace) //mId in class, mName for race. Stupid.
             {
                 nosuchrace = false;
                 break;
@@ -769,41 +769,41 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
 
         if (nosuchrace)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid race");
+            messages.push_back(id.toString() + "|" + npc.mId + " has invalid race");
         }
     }
 
     if (disposition < 0)
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has negative disposition");
+        messages.push_back(id.toString() + "|" + npc.mId + " has negative disposition");
     }
 
     if (reputation < 0) //It seems that no character in Morrowind.esm have negative reputation. I'm assuming that negative reputation is invalid
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has negative reputation");
+        messages.push_back(id.toString() + "|" + npc.mId + " has negative reputation");
     }
 
-    if (NPC.mFaction.empty() == false)
+    if (npc.mFaction.empty() == false)
     {
         if (rank < 0)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " has negative rank");
+            messages.push_back(id.toString() + "|" + npc.mId + " has negative rank");
         }
 
-        if (mFactions.searchId(NPC.mFaction) == -1)
+        if (mFactions.searchId(npc.mFaction) == -1)
         {
-            messages.push_back(id.toString() + "|" + NPC.mId + " has invalid faction");
+            messages.push_back(id.toString() + "|" + npc.mId + " has invalid faction");
         }
     }
 
-    if (NPC.mHead.empty())
+    if (npc.mHead.empty())
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has no head");
+        messages.push_back(id.toString() + "|" + npc.mId + " has no head");
     }
 
-    if (NPC.mHair.empty())
+    if (npc.mHair.empty())
     {
-        messages.push_back(id.toString() + "|" + NPC.mId + " has no hair");
+        messages.push_back(id.toString() + "|" + npc.mId + " has no hair");
     }
 
     //TODO: reputation, Disposition, rank, everything else
