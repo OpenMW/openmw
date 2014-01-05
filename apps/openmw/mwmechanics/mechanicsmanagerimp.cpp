@@ -481,6 +481,8 @@ namespace MWMechanics
         if (playerStats.getDrawState() == MWMechanics::DrawState_Weapon)
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
 
+        x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).mMagnitude;
+
         int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
         return effective_disposition;
     }

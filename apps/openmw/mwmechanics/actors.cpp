@@ -228,7 +228,7 @@ namespace MWMechanics
 
         now += creatureStats.getActiveSpells().getMagicEffects();
 
-        MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
+        //MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
 
         creatureStats.setMagicEffects(now);
 
