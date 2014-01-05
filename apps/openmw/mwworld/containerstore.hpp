@@ -64,7 +64,7 @@ namespace MWWorld
 
             ContainerStoreIterator end();
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
@@ -72,10 +72,12 @@ namespace MWWorld
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
             ///
+            /// @param setOwner Set the owner of the added item to \a actorPtr?
+            ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
             ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
-            ///< Utility to construct a ManualRef and call add(ptr, actorPtr)
+            ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
             int remove(const std::string& itemId, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a itemId from this container.

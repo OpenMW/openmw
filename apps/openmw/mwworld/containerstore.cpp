@@ -123,10 +123,10 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    return add(ref.getPtr(), count, actorPtr);
+    return add(ref.getPtr(), count, actorPtr, true);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
 {
     MWWorld::ContainerStoreIterator it = addImp(itemPtr, count);
     MWWorld::Ptr item = *it;
@@ -139,6 +139,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().mPos.pos[0] = 0;
     item.getCellRef().mPos.pos[1] = 0;
     item.getCellRef().mPos.pos[2] = 0;
+
+    if (setOwner)
+        item.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
 
     std::string script = MWWorld::Class::get(item).getScript(item);
     if(script != "")

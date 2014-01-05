@@ -75,9 +75,9 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
 {
-    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr);
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
 
     // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
     if ((actorPtr.getRefData().getHandle() != "player")
@@ -182,6 +182,11 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         {
             continue;
         }
+
+        // Only autoEquip if we are the original owner of the item.
+        // This stops merchants from auto equipping anything you sell to them.
+        if (!Misc::StringUtils::ciEqual(test.getCellRef().mOwner, actor.getCellRef().mRefID))
+            continue;
 
         int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
 
