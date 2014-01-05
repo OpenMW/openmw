@@ -25,145 +25,145 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
 {
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
-    const int BookSize(mReferencables.getBooks().getSize());
+    const int bookSize(mReferencables.getBooks().getSize());
 
-    if (stage < BookSize)
+    if (stage < bookSize)
     {
         bookCheck(stage, mReferencables.getBooks(), messages);
         return;
     }
 
-    stage -= BookSize;
+    stage -= bookSize;
 
-    const int ActivatorSize(mReferencables.getActivators().getSize());
+    const int activatorSize(mReferencables.getActivators().getSize());
 
-    if (stage < ActivatorSize)
+    if (stage < activatorSize)
     {
         activatorCheck(stage, mReferencables.getActivators(), messages);
         return;
     }
 
-    stage -= ActivatorSize;
+    stage -= activatorSize;
 
-    const int PotionSize(mReferencables.getActivators().getSize());
+    const int potionSize(mReferencables.getActivators().getSize());
 
-    if (stage < PotionSize)
+    if (stage < potionSize)
     {
         potionCheck(stage, mReferencables.getPotions(), messages);
         return;
     }
 
-    stage -= PotionSize;
+    stage -= potionSize;
 
-    const int ApparatusSize(mReferencables.getApparati().getSize());
+    const int apparatusSize(mReferencables.getApparati().getSize());
 
-    if (stage < ApparatusSize)
+    if (stage < apparatusSize)
     {
         apparatusCheck(stage, mReferencables.getApparati(), messages);
         return;
     }
 
-    stage -= ApparatusSize;
+    stage -= apparatusSize;
 
-    const int ArmorSize(mReferencables.getArmors().getSize());
+    const int armorSize(mReferencables.getArmors().getSize());
 
-    if (stage < ArmorSize)
+    if (stage < armorSize)
     {
         armorCheck(stage, mReferencables.getArmors(), messages);
         return;
     }
 
-    stage -= ArmorSize;
+    stage -= armorSize;
 
-    const int ClothingSize(mReferencables.getClothing().getSize());
+    const int clothingSize(mReferencables.getClothing().getSize());
 
-    if (stage < ClothingSize)
+    if (stage < clothingSize)
     {
         clothingCheck(stage, mReferencables.getClothing(), messages);
         return;
     }
 
-    stage -= ClothingSize;
+    stage -= clothingSize;
 
-    const int ContainerSize(mReferencables.getContainers().getSize());
+    const int containerSize(mReferencables.getContainers().getSize());
 
-    if (stage < ContainerSize)
+    if (stage < containerSize)
     {
         containerCheck(stage, mReferencables.getContainers(), messages);
         return;
     }
 
-    stage -= ContainerSize;
+    stage -= containerSize;
 
-    const int DoorSize(mReferencables.getDoors().getSize());
+    const int doorSize(mReferencables.getDoors().getSize());
 
-    if (stage < DoorSize)
+    if (stage < doorSize)
     {
         doorCheck(stage, mReferencables.getDoors(), messages);
         return;
     }
 
-    stage -= DoorSize;
+    stage -= doorSize;
 
-    const int IngredientSize(mReferencables.getIngredients().getSize());
+    const int ingredientSize(mReferencables.getIngredients().getSize());
 
-    if (stage < IngredientSize)
+    if (stage < ingredientSize)
     {
         ingredientCheck(stage, mReferencables.getIngredients(), messages);
         return;
     }
 
-    stage -= IngredientSize;
+    stage -= ingredientSize;
 
-    const int CreatureLevListSize(mReferencables.getCreatureLevelledLists().getSize());
+    const int creatureLevListSize(mReferencables.getCreatureLevelledLists().getSize());
 
-    if (stage < CreatureLevListSize)
+    if (stage < creatureLevListSize)
     {
         creaturesLevListCheck(stage, mReferencables.getCreatureLevelledLists(), messages);
         return;
     }
 
-    stage -= CreatureLevListSize;
+    stage -= creatureLevListSize;
 
-    const int ItemLevelledListSize(mReferencables.getItemLevelledList().getSize());
+    const int itemLevelledListSize(mReferencables.getItemLevelledList().getSize());
 
-    if (stage < ItemLevelledListSize)
+    if (stage < itemLevelledListSize)
     {
         itemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
         return;
     }
 
-    stage -= ItemLevelledListSize;
+    stage -= itemLevelledListSize;
 
-    const int LightSize(mReferencables.getLights().getSize());
+    const int lightSize(mReferencables.getLights().getSize());
 
-    if (stage < LightSize)
+    if (stage < lightSize)
     {
         lightCheck(stage, mReferencables.getLights(), messages);
         return;
     }
 
-    stage -= LightSize;
+    stage -= lightSize;
 
-    const int LockpickSize(mReferencables.getLocpicks().getSize());
+    const int lockpickSize(mReferencables.getLocpicks().getSize());
 
-    if (stage < LockpickSize)
+    if (stage < lockpickSize)
     {
         lockpickCheck(stage, mReferencables.getLocpicks(), messages);
         return;
     }
 
-    stage -= LockpickSize;
+    stage -= lockpickSize;
 
-    const int MiscSize(mReferencables.getMiscellaneous().getSize());
+    const int miscSize(mReferencables.getMiscellaneous().getSize());
 
-    if (stage < MiscSize)
+    if (stage < miscSize)
     {
         miscCheck(stage, mReferencables.getMiscellaneous(), messages);
         return;
     }
 
-    stage -= MiscSize;
+    stage -= miscSize;
 
     const int NPCSize(mReferencables.getNPCs().getSize());
 
@@ -175,39 +175,39 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     stage -= NPCSize;
 
-    const int WeaponSize(mReferencables.getWeapons().getSize());
+    const int weaponSize(mReferencables.getWeapons().getSize());
 
-    if (stage < WeaponSize)
+    if (stage < weaponSize)
     {
         weaponCheck(stage, mReferencables.getWeapons(), messages);
         return;
     }
 
-    stage -= WeaponSize;
+    stage -= weaponSize;
 
-    const int ProbeSize(mReferencables.getProbes().getSize());
+    const int probeSize(mReferencables.getProbes().getSize());
 
-    if (stage < ProbeSize)
+    if (stage < probeSize)
     {
         probeCheck(stage, mReferencables.getProbes(), messages);
         return;
     }
 
-    stage -= ProbeSize;
+    stage -= probeSize;
 
-    const int RepairSize(mReferencables.getRepairs().getSize());
+    const int repairSize(mReferencables.getRepairs().getSize());
 
-    if (stage < RepairSize)
+    if (stage < repairSize)
     {
         repairCheck(stage, mReferencables.getRepairs(), messages);
         return;
     }
 
-    stage -= RepairSize;
+    stage -= repairSize;
 
-    const int StaticSize(mReferencables.getStatics().getSize());
+    const int staticSize(mReferencables.getStatics().getSize());
 
-    if (stage < StaticSize)
+    if (stage < staticSize)
     {
         staticCheck(stage, mReferencables.getStatics(), messages);
         return;
