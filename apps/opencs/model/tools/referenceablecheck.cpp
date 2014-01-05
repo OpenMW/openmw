@@ -945,12 +945,12 @@ void CSMTools::ReferenceableCheckStage::staticCheck(
         return;
     }
 
-    const ESM::Static& static = (dynamic_cast<const CSMWorld::Record<ESM::Static>& >(baseRecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Static, static.mId);
+    const ESM::Static& staticElement = (dynamic_cast<const CSMWorld::Record<ESM::Static>& >(baseRecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Static, staticElement.mId);
 
-    if (static.mModel.empty())
+    if (staticElement.mModel.empty())
     {
-        messages.push_back(id.toString() + "|" + static.mId + " has no model");
+        messages.push_back(id.toString() + "|" + staticElement.mId + " has no model");
     }
 }
 
@@ -1074,12 +1074,12 @@ template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(
     {
         if (mReferencables.searchId(someList.mList[i].mId).first == -1)
         {
-            messages.push_back(someid + "|" + someList.mId + " contains item without referencable");
+            messages.push_back(someID + "|" + someList.mId + " contains item without referencable");
         }
             
         if (someList.mList[i].mLevel < 1)
         {
-            messages.push_back(someid + "|" + someList.mId + " contains item with non-positive level");
+            messages.push_back(someID + "|" + someList.mId + " contains item with non-positive level");
         }
     }
 }
