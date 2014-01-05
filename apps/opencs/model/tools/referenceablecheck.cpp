@@ -1072,11 +1072,6 @@ template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(
 {
     for (unsigned i = 0; i < somelist.mList.size(); ++i)
     {
-        if (somelist.mList[i].mName.empty())
-        {
-            messages.push_back(someid + "|" + somelist.mId + " contains item with empty name");
-        }
-
         if (somelist.mList[i].mLevel < 1)
         {
             messages.push_back(someid + "|" + somelist.mId + " contains item with non-positive level");
