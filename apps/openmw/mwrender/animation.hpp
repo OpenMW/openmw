@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_ANIMATION_H
-#define _GAME_RENDER_ANIMATION_H
+#ifndef GAME_RENDER_ANIMATION_H
+#define GAME_RENDER_ANIMATION_H
 
 #include <OgreController.h>
 #include <OgreVector3.h>

@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDERING_MANAGER_H
-#define _GAME_RENDERING_MANAGER_H
+#ifndef GAME_RENDERING_MANAGER_H
+#define GAME_RENDERING_MANAGER_H
 
 #include "sky.hpp"
 #include "debugging.hpp"

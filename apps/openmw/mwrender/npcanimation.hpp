@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_NPCANIMATION_H
-#define _GAME_RENDER_NPCANIMATION_H
+#ifndef GAME_RENDER_NPCANIMATION_H
+#define GAME_RENDER_NPCANIMATION_H
 
 #include "animation.hpp"
 
