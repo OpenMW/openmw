@@ -10,7 +10,7 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
     //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
     //  as many exterior cells do not have a name. Instead, we need to search by (x,y) coordinates - and they
     //  are not available until both cells have been loaded! So first, proceed as usual.
-    
+
     // All cells have a name record, even nameless exterior cells.
     std::string idLower = Misc::StringUtils::lowerCase(id);
     ESM::Cell *cell = new ESM::Cell;
@@ -30,11 +30,10 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
 
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
-        cell->getNextRef(esm, ref);
-        std::string lowerCase;
+        bool deleted = false;
+        cell->getNextRef(esm, ref, deleted);
 
-        std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
+        Misc::StringUtils::toLower (ref.mRefID);
 
         // Add data required to make reference appear in the correct cell.
         // We should not need to test for duplicates, as this part of the code is pre-cell merge.

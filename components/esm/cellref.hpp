@@ -71,9 +71,6 @@ namespace ESM
             // -1 is not blocked, otherwise it is blocked.
             signed char mReferenceBlocked;
 
-            // Track deleted references. 0 - not deleted, 1 - deleted, but respawns, 2 - deleted and does not respawn.
-            int mDeleted;
-
             // Occurs in Tribunal.esm, eg. in the cell "Mournhold, Plaza
             // Brindisi Dorom", where it has the value 100. Also only for
             // activators.

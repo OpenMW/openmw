@@ -108,7 +108,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             }
             // Insert the reference into the global lookup
             if (!id.empty() && isCacheableRecord(n.val)) {
-                mIds[id] = n.val;
+                mIds[Misc::StringUtils::lowerCase (id)] = n.val;
             }
         }
         listener->setProgress(esm.getFileOffset() / (float)esm.getFileSize() * 1000);

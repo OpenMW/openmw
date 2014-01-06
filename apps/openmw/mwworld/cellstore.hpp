@@ -25,7 +25,7 @@ namespace MWWorld
     // and the build will fail with an ugly three-way cyclic header dependence
     // so we need to pass the instantiation of the method to the lnker, when
     // all methods are known.
-    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore);
+    void load(ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore);
 
     LiveRef *find (const std::string& name)
     {
@@ -153,6 +153,11 @@ namespace MWWorld
     void listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
     void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+
+        void loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store);
+        ///< Make case-adjustments to \a ref and insert it into the respective container.
+        ///
+        /// Invalid \a ref objects are silently dropped.
 
   };
 }

@@ -141,7 +141,7 @@ std::string Cell::getDescription() const
     }
 }
 
-bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
+bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted)
 {
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
@@ -259,12 +259,13 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         //esm.getHNOT(NAM0, "NAM0");
     }
 
-    if (esm.isNextSub("DELE")) {
+    if (esm.isNextSub("DELE"))
+    {
         esm.skipHSub();
-        ref.mDeleted = 2; // Deleted, will not respawn.
-        // TODO: find out when references do respawn.
-    } else
-        ref.mDeleted = 0;
+        deleted = true;
+    }
+    else
+        deleted = false;
 
     return true;
 }
