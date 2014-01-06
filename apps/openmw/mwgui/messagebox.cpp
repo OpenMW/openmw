@@ -16,6 +16,15 @@ namespace MWGui
         mLastButtonPressed = -1;
     }
 
+    MessageBoxManager::~MessageBoxManager ()
+    {
+        std::vector<MessageBox*>::iterator it(mMessageBoxes.begin());
+        for (; it != mMessageBoxes.end(); ++it)
+        {
+            delete *it;
+        }
+    }
+
     void MessageBoxManager::onFrame (float frameDuration)
     {
         std::vector<MessageBox*>::iterator it;
@@ -141,7 +150,6 @@ namespace MWGui
       , mMaxTime(0)
     {
         // defines
-        mFixedWidth = 300;
         mBottomPadding = 20;
         mNextBoxPadding = 20;
 
@@ -149,41 +157,21 @@ namespace MWGui
 
         mMessageWidget->setOverflowToTheLeft(true);
         mMessageWidget->setCaptionWithReplacing(mMessage);
-
-        MyGUI::IntSize size;
-        size.width = mFixedWidth;
-        size.height = 100; // dummy
-
-        mMessageWidget->setSize(size);
-
-        MyGUI::IntSize textSize = mMessageWidget->getTextSize();
-
-        size.height = mHeight = textSize.height + 20; // this is the padding between the text and the box
-
-        mMainWidget->setSize(size);
-        size.width -= 15; // this is to center the text (see messagebox.layout, Widget type="Edit" position="-2 -3 0 0")
-        mMessageWidget->setSize(size);
     }
 
     void MessageBox::update (int height)
     {
         MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
-        MyGUI::IntCoord coord;
-        coord.left = (gameWindowSize.width - mFixedWidth)/2;
-        coord.top = (gameWindowSize.height - mHeight - height - mBottomPadding);
+        MyGUI::IntPoint pos;
+        pos.left = (gameWindowSize.width - mMainWidget->getWidth())/2;
+        pos.top = (gameWindowSize.height - mMainWidget->getHeight() - height - mBottomPadding);
 
-        MyGUI::IntSize size;
-        size.width = mFixedWidth;
-        size.height = mHeight;
-
-        mMainWidget->setCoord(coord);
-        mMainWidget->setSize(size);
-        mMainWidget->setVisible(true);
+        mMainWidget->setPosition(pos);
     }
 
     int MessageBox::getHeight ()
     {
-        return mHeight+mNextBoxPadding; // 20 is the padding between this and the next MessageBox
+        return mMainWidget->getHeight()+mNextBoxPadding; // 20 is the padding between this and the next MessageBox
     }
 
 

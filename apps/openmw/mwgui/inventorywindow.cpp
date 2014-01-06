@@ -120,10 +120,13 @@ namespace MWGui
                              Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height);
         MyGUI::IntSize size (Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width,
                              Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
+
+        if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
+            mPreviewDirty = true;
+
         mMainWidget->setPosition(pos);
         mMainWidget->setSize(size);
         adjustPanes();
-        mPreviewDirty = true;
     }
 
     TradeItemModel* InventoryWindow::getTradeModel()
@@ -159,6 +162,14 @@ namespace MWGui
 
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
+
+        // Bound items may not be moved
+        if (item.mBase.getCellRef().mRefID.size() > 6
+                && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
+            return;
+        }
 
         if (item.mType == ItemStack::Type_Equipped)
         {
@@ -353,10 +364,7 @@ namespace MWGui
                 MWWorld::ContainerStore& invStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
                 MWWorld::ContainerStoreIterator it = invStore.begin();
 
-                int origCount = ptr.getRefData().getCount();
-                ptr.getRefData().setCount(mDragAndDrop->mDraggedCount);
-                it = invStore.add(ptr, mPtr);
-                ptr.getRefData().setCount(origCount);
+                it = invStore.add(ptr, mDragAndDrop->mDraggedCount, mPtr);
 
                 mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
                 ptr = *it;
@@ -414,7 +422,7 @@ namespace MWGui
             // NOTE: Don't allow users to select WerewolfRobe objects in the inventory. Vanilla
             // likely uses a hack like this since there's no other way to prevent it from being
             // taken.
-            if(item.getCellRef().mRefID == "WerewolfRobe")
+            if(item.getCellRef().mRefID == "werewolfrobe")
                 return MWWorld::Ptr();
             return item;
         }
@@ -510,7 +518,7 @@ namespace MWGui
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWWorld::Ptr newObject = *MWWorld::Class::get (player).getContainerStore (player).add (object, player);
+        MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
 

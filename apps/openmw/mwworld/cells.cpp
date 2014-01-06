@@ -129,9 +129,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
 
     if (cell.mState==CellStore::State_Preloaded)
     {
-        std::string lowerCase = Misc::StringUtils::lowerCase(name);
-
-        if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), lowerCase))
+        if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), name))
         {
             cell.load (mStore, mReader);
         }
@@ -260,4 +258,16 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 
     // giving up
     return Ptr();
+}
+
+void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
+{
+    for (std::map<std::pair<int, int>, CellStore>::iterator iter = mExteriors.begin();
+        iter!=mExteriors.end(); ++iter)
+    {
+        Ptr ptr = getPtrAndCache (name, iter->second);
+        if (!ptr.isEmpty())
+            out.push_back(ptr);
+    }
+
 }

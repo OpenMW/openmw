@@ -203,6 +203,7 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
+        mRendering.enableTerrain(true);
         Nif::NIFFile::CacheLock cachelock;
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
@@ -349,6 +350,7 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        Nif::NIFFile::CacheLock lock;
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
 
         mRendering.enableTerrain(false);
@@ -435,8 +437,6 @@ namespace MWWorld
         int y = 0;
 
         MWBase::Environment::get().getWorld()->positionToIndex (position.pos[0], position.pos[1], x, y);
-
-        mRendering.enableTerrain(true);
 
         changeCell (x, y, position, true);
     }

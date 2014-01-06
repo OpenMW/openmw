@@ -28,7 +28,6 @@ MWMechanics::NpcStats::NpcStats()
 , mBounty (0)
 , mLevelProgress(0)
 , mDisposition(0)
-, mVampire (0)
 , mReputation(0)
 , mWerewolfKills (0)
 , mProfit(0)
@@ -84,17 +83,17 @@ void MWMechanics::NpcStats::setMovementFlag (Flag flag, bool state)
         mMovementFlags &= ~flag;
 }
 
-const MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index) const
+const MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index) const
 {
-    if (index<0 || index>=27)
+    if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
     return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
 }
 
-MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
+MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index)
 {
-    if (index<0 || index>=27)
+    if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
     return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
@@ -197,34 +196,25 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     if(mIsWerewolf)
         return;
 
-    float base = getSkill (skillIndex).getBase();
+    MWMechanics::SkillValue value = getSkill (skillIndex);
 
-    int level = static_cast<int> (base);
+    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType));
 
-    base += getSkillGain (skillIndex, class_, usageType);
-
-    if (static_cast<int> (base)!=level)
+    if (value.getProgress()>=1)
     {
         // skill leveled up
         increaseSkill(skillIndex, class_, false);
     }
-    else
-        getSkill (skillIndex).setBase (base);
 }
 
 void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &class_, bool preserveProgress)
 {
-    float base = getSkill (skillIndex).getBase();
+    int base = getSkill (skillIndex).getBase();
 
-    int level = static_cast<int> (base);
-
-    if (level >= 100)
+    if (base >= 100)
         return;
 
-    if (preserveProgress)
-        base += 1;
-    else
-        base = level+1;
+    base += 1;
 
     // if this is a major or minor skill of the class, increase level progress
     bool levelProgress = false;
@@ -260,6 +250,8 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     }
 
     getSkill (skillIndex).setBase (base);
+    if (!preserveProgress)
+        getSkill(skillIndex).setProgress(0);
 }
 
 int MWMechanics::NpcStats::getLevelProgress () const
@@ -325,16 +317,6 @@ void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, in
     mFactionReputation[faction] = value;
 }
 
-bool MWMechanics::NpcStats::isVampire() const
-{
-    return mVampire;
-}
-
-void MWMechanics::NpcStats::setVampire (bool set)
-{
-    mVampire = set;
-}
-
 int MWMechanics::NpcStats::getReputation() const
 {
     return mReputation;
@@ -387,7 +369,7 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
             // Oh, Bethesda. It's "Intelligence".
             std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
                                             ESM::Attribute::sAttributeNames[i]);
-            mWerewolfAttributes[i].setModified(int(gmst.find(name)->getFloat()), 0);
+            mWerewolfAttributes[i].setBase(int(gmst.find(name)->getFloat()));
         }
 
         for(size_t i = 0;i < ESM::Skill::Length;i++)
@@ -401,7 +383,7 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
             // "Mercantile"! >_<
             std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
                                             ESM::Skill::sSkillNames[i]);
-            mWerewolfSkill[i].setModified(int(gmst.find(name)->getFloat()), 0);
+            mWerewolfSkill[i].setBase(int(gmst.find(name)->getFloat()));
         }
     }
     mIsWerewolf = set;

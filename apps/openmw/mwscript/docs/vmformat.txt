@@ -127,7 +127,6 @@ op 0x200007e-0x2000084: Enable Controls
 op 0x2000085-0x200008b: Disable Controls
 op 0x200008c: Unlock
 op 0x200008d: Unlock, explicit reference
-op 0x200008e: COE
 op 0x200008e-0x20000a8: GetSkill
 op 0x20000a9-0x20000c3: GetSkill, explicit reference
 op 0x20000c4-0x20000de: SetSkill
@@ -358,5 +357,18 @@ op 0x2000222: GetLineOfSight
 op 0x2000223: GetLineOfSightExplicit
 op 0x2000224: ToggleAI
 op 0x2000225: ToggleAIExplicit
-
-opcodes 0x2000226-0x3ffffff unused
+op 0x2000226: COE
+op 0x2000227: Cast
+op 0x2000228: Cast, explicit
+op 0x2000229: ExplodeSpell
+op 0x200022a: ExplodeSpell, explicit
+op 0x200022b: RemoveSpellEffects
+op 0x200022c: RemoveSpellEffects, explicit
+op 0x200022d: RemoveEffects
+op 0x200022e: RemoveEffects, explicit
+op 0x200022f: Resurrect
+op 0x2000230: Resurrect, explicit
+op 0x2000231: GetSpellReadied
+op 0x2000232: GetSpellReadied, explicit
+op 0x2000233: GetPcJumping
+opcodes 0x2000234-0x3ffffff unused

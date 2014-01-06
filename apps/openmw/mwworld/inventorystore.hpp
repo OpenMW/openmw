@@ -113,7 +113,7 @@ namespace MWWorld
 
             InventoryStore& operator= (const InventoryStore& store);
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             /// Auto-equip items if specific conditions are fulfilled (see the implementation).
             ///
@@ -121,6 +121,8 @@ namespace MWWorld
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
+            ///
+            /// @param setOwner Set the owner of the added item to \a actorPtr?
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
@@ -179,7 +181,10 @@ namespace MWWorld
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
             void rechargeItems (float duration);
-            /// Restore charge on enchanted items. Note this should only be done for the player.
+            ///< Restore charge on enchanted items. Note this should only be done for the player.
+
+            void purgeEffect (short effectId);
+            ///< Remove a magic effect
     };
 }
 

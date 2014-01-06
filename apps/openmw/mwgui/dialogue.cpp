@@ -302,6 +302,8 @@ namespace MWGui
 
     void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     {
+        if (!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
+            return;
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
     }
 

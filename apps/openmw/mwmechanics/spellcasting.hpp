@@ -203,7 +203,7 @@ namespace MWMechanics
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false);
 
-        void applyInstantEffect (const MWWorld::Ptr& target, short effectId, float magnitude);
+        void applyInstantEffect (const MWWorld::Ptr& target, MWMechanics::EffectKey effect, float magnitude);
     };
 
 }

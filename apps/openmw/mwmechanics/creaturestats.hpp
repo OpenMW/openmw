@@ -18,13 +18,13 @@ namespace MWMechanics
     ///
     class CreatureStats
     {
-        Stat<int> mAttributes[8];
+        AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         int mLevel;
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
-        int mAiSettings[4];
+        Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
         float mLevelHealthBonus;
         bool mDead;
@@ -36,23 +36,36 @@ namespace MWMechanics
         bool mHostile;
         bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
 
+        float mFallHeight;
+
         int mAttackType;
 
         std::string mLastHitObject; // The last object to hit this actor
+
+        // Do we need to recalculate stats derived from attributes or other factors?
+        bool mRecalcDynamicStats;
 
         std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
 
     protected:
         bool mIsWerewolf;
-        Stat<int> mWerewolfAttributes[8];
+        AttributeValue mWerewolfAttributes[8];
 
     public:
         CreatureStats();
 
+        bool needToRecalcDynamicStats();
+
+        void addToFallHeight(float height);
+
+        /// Reset the fall height
+        /// @return total fall height
+        float land();
+
         bool canUsePower (const std::string& power) const;
         void usePower (const std::string& power);
 
-        const Stat<int> & getAttribute(int index) const;
+        const AttributeValue & getAttribute(int index) const;
 
         const DynamicStat<float> & getHealth() const;
 
@@ -72,18 +85,15 @@ namespace MWMechanics
 
         int getLevel() const;
 
-        int getAiSetting (int index) const;
-        ///< 0: hello, 1 fight, 2 flee, 3 alarm
-
-        Stat<int> & getAttribute(int index);
-
         Spells & getSpells();
 
         ActiveSpells & getActiveSpells();
 
         MagicEffects & getMagicEffects();
 
-        void setAttribute(int index, const Stat<int> &value);
+        void setAttribute(int index, const AttributeValue &value);
+        // Shortcut to set only the base
+        void setAttribute(int index, int base);
 
         void setHealth(const DynamicStat<float> &value);
 
@@ -112,8 +122,16 @@ namespace MWMechanics
 
         void setLevel(int level);
 
-        void setAiSetting (int index, int value);
-        ///< 0: hello, 1 fight, 2 flee, 3 alarm
+        enum AiSetting
+        {
+            AI_Hello,
+            AI_Fight,
+            AI_Flee,
+            AI_Alarm
+        };
+        void setAiSetting (AiSetting index, Stat<int> value);
+        void setAiSetting (AiSetting index, int base);
+        Stat<int> getAiSetting (AiSetting index) const;
 
         const AiSequence& getAiSequence() const;
 

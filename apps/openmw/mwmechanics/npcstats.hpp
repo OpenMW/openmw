@@ -45,12 +45,11 @@ namespace MWMechanics
             DrawState_ mDrawState;
             int mDisposition;
             unsigned int mMovementFlags;
-            Stat<float> mSkill[27];
-            Stat<float> mWerewolfSkill[27];
+            SkillValue mSkill[27];
+            SkillValue mWerewolfSkill[27];
             int mBounty;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
-            bool mVampire;
             int mReputation;
             int mWerewolfKills;
             int mProfit;
@@ -94,8 +93,8 @@ namespace MWMechanics
 
             void setMovementFlag (Flag flag, bool state);
 
-            const Stat<float>& getSkill (int index) const;
-            Stat<float>& getSkill (int index);
+            const SkillValue& getSkill (int index) const;
+            SkillValue& getSkill (int index);
 
             const std::map<std::string, int>& getFactionRanks() const;
             std::map<std::string, int>& getFactionRanks();
@@ -134,10 +133,6 @@ namespace MWMechanics
             int getFactionReputation (const std::string& faction) const;
 
             void setFactionReputation (const std::string& faction, int value);
-
-            bool isVampire() const;
-
-            void setVampire (bool set);
 
             bool hasSkillsForRank (const std::string& factionId, int rank) const;
 

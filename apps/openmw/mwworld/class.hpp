@@ -162,7 +162,7 @@ namespace MWWorld
 
             virtual float getRemainingUsageTime (const Ptr& ptr) const;
             ///< Returns the remaining duration of the object, such as an equippable light
-            /// source. (default implementation: throw an exception)
+            /// source. (default implementation: -1, i.e. infinite)
 
             virtual std::string getScript (const Ptr& ptr) const;
             ///< Return name of the script attached to ptr (default implementation: return an empty
@@ -290,6 +290,8 @@ namespace MWWorld
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
+            virtual bool isKey (const MWWorld::Ptr& ptr) const { return false; }
+
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 
@@ -303,6 +305,8 @@ namespace MWWorld
             virtual bool isNpc() const {
                 return false;
             }
+
+            virtual bool isFlying(const MWWorld::Ptr& ptr) const;
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

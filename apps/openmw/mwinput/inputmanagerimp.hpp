@@ -1,5 +1,5 @@
-#ifndef _MWINPUT_MWINPUTMANAGERIMP_H
-#define _MWINPUT_MWINPUTMANAGERIMP_H
+#ifndef MWINPUT_MWINPUTMANAGERIMP_H
+#define MWINPUT_MWINPUTMANAGERIMP_H
 
 #include "../mwgui/mode.hpp"
 
@@ -137,6 +137,8 @@ namespace MWInput
         std::string mUserFile;
 
         bool mDragDrop;
+
+        bool mGrabCursor;
 
         bool mInvertY;
 

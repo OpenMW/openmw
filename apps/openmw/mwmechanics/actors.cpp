@@ -46,15 +46,116 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
     }
 }
 
+bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
+{
+    // TODO: remove this check once creatures support inventory store
+    if (ptr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator item =
+                inv.getSlot(slot);
+        if (item != inv.end())
+        {
+            if (!item->getClass().hasItemHealth(*item))
+                return false;
+            if (item->getCellRef().mCharge == -1)
+                item->getCellRef().mCharge = item->getClass().getItemMaxHealth(*item);
+
+            if (item->getCellRef().mCharge == 0)
+                return false;
+
+            item->getCellRef().mCharge -=
+                    std::min(disintegrate,
+                             static_cast<float>(item->getCellRef().mCharge));
+
+            if (item->getCellRef().mCharge == 0)
+            {
+                // Will unequip the broken item and try to find a replacement
+                if (ptr.getRefData().getHandle() != "player")
+                    inv.autoEquip(ptr);
+                else
+                    inv.unequipItem(*item, ptr);
+            }
+
+            return true;
+        }
+    }
+    return true;
+}
+
+
 }
 
 namespace MWMechanics
 {
+
+    class SoulTrap : public MWMechanics::EffectSourceVisitor
+    {
+        MWWorld::Ptr mCreature;
+        MWWorld::Ptr mActor;
+    public:
+        SoulTrap(MWWorld::Ptr trappedCreature)
+            : mCreature(trappedCreature) {}
+
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, const std::string& casterHandle,
+                            float magnitude, float remainingTime = -1)
+        {
+            if (key.mId != ESM::MagicEffect::Soultrap)
+                return;
+            if (magnitude <= 0)
+                return;
+
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+
+            MWWorld::Ptr caster = world->searchPtrViaHandle(casterHandle);
+            if (caster.isEmpty() || !caster.getClass().isActor())
+                return;
+
+            static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->getFloat();
+
+            float creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
+
+            // Use the smallest soulgem that is large enough to hold the soul
+            MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
+            MWWorld::ContainerStoreIterator gem = container.end();
+            float gemCapacity = std::numeric_limits<float>().max();
+            std::string soulgemFilter = "misc_soulgem"; // no other way to check for soulgems? :/
+            for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
+                 it != container.end(); ++it)
+            {
+                const std::string& id = it->getCellRef().mRefID;
+                if (id.size() >= soulgemFilter.size()
+                        && id.substr(0,soulgemFilter.size()) == soulgemFilter)
+                {
+                    float thisGemCapacity = it->get<ESM::Miscellaneous>()->mBase->mData.mValue * fSoulgemMult;
+                    if (thisGemCapacity >= creatureSoulValue && thisGemCapacity < gemCapacity
+                            && it->getCellRef().mSoul.empty())
+                    {
+                        gem = it;
+                        gemCapacity = thisGemCapacity;
+                    }
+                }
+            }
+
+            if (gem == container.end())
+                return;
+
+            // Set the soul on just one of the gems, not the whole stack
+            gem->getContainerStore()->unstack(*gem, caster);
+            gem->getCellRef().mSoul = mCreature.getCellRef().mRefID;
+
+            if (caster.getRefData().getHandle() == "player")
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
+        }
+    };
+
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
     {
         // magic effects
         adjustMagicEffects (ptr);
-        calculateDynamicStats (ptr);
+        if (ptr.getClass().getCreatureStats(ptr).needToRecalcDynamicStats())
+            calculateDynamicStats (ptr);
         calculateCreatureStatModifiers (ptr, duration);
 
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
@@ -71,7 +172,7 @@ namespace MWMechanics
                     float d = sqrt((actorpos.pos[0] - playerpos.pos[0])*(actorpos.pos[0] - playerpos.pos[0])
                         +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
                         +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
-                    float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(1);
+                    float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified();
                     float disp = 100; //creatures don't have disposition, so set it to 100 by default
                     if(ptr.getTypeName() == typeid(ESM::NPC).name())
                     {
@@ -127,7 +228,7 @@ namespace MWMechanics
 
         now += creatureStats.getActiveSpells().getMagicEffects();
 
-        MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
+        //MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
 
         creatureStats.setMagicEffects(now);
 
@@ -177,7 +278,7 @@ namespace MWMechanics
         {
             // the actor is sleeping, restore health and magicka
 
-            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
+            bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0;
 
             DynamicStat<float> health = stats.getHealth();
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
@@ -216,7 +317,7 @@ namespace MWMechanics
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
-            Stat<int> stat = creatureStats.getAttribute(i);
+            AttributeValue stat = creatureStats.getAttribute(i);
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).mMagnitude);
@@ -228,16 +329,67 @@ namespace MWMechanics
         for(int i = 0;i < 3;++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyHealth+i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
+            stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).mMagnitude -
+                             effects.get(ESM::MagicEffect::DrainHealth+i).mMagnitude);
 
 
-            float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::AbsorbHealth+i)).mMagnitude;
+            float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).mMagnitude
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth+i).mMagnitude
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth+i).mMagnitude;
             stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
+        }
+
+        // AI setting modifiers
+        int creature = !ptr.getClass().isNpc();
+        if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Humanoid)
+            creature = false;
+        // Note: the Creature variants only work on normal creatures, not on daedra or undead creatures.
+        if (!creature || ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Creatures)
+        {
+            Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::FrenzyHumanoid+creature).mMagnitude
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid+creature).mMagnitude);
+            creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
+
+            stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::DemoralizeHumanoid+creature).mMagnitude
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::RallyHumanoid+creature).mMagnitude);
+            creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
+        }
+        if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
+        {
+            Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::TurnUndead).mMagnitude);
+            creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
+        }
+
+        // Apply disintegration (reduces item health)
+        float disintegrateWeapon = effects.get(ESM::MagicEffect::DisintegrateWeapon).mMagnitude;
+        if (disintegrateWeapon > 0)
+            disintegrateSlot(ptr, MWWorld::InventoryStore::Slot_CarriedRight, disintegrateWeapon*duration);
+        float disintegrateArmor = effects.get(ESM::MagicEffect::DisintegrateArmor).mMagnitude;
+        if (disintegrateArmor > 0)
+        {
+            // According to UESP
+            int priorities[] = {
+                MWWorld::InventoryStore::Slot_CarriedLeft,
+                MWWorld::InventoryStore::Slot_Cuirass,
+                MWWorld::InventoryStore::Slot_LeftPauldron,
+                MWWorld::InventoryStore::Slot_RightPauldron,
+                MWWorld::InventoryStore::Slot_LeftGauntlet,
+                MWWorld::InventoryStore::Slot_RightGauntlet,
+                MWWorld::InventoryStore::Slot_Helmet,
+                MWWorld::InventoryStore::Slot_Greaves,
+                MWWorld::InventoryStore::Slot_Boots
+            };
+
+            for (unsigned int i=0; i<sizeof(priorities)/sizeof(int); ++i)
+            {
+                if (disintegrateSlot(ptr, priorities[i], disintegrateArmor*duration))
+                    break;
+            }
         }
 
         // Apply damage ticks
@@ -249,7 +401,7 @@ namespace MWMechanics
         DynamicStat<float> health = creatureStats.getHealth();
         for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
         {
-            float magnitude = creatureStats.getMagicEffects().get(EffectKey(damageEffects[i])).mMagnitude;
+            float magnitude = creatureStats.getMagicEffects().get(damageEffects[i]).mMagnitude;
 
             if (damageEffects[i] == ESM::MagicEffect::SunDamage)
             {
@@ -280,30 +432,32 @@ namespace MWMechanics
         static std::map<int, std::string> boundItemsMap;
         if (boundItemsMap.empty())
         {
-            boundItemsMap[ESM::MagicEffect::BoundBattleAxe] = "battle_axe";
-            boundItemsMap[ESM::MagicEffect::BoundBoots] = "boots";
-            boundItemsMap[ESM::MagicEffect::BoundCuirass] = "cuirass";
-            boundItemsMap[ESM::MagicEffect::BoundDagger] = "dagger";
-            boundItemsMap[ESM::MagicEffect::BoundGloves] = "gauntlet"; // Note: needs both _left and _right variants, see below
-            boundItemsMap[ESM::MagicEffect::BoundHelm] = "helm";
-            boundItemsMap[ESM::MagicEffect::BoundLongbow] = "longbow";
-            boundItemsMap[ESM::MagicEffect::BoundLongsword] = "longsword";
-            boundItemsMap[ESM::MagicEffect::BoundMace] = "mace";
-            boundItemsMap[ESM::MagicEffect::BoundShield] = "shield";
-            boundItemsMap[ESM::MagicEffect::BoundSpear] = "spear";
+            boundItemsMap[ESM::MagicEffect::BoundBattleAxe] = "sMagicBoundBattleAxeID";
+            boundItemsMap[ESM::MagicEffect::BoundBoots] = "sMagicBoundBootsID";
+            boundItemsMap[ESM::MagicEffect::BoundCuirass] = "sMagicBoundCuirassID";
+            boundItemsMap[ESM::MagicEffect::BoundDagger] = "sMagicBoundDaggerID";
+            boundItemsMap[ESM::MagicEffect::BoundGloves] = "sMagicBoundLeftGauntletID"; // Note: needs RightGauntlet variant too (see below)
+            boundItemsMap[ESM::MagicEffect::BoundHelm] = "sMagicBoundHelmID";
+            boundItemsMap[ESM::MagicEffect::BoundLongbow] = "sMagicBoundLongbowID";
+            boundItemsMap[ESM::MagicEffect::BoundLongsword] = "sMagicBoundLongswordID";
+            boundItemsMap[ESM::MagicEffect::BoundMace] = "sMagicBoundMaceID";
+            boundItemsMap[ESM::MagicEffect::BoundShield] = "sMagicBoundShieldID";
+            boundItemsMap[ESM::MagicEffect::BoundSpear] = "sMagicBoundSpearID";
         }
 
         for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
         {
             bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
-            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
-                std::string item = "bound_" + it->second;
+                std::string itemGmst = it->second;
+                std::string item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                            itemGmst)->getString();
                 if (it->first == ESM::MagicEffect::BoundGloves)
                 {
-                    adjustBoundItem(item + "_left", magnitude > 0, ptr);
-                    adjustBoundItem(item + "_right", magnitude > 0, ptr);
+                    adjustBoundItem("sMagicBoundLeftGauntletID", magnitude > 0, ptr);
+                    adjustBoundItem("sMagicBoundRightGauntletID", magnitude > 0, ptr);
                 }
                 else
                     adjustBoundItem(item, magnitude > 0, ptr);
@@ -319,32 +473,34 @@ namespace MWMechanics
         static std::map<int, std::string> summonMap;
         if (summonMap.empty())
         {
-            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "ancestor_ghost_summon";
-            summonMap[ESM::MagicEffect::SummonBear] = "BM_bear_black_summon";
-            summonMap[ESM::MagicEffect::SummonBonelord] = "bonelord_summon";
-            summonMap[ESM::MagicEffect::SummonBonewalker] = "bonewalker_summon";
-            summonMap[ESM::MagicEffect::SummonBonewolf] = "BM_wolf_bone_summon";
-            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "centurion_sphere_summon";
-            summonMap[ESM::MagicEffect::SummonClannfear] = "clannfear_summon";
-            summonMap[ESM::MagicEffect::SummonDaedroth] = "daedroth_summon";
-            summonMap[ESM::MagicEffect::SummonDremora] = "dremora_summon";
-            summonMap[ESM::MagicEffect::SummonFabricant] = "fabricant_summon";
-            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "atronach_flame_summon";
-            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "atronach_frost_summon";
-            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "golden saint_summon";
-            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "bonewalker_greater_summ";
-            summonMap[ESM::MagicEffect::SummonHunger] = "hunger_summon";
-            summonMap[ESM::MagicEffect::SummonScamp] = "scamp_summon";
-            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "skeleton_summon";
-            summonMap[ESM::MagicEffect::SummonStormAtronach] = "atronach_storm_summon";
-            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "winged twilight_summon";
-            summonMap[ESM::MagicEffect::SummonWolf] = "BM_wolf_grey_summon";
+            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "sMagicAncestralGhostID";
+            summonMap[ESM::MagicEffect::SummonBonelord] = "sMagicBonelordID";
+            summonMap[ESM::MagicEffect::SummonBonewalker] = "sMagicLeastBonewalkerID";
+            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "sMagicCenturionSphereID";
+            summonMap[ESM::MagicEffect::SummonClannfear] = "sMagicClannfearID";
+            summonMap[ESM::MagicEffect::SummonDaedroth] = "sMagicDaedrothID";
+            summonMap[ESM::MagicEffect::SummonDremora] = "sMagicDremoraID";
+            summonMap[ESM::MagicEffect::SummonFabricant] = "sMagicFabricantID";
+            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "sMagicFlameAtronachID";
+            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "sMagicFrostAtronachID";
+            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "sMagicGoldenSaintID";
+            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "sMagicGreaterBonewalkerID";
+            summonMap[ESM::MagicEffect::SummonHunger] = "sMagicHungerID";
+            summonMap[ESM::MagicEffect::SummonScamp] = "sMagicScampID";
+            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "sMagicSkeletalMinionID";
+            summonMap[ESM::MagicEffect::SummonStormAtronach] = "sMagicStormAtronachID";
+            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "sMagicWingedTwilightID";
+            summonMap[ESM::MagicEffect::SummonWolf] = "sMagicCreature01ID";
+            summonMap[ESM::MagicEffect::SummonBear] = "sMagicCreature02ID";
+            summonMap[ESM::MagicEffect::SummonBonewolf] = "sMagicCreature03ID";
+            summonMap[ESM::MagicEffect::SummonCreature04] = "sMagicCreature04ID";
+            summonMap[ESM::MagicEffect::SummonCreature05] = "sMagicCreature05ID";
         }
 
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
         {
             bool found = creatureStats.mSummonedCreatures.find(it->first) != creatureStats.mSummonedCreatures.end();
-            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
                 if (magnitude > 0)
@@ -361,15 +517,20 @@ namespace MWMechanics
                     ipos.rot[1] = 0;
                     ipos.rot[2] = 0;
 
-                    MWWorld::CellStore* store = ptr.getCell();
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), it->second, 1);
-                    ref.getPtr().getCellRef().mPos = ipos;
+                    std::string creatureID =
+                            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(it->second)->getString();
 
-                    // TODO: Add AI to follow player and fight for him
+                    if (!creatureID.empty())
+                    {
+                        MWWorld::CellStore* store = ptr.getCell();
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
+                        ref.getPtr().getCellRef().mPos = ipos;
 
-                    creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
+                        // TODO: Add AI to follow player and fight for him
 
+                        creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
+                            MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
+                    }
                 }
                 else
                 {
@@ -395,7 +556,7 @@ namespace MWMechanics
         // skills
         for(int i = 0;i < ESM::Skill::Length;++i)
         {
-            Stat<float>& skill = npcStats.getSkill(i);
+            SkillValue& skill = npcStats.getSkill(i);
             skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).mMagnitude);
@@ -439,15 +600,69 @@ namespace MWMechanics
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
     {
-        //If holding a light...
+        bool isPlayer = ptr.getRefData().getHandle()=="player";
+
         MWWorld::InventoryStore &inventoryStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator heldIter =
                 inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        /**
+         * Automatically equip NPCs torches at night and unequip them at day
+         */
+        if (!isPlayer)
+        {
+            MWWorld::ContainerStoreIterator torch = inventoryStore.end();
+            for (MWWorld::ContainerStoreIterator it = inventoryStore.begin(); it != inventoryStore.end(); ++it)
+            {
+                if (it->getTypeName() == typeid(ESM::Light).name())
+                {
+                    torch = it;
+                    break;
+                }
+            }
 
+            if (MWBase::Environment::get().getWorld()->isDark())
+            {
+                if (torch != inventoryStore.end())
+                {
+                    if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isHostile())
+                    {
+                        // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
+                        if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
+                            inventoryStore.unequipItem(*heldIter, ptr);
+
+                        // Also unequip twohanded weapons which conflict with anything in CarriedLeft
+                        if (torch->getClass().canBeEquipped(*torch, ptr).first == 3)
+                            inventoryStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, ptr);
+                    }
+
+                    heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
+                    // If we have a torch and can equip it (left slot free, no
+                    // twohanded weapon in right slot), then equip it now.
+                    if (heldIter == inventoryStore.end()
+                            && torch->getClass().canBeEquipped(*torch, ptr).first == 1)
+                    {
+                        inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torch, ptr);
+                    }
+                }
+            }
+            else
+            {
+                if (heldIter != inventoryStore.end() && heldIter->getTypeName() == typeid(ESM::Light).name())
+                {
+                    // At day, unequip lights and auto equip shields or other suitable items
+                    // (Note: autoEquip will ignore lights)
+                    inventoryStore.autoEquip(ptr);
+                }
+            }
+        }
+
+        heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
+        //If holding a light...
         if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
         {
             // Use time from the player's light
-            bool isPlayer = ptr.getRefData().getHandle()=="player";
             if(isPlayer)
             {
                 float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
@@ -481,6 +696,16 @@ namespace MWMechanics
     }
 
     Actors::Actors() {}
+
+    Actors::~Actors()
+    {
+      PtrControllerMap::iterator it(mActors.begin());
+      for (; it != mActors.end(); ++it)
+      {
+        delete it->second;
+        it->second = NULL;
+      }
+    }
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
@@ -572,6 +797,18 @@ namespace MWMechanics
                     }
                 }
 
+                // Apply soultrap
+                if (iter->first.getTypeName() == typeid(ESM::Creature).name())
+                {
+                    SoulTrap soulTrap (iter->first);
+                    stats.getActiveSpells().visitEffectSources(soulTrap);
+                }
+
+                // Reset magic effects and recalculate derived effects
+                // One case where we need this is to make sure bound items are removed upon death
+                stats.setMagicEffects(MWMechanics::MagicEffects());
+                calculateCreatureStatModifiers(iter->first, 0);
+
                 if (iter->second->kill())
                 {
                     ++mDeathCount[cls.getId(iter->first)];
@@ -592,7 +829,12 @@ namespace MWMechanics
                 iter->second->updateContinuousVfx();
 
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
+                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                    iter->second->skipAnim();
                 iter->second->update(duration);
+            }
         }
     }
     void Actors::restoreDynamicStats()

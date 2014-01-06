@@ -128,7 +128,7 @@ namespace MWRender
 
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
-        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
+        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 62, -200), Ogre::Vector3(0, 62, 0))
         , mSelectionBuffer(NULL)
     {
     }
@@ -140,8 +140,7 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
-        // TODO: can we avoid this. Vampire state needs to be updated.
-        mAnimation->rebuild();
+        mAnimation->updateParts();
 
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
@@ -177,12 +176,8 @@ namespace MWRender
                 groupname = "inventoryhandtohand";
         }
 
-        // TODO see above
-        //if(groupname != mCurrentAnimGroup)
-        //{
-            mCurrentAnimGroup = groupname;
-            mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
-        //}
+        mCurrentAnimGroup = groupname;
+        mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
@@ -194,7 +189,6 @@ namespace MWRender
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
 
-        mAnimation->updateParts();
         mAnimation->runAnimation(0.0f);
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));

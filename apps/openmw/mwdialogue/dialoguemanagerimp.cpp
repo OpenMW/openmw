@@ -251,7 +251,7 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::executeTopic (const std::string& topic, bool randomResponse)
+    void DialogueManager::executeTopic (const std::string& topic)
     {
         Filter filter (mActor, mChoice, mTalkedTo);
 
@@ -262,12 +262,9 @@ namespace MWDialogue
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
-        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, true, true);
-
-        if (!infos.empty())
+        const ESM::DialInfo* info = filter.search(dialogue, true);
+        if (info)
         {
-            const ESM::DialInfo* info = infos[randomResponse ? std::rand() % infos.size() : 0];
-
             parseText (info->mResponse);
 
             std::string title;
@@ -413,10 +410,6 @@ namespace MWDialogue
 
     void DialogueManager::goodbyeSelected()
     {
-        // Do not close the dialogue window if the player has to answer a question
-        if (mIsInChoice)
-            return;
-
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
         // Apply disposition change to NPC's base disposition
@@ -474,6 +467,8 @@ namespace MWDialogue
 
     void DialogueManager::goodbye()
     {
+        mIsInChoice = true;
+
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
         win->goodbye();
@@ -511,7 +506,7 @@ namespace MWDialogue
             text = "Bribe";
         }
 
-        executeTopic (text + (success ? " Success" : " Fail"), true);
+        executeTopic (text + (success ? " Success" : " Fail"));
     }
 
     int DialogueManager::getTemporaryDispositionChange() const

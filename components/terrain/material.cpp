@@ -220,9 +220,8 @@ namespace Terrain
                         ++neededTextureUnits; // layer texture
 
                         // Check if this layer has a normal map
-                        if (mNormalMapping && !mLayerList[layerOffset].mNormalMap.empty())
+                        if (mNormalMapping && !mLayerList[layerIndex].mNormalMap.empty() && !renderCompositeMap)
                             ++neededTextureUnits; // normal map
-
                         if (neededTextureUnits <= remainingTextureUnits)
                         {
                             // We can fit another!
@@ -334,6 +333,8 @@ namespace Terrain
 
                     // Make sure the pass index is fed to the permutation handler, because blendmap components may be different
                     p->mShaderProperties.setProperty ("pass_index", sh::makeProperty(new sh::IntValue(layerOffset)));
+
+                    assert ((int)p->mTexUnits.size() == OGRE_MAX_TEXTURE_LAYERS - remainingTextureUnits);
 
                     layerOffset += numLayersInThisPass;
                 }

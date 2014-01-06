@@ -40,7 +40,7 @@ struct Creature
     enum Type
     {
         Creatures = 0,
-        Deadra  = 1,
+        Daedra  = 1,
         Undead = 2,
         Humanoid = 3
     };

@@ -17,13 +17,15 @@
 #define NORMAL_MAP @shPropertyHasValue(normalMap)
 #define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
 #define DETAIL_MAP @shPropertyHasValue(detailMap)
+#define DIFFUSE_MAP @shPropertyHasValue(diffuseMap)
+#define DARK_MAP @shPropertyHasValue(darkMap)
 
 #define PARALLAX @shPropertyBool(use_parallax)
 #define PARALLAX_SCALE 0.04
 #define PARALLAX_BIAS -0.02
 
 // right now we support 2 UV sets max. implementing them is tedious, and we're probably not going to need more
-#define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet))
+#define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet) || @shPropertyString(diffuseMapUVSet) || @shPropertyString(darkMapUVSet))
 
 // if normal mapping is enabled, we force pixel lighting
 #define VERTEX_LIGHTING (!@shPropertyHasValue(normalMap))
@@ -98,9 +100,7 @@
 #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
 #endif
-#if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-#endif
 #if VERTEXCOLOR_MODE != 1
     shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
 #endif
@@ -234,9 +234,7 @@
         lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
 #endif
 
-#if VERTEXCOLOR_MODE != 2
         lightResult.a *= materialDiffuse.a;
-#endif
 
 #endif
     }
@@ -250,18 +248,24 @@
 #endif
 
     SH_BEGIN_PROGRAM
+#if DIFFUSE_MAP
         shSampler2D(diffuseMap)
+#endif
 
 #if NORMAL_MAP
         shSampler2D(normalMap)
 #endif
 
-#if EMISSIVE_MAP
-        shSampler2D(emissiveMap)
+#if DARK_MAP
+        shSampler2D(darkMap)
 #endif
 
 #if DETAIL_MAP
         shSampler2D(detailMap)
+#endif
+
+#if EMISSIVE_MAP
+        shSampler2D(emissiveMap)
 #endif
 
 #if ENV_MAP
@@ -339,9 +343,7 @@
     #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
     #endif
-    #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-    #endif
     #if VERTEXCOLOR_MODE != 1
     shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
     #endif
@@ -382,17 +384,33 @@
         newUV += (TSeyeDir.xyxy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS )).xyxy;
 #endif
 
+#if DIFFUSE_MAP
+    #if @shPropertyString(diffuseMapUVSet)
+        float4 diffuse = shSample(diffuseMap, newUV.zw);
+    #else
         float4 diffuse = shSample(diffuseMap, newUV.xy);
-        shOutputColour(0) = diffuse;
+    #endif
+#else
+        float4 diffuse = float4(1,1,1,1);
+#endif
 
 #if DETAIL_MAP
 #if @shPropertyString(detailMapUVSet)
-        shOutputColour(0) *= shSample(detailMap, newUV.zw)*2;
+        diffuse *= shSample(detailMap, newUV.zw)*2;
 #else
-        shOutputColour(0) *= shSample(detailMap, newUV.xy)*2;
+        diffuse *= shSample(detailMap, newUV.xy)*2;
 #endif
 #endif
 
+#if DARK_MAP
+#if @shPropertyString(darkMapUVSet)
+        diffuse *= shSample(darkMap, newUV.zw);
+#else
+        diffuse *= shSample(darkMap, newUV.xy);
+#endif
+#endif
+
+        shOutputColour(0) = diffuse;
 
 #if !VERTEX_LIGHTING
         float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough.xyz,1)).xyz;
@@ -434,9 +452,7 @@
         lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
 #endif
 
-#if VERTEXCOLOR_MODE != 2
         lightResult.a *= materialDiffuse.a;
-#endif
 #endif
 
             // shadows only for the first (directional) light

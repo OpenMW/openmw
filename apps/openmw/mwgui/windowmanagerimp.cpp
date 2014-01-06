@@ -16,6 +16,7 @@
 #include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -112,9 +113,6 @@ namespace MWGui
       , mPlayerMinorSkills()
       , mPlayerMajorSkills()
       , mPlayerSkillValues()
-      , mPlayerHealth()
-      , mPlayerMagicka()
-      , mPlayerFatigue()
       , mGui(NULL)
       , mGuiModes()
       , mCursorManager(NULL)
@@ -177,10 +175,10 @@ namespace MWGui
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
-        mCursorManager->setEnabled(true);
-
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
         SDL_ShowCursor(false);
+
+        mCursorManager->setEnabled(true);
 
         // hide mygui's pointer
         MyGUI::PointerManager::getInstance().setVisible(false);
@@ -251,12 +249,12 @@ namespace MWGui
         // Setup player stats
         for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
-            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::Stat<int>()));
+            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue()));
         }
 
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::Stat<float>()));
+            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue()));
         }
 
         // Set up visibility
@@ -325,6 +323,7 @@ namespace MWGui
         delete mSoulgemDialog;
         delete mCursorManager;
         delete mRecharge;
+        delete mCompanionWindow;
 
         cleanupGarbage();
 
@@ -545,7 +544,7 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void WindowManager::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         mStatsWindow->setValue (id, value);
         mCharGen->setValue(id, value);
@@ -576,7 +575,7 @@ namespace MWGui
     }
 
 
-    void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& value)
+    void WindowManager::setValue (int parSkill, const MWMechanics::SkillValue& value)
     {
         /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
         /// allow custom skills.
@@ -590,31 +589,7 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
         mHud->setValue (id, value);
         mCharGen->setValue(id, value);
-        if (id == "HBar")
-        {
-            mPlayerHealth = value;
-        }
-        else if (id == "MBar")
-        {
-            mPlayerMagicka = value;
-        }
-        else if (id == "FBar")
-        {
-            mPlayerFatigue = value;
-        }
     }
-
-    #if 0
-    MWMechanics::DynamicStat<int> WindowManager::getValue(const std::string& id)
-    {
-        if(id == "HBar")
-            return mPlayerHealth;
-        else if (id == "MBar")
-            return mPlayerMagicka;
-        else if (id == "FBar")
-            return mPlayerFatigue;
-    }
-    #endif
 
     void WindowManager::setValue (const std::string& id, const std::string& value)
     {
@@ -788,6 +763,13 @@ namespace MWGui
         {
             mMap->setCellPrefix( cell->mCell->mName );
             mHud->setCellPrefix( cell->mCell->mName );
+
+            Ogre::Vector3 worldPos;
+            if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
+                worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
+            else
+                MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
+            mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
         }
     }
 
@@ -1023,6 +1005,7 @@ namespace MWGui
 
     void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
     {
+        mSelectedSpell = spellId;
         mHud->setSelectedSpell(spellId, successChancePercent);
 
         const ESM::Spell* spell =
@@ -1033,6 +1016,7 @@ namespace MWGui
 
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
+        mSelectedSpell = "";
         const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
                 .find(MWWorld::Class::get(item).getEnchantment(item));
 
@@ -1052,6 +1036,7 @@ namespace MWGui
 
     void WindowManager::unsetSelectedSpell()
     {
+        mSelectedSpell = "";
         mHud->unsetSelectedSpell();
         mSpellWindow->setTitle("#{sNone}");
     }
@@ -1179,12 +1164,12 @@ namespace MWGui
         return mGuiModes.back();
     }
 
-    std::map<int, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
+    std::map<int, MWMechanics::SkillValue > WindowManager::getPlayerSkillValues()
     {
         return mPlayerSkillValues;
     }
 
-    std::map<int, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
+    std::map<int, MWMechanics::AttributeValue > WindowManager::getPlayerAttributeValues()
     {
         return mPlayerAttributes;
     }

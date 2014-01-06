@@ -351,7 +351,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
-    , mFallHeight(0)
 {
     if(!mAnimation)
         return;
@@ -427,10 +426,10 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     {
         forcestateupdate = true;
 
-        // Shields shouldn't be visible during spellcasting
+        // Shields/torches shouldn't be visible during spellcasting or hand-to-hand
         // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
         // but they are also present in weapon drawing animation.
-        mAnimation->showShield(weaptype != WeapType_Spell);
+        mAnimation->showCarriedLeft(weaptype != WeapType_Spell && weaptype != WeapType_HandToHand);
 
         std::string weapgroup;
         if(weaptype == WeapType_None)
@@ -502,13 +501,25 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     {
         if(mUpperBodyState == UpperCharState_WeapEquiped)
         {
+            MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
             mAttackType.clear();
             if(mWeaponType == WeapType_Spell)
             {
+                // Unset casting flag, otherwise pressing the mouse button down would
+                // continue casting every frame if there is no animation
+                mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(false);
+
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                const std::string spellid = stats.getSpells().getSelectedSpell();
-                if(!spellid.empty())
+                // For the player, set the spell we want to cast
+                // This has to be done at the start of the casting animation,
+                // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
+                if (mPtr.getRefData().getHandle() == "player")
+                    stats.getSpells().setSelectedSpell(MWBase::Environment::get().getWindowManager()->getSelectedSpell());
+
+                std::string spellid = stats.getSpells().getSelectedSpell();
+
+                if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
                     static const std::string schools[] = {
                         "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
@@ -707,17 +718,18 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
         }
     }
 
-
     MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
+            && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
+
     {
-        if(!mAnimation->isPlaying("torch"))
-            mAnimation->play("torch", Priority_Torch,
-                             MWRender::Animation::Group_LeftArm, false,
-                             1.0f, "start", "stop", 0.0f, (~(size_t)0));
+        mAnimation->play("torch", Priority_Torch, MWRender::Animation::Group_LeftArm,
+            false, 1.0f, "start", "stop", 0.0f, (~(size_t)0));
     }
-    else if(mAnimation->isPlaying("torch"))
+    else if (mAnimation->isPlaying("torch"))
+    {
         mAnimation->disable("torch");
+    }
 
     return forcestateupdate;
 }
@@ -727,6 +739,8 @@ void CharacterController::update(float duration)
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     Ogre::Vector3 movement(0.0f);
+
+    updateVisibility();
 
     if(!cls.isActor())
     {
@@ -787,10 +801,10 @@ void CharacterController::update(float duration)
         }
 
         if(sneak || inwater || flying)
-        {
             vec.z = 0.0f;
-            mFallHeight = mPtr.getRefData().getPosition().pos[2];
-        }
+
+        if (inwater || flying)
+            cls.getCreatureStats(mPtr).land();
 
         if(!onground && !flying && !inwater)
         {
@@ -799,11 +813,7 @@ void CharacterController::update(float duration)
             if (world->isSlowFalling(mPtr))
             {
                 // SlowFalling spell effect is active, do not keep previous fall height
-                mFallHeight = mPtr.getRefData().getPosition().pos[2];
-            }
-            else
-            {
-                mFallHeight = std::max(mFallHeight, mPtr.getRefData().getPosition().pos[2]);
+                cls.getCreatureStats(mPtr).land();
             }
 
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -859,7 +869,8 @@ void CharacterController::update(float duration)
             mJumpState = JumpState_Landing;
             vec.z = 0.0f;
 
-            float healthLost = cls.getFallDamage(mPtr, mFallHeight - mPtr.getRefData().getPosition().pos[2]);
+            float height = cls.getCreatureStats(mPtr).land();
+            float healthLost = cls.getFallDamage(mPtr, height);
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
@@ -880,8 +891,6 @@ void CharacterController::update(float duration)
                     //TODO: actor falls over
                 }
             }
-
-            mFallHeight = mPtr.getRefData().getPosition().pos[2];
         }
         else
         {
@@ -920,6 +929,9 @@ void CharacterController::update(float duration)
             }
         }
 
+        if (onground)
+            cls.getCreatureStats(mPtr).land();
+
         if(movestate != CharState_None)
             clearAnimQueue();
 
@@ -944,9 +956,12 @@ void CharacterController::update(float duration)
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
 
         rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
-        world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
 
-        world->queueMovement(mPtr, vec);
+        if (!mSkipAnim)
+        {
+            world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
+            world->queueMovement(mPtr, vec);
+        }
         movement = vec;
     }
     else if(cls.getCreatureStats(mPtr).isDead())
@@ -1139,6 +1154,27 @@ void CharacterController::updateContinuousVfx()
             || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).mMagnitude <= 0)
             mAnimation->removeEffect(*it);
     }
+}
+
+void CharacterController::updateVisibility()
+{
+    if (!mPtr.getClass().isActor())
+        return;
+    float alpha = 1.f;
+    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude)
+    {
+        if (mPtr.getRefData().getHandle() == "player")
+            alpha = 0.4f;
+        else
+            alpha = 0.f;
+    }
+    float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude;
+    if (chameleon)
+    {
+        alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
+    }
+
+    mAnimation->setAlpha(alpha);
 }
 
 }

@@ -68,14 +68,14 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
             // creature stats
-            data->mCreatureStats.getAttribute(0).set (ref->mBase->mData.mStrength);
-            data->mCreatureStats.getAttribute(1).set (ref->mBase->mData.mIntelligence);
-            data->mCreatureStats.getAttribute(2).set (ref->mBase->mData.mWillpower);
-            data->mCreatureStats.getAttribute(3).set (ref->mBase->mData.mAgility);
-            data->mCreatureStats.getAttribute(4).set (ref->mBase->mData.mSpeed);
-            data->mCreatureStats.getAttribute(5).set (ref->mBase->mData.mEndurance);
-            data->mCreatureStats.getAttribute(6).set (ref->mBase->mData.mPersonality);
-            data->mCreatureStats.getAttribute(7).set (ref->mBase->mData.mLuck);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mData.mStrength);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mData.mIntelligence);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mData.mWillpower);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mData.mAgility);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mData.mSpeed);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mData.mEndurance);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mData.mPersonality);
+            data->mCreatureStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mData.mLuck);
             data->mCreatureStats.setHealth (ref->mBase->mData.mHealth);
             data->mCreatureStats.setMagicka (ref->mBase->mData.mMana);
             data->mCreatureStats.setFatigue (ref->mBase->mData.mFatigue);
@@ -84,10 +84,10 @@ namespace MWClass
 
             data->mCreatureStats.getAiSequence().fill(ref->mBase->mAiPackage);
 
-            data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
-            data->mCreatureStats.setAiSetting (1, ref->mBase->mAiData.mFight);
-            data->mCreatureStats.setAiSetting (2, ref->mBase->mAiData.mFlee);
-            data->mCreatureStats.setAiSetting (3, ref->mBase->mAiData.mAlarm);
+            data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Hello, ref->mBase->mAiData.mHello);
+            data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight, ref->mBase->mAiData.mFight);
+            data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee, ref->mBase->mAiData.mFlee);
+            data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Alarm, ref->mBase->mAiData.mAlarm);
 
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
@@ -199,7 +199,7 @@ namespace MWClass
         else
         {
             MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
-            fatigue.setCurrent(fatigue.getCurrent() - damage);
+            fatigue.setCurrent(fatigue.getCurrent() - damage, true);
             getCreatureStats(ptr).setFatigue(fatigue);
         }
     }
@@ -411,6 +411,14 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         return MWWorld::Ptr(&cell.mCreatures.insert(*ref), &cell);
+    }
+
+    bool Creature::isFlying(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Flies;
     }
 
     int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)

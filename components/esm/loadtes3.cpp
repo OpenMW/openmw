@@ -28,7 +28,15 @@ void ESM::Header::load (ESMReader &esm)
     else
         mFormat = 0;
 
-    esm.getHNT (mData, "HEDR", 300);
+    if (esm.isNextSub("HEDR"))
+    {
+      esm.getSubHeader();
+      esm.getT(mData.version);
+      esm.getT(mData.type);
+      mData.author.assign(esm.getString(sizeof(mData.author.name)));
+      mData.desc.assign(esm.getString(sizeof(mData.desc.name)));
+      esm.getT(mData.records);
+    }
 
     while (esm.isNextSub ("MAST"))
     {

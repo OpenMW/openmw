@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_ACTORS_H
-#define _GAME_RENDER_ACTORS_H
+#ifndef GAME_RENDER_ACTORS_H
+#define GAME_RENDER_ACTORS_H
 
 #include <openengine/ogre/renderer.hpp>
 
@@ -47,7 +47,7 @@ namespace MWRender
 
         void removeCell(MWWorld::CellStore* store);
 
-        void update (float duration);
+        void update (Ogre::Camera* camera);
 
         /// Updates containing cell for object rendering data
         void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);

@@ -99,8 +99,6 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/BtOgreExtras.h
     ${LIBDIR}/openengine/bullet/BtOgreGP.h
     ${LIBDIR}/openengine/bullet/BtOgrePG.h
-    ${LIBDIR}/openengine/bullet/CMotionState.cpp
-    ${LIBDIR}/openengine/bullet/CMotionState.h
     ${LIBDIR}/openengine/bullet/physic.cpp
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
@@ -212,7 +210,7 @@ if (HAVE_UNORDERED_MAP)
 endif ()
 
 
-set(BOOST_COMPONENTS system filesystem program_options thread date_time wave)
+set(BOOST_COMPONENTS system filesystem program_options)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)

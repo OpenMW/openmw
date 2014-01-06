@@ -55,6 +55,8 @@ namespace MWGui
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(0)
         , mIsDrowning(false)
+        , mWeaponSpellTimer(0.f)
+        , mDrowningFlashTheta(0.f)
     {
         setCoord(0,0, width, height);
 
@@ -174,38 +176,32 @@ namespace MWGui
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
-        static const char *ids[] =
-        {
-            "HBar", "MBar", "FBar", 0
-        };
+        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int modified = static_cast<int>(value.getModified());
 
-        for (int i=0; ids[i]; ++i)
-            if (ids[i]==id)
-            {
-                MyGUI::Widget* w;
-                std::string valStr = boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
-                switch (i)
-                {
-                    case 0:
-                        mHealth->setProgressRange (value.getModified());
-                        mHealth->setProgressPosition (value.getCurrent());
-                        getWidget(w, "HealthFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
-                        break;
-                    case 1:
-                        mMagicka->setProgressRange (value.getModified());
-                        mMagicka->setProgressPosition (value.getCurrent());
-                        getWidget(w, "MagickaFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
-                        break;
-                    case 2:
-                        mStamina->setProgressRange (value.getModified());
-                        mStamina->setProgressPosition (value.getCurrent());
-                        getWidget(w, "FatigueFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
-                        break;
-                }
-            }
+        MyGUI::Widget* w;
+        std::string valStr = boost::lexical_cast<std::string>(current) + "/" + boost::lexical_cast<std::string>(modified);
+        if (id == "HBar")
+        {
+            mHealth->setProgressRange(modified);
+            mHealth->setProgressPosition(current);
+            getWidget(w, "HealthFrame");
+            w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
+        }
+        else if (id == "MBar")
+        {
+            mMagicka->setProgressRange (modified);
+            mMagicka->setProgressPosition (current);
+            getWidget(w, "MagickaFrame");
+            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+        }
+        else if (id == "FBar")
+        {
+            mStamina->setProgressRange (modified);
+            mStamina->setProgressPosition (current);
+            getWidget(w, "FatigueFrame");
+            w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
+        }
     }
 
     void HUD::setDrowningTimeLeft(float time)

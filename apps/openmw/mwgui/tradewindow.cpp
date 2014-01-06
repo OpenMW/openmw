@@ -24,6 +24,7 @@
 #include "containeritemmodel.hpp"
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
+#include "dialogue.hpp"
 
 namespace MWGui
 {
@@ -296,10 +297,10 @@ namespace MWGui
             const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
             const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-            float a1 = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+            float a1 = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
             float b1 = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float c1 = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-            float d1 = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+            float d1 = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
             float e1 = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float f1 = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 
@@ -339,6 +340,9 @@ namespace MWGui
             addOrRemoveGold(mCurrentBalance, playerPtr);
             addOrRemoveGold(-mCurrentBalance, mPtr);
         }
+
+        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
 
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);

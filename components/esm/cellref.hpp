@@ -20,7 +20,7 @@ namespace ESM
         public:
 
             int mRefnum;           // Reference number
-            std::string mRefID;    // ID of object being referenced
+            std::string mRefID;    // ID of object being referenced (must be lowercase)
 
             float mScale;          // Scale applied to mesh
 

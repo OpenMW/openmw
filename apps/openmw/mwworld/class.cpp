@@ -139,7 +139,7 @@ namespace MWWorld
 
     float Class::getRemainingUsageTime (const Ptr& ptr) const
     {
-        throw std::runtime_error ("class does not support time-based uses");
+        return -1;
     }
 
     std::string Class::getScript (const Ptr& ptr) const
@@ -372,4 +372,10 @@ namespace MWWorld
 
         return newPtr;
     }
+
+    bool Class::isFlying(const Ptr &ptr) const
+    {
+        return false;
+    }
+
 }

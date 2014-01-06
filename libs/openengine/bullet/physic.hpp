@@ -38,7 +38,6 @@ namespace MWWorld
 namespace OEngine {
 namespace Physic
 {
-    class CMotionState;
     struct PhysicEvent;
     class PhysicEngine;
     class RigidBody;
@@ -157,17 +156,7 @@ namespace Physic
     private:
         void disableCollisionBody();
         void enableCollisionBody();
-public:
-//HACK: in Visual Studio 2010 and presumably above, this structures alignment
-//      must be 16, but the built in operator new & delete don't properly
-//      perform this alignment.
-#if _MSC_VER >= 1600
-        void * operator new (size_t Size) { return _aligned_malloc (Size, 16); }
-        void operator delete (void * Data) { _aligned_free (Data); }
-#endif
 
-
-    private:
         OEngine::Physic::RigidBody* mBody;
         OEngine::Physic::RigidBody* mRaycastingBody;
 
@@ -328,12 +317,6 @@ public:
         std::pair<const RigidBody*,btVector3> getFilteredContact(const std::string &filter,
                                                                  const btVector3 &origin,
                                                                  btCollisionObject *object);
-
-        //event list of non player object
-        std::list<PhysicEvent> NPEventList;
-
-        //event list affecting the player
-        std::list<PhysicEvent> PEventList;
 
         //Bullet Stuff
         btOverlappingPairCache* pairCache;
