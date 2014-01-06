@@ -98,6 +98,9 @@ namespace MWMechanics
             void toLower(std::string npcFaction);
             ///< Perform a persuasion action on NPC
 
+            /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
+            virtual bool awarenessCheck (const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer);
+
         virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
         virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
