@@ -1,14 +1,6 @@
 #include "referenceablecheck.hpp"
-
-#include <sstream>
-#include <map>
-#include <cassert>
-#include <boost/graph/graph_concepts.hpp>
-
 #include "../world/record.hpp"
-
 #include "../world/universalid.hpp"
-#include <components/esm/loadmgef.hpp>
 
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
@@ -18,12 +10,18 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     mReferencables(referenceable),
     mClasses(classes),
     mRaces(races),
-    mFactions(faction)
+    mFactions(faction),
+    mPlayerPresent(false)
 {
 }
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
 {
+    if (stage == mReferencables.getSize() - 1)
+    {
+        finalCheck(messages);
+    }
+
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
     const int bookSize(mReferencables.getBooks().getSize());
 
@@ -104,7 +102,6 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= doorSize;
-
     const int ingredientSize(mReferencables.getIngredients().getSize());
 
     if (stage < ingredientSize)
@@ -296,7 +293,6 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(
 
     inventoryItemCheck<ESM::Apparatus>(apparatus, messages, id.toString());
 
-    //checking for quality, 0 → apparatus is basicly useless, any negative → apparatus is harmfull instead of helpfull
     toolCheck<ESM::Apparatus>(apparatus, messages, id.toString());
 }
 
@@ -656,6 +652,12 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     //Don't know what unknown is for
     int gold(npc.mNpdt52.mGold);
 
+    //Detect if player is present
+    if (npc.mId == "player")
+    {
+        mPlayerPresent = true;
+    }
+
     if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
     {
         if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0008 = autocalculated flag
@@ -954,6 +956,19 @@ void CSMTools::ReferenceableCheckStage::staticCheck(
     }
 }
 
+//final check
+
+void CSMTools::ReferenceableCheckStage::finalCheck(std::vector< std::string >& messages)
+{
+    if (!mPlayerPresent)
+    {
+        CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc);
+        messages.push_back(id.toString() + "| There is no player record");
+    }
+
+    mPlayerPresent = false;
+}
+
 
 //Templates begins here
 
@@ -1022,7 +1037,7 @@ template<typename ITEM> void CSMTools::ReferenceableCheckStage::inventoryItemChe
         messages.push_back(someID + "|" + someItem.mId + " has negative value");
     }
 
-//checking for model
+    //checking for model
     if (someItem.mModel.empty())
     {
         messages.push_back(someID + "|" + someItem.mId + " has no model");
@@ -1076,7 +1091,7 @@ template<typename LIST> void CSMTools::ReferenceableCheckStage::listCheck(
         {
             messages.push_back(someID + "|" + someList.mId + " contains item without referencable");
         }
-            
+
         if (someList.mList[i].mLevel < 1)
         {
             messages.push_back(someID + "|" + someList.mId + " contains item with non-positive level");

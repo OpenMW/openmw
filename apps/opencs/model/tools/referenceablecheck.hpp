@@ -37,7 +37,10 @@ namespace CSMTools
             void probeCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Probe>& records, std::vector<std::string>& messages);
             void repairCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Repair>& records, std::vector<std::string>& messages);
             void staticCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Static>& records, std::vector<std::string>& messages);
-
+            
+            //FINAL CHECK
+            void finalCheck(std::vector<std::string>& messages);
+            
 	    //TEMPLATE CHECKS
 	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem, std::vector<std::string>& messages, const std::string& someid, bool enchantable); //for all enchantable items.
 	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem, std::vector<std::string>& messages, const std::string& someid); //for non-enchantable items.
@@ -49,6 +52,7 @@ namespace CSMTools
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
             const CSMWorld::IdCollection<ESM::Class>& mClasses;
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+            bool mPlayerPresent;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H
