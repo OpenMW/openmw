@@ -79,13 +79,13 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 {
     const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
 
-    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
+    // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if ((actorPtr.getRefData().getHandle() != "player")
             && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf())
             && !actorPtr.getClass().getCreatureStats(actorPtr).isDead())
     {
         std::string type = itemPtr.getTypeName();
-        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()) || (type == typeid(ESM::Weapon).name()))
             autoEquip(actorPtr);
     }
 
@@ -185,7 +185,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
         // Only autoEquip if we are the original owner of the item.
         // This stops merchants from auto equipping anything you sell to them.
-        if (!Misc::StringUtils::ciEqual(test.getCellRef().mOwner, actor.getCellRef().mRefID))
+        // ...unless this is a companion, he should always equip items given to him.
+        if (!Misc::StringUtils::ciEqual(test.getCellRef().mOwner, actor.getCellRef().mRefID) &&
+                (actor.getClass().getScript(actor).empty() ||
+                !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
             continue;
 
         int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
