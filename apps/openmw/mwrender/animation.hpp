@@ -128,6 +128,7 @@ protected:
     NifOgre::ObjectScenePtr mObjectRoot;
     AnimSourceList mAnimSources;
     Ogre::Node *mAccumRoot;
+    bool mAccumRootPosUpd;
     Ogre::Node *mNonAccumRoot;
     NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     Ogre::Vector3 mAccumulate;

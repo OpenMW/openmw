@@ -249,7 +249,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         else
         {
             mAnimation->disable(mCurrentJump);
-            mCurrentJump.clear();
+            //mCurrentJump.clear();
+            mCurrentJump = jump;
             mAnimation->play(jump, Priority_Jump, jumpgroup, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
         }
@@ -678,6 +679,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 mUpperBodyState = UpperCharState_StartToMinAttack;   
             }
         }
+
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
     }
     else
@@ -708,7 +710,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 }
             }
             stats.setAttackStrength(complete);
-
+            
             mAnimation->disable(mCurrentWeapon);
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
                              MWRender::Animation::Group_UpperBody, false,
@@ -725,7 +727,6 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
            mUpperBodyState == UpperCharState_CastingSpell)
         {
             mUpperBodyState = UpperCharState_WeapEquiped;
-
             //don't allow to continue playing hit animation on UpperBody after actor had attacked during it
             if(mHitState != CharState_None) 
             {
@@ -748,6 +749,12 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 stop = mAttackType+" max attack";
                 mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                 break;
+            /*case UpperCharState_MinAttackToMaxAttack:
+                if(!mAnimation->isPlaying(mCurrentWeapon))
+                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_UpperBody, false,
+                                 1e-9f, mAttackType+" min attack", mAttackType+" max attack", 0.99f, ~0ul);
+                break;*/
             case UpperCharState_MaxAttackToMinHit:
                 if(mAttackType == "shoot")
                 {
@@ -797,12 +804,8 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
         }
     }
 
-    if(!animPlaying)
-    {
-        mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
-    }
     //if playing combat animation and lowerbody is not busy switch to whole body animation
-    if(weaptype != WeapType_None && animPlaying)
+    if((weaptype != WeapType_None || UpperCharState_UnEquipingWeap) && animPlaying)
     {
         if(  mMovementState != CharState_None || 
              mJumpState != JumpState_None || 
@@ -810,15 +813,14 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
              MWBase::Environment::get().getWorld()->isSwimming(mPtr) || 
              cls.getStance(mPtr, MWWorld::Class::Sneak))
         {
-            mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
             mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_UpperBody);
         }
         else
         {
-            mAnimation->setAccumulation(Ogre::Vector3(0.0f, 0.0f, 0.0f));
             mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_All);
         }
     }
+    
 
     MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
@@ -1001,7 +1003,13 @@ void CharacterController::update(float duration)
         else
         {
             if(!(vec.z > 0.0f))
-                mJumpState = JumpState_None;
+            {
+                if(!mAnimation->isPlaying(mCurrentJump))
+                {
+                    mJumpState = JumpState_None;
+                    mCurrentJump.clear();
+                }
+            }
             vec.z = 0.0f;
 
             if(std::abs(vec.x/2.0f) > std::abs(vec.y))
