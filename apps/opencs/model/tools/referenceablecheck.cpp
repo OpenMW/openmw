@@ -1,6 +1,7 @@
 #include "referenceablecheck.hpp"
 #include "../world/record.hpp"
 #include "../world/universalid.hpp"
+#include <iostream>
 
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
@@ -17,11 +18,6 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
 
 void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::string >& messages)
 {
-    if (stage == mReferencables.getSize() - 1)
-    {
-        finalCheck(messages);
-    }
-
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
     const int bookSize(mReferencables.getBooks().getSize());
 
@@ -102,6 +98,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
     }
 
     stage -= doorSize;
+
     const int ingredientSize(mReferencables.getIngredients().getSize());
 
     if (stage < ingredientSize)
@@ -209,11 +206,15 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
         staticCheck(stage, mReferencables.getStatics(), messages);
         return;
     }
+// if we come that far, we are about to perform our last, final check.
+    finalCheck(messages);
+    return;
 }
 
 int CSMTools::ReferenceableCheckStage::setup()
 {
-    return mReferencables.getSize();
+    mPlayerPresent = false;
+    return mReferencables.getSize() + 1;
 }
 
 void CSMTools::ReferenceableCheckStage::bookCheck(
@@ -965,8 +966,6 @@ void CSMTools::ReferenceableCheckStage::finalCheck(std::vector< std::string >& m
         CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc);
         messages.push_back(id.toString() + "| There is no player record");
     }
-
-    mPlayerPresent = false;
 }
 
 
