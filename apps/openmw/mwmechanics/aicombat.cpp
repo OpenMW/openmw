@@ -12,13 +12,13 @@
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
 
-#include "OgreMath.h"
+#include <OgreMath.h>
 
 namespace
 {
-    static float sgn(float a)
+    static float sgn(Ogre::Radian a)
     {
-        if(a > 0)
+        if(a.valueDegrees() > 0)
             return 1.0;
         return -1.0;
     }
@@ -106,7 +106,7 @@ namespace MWMechanics
             float directionY = dest.mY - start.mY;
             float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
-            zAngle = Ogre::Radian( acos(directionY / directionResult) * sgn(asin(directionX / directionResult)) ).valueDegrees();
+            zAngle = Ogre::Radian( Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult)) ).valueDegrees();
             // TODO: use movement settings instead of rotating directly
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
 

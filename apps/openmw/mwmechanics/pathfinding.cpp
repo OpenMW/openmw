@@ -53,9 +53,9 @@ namespace
         return sqrt(x * x + y * y + z * z);
     }
 
-    static float sgn(float a)
+    static float sgn(Ogre::Radian a)
     {
-        if(a > 0)
+        if(a.valueRadians() > 0)
             return 1.0;
         return -1.0;
     }
@@ -196,7 +196,7 @@ namespace MWMechanics
         float directionY = nextPoint.mY - y;
         float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
-        return Ogre::Radian(acos(directionY / directionResult) * sgn(asin(directionX / directionResult))).valueDegrees();
+        return Ogre::Radian(Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult))).valueDegrees();
     }
 
     bool PathFinder::checkWaypoint(float x, float y, float z)
