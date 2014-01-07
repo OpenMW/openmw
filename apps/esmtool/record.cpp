@@ -14,7 +14,7 @@ void printAIPackage(ESM::AIPackage p)
         std::cout << "    Duration: " << p.mWander.mDuration << std::endl;
         std::cout << "    Time of Day: " << (int)p.mWander.mTimeOfDay << std::endl;
         if (p.mWander.mShouldRepeat != 1)
-            std::cout <<  "    Unknown: " << (int)p.mWander.mShouldRepeat << std::endl;
+            std::cout <<  "    Should repeat: " << (bool)p.mWander.mShouldRepeat << std::endl;
 
         std::cout << "    Idle: ";
         for (int i = 0; i != 8; i++)
