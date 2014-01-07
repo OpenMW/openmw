@@ -79,7 +79,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
             // Cell isn't predefined. Make one on the fly.
             ESM::Cell record;
 
-            record.mData.mFlags = 0;
+            record.mData.mFlags = ESM::Cell::HasWater;
             record.mData.mX = x;
             record.mData.mY = y;
             record.mWater = 0;

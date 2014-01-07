@@ -19,7 +19,6 @@
 
 #include <openengine/bullet/physic.hpp>
 
-#include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
 #include <components/terrain/world.hpp>
 
@@ -407,12 +406,7 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
 
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
 {
-    const MWWorld::Store<ESM::Land> &lands =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>();
-
-    if(store->mCell->mData.mFlags & ESM::Cell::HasWater
-        || ((store->mCell->isExterior())
-            && !lands.search(store->mCell->getGridX(),store->mCell->getGridY()) )) // always use water, if the cell does not have land.
+    if(store->mCell->mData.mFlags & ESM::Cell::HasWater)
     {
         mWater->changeCell(store->mCell);
         mWater->setActive(true);
