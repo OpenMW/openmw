@@ -613,7 +613,7 @@ namespace MWClass
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
 
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "thief");
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
 
             if(object.isEmpty())
             {

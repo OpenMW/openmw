@@ -231,6 +231,7 @@ namespace MWMechanics
     {
         float mProgress;
     public:
+        SkillValue() : mProgress(0) {}
         float getProgress() const { return mProgress; }
         void setProgress(float progress) { mProgress = progress; }
     };

@@ -1840,13 +1840,6 @@ namespace MWWorld
 
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
-        // This is a placeholder! Needs to go into an NPC awareness check function (see
-        // https://wiki.openmw.org/index.php?title=Research:NPC_AI_Behaviour#NPC_Awareness_Check )
-        if (targetNpc.getClass().getCreatureStats(targetNpc).getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude)
-            return false;
-        if (targetNpc.getClass().getCreatureStats(targetNpc).getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude > 100)
-            return false;
-
         Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(npc.getRefData().getHandle())->getHalfExtents();
         float* pos1 = npc.getRefData().getPosition().pos;
         Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetNpc.getRefData().getHandle())->getHalfExtents();

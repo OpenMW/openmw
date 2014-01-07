@@ -12,6 +12,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include <OgreSceneNode.h>
+
 #include "spellcasting.hpp"
 
 namespace MWMechanics
@@ -724,5 +726,75 @@ namespace MWMechanics
     bool MechanicsManager::isAIActive()
     {
         return mAI;
+    }
+
+    bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
+    {
+        const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+
+        float invisibility = stats.getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude;
+        if (invisibility > 0)
+            return false;
+
+        float sneakTerm = 0;
+        if (ptr.getClass().getStance(ptr, MWWorld::Class::Sneak)
+                && !MWBase::Environment::get().getWorld()->isSwimming(ptr)
+                && MWBase::Environment::get().getWorld()->isOnGround(ptr))
+        {
+            static float fSneakSkillMult = store.find("fSneakSkillMult")->getFloat();
+            static float fSneakBootMult = store.find("fSneakBootMult")->getFloat();
+            float sneak = 0;
+            if (ptr.getClass().isNpc())
+                sneak = ptr.getClass().getNpcStats(ptr).getSkill(ESM::Skill::Sneak).getModified();
+            int agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
+            int luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
+            float bootWeight = 0;
+            if (ptr.getClass().isNpc())
+            {
+                MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ContainerStoreIterator it = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                if (it != inv.end())
+                    bootWeight = it->getClass().getWeight(*it);
+            }
+            sneakTerm = fSneakSkillMult * sneak + 0.2 * agility + 0.1 * luck + bootWeight * fSneakBootMult;
+        }
+
+        static float fSneakDistBase = store.find("fSneakDistanceBase")->getFloat();
+        static float fSneakDistMult = store.find("fSneakDistanceMultiplier")->getFloat();
+
+        Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
+        Ogre::Vector3 pos2 (observer.getRefData().getPosition().pos);
+        float distTerm = fSneakDistBase + fSneakDistMult * pos1.distance(pos2);
+
+        float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude;
+        float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
+
+        CreatureStats& observerStats = observer.getClass().getCreatureStats(observer);
+        int obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
+        int obsLuck = observerStats.getAttribute(ESM::Attribute::Luck).getModified();
+        float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
+        int obsSneak = 0;
+        if (observer.getClass().isNpc())
+            obsSneak = observer.getClass().getNpcStats(observer).getSkill(ESM::Skill::Sneak).getModified();
+
+        float obsTerm = obsSneak + 0.2 * obsAgility + 0.1 * obsLuck - obsBlind;
+
+        // is ptr behind the observer?
+        static float fSneakNoViewMult = store.find("fSneakNoViewMult")->getFloat();
+        static float fSneakViewMult = store.find("fSneakViewMult")->getFloat();
+        float y = 0;
+        Ogre::Vector3 vec = pos1 - pos2;
+        Ogre::Radian angle = observer.getRefData().getBaseNode()->getOrientation().yAxis().angleBetween(vec);
+        if (angle < Ogre::Degree(90))
+            y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
+        else
+            y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+
+        float target = x - y;
+        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+
+        return (roll >= target);
     }
 }

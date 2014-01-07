@@ -1209,20 +1209,27 @@ ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bo
 
     if(isskinned)
     {
+        // Apparently both are allowed. Sigh.
+        // This could also mean that filters are supposed to work on the actual node
+        // hierarchy, rather than just trishapes, and the 'tri ' should be omitted?
         std::string filter = "@shape=tri "+bonename;
+        std::string filter2 = "@shape="+bonename;
         Misc::StringUtils::toLower(filter);
+        Misc::StringUtils::toLower(filter2);
         for(size_t i = 0;i < scene->mEntities.size();i++)
         {
             Ogre::Entity *entity = scene->mEntities[i];
             if(entity->hasSkeleton())
             {
                 if(entity == scene->mSkelBase ||
-                   entity->getMesh()->getName().find(filter) != std::string::npos)
+                   entity->getMesh()->getName().find(filter) != std::string::npos
+                   || entity->getMesh()->getName().find(filter2) != std::string::npos)
                     parentNode->attachObject(entity);
             }
             else
             {
-                if(entity->getMesh()->getName().find(filter) == std::string::npos)
+                if(entity->getMesh()->getName().find(filter) == std::string::npos
+                        || entity->getMesh()->getName().find(filter2) == std::string::npos)
                     entity->detachFromParent();
             }
         }

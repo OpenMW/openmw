@@ -88,6 +88,9 @@ namespace MWBase
             virtual int countDeaths (const std::string& id) const = 0;
             ///< Return the number of deaths for actors with the given ID.
 
+            /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
+            virtual bool awarenessCheck (const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
+
             enum PersuasionType
             {
                 PT_Admire,

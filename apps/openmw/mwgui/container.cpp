@@ -6,9 +6,12 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+
+#include "../mwmechanics/pickpocket.hpp"
 
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
@@ -123,6 +126,7 @@ namespace MWGui
         , mSelectedItem(-1)
         , mModel(NULL)
         , mSortModel(NULL)
+        , mPickpocketDetected(false)
     {
         getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
         getWidget(mTakeButton, "TakeButton");
@@ -171,6 +175,9 @@ namespace MWGui
 
     void ContainerWindow::dragItem(MyGUI::Widget* sender, int count)
     {
+        if (!onTakeItem(mModel->getItem(mSelectedItem), count))
+            return;
+
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }
 
@@ -208,6 +215,7 @@ namespace MWGui
 
     void ContainerWindow::open(const MWWorld::Ptr& container, bool loot)
     {
+        mPickpocketDetected = false;
         mPtr = container;
 
         if (mPtr.getTypeName() == typeid(ESM::NPC).name() && !loot)
@@ -228,6 +236,28 @@ namespace MWGui
         // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
         // or we end up using a possibly invalid model.
         setTitle(MWWorld::Class::get(container).getName(container));
+    }
+
+    void ContainerWindow::close()
+    {
+        WindowBase::close();
+
+        // Make sure we were actually closed, rather than just temporarily hidden (e.g. console or main menu opened)
+        if (!MWBase::Environment::get().getWindowManager()->containsMode(GM_Container)
+                && !mPickpocketDetected // If it was already detected while taking an item, no need to check now
+                )
+        {
+            MWMechanics::Pickpocket pickpocket(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
+                                    mPtr);
+            if (pickpocket.finish())
+            {
+                // TODO: crime
+                MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
+                mPickpocketDetected = true;
+                return;
+            }
+        }
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
@@ -255,8 +285,13 @@ namespace MWGui
                     MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
                 }
 
-                playerModel->copyItem(mModel->getItem(i), mModel->getItem(i).mCount);
-                mModel->removeItem(mModel->getItem(i), mModel->getItem(i).mCount);
+                const ItemStack& item = mModel->getItem(i);
+
+                if (!onTakeItem(item, item.mCount))
+                    break;
+
+                playerModel->copyItem(item, item.mCount);
+                mModel->removeItem(item, item.mCount);
             }
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
@@ -281,6 +316,24 @@ namespace MWGui
     void ContainerWindow::onReferenceUnavailable()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
+    }
+
+    bool ContainerWindow::onTakeItem(const ItemStack &item, int count)
+    {
+        if (dynamic_cast<PickpocketItemModel*>(mModel))
+        {
+            MWMechanics::Pickpocket pickpocket(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
+                                    mPtr);
+            if (pickpocket.pick(item.mBase, count))
+            {
+                // TODO: crime
+                MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
+                mPickpocketDetected = true;
+                return false;
+            }
+        }
+        return true;
     }
 
 }

@@ -3,6 +3,7 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 300" name="_Main">
         <Property key="MinSize" value="245 145"/>
+        <Property key="Visible" value="false"/>
 
         <!-- Items -->
         <Widget type="ItemView" skin="MW_ItemView" position="5 5 575 225" name="ItemView" align="Left Top Stretch">
