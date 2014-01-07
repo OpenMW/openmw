@@ -39,7 +39,6 @@
 #include "localmap.hpp"
 #include "water.hpp"
 #include "npcanimation.hpp"
-#include "externalrendering.hpp"
 #include "globalmap.hpp"
 #include "videoplayer.hpp"
 #include "terrainstorage.hpp"
@@ -930,11 +929,6 @@ void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX
 bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
 {
     return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
-}
-
-void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
-{
-    rendering.setup (mRendering.getScene());
 }
 
 Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)

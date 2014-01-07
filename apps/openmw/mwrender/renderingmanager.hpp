@@ -48,7 +48,6 @@ namespace MWRender
     class Shadows;
     class LocalMap;
     class Water;
-    class ExternalRendering;
     class GlobalMap;
     class VideoPlayer;
     class Animation;
@@ -203,8 +202,6 @@ public:
 
     bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored
-
-    void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
 

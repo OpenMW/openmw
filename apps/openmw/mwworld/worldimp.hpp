@@ -456,8 +456,6 @@ namespace MWWorld
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
-            virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
-
             virtual int canRest();
             ///< check if the player is allowed to rest \n
             /// 0 - yes \n

@@ -40,7 +40,6 @@ namespace ESM
 
 namespace MWRender
 {
-    class ExternalRendering;
     class Animation;
 }
 
@@ -365,8 +364,6 @@ namespace MWBase
             ///< get Line of Sight (morrowind stupid implementation)
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
-
-            virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 
             virtual int canRest() = 0;
             ///< check if the player is allowed to rest \n

@@ -1705,11 +1705,6 @@ namespace MWWorld
         mPhysics->addActor(mPlayer->getPlayer());
     }
 
-    void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
-    {
-        mRendering->setupExternalRendering (rendering);
-    }
-
     int World::canRest ()
     {
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
