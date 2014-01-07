@@ -52,9 +52,12 @@ namespace MWGui
         ContainerWindow(DragAndDrop* dragAndDrop);
 
         void open(const MWWorld::Ptr& container, bool loot=false);
+        virtual void close();
 
     private:
         DragAndDrop* mDragAndDrop;
+
+        bool mPickpocketDetected;
 
         MWGui::ItemView* mItemView;
         SortFilterItemModel* mSortModel;
@@ -72,6 +75,9 @@ namespace MWGui
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
         void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
+
+        /// @return is taking the item allowed?
+        bool onTakeItem(const ItemStack& item, int count);
 
         virtual void onReferenceUnavailable();
     };

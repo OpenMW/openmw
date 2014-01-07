@@ -74,7 +74,7 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
     aiescort aiactivate aicombat repair enchanting pathfinding security spellsuccess spellcasting
-    disease
+    disease pickpocket
     )
 
 add_openmw_dir (mwbase
