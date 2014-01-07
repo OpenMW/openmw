@@ -95,9 +95,11 @@ namespace MWClass
                 data->mCreatureStats.getSpells().add (*iter);
 
             // inventory
-            data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr),
+            data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr), "",
                                        MWBase::Environment::get().getWorld()->getStore());
 
+            // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
+            // (except for gold you gave him)
             data->mContainerStore.add("gold_001", ref->mBase->mData.mGold, ptr);
 
             // store

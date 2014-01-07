@@ -279,19 +279,20 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
         std::string id = iter->mItem.toString();
-        addInitialItem(id, owner, iter->mCount);
+        addInitialItem(id, owner, faction, iter->mCount);
     }
 
     flagAsModified();
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance, bool topLevel)
+void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction,
+                                              int count, unsigned char failChance, bool topLevel)
 {
     count = std::abs(count); /// \todo implement item restocking (indicated by negative count)
 
@@ -312,7 +313,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             if (topLevel && count > 1 && levItem->mFlags & ESM::ItemLevList::Each)
             {
                 for (int i=0; i<count; ++i)
-                    addInitialItem(id, owner, 1, failChance, false);
+                    addInitialItem(id, owner, faction, 1, failChance, false);
                 return;
             }
 
@@ -342,12 +343,13 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
                 if (candidates.empty())
                     return;
                 std::string item = candidates[std::rand()%candidates.size()];
-                addInitialItem(item, owner, count, failChance, false);
+                addInitialItem(item, owner, faction, count, failChance, false);
             }
         }
         else
         {
             ref.getPtr().getCellRef().mOwner = owner;
+            ref.getPtr().getCellRef().mFaction = faction;
             addImp (ref.getPtr(), count);
         }
     }

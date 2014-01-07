@@ -731,16 +731,23 @@ namespace MWMechanics
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
     {
         const std::string& owner = item.getCellRef().mOwner;
-        if (owner.empty())
-            return;
+        bool isOwned = !owner.empty();
+
         const std::string& faction = item.getCellRef().mFaction;
-        if (faction.empty())
-            return;
-        const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
-        if (factions.find(Misc::StringUtils::lowerCase(faction)) != factions.end())
+        bool isFactionOwned = false;
+        if (!faction.empty())
+        {
+            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
+            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
+                isFactionOwned = true;
+        }
+
+        if (!isOwned && !isFactionOwned)
             return;
 
-        MWWorld::Ptr victim = MWBase::Environment::get().getWorld()->getPtr(owner, true);
+        MWWorld::Ptr victim;
+        if (!owner.empty())
+            victim = MWBase::Environment::get().getWorld()->getPtr(owner, true);
 
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }

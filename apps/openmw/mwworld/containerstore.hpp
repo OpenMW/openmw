@@ -52,7 +52,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance=0, bool topLevel=true);
+            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, unsigned char failChance=0, bool topLevel=true);
 
         public:
 
@@ -103,7 +103,7 @@ namespace MWWorld
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
             void clear();
