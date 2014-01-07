@@ -739,7 +739,9 @@ namespace MWMechanics
             return false;
 
         float sneakTerm = 0;
-        if (ptr.getClass().getStance(ptr, MWWorld::Class::Sneak))
+        if (ptr.getClass().getStance(ptr, MWWorld::Class::Sneak)
+                && !MWBase::Environment::get().getWorld()->isSwimming(ptr)
+                && MWBase::Environment::get().getWorld()->isOnGround(ptr))
         {
             static float fSneakSkillMult = store.find("fSneakSkillMult")->getFloat();
             static float fSneakBootMult = store.find("fSneakBootMult")->getFloat();
