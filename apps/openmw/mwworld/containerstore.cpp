@@ -560,6 +560,11 @@ MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *contain
 MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Weapon), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mWeapon(iterator){}
 
+MWWorld::ContainerStoreIterator::ContainerStoreIterator( const ContainerStoreIterator& src )
+{
+    copy(src);
+}
+
 void MWWorld::ContainerStoreIterator::incType()
 {
     if (mType==0)
@@ -810,6 +815,41 @@ int MWWorld::ContainerStoreIterator::getType() const
 const MWWorld::ContainerStore *MWWorld::ContainerStoreIterator::getContainerStore() const
 {
     return mContainer;
+}
+
+void MWWorld::ContainerStoreIterator::copy(const ContainerStoreIterator& src)
+{
+    mType = src.mType;
+    mMask = src.mMask;
+    mContainer = src.mContainer;
+    mPtr = src.mPtr;
+
+    switch (mType)
+    {
+        case MWWorld::ContainerStore::Type_Potion: mPotion = src.mPotion; break;
+        case MWWorld::ContainerStore::Type_Apparatus: mApparatus = src.mApparatus; break;
+        case MWWorld::ContainerStore::Type_Armor: mArmor = src.mArmor; break;
+        case MWWorld::ContainerStore::Type_Book: mBook = src.mBook; break;
+        case MWWorld::ContainerStore::Type_Clothing: mClothing = src.mClothing; break;
+        case MWWorld::ContainerStore::Type_Ingredient: mIngredient = src.mIngredient; break;
+        case MWWorld::ContainerStore::Type_Light: mLight = src.mLight; break;
+        case MWWorld::ContainerStore::Type_Lockpick: mLockpick = src.mLockpick; break;
+        case MWWorld::ContainerStore::Type_Miscellaneous: mMiscellaneous = src.mMiscellaneous; break;
+        case MWWorld::ContainerStore::Type_Probe: mProbe = src.mProbe; break;
+        case MWWorld::ContainerStore::Type_Repair: mRepair = src.mRepair; break;
+        case MWWorld::ContainerStore::Type_Weapon: mWeapon = src.mWeapon; break;
+        case -1: break;
+        default: assert(0);
+    }
+}
+
+MWWorld::ContainerStoreIterator& MWWorld::ContainerStoreIterator::operator=( const ContainerStoreIterator& rhs )
+{
+    if (this!=&rhs)
+    {
+        copy(rhs);
+    }
+    return *this;
 }
 
 bool MWWorld::operator== (const ContainerStoreIterator& left, const ContainerStoreIterator& right)
