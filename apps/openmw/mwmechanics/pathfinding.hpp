@@ -37,6 +37,11 @@ namespace MWMechanics
                 return mPath;
             }
 
+            void addPointToPath(ESM::Pathgrid::Point &point)
+            {
+                mPath.push_back(point);
+            }
+
         private:
             std::list<ESM::Pathgrid::Point> mPath;
             bool mIsPathConstructed;

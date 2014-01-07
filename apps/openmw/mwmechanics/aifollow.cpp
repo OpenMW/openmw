@@ -6,7 +6,7 @@
 #include "movement.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId)
+: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mTimer(0), mStuckTimer(0)
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
@@ -34,22 +34,66 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
     dest.mY = target.getRefData().getPosition().pos[1];
     dest.mZ = target.getRefData().getPosition().pos[2];
 
+    //std::cout << dest.mX;
+
+    ESM::Position pos = actor.getRefData().getPosition();
+
     if(mTimer > 0.25)
     {
-        ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back();
+        if(!mPathFinder.getPath().empty())
+        {
+            ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back();
 
-        if((dest.mX - lastPos.mX)*(dest.mX - lastPos.mX) 
-            +(dest.mY - lastPos.mY)*(dest.mY - lastPos.mY)
-            +(dest.mZ - lastPos.mZ)*(dest.mZ - lastPos.mZ)
+            if((dest.mX - lastPos.mX)*(dest.mX - lastPos.mX) 
+                +(dest.mY - lastPos.mY)*(dest.mY - lastPos.mY)
+                +(dest.mZ - lastPos.mZ)*(dest.mZ - lastPos.mZ)
             > 100*100)
-            mPathFinder.getPath().push_back(dest);
+            mPathFinder.addPointToPath(dest);
+        }
+        else
+            mPathFinder.addPointToPath(dest);
 
         mTimer = 0;
     }
 
-    ESM::Position pos = actor.getRefData().getPosition();
-    float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-    MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+    if(mStuckTimer>0.5)
+    {
+        if((mStuckPos.pos[0] - pos.pos[0])*(mStuckPos.pos[0] - pos.pos[0])
+            +(mStuckPos.pos[1] - pos.pos[1])*(mStuckPos.pos[1] - pos.pos[1])
+            +(mStuckPos.pos[2] - pos.pos[2])*(mStuckPos.pos[2] - pos.pos[2])
+            < 100) //NPC is stuck
+        {
+            std::cout << "stck\n";
+            ESM::Pathgrid::Point start;
+            start.mX = pos.pos[0];
+            start.mY = pos.pos[1];
+            start.mZ = pos.pos[2];
+
+            const ESM::Pathgrid *pathgrid =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+
+            float xCell = 0;
+            float yCell = 0;
+
+            if (actor.getCell()->mCell->isExterior())
+            {
+                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
+                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
+            }
+            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+        }
+        mStuckTimer = 0;
+        mStuckPos = pos;
+    }
+
+    if(mPathFinder.getPath().empty())
+        mPathFinder.addPointToPath(dest);
+
+    if(!mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
+    {
+        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+        MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+    }
 
     if((dest.mX - pos.pos[0])*(dest.mX - pos.pos[0])+(dest.mY - pos.pos[1])*(dest.mY - pos.pos[1])+(dest.mZ - pos.pos[2])*(dest.mZ - pos.pos[2])
         < 100*100)
@@ -57,7 +101,6 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
     else
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
-    std::cout << "AiFollow completed.\n";
     return false;
 }
 

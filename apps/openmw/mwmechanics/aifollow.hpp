@@ -4,6 +4,7 @@
 #include "aipackage.hpp"
 #include <string>
 #include "pathfinding.hpp"
+#include "../../../components/esm/defs.hpp"
 
 namespace MWMechanics
 {
@@ -29,6 +30,8 @@ namespace MWMechanics
             float mTimer;
             float mStuckTimer;
             float mTotalTime;
+
+            ESM::Position mStuckPos;
 
             PathFinder mPathFinder;
     };
