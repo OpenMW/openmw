@@ -80,7 +80,7 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
             return true;
         }
     }
-    return true;
+    return false;
 }
 
 
