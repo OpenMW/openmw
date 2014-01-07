@@ -242,9 +242,11 @@ namespace MWGui
     {
         WindowBase::close();
 
-        // Make sure we were actually closed, rather than just temporarily hidden (e.g. console or main menu opened)
-        if (!MWBase::Environment::get().getWindowManager()->containsMode(GM_Container)
-                && !mPickpocketDetected // If it was already detected while taking an item, no need to check now
+        if (dynamic_cast<PickpocketItemModel*>(mModel)
+                // Make sure we were actually closed, rather than just temporarily hidden (e.g. console or main menu opened)
+                && !MWBase::Environment::get().getWindowManager()->containsMode(GM_Container)
+                // If it was already detected while taking an item, no need to check now
+                && !mPickpocketDetected
                 )
         {
             MWMechanics::Pickpocket pickpocket(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
