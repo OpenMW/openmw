@@ -23,5 +23,5 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
 
  int MWMechanics::AiFollow::getTypeId() const
 {
-    return 3;
+    return TypeIdFollow;
 }

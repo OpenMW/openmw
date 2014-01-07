@@ -17,5 +17,5 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
 
 int MWMechanics::AiActivate::getTypeId() const
 {
-    return 4;
+    return TypeIdActivate;
 }

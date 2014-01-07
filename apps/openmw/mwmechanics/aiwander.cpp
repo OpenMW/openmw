@@ -254,7 +254,7 @@ namespace MWMechanics
 
     int AiWander::getTypeId() const
     {
-        return 0;
+        return TypeIdWander;
     }
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor)

@@ -135,12 +135,17 @@ namespace MWMechanics
 
     int AiCombat::getTypeId() const
     {
-        return 5;
+        return TypeIdCombat;
     }
 
     unsigned int AiCombat::getPriority() const
     {
         return 1;
+    }
+
+    const std::string &AiCombat::getTargetId() const
+    {
+        return mTargetId;
     }
 
     AiCombat *MWMechanics::AiCombat::clone() const

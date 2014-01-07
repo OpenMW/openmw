@@ -16,6 +16,7 @@
 #include "../mwmechanics/aifollow.hpp"
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
+#include "../mwmechanics/aicombat.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -400,6 +401,58 @@ namespace MWScript
         };
 
         template<class R>
+        class OpGetTarget : public Interpreter::Opcode0
+        {
+            public:
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr actor = R()(runtime);
+                    std::string testedTargetId = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    const MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+                    std::string currentTargetId;
+
+                    bool targetsAreEqual = false;
+                    if (creatureStats.getAiSequence().getCombatTarget (currentTargetId))
+                    {
+                        if (currentTargetId == testedTargetId)
+                            targetsAreEqual = true;
+                    }
+                    runtime.push(int(targetsAreEqual));
+                }
+        };
+
+        template<class R>
+        class OpStartCombat : public Interpreter::Opcode0
+        {
+            public:
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr actor = R()(runtime);
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+                    creatureStats.getAiSequence().stack(MWMechanics::AiCombat(actorID));
+                    if (actorID == "player")
+                        creatureStats.setHostile(true);
+                }
+        };
+
+        template<class R>
+        class OpStopCombat : public Interpreter::Opcode0
+        {
+            public:
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr actor = R()(runtime);
+                    MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+                    creatureStats.getAiSequence().stopCombat();
+                }
+        };
+
+        template<class R>
         class OpToggleAI : public Interpreter::Opcode0
         {
             public:
@@ -436,6 +489,12 @@ namespace MWScript
             interpreter.installSegment3 (Compiler::Ai::opcodeGetDetectedExplicit, new OpGetDetected<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSight, new OpGetLineOfSight<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSightExplicit, new OpGetLineOfSight<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetTarget, new OpGetTarget<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetTargetExplicit, new OpGetTarget<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStartCombat, new OpStartCombat<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStartCombatExplicit, new OpStartCombat<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStopCombat, new OpStopCombat<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStopCombatExplicit, new OpStopCombat<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeToggleAI, new OpToggleAI<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeToggleAIExplicit, new OpToggleAI<ExplicitRef>);
 

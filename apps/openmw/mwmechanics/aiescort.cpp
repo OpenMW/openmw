@@ -179,7 +179,7 @@ namespace MWMechanics
 
     int AiEscort::getTypeId() const
     {
-        return 2;
+        return TypeIdEscort;
     }
 }
 

@@ -53,6 +53,12 @@ namespace Compiler
         const int opcodeGetLineOfSightExplicit = 0x2000223;
         const int opcodeToggleAI = 0x2000224;
         const int opcodeToggleAIExplicit = 0x2000225;
+        const int opcodeGetTarget = 0x2000b23;
+        const int opcodeGetTargetExplicit = 0x2000b24;
+        const int opcodeStartCombat = 0x2000b25;
+        const int opcodeStartCombatExplicit = 0x2000b26;
+        const int opcodeStopCombat = 0x2000b27;
+        const int opcodeStopCombatExplicit = 0x2000b28;
     }
 
     namespace Animation
