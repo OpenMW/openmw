@@ -8,6 +8,7 @@ material openmw_objects_base
     diffuseMap black.png
     normalMap
     emissiveMap
+    specMap
     darkMap
     use_emissive_map false
     use_detail_map false
@@ -44,6 +45,7 @@ material openmw_objects_base
             emissiveMap $emissiveMap
             detailMap $detailMap
             diffuseMap $diffuseMap
+            specMap $specMap
             darkMap $darkMap
             env_map $env_map
             env_map_color $env_map_color
@@ -106,6 +108,11 @@ material openmw_objects_base
             env_map spherical
             anim_texture2 textures\magicitem\caust.dds 32 2
             colour_op add
+        }
+
+        texture_unit specMap
+        {
+            direct_texture $specMap
         }
       
         texture_unit shadowMap0
