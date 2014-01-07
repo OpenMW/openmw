@@ -8,6 +8,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -533,6 +534,8 @@ namespace MWGui
         if (i == mTradeModel->getItemCount())
             throw std::runtime_error("Added item not found");
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
+
+        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, count);
     }
 
     MyGUI::IntCoord InventoryWindow::getAvatarScreenCoord ()

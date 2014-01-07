@@ -101,6 +101,18 @@ namespace MWMechanics
             /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
             virtual bool awarenessCheck (const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer);
 
+            /**
+             * @brief Commit a crime. If any actors witness the crime and report it,
+             *        reportCrime will be called automatically.
+             * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
+             */
+            virtual void commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+                                      OffenseType type, int arg=0);
+            virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+                                      OffenseType type, int arg=0);
+            /// Utility to check if taking this item is illegal and calling commitCrime if so
+            virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count);
+
         virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
         virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);

@@ -728,6 +728,72 @@ namespace MWMechanics
         return mAI;
     }
 
+    void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
+    {
+        const std::string& owner = item.getCellRef().mOwner;
+        if (owner.empty())
+            return;
+        const std::string& faction = item.getCellRef().mFaction;
+        if (faction.empty())
+            return;
+        const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
+        if (factions.find(Misc::StringUtils::lowerCase(faction)) != factions.end())
+            return;
+
+        MWWorld::Ptr victim = MWBase::Environment::get().getWorld()->getPtr(owner, true);
+
+        commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
+    }
+
+    void MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    {
+        bool reported=false;
+        for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
+        {
+            if (it->first != ptr && awarenessCheck(ptr, it->first))
+            {
+                // NPCs will always curse you when they notice you steal their items, even if they don't report the crime
+                if (it->first == victim && type == OT_Theft)
+                {
+                    MWBase::Environment::get().getDialogueManager()->say(victim, "Thief");
+                }
+
+                // Actor has witnessed a crime. Will he report it?
+                // (not sure, is > 0 correct?)
+                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0
+                        // This is a bit inconsistent, but AFAIK assaulted NPCs can not report if they are alone
+                        && (type != OT_Assault || it->first != victim)
+                )
+                {
+                    reported=true;
+                    break;
+                }
+            }
+        }
+
+        if (reported)
+            reportCrime(ptr, victim, type, arg);
+    }
+
+    void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    {
+        // Bounty for each type of crime
+        if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+            arg = 5;
+        else if (type == OT_Pickpocket)
+            arg = 25;
+        else if (type == OT_Assault)
+            arg = 40;
+        else if (type == OT_Murder)
+            arg = 1000;
+
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
+        ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
+                                                  + arg);
+
+        // TODO: make any guards in the area try to arrest the player
+    }
+
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
     {
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

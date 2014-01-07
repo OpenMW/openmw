@@ -91,6 +91,27 @@ namespace MWBase
             /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
             virtual bool awarenessCheck (const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
 
+            enum OffenseType
+            {
+                OT_Theft, // Taking items owned by an NPC or a faction you are not a member of
+                OT_Assault, // Attacking a peaceful NPC
+                OT_Murder, // Murdering a peaceful NPC
+                OT_Trespassing, // Staying in a cell you are not allowed in (where is this defined?)
+                OT_SleepingInOwnedBed, // Sleeping in a bed owned by an NPC or a faction you are not a member of
+                OT_Pickpocket // Entering pickpocket mode, leaving it, and being detected. Any items stolen are a separate crime (Theft)
+            };
+            /**
+             * @brief Commit a crime. If any actors witness the crime and report it,
+             *        reportCrime will be called automatically.
+             * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
+             */
+            virtual void commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+                                      OffenseType type, int arg=0) = 0;
+            virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+                                      OffenseType type, int arg=0) = 0;
+            /// Utility to check if taking this item is illegal and calling commitCrime if so
+            virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count) = 0;
+
             enum PersuasionType
             {
                 PT_Admire,

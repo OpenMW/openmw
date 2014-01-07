@@ -25,9 +25,6 @@ namespace MWMechanics
 {
     class Actors
     {
-            typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
-            PtrControllerMap mActors;
-
             std::map<std::string, int> mDeathCount;
 
             void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
@@ -49,6 +46,11 @@ namespace MWMechanics
 
             Actors();
             ~Actors();
+
+            typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
+
+            PtrControllerMap::const_iterator begin() { return mActors.begin(); }
+            PtrControllerMap::const_iterator end() { return mActors.end(); }
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)
@@ -88,6 +90,10 @@ namespace MWMechanics
         void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         void skipAnimation(const MWWorld::Ptr& ptr);
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
+
+    private:
+        PtrControllerMap mActors;
+
     };
 }
 
