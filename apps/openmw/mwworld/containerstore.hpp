@@ -143,10 +143,6 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Repair>::List::iterator mRepair;
             MWWorld::CellRefList<ESM::Weapon>::List::iterator mWeapon;
 
-		public:
-
-			ContainerStoreIterator(const ContainerStoreIterator& src);
-
         private:
 
             ContainerStoreIterator (ContainerStore *container);
@@ -187,6 +183,8 @@ namespace MWWorld
 
         public:
 
+            ContainerStoreIterator(const ContainerStoreIterator& src);
+
             Ptr *operator->() const;
 
             Ptr operator*() const;
@@ -195,7 +193,7 @@ namespace MWWorld
 
             ContainerStoreIterator operator++ (int);
 
-			ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);			
+            ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);			
 
             bool isEqual (const ContainerStoreIterator& iter) const;
 
