@@ -762,7 +762,9 @@ namespace MWMechanics
         bool reported=false;
         for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
         {
-            if (it->first != ptr && awarenessCheck(ptr, it->first))
+            if (it->first != ptr &&
+                    MWBase::Environment::get().getWorld()->getLOS(ptr, it->first) &&
+                    awarenessCheck(ptr, it->first))
             {
                 // NPCs will always curse you when they notice you steal their items, even if they don't report the crime
                 if (it->first == victim && type == OT_Theft)
