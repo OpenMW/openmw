@@ -143,6 +143,7 @@ Bug #1026: Game loses track of torch usage.
 Bug #1028: Crash on pickup of jug in Unexplored Shipwreck, Upper level
 Bug #1029: Quick keys menu: Select compatible replacement when tool used up
 Bug #1042: TES3 header data wrong encoding
+Bug #1045: OS X: deployed OpenCS won't launch
 Bug #1046: All damaged weaponry is worth 1 gold
 Bug #1048: Links in "locked" dialogue are still clickable
 Bug #1052: Using color codes when naming your character actually changes the name's color
