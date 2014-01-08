@@ -198,7 +198,7 @@ namespace Compiler
             extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
             extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
 
-            extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);
+            extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu, opcodeShowRestMenuExplicit);
 
             extensions.registerFunction ("getbuttonpressed", 'l', "", opcodeGetButtonPressed);
 

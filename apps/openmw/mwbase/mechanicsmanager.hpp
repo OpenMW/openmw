@@ -104,13 +104,17 @@ namespace MWBase
              * @brief Commit a crime. If any actors witness the crime and report it,
              *        reportCrime will be called automatically.
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
+             * @return was the crime reported?
              */
-            virtual void commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+            virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0) = 0;
             virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0) = 0;
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count) = 0;
+            /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
+            /// @return was it illegal, and someone saw you doing it?
+            virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) = 0;
 
             enum PersuasionType
             {

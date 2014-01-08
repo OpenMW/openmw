@@ -16,6 +16,27 @@
 
 #include "spellcasting.hpp"
 
+namespace
+{
+    /// @return is \a ptr allowed to take/use \a item or is it a crime?
+    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item)
+    {
+        const std::string& owner = item.getCellRef().mOwner;
+        bool isOwned = !owner.empty();
+
+        const std::string& faction = item.getCellRef().mFaction;
+        bool isFactionOwned = false;
+        if (!faction.empty())
+        {
+            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
+            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
+                isFactionOwned = true;
+        }
+
+        return (!isOwned && !isFactionOwned);
+    }
+}
+
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
@@ -729,33 +750,35 @@ namespace MWMechanics
         return mAI;
     }
 
+    bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
+    {
+        if (isAllowedToUse(ptr, bed))
+            return false;
+        MWWorld::Ptr victim;
+        if (!bed.getCellRef().mOwner.empty())
+            victim = MWBase::Environment::get().getWorld()->getPtr(bed.getCellRef().mOwner, true);
+
+        if(commitCrime(ptr, victim, OT_SleepingInOwnedBed))
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage64}");
+            return true;
+        }
+        else
+            return false;
+    }
+
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
     {
-        const std::string& owner = item.getCellRef().mOwner;
-        bool isOwned = !owner.empty();
-
-        const std::string& faction = item.getCellRef().mFaction;
-        bool isFactionOwned = false;
-        if (!faction.empty())
-        {
-            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
-            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
-                isFactionOwned = true;
-        }
-
-        if (!isOwned && !isFactionOwned)
+        if (isAllowedToUse(ptr, item))
             return;
-
         MWWorld::Ptr victim;
-        if (!owner.empty())
-            victim = MWBase::Environment::get().getWorld()->getPtr(owner, true);
-
-        // TODO: expell from faction
+        if (!item.getCellRef().mOwner.empty())
+            victim = MWBase::Environment::get().getWorld()->getPtr(item.getCellRef().mOwner, true);
 
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
-    void MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         // TODO: expell from faction
 
@@ -787,6 +810,7 @@ namespace MWMechanics
 
         if (reported)
             reportCrime(ptr, victim, type, arg);
+        return reported;
     }
 
     void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)

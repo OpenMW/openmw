@@ -371,4 +371,6 @@ op 0x2000230: Resurrect, explicit
 op 0x2000231: GetSpellReadied
 op 0x2000232: GetSpellReadied, explicit
 op 0x2000233: GetPcJumping
-opcodes 0x2000234-0x3ffffff unused
+op 0x2000234: ShowRestMenu, explicit
+opcodes 0x2000235-0x3ffffff unused
+

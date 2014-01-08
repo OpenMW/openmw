@@ -161,6 +161,7 @@ namespace Compiler
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
         const int opcodeShowRestMenu = 0x2000018;
+        const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;
         const int opcodeToggleFogOfWar = 0x2000145;
         const int opcodeToggleFullHelp = 0x2000151;

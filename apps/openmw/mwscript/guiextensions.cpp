@@ -11,11 +11,15 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwbase/mechanicsmanager.hpp"
+
 #include "interpretercontext.hpp"
+#include "ref.hpp"
 
 namespace MWScript
 {
@@ -43,6 +47,27 @@ namespace MWScript
                 {
                     MWBase::Environment::get().getWindowManager()->enableRest();
                 }
+        };
+
+        template <class R>
+        class OpShowRestMenu : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                // FIXME: No way to tell if we have a reference before trying to get it, and it will
+                // cause an exception is there isn't one :(
+                MWWorld::Ptr bed;
+                try {
+                    bed = R()(runtime);
+                }
+                catch(std::runtime_error&) {
+                }
+
+                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
+                                                                             bed))
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_RestBed);
+            }
         };
 
         class OpShowDialogue : public Interpreter::Opcode0
@@ -172,7 +197,8 @@ namespace MWScript
                 new OpEnableRest ());
 
             interpreter.installSegment5 (Compiler::Gui::opcodeShowRestMenu,
-                new OpShowDialogue (MWGui::GM_RestBed));
+                new OpShowRestMenu<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Gui::opcodeShowRestMenuExplicit, new OpShowRestMenu<ExplicitRef>);
 
             interpreter.installSegment5 (Compiler::Gui::opcodeGetButtonPressed, new OpGetButtonPressed);
 
