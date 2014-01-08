@@ -255,7 +255,7 @@ namespace MWGui
             if (pickpocket.finish())
             {
                 MWBase::Environment::get().getMechanicsManager()->reportCrime(
-                            player, MWWorld::Ptr(), MWBase::MechanicsManager::OT_Pickpocket);
+                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket);
                 MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
                 MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
                 mPickpocketDetected = true;

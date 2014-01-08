@@ -829,6 +829,18 @@ namespace MWMechanics
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
                                                   + arg);
 
+        // If committing a crime against a faction member, expell from the faction
+        if (!victim.isEmpty() && victim.getClass().isNpc())
+        {
+            std::string factionID;
+            if(!victim.getClass().getNpcStats(victim).getFactionRanks().empty())
+                factionID = victim.getClass().getNpcStats(victim).getFactionRanks().begin()->first;
+            if (ptr.getClass().getNpcStats(ptr).isSameFaction(victim.getClass().getNpcStats(victim)))
+            {
+                ptr.getClass().getNpcStats(ptr).expell(factionID);
+            }
+        }
+
         // TODO: make any guards in the area try to arrest the player
     }
 
