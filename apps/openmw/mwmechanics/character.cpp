@@ -158,6 +158,7 @@ public:
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
 {
+    //hit recoils/knockdown animations handling
     if(MWWorld::Class::get(mPtr).isActor())
     {
         if(MWWorld::Class::get(mPtr).getCreatureStats(mPtr).getAttacked())
@@ -166,19 +167,20 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         
             if(mHitState == CharState_None)
             {
-                mHitState = CharState_Hit;
                 if(mJumpState != JumpState_None && !MWBase::Environment::get().getWorld()->isFlying(mPtr) 
                         && !MWBase::Environment::get().getWorld()->isSwimming(mPtr) )
                 {
-                    mCurrentHit = sHitList[sHitListSize-1]; //knockdown animation
                     mHitState = CharState_KnockDown;
+                    mCurrentHit = sHitList[sHitListSize-1]; 
+                    mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
                 }
                 else
                 {
+                    mHitState = CharState_Hit;
                     int iHit = rand() % (sHitListSize-1);
                     mCurrentHit = sHitList[iHit];
+                    mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
                 }
-                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
             }
         }
         else if(mHitState != CharState_None && !mAnimation->isPlaying(mCurrentHit))
@@ -249,8 +251,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         else
         {
             mAnimation->disable(mCurrentJump);
-            //mCurrentJump.clear();
-            mCurrentJump = jump;
+            mCurrentJump.clear();
             mAnimation->play(jump, Priority_Jump, jumpgroup, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
         }
@@ -685,7 +686,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     else
     {
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
+        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && mHitState != CharState_KnockDown)
         {
             if(mAttackType != "shoot")
             {
@@ -710,13 +711,18 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 }
             }
             stats.setAttackStrength(complete);
-            
+
             mAnimation->disable(mCurrentWeapon);
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
                              MWRender::Animation::Group_UpperBody, false,
                              weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
                              1.0f-complete, 0);
             mUpperBodyState = UpperCharState_MaxAttackToMinHit;
+        }
+        else if (mHitState == CharState_KnockDown)
+        {
+            mUpperBodyState = UpperCharState_WeapEquiped;
+            mAnimation->disable(mCurrentWeapon);
         }
     }
 
@@ -728,7 +734,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
         {
             mUpperBodyState = UpperCharState_WeapEquiped;
             //don't allow to continue playing hit animation on UpperBody after actor had attacked during it
-            if(mHitState != CharState_None) 
+            if(mHitState == CharState_Hit) 
             {
                 mAnimation->changeGroups(mCurrentHit, MWRender::Animation::Group_LowerBody);
                 //commenting out following 2 lines will give a bit different combat dynamics(slower)
@@ -749,12 +755,6 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 stop = mAttackType+" max attack";
                 mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                 break;
-            /*case UpperCharState_MinAttackToMaxAttack:
-                if(!mAnimation->isPlaying(mCurrentWeapon))
-                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                 MWRender::Animation::Group_UpperBody, false,
-                                 1e-9f, mAttackType+" min attack", mAttackType+" max attack", 0.99f, ~0ul);
-                break;*/
             case UpperCharState_MaxAttackToMinHit:
                 if(mAttackType == "shoot")
                 {
@@ -801,23 +801,6 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 mAnimation->play(mCurrentWeapon, Priority_Weapon,
                                  MWRender::Animation::Group_UpperBody, false,
                                  weapSpeed, start, stop, 0.0f, 0);
-        }
-    }
-
-    //if playing combat animation and lowerbody is not busy switch to whole body animation
-    if((weaptype != WeapType_None || UpperCharState_UnEquipingWeap) && animPlaying)
-    {
-        if(  mMovementState != CharState_None || 
-             mJumpState != JumpState_None || 
-             mHitState != CharState_None ||
-             MWBase::Environment::get().getWorld()->isSwimming(mPtr) || 
-             cls.getStance(mPtr, MWWorld::Class::Sneak))
-        {
-            mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_UpperBody);
-        }
-        else
-        {
-            mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_All);
         }
     }
     
@@ -1002,14 +985,8 @@ void CharacterController::update(float duration)
         }
         else
         {
-            if(!(vec.z > 0.0f))
-            {
-                if(!mAnimation->isPlaying(mCurrentJump))
-                {
-                    mJumpState = JumpState_None;
-                    mCurrentJump.clear();
-                }
-            }
+           if(!(vec.z > 0.0f))
+                mJumpState = JumpState_None;
             vec.z = 0.0f;
 
             if(std::abs(vec.x/2.0f) > std::abs(vec.y))
@@ -1076,7 +1053,7 @@ void CharacterController::update(float duration)
                 rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
                 world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
             }
-            else
+            else //avoid z-rotating for knockdown
                 world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
 
             world->queueMovement(mPtr, vec);

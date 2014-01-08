@@ -562,7 +562,6 @@ void Animation::updatePosition(float oldtime, float newtime, Ogre::Vector3 &posi
 
     /* Translate the accumulation root back to compensate for the move. */
     mAccumRoot->setPosition(-off);
-    mAccumRootPosUpd=true;
 }
 
 bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
@@ -852,7 +851,6 @@ void Animation::disable(const std::string &groupname)
 Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
-    mAccumRootPosUpd = false;
     AnimStateMap::iterator stateiter = mStates.begin();
     while(stateiter != mStates.end())
     {
@@ -945,18 +943,6 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     }
 
     updateEffects(duration);
-
-    if (!mAccumRootPosUpd)
-    {
-        for(stateiter = mStates.begin();stateiter != mStates.end(); stateiter++)
-        {
-            if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
-            {
-                updatePosition(stateiter->second.mTime, stateiter->second.mTime, movement);
-                break;
-            }
-        }
-    }
 
     return movement;
 }

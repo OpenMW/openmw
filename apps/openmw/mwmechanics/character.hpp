@@ -30,6 +30,7 @@ enum Priority {
     Priority_Movement,
     Priority_Hit,
     Priority_Weapon,
+    Priority_Knockdown,
     Priority_Torch,
 
     Priority_Death,
