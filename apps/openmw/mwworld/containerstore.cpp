@@ -63,6 +63,8 @@ namespace
     }
 }
 
+const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
+
 MWWorld::ContainerStore::ContainerStore() : mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
@@ -196,7 +198,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
+            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, MWWorld::ContainerStore::sGoldId))
             {
                 iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
@@ -204,7 +206,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
             }
         }
 
-        MWWorld::ManualRef ref(esmStore, "Gold_001", count);
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, count);
         return addNewStack(ref.getPtr(), count);
     }
 

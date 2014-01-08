@@ -802,6 +802,7 @@ namespace MWMechanics
                         && (type != OT_Assault || it->first != victim)
                 )
                 {
+                    // TODO: stats.setAlarmed(true) on NPCs within earshot
                     reported=true;
                     break;
                 }

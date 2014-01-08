@@ -31,8 +31,6 @@ namespace MWGui
 
             void pickUpObject (MWWorld::Ptr object);
 
-            int getPlayerGold();
-
             MyGUI::IntCoord getAvatarScreenCoord();
 
             MWWorld::Ptr getAvatarSelectedItem(int x, int y);

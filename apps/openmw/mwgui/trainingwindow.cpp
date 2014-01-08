@@ -14,7 +14,6 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
-#include "inventorywindow.hpp"
 #include "tooltips.hpp"
 
 namespace MWGui
@@ -40,7 +39,10 @@ namespace MWGui
     {
         mPtr = actor;
 
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
 
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats (actor);
 
@@ -71,7 +73,6 @@ namespace MWGui
         MyGUI::EnumeratorWidgetPtr widgets = mTrainingOptions->getEnumerator ();
         MyGUI::Gui::getInstance ().destroyWidgets (widgets);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
@@ -82,7 +83,7 @@ namespace MWGui
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
                     (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
-            std::string skin = (price > MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
+            std::string skin = (price > playerGold) ? "SandTextGreyedOut" : "SandTextButton";
 
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(skin,
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
@@ -115,6 +116,7 @@ namespace MWGui
         int skillId = *sender->getUserData<int>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         const MWWorld::ESMStore &store =
@@ -123,7 +125,7 @@ namespace MWGui
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()<price)
+        if (playerGold<price)
             return;
 
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mPtr).getNpcStats (mPtr);
@@ -141,7 +143,7 @@ namespace MWGui
         pcStats.increaseSkill (skillId, *class_, true);
 
         // remove gold
-        player.getClass().getContainerStore(player).remove("gold_001", price, player);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);

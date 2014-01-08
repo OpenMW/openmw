@@ -11,8 +11,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 
-#include "inventorywindow.hpp"
-
 namespace MWGui
 {
 
@@ -36,6 +34,8 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
     int currentY = 0;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
     MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
     for (MWWorld::ContainerStoreIterator iter (store.begin(categories));
@@ -69,7 +69,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
             MyGUI::Button* button =
                 mList->createWidget<MyGUI::Button>(
-                    (price>MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton",
+                    (price>playerGold) ? "SandTextGreyedOut" : "SandTextButton",
                     0,
                     currentY,
                     0,
@@ -79,7 +79,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
             currentY += 18;
 
-            button->setEnabled(price<=MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold());
+            button->setEnabled(price<=playerGold);
             button->setUserString("Price", boost::lexical_cast<std::string>(price));
             button->setUserData(*iter);
             button->setCaptionWithReplacing(name);
@@ -92,7 +92,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
     mList->setCanvasSize (MyGUI::IntSize(mList->getWidth(), std::max(mList->getHeight(), currentY)));
 
     mGoldLabel->setCaptionWithReplacing("#{sGold}: "
-        + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
+        + boost::lexical_cast<std::string>(playerGold));
 }
 
 void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
@@ -119,7 +119,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
     int price = boost::lexical_cast<int>(sender->getUserString("Price"));
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    player.getClass().getContainerStore(player).remove("gold_001", price, player);
+    player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
     startRepair(mActor);
 }

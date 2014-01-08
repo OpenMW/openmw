@@ -447,19 +447,6 @@ namespace MWGui
         updateEncumbranceBar();
     }
 
-    int InventoryWindow::getPlayerGold()
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        for (MWWorld::ContainerStoreIterator it = invStore.begin();
-                it != invStore.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
-                return it->getRefData().getCount();
-        }
-        return 0;
-    }
-
     void InventoryWindow::setTrading(bool trading)
     {
         mTrading = trading;

@@ -5,12 +5,11 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "itemselection.hpp"
 #include "container.hpp"
-#include "inventorywindow.hpp"
 
 #include "sortfilteritemmodel.hpp"
 
@@ -289,7 +288,9 @@ namespace MWGui
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
-        if (mEnchanting.getEnchantPrice() > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        if (mEnchanting.getEnchantPrice() > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;

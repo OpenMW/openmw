@@ -35,6 +35,8 @@ namespace MWWorld
 
             static const int Type_All = 0xffff;
 
+            static const std::string sGoldId;
+
         private:
 
             MWWorld::CellRefList<ESM::Potion>            potions;

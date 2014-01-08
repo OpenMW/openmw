@@ -100,7 +100,7 @@ namespace MWClass
 
             // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
             // (except for gold you gave him)
-            data->mContainerStore.add("gold_001", ref->mBase->mData.mGold, ptr);
+            data->mContainerStore.add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
 
             // store
             ptr.getRefData().setCustomData (data.release());

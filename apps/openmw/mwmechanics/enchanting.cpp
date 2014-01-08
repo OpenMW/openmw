@@ -299,6 +299,6 @@ namespace MWMechanics
         const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
 
-        store.remove("gold_001", getEnchantPrice(), player);
+        store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
     }
 }
