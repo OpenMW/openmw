@@ -45,13 +45,14 @@ namespace MWGui
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
-                (price>playerGold) ? "SandTextGreyedOut" : "SandTextButton",
+                "SandTextButton",
                 0,
                 mCurrentY,
                 200,
                 sLineHeight,
                 MyGUI::Align::Default
             );
+        toAdd->setEnabled(price<=playerGold);
 
         mCurrentY += sLineHeight;
 
@@ -118,19 +119,13 @@ namespace MWGui
         int price = *_sender->getUserData<int>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::Spells& spells = stats.getSpells();
+        spells.add (mSpellsWidgetMap.find(_sender)->second);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+        startSpellBuying(mPtr);
 
-        if (playerGold>=price)
-        {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
-            MWMechanics::Spells& spells = stats.getSpells();
-            spells.add (mSpellsWidgetMap.find(_sender)->second);
-            player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
-            startSpellBuying(mPtr);
-
-            MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
-        }
+        MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
     }
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

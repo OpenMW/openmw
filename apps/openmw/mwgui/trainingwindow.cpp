@@ -83,11 +83,10 @@ namespace MWGui
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
                     (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
-            std::string skin = (price > playerGold) ? "SandTextGreyedOut" : "SandTextButton";
-
-            MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(skin,
+            MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
 
+            button->setEnabled(price <= playerGold);
             button->setUserData(bestSkills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
@@ -116,7 +115,6 @@ namespace MWGui
         int skillId = *sender->getUserData<int>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         const MWWorld::ESMStore &store =
@@ -124,9 +122,6 @@ namespace MWGui
 
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
-
-        if (playerGold<price)
-            return;
 
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mPtr).getNpcStats (mPtr);
         if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())

@@ -68,8 +68,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
 
             MyGUI::Button* button =
-                mList->createWidget<MyGUI::Button>(
-                    (price>playerGold) ? "SandTextGreyedOut" : "SandTextButton",
+                mList->createWidget<MyGUI::Button>("SandTextButton",
                     0,
                     currentY,
                     0,

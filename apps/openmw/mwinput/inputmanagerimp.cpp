@@ -555,7 +555,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
         {
             MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-            if (b)
+            if (b && b->getEnabled())
             {
                 MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
             }

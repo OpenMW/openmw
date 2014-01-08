@@ -66,7 +66,8 @@ namespace MWGui
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>playerGold) ? "SandTextGreyedOut" : "SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        toAdd->setEnabled(price<=playerGold);
         mCurrentY += sLineHeight;
         if(interior)
             toAdd->setUserString("interior","y");
