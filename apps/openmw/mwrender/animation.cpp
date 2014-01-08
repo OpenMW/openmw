@@ -673,7 +673,20 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
 }
 
-
+void Animation::changeGroups(const std::string &groupname, int groups)
+{
+    AnimStateMap::iterator stateiter = mStates.begin();
+    stateiter = mStates.find(groupname);
+    if(stateiter != mStates.end())
+    {
+        if(stateiter->second.mGroups != groups)
+        {
+            stateiter->second.mGroups = groups;
+            resetActiveGroups();
+        }
+        return;
+    }
+}
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase || mAnimSources.empty())
@@ -839,7 +852,6 @@ void Animation::disable(const std::string &groupname)
 Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
-
     AnimStateMap::iterator stateiter = mStates.begin();
     while(stateiter != mStates.end())
     {

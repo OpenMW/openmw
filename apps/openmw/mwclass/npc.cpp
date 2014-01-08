@@ -616,6 +616,7 @@ namespace MWClass
             // something, alert the character controller, scripts, etc.
 
             MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+            getCreatureStats(ptr).setAttacked(true);//used in CharacterController
 
             if(object.isEmpty())
             {
