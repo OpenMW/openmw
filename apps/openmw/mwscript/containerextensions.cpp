@@ -87,15 +87,9 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
-                    Interpreter::Type_Integer sum = 0;
-
-                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
-                            sum += iter->getRefData().getCount();
-
-                    runtime.push (sum);
+                    runtime.push (store.count(item));
                 }
         };
 

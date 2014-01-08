@@ -77,6 +77,15 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
+int MWWorld::ContainerStore::count(const std::string &id)
+{
+    int total=0;
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, id))
+            total += iter->getRefData().getCount();
+    return total;
+}
+
 void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
 {
     if (ptr.getRefData().getCount() <= 1)

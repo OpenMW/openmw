@@ -92,6 +92,9 @@ namespace MWWorld
             void unstack (const Ptr& ptr, const Ptr& container);
             ///< Unstack an item in this container. The item's count will be set to 1, then a new stack will be added with (origCount-1).
 
+            /// @return How many items with refID \a id are in this container?
+            int count (const std::string& id);
+
         protected:
             ContainerStoreIterator addNewStack (const Ptr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
