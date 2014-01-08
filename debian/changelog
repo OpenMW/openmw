@@ -1,3 +1,9 @@
+openmw (0.27.1-2) UNRELEASED; urgency=low
+
+  * Updated debian/watch
+
+ -- Scott Howard <showard@debian.org>  Tue, 07 Jan 2014 21:07:59 -0500
+
 openmw (0.27.1-1) experimental; urgency=low
 
   * Bumping for re-tag

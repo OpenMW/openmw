@@ -1,2 +1,2 @@
 version=3
-https://github.com/zinnschlag/openmw/releases (.*).tar.gz
+https://github.com/zinnschlag/openmw/releases .*openmw-(.*).tar.gz
