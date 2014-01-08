@@ -46,7 +46,6 @@ namespace MWMechanics
         bool mRecalcDynamicStats;
 
         std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
-
     protected:
         bool mIsWerewolf;
         AttributeValue mWerewolfAttributes[8];
@@ -124,10 +123,10 @@ namespace MWMechanics
 
         enum AiSetting
         {
-            AI_Hello,
-            AI_Fight,
-            AI_Flee,
-            AI_Alarm
+            AI_Hello = 0,
+            AI_Fight = 1,
+            AI_Flee = 2,
+            AI_Alarm = 3
         };
         void setAiSetting (AiSetting index, Stat<int> value);
         void setAiSetting (AiSetting index, int base);

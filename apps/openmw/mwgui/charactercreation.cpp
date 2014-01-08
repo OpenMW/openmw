@@ -221,7 +221,7 @@ namespace MWGui
 
                 {
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-                    MWMechanics::CreatureStats stats = MWWorld::Class::get(player).getCreatureStats(player);
+                    const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
 
                     mReviewDialog->setHealth ( stats.getHealth()  );
                     mReviewDialog->setMagicka( stats.getMagicka() );

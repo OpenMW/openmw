@@ -149,7 +149,7 @@ namespace MWGui
         // I'm making the assumption here that the # of hours rested is calculated when rest is started
         // TODO: the rougher logic here (calculating the hourly deltas) should really go into helper funcs elsewhere
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWMechanics::CreatureStats stats = MWWorld::Class::get(player).getCreatureStats(player);
+        const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         float hourlyHealthDelta  = stats.getAttribute(ESM::Attribute::Endurance).getModified() * 0.1;

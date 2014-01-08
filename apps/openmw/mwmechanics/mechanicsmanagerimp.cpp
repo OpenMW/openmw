@@ -424,7 +424,7 @@ namespace MWMechanics
 
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
-        MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        const MWMechanics::NpcStats& npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
         float x = npcSkill.getBaseDisposition();
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
@@ -539,7 +539,7 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        MWMechanics::NpcStats npcStats = MWWorld::Class::get(npc).getNpcStats(npc);
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(npc).getNpcStats(npc);
 
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
@@ -613,6 +613,8 @@ namespace MWMechanics
                 int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
                                        std::max(0, std::min(100, flee + int(std::max(iPerMinChange, s)))));
+                // TODO: initiate combat and quit dialogue if fight rating is too high
+                // or should setAiSetting handle this?
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
                                        std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
             }
@@ -644,10 +646,9 @@ namespace MWMechanics
 
             float c = std::abs(int(target1 - roll));
 
-            if (roll <= target1)
+            if (success)
             {
                 float s = c * fPerDieRollMult * fPerTempMult;
-
                 int flee = npcStats.getAiSetting (CreatureStats::AI_Flee).getBase();
                 int fight = npcStats.getAiSetting (CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (CreatureStats::AI_Flee,
