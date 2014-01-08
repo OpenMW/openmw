@@ -107,7 +107,8 @@ namespace MWScript
 
                     std::string current = cell->mName;
 
-                    if (!(cell->mData.mFlags & ESM::Cell::Interior) && current.empty())
+                    if (!(cell->mData.mFlags & ESM::Cell::Interior) && current.empty()
+                            && !cell->mRegion.empty())
                     {
                         const ESM::Region *region =
                             MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find (cell->mRegion);
