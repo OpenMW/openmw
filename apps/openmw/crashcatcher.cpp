@@ -177,7 +177,7 @@ static void sys_info(void)
 {
 #ifdef __unix__
     struct utsname info;
-    if(!uname(&info))
+    if(uname(&info))
         printf("!!! Failed to get system information\n");
     else
         printf("System: %s %s %s %s %s\n",
