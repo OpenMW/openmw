@@ -21,7 +21,6 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -55,7 +54,7 @@ namespace MWScript
                     MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
-                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer() )
+                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr() )
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
                         std::string msgBox;
@@ -133,7 +132,7 @@ namespace MWScript
 
                     // Spawn a messagebox (only for items removed from player's inventory)
                     if ((numRemoved > 0)
-                        && (ptr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer()))
+                        && (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()))
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;

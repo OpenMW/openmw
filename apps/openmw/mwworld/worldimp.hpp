@@ -187,6 +187,7 @@ namespace MWWorld
             virtual const Fallback *getFallback() const;
 
             virtual Player& getPlayer();
+            virtual MWWorld::Ptr getPlayerPtr();
 
             virtual const MWWorld::ESMStore& getStore() const;
 

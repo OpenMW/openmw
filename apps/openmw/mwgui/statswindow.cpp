@@ -6,8 +6,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -224,7 +224,7 @@ namespace MWGui
         if (!mMainWidget->getVisible())
             return;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
 
         // level progress
@@ -424,7 +424,7 @@ namespace MWGui
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::NPC *player =
-            world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
         // race tooltip
         const ESM::Race* playerRace = store.get<ESM::Race>().find(player->mRace);
@@ -452,7 +452,7 @@ namespace MWGui
             if (!mSkillWidgets.empty())
                 addSeparator(coord1, coord2);
 
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
             const std::set<std::string> &expelled = PCstats.getExpelled();
 

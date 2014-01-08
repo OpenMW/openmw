@@ -18,7 +18,6 @@
 #include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -65,7 +64,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr player = world->getPlayer().getPlayer();
+                MWWorld::Ptr player = world->getPlayerPtr();
                 runtime.push (!world->isOnGround(player) && !world->isFlying(player));
             }
         };

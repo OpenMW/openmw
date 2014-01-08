@@ -8,7 +8,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 
@@ -103,7 +102,7 @@ namespace MWGui
 
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
         for (MWMechanics::Spells::TIterator it = playerSpells.begin(); it != playerSpells.end(); ++it)
         {
@@ -119,7 +118,7 @@ namespace MWGui
 
         if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()>=price)
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
             MWMechanics::Spells& spells = stats.getSpells();
             spells.add (mSpellsWidgetMap.find(_sender)->second);

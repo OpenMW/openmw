@@ -9,7 +9,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -148,7 +147,7 @@ namespace MWGui
         // we need to sleep for a specific time, and since that isn't calculated yet, we'll do it here
         // I'm making the assumption here that the # of hours rested is calculated when rest is started
         // TODO: the rougher logic here (calculating the hourly deltas) should really go into helper funcs elsewhere
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -218,7 +217,7 @@ namespace MWGui
 
     void WaitDialog::setCanRest (bool canRest)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
                 && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
@@ -272,7 +271,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
         mWaiting = false;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &pcstats = MWWorld::Class::get(player).getNpcStats(player);
 
         // trigger levelup if possible

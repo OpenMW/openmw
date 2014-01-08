@@ -12,7 +12,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
@@ -69,7 +68,7 @@ namespace MWGui
 
     void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWBase::MechanicsManager::PersuasionType type;
         if (sender == mAdmireButton) type = MWBase::MechanicsManager::PT_Admire;
         else if (sender == mIntimidateButton) type = MWBase::MechanicsManager::PT_Intimidate;

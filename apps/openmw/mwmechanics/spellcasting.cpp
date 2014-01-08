@@ -7,8 +7,8 @@
 
 
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/actionteleport.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwrender/animation.hpp"
 

@@ -24,7 +24,7 @@ namespace MWWorld
         std::pair <int, std::string> result = MWWorld::Class::get (object).canBeEquipped (object, actor);
 
         // display error message if the player tried to equip something
-        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
             MWBase::Environment::get().getWindowManager()->messageBox(result.second);
 
         switch(result.first)
@@ -84,7 +84,7 @@ namespace MWWorld
         std::string script = MWWorld::Class::get(object).getScript(object);
         
         /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
-        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && script != "")
+        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayerPtr() && script != "")
             object.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }

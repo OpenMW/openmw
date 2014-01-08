@@ -9,7 +9,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 
@@ -57,7 +56,7 @@ namespace MWGui
         }
         else
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
             price = d/gmst.find("fTravelMult")->getFloat();
@@ -121,7 +120,7 @@ namespace MWGui
         int price;
         iss >> price;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()<price)
             return;

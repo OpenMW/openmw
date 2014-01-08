@@ -11,7 +11,6 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -64,7 +63,7 @@ namespace MWScript
                 catch(std::runtime_error&) {
                 }
 
-                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
+                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWBase::Environment::get().getWorld()->getPlayerPtr(),
                                                                              bed))
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_RestBed);
             }

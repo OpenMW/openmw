@@ -1,7 +1,6 @@
 #include "security.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwbase/world.hpp"

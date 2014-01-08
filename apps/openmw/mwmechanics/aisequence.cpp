@@ -15,7 +15,6 @@
 #include "npcstats.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwworld/player.hpp"
 
 void MWMechanics::AiSequence::copy (const AiSequence& sequence)
 {
@@ -63,7 +62,7 @@ bool MWMechanics::AiSequence::isPackageDone() const
 
 void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
 {
-    if(actor != MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+    if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
     {
         if (!mPackages.empty())
         {

@@ -30,7 +30,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwgui/dialogue.hpp"
 
@@ -493,7 +492,7 @@ namespace MWDialogue
         else if (curDisp + mTemporaryDispositionChange > 100)
             mTemporaryDispositionChange = 100 - curDisp;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
 
         std::string text;

@@ -17,7 +17,6 @@
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"

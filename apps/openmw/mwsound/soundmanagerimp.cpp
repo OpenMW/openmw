@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"
@@ -479,7 +478,7 @@ namespace MWSound
         static std::string regionName = "";
         static float sTimePassed = 0.0;
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        const MWWorld::Ptr player = world->getPlayer().getPlayer();
+        const MWWorld::Ptr player = world->getPlayerPtr();
         const ESM::Cell *cell = player.getCell()->mCell;
 
         sTimePassed += duration;
@@ -547,7 +546,7 @@ namespace MWSound
             startRandomTitle();
 
         MWWorld::Ptr player =
-            MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWBase::Environment::get().getWorld()->getPlayerPtr();
         const ESM::Cell *cell = player.getCell()->mCell;
 
         Environment env = Env_Normal;

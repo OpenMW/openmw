@@ -41,7 +41,7 @@ namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
     {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
@@ -251,7 +251,7 @@ namespace MWMechanics
     {
         // Uses ingame time, but scaled to real time
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
 
@@ -332,7 +332,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager();
 
             const ESM::NPC *player =
-                world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+                world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
             const ESM::Race *race =
                 world->getStore().get<ESM::Race>().find(player->mRace);
@@ -358,7 +358,7 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
             mActors.removeActor(ptr);
             mActors.addActor(ptr);
         }
@@ -377,7 +377,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mName = name;
 
         world->createRecord(player);
@@ -390,7 +390,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
         player.mRace = race;
         player.mHead = head;
@@ -416,7 +416,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = id;
 
         world->createRecord(player);
@@ -433,7 +433,7 @@ namespace MWMechanics
         const ESM::Class *ptr = world->createRecord(cls);
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = ptr->mId;
 
         world->createRecord(player);
@@ -449,7 +449,7 @@ namespace MWMechanics
         float x = npcSkill.getBaseDisposition();
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
@@ -517,7 +517,7 @@ namespace MWMechanics
 
         const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
         // I suppose the temporary disposition change _has_ to be considered here,
@@ -562,7 +562,7 @@ namespace MWMechanics
 
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(npc).getNpcStats(npc);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
         float persTerm = playerStats.getAttribute(ESM::Attribute::Personality).getModified()

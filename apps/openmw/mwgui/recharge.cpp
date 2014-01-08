@@ -7,7 +7,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -85,7 +84,7 @@ void Recharge::updateView()
 
     int currentY = 0;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
     for (MWWorld::ContainerStoreIterator iter (store.begin());
          iter!=store.end(); ++iter)
@@ -141,7 +140,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
 
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
     MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
 

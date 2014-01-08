@@ -112,6 +112,7 @@ namespace MWBase
             virtual const MWWorld::Fallback *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
+            virtual MWWorld::Ptr getPlayerPtr() = 0;
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
 

@@ -11,7 +11,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -144,7 +143,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                     runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Run));
                 }
         };
@@ -155,7 +154,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                     runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Sneak));
                 }
         };

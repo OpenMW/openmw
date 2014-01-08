@@ -148,7 +148,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     {
         CellStore *cell;
 
-        Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
@@ -305,8 +305,8 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
             const std::vector<ESM::LeveledListBase::LevelItem>& items = levItem->mList;
 
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            int playerLevel = MWWorld::Class::get(player).getCreatureStats(player).getLevel();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
             failChance += levItem->mChanceNone;
 

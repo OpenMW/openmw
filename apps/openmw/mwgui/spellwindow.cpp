@@ -5,7 +5,6 @@
 
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 
@@ -81,7 +80,7 @@ namespace MWGui
 
         // retrieve all player spells, divide them into Powers and Spells and sort them
         std::vector<std::string> spellList;
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
@@ -298,7 +297,7 @@ namespace MWGui
 
     void SpellWindow::onEnchantedItemSelected(MyGUI::Widget* _sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWWorld::Ptr item = *_sender->getUserData<MWWorld::Ptr>();
 
@@ -320,7 +319,7 @@ namespace MWGui
             // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
 
             MWWorld::ActionEquip action(item);
-            action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
+            action.execute (MWBase::Environment::get().getWorld ()->getPlayerPtr());
 
             // since we changed equipping status, update the inventory window
             MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
@@ -335,7 +334,7 @@ namespace MWGui
     void SpellWindow::onSpellSelected(MyGUI::Widget* _sender)
     {
         std::string spellId = _sender->getUserString("Spell");
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
 
         if (MyGUI::InputManager::getInstance().isShiftPressed())
@@ -389,7 +388,7 @@ namespace MWGui
 
     void SpellWindow::onDeleteSpellAccept()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 

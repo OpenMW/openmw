@@ -12,7 +12,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/actioneat.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/nullaction.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -153,7 +152,7 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
         int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
 

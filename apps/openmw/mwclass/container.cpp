@@ -16,7 +16,6 @@
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/physicssystem.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -108,7 +107,7 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
         bool needKey = ptr.getCellRef().mLockLevel>0;

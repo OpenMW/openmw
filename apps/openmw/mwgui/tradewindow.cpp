@@ -16,8 +16,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "../mwworld/player.hpp"
-
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -271,7 +269,7 @@ namespace MWGui
             return;
         }
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         if(mCurrentBalance > mCurrentMerchantOffer)
         {

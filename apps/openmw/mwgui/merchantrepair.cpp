@@ -8,7 +8,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 
@@ -36,7 +35,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
     int currentY = 0;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
     for (MWWorld::ContainerStoreIterator iter (store.begin(categories));
@@ -119,7 +118,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 
     int price = boost::lexical_cast<int>(sender->getUserString("Price"));
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     player.getClass().getContainerStore(player).remove("gold_001", price, player);
 
     startRepair(mActor);

@@ -166,10 +166,10 @@ namespace MWWorld
     void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr old = world->getPlayer().getPlayer();
+        MWWorld::Ptr old = world->getPlayerPtr();
         world->getPlayer().setCell(cell);
 
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         mRendering.updatePlayerPtr(player);
 
         if (adjustPlayerPos) {
@@ -369,14 +369,14 @@ namespace MWWorld
         if(!loadcell)
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            world->moveObject(world->getPlayer().getPlayer(), position.pos[0], position.pos[1], position.pos[2]);
+            world->moveObject(world->getPlayerPtr(), position.pos[0], position.pos[1], position.pos[2]);
 
             float x = Ogre::Radian(position.rot[0]).valueDegrees();
             float y = Ogre::Radian(position.rot[1]).valueDegrees();
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
-            world->rotateObject(world->getPlayer().getPlayer(), x, y, z);
+            world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            MWWorld::Class::get(world->getPlayer().getPlayer()).adjustPosition(world->getPlayer().getPlayer());
+            MWWorld::Class::get(world->getPlayerPtr()).adjustPosition(world->getPlayerPtr());
             world->getFader()->fadeIn(0.5f);
             return;
         }

@@ -33,7 +33,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/player.hpp"
 
 #include "shadows.hpp"
 #include "localmap.hpp"
@@ -324,7 +323,7 @@ void RenderingManager::update (float duration, bool paused)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-    MWWorld::Ptr player = world->getPlayer().getPlayer();
+    MWWorld::Ptr player = world->getPlayerPtr();
 
     int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
     mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
@@ -585,7 +584,7 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
 {
     mAmbientColor = colour;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
     Ogre::ColourValue final = colour;
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
@@ -737,7 +736,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         else if (it->second == "max viewing distance" && it->first == "Viewing distance")
         {
             if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
-                configureFog(*MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell());
+                configureFog(*MWBase::Environment::get().getWorld()->getPlayerPtr().getCell());
         }
         else if (it->first == "Video" && (
                 it->second == "resolution x"

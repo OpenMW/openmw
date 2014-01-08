@@ -11,7 +11,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/actionequip.hpp"
 
@@ -163,7 +162,7 @@ namespace MWMechanics
         {
             CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
             //engage combat or not?
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             if(ptr != player && !creatureStats.isHostile())
             {
                 ESM::Position playerpos = player.getRefData().getPosition();
@@ -585,7 +584,7 @@ namespace MWMechanics
                 ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - 3.0f*duration);
 
                 // Play a drowning sound as necessary for the player
-                if(ptr == world->getPlayer().getPlayer())
+                if(ptr == world->getPlayerPtr())
                 {
                     MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
                     if(!sndmgr->getSoundPlaying(MWWorld::Ptr(), "drown"))

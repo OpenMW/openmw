@@ -355,7 +355,7 @@ namespace MWInput
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
             {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                 mOverencumberedMessageDelay -= dt;
                 if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
                 {

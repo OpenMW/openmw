@@ -2,7 +2,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwmechanics/spellcasting.hpp"
@@ -126,7 +125,7 @@ namespace MWGui
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         mAssignDialog->setVisible (false);
     }
@@ -267,7 +266,7 @@ namespace MWGui
 
         QuickKeyType type = *button->getUserData<QuickKeyType>();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
 
         if (type == Type_Item || type == Type_MagicItem)
@@ -311,7 +310,7 @@ namespace MWGui
 
             boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(item).use(item);
 
-            action->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+            action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
             // this is necessary for books/scrolls: if they are already in the player's inventory,
             // the "Take" button should not be visible.
@@ -344,7 +343,7 @@ namespace MWGui
                 // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
 
                 MWWorld::ActionEquip action(item);
-                action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
+                action.execute (MWBase::Environment::get().getWorld ()->getPlayerPtr());
             }
 
             store.setSelectedEnchantItem(it);
@@ -430,7 +429,7 @@ namespace MWGui
 
         const int spellHeight = 18;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();

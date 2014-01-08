@@ -9,7 +9,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 
@@ -72,7 +71,7 @@ namespace MWGui
         MyGUI::EnumeratorWidgetPtr widgets = mTrainingOptions->getEnumerator ();
         MyGUI::Gui::getInstance ().destroyWidgets (widgets);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
@@ -115,7 +114,7 @@ namespace MWGui
     {
         int skillId = *sender->getUserData<int>();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         const MWWorld::ESMStore &store =
