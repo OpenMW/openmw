@@ -223,6 +223,9 @@ int CS::Editor::run()
     params.insert(std::make_pair("FSAA", "0"));
     params.insert(std::make_pair("vsync", "false"));
     params.insert(std::make_pair("hidden", "true"));
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    params.insert(std::make_pair("macAPI", "cocoa"));
+#endif
     Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
     hiddenWindow->setActive(false);
 #endif
