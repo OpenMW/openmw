@@ -130,7 +130,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
-                    runtime.push (cell->mWaterLevel);
+                    if (cell->mCell->hasWater())
+                        runtime.push (cell->mWaterLevel);
+                    else
+                        runtime.push (-std::numeric_limits<float>().max());
                 }
         };
 
