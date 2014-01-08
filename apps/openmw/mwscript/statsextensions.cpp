@@ -905,15 +905,7 @@ namespace MWScript
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     if(factionID!="")
                     {
-                        std::set<std::string>& expelled = MWWorld::Class::get(player).getNpcStats(player).getExpelled ();
-                        if (expelled.find (factionID) != expelled.end())
-                        {
-                            runtime.push(1);
-                        }
-                        else
-                        {
-                            runtime.push(0);
-                        }
+                        runtime.push(player.getClass().getNpcStats(player).getExpelled(factionID));
                     }
                     else
                     {
@@ -951,9 +943,7 @@ namespace MWScript
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     if(factionID!="")
                     {
-                        std::set<std::string>& expelled = MWWorld::Class::get(player).getNpcStats(player).getExpelled ();
-                        Misc::StringUtils::toLower(factionID);
-                        expelled.insert(factionID);
+                        player.getClass().getNpcStats(player).expell(factionID);
                     }
                 }
         };
@@ -986,11 +976,7 @@ namespace MWScript
                     }
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     if(factionID!="")
-                    {
-                        std::set<std::string>& expelled = MWWorld::Class::get(player).getNpcStats(player).getExpelled ();
-                        Misc::StringUtils::toLower(factionID);
-                        expelled.erase (factionID);
-                    }
+                        player.getClass().getNpcStats(player).clearExpelled(factionID);
                 }
         };
 

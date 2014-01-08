@@ -99,8 +99,10 @@ namespace MWMechanics
             const std::map<std::string, int>& getFactionRanks() const;
             std::map<std::string, int>& getFactionRanks();
 
-            const std::set<std::string>& getExpelled() const;
-            std::set<std::string>& getExpelled();
+            const std::set<std::string>& getExpelled() const { return mExpelled; }
+            bool getExpelled(const std::string& factionID) const;
+            void expell(const std::string& factionID);
+            void clearExpelled(const std::string& factionID);
 
             bool isSameFaction (const NpcStats& npcStats) const;
             ///< Do *this and \a npcStats share a faction?

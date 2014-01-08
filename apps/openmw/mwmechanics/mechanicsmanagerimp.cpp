@@ -470,7 +470,7 @@ namespace MWMechanics
                 it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
             {
                 if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)
-                        && playerStats.getExpelled().find(Misc::StringUtils::lowerCase(it->mFaction)) == playerStats.getExpelled().end())
+                        && !playerStats.getExpelled(it->mFaction))
                     reaction = it->mReaction;
             }
             rank = playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;

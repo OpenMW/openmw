@@ -507,9 +507,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             std::string faction =
                 MWWorld::Class::get (mActor).getNpcStats (mActor).getFactionRanks().begin()->first;
 
-            std::set<std::string>& expelled = MWWorld::Class::get (player).getNpcStats (player).getExpelled();
-
-            return expelled.find (faction)!=expelled.end();
+            return player.getClass().getNpcStats(player).getExpelled(faction);
         }
 
         case SelectWrapper::Function_PcVampire:
