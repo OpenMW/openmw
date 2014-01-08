@@ -448,6 +448,10 @@ namespace MWBase
             /// @note This also works for references in containers.
             virtual void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
                                                   DetectionType type) = 0;
+
+            /// Update the value of some globals according to the world state, which may be used by dialogue entries.
+            /// This should be called when initiating a dialogue.
+            virtual void updateDialogueGlobals() = 0;
     };
 }
 

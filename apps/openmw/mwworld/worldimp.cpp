@@ -2420,4 +2420,25 @@ namespace MWWorld
     {
         return mPlayer->getPlayer();
     }
+
+    void World::updateDialogueGlobals()
+    {
+        MWWorld::Ptr player = getPlayerPtr();
+        int bounty = player.getClass().getNpcStats(player).getBounty();
+        int playerGold = player.getClass().getContainerStore(player).count(ContainerStore::sGoldId);
+
+        float fCrimeGoldDiscountMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
+        float fCrimeGoldTurnInMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->getFloat();
+
+        int discount = bounty*fCrimeGoldDiscountMult;
+        int turnIn = bounty * fCrimeGoldTurnInMult;
+
+        mGlobalVariables->setInt("pchascrimegold", (bounty <= playerGold) ? 1 : 0);
+
+        mGlobalVariables->setInt("pchasgolddiscount", (discount <= playerGold) ? 1 : 0);
+        mGlobalVariables->setInt("crimegolddiscount", discount);
+
+        mGlobalVariables->setInt("crimegoldturnin", turnIn);
+        mGlobalVariables->setInt("pchasturnin", (turnIn <= playerGold) ? 1 : 0);
+    }
 }
