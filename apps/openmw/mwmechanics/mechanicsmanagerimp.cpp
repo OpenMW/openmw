@@ -749,11 +749,15 @@ namespace MWMechanics
         if (!owner.empty())
             victim = MWBase::Environment::get().getWorld()->getPtr(owner, true);
 
+        // TODO: expell from faction
+
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
     void MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
+        // TODO: expell from faction
+
         bool reported=false;
         for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
         {

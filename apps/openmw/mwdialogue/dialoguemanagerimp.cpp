@@ -126,6 +126,8 @@ namespace MWDialogue
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
         mLastTopic = "";
+        mPermanentDispositionChange = 0;
+        mTemporaryDispositionChange = 0;
 
         mChoice = -1;
         mIsInChoice = false;
@@ -514,9 +516,19 @@ namespace MWDialogue
         return mTemporaryDispositionChange;
     }
 
-    void DialogueManager::applyTemporaryDispositionChange(int delta)
+    void DialogueManager::applyDispositionChange(int delta)
     {
+        int oldTemp = mTemporaryDispositionChange;
         mTemporaryDispositionChange += delta;
+        // don't allow increasing beyond 100 or decreasing below 0
+        int curDisp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
+        if (curDisp + mTemporaryDispositionChange < 0)
+            mTemporaryDispositionChange = -curDisp;
+        else if (curDisp + mTemporaryDispositionChange > 100)
+            mTemporaryDispositionChange = 100 - curDisp;
+
+        int diff = mTemporaryDispositionChange - oldTemp;
+        mPermanentDispositionChange += diff;
     }
 
     bool DialogueManager::checkServiceRefused()

@@ -248,7 +248,8 @@ namespace MWMechanics
 
     void CreatureStats::setAiSetting (AiSetting index, int base)
     {
-        Stat<int> stat(base);
+        Stat<int> stat = getAiSetting(index);
+        stat.setBase(base);
         setAiSetting(index, stat);
     }
 
