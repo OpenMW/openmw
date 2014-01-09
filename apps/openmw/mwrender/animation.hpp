@@ -258,7 +258,7 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
-    bool isPlaying(Group group) const;
+    bool allowSwitchViewMode() const;
 
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
