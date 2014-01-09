@@ -244,6 +244,9 @@ namespace Compiler
             extensions.registerFunction ("getpcjumping", 'l', "", opcodeGetPcJumping);
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
             extensions.registerInstruction ("playbink", "Sl", opcodePlayBink);
+            extensions.registerInstruction ("payfine", "", opcodePayFine);
+            extensions.registerInstruction ("payfinethief", "", opcodePayFineThief);
+            extensions.registerInstruction ("gotojail", "", opcodeGoToJail);
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "S", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);

@@ -287,17 +287,13 @@ namespace MWMechanics
             if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled())
                 return;
 
-            Ogre::Vector3 worldPos;
-            if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(target.getCell(), worldPos))
-                worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
-
             if (effectId == ESM::MagicEffect::DivineIntervention)
             {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker", worldPos);
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker");
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker", worldPos);
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker");
             }
 
             else if (effectId == ESM::MagicEffect::Mark)

@@ -2273,6 +2273,8 @@ namespace MWWorld
 
     bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
     {
+        if (cell->isExterior())
+            return false;
         MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
         CellRefList<ESM::Door>::List& refList = doors.mList;
 
@@ -2293,8 +2295,12 @@ namespace MWWorld
     }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                          const std::string& id, Ogre::Vector3 worldPos)
+                                          const std::string& id)
     {
+        Ogre::Vector3 worldPos;
+        if (!findInteriorPositionInWorldSpace(ptr.getCell(), worldPos))
+            worldPos = mPlayer->getLastKnownExteriorPosition();
+
         MWWorld::Ptr closestMarker;
         float closestDistance = FLT_MAX;
 

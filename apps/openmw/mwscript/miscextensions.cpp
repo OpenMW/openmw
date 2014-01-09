@@ -762,6 +762,43 @@ namespace MWScript
             }
         };
 
+        class OpGoToJail : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                MWWorld::Ptr player = world->getPlayerPtr();
+                world->teleportToClosestMarker(player, "prisonmarker");
+                player.getClass().getNpcStats(player).setBounty(0);
+                // TODO: pass time, change skills, show messagebox
+                // TODO: move stolen items to closest evidence chest
+                // iDaysinPrisonMod
+            }
+        };
+
+        class OpPayFine : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                player.getClass().getNpcStats(player).setBounty(0);
+
+                // TODO: move stolen items to closest evidence chest
+            }
+        };
+
+        class OpPayFineThief : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                player.getClass().getNpcStats(player).setBounty(0);
+            }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -785,6 +822,9 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcJumping, new OpGetPcJumping);
             interpreter.installSegment5 (Compiler::Misc::opcodeWakeUpPc, new OpWakeUpPc);
             interpreter.installSegment5 (Compiler::Misc::opcodePlayBink, new OpPlayBink);
+            interpreter.installSegment5 (Compiler::Misc::opcodePayFine, new OpPayFine);
+            interpreter.installSegment5 (Compiler::Misc::opcodePayFineThief, new OpPayFineThief);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGoToJail, new OpGoToJail);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetLocked, new OpGetLocked<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetEffect, new OpGetEffect<ImplicitRef>);
