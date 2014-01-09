@@ -8,7 +8,6 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/player.hpp"
 
 #include "formatting.hpp"
 
@@ -138,7 +137,7 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound("Item Book Up", 1.0, 1.0);
 
         MWWorld::ActionTake take(mBook);
-        take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        take.execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }

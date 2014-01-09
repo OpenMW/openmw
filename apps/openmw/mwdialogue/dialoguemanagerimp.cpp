@@ -30,7 +30,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwgui/dialogue.hpp"
 
@@ -144,6 +143,7 @@ namespace MWDialogue
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
+        updateGlobals();
 
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
@@ -297,6 +297,11 @@ namespace MWDialogue
             // no response found, print a fallback text
             win->addResponse ("…", topic);
         }
+    }
+
+    void DialogueManager::updateGlobals()
+    {
+        MWBase::Environment::get().getWorld()->updateDialogueGlobals();
     }
 
     void DialogueManager::updateTopics()
@@ -493,7 +498,7 @@ namespace MWDialogue
         else if (curDisp + mTemporaryDispositionChange > 100)
             mTemporaryDispositionChange = 100 - curDisp;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
 
         std::string text;

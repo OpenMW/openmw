@@ -6,7 +6,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
 
@@ -59,7 +58,7 @@ namespace MWGui
 
     void LevelupDialog::setAttributeValues()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
@@ -115,7 +114,7 @@ namespace MWGui
     void LevelupDialog::open()
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
@@ -155,7 +154,7 @@ namespace MWGui
 
     void LevelupDialog::onOkButtonClicked (MyGUI::Widget* sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 

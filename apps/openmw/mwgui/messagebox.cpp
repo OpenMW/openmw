@@ -10,6 +10,7 @@ namespace MWGui
 
     MessageBoxManager::MessageBoxManager ()
     {
+        // TODO: fMessageTimePerChar
         mMessageBoxSpeed = 0.1;
         mInterMessageBoxe = NULL;
         mStaticMessageBox = NULL;

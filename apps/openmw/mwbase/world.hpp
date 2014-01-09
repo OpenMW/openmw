@@ -112,6 +112,7 @@ namespace MWBase
             virtual const MWWorld::Fallback *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
+            virtual MWWorld::Ptr getPlayerPtr() = 0;
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
 
@@ -430,11 +431,10 @@ namespace MWBase
 
             virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result) = 0;
 
-            /// Teleports \a ptr to the reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
-            /// closest to \a worldPos.
+            /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
             virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                                  const std::string& id, Ogre::Vector3 worldPos) = 0;
+                                                  const std::string& id) = 0;
 
             enum DetectionType
             {
@@ -447,6 +447,10 @@ namespace MWBase
             /// @note This also works for references in containers.
             virtual void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
                                                   DetectionType type) = 0;
+
+            /// Update the value of some globals according to the world state, which may be used by dialogue entries.
+            /// This should be called when initiating a dialogue.
+            virtual void updateDialogueGlobals() = 0;
     };
 }
 

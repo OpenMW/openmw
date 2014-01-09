@@ -10,7 +10,6 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/pickpocket.hpp"
@@ -223,7 +222,7 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name() && !loot)
         {
             // we are stealing stuff
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             mModel = new PickpocketItemModel(player, new InventoryItemModel(container));
         }
         else
@@ -251,12 +250,12 @@ namespace MWGui
                 && !mPickpocketDetected
                 )
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             MWMechanics::Pickpocket pickpocket(player, mPtr);
             if (pickpocket.finish())
             {
                 MWBase::Environment::get().getMechanicsManager()->reportCrime(
-                            player, MWWorld::Ptr(), MWBase::MechanicsManager::OT_Pickpocket);
+                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket);
                 MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
                 MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
                 mPickpocketDetected = true;
@@ -325,7 +324,7 @@ namespace MWGui
 
     bool ContainerWindow::onTakeItem(const ItemStack &item, int count)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (dynamic_cast<PickpocketItemModel*>(mModel))
         {
             MWMechanics::Pickpocket pickpocket(player, mPtr);

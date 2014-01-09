@@ -161,6 +161,7 @@ namespace Compiler
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
         const int opcodeShowRestMenu = 0x2000018;
+        const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;
         const int opcodeToggleFogOfWar = 0x2000145;
         const int opcodeToggleFullHelp = 0x2000151;
@@ -222,6 +223,9 @@ namespace Compiler
         const int opcodeGetStandingActorExplicit = 0x200020f;
         const int opcodeGetWindSpeed = 0x2000212;
         const int opcodePlayBink = 0x20001f7;
+        const int opcodeGoToJail = 0x2000235;
+        const int opcodePayFine = 0x2000236;
+        const int opcodePayFineThief = 0x2000237;
         const int opcodeHitOnMe = 0x2000213;
         const int opcodeHitOnMeExplicit = 0x2000214;
         const int opcodeDisableTeleporting = 0x2000215;

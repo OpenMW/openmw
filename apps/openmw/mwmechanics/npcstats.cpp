@@ -15,7 +15,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -109,14 +108,26 @@ std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
     return mFactionRank;
 }
 
-const std::set<std::string>& MWMechanics::NpcStats::getExpelled() const
+bool MWMechanics::NpcStats::getExpelled(const std::string& factionID) const
 {
-    return mExpelled;
+    return mExpelled.find(Misc::StringUtils::lowerCase(factionID)) != mExpelled.end();
 }
 
-std::set<std::string>& MWMechanics::NpcStats::getExpelled()
+void MWMechanics::NpcStats::expell(const std::string& factionID)
 {
-    return mExpelled;
+    std::string lower = Misc::StringUtils::lowerCase(factionID);
+    if (mExpelled.find(lower) == mExpelled.end())
+    {
+        std::string message = "#{sExpelledMessage}";
+        message += MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID)->mName;
+        MWBase::Environment::get().getWindowManager()->messageBox(message);
+        mExpelled.insert(lower);
+    }
+}
+
+void MWMechanics::NpcStats::clearExpelled(const std::string& factionID)
+{
+    mExpelled.erase(Misc::StringUtils::lowerCase(factionID));
 }
 
 bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const

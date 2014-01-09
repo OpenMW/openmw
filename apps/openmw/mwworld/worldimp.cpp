@@ -753,16 +753,16 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        removeContainerScripts(getPlayer().getPlayer());
+        removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToInteriorCell(cellName, position);
-        addContainerScripts(getPlayer().getPlayer(), getPlayer().getPlayer().getCell());
+        addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
-        removeContainerScripts(getPlayer().getPlayer());
+        removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToExteriorCell(position);
-        addContainerScripts(getPlayer().getPlayer(), getPlayer().getPlayer().getCell());
+        addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
     void World::markCellAsUnchanged()
@@ -869,7 +869,7 @@ namespace MWWorld
                     int cellY = newCell.mCell->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
-                addContainerScripts (getPlayer().getPlayer(), &newCell);
+                addContainerScripts (getPlayerPtr(), &newCell);
             }
             else
             {
@@ -1493,9 +1493,9 @@ namespace MWWorld
             cell = mCells.getExterior(cellX, cellY);
         }
         else
-            cell = getPlayer().getPlayer().getCell();
+            cell = getPlayerPtr().getCell();
 
-        ESM::Position pos = getPlayer().getPlayer().getRefData().getPosition();
+        ESM::Position pos = getPlayerPtr().getRefData().getPosition();
         pos.pos[0] = result.second[0];
         pos.pos[1] = result.second[1];
         pos.pos[2] = result.second[2];
@@ -2035,7 +2035,7 @@ namespace MWWorld
 
         std::string message;
         bool fail = false;
-        bool isPlayer = (actor == getPlayer().getPlayer());
+        bool isPlayer = (actor == getPlayerPtr());
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
@@ -2273,6 +2273,8 @@ namespace MWWorld
 
     bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
     {
+        if (cell->isExterior())
+            return false;
         MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
         CellRefList<ESM::Door>::List& refList = doors.mList;
 
@@ -2293,8 +2295,12 @@ namespace MWWorld
     }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
-                                          const std::string& id, Ogre::Vector3 worldPos)
+                                          const std::string& id)
     {
+        Ogre::Vector3 worldPos;
+        if (!findInteriorPositionInWorldSpace(ptr.getCell(), worldPos))
+            worldPos = mPlayer->getLastKnownExteriorPosition();
+
         MWWorld::Ptr closestMarker;
         float closestDistance = FLT_MAX;
 
@@ -2414,5 +2420,31 @@ namespace MWWorld
         // Looks like there is no GMST for this. This factor was determined in experiments
         // with the Telekinesis effect.
         return feet * 22;
+    }
+
+    MWWorld::Ptr World::getPlayerPtr()
+    {
+        return mPlayer->getPlayer();
+    }
+
+    void World::updateDialogueGlobals()
+    {
+        MWWorld::Ptr player = getPlayerPtr();
+        int bounty = player.getClass().getNpcStats(player).getBounty();
+        int playerGold = player.getClass().getContainerStore(player).count(ContainerStore::sGoldId);
+
+        float fCrimeGoldDiscountMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
+        float fCrimeGoldTurnInMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->getFloat();
+
+        int discount = bounty*fCrimeGoldDiscountMult;
+        int turnIn = bounty * fCrimeGoldTurnInMult;
+
+        mGlobalVariables->setInt("pchascrimegold", (bounty <= playerGold) ? 1 : 0);
+
+        mGlobalVariables->setInt("pchasgolddiscount", (discount <= playerGold) ? 1 : 0);
+        mGlobalVariables->setInt("crimegolddiscount", discount);
+
+        mGlobalVariables->setInt("crimegoldturnin", turnIn);
+        mGlobalVariables->setInt("pchasturnin", (turnIn <= playerGold) ? 1 : 0);
     }
 }

@@ -63,6 +63,8 @@ namespace
     }
 }
 
+const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
+
 MWWorld::ContainerStore::ContainerStore() : mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
@@ -75,6 +77,15 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::begin (int mask)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 {
     return ContainerStoreIterator (this);
+}
+
+int MWWorld::ContainerStore::count(const std::string &id)
+{
+    int total=0;
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, id))
+            total += iter->getRefData().getCount();
+    return total;
 }
 
 void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
@@ -123,7 +134,11 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    return add(ref.getPtr(), count, actorPtr, true);
+    // a bit pointless to set owner for the player
+    if (actorPtr.getRefData().getHandle() != "player")
+        return add(ref.getPtr(), count, actorPtr, true);
+    else
+        return add(ref.getPtr(), count, actorPtr, false);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
@@ -148,7 +163,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     {
         CellStore *cell;
 
-        Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
@@ -183,11 +198,13 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        int realCount = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
+        int realCount = ptr.getRefData().getCount();
+        if (ptr.getCellRef().mGoldValue > 1 && realCount == 1)
+            realCount = ptr.getCellRef().mGoldValue;
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
+            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, MWWorld::ContainerStore::sGoldId))
             {
                 iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
@@ -195,7 +212,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
             }
         }
 
-        MWWorld::ManualRef ref(esmStore, "Gold_001", count);
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, count);
         return addNewStack(ref.getPtr(), count);
     }
 
@@ -305,8 +322,8 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
             const std::vector<ESM::LeveledListBase::LevelItem>& items = levItem->mList;
 
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            int playerLevel = MWWorld::Class::get(player).getCreatureStats(player).getLevel();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
             failChance += levItem->mChanceNone;
 

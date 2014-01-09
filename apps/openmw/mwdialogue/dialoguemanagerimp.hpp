@@ -40,6 +40,7 @@ namespace MWDialogue
             void parseText (const std::string& text);
 
             void updateTopics();
+            void updateGlobals();
 
             bool compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code);
             void executeScript (const std::string& script);

@@ -5,13 +5,11 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "itemselection.hpp"
 #include "container.hpp"
-#include "inventorywindow.hpp"
 
 #include "sortfilteritemmodel.hpp"
 
@@ -106,7 +104,7 @@ namespace MWGui
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
@@ -149,7 +147,7 @@ namespace MWGui
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
         mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyEnchantable);
     }
 
@@ -236,7 +234,7 @@ namespace MWGui
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
         mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
 
         //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
@@ -290,7 +288,9 @@ namespace MWGui
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
-        if (mEnchanting.getEnchantPrice() > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        if (mEnchanting.getEnchantPrice() > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;

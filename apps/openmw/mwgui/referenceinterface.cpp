@@ -3,8 +3,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
-#include "../mwworld/player.hpp"
-
 namespace MWGui
 {
     ReferenceInterface::ReferenceInterface()
@@ -18,7 +16,7 @@ namespace MWGui
 
     void ReferenceInterface::checkReferenceAvailable()
     {
-        MWWorld::Ptr::CellStore* playerCell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+        MWWorld::Ptr::CellStore* playerCell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
         // check if player has changed cell, or count of the reference has become 0
         if ((playerCell != mCurrentPlayerCell && mCurrentPlayerCell != NULL)

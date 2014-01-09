@@ -16,11 +16,32 @@
 
 #include "spellcasting.hpp"
 
+namespace
+{
+    /// @return is \a ptr allowed to take/use \a item or is it a crime?
+    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item)
+    {
+        const std::string& owner = item.getCellRef().mOwner;
+        bool isOwned = !owner.empty();
+
+        const std::string& faction = item.getCellRef().mFaction;
+        bool isFactionOwned = false;
+        if (!faction.empty())
+        {
+            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
+            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
+                isFactionOwned = true;
+        }
+
+        return (!isOwned && !isFactionOwned);
+    }
+}
+
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
     {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
@@ -230,7 +251,7 @@ namespace MWMechanics
     {
         // Uses ingame time, but scaled to real time
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
 
@@ -311,7 +332,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager();
 
             const ESM::NPC *player =
-                world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+                world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
             const ESM::Race *race =
                 world->getStore().get<ESM::Race>().find(player->mRace);
@@ -337,7 +358,7 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
             mActors.removeActor(ptr);
             mActors.addActor(ptr);
         }
@@ -356,7 +377,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mName = name;
 
         world->createRecord(player);
@@ -369,7 +390,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
         player.mRace = race;
         player.mHead = head;
@@ -395,7 +416,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = id;
 
         world->createRecord(player);
@@ -412,7 +433,7 @@ namespace MWMechanics
         const ESM::Class *ptr = world->createRecord(cls);
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = ptr->mId;
 
         world->createRecord(player);
@@ -428,7 +449,7 @@ namespace MWMechanics
         float x = npcSkill.getBaseDisposition();
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
@@ -449,7 +470,7 @@ namespace MWMechanics
                 it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
             {
                 if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)
-                        && playerStats.getExpelled().find(Misc::StringUtils::lowerCase(it->mFaction)) == playerStats.getExpelled().end())
+                        && !playerStats.getExpelled(it->mFaction))
                     reaction = it->mReaction;
             }
             rank = playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
@@ -496,7 +517,7 @@ namespace MWMechanics
 
         const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
         // I suppose the temporary disposition change _has_ to be considered here,
@@ -541,7 +562,7 @@ namespace MWMechanics
 
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(npc).getNpcStats(npc);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
         float persTerm = playerStats.getAttribute(ESM::Attribute::Personality).getModified()
@@ -729,40 +750,44 @@ namespace MWMechanics
         return mAI;
     }
 
+    bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
+    {
+        if (isAllowedToUse(ptr, bed))
+            return false;
+        MWWorld::Ptr victim;
+        if (!bed.getCellRef().mOwner.empty())
+            victim = MWBase::Environment::get().getWorld()->getPtr(bed.getCellRef().mOwner, true);
+
+        if(commitCrime(ptr, victim, OT_SleepingInOwnedBed))
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage64}");
+            return true;
+        }
+        else
+            return false;
+    }
+
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
     {
-        const std::string& owner = item.getCellRef().mOwner;
-        bool isOwned = !owner.empty();
-
-        const std::string& faction = item.getCellRef().mFaction;
-        bool isFactionOwned = false;
-        if (!faction.empty())
-        {
-            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
-            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
-                isFactionOwned = true;
-        }
-
-        if (!isOwned && !isFactionOwned)
+        if (isAllowedToUse(ptr, item))
             return;
-
         MWWorld::Ptr victim;
-        if (!owner.empty())
-            victim = MWBase::Environment::get().getWorld()->getPtr(owner, true);
-
-        // TODO: expell from faction
+        if (!item.getCellRef().mOwner.empty())
+            victim = MWBase::Environment::get().getWorld()->getPtr(item.getCellRef().mOwner, true);
 
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
-    void MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         // TODO: expell from faction
 
         bool reported=false;
         for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
         {
-            if (it->first != ptr && awarenessCheck(ptr, it->first))
+            if (it->first != ptr &&
+                    MWBase::Environment::get().getWorld()->getLOS(ptr, it->first) &&
+                    awarenessCheck(ptr, it->first))
             {
                 // NPCs will always curse you when they notice you steal their items, even if they don't report the crime
                 if (it->first == victim && type == OT_Theft)
@@ -777,6 +802,8 @@ namespace MWMechanics
                         && (type != OT_Assault || it->first != victim)
                 )
                 {
+                    // TODO: stats.setAlarmed(true) on NPCs within earshot
+                    // fAlarmRadius ?
                     reported=true;
                     break;
                 }
@@ -785,23 +812,39 @@ namespace MWMechanics
 
         if (reported)
             reportCrime(ptr, victim, type, arg);
+        return reported;
     }
 
     void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
+        const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         // Bounty for each type of crime
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
-            arg = 5;
+            arg = store.find("iCrimeTresspass")->getInt();
         else if (type == OT_Pickpocket)
-            arg = 25;
+            arg = store.find("iCrimePickPocket")->getInt();
         else if (type == OT_Assault)
-            arg = 40;
+            arg = store.find("iCrimeAttack")->getInt();
         else if (type == OT_Murder)
-            arg = 1000;
+            arg = store.find("iCrimeKilling")->getInt();
+        else if (type == OT_Theft)
+            arg *= store.find("fCrimeStealing")->getFloat();
 
         MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
                                                   + arg);
+
+        // If committing a crime against a faction member, expell from the faction
+        if (!victim.isEmpty() && victim.getClass().isNpc())
+        {
+            std::string factionID;
+            if(!victim.getClass().getNpcStats(victim).getFactionRanks().empty())
+                factionID = victim.getClass().getNpcStats(victim).getFactionRanks().begin()->first;
+            if (ptr.getClass().getNpcStats(ptr).isSameFaction(victim.getClass().getNpcStats(victim)))
+            {
+                ptr.getClass().getNpcStats(ptr).expell(factionID);
+            }
+        }
 
         // TODO: make any guards in the area try to arrest the player
     }

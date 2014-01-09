@@ -18,7 +18,6 @@
 #include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -65,7 +64,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr player = world->getPlayer().getPlayer();
+                MWWorld::Ptr player = world->getPlayerPtr();
                 runtime.push (!world->isOnGround(player) && !world->isFlying(player));
             }
         };
@@ -700,13 +699,11 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime& runtime)
             {
-                // No way to tell if we have a reference before trying to get it, and it will
-                // cause an exception is there isn't one :(
-                try {
-                    MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr = R()(runtime, false);
+                if (!ptr.isEmpty())
                     printLocalVars(runtime, ptr);
-                }
-                catch(std::runtime_error&) {
+                else
+                {
                     // No reference, no problem.
                     printGlobalVars(runtime);
                 }
@@ -763,6 +760,43 @@ namespace MWScript
             }
         };
 
+        class OpGoToJail : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                MWWorld::Ptr player = world->getPlayerPtr();
+                world->teleportToClosestMarker(player, "prisonmarker");
+                player.getClass().getNpcStats(player).setBounty(0);
+                // TODO: pass time, change skills, show messagebox
+                // TODO: move stolen items to closest evidence chest
+                // iDaysinPrisonMod
+            }
+        };
+
+        class OpPayFine : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                player.getClass().getNpcStats(player).setBounty(0);
+
+                // TODO: move stolen items to closest evidence chest
+            }
+        };
+
+        class OpPayFineThief : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                player.getClass().getNpcStats(player).setBounty(0);
+            }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -786,6 +820,9 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcJumping, new OpGetPcJumping);
             interpreter.installSegment5 (Compiler::Misc::opcodeWakeUpPc, new OpWakeUpPc);
             interpreter.installSegment5 (Compiler::Misc::opcodePlayBink, new OpPlayBink);
+            interpreter.installSegment5 (Compiler::Misc::opcodePayFine, new OpPayFine);
+            interpreter.installSegment5 (Compiler::Misc::opcodePayFineThief, new OpPayFineThief);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGoToJail, new OpGoToJail);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetLocked, new OpGetLocked<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetEffect, new OpGetEffect<ImplicitRef>);

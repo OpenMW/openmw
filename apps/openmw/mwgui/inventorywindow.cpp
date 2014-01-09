@@ -10,7 +10,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
@@ -34,7 +33,7 @@ namespace MWGui
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
-        , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
+        , mPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr())
         , mPreviewDirty(true)
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
@@ -85,7 +84,7 @@ namespace MWGui
 
     void InventoryWindow::updatePlayer()
     {
-        mPtr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+        mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel(mSortModel);
@@ -277,7 +276,7 @@ namespace MWGui
 
     void InventoryWindow::open()
     {
-        mPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        mPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         updateEncumbranceBar();
 
@@ -373,7 +372,7 @@ namespace MWGui
 
             boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
 
-            action->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+            action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
             // this is necessary for books/scrolls: if they are already in the player's inventory,
             // the "Take" button should not be visible.
@@ -433,7 +432,7 @@ namespace MWGui
 
     void InventoryWindow::updateEncumbranceBar()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         float capacity = MWWorld::Class::get(player).getCapacity(player);
         float encumbrance = MWWorld::Class::get(player).getEncumbrance(player);
@@ -446,19 +445,6 @@ namespace MWGui
             return;
 
         updateEncumbranceBar();
-    }
-
-    int InventoryWindow::getPlayerGold()
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        for (MWWorld::ContainerStoreIterator it = invStore.begin();
-                it != invStore.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
-                return it->getRefData().getCount();
-        }
-        return 0;
     }
 
     void InventoryWindow::setTrading(bool trading)
@@ -513,12 +499,10 @@ namespace MWGui
             return;
 
         int count = object.getRefData().getCount();
-        if (object.getCellRef().mGoldValue > 1)
-            count = object.getCellRef().mGoldValue;
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);

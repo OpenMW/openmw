@@ -13,7 +13,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/physicssystem.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/nullaction.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -133,7 +132,7 @@ namespace MWClass
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->mBase->mEffects);
 
         // hide effects the player doesnt know about
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
         int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
         int i=0;
@@ -167,7 +166,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         // remove used potion (assume it is present in inventory)
         ptr.getContainerStore()->remove(ptr, 1, actor);

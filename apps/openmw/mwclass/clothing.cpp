@@ -14,7 +14,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwgui/tooltips.hpp"
 

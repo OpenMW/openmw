@@ -35,6 +35,8 @@ namespace MWWorld
 
             static const int Type_All = 0xffff;
 
+            static const std::string sGoldId;
+
         private:
 
             MWWorld::CellRefList<ESM::Potion>            potions;
@@ -91,6 +93,9 @@ namespace MWWorld
 
             void unstack (const Ptr& ptr, const Ptr& container);
             ///< Unstack an item in this container. The item's count will be set to 1, then a new stack will be added with (origCount-1).
+
+            /// @return How many items with refID \a id are in this container?
+            int count (const std::string& id);
 
         protected:
             ContainerStoreIterator addNewStack (const Ptr& ptr, int count);
