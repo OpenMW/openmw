@@ -499,8 +499,6 @@ namespace MWGui
             return;
 
         int count = object.getRefData().getCount();
-        if (object.getCellRef().mGoldValue > 1)
-            count = object.getCellRef().mGoldValue;
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object

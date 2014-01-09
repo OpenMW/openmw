@@ -134,7 +134,11 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    return add(ref.getPtr(), count, actorPtr, true);
+    // a bit pointless to set owner for the player
+    if (actorPtr.getRefData().getHandle() != "player")
+        return add(ref.getPtr(), count, actorPtr, true);
+    else
+        return add(ref.getPtr(), count, actorPtr, false);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
@@ -194,7 +198,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        int realCount = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
+        int realCount = ptr.getRefData().getCount();
+        if (ptr.getCellRef().mGoldValue > 1 && realCount == 1)
+            realCount = ptr.getCellRef().mGoldValue;
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
