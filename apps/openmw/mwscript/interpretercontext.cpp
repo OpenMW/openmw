@@ -23,7 +23,7 @@
 namespace MWScript
 {
     MWWorld::Ptr InterpreterContext::getReference (
-        const std::string& id, bool activeOnly)
+        const std::string& id, bool activeOnly, bool doThrow)
     {
         if (!id.empty())
         {
@@ -31,7 +31,7 @@ namespace MWScript
         }
         else
         {
-            if (mReference.isEmpty())
+            if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
 
             return mReference;
@@ -39,7 +39,7 @@ namespace MWScript
     }
 
     const MWWorld::Ptr InterpreterContext::getReference (
-        const std::string& id, bool activeOnly) const
+        const std::string& id, bool activeOnly, bool doThrow) const
     {
         if (!id.empty())
         {
@@ -47,7 +47,7 @@ namespace MWScript
         }
         else
         {
-            if (mReference.isEmpty())
+            if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
 
             return mReference;
@@ -498,8 +498,8 @@ namespace MWScript
         ptr.getRefData().getLocals().mFloats[index] = value;
     }
 
-    MWWorld::Ptr InterpreterContext::getReference()
+    MWWorld::Ptr InterpreterContext::getReference(bool required)
     {
-        return getReference ("", true);
+        return getReference ("", true, required);
     }
 }

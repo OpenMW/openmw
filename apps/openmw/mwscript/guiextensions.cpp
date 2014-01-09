@@ -54,14 +54,7 @@ namespace MWScript
         public:
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                // FIXME: No way to tell if we have a reference before trying to get it, and it will
-                // cause an exception is there isn't one :(
-                MWWorld::Ptr bed;
-                try {
-                    bed = R()(runtime);
-                }
-                catch(std::runtime_error&) {
-                }
+                MWWorld::Ptr bed = R()(runtime, false);
 
                 if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWBase::Environment::get().getWorld()->getPlayerPtr(),
                                                                              bed))

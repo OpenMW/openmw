@@ -699,13 +699,11 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime& runtime)
             {
-                // No way to tell if we have a reference before trying to get it, and it will
-                // cause an exception is there isn't one :(
-                try {
-                    MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr = R()(runtime, false);
+                if (!ptr.isEmpty())
                     printLocalVars(runtime, ptr);
-                }
-                catch(std::runtime_error&) {
+                else
+                {
                     // No reference, no problem.
                     printGlobalVars(runtime);
                 }
