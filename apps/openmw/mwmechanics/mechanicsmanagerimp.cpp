@@ -803,6 +803,7 @@ namespace MWMechanics
                 )
                 {
                     // TODO: stats.setAlarmed(true) on NPCs within earshot
+                    // fAlarmRadius ?
                     reported=true;
                     break;
                 }
@@ -816,15 +817,18 @@ namespace MWMechanics
 
     void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
+        const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         // Bounty for each type of crime
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
-            arg = 5;
+            arg = store.find("iCrimeTresspass")->getInt();
         else if (type == OT_Pickpocket)
-            arg = 25;
+            arg = store.find("iCrimePickPocket")->getInt();
         else if (type == OT_Assault)
-            arg = 40;
+            arg = store.find("iCrimeAttack")->getInt();
         else if (type == OT_Murder)
-            arg = 1000;
+            arg = store.find("iCrimeKilling")->getInt();
+        else if (type == OT_Theft)
+            arg *= store.find("fCrimeStealing")->getFloat();
 
         MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
