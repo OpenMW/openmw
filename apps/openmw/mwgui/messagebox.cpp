@@ -63,7 +63,8 @@ namespace MWGui
     {
         MessageBox *box = new MessageBox(*this, message);
         box->mCurrentTime = 0;
-        box->mMaxTime = message.length()*mMessageBoxSpeed;
+        std::string realMessage = MyGUI::LanguageManager::getInstance().replaceTags(message);
+        box->mMaxTime = realMessage.length()*mMessageBoxSpeed;
 
         if(stat)
             mStaticMessageBox = box;
