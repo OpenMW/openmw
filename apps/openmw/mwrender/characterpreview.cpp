@@ -4,6 +4,7 @@
 #include <OgreSceneManager.h>
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreCamera.h>
 
 #include <libs/openengine/ogre/selectionbuffer.hpp>
 

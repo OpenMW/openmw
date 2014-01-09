@@ -6,6 +6,7 @@
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 #include <OgreEntity.h>
+#include <OgreCamera.h>
 
 namespace CSVRender
 {

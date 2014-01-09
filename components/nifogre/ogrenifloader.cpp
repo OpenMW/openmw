@@ -26,7 +26,6 @@
 #include <algorithm>
 
 #include <OgreTechnique.h>
-#include <OgreRoot.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
 #include <OgreTagPoint.h>
@@ -36,6 +35,9 @@
 #include <OgreMeshManager.h>
 #include <OgreSkeletonManager.h>
 #include <OgreControllerManager.h>
+#include <OgreMaterialManager.h>
+#include <OgreCamera.h>
+#include <OgreSceneManager.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 
