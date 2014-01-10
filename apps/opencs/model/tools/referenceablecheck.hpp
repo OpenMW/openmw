@@ -42,11 +42,27 @@ namespace CSMTools
             void finalCheck(std::vector<std::string>& messages);
             
 	    //TEMPLATE CHECKS
-	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem, std::vector<std::string>& messages, const std::string& someid, bool enchantable); //for all enchantable items.
-	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem, std::vector<std::string>& messages, const std::string& someid); //for non-enchantable items.
-	    template<typename TOOL> void toolCheck(const TOOL& sometool, std::vector<std::string>& messages, const std::string& someid, bool canbebroken); //for tools with uses.
-	    template<typename TOOL> void toolCheck(const TOOL& sometool, std::vector<std::string>& messages, const std::string& someid); //for tools without uses.
-	    template<typename LIST> void listCheck(const LIST& somelist, std::vector< std::string >& messages, const std::string& Som);
+	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem,
+                                                            std::vector<std::string>& messages,
+                                                            const std::string& someID,
+                                                            bool enchantable); //for all enchantable items.
+            
+	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem,
+                                                            std::vector<std::string>& messages,
+                                                            const std::string& someID); //for non-enchantable items.
+            
+	    template<typename TOOL> void toolCheck(const TOOL& sometool,
+                                                   std::vector<std::string>& messages,
+                                                   const std::string& someID,
+                                                   bool canbebroken); //for tools with uses.
+            
+	    template<typename TOOL> void toolCheck(const TOOL& sometool,
+                                                   std::vector<std::string>& messages,
+                                                   const std::string& someID); //for tools without uses.
+
+	    template<typename LIST> void listCheck(const LIST& somelist,
+                                                   std::vector< std::string >& messages,
+                                                   const std::string& someID);
 	    
             const CSMWorld::RefIdData& mReferencables;
             const CSMWorld::IdCollection<ESM::Race>& mRaces;

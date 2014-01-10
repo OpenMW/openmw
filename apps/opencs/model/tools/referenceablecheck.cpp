@@ -538,7 +538,6 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
     const ESM::CreatureLevList& CreatureLevList = (dynamic_cast<const CSMWorld::Record<ESM::CreatureLevList>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList, CreatureLevList.mId); //CreatureLevList but Type_CreatureLevelledList :/
 
-
     listCheck<ESM::CreatureLevList>(CreatureLevList, messages, id.toString());
 }
 
