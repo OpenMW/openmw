@@ -42,25 +42,25 @@ namespace CSMTools
             void finalCheck(std::vector<std::string>& messages);
             
 	    //TEMPLATE CHECKS
-	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem,
+	    template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
                                                             std::vector<std::string>& messages,
                                                             const std::string& someID,
                                                             bool enchantable); //for all enchantable items.
             
-	    template<typename ITEM> void inventoryItemCheck(const ITEM& someitem,
+	    template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
                                                             std::vector<std::string>& messages,
                                                             const std::string& someID); //for non-enchantable items.
             
-	    template<typename TOOL> void toolCheck(const TOOL& sometool,
+	    template<typename TOOL> void toolCheck(const TOOL& someTool,
                                                    std::vector<std::string>& messages,
                                                    const std::string& someID,
                                                    bool canbebroken); //for tools with uses.
             
-	    template<typename TOOL> void toolCheck(const TOOL& sometool,
+	    template<typename TOOL> void toolCheck(const TOOL& someTool,
                                                    std::vector<std::string>& messages,
                                                    const std::string& someID); //for tools without uses.
 
-	    template<typename LIST> void listCheck(const LIST& somelist,
+	    template<typename LIST> void listCheck(const LIST& someList,
                                                    std::vector< std::string >& messages,
                                                    const std::string& someID);
 	    
