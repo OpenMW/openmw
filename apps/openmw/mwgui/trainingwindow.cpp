@@ -130,6 +130,14 @@ namespace MWGui
             return;
         }
 
+        // You can not train a skill above its governing attribute
+        const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skillId);
+        if (pcStats.getSkill(skillId).getBase() >= pcStats.getAttribute(skill->mData.mAttribute).getBase())
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage17}");
+            return;
+        }
+
         // increase skill
         MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
 
