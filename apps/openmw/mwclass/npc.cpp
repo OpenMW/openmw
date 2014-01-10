@@ -615,7 +615,13 @@ namespace MWClass
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
 
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->getInt();
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (roll < chance)
+            {
+                MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+            }
             getCreatureStats(ptr).setAttacked(true);//used in CharacterController
 
             if(object.isEmpty())
