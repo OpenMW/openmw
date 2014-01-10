@@ -8,13 +8,12 @@
 namespace MWGui
 {
 
-    MessageBoxManager::MessageBoxManager ()
+    MessageBoxManager::MessageBoxManager (float timePerChar)
     {
-        // TODO: fMessageTimePerChar
-        mMessageBoxSpeed = 0.1;
         mInterMessageBoxe = NULL;
         mStaticMessageBox = NULL;
         mLastButtonPressed = -1;
+        mMessageBoxSpeed = timePerChar;
     }
 
     MessageBoxManager::~MessageBoxManager ()

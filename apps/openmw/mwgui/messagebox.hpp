@@ -22,7 +22,7 @@ namespace MWGui
     class MessageBoxManager
     {
         public:
-            MessageBoxManager ();
+            MessageBoxManager (float timePerChar);
             ~MessageBoxManager ();
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message, bool stat = false);

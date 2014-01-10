@@ -581,7 +581,8 @@ namespace MWMechanics
             if(timeLeft == 0.0f)
             {
                 // If drowning, apply 3 points of damage per second
-                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - 3.0f*duration);
+                static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
+                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - fSuffocationDamage*duration);
 
                 // Play a drowning sound as necessary for the player
                 if(ptr == world->getPlayerPtr())
@@ -593,7 +594,10 @@ namespace MWMechanics
             }
         }
         else
-            stats.setTimeToStartDrowning(20);
+        {
+            static const float fHoldBreathTime = world->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+            stats.setTimeToStartDrowning(fHoldBreathTime);
+        }
     }
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)

@@ -207,7 +207,8 @@ namespace MWGui
         mConsole = new Console(w,h, mConsoleOnlyScripts);
         trackWindow(mConsole, "console");
         mJournal = JournalWindow::create(JournalViewModel::create ());
-        mMessageBoxManager = new MessageBoxManager();
+        mMessageBoxManager = new MessageBoxManager(
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
         mTradeWindow = new TradeWindow();
         trackWindow(mTradeWindow, "barter");
