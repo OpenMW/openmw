@@ -215,7 +215,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 int CSMTools::ReferenceableCheckStage::setup()
 {
     mPlayerPresent = false;
-    return mReferencables.getSize() + 1;
+    return mReferencables.getSize() + 2; //DANGER, final check is not performed if it is just +1
 }
 
 void CSMTools::ReferenceableCheckStage::bookCheck(
