@@ -206,6 +206,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
         staticCheck(stage, mReferencables.getStatics(), messages);
         return;
     }
+
 // if we come that far, we are about to perform our last, final check.
     finalCheck(messages);
     return;
@@ -581,14 +582,11 @@ void CSMTools::ReferenceableCheckStage::lightCheck(
 
     if (light.mData.mFlags & ESM::Light::Carry)
     {
-        if (light.mIcon.empty()) //Needs to be checked with carrable flag
-        {
-            inventoryItemCheck<ESM::Light>(light, messages, id.toString());
+        inventoryItemCheck<ESM::Light>(light, messages, id.toString());
 
-            if (light.mData.mTime == 0)
-            {
-                messages.push_back(id.toString() + "|" + light.mId + " has zero duration");
-            }
+        if (light.mData.mTime == 0)
+        {
+            messages.push_back(id.toString() + "|" + light.mId + " has zero duration");
         }
     }
 }
