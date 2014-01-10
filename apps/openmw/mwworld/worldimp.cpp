@@ -2174,14 +2174,13 @@ namespace MWWorld
 
             Ogre::Vector3 rot(ptr.getRefData().getPosition().rot);
 
-            // TODO: Why -rot.z, but not -rot.x?
+            // TODO: Why -rot.z, but not -rot.x? (note: same issue in MovementSolver::move)
             Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
             orient = orient * Ogre::Quaternion(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
 
-            // This is just a guess, probably wrong
-            static float fProjectileMinSpeed = getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
-            static float fProjectileMaxSpeed = getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
-            float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * it->second.mSpeed;
+
+            static float fTargetSpellMaxSpeed = getStore().get<ESM::GameSetting>().find("fTargetSpellMaxSpeed")->getFloat();
+            float speed = fTargetSpellMaxSpeed * it->second.mSpeed;
 
             Ogre::Vector3 direction = orient.yAxis();
             direction.normalise();
