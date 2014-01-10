@@ -4,7 +4,7 @@
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
-
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/actionteleport.hpp"
@@ -167,7 +167,7 @@ namespace MWMechanics
                     }
                 }
                 else
-                    applyInstantEffect(target, EffectKey(*effectIt), magnitude);
+                    applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
 
                 // HACK: Damage attribute/skill actually has a duration, even though the actual effect is instant and permanent.
                 // This was probably just done to have the effect visible in the magic menu for a while
@@ -177,7 +177,7 @@ namespace MWMechanics
                         || effectIt->mEffectID == ESM::MagicEffect::RestoreAttribute
                         || effectIt->mEffectID == ESM::MagicEffect::RestoreSkill
                         )
-                    applyInstantEffect(target, EffectKey(*effectIt), magnitude);
+                    applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
 
                 if (target.getClass().isActor() || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
                 {
@@ -220,7 +220,7 @@ namespace MWMechanics
                                                                                   mSourceName, caster.getRefData().getHandle());
     }
 
-    void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, MWMechanics::EffectKey effect, float magnitude)
+    void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, MWMechanics::EffectKey effect, float magnitude)
     {
         short effectId = effect.mId;
         if (!target.getClass().isActor())
@@ -232,11 +232,13 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
-                // TODO: This is a crime
                 if (target.getCellRef().mLockLevel <= magnitude)
                 {
                     if (target.getCellRef().mLockLevel > 0)
+                    {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
+                        MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
+                    }
                     target.getCellRef().mLockLevel = 0;
                 }
                 else

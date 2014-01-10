@@ -19,7 +19,7 @@
 namespace
 {
     /// @return is \a ptr allowed to take/use \a item or is it a crime?
-    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item)
+    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
     {
         const std::string& owner = item.getCellRef().mOwner;
         bool isOwned = !owner.empty();
@@ -32,6 +32,9 @@ namespace
             if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
                 isFactionOwned = true;
         }
+
+        if (!item.getCellRef().mOwner.empty())
+            victim = MWBase::Environment::get().getWorld()->getPtr(item.getCellRef().mOwner, true);
 
         return (!isOwned && !isFactionOwned);
     }
@@ -752,11 +755,9 @@ namespace MWMechanics
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
     {
-        if (isAllowedToUse(ptr, bed))
-            return false;
         MWWorld::Ptr victim;
-        if (!bed.getCellRef().mOwner.empty())
-            victim = MWBase::Environment::get().getWorld()->getPtr(bed.getCellRef().mOwner, true);
+        if (isAllowedToUse(ptr, bed, victim))
+            return false;
 
         if(commitCrime(ptr, victim, OT_SleepingInOwnedBed))
         {
@@ -767,14 +768,19 @@ namespace MWMechanics
             return false;
     }
 
+    void MechanicsManager::objectOpened(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item)
+    {
+        MWWorld::Ptr victim;
+        if (isAllowedToUse(ptr, item, victim))
+            return;
+        commitCrime(ptr, victim, OT_Trespassing);
+    }
+
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
     {
-        if (isAllowedToUse(ptr, item))
-            return;
         MWWorld::Ptr victim;
-        if (!item.getCellRef().mOwner.empty())
-            victim = MWBase::Environment::get().getWorld()->getPtr(item.getCellRef().mOwner, true);
-
+        if (isAllowedToUse(ptr, item, victim))
+            return;
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 

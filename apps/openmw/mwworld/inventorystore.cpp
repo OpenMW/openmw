@@ -392,7 +392,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // Apply instant effects
                     MWMechanics::CastSpell cast(actor, actor);
                     if (magnitude)
-                        cast.applyInstantEffect(actor, effectIt->mEffectID, magnitude);
+                        cast.applyInstantEffect(actor, actor, effectIt->mEffectID, magnitude);
                 }
 
                 if (magnitude)

@@ -113,6 +113,8 @@ namespace MWMechanics
                                       OffenseType type, int arg=0);
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count);
+            /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
+            virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item);
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it?
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed);
