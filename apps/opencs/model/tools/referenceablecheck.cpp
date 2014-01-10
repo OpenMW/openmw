@@ -1,7 +1,7 @@
 #include "referenceablecheck.hpp"
 #include "../world/record.hpp"
 #include "../world/universalid.hpp"
-#include <iostream>
+#include <boost/algorithm/string.hpp>
 
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
@@ -651,7 +651,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     int gold(npc.mNpdt52.mGold);
 
     //Detect if player is present
-    if (npc.mId == "player")
+    if ( boost::algorithm::iequals(npc.mId, "player") )
     {
         mPlayerPresent = true;
     }
