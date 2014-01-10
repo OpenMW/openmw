@@ -351,8 +351,10 @@ void RenderingManager::update (float duration, bool paused)
     bool isInAir = !world->isOnGround(player);
     bool isSwimming = world->isSwimming(player);
 
+    static const int i1stPersonSneakDelta = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+            .find("i1stPersonSneakDelta")->getInt();
     if(isSneaking && !(isSwimming || isInAir))
-        mCamera->setSneakOffset();
+        mCamera->setSneakOffset(i1stPersonSneakDelta);
 
 
     mOcclusionQuery->update(duration);

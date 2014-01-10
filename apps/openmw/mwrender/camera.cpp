@@ -226,11 +226,10 @@ namespace MWRender
         mCamera->setPosition(0.f, 0.f, offset);
     }
 
-    void Camera::setSneakOffset()
+    void Camera::setSneakOffset(float offset)
     {
-        // TODO: iFirstPersonSneakDelta
         if(mAnimation)
-            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -9.8f));
+            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -offset));
     }
 
     float Camera::getYaw()
