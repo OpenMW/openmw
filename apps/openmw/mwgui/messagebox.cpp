@@ -127,12 +127,6 @@ namespace MWGui
         mMessageBoxSpeed = speed;
     }
 
-    void MessageBoxManager::okayPressed ()
-    {
-        if(mInterMessageBoxe != NULL)
-            mInterMessageBoxe->okayPressed();
-    }
-
     int MessageBoxManager::readPressedButton ()
     {
         int pressed = mLastButtonPressed;
@@ -333,23 +327,25 @@ namespace MWGui
             }
 
         }
-    }
 
-    void InteractiveMessageBox::okayPressed()
-    {
-
+        // Set key focus to "Ok" button
         std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));
         std::vector<MyGUI::Button*>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
             if(Misc::StringUtils::lowerCase((*button)->getCaption()) == ok)
             {
-                buttonActivated(*button);
-                MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
+                MyGUI::InputManager::getInstance().setKeyFocusWidget(*button);
+                (*button)->eventKeyButtonPressed += MyGUI::newDelegate(this, &InteractiveMessageBox::onKeyPressed);
                 break;
             }
         }
+    }
 
+    void InteractiveMessageBox::onKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    {
+        if (_key == MyGUI::KeyCode::Return || _key == MyGUI::KeyCode::NumpadEnter || _key == MyGUI::KeyCode::Space)
+            buttonActivated(_sender);
     }
 
     void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)

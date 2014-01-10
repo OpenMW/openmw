@@ -139,6 +139,7 @@ namespace MWGui
 
         mDisposeCorpseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onDisposeCorpseButtonClicked);
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
+        mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ContainerWindow::onKeyPressed);
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
 
         setCoord(200,0,600,300);
@@ -234,9 +235,19 @@ namespace MWGui
 
         mItemView->setModel (mSortModel);
 
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCloseButton);
+
         // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
         // or we end up using a possibly invalid model.
         setTitle(MWWorld::Class::get(container).getName(container));
+    }
+
+    void ContainerWindow::onKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    {
+        if (_key == MyGUI::KeyCode::Space)
+            onCloseButtonClicked(mCloseButton);
+        if (_key == MyGUI::KeyCode::Return || _key == MyGUI::KeyCode::NumpadEnter)
+            onTakeAllButtonClicked(mTakeButton);
     }
 
     void ContainerWindow::close()

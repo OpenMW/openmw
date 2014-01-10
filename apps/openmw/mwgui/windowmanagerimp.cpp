@@ -677,17 +677,6 @@ namespace MWGui
         mMessageBoxManager->removeStaticMessageBox();
     }
 
-    void WindowManager::enterPressed ()
-    {
-        mMessageBoxManager->okayPressed();
-    }
-
-    void WindowManager::activateKeyPressed ()
-    {
-        mMessageBoxManager->okayPressed();
-        mCountDialog->cancel();
-    }
-
     int WindowManager::readPressedButton ()
     {
         return mMessageBoxManager->readPressedButton();
