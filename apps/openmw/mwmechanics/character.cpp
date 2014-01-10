@@ -178,6 +178,12 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                     mHitState = CharState_Hit;
                     int iHit = rand() % (sHitListSize-1);
                     mCurrentHit = sHitList[iHit];
+                    if(mPtr.getRefData().getHandle()=="player" && !mAnimation->hasAnimation(mCurrentHit))
+                    {
+                        //only 3 different hit animations if player is in 1st person
+                        int iHit = rand() % (sHitListSize-3);
+                        mCurrentHit = sHitList[iHit];
+                    }
                     mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
                 }
             }
@@ -482,7 +488,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     const bool isWerewolf = stats.isWerewolf();
 
     bool forcestateupdate = false;
-    if(weaptype != mWeaponType)
+    if(weaptype != mWeaponType && mHitState != CharState_KnockDown)
     {
         forcestateupdate = true;
 

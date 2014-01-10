@@ -141,6 +141,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 {
     assert(viewMode != VM_HeadOnly);
+    if(mViewMode == viewMode) 
+        return;
+
     mViewMode = viewMode;
     rebuild();
 }

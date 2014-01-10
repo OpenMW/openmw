@@ -388,7 +388,6 @@ Ogre::Node *Animation::getNode(const std::string &name)
     return NULL;
 }
 
-
 NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname)
 {
     NifOgre::TextKeyMap::const_iterator iter(keys.begin());
@@ -1009,14 +1008,16 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
-bool Animation::isPlaying(Group group) const
+bool Animation::allowSwitchViewMode() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mGroups == group)
-            return true;
+        if(stateiter->second.mGroups == Group_UpperBody 
+                || (stateiter->first.size()==4 && stateiter->first.find("hit") != std::string::npos)
+                || (stateiter->first.find("knock") != std::string::npos) )
+            return false;
     }
-    return false;
+    return true;
 }
 
 void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)

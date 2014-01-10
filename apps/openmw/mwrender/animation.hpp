@@ -258,7 +258,8 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
-    bool isPlaying(Group group) const;
+    //Checks if playing any animation which shouldn't be stopped when switching camera view modes
+    bool allowSwitchViewMode() const;
 
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
