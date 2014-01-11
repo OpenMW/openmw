@@ -857,6 +857,9 @@ namespace MWMechanics
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
     {
+        if (observer.getClass().getCreatureStats(observer).isDead())
+            return false;
+
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
