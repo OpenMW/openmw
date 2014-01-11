@@ -485,8 +485,9 @@ namespace MWWorld
         mLocalScripts.remove (ref);
     }
 
-    Ptr World::getPtr (const std::string& name, bool activeOnly)
+    Ptr World::searchPtr (const std::string& name, bool activeOnly)
     {
+        Ptr ret;
         // the player is always in an active cell.
         if (name=="player")
         {
@@ -514,12 +515,16 @@ namespace MWWorld
 
         if (!activeOnly)
         {
-            Ptr ptr = mCells.getPtr (lowerCaseName);
-
-            if (!ptr.isEmpty())
-                return ptr;
+            ret = mCells.getPtr (lowerCaseName);
         }
+        return ret;
+    }
 
+    Ptr World::getPtr (const std::string& name, bool activeOnly)
+    {
+        Ptr ret = searchPtr(name, activeOnly);
+        if (!ret.isEmpty())
+            return ret;
         throw std::runtime_error ("unknown ID: " + name);
     }
 

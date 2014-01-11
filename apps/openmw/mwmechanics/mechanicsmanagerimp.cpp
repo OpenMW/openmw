@@ -34,7 +34,7 @@ namespace
         }
 
         if (!item.getCellRef().mOwner.empty())
-            victim = MWBase::Environment::get().getWorld()->getPtr(item.getCellRef().mOwner, true);
+            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().mOwner, true);
 
         return (!isOwned && !isFactionOwned);
     }

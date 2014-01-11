@@ -157,6 +157,10 @@ namespace MWBase
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
+            virtual MWWorld::Ptr searchPtr (const std::string& name, bool activeOnly) = 0;
+            ///< Return a pointer to a liveCellRef with the given name.
+            /// \param activeOnly do non search inactive cells.
+
             virtual MWWorld::Ptr getPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
 
