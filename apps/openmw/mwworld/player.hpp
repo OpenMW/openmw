@@ -86,6 +86,8 @@ namespace MWWorld
 
         bool wasTeleported() const;
         void setTeleported(bool teleported);
+
+        void clear();
     };
 }
 #endif

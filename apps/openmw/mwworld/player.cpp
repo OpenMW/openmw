@@ -171,4 +171,14 @@ namespace MWWorld
         if (mMarkedCell)
             markedPosition = mMarkedPosition;
     }
+
+    void Player::clear()
+    {
+        mCellStore = 0;
+        mSign.clear();
+        mMarkedCell = 0;
+        mAutoMove = false;
+        mForwardBackward = 0;
+        mTeleported = false;
+    }
 }

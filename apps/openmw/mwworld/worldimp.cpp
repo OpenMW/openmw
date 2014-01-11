@@ -267,6 +267,7 @@ namespace MWWorld
     void World::clear()
     {
         mLocalScripts.clear();
+        mPlayer->clear();
 
         // enable collision
         if (!mPhysics->toggleCollisionMode())
