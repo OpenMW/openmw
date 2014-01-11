@@ -468,6 +468,10 @@ namespace MWClass
         if(ptr.getRefData().getHandle() == "player")
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
+        // Attacking peaceful NPCs is a crime
+        if (victim.getClass().isNpc() && victim.getClass().getCreatureStats(victim).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(ptr, victim, MWBase::MechanicsManager::OT_Assault);
+
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
             weapskill = get(weapon).getEquipmentSkill(weapon);
@@ -611,10 +615,6 @@ namespace MWClass
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
         // NOTE: 'object' and/or 'attacker' may be empty.
-
-        // Attacking peaceful NPCs is a crime
-        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
-            MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         if(!successful)
         {
