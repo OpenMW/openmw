@@ -786,7 +786,8 @@ namespace MWMechanics
 
     bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
-        // TODO: expell from faction
+        if (ptr.getRefData().getHandle() != "player")
+            return false;
 
         bool reported=false;
         for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
@@ -803,10 +804,7 @@ namespace MWMechanics
 
                 // Actor has witnessed a crime. Will he report it?
                 // (not sure, is > 0 correct?)
-                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0
-                        // This is a bit inconsistent, but AFAIK assaulted NPCs can not report if they are alone
-                        && (type != OT_Assault || it->first != victim)
-                )
+                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0)
                 {
                     // TODO: stats.setAlarmed(true) on NPCs within earshot
                     // fAlarmRadius ?
@@ -835,6 +833,9 @@ namespace MWMechanics
             arg = store.find("iCrimeKilling")->getInt();
         else if (type == OT_Theft)
             arg *= store.find("fCrimeStealing")->getFloat();
+
+        // TODO: In some cases (type == Assault), if no NPCs are within earshot, the report will have no effect.
+        // however other crime types seem to be always produce a bounty.
 
         MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()

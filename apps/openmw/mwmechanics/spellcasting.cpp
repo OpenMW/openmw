@@ -57,6 +57,7 @@ namespace MWMechanics
         ESM::EffectList reflectedEffects;
         std::vector<ActiveSpells::Effect> appliedLastingEffects;
         bool firstAppliedEffect = true;
+        bool anyHarmfulEffect = false;
 
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
             effectIt!=effects.mList.end(); ++effectIt)
@@ -77,6 +78,8 @@ namespace MWMechanics
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
             {
+                anyHarmfulEffect = true;
+
                 // If player is attempting to cast a harmful spell, show the target's HP bar
                 if (caster.getRefData().getHandle() == "player" && target != caster)
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
@@ -218,6 +221,10 @@ namespace MWMechanics
         if (appliedLastingEffects.size())
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, caster.getRefData().getHandle());
+
+        if (anyHarmfulEffect && target.getClass().isActor()
+                && target.getClass().getCreatureStats(target).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(caster, target, MWBase::MechanicsManager::OT_Assault);
     }
 
     void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, MWMechanics::EffectKey effect, float magnitude)
