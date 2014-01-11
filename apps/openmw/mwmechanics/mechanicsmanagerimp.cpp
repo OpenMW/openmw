@@ -840,6 +840,25 @@ namespace MWMechanics
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
                                                   + arg);
 
+        if (!victim.isEmpty())
+        {
+            int fight = 0;
+            // Increase in fight rating for each type of crime
+            if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+                fight = store.find("iFightTrespass")->getFloat();
+            else if (type == OT_Pickpocket)
+                fight = store.find("iFightPickpocket")->getInt();
+            else if (type == OT_Assault)
+                fight = store.find("iFightAttack")->getInt();
+            else if (type == OT_Murder)
+                fight = store.find("iFightKilling")->getInt();
+            else if (type == OT_Theft)
+                fight = store.find("fFightStealing")->getFloat();
+            // Not sure if this should be permanent?
+            fight = victim.getClass().getCreatureStats(victim).getAiSetting(CreatureStats::AI_Fight).getBase() + fight;
+            victim.getClass().getCreatureStats(victim).setAiSetting(CreatureStats::AI_Fight, fight);
+        }
+
         // If committing a crime against a faction member, expell from the faction
         if (!victim.isEmpty() && victim.getClass().isNpc())
         {
