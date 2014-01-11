@@ -797,21 +797,21 @@ namespace MWMechanics
                     }
                 }
 
-                // Apply soultrap
-                if (iter->first.getTypeName() == typeid(ESM::Creature).name())
-                {
-                    SoulTrap soulTrap (iter->first);
-                    stats.getActiveSpells().visitEffectSources(soulTrap);
-                }
-
-                // Reset magic effects and recalculate derived effects
-                // One case where we need this is to make sure bound items are removed upon death
-                stats.setMagicEffects(MWMechanics::MagicEffects());
-                calculateCreatureStatModifiers(iter->first, 0);
-
                 if (iter->second->kill())
                 {
                     ++mDeathCount[cls.getId(iter->first)];
+
+                    // Apply soultrap
+                    if (iter->first.getTypeName() == typeid(ESM::Creature).name())
+                    {
+                        SoulTrap soulTrap (iter->first);
+                        stats.getActiveSpells().visitEffectSources(soulTrap);
+                    }
+
+                    // Reset magic effects and recalculate derived effects
+                    // One case where we need this is to make sure bound items are removed upon death
+                    stats.setMagicEffects(MWMechanics::MagicEffects());
+                    calculateCreatureStatModifiers(iter->first, 0);
 
                     if(cls.isEssential(iter->first))
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
