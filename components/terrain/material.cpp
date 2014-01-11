@@ -297,6 +297,7 @@ namespace Terrain
                                                           sh::makeProperty (new sh::BooleanValue(useSpecular)));
                         boost::hash_combine(normalMaps, useNormalMap);
                         boost::hash_combine(normalMaps, useNormalMap && layer.mParallax);
+                        boost::hash_combine(normalMaps, useSpecular);
 
                         if (i+layerOffset > 0)
                         {
