@@ -11,7 +11,7 @@
         </Widget>
         <Widget type="TextBox" skin="SandText" position="0 0 24 24" name="Travel" align="Right Top">
             <Property key="TextAlign" value="Right"/>
-            <Property key="Caption" value="#D8C09A#{sTravel}"/>
+            <Property key="Caption" value="#D8C09A#{sServiceTravelTitle}"/>
         </Widget>
 
 

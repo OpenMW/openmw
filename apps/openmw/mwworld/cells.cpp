@@ -271,3 +271,15 @@ void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorl
     }
 
 }
+
+void MWWorld::Cells::getInteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
+{
+    for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
+        iter!=mInteriors.end(); ++iter)
+    {
+        Ptr ptr = getPtrAndCache (name, iter->second);
+        if (!ptr.isEmpty())
+            out.push_back(ptr);
+    }
+
+}

@@ -307,6 +307,17 @@ namespace MWClass
                 autoCalculateSkills(ref->mBase, data->mNpcStats);
             }
 
+            if (data->mNpcStats.getFactionRanks().size())
+            {
+                static const int iAutoRepFacMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("iAutoRepFacMod")->getInt();
+                static const int iAutoRepLevMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("iAutoRepLevMod")->getInt();
+                int rank = data->mNpcStats.getFactionRanks().begin()->second;
+
+                data->mNpcStats.setReputation(iAutoRepFacMod * (rank+1) + iAutoRepLevMod * (data->mNpcStats.getLevel()-1));
+            }
+
             data->mNpcStats.getAiSequence().fill(ref->mBase->mAiPackage);
 
             data->mNpcStats.setAiSetting (MWMechanics::CreatureStats::AI_Hello, ref->mBase->mAiData.mHello);
@@ -587,6 +598,10 @@ namespace MWClass
 
         // NOTE: 'object' and/or 'attacker' may be empty.
 
+        // Attacking peaceful NPCs is a crime
+        if (ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+
         if(!successful)
         {
             // TODO: Handle HitAttemptOnMe script function
@@ -615,7 +630,13 @@ namespace MWClass
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
 
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->getInt();
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (roll < chance)
+            {
+                MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+            }
             getCreatureStats(ptr).setAttacked(true);//used in CharacterController
 
             if(object.isEmpty())

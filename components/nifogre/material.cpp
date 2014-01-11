@@ -277,6 +277,8 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         if (itr != sMaterialMap.end())
         {
             // a suitable material exists already - use it
+            sh::MaterialInstance* instance = sh::Factory::getInstance().getMaterialInstance(itr->second);
+            needTangents = !sh::retrieveValue<sh::StringValue>(instance->getProperty("normalMap"), instance).get().empty();
             return itr->second;
         }
         // not found, create a new one

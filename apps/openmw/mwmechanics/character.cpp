@@ -598,7 +598,12 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                     const ESM::MagicEffect *effect;
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
-                    const ESM::Static* castStatic = store.get<ESM::Static>().find (effect->mCasting);
+                    const ESM::Static* castStatic;
+                    if (!effect->mCasting.empty())
+                        castStatic = store.get<ESM::Static>().find (effect->mCasting);
+                    else
+                        castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
+
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
 
                     castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");

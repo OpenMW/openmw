@@ -157,6 +157,10 @@ namespace MWBase
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
+            virtual MWWorld::Ptr searchPtr (const std::string& name, bool activeOnly) = 0;
+            ///< Return a pointer to a liveCellRef with the given name.
+            /// \param activeOnly do non search inactive cells.
+
             virtual MWWorld::Ptr getPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
 
@@ -451,6 +455,11 @@ namespace MWBase
             /// Update the value of some globals according to the world state, which may be used by dialogue entries.
             /// This should be called when initiating a dialogue.
             virtual void updateDialogueGlobals() = 0;
+
+            /// Moves all stolen items from \a ptr to the closest evidence chest.
+            virtual void confiscateStolenItems(const MWWorld::Ptr& ptr) = 0;
+
+            virtual void goToJail () = 0;
     };
 }
 

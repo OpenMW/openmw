@@ -257,7 +257,7 @@ namespace MWGui
     {
         if (mEffects.size() <= 0)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage30}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu11}");
             return;
         }
 

@@ -19,7 +19,7 @@
 namespace
 {
     /// @return is \a ptr allowed to take/use \a item or is it a crime?
-    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item)
+    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
     {
         const std::string& owner = item.getCellRef().mOwner;
         bool isOwned = !owner.empty();
@@ -32,6 +32,9 @@ namespace
             if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
                 isFactionOwned = true;
         }
+
+        if (!item.getCellRef().mOwner.empty())
+            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().mOwner, true);
 
         return (!isOwned && !isFactionOwned);
     }
@@ -752,11 +755,9 @@ namespace MWMechanics
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
     {
-        if (isAllowedToUse(ptr, bed))
-            return false;
         MWWorld::Ptr victim;
-        if (!bed.getCellRef().mOwner.empty())
-            victim = MWBase::Environment::get().getWorld()->getPtr(bed.getCellRef().mOwner, true);
+        if (isAllowedToUse(ptr, bed, victim))
+            return false;
 
         if(commitCrime(ptr, victim, OT_SleepingInOwnedBed))
         {
@@ -767,20 +768,26 @@ namespace MWMechanics
             return false;
     }
 
+    void MechanicsManager::objectOpened(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item)
+    {
+        MWWorld::Ptr victim;
+        if (isAllowedToUse(ptr, item, victim))
+            return;
+        commitCrime(ptr, victim, OT_Trespassing);
+    }
+
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
     {
-        if (isAllowedToUse(ptr, item))
-            return;
         MWWorld::Ptr victim;
-        if (!item.getCellRef().mOwner.empty())
-            victim = MWBase::Environment::get().getWorld()->getPtr(item.getCellRef().mOwner, true);
-
+        if (isAllowedToUse(ptr, item, victim))
+            return;
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
     bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
-        // TODO: expell from faction
+        if (ptr.getRefData().getHandle() != "player")
+            return false;
 
         bool reported=false;
         for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
@@ -797,10 +804,7 @@ namespace MWMechanics
 
                 // Actor has witnessed a crime. Will he report it?
                 // (not sure, is > 0 correct?)
-                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0
-                        // This is a bit inconsistent, but AFAIK assaulted NPCs can not report if they are alone
-                        && (type != OT_Assault || it->first != victim)
-                )
+                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0)
                 {
                     // TODO: stats.setAlarmed(true) on NPCs within earshot
                     // fAlarmRadius ?
@@ -830,9 +834,31 @@ namespace MWMechanics
         else if (type == OT_Theft)
             arg *= store.find("fCrimeStealing")->getFloat();
 
+        // TODO: In some cases (type == Assault), if no NPCs are within earshot, the report will have no effect.
+        // however other crime types seem to be always produce a bounty.
+
         MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
                                                   + arg);
+
+        if (!victim.isEmpty())
+        {
+            int fight = 0;
+            // Increase in fight rating for each type of crime
+            if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+                fight = store.find("iFightTrespass")->getFloat();
+            else if (type == OT_Pickpocket)
+                fight = store.find("iFightPickpocket")->getInt();
+            else if (type == OT_Assault)
+                fight = store.find("iFightAttack")->getInt();
+            else if (type == OT_Murder)
+                fight = store.find("iFightKilling")->getInt();
+            else if (type == OT_Theft)
+                fight = store.find("fFightStealing")->getFloat();
+            // Not sure if this should be permanent?
+            fight = victim.getClass().getCreatureStats(victim).getAiSetting(CreatureStats::AI_Fight).getBase() + fight;
+            victim.getClass().getCreatureStats(victim).setAiSetting(CreatureStats::AI_Fight, fight);
+        }
 
         // If committing a crime against a faction member, expell from the faction
         if (!victim.isEmpty() && victim.getClass().isNpc())
@@ -851,6 +877,9 @@ namespace MWMechanics
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
     {
+        if (observer.getClass().getCreatureStats(observer).isDead())
+            return false;
+
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);

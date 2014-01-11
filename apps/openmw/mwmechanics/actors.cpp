@@ -525,7 +525,7 @@ namespace MWMechanics
                         ref.getPtr().getCellRef().mPos = ipos;
 
                         // TODO: Add AI to follow player and fight for him
-
+                        // TODO: VFX_SummonStart, VFX_SummonEnd
                         creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
                             MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
                     }
@@ -581,7 +581,8 @@ namespace MWMechanics
             if(timeLeft == 0.0f)
             {
                 // If drowning, apply 3 points of damage per second
-                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - 3.0f*duration);
+                static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
+                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - fSuffocationDamage*duration);
 
                 // Play a drowning sound as necessary for the player
                 if(ptr == world->getPlayerPtr())
@@ -593,7 +594,10 @@ namespace MWMechanics
             }
         }
         else
-            stats.setTimeToStartDrowning(20);
+        {
+            static const float fHoldBreathTime = world->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+            stats.setTimeToStartDrowning(fHoldBreathTime);
+        }
     }
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)

@@ -337,6 +337,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
         float2 layerUV = float2(UV.x, 1.f-UV.y) * 16; // Reverse Y, required to get proper tangents
         float2 thisLayerUV;
         float4 normalTex;
+        float4 diffuseTex;
 
         float3 eyeDir = normalize(cameraPos.xyz - worldPos);
 #if PARALLAX
@@ -358,19 +359,18 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
         thisLayerUV += TSeyeDir.xy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS );
 #endif
 
-#if IS_FIRST_PASS
-        #if @shIterator == 0
-        // first layer of first pass is the base layer and doesn't need a blend map
-        albedo = shSample(diffuseMap0, layerUV);
-        #else
-        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, thisLayerUV), blendValues@shPropertyString(blendmap_component_@shIterator));
-        #endif
+        diffuseTex = shSample(diffuseMap@shIterator, layerUV);
+#if !@shPropertyBool(use_specular_@shIterator)
+        diffuseTex.a = 0;
+#endif
+
+#if @shIterator == 0
+albedo = diffuseTex;
 #else
-        #if @shIterator == 0
-        albedo = shSample(diffuseMap@shIterator, layerUV);
-        #else
-        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, thisLayerUV), blendValues@shPropertyString(blendmap_component_@shIterator));
-        #endif
+albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_component_@shIterator));
+#endif
+
+#if !IS_FIRST_PASS
         previousAlpha *= 1.f-blendValues@shPropertyString(blendmap_component_@shIterator);
 #endif
 
@@ -448,7 +448,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
         float3 halfVec = normalize (light0Dir + eyeDir);
 
         float3 specular = pow(max(dot(normal, halfVec), 0), 32) * lightSpec0;
-        shOutputColour(0).xyz += specular * (1.f-albedo.a) * shadow;
+        shOutputColour(0).xyz += specular * (albedo.a) * shadow;
 #endif
 
 #if FOG

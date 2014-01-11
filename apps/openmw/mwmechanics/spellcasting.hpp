@@ -19,12 +19,12 @@ namespace MWMechanics
     inline int spellSchoolToSkill(int school)
     {
         std::map<int, int> schoolSkillMap; // maps spell school to skill id
-        schoolSkillMap[0] = 11; // alteration
-        schoolSkillMap[1] = 13; // conjuration
-        schoolSkillMap[3] = 12; // illusion
-        schoolSkillMap[2] = 10; // destruction
-        schoolSkillMap[4] = 14; // mysticism
-        schoolSkillMap[5] = 15; // restoration
+        schoolSkillMap[0] = ESM::Skill::Alteration;
+        schoolSkillMap[1] = ESM::Skill::Conjuration;
+        schoolSkillMap[3] = ESM::Skill::Illusion;
+        schoolSkillMap[2] = ESM::Skill::Destruction;
+        schoolSkillMap[4] = ESM::Skill::Mysticism;
+        schoolSkillMap[5] = ESM::Skill::Restoration;
         assert(schoolSkillMap.find(school) != schoolSkillMap.end());
         return schoolSkillMap[school];
     }
@@ -203,7 +203,7 @@ namespace MWMechanics
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false);
 
-        void applyInstantEffect (const MWWorld::Ptr& target, MWMechanics::EffectKey effect, float magnitude);
+        void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, MWMechanics::EffectKey effect, float magnitude);
     };
 
 }

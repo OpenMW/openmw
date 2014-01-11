@@ -165,7 +165,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
     const MWMechanics::NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
-    MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
     TSlots slots_;
     initSlots (slots_);
@@ -266,10 +265,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 case 0:
                     continue;
                 case 2:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, actor);
+                    slots_[MWWorld::InventoryStore::Slot_CarriedLeft] = end();
                     break;
                 case 3:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
+                    // Prefer keeping twohanded weapon
                     break;
             }
 
@@ -392,7 +391,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // Apply instant effects
                     MWMechanics::CastSpell cast(actor, actor);
                     if (magnitude)
-                        cast.applyInstantEffect(actor, effectIt->mEffectID, magnitude);
+                        cast.applyInstantEffect(actor, actor, effectIt->mEffectID, magnitude);
                 }
 
                 if (magnitude)

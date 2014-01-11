@@ -766,12 +766,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr player = world->getPlayerPtr();
-                world->teleportToClosestMarker(player, "prisonmarker");
-                player.getClass().getNpcStats(player).setBounty(0);
-                // TODO: pass time, change skills, show messagebox
-                // TODO: move stolen items to closest evidence chest
-                // iDaysinPrisonMod
+                world->goToJail();
             }
         };
 
@@ -782,8 +777,7 @@ namespace MWScript
             {
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 player.getClass().getNpcStats(player).setBounty(0);
-
-                // TODO: move stolen items to closest evidence chest
+                MWBase::Environment::get().getWorld()->confiscateStolenItems(player);
             }
         };
 

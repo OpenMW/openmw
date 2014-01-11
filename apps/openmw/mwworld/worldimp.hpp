@@ -151,6 +151,7 @@ namespace MWWorld
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
+            bool mGoToJail;
 
             /// Called when \a object is moved to an inactive cell
             void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
@@ -229,6 +230,10 @@ namespace MWWorld
             //< Remove the script attached to ref from mLocalScripts
 
             virtual Ptr getPtr (const std::string& name, bool activeOnly);
+            ///< Return a pointer to a liveCellRef with the given name.
+            /// \param activeOnly do non search inactive cells.
+
+            virtual Ptr searchPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
@@ -536,6 +541,11 @@ namespace MWWorld
             /// Update the value of some globals according to the world state, which may be used by dialogue entries.
             /// This should be called when initiating a dialogue.
             virtual void updateDialogueGlobals();
+
+            /// Moves all stolen items from \a ptr to the closest evidence chest.
+            virtual void confiscateStolenItems(const MWWorld::Ptr& ptr);
+
+            virtual void goToJail ();
     };
 }
 

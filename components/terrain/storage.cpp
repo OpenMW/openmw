@@ -475,6 +475,7 @@ namespace Terrain
 
         LayerInfo info;
         info.mParallax = false;
+        info.mSpecular = false;
         info.mDiffuseMap = "textures\\" + texture;
         std::string texture_ = texture;
         boost::replace_last(texture_, ".", "_nh.");
@@ -489,6 +490,14 @@ namespace Terrain
             boost::replace_last(texture_, ".", "_n.");
             if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\" + texture_))
                 info.mNormalMap = "textures\\" + texture_;
+        }
+
+        texture_ = texture;
+        boost::replace_last(texture_, ".", "_diffusespec.");
+        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\" + texture_))
+        {
+            info.mDiffuseMap = "textures\\" + texture_;
+            info.mSpecular = true;
         }
 
         mLayerInfoMap[texture] = info;
