@@ -525,7 +525,7 @@ namespace MWMechanics
                         ref.getPtr().getCellRef().mPos = ipos;
 
                         // TODO: Add AI to follow player and fight for him
-
+                        // TODO: VFX_SummonStart, VFX_SummonEnd
                         creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
                             MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
                     }

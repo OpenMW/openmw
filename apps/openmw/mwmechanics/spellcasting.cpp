@@ -200,15 +200,17 @@ namespace MWMechanics
                     }
 
                     // Add VFX
+                    const ESM::Static* castStatic;
                     if (!magicEffect->mHit.empty())
-                    {
-                        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-                        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
-                        // Note: in case of non actor, a free effect should be fine as well
-                        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
-                        if (anim)
-                            anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
-                    }
+                        castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+                    else
+                        castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
+
+                    bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+                    // Note: in case of non actor, a free effect should be fine as well
+                    MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
+                    if (anim)
+                        anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
                 }
 
                 // TODO: For Area effects, launch a growing particle effect that applies the effect to more actors as it hits them. Best managed in World.
