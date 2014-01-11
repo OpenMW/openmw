@@ -150,6 +150,7 @@ namespace MWMechanics
     void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                                const ESM::Pathgrid *pathGrid, float xCell, float yCell, bool allowShortcuts)
     {
+        mPath.clear();
         if(allowShortcuts)
         {
             if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ,
