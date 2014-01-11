@@ -27,16 +27,18 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
     mStuckTimer = mStuckTimer + duration;
     mTotalTime = mTotalTime + duration;
 
-    if(mTotalTime > mDuration) return true;
+    ESM::Position pos = actor.getRefData().getPosition();
+
+    if(mTotalTime > mDuration ||
+        (pos.pos[0]-mX)*(pos.pos[0]-mX) +
+        (pos.pos[1]-mY)*(pos.pos[1]-mY) +
+        (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < 100*100) 
+        return true;
 
     ESM::Pathgrid::Point dest;
     dest.mX = target.getRefData().getPosition().pos[0];
     dest.mY = target.getRefData().getPosition().pos[1];
     dest.mZ = target.getRefData().getPosition().pos[2];
-
-    //std::cout << dest.mX;
-
-    ESM::Position pos = actor.getRefData().getPosition();
 
     if(mTimer > 0.25)
     {
@@ -63,7 +65,6 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
             +(mStuckPos.pos[2] - pos.pos[2])*(mStuckPos.pos[2] - pos.pos[2])
             < 100) //NPC is stuck
         {
-            std::cout << "stck\n";
             ESM::Pathgrid::Point start;
             start.mX = pos.pos[0];
             start.mY = pos.pos[1];
