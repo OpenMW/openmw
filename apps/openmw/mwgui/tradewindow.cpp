@@ -318,7 +318,8 @@ namespace MWGui
                     messageBox("#{sNotifyMessage9}");
 
                 int iBarterFailDisposition = gmst.find("iBarterFailDisposition")->getInt();
-                MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterFailDisposition);
+                if (mPtr.getClass().isNpc())
+                    MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterFailDisposition);
                 return;
             }
 
@@ -327,7 +328,8 @@ namespace MWGui
         }
 
         int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();
-        MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterSuccessDisposition);
+        if (mPtr.getClass().isNpc())
+            MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterSuccessDisposition);
 
         // make the item transfer
         mTradeModel->transferItems();
