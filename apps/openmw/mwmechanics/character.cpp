@@ -900,6 +900,41 @@ void CharacterController::update(float duration)
             }
         }
 
+        // reduce fatigue
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+        float fatigueLoss = 0;
+        static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->getFloat();
+        static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->getFloat();
+        static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->getFloat();
+        static const float fFatigueSwimRunBase = gmst.find("fFatigueSwimRunBase")->getFloat();
+        static const float fFatigueSwimWalkMult = gmst.find("fFatigueSwimWalkMult")->getFloat();
+        static const float fFatigueSwimRunMult = gmst.find("fFatigueSwimRunMult")->getFloat();
+        static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->getFloat();
+        static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->getFloat();
+
+        const float encumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
+        if (encumbrance < 1)
+        {
+            if (sneak)
+                fatigueLoss = fFatigueSneakBase + encumbrance * fFatigueSneakMult;
+            else
+            {
+                if (inwater)
+                {
+                    if (!isrunning)
+                        fatigueLoss = fFatigueSwimWalkBase + encumbrance * fFatigueSwimWalkMult;
+                    else
+                        fatigueLoss = fFatigueSwimRunBase + encumbrance * fFatigueSwimRunMult;
+                }
+                if (isrunning)
+                    fatigueLoss = fFatigueRunBase + encumbrance * fFatigueRunMult;
+            }
+        }
+        fatigueLoss *= duration;
+        DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
+        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
+        cls.getCreatureStats(mPtr).setFatigue(fatigue);
+
         if(sneak || inwater || flying)
             vec.z = 0.0f;
 
@@ -915,8 +950,6 @@ void CharacterController::update(float duration)
                 // SlowFalling spell effect is active, do not keep previous fall height
                 cls.getCreatureStats(mPtr).land();
             }
-
-            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
             forcestateupdate = (mJumpState != JumpState_Falling);
             mJumpState = JumpState_Falling;

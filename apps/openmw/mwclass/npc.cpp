@@ -436,6 +436,20 @@ namespace MWClass
         if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
             weapon = MWWorld::Ptr();
 
+        // Reduce fatigue
+        // somewhat of a guess, but using the weapon weight makes sense
+        const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
+        const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
+        const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
+        MWMechanics::DynamicStat<float> fatigue = getCreatureStats(ptr).getFatigue();
+        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
+        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
+        if (!weapon.isEmpty())
+            fatigueLoss += weapon.getClass().getWeight(weapon) * getNpcStats(ptr).getAttackStrength() * fWeaponFatigueMult;
+        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
+        getCreatureStats(ptr).setFatigue(fatigue);
+
+
         float dist = 100.0f * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                gmst.find("fHandToHandReach")->getFloat());

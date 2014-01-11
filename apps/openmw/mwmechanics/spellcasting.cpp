@@ -437,8 +437,7 @@ namespace MWMechanics
             DynamicStat<float> fatigue = stats.getFatigue();
             const float normalizedEncumbrance = mCaster.getClass().getEncumbrance(mCaster) / mCaster.getClass().getCapacity(mCaster);
             float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
-            fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-            stats.setFatigue(fatigue);
+            fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
 
             bool fail = false;
 
