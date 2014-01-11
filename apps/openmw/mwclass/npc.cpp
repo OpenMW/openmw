@@ -307,6 +307,17 @@ namespace MWClass
                 autoCalculateSkills(ref->mBase, data->mNpcStats);
             }
 
+            if (data->mNpcStats.getFactionRanks().size())
+            {
+                static const int iAutoRepFacMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("iAutoRepFacMod")->getInt();
+                static const int iAutoRepLevMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("iAutoRepLevMod")->getInt();
+                int rank = data->mNpcStats.getFactionRanks().begin()->second;
+
+                data->mNpcStats.setReputation(iAutoRepFacMod * (rank+1) + iAutoRepLevMod * (data->mNpcStats.getLevel()-1));
+            }
+
             data->mNpcStats.getAiSequence().fill(ref->mBase->mAiPackage);
 
             data->mNpcStats.setAiSetting (MWMechanics::CreatureStats::AI_Hello, ref->mBase->mAiData.mHello);
