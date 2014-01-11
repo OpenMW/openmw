@@ -3,6 +3,7 @@
 
 #include "aipackage.hpp"
 #include <string>
+#include "pathfinding.hpp"
 
 namespace MWMechanics
 {
@@ -24,6 +25,12 @@ namespace MWMechanics
             float mZ;
             std::string mActorId;
             std::string mCellId;
+
+            float mTimer;
+            float mStuckTimer;
+            float mTotalTime;
+
+            PathFinder mPathFinder;
     };
 }
 #endif

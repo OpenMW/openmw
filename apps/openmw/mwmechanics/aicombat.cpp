@@ -3,7 +3,7 @@
 #include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -87,6 +87,7 @@ namespace MWMechanics
                     mPathFinder = mPathFinder2;
             }
         }
+        ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
 
         mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
