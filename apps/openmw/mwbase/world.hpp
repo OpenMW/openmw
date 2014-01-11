@@ -458,6 +458,8 @@ namespace MWBase
 
             /// Moves all stolen items from \a ptr to the closest evidence chest.
             virtual void confiscateStolenItems(const MWWorld::Ptr& ptr) = 0;
+
+            virtual void goToJail () = 0;
     };
 }
 

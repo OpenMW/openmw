@@ -151,6 +151,7 @@ namespace MWWorld
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
+            bool mGoToJail;
 
             /// Called when \a object is moved to an inactive cell
             void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
@@ -543,6 +544,8 @@ namespace MWWorld
 
             /// Moves all stolen items from \a ptr to the closest evidence chest.
             virtual void confiscateStolenItems(const MWWorld::Ptr& ptr);
+
+            virtual void goToJail ();
     };
 }
 

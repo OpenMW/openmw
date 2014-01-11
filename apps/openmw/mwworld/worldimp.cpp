@@ -216,7 +216,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(false),
-      mFacedDistance(FLT_MAX), mGodMode(false)
+      mFacedDistance(FLT_MAX), mGodMode(false), mGoToJail(false)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -259,6 +259,9 @@ namespace MWWorld
 
     void World::startNewGame()
     {
+        mGoToJail = false;
+        mLevitationEnabled = true;
+        mTeleportEnabled = true;
         mWorldScene->changeToVoid();
 
         mStore.clearDynamic();
@@ -1271,6 +1274,9 @@ namespace MWWorld
             if (mPlayIntro == 0)
                 mRendering->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
         }
+
+        if (mGoToJail && !paused)
+            goToJail();
 
         updateWeather(duration);
 
@@ -2489,6 +2495,77 @@ namespace MWWorld
                     store.remove(*it, it->getRefData().getCount(), ptr);
                 }
             }
+        }
+    }
+
+    void World::goToJail()
+    {
+        if (!mGoToJail)
+        {
+            // Save for next update, since the player should be able to read the dialog text first
+            mGoToJail = true;
+            return;
+        }
+        else
+        {
+            mGoToJail = false;
+
+            MWWorld::Ptr player = getPlayerPtr();
+            teleportToClosestMarker(player, "prisonmarker");
+            int bounty = player.getClass().getNpcStats(player).getBounty();
+            player.getClass().getNpcStats(player).setBounty(0);
+            confiscateStolenItems(player);
+
+            int iDaysinPrisonMod = getStore().get<ESM::GameSetting>().find("iDaysinPrisonMod")->getInt();
+            int days = std::max(1, bounty / iDaysinPrisonMod);
+
+            advanceTime(days * 24);
+
+            std::set<int> skills;
+            for (int day=0; day<days; ++day)
+            {
+                int skill = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * ESM::Skill::Length;
+                skills.insert(skill);
+
+                MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);
+                if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
+                    value.setBase(std::min(100, value.getBase()+1));
+                else
+                    value.setBase(value.getBase()-1);
+            }
+
+            const Store<ESM::GameSetting>& gmst = getStore().get<ESM::GameSetting>();
+
+            std::string message;
+            if (days == 1)
+                message = gmst.find("sNotifyMessage42")->getString();
+            else
+                message = gmst.find("sNotifyMessage43")->getString();
+
+            std::stringstream dayStr;
+            dayStr << days;
+            if (message.find("%d") != std::string::npos)
+                message.replace(message.find("%d"), 2, dayStr.str());
+
+            for (std::set<int>::iterator it = skills.begin(); it != skills.end(); ++it)
+            {
+                std::string skillName = gmst.find(ESM::Skill::sSkillNameIds[*it])->getString();
+                std::stringstream skillValue;
+                skillValue << player.getClass().getNpcStats(player).getSkill(*it).getBase();
+                std::string skillMsg = gmst.find("sNotifyMessage44")->getString();
+                if (*it == ESM::Skill::Sneak || *it == ESM::Skill::Security)
+                    skillMsg = gmst.find("sNotifyMessage39")->getString();
+
+                if (skillMsg.find("%s") != std::string::npos)
+                    skillMsg.replace(skillMsg.find("%s"), 2, skillName);
+                if (skillMsg.find("%d") != std::string::npos)
+                    skillMsg.replace(skillMsg.find("%d"), 2, skillValue.str());
+                message += "\n" + skillMsg;
+            }
+
+            std::vector<std::string> buttons;
+            buttons.push_back("#{sOk}");
+            MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
         }
     }
 }
