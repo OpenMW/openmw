@@ -451,6 +451,9 @@ namespace MWBase
             /// Update the value of some globals according to the world state, which may be used by dialogue entries.
             /// This should be called when initiating a dialogue.
             virtual void updateDialogueGlobals() = 0;
+
+            /// Moves all stolen items from \a ptr to the closest evidence chest.
+            virtual void confiscateStolenItems(const MWWorld::Ptr& ptr) = 0;
     };
 }
 

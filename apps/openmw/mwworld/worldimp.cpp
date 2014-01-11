@@ -2446,4 +2446,44 @@ namespace MWWorld
         mGlobalVariables->setInt("crimegoldturnin", turnIn);
         mGlobalVariables->setInt("pchasturnin", (turnIn <= playerGold) ? 1 : 0);
     }
+
+    void World::confiscateStolenItems(const Ptr &ptr)
+    {
+        Ogre::Vector3 playerPos;
+        if (!findInteriorPositionInWorldSpace(ptr.getCell(), playerPos))
+            playerPos = mPlayer->getLastKnownExteriorPosition();
+
+        MWWorld::Ptr closestChest;
+        float closestDistance = FLT_MAX;
+
+        std::vector<MWWorld::Ptr> chests;
+        mCells.getInteriorPtrs("stolen_goods", chests);
+
+        Ogre::Vector3 chestPos;
+        for (std::vector<MWWorld::Ptr>::iterator it = chests.begin(); it != chests.end(); ++it)
+        {
+            if (!findInteriorPositionInWorldSpace(it->getCell(), chestPos))
+                continue;
+
+            float distance = playerPos.squaredDistance(chestPos);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestChest = *it;
+            }
+        }
+
+        if (!closestChest.isEmpty())
+        {
+            ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+            for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            {
+                if (!it->getCellRef().mOwner.empty() && it->getCellRef().mOwner != "player")
+                {
+                    closestChest.getClass().getContainerStore(closestChest).add(*it, it->getRefData().getCount(), closestChest);
+                    store.remove(*it, it->getRefData().getCount(), ptr);
+                }
+            }
+        }
+    }
 }

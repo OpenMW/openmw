@@ -56,6 +56,12 @@ namespace MWWorld
             /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
             /// @note name must be lower case
             void getExteriorPtrs (const std::string& name, std::vector<MWWorld::Ptr>& out);
+
+            /// Get all Ptrs referencing \a name in interior cells
+            /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
+            /// @note name must be lower case
+            void getInteriorPtrs (const std::string& name, std::vector<MWWorld::Ptr>& out);
+
     };
 }
 
