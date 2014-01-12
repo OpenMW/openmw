@@ -6,7 +6,7 @@
 #include "movement.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mTimer(0), mStuckTimer(0)
+: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), mTimer(0), mStuckTimer(0)
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
@@ -19,7 +19,7 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
     return new AiFollow(*this);
 }
 
- bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
+bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
 
@@ -29,11 +29,24 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
 
     ESM::Position pos = actor.getRefData().getPosition();
 
-    if(mTotalTime > mDuration ||
-        (pos.pos[0]-mX)*(pos.pos[0]-mX) +
+    if(mTotalTime > mDuration)
+        return true;
+
+    if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
         (pos.pos[1]-mY)*(pos.pos[1]-mY) +
         (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < 100*100) 
-        return true;
+    {
+        if(actor.getCell()->isExterior())
+        {
+            if(mCellId == "") 
+                return true;
+        }
+        else
+        {
+            if(mCellId == actor.getCell()->mCell->mName)
+                return true;
+        }
+    }
 
     ESM::Pathgrid::Point dest;
     dest.mX = target.getRefData().getPosition().pos[0];
