@@ -3,6 +3,12 @@
 
 #include <components/esm/loadpgrd.hpp>
 #include <list>
+#include <boost/graph/adjacency_list.hpp>
+
+namespace MWWorld
+{
+    class CellStore;
+}
 
 namespace MWMechanics
 {
@@ -12,9 +18,11 @@ namespace MWMechanics
             PathFinder();
 
             void clearPath();
+
+            void buildPathgridGraph(const ESM::Pathgrid* pathGrid,float xCell = 0, float yCell = 0);
+
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                           const ESM::Pathgrid* pathGrid, float xCell = 0, float yCell = 0,
-                           bool allowShortcuts = true);
+                           const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
             bool checkPathCompleted(float x, float y, float z);
             ///< \Returns true if the last point of the path has been reached.
@@ -45,6 +53,13 @@ namespace MWMechanics
         private:
             std::list<ESM::Pathgrid::Point> mPath;
             bool mIsPathConstructed;
+
+            typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS,
+                boost::property<boost::vertex_index_t, int, ESM::Pathgrid::Point>, boost::property<boost::edge_weight_t, float> >
+                PathGridGraph;
+            PathGridGraph mGraph;
+            bool mIsGraphConstructed;
+            const MWWorld::CellStore* mCell;
     };
 }
 

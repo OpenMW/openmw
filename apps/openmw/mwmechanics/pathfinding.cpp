@@ -6,7 +6,6 @@
 #include "OgreMath.h"
 
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-#include <boost/graph/adjacency_list.hpp>
 
 namespace
 {
@@ -136,8 +135,8 @@ namespace
 namespace MWMechanics
 {
     PathFinder::PathFinder()
+        :mIsPathConstructed(false),mIsGraphConstructed(false)
     {
-        mIsPathConstructed = false;
     }
 
     void PathFinder::clearPath()
@@ -147,10 +146,19 @@ namespace MWMechanics
         mIsPathConstructed = false;
     }
 
+    void PathFinder::buildPathgridGraph(const ESM::Pathgrid* pathGrid,float xCell, float yCell)
+    {
+        mGraph = buildGraph(pathGrid, xCell, yCell);
+        mIsGraphConstructed = true;
+    }
+
     void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                               const ESM::Pathgrid *pathGrid, float xCell, float yCell, bool allowShortcuts)
+                               const MWWorld::CellStore* cell, bool allowShortcuts)
     {
         mPath.clear();
+        if(mCell != cell) mIsGraphConstructed = false;
+        mCell = cell;
+
         if(allowShortcuts)
         {
             if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ,
@@ -160,13 +168,24 @@ namespace MWMechanics
 
         if(!allowShortcuts)
         {
+            const ESM::Pathgrid *pathGrid =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell->mCell);
+            float xCell = 0;
+            float yCell = 0;
+
+            if (mCell->isExterior())
+            {
+                xCell = mCell->mCell->mData.mX * ESM::Land::REAL_SIZE;
+                yCell = mCell->mCell->mData.mY * ESM::Land::REAL_SIZE;
+            }
             int startNode = getClosestPoint(pathGrid, startPoint.mX - xCell, startPoint.mY - yCell,startPoint.mZ);
             int endNode = getClosestPoint(pathGrid, endPoint.mX - xCell, endPoint.mY - yCell, endPoint.mZ);
 
             if(startNode != -1 && endNode != -1)
             {
-                PathGridGraph graph = buildGraph(pathGrid, xCell, yCell);
-                mPath = findPath(startNode, endNode, graph);
+                if(!mIsGraphConstructed) buildPathgridGraph(pathGrid, xCell, yCell);
+
+                mPath = findPath(startNode, endNode, mGraph);
 
                 if(!mPath.empty())
                 {

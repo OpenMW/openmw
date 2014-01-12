@@ -213,7 +213,7 @@ namespace MWMechanics
                 start.mY = pos.pos[1];
                 start.mZ = pos.pos[2];
 
-                mPathFinder.buildPath(start, dest, mPathgrid, mXCell, mYCell, false);
+                mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
                 if(mPathFinder.isPathConstructed())
                 {

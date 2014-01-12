@@ -83,9 +83,6 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            const ESM::Pathgrid *pathgrid =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
-
             float xCell = 0;
             float yCell = 0;
 
@@ -94,7 +91,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
                 xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
                 yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
             }
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
         mStuckTimer = 0;
         mStuckPos = pos;

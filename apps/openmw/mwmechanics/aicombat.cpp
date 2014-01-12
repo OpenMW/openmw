@@ -49,8 +49,6 @@ namespace MWMechanics
             //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
         }
         ESM::Position pos = actor.getRefData().getPosition();
-        const ESM::Pathgrid *pathgrid =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
 
         float xCell = 0;
         float yCell = 0;
@@ -74,20 +72,19 @@ namespace MWMechanics
         mTimer2 = mTimer2 + duration;
 
         if(!mPathFinder.isPathConstructed())
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         else
         {
             if(mTimer2 > 0.25)
             {
                 mTimer2 = 0;
-                mPathFinder2.buildPath(start, dest, pathgrid, xCell, yCell, true);
+                mPathFinder2.buildPath(start, dest, actor.getCell(), true);
                 ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
                 if(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
                     (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200)
                     mPathFinder = mPathFinder2;
             }
         }
-        ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
 
         mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
