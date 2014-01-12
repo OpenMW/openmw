@@ -122,3 +122,8 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
     return 3;
 }
+
+std::string MWMechanics::AiFollow::getFollowedActor()
+{
+    return mActorId;
+}

@@ -19,6 +19,8 @@ namespace MWMechanics
                     ///< \return Package completed?
             virtual int getTypeId() const;
 
+            std::string getFollowedActor();
+
         private:
             float mDuration;
             float mX;
