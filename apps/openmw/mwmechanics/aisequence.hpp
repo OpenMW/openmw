@@ -52,6 +52,9 @@ namespace MWMechanics
             ///< Add \a package to the end of the sequence (executed after all other packages have been
             /// completed)
 
+            AiPackage* getActivePackage();
+            ///< return the current active package. If there is no active package, throw an exeption
+
             void fill (const ESM::AIPackageList& list);
     };
 }

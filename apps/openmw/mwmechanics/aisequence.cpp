@@ -102,6 +102,14 @@ void MWMechanics::AiSequence::queue (const AiPackage& package)
     mPackages.push_back (package.clone());
 }
 
+MWMechanics::AiPackage* MWMechanics::AiSequence::getActivePackage()
+{
+    if(mPackages.empty())
+        throw std::runtime_error(std::string("No AI Package!"));
+    else
+        return mPackages.front();
+}
+
 void MWMechanics::AiSequence::fill(const ESM::AIPackageList &list)
 {
     for (std::vector<ESM::AIPackage>::const_iterator it = list.mList.begin(); it != list.mList.end(); ++it)
