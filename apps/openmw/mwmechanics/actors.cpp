@@ -814,6 +814,13 @@ namespace MWMechanics
                 stats.setMagicEffects(MWMechanics::MagicEffects());
                 calculateCreatureStatModifiers(iter->first, 0);
 
+                // Make sure spell effects with CasterLinked flag are removed
+                for(PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
+                {
+                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
+                    spells.purge(iter->first.getRefData().getHandle());
+                }
+
                 ++mDeathCount[cls.getId(iter->first)];
 
                 if(cls.isEssential(iter->first))

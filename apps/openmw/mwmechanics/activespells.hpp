@@ -90,6 +90,9 @@ namespace MWMechanics
             /// Remove all active effects, if roll succeeds (for each effect)
             void purgeAll (float chance);
 
+            /// Remove all effects with CASTER_LINKED flag that were cast by \a actorHandle
+            void purge (const std::string& actorHandle);
+
             bool isSpellActive (std::string id) const;
             ///< case insensitive
 

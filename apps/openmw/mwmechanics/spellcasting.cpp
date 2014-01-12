@@ -164,8 +164,9 @@ namespace MWMechanics
                             ActiveSpells::Effect effect_ = effect;
                             effect_.mMagnitude *= -1;
                             effects.push_back(effect_);
+                            // Also make sure to set casterHandle = target, so that the effect on the caster gets purged when the target dies
                             caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                        effects, mSourceName, caster.getRefData().getHandle());
+                                        effects, mSourceName, target.getRefData().getHandle());
                         }
                     }
                 }
@@ -224,7 +225,7 @@ namespace MWMechanics
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, caster.getRefData().getHandle());
 
-        if (anyHarmfulEffect && target.getClass().isActor()
+        if (anyHarmfulEffect && target.getClass().isActor() && target != caster
                 && target.getClass().getCreatureStats(target).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(caster, target, MWBase::MechanicsManager::OT_Assault);
     }
