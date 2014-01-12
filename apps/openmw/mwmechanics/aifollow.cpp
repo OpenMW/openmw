@@ -83,14 +83,6 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            float xCell = 0;
-            float yCell = 0;
-
-            if (actor.getCell()->mCell->isExterior())
-            {
-                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
-            }
             mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
         mStuckTimer = 0;

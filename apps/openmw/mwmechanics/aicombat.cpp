@@ -50,15 +50,6 @@ namespace MWMechanics
         }
         ESM::Position pos = actor.getRefData().getPosition();
 
-        float xCell = 0;
-        float yCell = 0;
-
-        if (actor.getCell()->mCell->isExterior())
-        {
-            xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-            yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
-        }
-
         ESM::Pathgrid::Point dest;
         dest.mX = target.getRefData().getPosition().pos[0];
         dest.mY = target.getRefData().getPosition().pos[1];

@@ -106,7 +106,7 @@ namespace
         return graph;
     }
 
-    std::list<ESM::Pathgrid::Point> findPath(PointID start, PointID end, PathGridGraph graph)
+    std::list<ESM::Pathgrid::Point> findPath(PointID start, PointID end,const PathGridGraph& graph)
     {
         std::vector<PointID> p(boost::num_vertices(graph));
         std::vector<float> d(boost::num_vertices(graph));
