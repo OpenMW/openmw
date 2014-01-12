@@ -29,7 +29,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
     ESM::Position pos = actor.getRefData().getPosition();
 
-    if(mTotalTime > mDuration)
+    if(mTotalTime > mDuration && mDuration != 0)
         return true;
 
     if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
