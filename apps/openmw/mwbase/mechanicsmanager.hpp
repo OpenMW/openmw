@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 namespace Ogre
 {
@@ -151,6 +152,9 @@ namespace MWBase
 
         virtual void toggleAI() = 0;
         virtual bool isAIActive() = 0;
+
+        ///return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
+        virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
     };
 }
 

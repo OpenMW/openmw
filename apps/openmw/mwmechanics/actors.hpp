@@ -91,6 +91,9 @@ namespace MWMechanics
         void skipAnimation(const MWWorld::Ptr& ptr);
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
 
+            std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
+            ///<return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
+
     private:
         PtrControllerMap mActors;
 

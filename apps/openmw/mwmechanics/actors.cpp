@@ -27,6 +27,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "aicombat.hpp"
+#include "aifollow.hpp"
 
 namespace
 {
@@ -876,5 +877,23 @@ namespace MWMechanics
         if(iter != mActors.end())
             return iter->second->isAnimPlaying(groupName);
         return false;
+    }
+
+    std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
+    {
+        std::list<MWWorld::Ptr> list;
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
+        {
+            const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
+            CreatureStats &stats = cls.getCreatureStats(iter->first);
+
+            if(stats.getAiSequence().getTypeId() == 3)
+            {
+                MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
+                if(package->getFollowedActor() == actor.getCellRef().mRefID)
+                    list.push_front(iter->first);
+            }
+        }
+        return list;
     }
 }
