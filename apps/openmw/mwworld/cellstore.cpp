@@ -42,7 +42,7 @@ namespace MWWorld
         if (const X *ptr = store.search (ref.mRefID))
         {
             typename std::list<LiveRef>::iterator iter =
-                std::find(mList.begin(), mList.end(), ref.mRefnum);
+                std::find(mList.begin(), mList.end(), ref.mRefNum);
 
             LiveRef liveCellRef (ref, ptr);
 
@@ -143,13 +143,16 @@ namespace MWWorld
             mCell->restore (esm[index], i);
 
             ESM::CellRef ref;
+            ref.mRefNum.mContentFile = -1;
 
             // Get each reference in turn
             bool deleted = false;
             while(mCell->getNextRef(esm[index], ref, deleted))
             {
                 // Don't load reference if it was moved to a different cell.
-                ESM::MovedCellRefTracker::const_iterator iter = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefnum);
+                std::string lowerCase = Misc::StringUtils::lowerCase(ref.mRefID);
+                ESM::MovedCellRefTracker::const_iterator iter =
+                    std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
                 if (iter != mCell->mMovedRefs.end()) {
                     continue;
                 }

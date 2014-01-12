@@ -19,8 +19,14 @@ namespace ESM
     {
         public:
 
-            int mRefnum;           // Reference number
-            std::string mRefID;    // ID of object being referenced (must be lowercase)
+            struct RefNum
+            {
+                int mIndex;
+                int mContentFile; // -1 no content file
+            };
+
+            RefNum mRefNum;        // Reference number
+            std::string mRefID;    // ID of object being referenced
 
             float mScale;          // Scale applied to mesh
 
@@ -84,6 +90,8 @@ namespace ESM
 
             void blank();
     };
+
+    bool operator== (const CellRef::RefNum& left, const CellRef::RefNum& right);
 }
 
 #endif

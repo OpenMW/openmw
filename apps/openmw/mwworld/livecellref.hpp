@@ -31,6 +31,11 @@ namespace MWWorld
         virtual ~LiveCellRefBase() { }
     };
 
+    inline bool operator== (const LiveCellRefBase& cellRef, const ESM::CellRef::RefNum refNum)
+    {
+        return cellRef.mRef.mRefNum==refNum;
+    }
+
     /// A reference to one object (of any type) in a cell.
     ///
     /// Constructing this with a CellRef instance in the constructor means that
@@ -51,8 +56,6 @@ namespace MWWorld
         // The object that this instance is based on.
         const X* mBase;
     };
-
-//    template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum);
 }
 
 #endif

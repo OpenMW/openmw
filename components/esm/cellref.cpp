@@ -5,7 +5,8 @@
 
 void ESM::CellRef::save(ESMWriter &esm) const
 {
-    esm.writeHNT("FRMR", mRefnum);
+    esm.writeHNT("FRMR", mRefNum.mIndex);
+    /// \todo read content file index (if present)
     esm.writeHNCString("NAME", mRefID);
 
     if (mScale != 1.0) {
@@ -58,7 +59,8 @@ void ESM::CellRef::save(ESMWriter &esm) const
 
 void ESM::CellRef::blank()
 {
-    mRefnum = 0;
+    mRefNum.mIndex = 0;
+    mRefNum.mContentFile = -1;
     mRefID.clear();
     mScale = 1;
     mOwner.clear();
@@ -84,4 +86,9 @@ void ESM::CellRef::blank()
         mPos.pos[i] = 0;
         mPos.rot[i] = 0;
     }
+}
+
+bool ESM::operator== (const CellRef::RefNum& left, const CellRef::RefNum& right)
+{
+    return left.mIndex==right.mIndex && left.mContentFile==right.mContentFile;
 }
