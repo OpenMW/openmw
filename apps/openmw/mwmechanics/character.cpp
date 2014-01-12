@@ -863,6 +863,7 @@ void CharacterController::update(float duration)
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
         bool flying = world->isFlying(mPtr);
         Ogre::Vector3 vec = cls.getMovementVector(mPtr);
+        vec.normalise();
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
@@ -1119,9 +1120,11 @@ void CharacterController::update(float duration)
         else
             moved = Ogre::Vector3(0.0f);
 
-        // Ensure we're moving in generally the right direction
+        // Ensure we're moving in generally the right direction...
         if(mMovementSpeed > 0.f)
         {
+            float l = moved.length();
+
             if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
                (movement.x > 0.0f && movement.x > moved.x*2.0f))
                 moved.x = movement.x;
@@ -1131,7 +1134,12 @@ void CharacterController::update(float duration)
             if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
                (movement.z > 0.0f && movement.z > moved.z*2.0f))
                 moved.z = movement.z;
+            // but keep the original speed
+            float newLength = moved.length();
+            if (newLength > 0)
+                moved *= (l / newLength);
         }
+
         // Update movement
         if(moved.squaredLength() > 1.0f)
             world->queueMovement(mPtr, moved);
