@@ -177,77 +177,10 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted)
         // That should be it, I haven't seen any other fields yet.
     }
 
-    // NAM0 sometimes appears here, sometimes further on
-    ref.mNam0 = 0;
-    if (esm.isNextSub("NAM0"))
-    {
-        esm.getHT(ref.mNam0);
-        //esm.getHNOT(NAM0, "NAM0");
-    }
-
-    esm.getHNT (ref.mRefNum.mIndex, "FRMR");
-    ref.mRefID = esm.getHNString("NAME");
+    ref.load (esm);
 
     // Identify references belonging to a parent file and adapt the ID accordingly.
     adjustRefNum (ref.mRefNum, esm);
-
-    // getHNOT will not change the existing value if the subrecord is
-    // missing
-    ref.mScale = 1.0;
-    esm.getHNOT(ref.mScale, "XSCL");
-
-    ref.mOwner = esm.getHNOString("ANAM");
-    ref.mGlob = esm.getHNOString("BNAM");
-    ref.mSoul = esm.getHNOString("XSOL");
-
-    ref.mFaction = esm.getHNOString("CNAM");
-    ref.mFactIndex = -2;
-    esm.getHNOT(ref.mFactIndex, "INDX");
-
-    ref.mGoldValue = 1;
-    ref.mCharge = -1;
-    ref.mEnchantmentCharge = -1;
-
-    esm.getHNOT(ref.mEnchantmentCharge, "XCHG");
-
-    esm.getHNOT(ref.mCharge, "INTV");
-
-    esm.getHNOT(ref.mGoldValue, "NAM9");
-
-    // Present for doors that teleport you to another cell.
-    if (esm.isNextSub("DODT"))
-    {
-        ref.mTeleport = true;
-        esm.getHT(ref.mDoorDest);
-        ref.mDestCell = esm.getHNOString("DNAM");
-    } else {
-        ref.mTeleport = false;
-    }
-
-    // Integer, despite the name suggesting otherwise
-    ref.mLockLevel = -1;
-    esm.getHNOT(ref.mLockLevel, "FLTV");
-    ref.mKey = esm.getHNOString("KNAM");
-    ref.mTrap = esm.getHNOString("TNAM");
-
-    ref.mReferenceBlocked = -1;
-    ref.mFltv = 0;
-    esm.getHNOT(ref.mReferenceBlocked, "UNAM");
-    esm.getHNOT(ref.mFltv, "FLTV");
-
-    esm.getHNOT(ref.mPos, "DATA", 24);
-
-    // Number of references in the cell? Maximum once in each cell,
-    // but not always at the beginning, and not always right. In other
-    // words, completely useless.
-    // Update: Well, maybe not completely useless. This might actually be
-    //  number_of_references + number_of_references_moved_here_Across_boundaries,
-    //  and could be helpful for collecting these weird moved references.
-    if (esm.isNextSub("NAM0"))
-    {
-        esm.getHT(ref.mNam0);
-        //esm.getHNOT(NAM0, "NAM0");
-    }
 
     if (esm.isNextSub("DELE"))
     {

@@ -1,12 +1,80 @@
 
 #include "cellref.hpp"
 
+#include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
+{
+    // NAM0 sometimes appears here, sometimes further on
+    mNam0 = 0;
+    if (esm.isNextSub ("NAM0"))
+        esm.getHT (mNam0);
+
+    if (wideRefNum)
+        esm.getHNT (mRefNum, "FRMR", 8);
+    else
+        esm.getHNT (mRefNum.mIndex, "FRMR");
+
+    mRefID = esm.getHNString ("NAME");
+
+    mScale = 1.0;
+    esm.getHNOT (mScale, "XSCL");
+
+    mOwner = esm.getHNOString ("ANAM");
+    mGlob = esm.getHNOString ("BNAM");
+    mSoul = esm.getHNOString ("XSOL");
+
+    mFaction = esm.getHNOString ("CNAM");
+    mFactIndex = -2;
+    esm.getHNOT (mFactIndex, "INDX");
+
+    mGoldValue = 1;
+    mCharge = -1;
+    mEnchantmentCharge = -1;
+
+    esm.getHNOT (mEnchantmentCharge, "XCHG");
+
+    esm.getHNOT (mCharge, "INTV");
+
+    esm.getHNOT (mGoldValue, "NAM9");
+
+    // Present for doors that teleport you to another cell.
+    if (esm.isNextSub ("DODT"))
+    {
+        mTeleport = true;
+        esm.getHT (mDoorDest);
+        mDestCell = esm.getHNOString ("DNAM");
+    }
+    else
+        mTeleport = false;
+
+    mLockLevel = -1;
+    esm.getHNOT (mLockLevel, "FLTV");
+    mKey = esm.getHNOString ("KNAM");
+    mTrap = esm.getHNOString ("TNAM");
+
+    mReferenceBlocked = -1;
+    mFltv = 0;
+    esm.getHNOT (mReferenceBlocked, "UNAM");
+    esm.getHNOT (mFltv, "FLTV");
+
+    esm.getHNOT(mPos, "DATA", 24);
+
+    // Number of references in the cell? Maximum once in each cell,
+    // but not always at the beginning, and not always right. In other
+    // words, completely useless.
+    // Update: Well, maybe not completely useless. This might actually be
+    //  number_of_references + number_of_references_moved_here_Across_boundaries,
+    //  and could be helpful for collecting these weird moved references.
+    if (esm.isNextSub ("NAM0"))
+        esm.getHT (mNam0);
+}
 
 void ESM::CellRef::save(ESMWriter &esm) const
 {
     esm.writeHNT("FRMR", mRefNum.mIndex);
-    /// \todo read content file index (if present)
+
     esm.writeHNCString("NAME", mRefID);
 
     if (mScale != 1.0) {

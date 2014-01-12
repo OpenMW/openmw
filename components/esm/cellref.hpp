@@ -8,6 +8,7 @@
 namespace ESM
 {
     class ESMWriter;
+    class ESMReader;
 
     /* Cell reference. This represents ONE object (of many) inside the
     cell. The cell references are not loaded as part of the normal
@@ -85,6 +86,8 @@ namespace ESM
 
             // Position and rotation of this object within the cell
             Position mPos;
+
+            void load (ESMReader& esm, bool wideRefNum = false);
 
             void save(ESMWriter &esm) const;
 
