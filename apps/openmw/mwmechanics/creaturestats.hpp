@@ -34,7 +34,9 @@ namespace MWMechanics
         bool mAlarmed;
         bool mAttacked;
         bool mHostile;
-        bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
+        bool mAttackingOrSpell;
+        bool mKnockdown;
+        bool mHitRecovery;
 
         float mFallHeight;
 
@@ -185,6 +187,11 @@ namespace MWMechanics
         bool getCreatureTargetted() const;
 
         float getEvasion() const;
+
+        void setKnockedDown(bool value);
+        bool getKnockedDown() const;
+        void setHitRecovery(bool value);
+        bool getHitRecovery() const;
 
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;

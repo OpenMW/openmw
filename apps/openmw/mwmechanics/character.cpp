@@ -157,40 +157,40 @@ public:
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
 {
-    //hit recoils/knockdown animations handling
-    if(MWWorld::Class::get(mPtr).isActor())
+    // hit recoils/knockdown animations handling
+    if(mPtr.getClass().isActor())
     {
-        if(MWWorld::Class::get(mPtr).getCreatureStats(mPtr).getAttacked())
+        bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
+        bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
+        if(mHitState == CharState_None)
         {
-            MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setAttacked(false);
-        
-            if(mHitState == CharState_None)
+            if(knockdown)
             {
-                if(mJumpState != JumpState_None && !MWBase::Environment::get().getWorld()->isFlying(mPtr) 
-                        && !MWBase::Environment::get().getWorld()->isSwimming(mPtr) )
+                mHitState = CharState_KnockDown;
+                mCurrentHit = sHitList[sHitListSize-1];
+                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
+            }
+            else if (recovery)
+            {
+                mHitState = CharState_Hit;
+                int iHit = rand() % (sHitListSize-1);
+                mCurrentHit = sHitList[iHit];
+                if(mPtr.getRefData().getHandle()=="player" && !mAnimation->hasAnimation(mCurrentHit))
                 {
-                    mHitState = CharState_KnockDown;
-                    mCurrentHit = sHitList[sHitListSize-1]; 
-                    mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
-                }
-                else
-                {
-                    mHitState = CharState_Hit;
-                    int iHit = rand() % (sHitListSize-1);
+                    //only 3 different hit animations if player is in 1st person
+                    int iHit = rand() % (sHitListSize-3);
                     mCurrentHit = sHitList[iHit];
-                    if(mPtr.getRefData().getHandle()=="player" && !mAnimation->hasAnimation(mCurrentHit))
-                    {
-                        //only 3 different hit animations if player is in 1st person
-                        int iHit = rand() % (sHitListSize-3);
-                        mCurrentHit = sHitList[iHit];
-                    }
-                    mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
                 }
+                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
             }
         }
-        else if(mHitState != CharState_None && !mAnimation->isPlaying(mCurrentHit))
+        else if(!mAnimation->isPlaying(mCurrentHit))
         {
             mCurrentHit.erase();
+            if (knockdown)
+                mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(false);
+            if (recovery)
+                mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
             mHitState = CharState_None;
         }
     }

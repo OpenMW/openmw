@@ -242,6 +242,9 @@ namespace MWClass
             fJumpAcroMultiplier = gmst.find("fJumpAcroMultiplier");
             fJumpRunMultiplier = gmst.find("fJumpRunMultiplier");
             fWereWolfRunMult = gmst.find("fWereWolfRunMult");
+            fKnockDownMult = gmst.find("fKnockDownMult");
+            iKnockDownOddsMult = gmst.find("iKnockDownOddsMult");
+            iKnockDownOddsBase = gmst.find("iKnockDownOddsBase");
 
             inited = true;
         }
@@ -651,7 +654,20 @@ namespace MWClass
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
             }
-            getCreatureStats(ptr).setAttacked(true);//used in CharacterController
+            getCreatureStats(ptr).setAttacked(true);
+
+            // Check for knockdown
+            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
+            float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                    * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
+            roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+            {
+                getCreatureStats(ptr).setKnockedDown(true);
+
+            }
+            else
+                getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
             if(object.isEmpty())
             {
@@ -725,6 +741,15 @@ namespace MWClass
             MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
             fatigue.setCurrent(fatigue.getCurrent() - damage, true);
             getCreatureStats(ptr).setFatigue(fatigue);
+        }
+
+        if (object.isEmpty())
+        {
+            // Hand-to-hand automatically knocks down when running out of fatigue
+            if (getCreatureStats(ptr).getFatigue().getCurrent() < 0)
+            {
+                getCreatureStats(ptr).setKnockedDown(true);
+            }
         }
     }
 
@@ -1286,4 +1311,7 @@ namespace MWClass
     const ESM::GameSetting *Npc::fJumpAcroMultiplier;
     const ESM::GameSetting *Npc::fJumpRunMultiplier;
     const ESM::GameSetting *Npc::fWereWolfRunMult;
+    const ESM::GameSetting *Npc::fKnockDownMult;
+    const ESM::GameSetting *Npc::iKnockDownOddsMult;
+    const ESM::GameSetting *Npc::iKnockDownOddsBase;
 }
