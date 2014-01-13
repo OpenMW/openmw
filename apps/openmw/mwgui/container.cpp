@@ -349,6 +349,8 @@ namespace MWGui
                 mPickpocketDetected = true;
                 return false;
             }
+            else
+                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 1);
         }
         else
         {
