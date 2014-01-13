@@ -46,6 +46,8 @@ namespace MWGui
 
             void updatePlayer();
 
+            void useItem(const MWWorld::Ptr& ptr);
+
             void setGuiMode(GuiMode mode);
 
         private:
@@ -73,6 +75,8 @@ namespace MWGui
             MyGUI::Button* mFilterApparel;
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
+
+            MWWorld::Ptr mSkippedToEquip;
 
             GuiMode mGuiMode;
 

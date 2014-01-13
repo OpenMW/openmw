@@ -80,11 +80,5 @@ namespace MWWorld
                 break;
             }
         }
-
-        std::string script = MWWorld::Class::get(object).getScript(object);
-        
-        /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
-        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayerPtr() && script != "")
-            object.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }

@@ -13,6 +13,8 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
+#include "../mwscript/interpretercontext.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
@@ -351,6 +353,48 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
 
+    void InventoryWindow::useItem(const MWWorld::Ptr &ptr)
+    {
+        const std::string& script = ptr.getClass().getScript(ptr);
+
+        // If the item has a script, set its OnPcEquip to 1
+        if (!script.empty()
+                // Another morrowind oddity: when an item has skipped equipping and pcskipequip is reset to 0 afterwards,
+                // the next time it is equipped will work normally, but will not set onpcequip
+                && (ptr != mSkippedToEquip || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1))
+            ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
+
+        // Give the script a chance to run once before we do anything else
+        // this is important when setting pcskipequip as a reaction to onpcequip being set (bk_treasuryreport does this)
+        if (!script.empty())
+        {
+            MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
+            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+        }
+
+        if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
+        {
+            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
+
+            action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
+
+            // this is necessary for books/scrolls: if they are already in the player's inventory,
+            // the "Take" button should not be visible.
+            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
+            // without screwing up future book windows
+            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
+
+            mSkippedToEquip = MWWorld::Ptr();
+        }
+        else
+            mSkippedToEquip = ptr;
+
+        mItemView->update();
+
+        notifyContentChanged();
+    }
+
     void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
@@ -369,21 +413,7 @@ namespace MWGui
                 mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
                 ptr = *it;
             }
-
-            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
-
-            action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-            // this is necessary for books/scrolls: if they are already in the player's inventory,
-            // the "Take" button should not be visible.
-            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-            // without screwing up future book windows
-            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
-            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
-
-            mItemView->update();
-
-            notifyContentChanged();
+            useItem(ptr);
         }
         else
         {
