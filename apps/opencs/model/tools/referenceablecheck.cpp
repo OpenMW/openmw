@@ -39,7 +39,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 
     stage -= activatorSize;
 
-    const int potionSize(mReferencables.getActivators().getSize());
+    const int potionSize(mReferencables.getPotions().getSize());
 
     if (stage < potionSize)
     {
