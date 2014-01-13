@@ -2,6 +2,7 @@
 #include "../world/record.hpp"
 #include "../world/universalid.hpp"
 #include <boost/algorithm/string.hpp>
+#include "../../../../openmw/apps/openmw/mwclass/misc.hpp"
 
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
@@ -660,7 +661,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     int gold(npc.mNpdt52.mGold);
 
     //Detect if player is present
-    if ( boost::algorithm::iequals(npc.mId, "player") )
+    if (Misc::StringUtils::ciEqual(npc.mId, "player"))
     {
         mPlayerPresent = true;
     }
