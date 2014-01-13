@@ -240,11 +240,6 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
-            virtual bool hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const;
-            ///< Has \æ ptr detected \a ptr2?
-            ///
-            /// (default implementation: return false)
-
             virtual std::string getUpSoundId (const Ptr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)

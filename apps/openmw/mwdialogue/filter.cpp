@@ -525,7 +525,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_Detected:
 
-            return MWWorld::Class::get (mActor).hasDetected (mActor, player);
+            return MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, mActor);
 
         case SelectWrapper::Function_Attacked:
 

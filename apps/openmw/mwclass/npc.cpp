@@ -518,12 +518,6 @@ namespace MWClass
                         weapon.getCellRef().mCharge = weapmaxhealth;
                     damage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
                 }
-                if(!othercls.hasDetected(victim, ptr))
-                {
-                    damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
-                }
                 
                 if (!MWBase::Environment::get().getWorld()->getGodModeState())
                     weapon.getCellRef().mCharge -= std::min(std::max(1,
@@ -545,12 +539,6 @@ namespace MWClass
             float maxstrike = gmst.find("fMaxHandToHandMult")->getFloat();
             damage  = stats.getSkill(weapskill).getModified();
             damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
-            if(!othercls.hasDetected(victim, ptr))
-            {
-                damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
-            }
 
             healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f)
                     || (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
@@ -576,6 +564,16 @@ namespace MWClass
         }
         if(ptr.getRefData().getHandle() == "player")
             skillUsageSucceeded(ptr, weapskill, 0);
+
+        bool detected = MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, victim);
+        if(!detected)
+        {
+            damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+            MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+        }
+        if (othercls.getCreatureStats(victim).getKnockedDown())
+            damage *= gmst.find("fCombatKODamageMult")->getFloat();
 
         // Apply "On hit" enchanted weapons
         std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
