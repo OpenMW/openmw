@@ -334,7 +334,7 @@ namespace MWMechanics
             float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).mMagnitude
                     - creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth+i).mMagnitude
                     - creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth+i).mMagnitude;
-            stat.setCurrent(stat.getCurrent() + currentDiff * duration);
+            stat.setCurrent(stat.getCurrent() + currentDiff * duration, i == 2);
 
             creatureStats.setDynamic(i, stat);
         }
