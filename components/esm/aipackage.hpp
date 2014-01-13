@@ -30,7 +30,7 @@ namespace ESM
         short   mDuration;
         unsigned char mTimeOfDay;
         unsigned char mIdle[8];
-        unsigned char mUnk;
+        unsigned char mShouldRepeat;
     };
 
     struct AITravel
