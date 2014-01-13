@@ -206,7 +206,16 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
         staticCheck(stage, mReferencables.getStatics(), messages);
         return;
     }
+    
+    stage -= staticSize;
 
+    const int creatureSize(mReferencables.getCreatures().getSize());
+    
+    if (stage < creatureSize)
+    {
+        creatureCheck(stage, mReferencables.getCreatures(), messages);
+        return;
+    }
 // if we come that far, we are about to perform our last, final check.
     finalCheck(messages);
     return;
@@ -215,7 +224,7 @@ void CSMTools::ReferenceableCheckStage::perform(int stage, std::vector< std::str
 int CSMTools::ReferenceableCheckStage::setup()
 {
     mPlayerPresent = false;
-    return mReferencables.getSize() + 2; //DANGER, final check is not performed if it is just +1
+    return mReferencables.getSize() + 1;
 }
 
 void CSMTools::ReferenceableCheckStage::bookCheck(
