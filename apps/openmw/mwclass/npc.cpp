@@ -740,15 +740,6 @@ namespace MWClass
             fatigue.setCurrent(fatigue.getCurrent() - damage, true);
             getCreatureStats(ptr).setFatigue(fatigue);
         }
-
-        if (object.isEmpty())
-        {
-            // Hand-to-hand automatically knocks down when running out of fatigue
-            if (getCreatureStats(ptr).getFatigue().getCurrent() < 0)
-            {
-                getCreatureStats(ptr).setKnockedDown(true);
-            }
-        }
     }
 
     void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
