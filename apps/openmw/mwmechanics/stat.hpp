@@ -246,6 +246,18 @@ namespace MWMechanics
     {
         return !(left == right);
     }
+
+    inline bool operator== (const SkillValue& left, const SkillValue& right)
+    {
+        return left.getBase() == right.getBase()
+                && left.getModifier() == right.getModifier()
+                && left.getDamage() == right.getDamage()
+                && left.getProgress() == right.getProgress();
+    }
+    inline bool operator!= (const SkillValue& left, const SkillValue& right)
+    {
+        return !(left == right);
+    }
 }
 
 #endif

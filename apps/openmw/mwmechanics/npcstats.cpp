@@ -207,7 +207,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     if(mIsWerewolf)
         return;
 
-    MWMechanics::SkillValue value = getSkill (skillIndex);
+    MWMechanics::SkillValue& value = getSkill (skillIndex);
 
     value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType));
 

@@ -185,7 +185,7 @@ namespace MWGui
         MyGUI::TextBox* widget = mSkillWidgetMap[(int)parSkill];
         if (widget)
         {
-            float modified = value.getModified(), base = value.getBase();
+            int modified = value.getModified(), base = value.getBase();
             std::string text = boost::lexical_cast<std::string>(std::floor(modified));
             std::string state = "normal";
             if (modified > base)
