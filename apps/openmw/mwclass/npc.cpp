@@ -471,10 +471,6 @@ namespace MWClass
         if(ptr.getRefData().getHandle() == "player")
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
-        // Attacking peaceful NPCs is a crime
-        if (victim.getClass().isNpc() && victim.getClass().getCreatureStats(victim).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
-            MWBase::Environment::get().getMechanicsManager()->commitCrime(ptr, victim, MWBase::MechanicsManager::OT_Assault);
-
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
             weapskill = get(weapon).getEquipmentSkill(weapon);
@@ -617,6 +613,10 @@ namespace MWClass
 
         // NOTE: 'object' and/or 'attacker' may be empty.
 
+        // Attacking peaceful NPCs is a crime
+        if (!attacker.isEmpty() && ptr.getClass().isNpc() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+
         if(!successful)
         {
             // TODO: Handle HitAttemptOnMe script function
@@ -631,7 +631,7 @@ namespace MWClass
 
         if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
-            const std::string &script = ptr.get<ESM::NPC>()->mBase->mScript;
+            const std::string &script = ptr.getClass().getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
             if(!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
