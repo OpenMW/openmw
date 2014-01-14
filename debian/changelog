@@ -1,14 +1,12 @@
 openmw (0.28.0-1) experimental; urgency=low
 
+  [ Bret Curtis ]
   * New release: OpenMW-0.28.0
 
- -- Bret Curtis <psi29a@gmail.com>  Tue, 14 Jan 2014 08:13:09 +0200
-
-openmw (0.27.1-2) UNRELEASED; urgency=low
-
+  [ Scott Howard ]
   * Updated debian/watch
 
- -- Scott Howard <showard@debian.org>  Tue, 07 Jan 2014 21:07:59 -0500
+ -- Bret Curtis <psi29a@gmail.com>  Tue, 14 Jan 2014 08:13:09 +0200
 
 openmw (0.27.1-1) experimental; urgency=low
 

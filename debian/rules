@@ -47,3 +47,6 @@ copyright_check:
 
 %:
 	dh $@ --parallel
+
+get-orig-source:
+	uscan --download-current-version --rename
