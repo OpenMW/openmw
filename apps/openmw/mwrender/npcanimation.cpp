@@ -117,9 +117,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
-    mShowShield(true),
+    mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
-    mAlpha(1.f)
+    mAlpha(1.f),
+    mNpcType(Type_Normal)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -140,6 +141,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 {
     assert(viewMode != VM_HeadOnly);
+    if(mViewMode == viewMode) 
+        return;
+
     mViewMode = viewMode;
     rebuild();
 }
@@ -157,8 +161,8 @@ void NpcAnimation::updateNpcBase()
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-    bool isWerewolf = mPtr.getClass().getNpcStats(mPtr).isWerewolf();
-    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).mMagnitude;
+    bool isWerewolf = (mNpcType == Type_Werewolf);
+    bool isVampire = (mNpcType == Type_Vampire);
 
     if (isWerewolf)
     {
@@ -167,7 +171,7 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
-        if (vampire)
+        if (isVampire)
             mHeadModel = getVampireHead(mNpc->mRace, mNpc->mFlags & ESM::NPC::Female);
         else
             mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
@@ -221,10 +225,23 @@ void NpcAnimation::updateNpcBase()
 }
 
 void NpcAnimation::updateParts()
-{
+{    
     mAlpha = 1.f;
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+
+    NpcType curType = Type_Normal;
+    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).mMagnitude > 0)
+        curType = Type_Vampire;
+    if (cls.getNpcStats(mPtr).isWerewolf())
+        curType = Type_Werewolf;
+
+    if (curType != mNpcType)
+    {
+        mNpcType = curType;
+        rebuild();
+        return;
+    }
 
     static const struct {
         int mSlot;
@@ -319,7 +336,7 @@ void NpcAnimation::updateParts()
     }
 
     showWeapons(mShowWeapons);
-    showShield(mShowShield);
+    showCarriedLeft(mShowCarriedLeft);
 
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
@@ -329,7 +346,7 @@ void NpcAnimation::updateParts()
     static const int Flag_Female      = 1<<0;
     static const int Flag_FirstPerson = 1<<1;
 
-    bool isWerewolf = cls.getNpcStats(mPtr).isWerewolf();
+    bool isWerewolf = (mNpcType == Type_Werewolf);
     int flags = (isWerewolf ? -1 : 0);
     if(!mNpc->isMale())
         flags |= Flag_Female;
@@ -654,32 +671,25 @@ void NpcAnimation::showWeapons(bool showWeapon)
     mAlpha = 1.f;
 }
 
-void NpcAnimation::showShield(bool show)
+void NpcAnimation::showCarriedLeft(bool show)
 {
-    mShowShield = show;
+    mShowCarriedLeft = show;
     MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
-    if (shield != inv.end() && shield->getTypeName() == typeid(ESM::Light).name())
+    if(show && iter != inv.end())
     {
-        // ... Except for lights, which are still shown during spellcasting since they
-        // have their own (one-handed) casting animations
-        show = true;
-    }
-    if(show && shield != inv.end())
-    {
-        Ogre::Vector3 glowColor = getEnchantmentColor(*shield);
-        std::string mesh = MWWorld::Class::get(*shield).getModel(*shield);
-        addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                                   mesh, !shield->getClass().getEnchantment(*shield).empty(), &glowColor);
-
-        if (shield->getTypeName() == typeid(ESM::Light).name())
-            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], shield->get<ESM::Light>()->mBase);
+        Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
+        std::string mesh = MWWorld::Class::get(*iter).getModel(*iter);
+        if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
+                                   mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
+        {
+            if (iter->getTypeName() == typeid(ESM::Light).name())
+                addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], iter->get<ESM::Light>()->mBase);
+        }
     }
     else
-    {
         removeIndividualPart(ESM::PRT_Shield);
-    }
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
@@ -730,8 +740,20 @@ void NpcAnimation::setAlpha(float alpha)
     }
 }
 
+void NpcAnimation::preRender(Ogre::Camera *camera)
+{
+    Animation::preRender(camera);
+    for (int i=0; i<ESM::PRT_Count; ++i)
+    {
+        if (mObjectParts[i].isNull())
+            continue;
+        mObjectParts[i]->rotateBillboardNodes(camera);
+    }
+}
+
 void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectScenePtr scene)
 {
+    sh::Factory::getInstance()._ensureMaterial(ent->getSubEntity(0)->getMaterial()->getName(), "Default");
     ent->getSubEntity(0)->setRenderQueueGroup(alpha != 1.f || ent->getSubEntity(0)->getMaterial()->isTransparent()
             ? RQG_Alpha : RQG_Main);
 

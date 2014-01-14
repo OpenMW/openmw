@@ -11,7 +11,7 @@
         </Widget>
         <Widget type="TextBox" skin="NormalText" position="0 0 450 18" align="Right Top">
             <Property key="TextAlign" value="Center"/>
-            <Property key="Caption" value="#{sSpells}"/>
+            <Property key="Caption" value="#{sServiceSpellsTitle}"/>
         </Widget>
 
 

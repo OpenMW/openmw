@@ -3,7 +3,6 @@
 #include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -236,6 +235,7 @@ namespace MWMechanics
         if(mWalking)
         {
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+            // TODO: use movement settings instead of rotating directly
             world->rotateObject(actor, 0, 0, zAngle, false);
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
@@ -253,7 +253,7 @@ namespace MWMechanics
 
     int AiWander::getTypeId() const
     {
-        return 0;
+        return TypeIdWander;
     }
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor)

@@ -6,7 +6,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -55,6 +54,8 @@ namespace MWGui
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(0)
         , mIsDrowning(false)
+        , mWeaponSpellTimer(0.f)
+        , mDrowningFlashTheta(0.f)
     {
         setCoord(0,0, width, height);
 
@@ -240,7 +241,7 @@ namespace MWGui
             if (world->canPlaceObject(mouseX, mouseY))
                 world->placeObject(object, mouseX, mouseY, mDragAndDrop->mDraggedCount);
             else
-                world->dropObjectOnGround(world->getPlayer().getPlayer(), object, mDragAndDrop->mDraggedCount);
+                world->dropObjectOnGround(world->getPlayerPtr(), object, mDragAndDrop->mDraggedCount);
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
@@ -318,7 +319,7 @@ namespace MWGui
 
     void HUD::onWeaponClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -330,7 +331,7 @@ namespace MWGui
 
     void HUD::onMagicClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -515,7 +516,7 @@ namespace MWGui
         mWeapStatus->setProgressPosition(0);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
             mWeapImage->setImageTexture("icons\\k\\tx_werewolf_hand.dds");
         else

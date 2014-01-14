@@ -29,14 +29,16 @@ struct WindowsPath
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getUserPath() const;
+    boost::filesystem::path getUserConfigPath() const;
+
+    boost::filesystem::path getUserDataPath() const;
 
     /**
      * \brief Returns "X:\Program Files\"
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getGlobalPath() const;
+    boost::filesystem::path getGlobalConfigPath() const;
 
     /**
      * \brief Return local path which is a location where

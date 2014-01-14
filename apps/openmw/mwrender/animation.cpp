@@ -146,29 +146,21 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 struct AddGlow
 {
     Ogre::Vector3* mColor;
-    AddGlow(Ogre::Vector3* col) : mColor(col) {}
+    NifOgre::MaterialControllerManager* mMaterialControllerMgr;
+    AddGlow(Ogre::Vector3* col, NifOgre::MaterialControllerManager* materialControllerMgr)
+        : mColor(col)
+        , mMaterialControllerMgr(materialControllerMgr)
+    {}
 
-    // TODO: integrate this with material controllers?
     void operator()(Ogre::Entity* entity) const
     {
-        unsigned int numsubs = entity->getNumSubEntities();
-        for(unsigned int i = 0;i < numsubs;++i)
-        {
-            unsigned int numsubs = entity->getNumSubEntities();
-            for(unsigned int i = 0;i < numsubs;++i)
-            {
-                Ogre::SubEntity* subEnt = entity->getSubEntity(i);
-                std::string newName = subEnt->getMaterialName() + "@fx";
-                if (sh::Factory::getInstance().searchInstance(newName) == NULL)
-                {
-                    sh::MaterialInstance* instance =
-                        sh::Factory::getInstance().createMaterialInstance(newName, subEnt->getMaterialName());
-                    instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
-                    instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
-                }
-                subEnt->setMaterialName(newName);
-            }
-        }
+        if (!entity->getNumSubEntities())
+            return;
+        Ogre::MaterialPtr writableMaterial = mMaterialControllerMgr->getWritableMaterial(entity);
+        sh::MaterialInstance* instance = sh::Factory::getInstance().getMaterialInstance(writableMaterial->getName());
+
+        instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
     }
 };
 
@@ -193,6 +185,7 @@ public:
         for(unsigned int i = 0;i < numsubs;++i)
         {
             Ogre::SubEntity* subEnt = entity->getSubEntity(i);
+            sh::Factory::getInstance()._ensureMaterial(subEnt->getMaterial()->getName(), "Default");
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? mTransQueue : mSolidQueue);
         }
     }
@@ -216,7 +209,7 @@ void Animation::setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint3
 
     if (enchantedGlow)
         std::for_each(objlist->mEntities.begin(), objlist->mEntities.end(),
-                  AddGlow(glowColor));
+                  AddGlow(glowColor, &objlist->mMaterialControllerMgr));
 }
 
 
@@ -394,7 +387,6 @@ Ogre::Node *Animation::getNode(const std::string &name)
     }
     return NULL;
 }
-
 
 NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname)
 {
@@ -680,7 +672,20 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
 }
 
-
+void Animation::changeGroups(const std::string &groupname, int groups)
+{
+    AnimStateMap::iterator stateiter = mStates.begin();
+    stateiter = mStates.find(groupname);
+    if(stateiter != mStates.end())
+    {
+        if(stateiter->second.mGroups != groups)
+        {
+            stateiter->second.mGroups = groups;
+            resetActiveGroups();
+        }
+        return;
+    }
+}
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase || mAnimSources.empty())
@@ -846,7 +851,6 @@ void Animation::disable(const std::string &groupname)
 Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
-
     AnimStateMap::iterator stateiter = mStates.begin();
     while(stateiter != mStates.end())
     {
@@ -1004,6 +1008,18 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
+bool Animation::allowSwitchViewMode() const
+{
+    for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
+    {
+        if(stateiter->second.mGroups == Group_UpperBody 
+                || (stateiter->first.size()==4 && stateiter->first.find("hit") != std::string::npos)
+                || (stateiter->first.find("knock") != std::string::npos) )
+            return false;
+    }
+    return true;
+}
+
 void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)
 {
     // Early out if we already have this effect
@@ -1025,6 +1041,10 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     else
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+
+    setRenderProperties(params.mObjects, RV_Misc,
+                        RQG_Main, RQG_Alpha, 0.f, false, NULL);
+
     params.mLoop = loop;
     params.mEffectId = effectId;
     params.mBoneName = bonename;
@@ -1040,17 +1060,12 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         for(size_t i = 0;i < params.mObjects->mParticles.size(); ++i)
         {
             Ogre::ParticleSystem* partSys = params.mObjects->mParticles[i];
-            sh::Factory::getInstance()._ensureMaterial(partSys->getMaterialName(), "Default");
-            Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
-            static int count = 0;
-            Ogre::String materialName = "openmw/" + Ogre::StringConverter::toString(count++);
-            // TODO: destroy when effect is removed
-            Ogre::MaterialPtr newMat = mat->clone(materialName);
-            partSys->setMaterialName(materialName);
 
-            for (int t=0; t<newMat->getNumTechniques(); ++t)
+            Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(partSys);
+
+            for (int t=0; t<mat->getNumTechniques(); ++t)
             {
-                Ogre::Technique* tech = newMat->getTechnique(t);
+                Ogre::Technique* tech = mat->getTechnique(t);
                 for (int p=0; p<tech->getNumPasses(); ++p)
                 {
                     Ogre::Pass* pass = tech->getPass(p);
@@ -1125,6 +1140,16 @@ void Animation::updateEffects(float duration)
     }
 }
 
+void Animation::preRender(Ogre::Camera *camera)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        NifOgre::ObjectScenePtr objects = it->mObjects;
+        objects->rotateBillboardNodes(camera);
+    }
+    mObjectRoot->rotateBillboardNodes(camera);
+}
+
 // TODO: Should not be here
 Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
 {
@@ -1177,6 +1202,7 @@ public:
         unsigned int numsubs = ent->getNumSubEntities();
         for(unsigned int i = 0;i < numsubs;++i)
         {
+            sh::Factory::getInstance()._ensureMaterial(ent->getSubEntity(i)->getMaterial()->getName(), "Default");
             if(ent->getSubEntity(i)->getMaterial()->isTransparent())
                 return true;
         }
@@ -1188,6 +1214,8 @@ bool ObjectAnimation::canBatch() const
 {
     if(!mObjectRoot->mParticles.empty() || !mObjectRoot->mLights.empty() || !mObjectRoot->mControllers.empty())
         return false;
+    if (!mObjectRoot->mBillboardNodes.empty())
+        return false;
     return std::find_if(mObjectRoot->mEntities.begin(), mObjectRoot->mEntities.end(),
                         FindEntityTransparency()) == mObjectRoot->mEntities.end();
 }
@@ -1198,7 +1226,8 @@ void ObjectAnimation::fillBatch(Ogre::StaticGeometry *sg)
     for(;iter != mObjectRoot->mEntities.rend();++iter)
     {
         Ogre::Node *node = (*iter)->getParentNode();
-        sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
+        if ((*iter)->isVisible())
+            sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
     }
 }
 

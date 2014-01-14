@@ -79,7 +79,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
             // Cell isn't predefined. Make one on the fly.
             ESM::Cell record;
 
-            record.mData.mFlags = 0;
+            record.mData.mFlags = ESM::Cell::HasWater;
             record.mData.mX = x;
             record.mData.mY = y;
             record.mWater = 0;
@@ -129,9 +129,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
 
     if (cell.mState==Ptr::CellStore::State_Preloaded)
     {
-        std::string lowerCase = Misc::StringUtils::lowerCase(name);
-
-        if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), lowerCase))
+        if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), name))
         {
             cell.load (mStore, mReader);
         }
@@ -260,4 +258,28 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 
     // giving up
     return Ptr();
+}
+
+void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
+{
+    for (std::map<std::pair<int, int>, Ptr::CellStore>::iterator iter = mExteriors.begin();
+        iter!=mExteriors.end(); ++iter)
+    {
+        Ptr ptr = getPtrAndCache (name, iter->second);
+        if (!ptr.isEmpty())
+            out.push_back(ptr);
+    }
+
+}
+
+void MWWorld::Cells::getInteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
+{
+    for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
+        iter!=mInteriors.end(); ++iter)
+    {
+        Ptr ptr = getPtrAndCache (name, iter->second);
+        if (!ptr.isEmpty())
+            out.push_back(ptr);
+    }
+
 }

@@ -23,6 +23,8 @@ namespace MWMechanics
 
             virtual unsigned int getPriority() const;
 
+            const std::string &getTargetId() const;
+
         private:
             std::string mTargetId;
 

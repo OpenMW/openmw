@@ -3,22 +3,22 @@
 #include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/timestamp.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
 
-#include "OgreMath.h"
+#include <OgreMath.h>
 
 namespace
 {
-    static float sgn(float a)
+    static float sgn(Ogre::Radian a)
     {
-        if(a > 0)
+        if(a.valueDegrees() > 0)
             return 1.0;
         return -1.0;
     }
@@ -91,6 +91,8 @@ namespace MWMechanics
         mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+
+        // TODO: use movement settings instead of rotating directly
         MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
@@ -104,7 +106,8 @@ namespace MWMechanics
             float directionY = dest.mY - start.mY;
             float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
-            zAngle = Ogre::Radian( acos(directionY / directionResult) * sgn(asin(directionX / directionResult)) ).valueDegrees();
+            zAngle = Ogre::Radian( Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult)) ).valueDegrees();
+            // TODO: use movement settings instead of rotating directly
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
 
             mPathFinder.clearPath();
@@ -116,6 +119,17 @@ namespace MWMechanics
             }
             if( mTimer > 1)
             {
+                if (actor.getClass().isNpc())
+                {
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
+                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                    if (roll < chance)
+                    {
+                        MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
+                    }
+                }
+
                 MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
                 mTimer = 0;
             }
@@ -132,12 +146,17 @@ namespace MWMechanics
 
     int AiCombat::getTypeId() const
     {
-        return 5;
+        return TypeIdCombat;
     }
 
     unsigned int AiCombat::getPriority() const
     {
         return 1;
+    }
+
+    const std::string &AiCombat::getTargetId() const
+    {
+        return mTargetId;
     }
 
     AiCombat *MWMechanics::AiCombat::clone() const

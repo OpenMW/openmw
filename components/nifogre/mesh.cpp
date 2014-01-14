@@ -116,21 +116,6 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
     Ogre::HardwareBuffer::Usage vertUsage = Ogre::HardwareBuffer::HBU_STATIC;
     bool vertShadowBuffer = false;
 
-    bool geomMorpherController = false;
-    if(!shape->controller.empty())
-    {
-        Nif::ControllerPtr ctrl = shape->controller;
-        do {
-            if(ctrl->recType == Nif::RC_NiGeomMorpherController)
-            {
-                vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
-                vertShadowBuffer = true;
-                geomMorpherController = true;
-                break;
-            }
-        } while(!(ctrl=ctrl->next).empty());
-    }
-
     if(skin != NULL)
     {
         vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
@@ -350,10 +335,39 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
             mesh->buildTangentVectors(Ogre::VES_TANGENT, src,dest);
     }
 
-    // Create a dummy vertex animation track if there's a geom morpher controller
-    // This is required to make Ogre create the buffers we will use for software vertex animation
-    if (srcVerts.size() && geomMorpherController)
-        mesh->createAnimation("dummy", 0)->createVertexTrack(1, sub->vertexData, Ogre::VAT_MORPH);
+
+    if(!shape->controller.empty())
+    {
+        Nif::ControllerPtr ctrl = shape->controller;
+        do {
+            // Load GeomMorpherController into an Ogre::Pose and Animation
+            if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+            {
+                const Nif::NiGeomMorpherController *geom =
+                        static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
+
+                const std::vector<Nif::NiMorphData::MorphData>& morphs = geom->data.getPtr()->mMorphs;
+                // Note we are not interested in morph 0, which just contains the original vertices
+                for (unsigned int i = 1; i < morphs.size(); ++i)
+                {
+                    Ogre::Pose* pose = mesh->createPose(i);
+                    const Nif::NiMorphData::MorphData& data = morphs[i];
+                    for (unsigned int v = 0; v < data.mVertices.size(); ++v)
+                        pose->addVertex(v, data.mVertices[v]);
+
+                    Ogre::String animationID = Ogre::StringConverter::toString(ctrl->recIndex)
+                            + "_" + Ogre::StringConverter::toString(i);
+                    Ogre::VertexAnimationTrack* track =
+                            mesh->createAnimation(animationID, 0)
+                            ->createVertexTrack(1, Ogre::VAT_POSE);
+                    Ogre::VertexPoseKeyFrame* keyframe = track->createVertexPoseKeyFrame(0);
+                    keyframe->addPoseReference(i-1, 1);
+                }
+
+                break;
+            }
+        } while(!(ctrl=ctrl->next).empty());
+    }
 }
 
 

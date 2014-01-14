@@ -43,7 +43,8 @@ namespace MWGui
         std::map <int, std::vector<MagicEffectInfo> > mEffectSources;
 
         virtual void visit (MWMechanics::EffectKey key,
-                                 const std::string& sourceName, float magnitude, float remainingTime = -1);
+                                 const std::string& sourceName, const std::string& casterHandle,
+                            float magnitude, float remainingTime = -1);
     };
 
     class SpellIcons

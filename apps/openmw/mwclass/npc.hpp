@@ -33,6 +33,9 @@ namespace MWClass
             static const ESM::GameSetting *fJumpAcroMultiplier;
             static const ESM::GameSetting *fJumpRunMultiplier;
             static const ESM::GameSetting *fWereWolfRunMult;
+            static const ESM::GameSetting *fKnockDownMult;
+            static const ESM::GameSetting *iKnockDownOddsMult;
+            static const ESM::GameSetting *iKnockDownOddsBase;
 
         public:
 

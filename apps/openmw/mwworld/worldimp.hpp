@@ -106,7 +106,7 @@ namespace MWWorld
             };
 
             std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
-
+            void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
@@ -114,7 +114,7 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos, bool adjustPos=true);
+            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, ESM::Position pos, bool adjustPos=true);
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
@@ -151,9 +151,12 @@ namespace MWWorld
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
+            bool mGoToJail;
 
             /// Called when \a object is moved to an inactive cell
             void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
+
+            float feetToGameUnits(float feet);
 
         public:
 
@@ -185,6 +188,7 @@ namespace MWWorld
             virtual const Fallback *getFallback() const;
 
             virtual Player& getPlayer();
+            virtual MWWorld::Ptr getPlayerPtr();
 
             virtual const MWWorld::ESMStore& getStore() const;
 
@@ -202,7 +206,7 @@ namespace MWWorld
             virtual Ogre::Vector2 getNorthVector (CellStore* cell);
             ///< get north vector (OGRE coordinates) for given interior cell
 
-            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell);
+            virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
             virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
@@ -226,6 +230,10 @@ namespace MWWorld
             //< Remove the script attached to ref from mLocalScripts
 
             virtual Ptr getPtr (const std::string& name, bool activeOnly);
+            ///< Return a pointer to a liveCellRef with the given name.
+            /// \param activeOnly do non search inactive cells.
+
+            virtual Ptr searchPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
@@ -454,8 +462,6 @@ namespace MWWorld
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
-            virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
-
             virtual int canRest();
             ///< check if the player is allowed to rest \n
             /// 0 - yes \n
@@ -499,12 +505,50 @@ namespace MWWorld
 
             virtual bool toggleGodMode();
 
+            /**
+             * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
+             * @param actor
+             * @return true if the spell can be casted (i.e. the animation should start)
+             */
+            virtual bool startSpellCast (const MWWorld::Ptr& actor);
+
+            /**
+             * @brief Cast the actual spell, should be called mid-animation
+             * @param actor
+             */
             virtual void castSpell (const MWWorld::Ptr& actor);
 
             virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
 
             virtual void breakInvisibility (const MWWorld::Ptr& actor);
+            // Are we in an exterior or pseudo-exterior cell and it's night?
+            virtual bool isDark() const;
+
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result);
+
+            /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
+            /// @note id must be lower case
+            virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
+                                                  const std::string& id);
+
+            /// List all references (filtered by \a type) detected by \a ptr. The range
+            /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
+            /// @note This also works for references in containers.
+            virtual void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
+                                                  DetectionType type);
+
+            /// Update the value of some globals according to the world state, which may be used by dialogue entries.
+            /// This should be called when initiating a dialogue.
+            virtual void updateDialogueGlobals();
+
+            /// Moves all stolen items from \a ptr to the closest evidence chest.
+            virtual void confiscateStolenItems(const MWWorld::Ptr& ptr);
+
+            virtual void goToJail ();
+
+            /// Spawn a random creature from a levelled list next to the player
+            virtual void spawnRandomCreature(const std::string& creatureList);
     };
 }
 

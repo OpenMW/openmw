@@ -29,11 +29,12 @@ namespace MWGui
 
         MyGUI::Button* backButton;
         getWidget(backButton, "BackButton");
+        backButton->setCaptionWithReplacing("#{sMessageQuestionAnswer3}");
         backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
-        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
+        okButton->setCaptionWithReplacing("#{sMessageQuestionAnswer2}");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
     }
 
@@ -466,7 +467,7 @@ namespace MWGui
 
     std::string CreateClassDialog::getName() const
     {
-        return mEditName->getOnlyText();
+        return mEditName->getCaption();
     }
 
     std::string CreateClassDialog::getDescription() const

@@ -5,7 +5,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 
 namespace
 {
@@ -38,7 +37,7 @@ namespace MWMechanics
         Movement &movement = actor.getClass().getMovementSettings(actor);
         const ESM::Cell *cell = actor.getCell()->mCell;
 
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->mCell->mData.mX)
         {
             int sideX = sgn(cell->mData.mX - player.getCell()->mCell->mData.mX);
@@ -97,6 +96,7 @@ namespace MWMechanics
         }
 
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+        // TODO: use movement settings instead of rotating directly
         world->rotateObject(actor, 0, 0, zAngle, false);
         movement.mPosition[1] = 1;
 
@@ -105,7 +105,7 @@ namespace MWMechanics
 
     int AiTravel::getTypeId() const
     {
-        return 1;
+        return TypeIdTravel;
     }
 }
 

@@ -1,5 +1,5 @@
-#ifndef _SDL4OGRE_CURSOR_MANAGER_H
-#define _SDL4OGRE_CURSOR_MANAGER_H
+#ifndef SDL4OGRE_CURSOR_MANAGER_H
+#define SDL4OGRE_CURSOR_MANAGER_H
 
 #include <SDL_types.h>
 #include <string>

@@ -232,11 +232,6 @@ namespace MWWorld
         return false;
     }
 
-    bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
-    {
-        return true;
-    }
-
     float Class::getArmorRating (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error("Class does not support armor rating");
@@ -372,4 +367,10 @@ namespace MWWorld
 
         return newPtr;
     }
+
+    bool Class::isFlying(const Ptr &ptr) const
+    {
+        return false;
+    }
+
 }

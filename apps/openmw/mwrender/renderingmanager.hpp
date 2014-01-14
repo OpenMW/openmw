@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDERING_MANAGER_H
-#define _GAME_RENDERING_MANAGER_H
+#ifndef GAME_RENDERING_MANAGER_H
+#define GAME_RENDERING_MANAGER_H
 
 #include "sky.hpp"
 #include "debugging.hpp"
@@ -48,7 +48,6 @@ namespace MWRender
     class Shadows;
     class LocalMap;
     class Water;
-    class ExternalRendering;
     class GlobalMap;
     class VideoPlayer;
     class Animation;
@@ -90,6 +89,7 @@ public:
 
     bool vanityRotateCamera(const float *rot);
     void setCameraDistance(float dist, bool adjust = false, bool override = true);
+    float getCameraDistance() const;
 
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
@@ -202,8 +202,6 @@ public:
 
     bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored
-
-    void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
 

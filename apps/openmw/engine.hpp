@@ -171,8 +171,6 @@ namespace OMW
             /// Font encoding
             void setEncoding(const ToUTF8::FromType& encoding);
 
-            void setAnimationVerbose(bool animverbose);
-
             void setFallbackValues(std::map<std::string,std::string> map);
 
             /// Enable console-only script functionality

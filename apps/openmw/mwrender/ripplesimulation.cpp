@@ -10,8 +10,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
-
 namespace MWRender
 {
 
@@ -154,11 +152,11 @@ void RippleSimulation::addImpulses()
     /// \todo it should be more efficient to render all emitters at once
     for (std::vector<Emitter>::iterator it=mEmitters.begin(); it !=mEmitters.end(); ++it)
     {
-        if (it->mPtr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
+        if (it->mPtr == MWBase::Environment::get().getWorld ()->getPlayerPtr())
         {
             // fetch a new ptr (to handle cell change etc)
             // for non-player actors this is done in updateObjectCell
-            it->mPtr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+            it->mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         }
         float* _currentPos = it->mPtr.getRefData().getPosition().pos;
         Ogre::Vector3 currentPos (_currentPos[0], _currentPos[1], _currentPos[2]);

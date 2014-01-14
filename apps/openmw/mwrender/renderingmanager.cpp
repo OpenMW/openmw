@@ -19,7 +19,6 @@
 
 #include <openengine/bullet/physic.hpp>
 
-#include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
 #include <components/terrain/world.hpp>
 
@@ -34,13 +33,11 @@
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/player.hpp"
 
 #include "shadows.hpp"
 #include "localmap.hpp"
 #include "water.hpp"
 #include "npcanimation.hpp"
-#include "externalrendering.hpp"
 #include "globalmap.hpp"
 #include "videoplayer.hpp"
 #include "terrainstorage.hpp"
@@ -109,10 +106,13 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mFactory->loadAllFiles();
 
-    // Set default mipmap level (NB some APIs ignore this)
-    // Mipmap generation is currently disabled because it causes issues on Intel/AMD
-    //TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
+    // Compressed textures with 0 mip maps are bugged in 1.8, so disable mipmap generator in that case
+    // ( https://ogre3d.atlassian.net/browse/OGRE-259 )
+#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
+    TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
+#else
     TextureManager::getSingleton().setDefaultNumMipmaps(0);
+#endif
 
     // Set default texture filtering options
     TextureFilterOptions tfo;
@@ -323,9 +323,9 @@ void RenderingManager::update (float duration, bool paused)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-    MWWorld::Ptr player = world->getPlayer().getPlayer();
+    MWWorld::Ptr player = world->getPlayerPtr();
 
-    int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
+    int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
     mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
@@ -351,8 +351,10 @@ void RenderingManager::update (float duration, bool paused)
     bool isInAir = !world->isOnGround(player);
     bool isSwimming = world->isSwimming(player);
 
+    static const int i1stPersonSneakDelta = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+            .find("i1stPersonSneakDelta")->getInt();
     if(isSneaking && !(isSwimming || isInAir))
-        mCamera->setSneakOffset();
+        mCamera->setSneakOffset(i1stPersonSneakDelta);
 
 
     mOcclusionQuery->update(duration);
@@ -372,9 +374,9 @@ void RenderingManager::update (float duration, bool paused)
     if(paused)
         return;
 
-    mActors->update (duration);
-    mObjects->update (duration);
-
+    mActors->update (mRendering.getCamera());
+    mPlayerAnimation->preRender(mRendering.getCamera());
+    mObjects->update (duration, mRendering.getCamera());
 
     mSkyManager->update(duration);
 
@@ -404,12 +406,7 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
 
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
 {
-    const MWWorld::Store<ESM::Land> &lands =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>();
-
-    if(store->mCell->mData.mFlags & ESM::Cell::HasWater
-        || ((store->mCell->isExterior())
-            && !lands.search(store->mCell->getGridX(),store->mCell->getGridY()) )) // always use water, if the cell does not have land.
+    if(store->mCell->mData.mFlags & ESM::Cell::HasWater)
     {
         mWater->changeCell(store->mCell);
         mWater->setActive(true);
@@ -589,8 +586,8 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
 {
     mAmbientColor = colour;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-    int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::NightEye)).mMagnitude;
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
     Ogre::ColourValue final = colour;
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 
@@ -741,7 +738,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         else if (it->second == "max viewing distance" && it->first == "Viewing distance")
         {
             if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
-                configureFog(*MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell());
+                configureFog(*MWBase::Environment::get().getWorld()->getPlayerPtr().getCell());
         }
         else if (it->first == "Video" && (
                 it->second == "resolution x"
@@ -935,11 +932,6 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
     return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
 }
 
-void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
-{
-    rendering.setup (mRendering.getScene());
-}
-
 Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
 {
     Animation *anim = mActors->getAnimation(ptr);
@@ -1021,6 +1013,11 @@ void RenderingManager::enableTerrain(bool enable)
     else
         if (mTerrain)
             mTerrain->setVisible(false);
+}
+
+float RenderingManager::getCameraDistance() const
+{
+    return mCamera->getCameraDistance();
 }
 
 } // namespace

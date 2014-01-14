@@ -12,7 +12,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
@@ -21,7 +20,6 @@
 #include "list.hpp"
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
-#include "inventorywindow.hpp"
 #include "travelwindow.hpp"
 #include "bookpage.hpp"
 
@@ -69,24 +67,24 @@ namespace MWGui
 
     void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWBase::MechanicsManager::PersuasionType type;
         if (sender == mAdmireButton) type = MWBase::MechanicsManager::PT_Admire;
         else if (sender == mIntimidateButton) type = MWBase::MechanicsManager::PT_Intimidate;
         else if (sender == mTauntButton) type = MWBase::MechanicsManager::PT_Taunt;
         else if (sender == mBribe10Button)
         {
-            player.getClass().getContainerStore(player).remove("gold_001", 10, player);
+            player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, 10, player);
             type = MWBase::MechanicsManager::PT_Bribe10;
         }
         else if (sender == mBribe100Button)
         {
-            player.getClass().getContainerStore(player).remove("gold_001", 100, player);
+            player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, 100, player);
             type = MWBase::MechanicsManager::PT_Bribe100;
         }
         else /*if (sender == mBribe1000Button)*/
         {
-            player.getClass().getContainerStore(player).remove("gold_001", 1000, player);
+            player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, 1000, player);
             type = MWBase::MechanicsManager::PT_Bribe1000;
         }
 
@@ -100,7 +98,8 @@ namespace MWGui
         WindowModal::open();
         center();
 
-        int playerGold = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         mBribe10Button->setEnabled (playerGold >= 10);
         mBribe100Button->setEnabled (playerGold >= 100);

@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_ANIMATION_H
-#define _GAME_RENDER_ANIMATION_H
+#ifndef GAME_RENDER_ANIMATION_H
+#define GAME_RENDER_ANIMATION_H
 
 #include <OgreController.h>
 #include <OgreVector3.h>
@@ -216,6 +216,9 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
 
+    /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
+    virtual void preRender (Ogre::Camera* camera);
+
     virtual void setAlpha(float alpha) {}
 private:
     void updateEffects(float duration);
@@ -255,6 +258,9 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
+    //Checks if playing any animation which shouldn't be stopped when switching camera view modes
+    bool allowSwitchViewMode() const;
+
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
      * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
@@ -267,6 +273,7 @@ public:
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
+    void changeGroups(const std::string &groupname, int group);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
@@ -274,7 +281,7 @@ public:
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showShield(bool show) {}
+    virtual void showCarriedLeft(bool show) {}
 
     void enableLights(bool enable);
 

@@ -949,9 +949,25 @@ void VideoState::init(const std::string& resourceName)
         this->format_ctx->pb = ioCtx;
 
     // Open video file
-    /// \todo leak here, ffmpeg or valgrind bug ?
+    ///
+    /// format_ctx->pb->buffer must be freed by hand,
+    /// if not, valgrind will show memleak, see:
+    ///
+    /// https://trac.ffmpeg.org/ticket/1357
+    ///
     if(!this->format_ctx || avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
     {
+        if (this->format_ctx != NULL)
+        {
+          if (this->format_ctx->pb != NULL)
+          {
+              av_free(this->format_ctx->pb->buffer);
+              this->format_ctx->pb->buffer = NULL;
+
+              av_free(this->format_ctx->pb);
+              this->format_ctx->pb = NULL;
+          }
+        }
         // "Note that a user-supplied AVFormatContext will be freed on failure."
         this->format_ctx = NULL;
         av_free(ioCtx);
@@ -989,9 +1005,12 @@ void VideoState::deinit()
     this->audioq.cond.notify_one();
     this->videoq.cond.notify_one();
 
-    this->parse_thread.join();
-    this->video_thread.join();
-    this->refresh_thread.join();
+    if (this->parse_thread.joinable())
+        this->parse_thread.join();
+    if (this->video_thread.joinable())
+        this->video_thread.join();
+    if (this->refresh_thread.joinable())
+        this->refresh_thread.join();
 
     if(this->audio_st)
         avcodec_close((*this->audio_st)->codec);
@@ -1006,9 +1025,21 @@ void VideoState::deinit()
 
     if(this->format_ctx)
     {
-        AVIOContext *ioContext = this->format_ctx->pb;
+        ///
+        /// format_ctx->pb->buffer must be freed by hand,
+        /// if not, valgrind will show memleak, see:
+        ///
+        /// https://trac.ffmpeg.org/ticket/1357
+        ///
+        if (this->format_ctx->pb != NULL)
+        {
+            av_free(this->format_ctx->pb->buffer);
+            this->format_ctx->pb->buffer = NULL;
+
+            av_free(this->format_ctx->pb);
+            this->format_ctx->pb = NULL;;
+        }
         avformat_close_input(&this->format_ctx);
-        av_free(ioContext);
     }
 }
 

@@ -6,8 +6,6 @@
 
 #include <components/esm/loadnpc.hpp>
 
-#include "externalrendering.hpp"
-
 #include "../mwworld/ptr.hpp"
 
 namespace OEngine

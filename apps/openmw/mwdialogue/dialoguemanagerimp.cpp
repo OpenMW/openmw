@@ -30,7 +30,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwgui/dialogue.hpp"
 
@@ -126,6 +125,8 @@ namespace MWDialogue
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
         mLastTopic = "";
+        mPermanentDispositionChange = 0;
+        mTemporaryDispositionChange = 0;
 
         mChoice = -1;
         mIsInChoice = false;
@@ -142,6 +143,7 @@ namespace MWDialogue
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
+        updateGlobals();
 
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
@@ -251,7 +253,7 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::executeTopic (const std::string& topic, bool randomResponse)
+    void DialogueManager::executeTopic (const std::string& topic)
     {
         Filter filter (mActor, mChoice, mTalkedTo);
 
@@ -262,12 +264,9 @@ namespace MWDialogue
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
-        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, true, true);
-
-        if (!infos.empty())
+        const ESM::DialInfo* info = filter.search(dialogue, true);
+        if (info)
         {
-            const ESM::DialInfo* info = infos[randomResponse ? std::rand() % infos.size() : 0];
-
             parseText (info->mResponse);
 
             std::string title;
@@ -298,6 +297,11 @@ namespace MWDialogue
             // no response found, print a fallback text
             win->addResponse ("…", topic);
         }
+    }
+
+    void DialogueManager::updateGlobals()
+    {
+        MWBase::Environment::get().getWorld()->updateDialogueGlobals();
     }
 
     void DialogueManager::updateTopics()
@@ -494,7 +498,7 @@ namespace MWDialogue
         else if (curDisp + mTemporaryDispositionChange > 100)
             mTemporaryDispositionChange = 100 - curDisp;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
 
         std::string text;
@@ -509,7 +513,7 @@ namespace MWDialogue
             text = "Bribe";
         }
 
-        executeTopic (text + (success ? " Success" : " Fail"), true);
+        executeTopic (text + (success ? " Success" : " Fail"));
     }
 
     int DialogueManager::getTemporaryDispositionChange() const
@@ -517,9 +521,19 @@ namespace MWDialogue
         return mTemporaryDispositionChange;
     }
 
-    void DialogueManager::applyTemporaryDispositionChange(int delta)
+    void DialogueManager::applyDispositionChange(int delta)
     {
+        int oldTemp = mTemporaryDispositionChange;
         mTemporaryDispositionChange += delta;
+        // don't allow increasing beyond 100 or decreasing below 0
+        int curDisp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
+        if (curDisp + mTemporaryDispositionChange < 0)
+            mTemporaryDispositionChange = -curDisp;
+        else if (curDisp + mTemporaryDispositionChange > 100)
+            mTemporaryDispositionChange = 100 - curDisp;
+
+        int diff = mTemporaryDispositionChange - oldTemp;
+        mPermanentDispositionChange += diff;
     }
 
     bool DialogueManager::checkServiceRefused()

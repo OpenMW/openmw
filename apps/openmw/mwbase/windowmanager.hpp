@@ -137,8 +137,8 @@ namespace MWBase
             virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
 
             /// Set value for the given ID.
-            virtual void setValue (const std::string& id, const MWMechanics::Stat<int>& value) = 0;
-            virtual void setValue (int parSkill, const MWMechanics::Stat<float>& value) = 0;
+            virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value) = 0;
+            virtual void setValue (int parSkill, const MWMechanics::SkillValue& value) = 0;
             virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) = 0;
             virtual void setValue (const std::string& id, const std::string& value) = 0;
             virtual void setValue (const std::string& id, int value) = 0;
@@ -204,6 +204,7 @@ namespace MWBase
 
             virtual void activateQuickKey  (int index) = 0;
 
+            virtual std::string getSelectedSpell() = 0;
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
             virtual void setSelectedEnchantItem(const MWWorld::Ptr& item) = 0;
             virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;
@@ -226,17 +227,14 @@ namespace MWBase
             virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
-
-            virtual void enterPressed () = 0;
-            virtual void activateKeyPressed () = 0;
             virtual int readPressedButton() = 0;
             ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
             virtual void onFrame (float frameDuration) = 0;
 
             /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-            virtual std::map<int, MWMechanics::Stat<float> > getPlayerSkillValues() = 0;
-            virtual std::map<int, MWMechanics::Stat<int> > getPlayerAttributeValues() = 0;
+            virtual std::map<int, MWMechanics::SkillValue > getPlayerSkillValues() = 0;
+            virtual std::map<int, MWMechanics::AttributeValue > getPlayerAttributeValues() = 0;
             virtual SkillList getPlayerMinorSkills() = 0;
             virtual SkillList getPlayerMajorSkills() = 0;
 

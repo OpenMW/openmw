@@ -18,11 +18,11 @@
 #include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -54,6 +54,18 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 runtime.push (MWBase::Environment::get().getWindowManager ()->getPlayerSleeping());
+            }
+        };
+
+        class OpGetPcJumping : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                MWWorld::Ptr player = world->getPlayerPtr();
+                runtime.push (!world->isOnGround(player) && !world->isFlying(player));
             }
         };
 
@@ -359,15 +371,20 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
-
-                    store.remove(soul, 1, ptr);
+                    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                    {
+                        if (::Misc::StringUtils::ciEqual(it->getCellRef().mSoul, soul))
+                        {
+                            store.remove(*it, 1, ptr);
+                            return;
+                        }
+                    }
                 }
         };
 
@@ -464,7 +481,20 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(MWWorld::Class::get(ptr).getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                    runtime.push(ptr.getClass().getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                }
+        };
+
+        template <class R>
+        class OpGetSpellReadied : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push(ptr.getClass().getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Spell);
                 }
         };
 
@@ -674,13 +704,11 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime& runtime)
             {
-                // No way to tell if we have a reference before trying to get it, and it will
-                // cause an exception is there isn't one :(
-                try {
-                    MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr = R()(runtime, false);
+                if (!ptr.isEmpty())
                     printLocalVars(runtime, ptr);
-                }
-                catch(std::runtime_error&) {
+                else
+                {
                     // No reference, no problem.
                     printGlobalVars(runtime);
                 }
@@ -700,6 +728,73 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpCast : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral (runtime[0].mInteger));
+                runtime.pop();
+
+                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
+
+                MWMechanics::CastSpell cast(ptr, target);
+                cast.cast(spell);
+            }
+        };
+
+        template <class R>
+        class OpExplodeSpell : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                MWMechanics::CastSpell cast(ptr, ptr);
+                cast.cast(spell);
+            }
+        };
+
+        class OpGoToJail : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                world->goToJail();
+            }
+        };
+
+        class OpPayFine : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                player.getClass().getNpcStats(player).setBounty(0);
+                MWBase::Environment::get().getWorld()->confiscateStolenItems(player);
+            }
+        };
+
+        class OpPayFineThief : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                player.getClass().getNpcStats(player).setBounty(0);
+            }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -721,8 +816,12 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeDontSaveObject, new OpDontSaveObject);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcSleep, new OpGetPcSleep);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcJumping, new OpGetPcJumping);
             interpreter.installSegment5 (Compiler::Misc::opcodeWakeUpPc, new OpWakeUpPc);
             interpreter.installSegment5 (Compiler::Misc::opcodePlayBink, new OpPlayBink);
+            interpreter.installSegment5 (Compiler::Misc::opcodePayFine, new OpPayFine);
+            interpreter.installSegment5 (Compiler::Misc::opcodePayFineThief, new OpPayFineThief);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGoToJail, new OpGoToJail);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetLocked, new OpGetLocked<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetEffect, new OpGetEffect<ImplicitRef>);
@@ -739,6 +838,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetAttackedExplicit, new OpGetAttacked<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetWeaponDrawn, new OpGetWeaponDrawn<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellReadied, new OpGetSpellReadied<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellReadiedExplicit, new OpGetSpellReadied<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellEffects, new OpGetSpellEffects<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetSpellEffectsExplicit, new OpGetSpellEffects<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetCurrentTime, new OpGetCurrentTime);
@@ -761,6 +862,10 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeCast, new OpCast<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeCastExplicit, new OpCast<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpell, new OpExplodeSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
         }
     }
 }

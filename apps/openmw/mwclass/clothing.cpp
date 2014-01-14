@@ -14,7 +14,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -195,6 +194,7 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -235,37 +235,26 @@ namespace MWClass
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
+        if (slots_.first.empty())
+            return std::make_pair(0, "");
+
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
-        for (std::vector<int>::const_iterator slot=slots_.first.begin();
-            slot!=slots_.first.end(); ++slot)
+        // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+        if(race->mData.mFlags & ESM::Race::Beast)
         {
+            std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;
 
-            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
-            if(race->mData.mFlags & ESM::Race::Beast)
+            for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
             {
-                std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;
-
-                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_Head)
-                            return std::make_pair(0, "#{sNotifyMessage13}");
-                    }
-                }
-
-                if (*slot == MWWorld::InventoryStore::Slot_Boots)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                            return std::make_pair(0, "#{sNotifyMessage15}");
-                    }
-                }
+                if((*itr).mPart == ESM::PRT_Head)
+                    return std::make_pair(0, "#{sNotifyMessage13}");
+                if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                    return std::make_pair(0, "#{sNotifyMessage15}");
             }
         }
+
         return std::make_pair (1, "");
     }
 

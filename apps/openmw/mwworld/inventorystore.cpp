@@ -75,17 +75,17 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, const Ptr& actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
 {
-    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, actorPtr);
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
 
-    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
+    // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if ((actorPtr.getRefData().getHandle() != "player")
             && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf())
             && !actorPtr.getClass().getCreatureStats(actorPtr).isDead())
     {
         std::string type = itemPtr.getTypeName();
-        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()) || (type == typeid(ESM::Weapon).name()))
             autoEquip(actorPtr);
     }
 
@@ -118,11 +118,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     // unstack item pointed to by iterator if required
     if (iterator!=end() && !slots_.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
     {
-        // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
-        int count = iterator->getRefData().getCount();
-        iterator->getRefData().setCount(count-1);
-        addNewStack(*iterator);
-        iterator->getRefData().setCount(1);
+        unstack(*iterator, actor);
     }
 
     mSlots[slot] = iterator;
@@ -139,8 +135,13 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 {
+    // Only *one* change event should be fired
+    mUpdatesEnabled = false;
     for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         unequipSlot(slot, actor);
+    mUpdatesEnabled = true;
+    fireEquipmentChangedEvent();
+    updateMagicEffects(actor);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
@@ -164,7 +165,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
     const MWMechanics::NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
-    MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
     TSlots slots_;
     initSlots (slots_);
@@ -175,6 +175,21 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
     {
         Ptr test = *iter;
+
+        // Don't autoEquip lights
+        if (test.getTypeName() == typeid(ESM::Light).name())
+        {
+            continue;
+        }
+
+        // Only autoEquip if we are the original owner of the item.
+        // This stops merchants from auto equipping anything you sell to them.
+        // ...unless this is a companion, he should always equip items given to him.
+        if (!Misc::StringUtils::ciEqual(test.getCellRef().mOwner, actor.getCellRef().mRefID) &&
+                (actor.getClass().getScript(actor).empty() ||
+                !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
+            continue;
+
         int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
 
         std::pair<std::vector<int>, bool> itemsSlots =
@@ -227,10 +242,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 case 0:
                     continue;
                 case 2:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, actor);
+                    slots_[MWWorld::InventoryStore::Slot_CarriedLeft] = end();
                     break;
                 case 3:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
+                    // Prefer keeping twohanded weapon
                     break;
             }
 
@@ -239,11 +254,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 // unstack item pointed to by iterator if required
                 if (iter->getRefData().getCount() > 1)
                 {
-                    // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
-                    int count = iter->getRefData().getCount();
-                    iter->getRefData().setCount(count-1);
-                    addNewStack(*iter);
-                    iter->getRefData().setCount(1);
+                    unstack(*iter, actor);
                 }
             }
 
@@ -357,7 +368,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // Apply instant effects
                     MWMechanics::CastSpell cast(actor, actor);
                     if (magnitude)
-                        cast.applyInstantEffect(actor, effectIt->mEffectID, magnitude);
+                        cast.applyInstantEffect(actor, actor, effectIt->mEffectID, magnitude);
                 }
 
                 if (magnitude)
@@ -577,7 +588,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
             float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
-            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), magnitude);
+            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), "", magnitude);
 
             ++i;
         }

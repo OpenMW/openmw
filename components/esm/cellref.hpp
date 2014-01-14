@@ -20,7 +20,7 @@ namespace ESM
         public:
 
             int mRefnum;           // Reference number
-            std::string mRefID;    // ID of object being referenced
+            std::string mRefID;    // ID of object being referenced (must be lowercase)
 
             float mScale;          // Scale applied to mesh
 
@@ -34,8 +34,8 @@ namespace ESM
             // ID of creature trapped in this soul gem (?)
             std::string mSoul;
 
-            // ?? CNAM has a faction name, might be for objects/beds etc
-            // belonging to a faction.
+            // The faction that owns this object (and will get angry if
+            // you take it and are not a faction member)
             std::string mFaction;
 
             // INDX might be PC faction rank required to use the item? Sometimes

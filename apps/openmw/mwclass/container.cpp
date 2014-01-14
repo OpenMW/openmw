@@ -16,7 +16,6 @@
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/physicssystem.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -53,7 +52,7 @@ namespace MWClass
                 ptr.get<ESM::Container>();
 
             data->mContainerStore.fill(
-                ref->mBase->mInventory, ptr.getCellRef().mOwner, MWBase::Environment::get().getWorld()->getStore());
+                ref->mBase->mInventory, ptr.getCellRef().mOwner, ptr.getCellRef().mFaction, MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -108,7 +107,7 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
         bool needKey = ptr.getCellRef().mLockLevel>0;
@@ -216,6 +215,7 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 

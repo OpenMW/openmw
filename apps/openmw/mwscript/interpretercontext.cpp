@@ -14,7 +14,6 @@
 #include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -24,7 +23,7 @@
 namespace MWScript
 {
     MWWorld::Ptr InterpreterContext::getReference (
-        const std::string& id, bool activeOnly)
+        const std::string& id, bool activeOnly, bool doThrow)
     {
         if (!id.empty())
         {
@@ -32,7 +31,7 @@ namespace MWScript
         }
         else
         {
-            if (mReference.isEmpty())
+            if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
 
             return mReference;
@@ -40,7 +39,7 @@ namespace MWScript
     }
 
     const MWWorld::Ptr InterpreterContext::getReference (
-        const std::string& id, bool activeOnly) const
+        const std::string& id, bool activeOnly, bool doThrow) const
     {
         if (!id.empty())
         {
@@ -48,7 +47,7 @@ namespace MWScript
         }
         else
         {
-            if (mReference.isEmpty())
+            if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
 
             return mReference;
@@ -248,28 +247,28 @@ namespace MWScript
     std::string InterpreterContext::getPCName() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        ESM::NPC player = *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+        ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         return player.mName;
     }
 
     std::string InterpreterContext::getPCRace() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        std::string race = world->getPlayer().getPlayer().get<ESM::NPC>()->mBase->mRace;
+        std::string race = world->getPlayerPtr().get<ESM::NPC>()->mBase->mRace;
         return world->getStore().get<ESM::Race>().find(race)->mName;
     }
 
     std::string InterpreterContext::getPCClass() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        std::string class_ = world->getPlayer().getPlayer().get<ESM::NPC>()->mBase->mClass;
+        std::string class_ = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
         return world->getStore().get<ESM::Class>().find(class_)->mName;
     }
 
     std::string InterpreterContext::getPCRank() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
 
         std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
 
@@ -288,7 +287,7 @@ namespace MWScript
     std::string InterpreterContext::getPCNextRank() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
 
         std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
 
@@ -316,7 +315,7 @@ namespace MWScript
     int InterpreterContext::getPCBounty() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         return MWWorld::Class::get (player).getNpcStats (player).getBounty();
     }
 
@@ -387,7 +386,7 @@ namespace MWScript
         if (!mAction.get())
             throw std::runtime_error ("activation failed, because no action to perform");
 
-        mAction->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mAction->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
         mActivationHandled = true;
     }
 
@@ -499,8 +498,8 @@ namespace MWScript
         ptr.getRefData().getLocals().mFloats[index] = value;
     }
 
-    MWWorld::Ptr InterpreterContext::getReference()
+    MWWorld::Ptr InterpreterContext::getReference(bool required)
     {
-        return getReference ("", true);
+        return getReference ("", true, required);
     }
 }

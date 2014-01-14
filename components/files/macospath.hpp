@@ -23,14 +23,16 @@ struct MacOsPath
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getUserPath() const;
+    boost::filesystem::path getUserConfigPath() const;
+
+    boost::filesystem::path getUserDataPath() const;
 
     /**
      * \brief Return path to the global (system) directory.
      *
      * \return boost::filesystem::path
      */
-    boost::filesystem::path getGlobalPath() const;
+    boost::filesystem::path getGlobalConfigPath() const;
 
     /**
      * \brief Return path to the runtime directory which is the

@@ -3,7 +3,6 @@
 #include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/timestamp.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -83,7 +82,7 @@ namespace MWMechanics
                 return true;
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ESM::Position pos = actor.getRefData().getPosition();
         bool cellChange = actor.getCell()->mCell->mData.mX != cellX || actor.getCell()->mCell->mData.mY != cellY;
         const ESM::Pathgrid *pathgrid =
@@ -161,6 +160,7 @@ namespace MWMechanics
         if(distanceBetweenResult <= mMaxDist * mMaxDist)
         {
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+            // TODO: use movement settings instead of rotating directly
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
             mMaxDist = 470;
@@ -178,7 +178,7 @@ namespace MWMechanics
 
     int AiEscort::getTypeId() const
     {
-        return 2;
+        return TypeIdEscort;
     }
 }
 

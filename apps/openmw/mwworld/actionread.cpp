@@ -34,7 +34,7 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->getBookWindow()->open(getTarget());
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         // Skill gain from books

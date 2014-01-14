@@ -28,7 +28,9 @@ enum Priority {
     Priority_Default,
     Priority_Jump,
     Priority_Movement,
+    Priority_Hit,
     Priority_Weapon,
+    Priority_Knockdown,
     Priority_Torch,
 
     Priority_Death,
@@ -87,7 +89,10 @@ enum CharacterState {
     CharState_Death3,
     CharState_Death4,
     CharState_Death5,
-    CharState_SwimDeath
+    CharState_SwimDeath,
+
+    CharState_Hit,
+    CharState_KnockDown
 };
 
 enum WeaponType {
@@ -142,6 +147,9 @@ class CharacterController
     CharacterState mDeathState;
     std::string mCurrentDeath;
 
+    CharacterState mHitState;
+    std::string mCurrentHit;
+
     UpperBodyCharacterState mUpperBodyState;
 
     JumpingState mJumpState;
@@ -155,9 +163,6 @@ class CharacterController
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
-
-    // used for acrobatics progress and fall damages
-    float mFallHeight;
 
     std::string mAttackType; // slash, chop or thrust
 
@@ -174,6 +179,8 @@ class CharacterController
     bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
 
     void updateVisibility();
+
+    void playRandomDeath(float startpoint = 0.0f);
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);

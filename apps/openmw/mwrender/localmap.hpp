@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_LOCALMAP_H
-#define _GAME_RENDER_LOCALMAP_H
+#ifndef GAME_RENDER_LOCALMAP_H
+#define GAME_RENDER_LOCALMAP_H
 
 #include <openengine/ogre/renderer.hpp>
 

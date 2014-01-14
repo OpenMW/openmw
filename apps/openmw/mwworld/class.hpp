@@ -240,11 +240,6 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
-            virtual bool hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const;
-            ///< Has \æ ptr detected \a ptr2?
-            ///
-            /// (default implementation: return false)
-
             virtual std::string getUpSoundId (const Ptr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
@@ -290,6 +285,8 @@ namespace MWWorld
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
+            virtual bool isKey (const MWWorld::Ptr& ptr) const { return false; }
+
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 
@@ -303,6 +300,8 @@ namespace MWWorld
             virtual bool isNpc() const {
                 return false;
             }
+
+            virtual bool isFlying(const MWWorld::Ptr& ptr) const;
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
