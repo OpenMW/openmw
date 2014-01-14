@@ -67,7 +67,10 @@ bool MWMechanics::AiSequence::getCombatTarget(std::string &targetActorId) const
 void MWMechanics::AiSequence::stopCombat()
 {
     while (getTypeId() == AiPackage::TypeIdCombat)
+    {
+        delete *mPackages.begin();
         mPackages.erase (mPackages.begin());
+    }
 }
 
 bool MWMechanics::AiSequence::isPackageDone() const
@@ -83,6 +86,7 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
         {
             if (mPackages.front()->execute (actor,duration))
             {
+                delete *mPackages.begin();
                 mPackages.erase (mPackages.begin());
                 mDone = true;
             }
