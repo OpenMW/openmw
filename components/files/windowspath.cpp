@@ -10,8 +10,12 @@
 
 #pragma comment(lib, "Shlwapi.lib")
 
+#include <boost/locale.hpp>
+namespace bconv = boost::locale::conv;
+
 /**
  * FIXME: Someone with Windows system should check this and correct if necessary
+ * FIXME: MAX_PATH is irrelevant for extended-length paths, i.e. \\?\...
  */
 
 /**
@@ -29,16 +33,15 @@ boost::filesystem::path WindowsPath::getUserConfigPath() const
 {
     boost::filesystem::path userPath(".");
 
-    TCHAR path[MAX_PATH];
+    WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
-    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, path)))
+    if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
-        PathAppend(path, TEXT("My Games"));
-        userPath = boost::filesystem::path(path);
+        userPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
-    return userPath / mName;
+    return userPath / "MyGames" / mName;
 }
 
 boost::filesystem::path WindowsPath::getUserDataPath() const
@@ -51,12 +54,12 @@ boost::filesystem::path WindowsPath::getGlobalConfigPath() const
 {
     boost::filesystem::path globalPath(".");
 
-    TCHAR path[MAX_PATH];
+    WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
-    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, NULL, 0, path)))
+    if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
-        globalPath = boost::filesystem::path(path);
+        globalPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
     return globalPath / mName;
