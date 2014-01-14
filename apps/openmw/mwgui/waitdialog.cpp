@@ -183,7 +183,7 @@ namespace MWGui
                     if (x > y)
                     {
                         float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
-                        mInterruptAt = int(fSleepRestMod * hoursToWait);
+                        mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);
                         mInterruptCreatureList = region->mSleepList;
                     }
                 }
