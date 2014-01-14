@@ -10,8 +10,6 @@
 #include <OgreMaterialManager.h>
 #include <OgreMaterial.h>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/functional/hash.hpp>
 
 

@@ -1,6 +1,5 @@
 #include "race.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
@@ -140,7 +139,7 @@ namespace MWGui
         size_t count = mRaceList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (boost::iequals(*mRaceList->getItemDataAt<std::string>(i), raceId))
+            if (Misc::StringUtils::ciEqual(*mRaceList->getItemDataAt<std::string>(i), raceId))
             {
                 mRaceList->setIndexSelected(i);
                 MyGUI::Button* okButton;
@@ -230,7 +229,7 @@ namespace MWGui
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
-        if (boost::iequals(mCurrentRaceId, *raceId))
+        if (Misc::StringUtils::ciEqual(mCurrentRaceId, *raceId))
             return;
 
         mCurrentRaceId = *raceId;
@@ -320,7 +319,7 @@ namespace MWGui
                 continue;
 
             mRaceList->addItem(it->mName, it->mId);
-            if (boost::iequals(it->mId, mCurrentRaceId))
+            if (Misc::StringUtils::ciEqual(it->mId, mCurrentRaceId))
                 mRaceList->setIndexSelected(index);
             ++index;
         }

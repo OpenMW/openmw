@@ -3,8 +3,6 @@
 
 #include <cmath>
 
-#include <boost/algorithm/string.hpp>
-
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"

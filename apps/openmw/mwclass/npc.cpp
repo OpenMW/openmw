@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include <boost/algorithm/string.hpp>
-
 #include <OgreSceneNode.h>
 
 #include <components/esm/loadmgef.hpp>

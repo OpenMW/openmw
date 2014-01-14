@@ -1,7 +1,5 @@
 #include "class.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -128,7 +126,7 @@ namespace MWGui
         size_t count = mClassList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (boost::iequals(*mClassList->getItemDataAt<std::string>(i), classId))
+            if (Misc::StringUtils::ciEqual(*mClassList->getItemDataAt<std::string>(i), classId))
             {
                 mClassList->setIndexSelected(i);
                 MyGUI::Button* okButton;
@@ -163,7 +161,7 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         const std::string *classId = mClassList->getItemDataAt<std::string>(_index);
-        if (boost::iequals(mCurrentClassId, *classId))
+        if (Misc::StringUtils::ciEqual(mCurrentClassId, *classId))
             return;
 
         mCurrentClassId = *classId;
@@ -193,7 +191,7 @@ namespace MWGui
                 mCurrentClassId = id;
                 mClassList->setIndexSelected(index);
             }
-            else if (boost::iequals(id, mCurrentClassId))
+            else if (Misc::StringUtils::ciEqual(id, mCurrentClassId))
             {
                 mClassList->setIndexSelected(index);
             }
