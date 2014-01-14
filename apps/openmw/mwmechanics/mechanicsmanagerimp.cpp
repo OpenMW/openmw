@@ -901,6 +901,9 @@ namespace MWMechanics
             static float fSneakSkillMult = store.find("fSneakSkillMult")->getFloat();
             static float fSneakBootMult = store.find("fSneakBootMult")->getFloat();
             float sneak = 0;
+            // TODO: According to Hrnchamd Research:Movement, "Creatures have generalized combat, magic and stealth
+            // stats which substitute for the specific skills (in the same way as specializations)."
+            // This probably applies to a large part of the code base.
             if (ptr.getClass().isNpc())
                 sneak = ptr.getClass().getNpcStats(ptr).getSkill(ESM::Skill::Sneak).getModified();
             int agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
