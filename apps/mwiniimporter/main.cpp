@@ -4,11 +4,43 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/locale.hpp>
 
 namespace bpo = boost::program_options;
 
+#ifndef _WIN32
 int main(int argc, char *argv[]) {
+#else
 
+class utf8argv
+{
+public:
+
+    utf8argv(int argc, wchar_t *wargv[])
+    {
+        args.reserve(argc);
+        argv = new const char *[argc];
+
+        for (int i = 0; i < argc; ++i) {
+            args.push_back(boost::locale::conv::utf_to_utf<char>(wargv[i]));
+            argv[i] = args.back().c_str();
+        }
+    }
+
+    ~utf8argv() { delete[] argv; }
+    const char * const *get() const { return argv; }
+
+private:
+
+    const char **argv;
+    std::vector<std::string> args;
+};
+
+int wmain(int argc, wchar_t *wargv[]) {
+    utf8argv converter(argc, wargv);
+    char **argv = converter.get();
+    boost::filesystem::path::imbue(boost::locale::generator().generate(""));
+#endif
     bpo::options_description desc("Syntax: mwiniimporter <options> inifile configfile\nAllowed options");
     bpo::positional_options_description p_desc;
     desc.add_options()

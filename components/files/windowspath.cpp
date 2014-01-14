@@ -27,7 +27,7 @@ namespace Files
 WindowsPath::WindowsPath(const std::string& application_name)
     : mName(application_name)
 {
-    boost::filesystem::path::imbue(boost::locale::generator.generate(""));
+    boost::filesystem::path::imbue(boost::locale::generator().generate(""));
 }
 
 boost::filesystem::path WindowsPath::getUserConfigPath() const
