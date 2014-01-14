@@ -18,6 +18,7 @@ namespace ESM
 {
 class ESMReader;
 class ESMWriter;
+    class CellId;
 
 /* Moved cell reference tracking object. This mainly stores the target cell
         of the reference, so we can easily know where it has been moved when another
@@ -150,6 +151,8 @@ struct Cell
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).
+
+    CellId getCellId() const;
 };
 }
 #endif

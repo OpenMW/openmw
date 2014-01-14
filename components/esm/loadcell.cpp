@@ -3,11 +3,15 @@
 #include <string>
 #include <sstream>
 #include <list>
+
 #include <boost/concept_check.hpp>
+
+#include <components/misc/stringops.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "cellid.hpp"
 
 namespace
 {
@@ -220,5 +224,25 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;
         mAmbi.mFogDensity = 0;
+    }
+
+    CellId Cell::getCellId() const
+    {
+        CellId id;
+
+        id.mPaged = (mData.mFlags & Interior);
+
+        if (id.mPaged)
+        {
+            id.mWorldspace = "default";
+            id.mIndex.mX = mData.mX;
+            id.mIndex.mY = mData.mY;
+        }
+        else
+        {
+            id.mWorldspace = Misc::StringUtils::lowerCase (mName);
+        }
+
+        return id;
     }
 }
