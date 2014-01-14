@@ -54,7 +54,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, unsigned char failChance=0, bool topLevel=true);
+            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true);
 
         public:
 
