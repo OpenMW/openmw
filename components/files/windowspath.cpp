@@ -27,6 +27,7 @@ namespace Files
 WindowsPath::WindowsPath(const std::string& application_name)
     : mName(application_name)
 {
+    boost::filesystem::path::imbue(boost::locale::generator.generate(""));
 }
 
 boost::filesystem::path WindowsPath::getUserConfigPath() const
@@ -41,7 +42,7 @@ boost::filesystem::path WindowsPath::getUserConfigPath() const
         userPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
-    return userPath / "MyGames" / mName;
+    return userPath / "My Games" / mName;
 }
 
 boost::filesystem::path WindowsPath::getUserDataPath() const
