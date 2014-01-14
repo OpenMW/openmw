@@ -4,7 +4,6 @@
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bulletnifloader.hpp>
 #include "OgreRoot.h"
-#include "btKinematicCharacterController.h"
 #include "BtOgrePG.h"
 #include "BtOgreGP.h"
 #include "BtOgreExtras.h"
