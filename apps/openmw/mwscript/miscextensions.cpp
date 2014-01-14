@@ -371,15 +371,20 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
-
-                    store.remove(soul, 1, ptr);
+                    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                    {
+                        if (::Misc::StringUtils::ciEqual(it->getCellRef().mSoul, soul))
+                        {
+                            store.remove(*it, 1, ptr);
+                            return;
+                        }
+                    }
                 }
         };
 

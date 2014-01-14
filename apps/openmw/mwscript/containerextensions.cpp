@@ -282,7 +282,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
       
-		    const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
+                    const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
