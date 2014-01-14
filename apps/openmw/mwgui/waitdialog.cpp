@@ -253,8 +253,7 @@ namespace MWGui
             if (mCurHour <= mHours)
             {
                 MWBase::Environment::get().getWorld ()->advanceTime (1);
-                if (mSleeping)
-                    MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
+                MWBase::Environment::get().getMechanicsManager ()->rest (mSleeping);
             }
         }
 

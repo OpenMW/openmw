@@ -148,7 +148,7 @@ namespace MWGui
             int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
             for(int i = 0;i < hours;i++)
             {
-                MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
+                MWBase::Environment::get().getMechanicsManager ()->rest (true);
             }
             MWBase::Environment::get().getWorld()->advanceTime(hours);
 

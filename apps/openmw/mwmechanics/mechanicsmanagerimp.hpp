@@ -81,8 +81,9 @@ namespace MWMechanics
             virtual void setPlayerClass (const ESM::Class& class_);
             ///< Set player class to custom class.
 
-            virtual void restoreDynamicStats();
-            ///< If the player is sleeping, this should be called every hour.
+            virtual void rest(bool sleep);
+            ///< If the player is sleeping or waiting, this should be called every hour.
+            /// @param sleep is the player sleeping or waiting?
 
             virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying);
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.

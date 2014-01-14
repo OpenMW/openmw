@@ -154,6 +154,8 @@ namespace MWGui
 
         // advance time
         MWBase::Environment::get().getWorld ()->advanceTime (2);
+        MWBase::Environment::get().getMechanicsManager()->rest(false);
+        MWBase::Environment::get().getMechanicsManager()->rest(false);
 
         MWBase::Environment::get().getWorld ()->getFader()->fadeOut(0.25);
         mFadeTimeRemaining = 0.5;

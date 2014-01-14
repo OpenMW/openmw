@@ -370,9 +370,9 @@ namespace MWMechanics
         mObjects.update(duration, paused);
     }
 
-    void MechanicsManager::restoreDynamicStats()
+    void MechanicsManager::rest(bool sleep)
     {
-        mActors.restoreDynamicStats ();
+        mActors.restoreDynamicStats (sleep);
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)

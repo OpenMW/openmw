@@ -199,7 +199,7 @@ namespace MWMechanics
         }
 
         // fatigue restoration
-        calculateRestoration(ptr, duration);
+        calculateRestoration(ptr, duration, false);
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
@@ -257,7 +257,7 @@ namespace MWMechanics
         creatureStats.setFatigue(fatigue);
     }
 
-    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
+    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration, bool sleep)
     {
         if (ptr.getClass().getCreatureStats(ptr).isDead())
             return;
@@ -272,10 +272,9 @@ namespace MWMechanics
         if (normalizedEncumbrance > 1)
             normalizedEncumbrance = 1;
 
-        if (duration == 3600)
+        if (sleep)
         {
             // the actor is sleeping, restore health and magicka
-
             bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0;
 
             DynamicStat<float> health = stats.getHealth();
@@ -294,7 +293,6 @@ namespace MWMechanics
         }
 
         // restore fatigue
-
         float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
         float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
@@ -847,10 +845,10 @@ namespace MWMechanics
             }
         }
     }
-    void Actors::restoreDynamicStats()
+    void Actors::restoreDynamicStats(bool sleep)
     {
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-            calculateRestoration(iter->first, 3600);
+            calculateRestoration(iter->first, 3600, sleep);
     }
 
     int Actors::countDeaths (const std::string& id) const
