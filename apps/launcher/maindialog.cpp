@@ -41,11 +41,11 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     // Check if the font is installed
     if (!fonts.contains("EB Garamond")) {
 
-        QString font = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+        QString font = QString::fromUtf8(mCfgMgr.getGlobalDataPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
         file.setFileName(font);
 
         if (!file.exists()) {
-            font = QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+            font = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
         }
 
         fontDatabase.addApplicationFont(font);
@@ -243,7 +243,7 @@ bool Launcher::MainDialog::showFirstRunDialog()
         }
 
         // Create the file if it doesn't already exist, else the importer will fail
-        QString path = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + QString("openmw.cfg");
+        QString path = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()) + QString("openmw.cfg");
         QFile file(path);
 
         if (!file.exists()) {
@@ -358,7 +358,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
 
     QStringList paths;
     paths.append(QString("launcher.cfg"));
@@ -464,8 +464,8 @@ bool Launcher::expansions(Launcher::UnshieldThread& cd)
 
 bool Launcher::MainDialog::setupGameSettings()
 {
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
-    QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
@@ -594,7 +594,7 @@ bool Launcher::MainDialog::setupGameSettings()
 
             while(expansions(cd));
 
-            selectedFile = QString::fromStdString(cd.GetMWEsmPath());
+            selectedFile = QString::fromUtf8(cd.GetMWEsmPath().c_str());
         }
         #endif // WIN32
 
@@ -615,8 +615,8 @@ bool Launcher::MainDialog::setupGraphicsSettings()
 {
     mGraphicsSettings.setMultiValueEnabled(false);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
-    QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
     QFile localDefault(QString("settings-default.cfg"));
     QFile globalDefault(globalPath + QString("settings-default.cfg"));
@@ -702,7 +702,7 @@ bool Launcher::MainDialog::writeSettings()
     mGraphicsPage->saveSettings();
     mDataFilesPage->saveSettings();
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QDir dir(userPath);
 
     if (!dir.exists()) {

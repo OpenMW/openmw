@@ -53,7 +53,7 @@ void Launcher::GameSettings::validatePaths()
     mDataDirs.clear();
 
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it) {
-        QString path = QString::fromStdString(it->string());
+        QString path = QString::fromUtf8(it->string().c_str());
         path.remove(QChar('\"'));
 
         QDir dir(path);
@@ -73,7 +73,7 @@ void Launcher::GameSettings::validatePaths()
     mCfgMgr.processPaths(dataDirs);
 
     if (!dataDirs.empty()) {
-        QString path = QString::fromStdString(dataDirs.front().string());
+        QString path = QString::fromUtf8(dataDirs.front().string().c_str());
         path.remove(QChar('\"'));
 
         QDir dir(path);
