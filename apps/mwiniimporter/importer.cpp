@@ -674,6 +674,10 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
             line = line.substr(0, line.length()-1);
         }
 
+        if(line.empty()) {
+            continue;
+        }
+
         if(line[0] == '[') {
             int pos = line.find(']');
             if(pos < 2) {
@@ -688,10 +692,6 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
         int comment_pos = line.find(";");
         if(comment_pos > 0) {
             line = line.substr(0,comment_pos);
-        }
-
-        if(line.empty()) {
-            continue;
         }
 
         int pos = line.find("=");
