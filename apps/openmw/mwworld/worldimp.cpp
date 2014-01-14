@@ -2075,8 +2075,11 @@ namespace MWWorld
             }
 
             // Reduce mana
-            magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
-            stats.setMagicka(magicka);
+            if (!fail)
+            {
+                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+                stats.setMagicka(magicka);
+            }
         }
 
         if (isPlayer && fail)
