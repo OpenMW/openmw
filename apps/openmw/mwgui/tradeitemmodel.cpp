@@ -154,6 +154,13 @@ namespace MWGui
                 if(!MWWorld::Class::get(base).canSell(base, services))
                     continue;
 
+                // Bound items may not be bought
+                if (item.mBase.getCellRef().mRefID.size() > 6
+                        && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
+                {
+                    continue;
+                }
+
                 // don't show equipped items
                 if(mMerchant.getTypeName() == typeid(ESM::NPC).name())
                 {

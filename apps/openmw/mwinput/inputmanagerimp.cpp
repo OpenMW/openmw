@@ -87,7 +87,7 @@ namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists)
+            const std::string& userFile, bool userFileExists, bool grab)
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
@@ -103,6 +103,7 @@ namespace MWInput
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
+        , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
@@ -111,7 +112,7 @@ namespace MWInput
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
-        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow());
+        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow(), grab);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
@@ -181,9 +182,6 @@ namespace MWInput
             {
             case A_GameMenu:
                 toggleMainMenu ();
-                break;
-            case A_Quit:
-                exitNow();
                 break;
             case A_Screenshot:
                 screenshot();
@@ -267,6 +265,8 @@ namespace MWInput
 
     void InputManager::update(float dt, bool loading)
     {
+        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
+
         mInputManager->capture(loading);
         // inject some fake mouse movement to force updating MyGUI's widget states
         // this shouldn't do any harm since we're moving back to the original position afterwards
@@ -277,7 +277,8 @@ namespace MWInput
         if (!loading)
             mInputBinder->update(dt);
 
-        bool main_menu = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu);
+        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+             && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
 
         bool was_relative = mInputManager->getMouseRelative();
         bool is_relative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
@@ -287,7 +288,7 @@ namespace MWInput
         mInputManager->setMouseRelative(is_relative);
 
         //we let the mouse escape in the main menu
-        mInputManager->setGrabPointer(!main_menu);
+        mInputManager->setGrabPointer(grab && (mGrabCursor || is_relative));
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
@@ -378,10 +379,9 @@ namespace MWInput
                         MWBase::Environment::get().getWorld()->togglePreviewMode(true);
                     }
                 } else {
-                    if (mPreviewPOVDelay > 0.5) {
-                        //disable preview mode
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    } else if (mPreviewPOVDelay > 0.f) {
+                    //disable preview mode
+                    MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5) {
                         MWBase::Environment::get().getWorld()->togglePOV();
                     }
                     mPreviewPOVDelay = 0.f;
@@ -430,6 +430,9 @@ namespace MWInput
 
             if (it->first == "Input" && it->second == "ui sensitivity")
                 mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
+
+            if (it->first == "Input" && it->second == "grab cursor")
+                mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
 
         }
     }
@@ -505,7 +508,7 @@ namespace MWInput
 
         mInputBinder->keyPressed (arg);
 
-        if(arg.keysym.sym == SDLK_RETURN
+        if((arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER)
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
@@ -642,6 +645,11 @@ namespace MWInput
     void InputManager::windowResized(int x, int y)
     {
         mOgre.windowResized(x,y);
+    }
+
+    void InputManager::windowClosed()
+    {
+        MWBase::Environment::setRequestExit();
     }
 
     void InputManager::toggleMainMenu()
@@ -814,13 +822,6 @@ namespace MWInput
         mAlwaysRunActive = !mAlwaysRunActive;
     }
 
-    // Exit program now button (which is disabled in GUI mode)
-    void InputManager::exitNow()
-    {
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            Ogre::Root::getSingleton().queueEndRendering ();
-    }
-
     void InputManager::resetIdleTime()
     {
         if (mTimeIdle < 0)
@@ -830,9 +831,11 @@ namespace MWInput
 
     void InputManager::updateIdleTime(float dt)
     {
+        static const float vanityDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fVanityDelay")->getFloat();
         if (mTimeIdle >= 0.f)
             mTimeIdle += dt;
-        if (mTimeIdle > 30.f) {
+        if (mTimeIdle > vanityDelay) {
             MWBase::Environment::get().getWorld()->toggleVanityMode(true);
             mTimeIdle = -1.f;
         }

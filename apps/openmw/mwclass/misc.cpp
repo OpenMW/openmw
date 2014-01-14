@@ -219,7 +219,6 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 newRef.getPtr().get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(&cell.mMiscItems.insert(*ref), &cell);
-            newPtr.getRefData ().setCount(1);
             newPtr.getCellRef().mGoldValue = goldAmount;
         } else {
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
@@ -242,7 +241,12 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             item.get<ESM::Miscellaneous>();
 
-        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc);
+        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc)
+                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_001")
+                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_005")
+                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_010")
+                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_025")
+                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_100");
     }
 
     float Miscellaneous::getWeight(const MWWorld::Ptr &ptr) const
@@ -250,6 +254,13 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
         return ref->mBase->mData.mWeight;
+    }
+
+    bool Miscellaneous::isKey(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+            ptr.get<ESM::Miscellaneous>();
+        return ref->mBase->mData.mIsKey;
     }
 
 }

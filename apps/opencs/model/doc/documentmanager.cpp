@@ -15,7 +15,7 @@
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
 : mConfiguration (configuration)
 {
-    boost::filesystem::path projectPath = configuration.getUserPath() / "projects";
+    boost::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
     if (!boost::filesystem::is_directory (projectPath))
         boost::filesystem::create_directories (projectPath);

@@ -24,7 +24,12 @@ namespace EsmTool
         bool mPrintPlain;
 
     public:
-        RecordBase () { mPrintPlain = false; }
+        RecordBase ()
+          : mFlags(0)
+          , mPrintPlain(false)
+        {
+        }
+
         virtual ~RecordBase() {}
 
         const std::string &getId() const {

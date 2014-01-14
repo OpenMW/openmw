@@ -16,7 +16,7 @@ namespace SFO
     class InputWrapper
     {
     public:
-        InputWrapper(SDL_Window *window, Ogre::RenderWindow* ogreWindow);
+        InputWrapper(SDL_Window *window, Ogre::RenderWindow* ogreWindow, bool grab);
         ~InputWrapper();
 
         void setMouseEventCallback(MouseListener* listen) { mMouseListener = listen; }
@@ -28,6 +28,7 @@ namespace SFO
 		bool isModifierHeld(SDL_Keymod mod);
 		bool isKeyDown(SDL_Scancode key);
 
+        void setMouseVisible (bool visible);
         void setMouseRelative(bool relative);
         bool getMouseRelative() { return mMouseRelative; }
         void setGrabPointer(bool grab);
@@ -35,6 +36,8 @@ namespace SFO
         OIS::KeyCode sdl2OISKeyCode(SDL_Keycode code);
 
         void warpMouse(int x, int y);
+
+        void updateMouseSettings();
 
     private:
 
@@ -57,14 +60,20 @@ namespace SFO
         Uint16 mWarpX;
         Uint16 mWarpY;
         bool mWarpCompensate;
-        bool mMouseRelative;
         bool mWrapPointer;
+
+        bool mAllowGrab;
+        bool mWantMouseVisible;
+        bool mWantGrab;
+        bool mWantRelative;
         bool mGrabPointer;
+        bool mMouseRelative;
 
         Sint32 mMouseZ;
         Sint32 mMouseX;
         Sint32 mMouseY;
 
+        bool mWindowHasFocus;
         bool mMouseInWindow;
 
         SDL_Window* mSDLWindow;

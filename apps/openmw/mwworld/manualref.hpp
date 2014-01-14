@@ -37,7 +37,7 @@ namespace MWWorld
 
         public:
 
-            ManualRef (const MWWorld::ESMStore& store, const std::string& name)
+            ManualRef (const MWWorld::ESMStore& store, const std::string& name, const int count=1)
             {
                 // create
                 if (!create (store.get<ESM::Activator>(), name) &&
@@ -74,6 +74,7 @@ namespace MWWorld
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
                 cellRef.mReferenceBlocked = 0;
+                mPtr.getRefData().setCount(count);
             }
 
             const Ptr& getPtr() const

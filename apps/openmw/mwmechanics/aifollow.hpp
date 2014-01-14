@@ -13,7 +13,7 @@ namespace MWMechanics
             AiFollow(const std::string &ActorId,float duration, float X, float Y, float Z);
             AiFollow(const std::string &ActorId,const std::string &CellId,float duration, float X, float Y, float Z);
             virtual AiFollow *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor);
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
                     ///< \return Package completed?
             virtual int getTypeId() const;
 

@@ -73,6 +73,11 @@ namespace MWWorld
             void setLocals (const ESM::Script& script);
 
             void setCount (int count);
+            /// Set object count (an object pile is a simple object with a count >1).
+            ///
+            /// \warning Do not call setCount() to add or remove objects from a
+            /// container or an actor's inventory. Call ContainerStore::add() or
+            /// ContainerStore::remove() instead.
 
             MWScript::Locals& getLocals();
 

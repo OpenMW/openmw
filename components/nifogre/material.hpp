@@ -37,9 +37,9 @@ class NIFMaterialLoader {
 
     static std::map<size_t,std::string> sMaterialMap;
 
+public:
     static std::string findTextureName(const std::string &filename);
 
-public:
     static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
                                     const Ogre::String &name, const Ogre::String &group,
                                     const Nif::NiTexturingProperty *texprop,

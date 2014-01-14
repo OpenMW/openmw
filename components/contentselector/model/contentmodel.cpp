@@ -1,6 +1,8 @@
 #include "contentmodel.hpp"
 #include "esmfile.hpp"
 
+#include <stdexcept>
+
 #include <QDir>
 #include <QTextCodec>
 #include <QDebug>
@@ -205,8 +207,11 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
 
     case Qt::CheckStateRole:
     {
-        if (!file->isGameFile())
-            return isChecked(file->filePath());
+        if (file->isGameFile())
+            return QVariant();
+
+        return mCheckStates[file->filePath()];
+
         break;
     }
 

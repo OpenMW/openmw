@@ -9,6 +9,8 @@
 #include "../mwbase/journal.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
+#include "savegamedialog.hpp"
+
 namespace MWGui
 {
 
@@ -77,13 +79,26 @@ namespace MWGui
         else if (sender == mButtons["options"])
             MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
         else if (sender == mButtons["exitgame"])
-            Ogre::Root::getSingleton ().queueEndRendering ();
+            MWBase::Environment::get().setRequestExit();
         else if (sender == mButtons["newgame"])
         {
             MWBase::Environment::get().getWorld()->startNewGame();
             MWBase::Environment::get().getWindowManager()->setNewGame(true);
             MWBase::Environment::get().getDialogueManager()->clear();
             MWBase::Environment::get().getJournal()->clear();
+        }
+
+        else if (sender == mButtons["loadgame"])
+        {
+            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
+            dialog->setLoadOrSave(true);
+            dialog->setVisible(true);
+        }
+        else if (sender == mButtons["savegame"])
+        {
+            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
+            dialog->setLoadOrSave(false);
+            dialog->setVisible(true);
         }
     }
 

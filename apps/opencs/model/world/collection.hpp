@@ -51,6 +51,18 @@ namespace CSMWorld
             Collection (const Collection&);
             Collection& operator= (const Collection&);
 
+        protected:
+
+            const std::map<std::string, int>& getIdMap() const;
+
+            const std::vector<Record<ESXRecordT> >& getRecords() const;
+
+            bool reorderRowsImp (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
+
         public:
 
             Collection();
@@ -104,7 +116,8 @@ namespace CSMWorld
 
             virtual const Record<ESXRecordT>& getRecord (int index) const;
 
-            virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const;
+            virtual int getAppendIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual std::vector<std::string> getIds (bool listDeleted = true) const;
@@ -112,11 +125,73 @@ namespace CSMWorld
             ///
             /// \param listDeleted include deleted record in the list
 
+            virtual void insertRecord (const RecordBase& record, int index,
+                UniversalId::Type type = UniversalId::Type_None);
+            ///< Insert record before index.
+            ///
+            /// If the record type does not match, an exception is thrown.
+            ///
+            /// If the index is invalid either generally (by being out of range) or for the particular
+            /// record, an exception is thrown.
+
+            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
+
             void addColumn (Column<ESXRecordT> *column);
 
             void setRecord (int index, const Record<ESXRecordT>& record);
             ///< \attention This function must not change the ID.
     };
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    const std::map<std::string, int>& Collection<ESXRecordT, IdAccessorT>::getIdMap() const
+    {
+        return mIndex;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    const std::vector<Record<ESXRecordT> >& Collection<ESXRecordT, IdAccessorT>::getRecords() const
+    {
+        return mRecords;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool Collection<ESXRecordT, IdAccessorT>::reorderRowsImp (int baseIndex,
+        const std::vector<int>& newOrder)
+    {
+        if (!newOrder.empty())
+        {
+            int size = static_cast<int> (newOrder.size());
+
+            // check that all indices are present
+            std::vector<int> test (newOrder);
+            std::sort (test.begin(), test.end());
+            if (*test.begin()!=0 || *--test.end()!=size-1)
+                return false;
+
+            // reorder records
+            std::vector<Record<ESXRecordT> > buffer (size);
+
+            for (int i=0; i<size; ++i)
+            {
+                buffer[newOrder[i]] = mRecords [baseIndex+i];
+                buffer[newOrder[i]].setModified (buffer[newOrder[i]].get());
+            }
+
+            std::copy (buffer.begin(), buffer.end(), mRecords.begin()+baseIndex);
+
+            // adjust index
+            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end();
+                 ++iter)
+                if (iter->second>=baseIndex && iter->second<baseIndex+size)
+                    iter->second = newOrder.at (iter->second-baseIndex)+baseIndex;
+        }
+
+        return true;
+    }
 
     template<typename ESXRecordT, typename IdAccessorT>
     Collection<ESXRecordT, IdAccessorT>::Collection()
@@ -142,8 +217,7 @@ namespace CSMWorld
             record2.mState = Record<ESXRecordT>::State_ModifiedOnly;
             record2.mModified = record;
 
-            mRecords.push_back (record2);
-            mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id), mRecords.size()-1));
+            insertRecord (record2, getAppendIndex (id));
         }
         else
         {
@@ -260,7 +334,12 @@ namespace CSMWorld
         ESXRecordT record;
         IdAccessorT().getId (record) = id;
         record.blank();
-        add (record);
+
+        Record<ESXRecordT> record2;
+        record2.mState = Record<ESXRecordT>::State_ModifiedOnly;
+        record2.mModified = record;
+
+        insertRecord (record2, getAppendIndex (id, type), type);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -286,14 +365,14 @@ namespace CSMWorld
     void Collection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record,
         UniversalId::Type type)
     {
-        mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
-        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (
-            dynamic_cast<const Record<ESXRecordT>&> (record).get())),
-            mRecords.size()-1));
+        insertRecord (record,
+            getAppendIndex (IdAccessorT().getId (
+            dynamic_cast<const Record<ESXRecordT>&> (record).get()), type), type);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
+    int Collection<ESXRecordT, IdAccessorT>::getAppendIndex (const std::string& id,
+        UniversalId::Type type) const
     {
         return static_cast<int> (mRecords.size());
     }
@@ -327,12 +406,41 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
+    void Collection<ESXRecordT, IdAccessorT>::insertRecord (const RecordBase& record, int index,
+        UniversalId::Type type)
+    {
+        if (index<0 || index>static_cast<int> (mRecords.size()))
+            throw std::runtime_error ("index out of range");
+
+        const Record<ESXRecordT>& record2 = dynamic_cast<const Record<ESXRecordT>&> (record);
+
+        mRecords.insert (mRecords.begin()+index, record2);
+
+        if (index<static_cast<int> (mRecords.size())-1)
+        {
+            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end();
+                ++iter)
+                 if (iter->second>=index)
+                     ++(iter->second);
+        }
+
+        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (
+            record2.get())), index));
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::setRecord (int index, const Record<ESXRecordT>& record)
     {
         if (IdAccessorT().getId (mRecords.at (index).get())!=IdAccessorT().getId (record.get()))
             throw std::runtime_error ("attempt to change the ID of a record");
 
         mRecords.at (index) = record;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool Collection<ESXRecordT, IdAccessorT>::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+    {
+        return false;
     }
 }
 

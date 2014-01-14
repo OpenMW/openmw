@@ -18,11 +18,23 @@ namespace MWMechanics
 
             bool checkPathCompleted(float x, float y, float z);
             ///< \Returns true if the last point of the path has been reached.
+            bool checkWaypoint(float x, float y, float z);
+            ///< \Returns true if a way point was reached
             float getZAngleToNext(float x, float y) const;
 
             bool isPathConstructed() const
             {
                 return mIsPathConstructed;
+            }
+
+            int getPathSize() const
+            {
+                return mPath.size();
+            }
+
+            std::list<ESM::Pathgrid::Point> getPath() const
+            {
+                return mPath;
             }
 
         private:

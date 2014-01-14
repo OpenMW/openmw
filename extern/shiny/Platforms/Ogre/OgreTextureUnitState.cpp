@@ -1,5 +1,8 @@
 #include "OgreTextureUnitState.hpp"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include "OgrePass.hpp"
 #include "OgrePlatform.hpp"
 #include "OgreMaterialSerializer.hpp"
@@ -28,6 +31,32 @@ namespace sh
 			setTextureName (retrieveValue<StringValue>(value, context).get());
 			return true;
 		}
+        else if (name == "anim_texture2")
+        {
+            std::string val = retrieveValue<StringValue>(value, context).get();
+            std::vector<std::string> tokens;
+            boost::split(tokens, val, boost::is_any_of(" "));
+            assert(tokens.size() == 3);
+            std::string texture = tokens[0];
+            int frames = boost::lexical_cast<int>(tokens[1]);
+            float duration = boost::lexical_cast<float>(tokens[2]);
+
+            std::vector<Ogre::String> frameTextures;
+            for (int i=0; i<frames; ++i)
+            {
+                std::stringstream stream;
+                stream << std::setw(2);
+                stream << std::setfill('0');
+                stream << i;
+                stream << '.';
+                std::string tex = texture;
+                boost::replace_last(tex, ".", stream.str());
+                frameTextures.push_back(tex);
+            }
+
+            mTextureUnitState->setAnimatedTextureName(&frameTextures[0], frames, duration);
+            return true;
+        }
 		else if (name == "create_in_ffp")
 			return true; // handled elsewhere
 

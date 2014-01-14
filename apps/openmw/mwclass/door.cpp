@@ -12,12 +12,12 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/failedaction.hpp"
-#include "../mwworld/actionapply.hpp"
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/actiondoor.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/actiontrap.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -109,12 +109,8 @@ namespace MWClass
             if(!ptr.getCellRef().mTrap.empty())
             {
                 // Trap activation
-                std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
-
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionApply(actor, ptr.getCellRef().mTrap));
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().mTrap, ptr));
                 action->setSound(trapActivationSound);
-                ptr.getCellRef().mTrap = "";
-
                 return action;
             }
 

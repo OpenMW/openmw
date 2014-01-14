@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_IDTABLE_H
 #define CSM_WOLRD_IDTABLE_H
 
+#include <vector>
+
 #include <QAbstractItemModel>
 
 #include "universalid.hpp"
@@ -15,7 +17,18 @@ namespace CSMWorld
     {
             Q_OBJECT
 
+        public:
+
+            enum Reordering
+            {
+                Reordering_None,
+                Reordering_WithinTopic
+            };
+
+        private:
+
             CollectionBase *mIdCollection;
+            Reordering mReordering;
 
             // not implemented
             IdTable (const IdTable&);
@@ -23,7 +36,7 @@ namespace CSMWorld
 
         public:
 
-            IdTable (CollectionBase *idCollection);
+            IdTable (CollectionBase *idCollection, Reordering reordering = Reordering_WithinTopic);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();
@@ -63,6 +76,12 @@ namespace CSMWorld
             int findColumnIndex (Columns::ColumnId id) const;
             ///< Return index of column with the given \a id. If no such column exists, an exception is
             /// thrown.
+
+            void reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+
+            Reordering getReordering() const;
     };
 }
 

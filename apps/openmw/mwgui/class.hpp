@@ -228,8 +228,8 @@ namespace MWGui
         DescriptionDialog();
         ~DescriptionDialog();
 
-        std::string getTextInput() const { return mTextEdit ? mTextEdit->getOnlyText() : ""; }
-        void setTextInput(const std::string &text) { if (mTextEdit) mTextEdit->setOnlyText(text); }
+        std::string getTextInput() const { return mTextEdit->getCaption(); }
+        void setTextInput(const std::string &text) { mTextEdit->setCaption(text); }
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);

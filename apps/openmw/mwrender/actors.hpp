@@ -39,7 +39,7 @@ namespace MWRender
 
         void setRootNode(Ogre::SceneNode* root);
 
-        void insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv);
+        void insertNPC(const MWWorld::Ptr& ptr);
         void insertCreature (const MWWorld::Ptr& ptr);
         void insertActivator (const MWWorld::Ptr& ptr);
          bool deleteObject (const MWWorld::Ptr& ptr);
@@ -47,7 +47,7 @@ namespace MWRender
 
         void removeCell(MWWorld::CellStore* store);
 
-        void update (float duration);
+        void update (Ogre::Camera* camera);
 
         /// Updates containing cell for object rendering data
         void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);

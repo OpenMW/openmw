@@ -12,7 +12,7 @@
 #include "creator.hpp"
 
 CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
-    const CreatorFactoryBase& creatorFactory)
+    const CreatorFactoryBase& creatorFactory, bool sorting)
 : SubView (id)
 {
     QVBoxLayout *layout = new QVBoxLayout;
@@ -23,7 +23,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this), 0);
 
     layout->insertWidget (0, mTable =
-        new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete()), 2);
+        new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete(), sorting), 2);
 
     CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (document.getData(), this);
 

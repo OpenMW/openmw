@@ -11,9 +11,9 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "inventorywindow.hpp"
-#include "tradewindow.hpp"
 
 namespace MWGui
 {
@@ -121,13 +121,15 @@ namespace MWGui
         int price;
         iss >> price;
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
         if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()<price)
             return;
 
-        MWBase::Environment::get().getWindowManager()->getTradeWindow ()->addOrRemoveGold (-price);
+
+        player.getClass().getContainerStore(player).remove("gold_001", price, player);
 
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
         std::string cellname = _sender->getUserString("Destination");
         int x,y;

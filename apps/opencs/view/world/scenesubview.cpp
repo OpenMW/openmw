@@ -9,6 +9,8 @@
 
 #include "../filter/filterbox.hpp"
 
+#include "../render/scenewidget.hpp"
+
 #include "tablebottombox.hpp"
 #include "creator.hpp"
 #include "scenetoolbar.hpp"
@@ -41,6 +43,14 @@ toolbar->addTool (new SceneToolMode (toolbar));
 toolbar->addTool (new SceneToolMode (toolbar));
     layout2->addWidget (toolbar, 0);
 
+// temporarily disable OGRE-integration (need to fix path problem first)
+#if 0
+    CSVRender::SceneWidget* sceneWidget = new CSVRender::SceneWidget(this);
+
+    layout2->addWidget (sceneWidget, 1);
+
+    layout->insertLayout (0, layout2, 1);
+#endif
     /// \todo replace with rendering widget
     QPalette palette2 (palette());
     palette2.setColor (QPalette::Background, Qt::white);
@@ -52,6 +62,7 @@ toolbar->addTool (new SceneToolMode (toolbar));
     layout2->addWidget (placeholder, 1);
 
     layout->insertLayout (0, layout2, 1);
+
 
     CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (document.getData(), this);
 

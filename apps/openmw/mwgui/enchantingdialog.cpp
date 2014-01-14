@@ -4,6 +4,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -298,9 +299,15 @@ namespace MWGui
         int result = mEnchanting.create();
 
         if(result==1)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound("enchant success", 1.f, 1.f);
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
+        }
         else
+        {
+            MWBase::Environment::get().getSoundManager()->playSound("enchant fail", 1.f, 1.f);
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
+        }
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }

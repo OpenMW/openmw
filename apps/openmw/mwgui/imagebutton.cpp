@@ -42,12 +42,13 @@ namespace MWGui
         ImageBox::onMouseButtonPressed(_left, _top, _id);
     }
 
-    MyGUI::IntSize ImageButton::getRequestedSize()
+    MyGUI::IntSize ImageButton::getRequestedSize(bool logError)
     {
         Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName(mImageNormal);
         if (texture.isNull())
         {
-            std::cerr << "ImageButton: can't find " << mImageNormal << std::endl;
+            if (logError)
+                std::cerr << "ImageButton: can't find " << mImageNormal << std::endl;
             return MyGUI::IntSize(0,0);
         }
         return MyGUI::IntSize (texture->getWidth(), texture->getHeight());

@@ -28,7 +28,7 @@ namespace MWGui
 
             void startTrade(const MWWorld::Ptr& actor);
 
-            void addOrRemoveGold(int gold);
+            void addOrRemoveGold(int gold, const MWWorld::Ptr& actor);
 
             void onFrame(float frameDuration);
 

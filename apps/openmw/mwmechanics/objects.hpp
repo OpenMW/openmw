@@ -21,6 +21,7 @@ namespace MWMechanics
 
     public:
         Objects();
+        ~Objects();
 
         void addObject (const MWWorld::Ptr& ptr);
         ///< Register an animated object
