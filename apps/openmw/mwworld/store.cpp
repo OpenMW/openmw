@@ -31,10 +31,6 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
         cell->getNextRef(esm, ref);
-        std::string lowerCase;
-
-        std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
 
         // Add data required to make reference appear in the correct cell.
         // We should not need to test for duplicates, as this part of the code is pre-cell merge.

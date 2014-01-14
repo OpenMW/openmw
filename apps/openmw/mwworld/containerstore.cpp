@@ -45,7 +45,7 @@ namespace
         for (typename MWWorld::CellRefList<T>::List::iterator iter (list.mList.begin());
              iter!=list.mList.end(); ++iter)
         {
-            if (Misc::StringUtils::lowerCase (iter->mBase->mId)==id2)
+            if (Misc::StringUtils::ciEqual(iter->mBase->mId, id2))
             {
                 MWWorld::Ptr ptr (&*iter, 0);
                 ptr.setContainerStore (store);

@@ -24,7 +24,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     // actor id
     if (!info.mActor.empty())
     {
-        if ( Misc::StringUtils::lowerCase (info.mActor)!=MWWorld::Class::get (mActor).getId (mActor))
+        if ( !Misc::StringUtils::ciEqual(info.mActor, MWWorld::Class::get (mActor).getId (mActor)))
             return false;
     }
     else if (isCreature)
@@ -41,7 +41,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
-        if (Misc::StringUtils::lowerCase (info.mRace)!= Misc::StringUtils::lowerCase (cellRef->mBase->mRace))
+        if (!Misc::StringUtils::ciEqual(info.mRace, cellRef->mBase->mRace))
             return false;
     }
 
@@ -53,7 +53,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
-        if ( Misc::StringUtils::lowerCase (info.mClass)!= Misc::StringUtils::lowerCase (cellRef->mBase->mClass))
+        if ( !Misc::StringUtils::ciEqual(info.mClass, cellRef->mBase->mClass))
             return false;
     }
 
@@ -110,7 +110,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 
     // check cell
     if (!info.mCell.empty())
-        if (Misc::StringUtils::lowerCase (player.getCell()->mCell->mName) != Misc::StringUtils::lowerCase (info.mCell))
+        if (!Misc::StringUtils::ciEqual(player.getCell()->mCell->mName, info.mCell))
             return false;
 
     return true;
@@ -188,7 +188,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             int i = 0;
 
             for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
+                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
                     break;
 
             if (i>=static_cast<int> (script->mVarNames.size()))
@@ -262,7 +262,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             std::string name = select.getName();
 
             for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                if (Misc::StringUtils::lowerCase(iter->getCellRef().mRefID) == name)
+                if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, name))
                     sum += iter->getRefData().getCount();
 
             return sum;
@@ -429,23 +429,23 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotId:
 
-            return select.getName()!=Misc::StringUtils::lowerCase (MWWorld::Class::get (mActor).getId (mActor));
+            return !Misc::StringUtils::ciEqual(MWWorld::Class::get (mActor).getId (mActor), select.getName());
 
         case SelectWrapper::Function_NotFaction:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mFaction)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mFaction, select.getName());
 
         case SelectWrapper::Function_NotClass:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mClass)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mClass, select.getName());
 
         case SelectWrapper::Function_NotRace:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, select.getName());
 
         case SelectWrapper::Function_NotCell:
 
-            return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.getCell()->mCell->mName, select.getName());
 
         case SelectWrapper::Function_NotLocal:
         {
@@ -462,7 +462,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             int i = 0;
             for (; i < static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
+                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
                     break;
 
             if (i >= static_cast<int> (script->mVarNames.size()))
@@ -478,8 +478,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_SameRace:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)!=
-                Misc::StringUtils::lowerCase (player.get<ESM::NPC>()->mBase->mRace);
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, player.get<ESM::NPC>()->mBase->mRace);
 
         case SelectWrapper::Function_SameFaction:
 

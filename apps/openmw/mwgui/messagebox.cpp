@@ -333,7 +333,7 @@ namespace MWGui
         std::vector<MyGUI::Button*>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
-            if(Misc::StringUtils::lowerCase((*button)->getCaption()) == ok)
+            if(Misc::StringUtils::ciEqual((*button)->getCaption(), ok))
             {
                 MyGUI::InputManager::getInstance().setKeyFocusWidget(*button);
                 (*button)->eventKeyButtonPressed += MyGUI::newDelegate(this, &InteractiveMessageBox::onKeyPressed);
