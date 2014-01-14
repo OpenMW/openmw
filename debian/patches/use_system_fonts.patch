@@ -1,9 +1,7 @@
 Description: use system fonts instead of installing new ones
 Author: Scott Howard <showard@debian.org>
-Index: openmw/files/mygui/CMakeLists.txt
-===================================================================
---- openmw.orig/files/mygui/CMakeLists.txt	2013-10-17 13:07:53.803213991 -0400
-+++ openmw/files/mygui/CMakeLists.txt	2013-10-17 14:51:09.667361244 -0400
+--- a/files/mygui/CMakeLists.txt
++++ b/files/mygui/CMakeLists.txt
 @@ -8,7 +8,6 @@ set(MYGUI_FILES
      black.png
      core.skin
@@ -12,18 +10,16 @@ Index: openmw/files/mygui/CMakeLists.txt
      openmw_alchemy_window.layout
      openmw_book.layout
      openmw_box.skin.xml
-@@ -81,7 +80,6 @@ set(MYGUI_FILES
-     openmw_repair.layout
-     openmw_companion_window.layout
+@@ -83,7 +82,6 @@ set(MYGUI_FILES
+     openmw_savegame_dialog.layout
+     openmw_recharge_dialog.layout
      smallbars.png
 -    DejaVuLGCSansMono.ttf
      markers.png
      ../launcher/images/openmw.png
  )
-Index: openmw/files/mygui/openmw_font.xml
-===================================================================
---- openmw.orig/files/mygui/openmw_font.xml	2013-10-17 13:07:53.811213991 -0400
-+++ openmw/files/mygui/openmw_font.xml	2013-10-17 14:52:01.071362466 -0400
+--- a/files/mygui/openmw_font.xml
++++ b/files/mygui/openmw_font.xml
 @@ -24,7 +24,7 @@
      </Resource>
  
