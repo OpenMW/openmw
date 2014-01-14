@@ -375,6 +375,11 @@ namespace MWMechanics
         mActors.restoreDynamicStats (sleep);
     }
 
+    int MechanicsManager::getHoursToRest() const
+    {
+        return mActors.getHoursToRest(mWatched);
+    }
+
     void MechanicsManager::setPlayerName (const std::string& name)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();

@@ -80,6 +80,9 @@ namespace MWBase
             ///< If the player is sleeping or waiting, this should be called every hour.
             /// @param sleep is the player sleeping or waiting?
 
+            virtual int getHoursToRest() const = 0;
+            ///< Calculate how many hours the player needs to rest in order to be fully healed
+
             virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying) = 0;
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
 

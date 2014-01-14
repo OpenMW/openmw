@@ -81,6 +81,9 @@ namespace MWMechanics
 
             void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.
+
+            int getHoursToRest(const MWWorld::Ptr& ptr) const;
+            ///< Calculate how many hours the given actor needs to rest in order to be fully healed
             
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.

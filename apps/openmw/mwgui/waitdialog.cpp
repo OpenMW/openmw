@@ -144,43 +144,7 @@ namespace MWGui
 
     void WaitDialog::onUntilHealedButtonClicked(MyGUI::Widget* sender)
     {
-        // we need to sleep for a specific time, and since that isn't calculated yet, we'll do it here
-        // I'm making the assumption here that the # of hours rested is calculated when rest is started
-        // TODO: the rougher logic here (calculating the hourly deltas) should really go into helper funcs elsewhere
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
-        float hourlyHealthDelta  = stats.getAttribute(ESM::Attribute::Endurance).getModified() * 0.1;
-
-        bool stunted = (stats.getMagicEffects().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0);
-        float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat();
-        float hourlyMagickaDelta = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
-
-        // this massive duplication is why it has to be put into helper functions instead
-        float fFatigueReturnBase = store.get<ESM::GameSetting>().find("fFatigueReturnBase")->getFloat();
-        float fFatigueReturnMult = store.get<ESM::GameSetting>().find("fFatigueReturnMult")->getFloat();
-        float fEndFatigueMult = store.get<ESM::GameSetting>().find("fEndFatigueMult")->getFloat();
-        float capacity = MWWorld::Class::get(player).getCapacity(player);
-        float encumbrance = MWWorld::Class::get(player).getEncumbrance(player);
-        float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
-        if (normalizedEncumbrance > 1)
-            normalizedEncumbrance = 1;
-        float hourlyFatigueDelta = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
-        hourlyFatigueDelta *= 3600 * fEndFatigueMult * stats.getAttribute(ESM::Attribute::Endurance).getModified();
-
-        float healthHours  = hourlyHealthDelta  >= 0.0
-                             ? (stats.getHealth().getBase() - stats.getHealth().getCurrent()) / hourlyHealthDelta
-                             : 1.0f;
-        float magickaHours = stunted ? 0.0 :
-                              hourlyMagickaDelta >= 0.0
-                              ? (stats.getMagicka().getBase() - stats.getMagicka().getCurrent()) / hourlyMagickaDelta
-                              : 1.0f;
-        float fatigueHours = hourlyFatigueDelta >= 0.0
-                             ? (stats.getFatigue().getBase() - stats.getFatigue().getCurrent()) / hourlyFatigueDelta
-                             : 1.0f;
-
-        int autoHours = int(std::ceil( std::max(std::max(healthHours, magickaHours), std::max(fatigueHours, 1.0f)) )); // this should use a variadic max if possible
+        int autoHours = MWBase::Environment::get().getMechanicsManager()->getHoursToRest();
 
         startWaiting(autoHours);
     }
