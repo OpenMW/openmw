@@ -17,12 +17,15 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include "../mwmechanics/character.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
 
 #include "renderconst.hpp"
+
 
 namespace MWRender
 {
@@ -39,26 +42,13 @@ void Animation::AnimationValue::setValue(Ogre::Real)
 {
 }
 
-
-void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
+Ogre::Real Animation::EffectAnimationValue::getValue() const
 {
-    for(size_t i = 0;i < objects.mLights.size();i++)
-    {
-        Ogre::Light *light = objects.mLights[i];
-        // If parent is a scene node, it was created specifically for this light. Destroy it now.
-        if(light->isAttached() && !light->isParentTagPoint())
-            sceneMgr->destroySceneNode(light->getParentSceneNode());
-        sceneMgr->destroyLight(light);
-    }
-    for(size_t i = 0;i < objects.mParticles.size();i++)
-        sceneMgr->destroyParticleSystem(objects.mParticles[i]);
-    for(size_t i = 0;i < objects.mEntities.size();i++)
-        sceneMgr->destroyEntity(objects.mEntities[i]);
-    objects.mControllers.clear();
-    objects.mLights.clear();
-    objects.mParticles.clear();
-    objects.mEntities.clear();
-    objects.mSkelBase = NULL;
+    return mTime;
+}
+
+void Animation::EffectAnimationValue::setValue(Ogre::Real)
+{
 }
 
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
@@ -78,10 +68,9 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 
 Animation::~Animation()
 {
-    mAnimSources.clear();
+    mEffects.clear();
 
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    destroyObjectList(sceneMgr, mObjectRoot);
+    mAnimSources.clear();
 }
 
 
@@ -90,7 +79,7 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     OgreAssert(mAnimSources.empty(), "Setting object root while animation sources are set!");
 
     mSkelBase = NULL;
-    destroyObjectList(mInsert->getCreator(), mObjectRoot);
+    mObjectRoot.setNull();
 
     if(model.empty())
         return;
@@ -111,11 +100,11 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
-    if(mObjectRoot.mSkelBase)
+    if(mObjectRoot->mSkelBase)
     {
-        mSkelBase = mObjectRoot.mSkelBase;
+        mSkelBase = mObjectRoot->mSkelBase;
 
-        Ogre::AnimationStateSet *aset = mObjectRoot.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateSet *aset = mObjectRoot->mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -126,7 +115,7 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 
         // Set the bones as manually controlled since we're applying the
         // transformations manually
-        Ogre::SkeletonInstance *skelinst = mObjectRoot.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = mObjectRoot->mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
@@ -147,15 +136,36 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     else
         mAttachedObjects.clear();
 
-    for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
+    for(size_t i = 0;i < mObjectRoot->mControllers.size();i++)
     {
-        if(mObjectRoot.mControllers[i].getSource().isNull())
-            mObjectRoot.mControllers[i].setSource(mAnimationValuePtr[0]);
+        if(mObjectRoot->mControllers[i].getSource().isNull())
+            mObjectRoot->mControllers[i].setSource(mAnimationValuePtr[0]);
     }
 }
 
+struct AddGlow
+{
+    Ogre::Vector3* mColor;
+    NifOgre::MaterialControllerManager* mMaterialControllerMgr;
+    AddGlow(Ogre::Vector3* col, NifOgre::MaterialControllerManager* materialControllerMgr)
+        : mColor(col)
+        , mMaterialControllerMgr(materialControllerMgr)
+    {}
 
-class VisQueueSet {
+    void operator()(Ogre::Entity* entity) const
+    {
+        if (!entity->getNumSubEntities())
+            return;
+        Ogre::MaterialPtr writableMaterial = mMaterialControllerMgr->getWritableMaterial(entity);
+        sh::MaterialInstance* instance = sh::Factory::getInstance().getMaterialInstance(writableMaterial->getName());
+
+        instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
+    }
+};
+
+class VisQueueSet
+{
     Ogre::uint32 mVisFlags;
     Ogre::uint8 mSolidQueue, mTransQueue;
     Ogre::Real mDist;
@@ -189,12 +199,16 @@ public:
     }
 };
 
-void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist)
+void Animation::setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist, bool enchantedGlow, Ogre::Vector3* glowColor)
 {
-    std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
+    std::for_each(objlist->mEntities.begin(), objlist->mEntities.end(),
                   VisQueueSet(visflags, solidqueue, transqueue, dist));
-    std::for_each(objlist.mParticles.begin(), objlist.mParticles.end(),
+    std::for_each(objlist->mParticles.begin(), objlist->mParticles.end(),
                   VisQueueSet(visflags, solidqueue, transqueue, dist));
+
+    if (enchantedGlow)
+        std::for_each(objlist->mEntities.begin(), objlist->mEntities.end(),
+                  AddGlow(glowColor, &objlist->mMaterialControllerMgr));
 }
 
 
@@ -292,7 +306,7 @@ void Animation::clearAnimSources()
 }
 
 
-void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light)
+void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light)
 {
     const MWWorld::Fallback *fallback = MWBase::Environment::get().getWorld()->getFallback();
 
@@ -305,8 +319,8 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
     if((light->mData.mFlags&ESM::Light::Negative))
         color *= -1;
 
-    objlist.mLights.push_back(sceneMgr->createLight());
-    Ogre::Light *olight = objlist.mLights.back();
+    objlist->mLights.push_back(sceneMgr->createLight());
+    Ogre::Light *olight = objlist->mLights.back();
     olight->setDiffuseColour(color);
 
     Ogre::ControllerValueRealPtr src(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
@@ -318,7 +332,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
         (light->mData.mFlags&ESM::Light::PulseSlow) ? OEngine::Render::LT_PulseSlow :
         OEngine::Render::LT_Normal
     ));
-    objlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
+    objlist->mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
 
     bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
     bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
@@ -344,14 +358,14 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
     }
 
     // If there's an AttachLight bone, attach the light to that, otherwise put it in the center,
-    if(objlist.mSkelBase && objlist.mSkelBase->getSkeleton()->hasBone("AttachLight"))
-        objlist.mSkelBase->attachObjectToBone("AttachLight", olight);
+    if(objlist->mSkelBase && objlist->mSkelBase->getSkeleton()->hasBone("AttachLight"))
+        objlist->mSkelBase->attachObjectToBone("AttachLight", olight);
     else
     {
         Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-        for(size_t i = 0;i < objlist.mEntities.size();i++)
+        for(size_t i = 0;i < objlist->mEntities.size();i++)
         {
-            Ogre::Entity *ent = objlist.mEntities[i];
+            Ogre::Entity *ent = objlist->mEntities[i];
             bounds.merge(ent->getBoundingBox());
         }
 
@@ -653,6 +667,9 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
         MWWorld::Class::get(mPtr).hit(mPtr);
+
+    else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
+        MWBase::Environment::get().getWorld()->castSpell(mPtr);
 }
 
 
@@ -891,8 +908,8 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             ++stateiter;
     }
 
-    for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
-        mObjectRoot.mControllers[i].update();
+    for(size_t i = 0;i < mObjectRoot->mControllers.size();i++)
+        mObjectRoot->mControllers[i].update();
 
     // Apply group controllers
     for(size_t grp = 0;grp < sNumGroups;grp++)
@@ -912,6 +929,8 @@ Ogre::Vector3 Animation::runAnimation(float duration)
         // transformations to entities this skeleton instance is shared with.
         mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
+
+    updateEffects(duration);
 
     return movement;
 }
@@ -933,7 +952,7 @@ public:
 
 void Animation::enableLights(bool enable)
 {
-    std::for_each(mObjectRoot.mLights.begin(), mObjectRoot.mLights.end(), ToggleLight(enable));
+    std::for_each(mObjectRoot->mLights.begin(), mObjectRoot->mLights.end(), ToggleLight(enable));
 }
 
 
@@ -952,7 +971,7 @@ public:
 Ogre::AxisAlignedBox Animation::getWorldBounds()
 {
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    std::for_each(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(), MergeBounds(&bounds));
+    std::for_each(mObjectRoot->mEntities.begin(), mObjectRoot->mEntities.end(), MergeBounds(&bounds));
     return bounds;
 }
 
@@ -977,6 +996,163 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
+bool Animation::isPlaying(Group group) const
+{
+    for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
+    {
+        if(stateiter->second.mGroups == group)
+            return true;
+    }
+    return false;
+}
+
+void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)
+{
+    // Early out if we already have this effect
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
+            return;
+
+    // fix texture extension to .dds
+    if (texture.size() > 4)
+    {
+        texture[texture.size()-3] = 'd';
+        texture[texture.size()-2] = 'd';
+        texture[texture.size()-1] = 's';
+    }
+
+    EffectParams params;
+    params.mModelName = model;
+    if (bonename.empty())
+        params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
+    else
+        params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+
+    setRenderProperties(params.mObjects, RV_Misc,
+                        RQG_Main, RQG_Alpha, 0.f, false, NULL);
+
+    params.mLoop = loop;
+    params.mEffectId = effectId;
+    params.mBoneName = bonename;
+
+    for(size_t i = 0;i < params.mObjects->mControllers.size();i++)
+    {
+        if(params.mObjects->mControllers[i].getSource().isNull())
+            params.mObjects->mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationValue> (new EffectAnimationValue()));
+    }
+
+    if (!texture.empty())
+    {
+        for(size_t i = 0;i < params.mObjects->mParticles.size(); ++i)
+        {
+            Ogre::ParticleSystem* partSys = params.mObjects->mParticles[i];
+
+            Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(partSys);
+
+            for (int t=0; t<mat->getNumTechniques(); ++t)
+            {
+                Ogre::Technique* tech = mat->getTechnique(t);
+                for (int p=0; p<tech->getNumPasses(); ++p)
+                {
+                    Ogre::Pass* pass = tech->getPass(p);
+                    for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
+                    {
+                        Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
+                        tus->setTextureName("textures\\" + texture);
+                    }
+                }
+            }
+        }
+    }
+
+    mEffects.push_back(params);
+}
+
+void Animation::removeEffect(int effectId)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        if (it->mEffectId == effectId)
+        {
+            mEffects.erase(it);
+            return;
+        }
+    }
+}
+
+void Animation::getLoopingEffects(std::vector<int> &out)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        if (it->mLoop)
+            out.push_back(it->mEffectId);
+    }
+}
+
+void Animation::updateEffects(float duration)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); )
+    {
+        NifOgre::ObjectScenePtr objects = it->mObjects;
+        for(size_t i = 0; i < objects->mControllers.size() ;i++)
+        {
+            EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects->mControllers[i].getSource().get());
+            if (value)
+                value->addTime(duration);
+
+            objects->mControllers[i].update();
+        }
+
+        if (objects->mControllers[0].getSource()->getValue() >= objects->mMaxControllerLength)
+        {
+            if (it->mLoop)
+            {
+                // Start from the beginning again; carry over the remainder
+                float remainder = objects->mControllers[0].getSource()->getValue() - objects->mMaxControllerLength;
+                for(size_t i = 0; i < objects->mControllers.size() ;i++)
+                {
+                    EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects->mControllers[i].getSource().get());
+                    if (value)
+                        value->resetTime(remainder);
+                }
+            }
+            else
+            {
+                it = mEffects.erase(it);
+                continue;
+            }
+        }
+         ++it;
+    }
+}
+
+void Animation::preRender(Ogre::Camera *camera)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        NifOgre::ObjectScenePtr objects = it->mObjects;
+        objects->rotateBillboardNodes(camera);
+    }
+    mObjectRoot->rotateBillboardNodes(camera);
+}
+
+// TODO: Should not be here
+Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
+{
+    Ogre::Vector3 result(1,1,1);
+    std::string enchantmentName = item.getClass().getEnchantment(item);
+    if (enchantmentName.empty())
+        return result;
+    const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantmentName);
+    assert (enchantment->mEffects.mList.size());
+    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+            enchantment->mEffects.mList.front().mEffectID);
+    result.x = magicEffect->mData.mRed / 255.f;
+    result.y = magicEffect->mData.mGreen / 255.f;
+    result.z = magicEffect->mData.mBlue / 255.f;
+    return result;
+}
+
 
 ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model)
   : Animation(ptr, ptr.getRefData().getBaseNode())
@@ -993,9 +1169,10 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
         small = false;
 
     float dist = small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
+    Ogre::Vector3 col = getEnchantmentColor(ptr);
     setRenderProperties(mObjectRoot, (mPtr.getTypeName() == typeid(ESM::Static).name()) ?
                                      (small ? RV_StaticsSmall : RV_Statics) : RV_Misc,
-                        RQG_Main, RQG_Alpha, dist);
+                        RQG_Main, RQG_Alpha, dist, !ptr.getClass().getEnchantment(ptr).empty(), &col);
 }
 
 void ObjectAnimation::addLight(const ESM::Light *light)
@@ -1020,19 +1197,22 @@ public:
 
 bool ObjectAnimation::canBatch() const
 {
-    if(!mObjectRoot.mParticles.empty() || !mObjectRoot.mLights.empty() || !mObjectRoot.mControllers.empty())
+    if(!mObjectRoot->mParticles.empty() || !mObjectRoot->mLights.empty() || !mObjectRoot->mControllers.empty())
         return false;
-    return std::find_if(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(),
-                        FindEntityTransparency()) == mObjectRoot.mEntities.end();
+    if (!mObjectRoot->mBillboardNodes.empty())
+        return false;
+    return std::find_if(mObjectRoot->mEntities.begin(), mObjectRoot->mEntities.end(),
+                        FindEntityTransparency()) == mObjectRoot->mEntities.end();
 }
 
 void ObjectAnimation::fillBatch(Ogre::StaticGeometry *sg)
 {
-    std::vector<Ogre::Entity*>::reverse_iterator iter = mObjectRoot.mEntities.rbegin();
-    for(;iter != mObjectRoot.mEntities.rend();++iter)
+    std::vector<Ogre::Entity*>::reverse_iterator iter = mObjectRoot->mEntities.rbegin();
+    for(;iter != mObjectRoot->mEntities.rend();++iter)
     {
         Ogre::Node *node = (*iter)->getParentNode();
-        sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
+        if ((*iter)->isVisible())
+            sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
     }
 }
 

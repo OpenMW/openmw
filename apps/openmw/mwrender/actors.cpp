@@ -68,13 +68,16 @@ void Actors::insertBegin(const MWWorld::Ptr &ptr)
     ptr.getRefData().setBaseNode(insert);
 }
 
-void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv)
+void Actors::insertNPC(const MWWorld::Ptr& ptr)
 {
     insertBegin(ptr);
-    NpcAnimation* anim = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(), inv, RV_Actors);
+    NpcAnimation* anim = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(), RV_Actors);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
+
+    // Create CustomData, will do autoEquip and trigger animation parts update
+    ptr.getClass().getInventoryStore(ptr);
 }
 void Actors::insertCreature (const MWWorld::Ptr& ptr)
 {
@@ -147,9 +150,12 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store)
     }
 }
 
-void Actors::update (float duration)
+void Actors::update (Ogre::Camera* camera)
 {
-    // Nothing to do
+    for(PtrAnimationMap::iterator iter = mAllActors.begin();iter != mAllActors.end(); ++iter)
+    {
+        iter->second->preRender(camera);
+    }
 }
 
 Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)

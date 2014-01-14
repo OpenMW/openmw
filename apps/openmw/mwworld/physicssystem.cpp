@@ -18,6 +18,8 @@
 #include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include <components/esm/loadgmst.hpp>
 #include "../mwworld/esmstore.hpp"
 
@@ -573,9 +575,35 @@ namespace MWWorld
                 if(cell->hasWater())
                     waterlevel = cell->mWater;
 
+                float oldHeight = iter->first.getRefData().getPosition().pos[2];
+
+                bool waterCollision = false;
+                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects()
+                        .get(ESM::MagicEffect::WaterWalking).mMagnitude
+                        && cell->hasWater()
+                        && !world->isUnderwater(iter->first.getCell(),
+                                               Ogre::Vector3(iter->first.getRefData().getPosition().pos)))
+                    waterCollision = true;
+
+                btStaticPlaneShape planeShape(btVector3(0,0,1), waterlevel);
+                btCollisionObject object;
+                object.setCollisionShape(&planeShape);
+
+                if (waterCollision)
+                    mEngine->dynamicsWorld->addCollisionObject(&object);
+
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
                                                             waterlevel, mEngine);
+
+                if (waterCollision)
+                    mEngine->dynamicsWorld->removeCollisionObject(&object);
+
+                float heightDiff = newpos.z - oldHeight;
+
+                if (heightDiff < 0)
+                    iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
+
                 mMovementResults.push_back(std::make_pair(iter->first, newpos));
             }
 

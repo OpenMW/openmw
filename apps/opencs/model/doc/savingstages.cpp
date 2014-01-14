@@ -7,6 +7,10 @@
 
 #include <QUndoStack>
 
+#include <components/esm/loaddial.hpp>
+
+#include "../world/infocollection.hpp"
+
 #include "document.hpp"
 #include "savingstate.hpp"
 
@@ -77,6 +81,115 @@ void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& mes
     }
 
     mState.getWriter().save (mState.getStream());
+}
+
+
+CSMDoc::WriteDialogueCollectionStage::WriteDialogueCollectionStage (Document& document,
+    SavingState& state, bool journal)
+: mDocument (document), mState (state),
+  mTopics (journal ? document.getData().getJournals() : document.getData().getTopics()),
+  mInfos (journal ? document.getData().getJournalInfos() : document.getData().getTopicInfos())
+{}
+
+int CSMDoc::WriteDialogueCollectionStage::setup()
+{
+    return mTopics.getSize();
+}
+
+void CSMDoc::WriteDialogueCollectionStage::perform (int stage, std::vector<std::string>& messages)
+{
+    const CSMWorld::Record<ESM::Dialogue>& topic = mTopics.getRecord (stage);
+
+    CSMWorld::RecordBase::State state = topic.mState;
+
+    if (state==CSMWorld::RecordBase::State_Deleted)
+    {
+        // if the topic is deleted, we do not need to bother with INFO records.
+
+        /// \todo wrote record with delete flag
+
+        return;
+    }
+
+    // Test, if we need to save anything associated info records.
+    bool infoModified = false;
+
+    CSMWorld::InfoCollection::Range range = mInfos.getTopicRange (topic.get().mId);
+
+    for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
+    {
+        CSMWorld::RecordBase::State state = iter->mState;
+
+        if (state==CSMWorld::RecordBase::State_Modified ||
+            state==CSMWorld::RecordBase::State_ModifiedOnly ||
+            state==CSMWorld::RecordBase::State_Deleted)
+        {
+            infoModified = true;
+            break;
+        }
+    }
+
+    if (state==CSMWorld::RecordBase::State_Modified ||
+        state==CSMWorld::RecordBase::State_ModifiedOnly ||
+        infoModified)
+    {
+        // always write the topic record
+        std::string type;
+        for (int i=0; i<4; ++i)
+            /// \todo make endianess agnostic (change ESMWriter interface?)
+            type += reinterpret_cast<const char *> (&topic.mModified.sRecordId)[i];
+
+        mState.getWriter().startRecord (type);
+        mState.getWriter().writeHNCString ("NAME", topic.mModified.mId);
+        topic.mModified.save (mState.getWriter());
+        mState.getWriter().endRecord (type);
+
+        // write modified selected info records
+        for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second;
+             ++iter)
+        {
+            CSMWorld::RecordBase::State state = iter->mState;
+
+            if (state==CSMWorld::RecordBase::State_Deleted)
+            {
+                /// \todo wrote record with delete flag
+            }
+            else if (state==CSMWorld::RecordBase::State_Modified ||
+                state==CSMWorld::RecordBase::State_ModifiedOnly)
+            {
+                ESM::DialInfo info = iter->get();
+                info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
+
+                if (iter!=range.first)
+                {
+                    CSMWorld::InfoCollection::RecordConstIterator prev = iter;
+                    --prev;
+
+                    info.mPrev =
+                        prev->mModified.mId.substr (prev->mModified.mId.find_last_of ('#')+1);
+                }
+
+                CSMWorld::InfoCollection::RecordConstIterator next = iter;
+                ++next;
+
+                if (next!=range.second)
+                {
+                    info.mNext =
+                        next->mModified.mId.substr (next->mModified.mId.find_last_of ('#')+1);
+                }
+
+                std::string type;
+                for (int i=0; i<4; ++i)
+                    /// \todo make endianess agnostic (change ESMWriter interface?)
+                    type += reinterpret_cast<const char *> (&info.sRecordId)[i];
+
+                mState.getWriter().startRecord (type);
+                mState.getWriter().writeHNCString ("INAM", info.mId);
+                info.save (mState.getWriter());
+                mState.getWriter().endRecord (type);
+            }
+        }
+    }
 }
 
 

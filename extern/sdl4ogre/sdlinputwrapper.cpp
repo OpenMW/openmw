@@ -9,7 +9,7 @@ namespace SFO
 {
     /// \brief General purpose wrapper for OGRE applications around SDL's event
     ///        queue, mostly used for handling input-related events.
-    InputWrapper::InputWrapper(SDL_Window* window, Ogre::RenderWindow* ogreWindow) :
+    InputWrapper::InputWrapper(SDL_Window* window, Ogre::RenderWindow* ogreWindow, bool grab) :
         mSDLWindow(window),
         mOgreWindow(ogreWindow),
         mWarpCompensate(false),
@@ -23,7 +23,12 @@ namespace SFO
         mJoyListener(NULL),
         mKeyboardListener(NULL),
         mMouseListener(NULL),
-        mWindowListener(NULL)
+        mWindowListener(NULL),
+        mWindowHasFocus(true),
+        mWantGrab(false),
+        mWantRelative(false),
+        mWantMouseVisible(false),
+        mAllowGrab(grab)
     {
         _setupOISKeys();
     }
@@ -51,13 +56,16 @@ namespace SFO
             switch(evt.type)
             {
                 case SDL_MOUSEMOTION:
-                    //ignore this if it happened due to a warp
+                    // Ignore this if it happened due to a warp
                     if(!_handleWarpMotion(evt.motion))
                     {
-                        mMouseListener->mouseMoved(_packageMouseMotion(evt));
+                        // If in relative mode, don't trigger events unless window has focus
+                        if (!mWantRelative || mWindowHasFocus)
+                            mMouseListener->mouseMoved(_packageMouseMotion(evt));
 
-                        //try to keep the mouse inside the window
-                        _wrapMousePointer(evt.motion);
+                        // Try to keep the mouse inside the window
+                        if (mWindowHasFocus)
+                            _wrapMousePointer(evt.motion);
                     }
                     break;
                 case SDL_MOUSEWHEEL:
@@ -103,7 +111,8 @@ namespace SFO
                     handleWindowEvent(evt);
                     break;
                 case SDL_QUIT:
-                    Ogre::Root::getSingleton().queueEndRendering();
+                    if (mWindowListener)
+                        mWindowListener->windowClosed();
                     break;
                 default:
                     std::cerr << "Unhandled SDL event of type " << evt.type << std::endl;
@@ -117,16 +126,16 @@ namespace SFO
         switch (evt.window.event) {
             case SDL_WINDOWEVENT_ENTER:
                 mMouseInWindow = true;
+                updateMouseSettings();
                 break;
             case SDL_WINDOWEVENT_LEAVE:
                 mMouseInWindow = false;
-                SDL_SetWindowGrab(mSDLWindow, SDL_FALSE);
-                SDL_SetRelativeMouseMode(SDL_FALSE);
+                updateMouseSettings();
                 break;
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 int w,h;
                 SDL_GetWindowSize(mSDLWindow, &w, &h);
-                // TODO: Fix Ogre to handle this more consistently
+                // TODO: Fix Ogre to handle this more consistently (fixed in 1.9)
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
                 mOgreWindow->resize(w, h);
 #else
@@ -137,7 +146,7 @@ namespace SFO
                 break;
 
             case SDL_WINDOWEVENT_RESIZED:
-                // TODO: Fix Ogre to handle this more consistently
+                // TODO: Fix Ogre to handle this more consistently (fixed in 1.9)
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
                 mOgreWindow->resize(evt.window.data1, evt.window.data2);
 #else
@@ -148,10 +157,15 @@ namespace SFO
                 break;
 
             case SDL_WINDOWEVENT_FOCUS_GAINED:
+                mWindowHasFocus = true;
+                updateMouseSettings();
                 if (mWindowListener)
                     mWindowListener->windowFocusChange(true);
+
                 break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
+                mWindowHasFocus = false;
+                updateMouseSettings();
                 if (mWindowListener)
                     mWindowListener->windowFocusChange(false);
                 break;
@@ -192,25 +206,43 @@ namespace SFO
     /// \brief Locks the pointer to the window
     void InputWrapper::setGrabPointer(bool grab)
     {
-        mGrabPointer = grab && mMouseInWindow;
-        SDL_SetWindowGrab(mSDLWindow, grab && mMouseInWindow ? SDL_TRUE : SDL_FALSE);
+        mWantGrab = grab;
+        updateMouseSettings();
     }
 
     /// \brief Set the mouse to relative positioning. Doesn't move the cursor
     ///        and disables mouse acceleration.
     void InputWrapper::setMouseRelative(bool relative)
     {
-        if(mMouseRelative == relative && mMouseInWindow)
+        mWantRelative = relative;
+        updateMouseSettings();
+    }
+
+    void InputWrapper::setMouseVisible(bool visible)
+    {
+        mWantMouseVisible = visible;
+        updateMouseSettings();
+    }
+
+    void InputWrapper::updateMouseSettings()
+    {
+        mGrabPointer = mWantGrab && mMouseInWindow && mWindowHasFocus;
+        SDL_SetWindowGrab(mSDLWindow, mGrabPointer && mAllowGrab ? SDL_TRUE : SDL_FALSE);
+
+        SDL_ShowCursor(mWantMouseVisible || !mWindowHasFocus);
+
+        bool relative = mWantRelative && mMouseInWindow && mWindowHasFocus;
+        if(mMouseRelative == relative)
             return;
 
-        mMouseRelative = relative && mMouseInWindow;
+        mMouseRelative = relative;
 
         mWrapPointer = false;
 
         //eep, wrap the pointer manually if the input driver doesn't support
         //relative positioning natively
-        int success = SDL_SetRelativeMouseMode(relative && mMouseInWindow ? SDL_TRUE : SDL_FALSE);
-        if(relative && mMouseInWindow && success != 0)
+        int success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
+        if(relative && success != 0)
             mWrapPointer = true;
 
         //now remove all mouse events using the old setting from the queue

@@ -12,6 +12,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include "spellcasting.hpp"
+
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
@@ -31,15 +33,14 @@ namespace MWMechanics
         for (int i=0; i<27; ++i)
             npcStats.getSkill (i).setBase (player->mNpdt52.mSkills[i]);
 
-        creatureStats.getAttribute(0).setBase (player->mNpdt52.mStrength);
-        creatureStats.getAttribute(1).setBase (player->mNpdt52.mIntelligence);
-        creatureStats.getAttribute(2).setBase (player->mNpdt52.mWillpower);
-        creatureStats.getAttribute(3).setBase (player->mNpdt52.mAgility);
-        creatureStats.getAttribute(4).setBase (player->mNpdt52.mSpeed);
-        creatureStats.getAttribute(5).setBase (player->mNpdt52.mEndurance);
-        creatureStats.getAttribute(6).setBase (player->mNpdt52.mPersonality);
-        creatureStats.getAttribute(7).setBase (player->mNpdt52.mLuck);
-
+        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt52.mStrength);
+        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt52.mIntelligence);
+        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt52.mWillpower);
+        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt52.mAgility);
+        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt52.mSpeed);
+        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt52.mEndurance);
+        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt52.mPersonality);
+        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt52.mLuck);
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
@@ -55,7 +56,7 @@ namespace MWMechanics
             {
                 const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
-                creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
+                creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
             }
 
             for (int i=0; i<27; ++i)
@@ -106,7 +107,7 @@ namespace MWMechanics
                 int attribute = class_->mData.mAttribute[i];
                 if (attribute>=0 && attribute<8)
                 {
-                    creatureStats.getAttribute(attribute).setBase (
+                    creatureStats.setAttribute(attribute,
                         creatureStats.getAttribute(attribute).getBase() + 10);
                 }
             }
@@ -123,6 +124,19 @@ namespace MWMechanics
                     {
                         npcStats.getSkill (index).setBase (
                             npcStats.getSkill (index).getBase() + bonus);
+                    }
+
+                    if (i==1)
+                    {
+                        // Major skill - add starting spells for this skill if existing
+                        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                        MWWorld::Store<ESM::Spell>::iterator it = store.get<ESM::Spell>().begin();
+                        for (; it != store.get<ESM::Spell>().end(); ++it)
+                        {
+                            if (it->mData.mFlags & ESM::Spell::F_PCStart
+                                    && spellSchoolToSkill(getSpellSchool(&*it, ptr)) == index)
+                                creatureStats.getSpells().add(it->mId);
+                        }
                     }
                 }
             }
@@ -159,15 +173,15 @@ namespace MWMechanics
         // auto-equip again. we need this for when the race is changed to a beast race
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
         for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
-            invStore.equip(i, invStore.end());
+            invStore.unequipAll(ptr);
         invStore.autoEquip(ptr);
     }
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),
-      mRaceSelected (false)
+      mRaceSelected (false), mAI(true)
     {
-        buildPlayer();
+        //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
     }
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)
@@ -200,10 +214,7 @@ namespace MWMechanics
 
     void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
     {
-        if(!mWatched.isEmpty() && mWatched.getCell() == cellStore)
-            mWatched = MWWorld::Ptr();
-
-        mActors.dropActors(cellStore);
+        mActors.dropActors(cellStore, mWatched);
         mObjects.dropObjects(cellStore);
     }
 
@@ -211,6 +222,14 @@ namespace MWMechanics
     void MechanicsManager::watchActor(const MWWorld::Ptr& ptr)
     {
         mWatched = ptr;
+    }
+
+    void MechanicsManager::advanceTime (float duration)
+    {
+        // Uses ingame time, but scaled to real time
+        duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
 
     void MechanicsManager::update(float duration, bool paused)
@@ -411,7 +430,7 @@ namespace MWMechanics
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-        if (Misc::StringUtils::lowerCase(npc->mBase->mRace) == Misc::StringUtils::lowerCase(player->mBase->mRace))
+        if (Misc::StringUtils::ciEqual(npc->mBase->mRace, player->mBase->mRace))
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
 
         x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityMult")->getFloat()
@@ -427,7 +446,9 @@ namespace MWMechanics
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
                 it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
             {
-                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)) reaction = it->mReaction;
+                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)
+                        && playerStats.getExpelled().find(Misc::StringUtils::lowerCase(it->mFaction)) == playerStats.getExpelled().end())
+                    reaction = it->mReaction;
             }
             rank = playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
         }
@@ -438,7 +459,8 @@ namespace MWMechanics
             {
                 if(playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerStats.getFactionRanks().end() )
                 {
-                    if(it->mReaction<reaction) reaction = it->mReaction;
+                    if(it->mReaction < reaction)
+                        reaction = it->mReaction;
                 }
             }
             rank = 0;
@@ -679,4 +701,18 @@ namespace MWMechanics
             return false;
     }
 
+    void MechanicsManager::updateMagicEffects(const MWWorld::Ptr &ptr)
+    {
+        mActors.updateMagicEffects(ptr);
+    }
+
+    void MechanicsManager::toggleAI()
+    {
+        mAI = !mAI;
+    }
+
+    bool MechanicsManager::isAIActive()
+    {
+        return mAI;
+    }
 }

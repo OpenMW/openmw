@@ -76,11 +76,6 @@ namespace MWGui
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
 
-            MyGUI::IntCoord mPositionInventory;
-            MyGUI::IntCoord mPositionContainer;
-            MyGUI::IntCoord mPositionCompanion;
-            MyGUI::IntCoord mPositionBarter;
-
             GuiMode mGuiMode;
 
             int mLastXSize;
@@ -103,9 +98,10 @@ namespace MWGui
             void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
 
-            void unequipItem(const MWWorld::Ptr& item);
             void updateEncumbranceBar();
             void notifyContentChanged();
+
+            void adjustPanes();
     };
 }
 

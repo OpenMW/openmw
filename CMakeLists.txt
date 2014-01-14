@@ -4,10 +4,6 @@ if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
-
-    set(CMAKE_EXE_LINKER_FLAGS "-F /Library/Frameworks")
-    set(CMAKE_SHARED_LINKER_FLAGS "-F /Library/Frameworks")
-    set(CMAKE_MODULE_LINKER_FLAGS "-F /Library/Frameworks")
 endif (APPLE)
 
 # Macros
@@ -19,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 27)
+set (OPENMW_VERSION_MINOR 28)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -50,7 +46,12 @@ option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
-find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+if(UNIX AND NOT APPLE)
+    option(BUILD_WITH_DPKG "enable dpkg-based install for debian and debian derivatives" OFF)
+    if(BUILD_WITH_DPKG)
+        find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+    endif(BUILD_WITH_DPKG)
+endif(UNIX AND NOT APPLE)
 
 # Location of morrowind data files
 if (APPLE)
@@ -79,7 +80,6 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/lights.cpp
-  ${LIBDIR}/openengine/ogre/particles.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
@@ -95,8 +95,6 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/BtOgreExtras.h
     ${LIBDIR}/openengine/bullet/BtOgreGP.h
     ${LIBDIR}/openengine/bullet/BtOgrePG.h
-    ${LIBDIR}/openengine/bullet/CMotionState.cpp
-    ${LIBDIR}/openengine/bullet/CMotionState.h
     ${LIBDIR}/openengine/bullet/physic.cpp
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
@@ -190,10 +188,6 @@ if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
 endif()
 
-if (APPLE)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif (APPLE)
-
 # Dependencies
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
@@ -208,7 +202,7 @@ if (HAVE_UNORDERED_MAP)
 endif ()
 
 
-set(BOOST_COMPONENTS system filesystem program_options thread date_time wave)
+set(BOOST_COMPONENTS system filesystem program_options)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
@@ -246,8 +240,14 @@ if (APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
                           ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
-                          ${OGRE_Plugin_CgProgramManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
+    
+    # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
+    # not reliable and equals TRUE even if there's no Ogre Cg plugin
+    if (Cg_FOUND)
+        set(USED_OGRE_PLUGINS ${USED_OGRE_PLUGINS}
+                              ${OGRE_Plugin_CgProgramManager_LIBRARY_REL})
+    endif ()
 
     if (${OGRE_PLUGIN_DIR_REL}})
         set(OGRE_PLUGINS_REL_FOUND TRUE)
@@ -286,7 +286,8 @@ endif()
 add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
 add_definitions(-DOGRE_PLUGIN_DIR_DBG="${OGRE_PLUGIN_DIR_DBG}")
 if (APPLE AND OPENMW_OSX_DEPLOYMENT)
-    add_definitions(-DOGRE_PLUGIN_DIR="${APP_BUNDLE_NAME}/Contents/Plugins")
+    # make it empty so plugin loading code can check this and try to find plugins inside app bundle
+    add_definitions(-DOGRE_PLUGIN_DIR="")
 else()
     add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
 endif()
@@ -319,7 +320,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
     "${OpenMW_BINARY_DIR}/opencs.cfg")
-    
+
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
 
@@ -687,9 +688,9 @@ if (APPLE)
 
     set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
 
-    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/OpenCS.app")
+    set(OPENCS_BUNDLE_NAME "OpenCS.app")
+    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}")
 
-    set(PLUGINS "")
     set(ABSOLUTE_PLUGINS "")
 
     foreach (PLUGIN ${USED_OGRE_PLUGINS})
@@ -697,12 +698,25 @@ if (APPLE)
         set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
-    set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins")
-    install(FILES ${ABSOLUTE_PLUGINS} DESTINATION "${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins" COMPONENT Runtime)
-    foreach (PLUGIN ${ABSOLUTE_PLUGINS})
-        get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
-        set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
-    endforeach ()
+    # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
+    # and returns list of install paths for all installed plugins
+    function (install_plugins_for_bundle bundle_path plugins_var)
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Plugins")
+        install(FILES ${ABSOLUTE_PLUGINS} DESTINATION ${RELATIVE_PLUGIN_INSTALL_BASE} COMPONENT Runtime)
+
+        set(PLUGINS "")
+        set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
+
+        foreach (PLUGIN ${ABSOLUTE_PLUGINS})
+            get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
+            set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
+        endforeach ()
+
+        set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
+    endfunction (install_plugins_for_bundle)
+
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
     set(DIRS "")
@@ -750,7 +764,7 @@ if (APPLE)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         include(BundleUtilities)
         fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
-        fixup_bundle(\"${OPENCS_APP}\" \"\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)

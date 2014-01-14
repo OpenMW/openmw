@@ -8,6 +8,14 @@
 #include "aitravel.hpp"
 #include "aifollow.hpp"
 #include "aiactivate.hpp"
+#include "aicombat.hpp"
+
+#include "../mwworld/class.hpp"
+#include "creaturestats.hpp"
+#include "npcstats.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwworld/player.hpp"
 
 void MWMechanics::AiSequence::copy (const AiSequence& sequence)
 {
@@ -29,6 +37,7 @@ MWMechanics::AiSequence& MWMechanics::AiSequence::operator= (const AiSequence& s
     {
         clear();
         copy (sequence);
+        mDone = sequence.mDone;
     }
     
     return *this;
@@ -52,17 +61,20 @@ bool MWMechanics::AiSequence::isPackageDone() const
     return mDone;
 }
 
-void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
+void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
 {
-    if (!mPackages.empty())
+    if(actor != MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
     {
-        if (mPackages.front()->execute (actor))
+        if (!mPackages.empty())
         {
-            mPackages.erase (mPackages.begin());
-            mDone = true;
+            if (mPackages.front()->execute (actor,duration))
+            {
+                mPackages.erase (mPackages.begin());
+                mDone = true;
+            }
+            else
+                mDone = false;    
         }
-        else
-            mDone = false;    
     }
 }
 
@@ -76,7 +88,14 @@ void MWMechanics::AiSequence::clear()
 
 void MWMechanics::AiSequence::stack (const AiPackage& package)
 {
-    mPackages.push_front (package.clone());
+    for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); it++)
+    {
+        if(mPackages.front()->getPriority() <= package.getPriority())
+            mPackages.insert(it,package.clone());
+    }
+
+    if(mPackages.empty())
+        mPackages.push_front (package.clone());
 }
 
 void MWMechanics::AiSequence::queue (const AiPackage& package)

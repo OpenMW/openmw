@@ -48,7 +48,6 @@ namespace MWRender
     class Shadows;
     class LocalMap;
     class Water;
-    class Compositors;
     class ExternalRendering;
     class GlobalMap;
     class VideoPlayer;
@@ -91,12 +90,12 @@ public:
 
     bool vanityRotateCamera(const float *rot);
     void setCameraDistance(float dist, bool adjust = false, bool override = true);
+    float getCameraDistance() const;
 
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
-    Compositors* getCompositors();
 
     void toggleLight();
     bool toggleRenderMode(int mode);
@@ -224,8 +223,6 @@ private:
 
     void setMenuTransparency(float val);
 
-    void applyCompositors();
-
     bool mSunEnabled;
 
     MWWorld::Fallback* mFallback;
@@ -242,8 +239,8 @@ private:
 
     OEngine::Render::OgreRenderer &mRendering;
 
-    MWRender::Objects mObjects;
-    MWRender::Actors mActors;
+    MWRender::Objects* mObjects;
+    MWRender::Actors* mActors;
 
     MWRender::NpcAnimation *mPlayerAnimation;
 
@@ -268,8 +265,6 @@ private:
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
-
-    MWRender::Compositors* mCompositors;
 
     VideoPlayer* mVideoPlayer;
 };

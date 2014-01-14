@@ -94,7 +94,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
 
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
         const int size = 11;
 
@@ -116,11 +116,11 @@ namespace MWClass
         for (int i=0; i<size; ++i)
             if (sMapping[i][0]==ref->mBase->mData.mType)
             {
-                slots.push_back (int (sMapping[i][1]));
+                slots_.push_back (int (sMapping[i][1]));
                 break;
             }
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr) const
@@ -169,7 +169,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
 
-        return ref->mBase->mData.mValue;
+        if (ptr.getCellRef().mCharge == -1)
+            return ref->mBase->mData.mValue;
+        else
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Armor::registerSelf()
@@ -245,7 +248,7 @@ namespace MWClass
                 + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight) + " (" + typeText + ")";
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
@@ -281,50 +284,43 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         ref->mBase = record;
+        ref->mRef.mRefID = record->mId;
     }
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
 
+        if (ptr.getCellRef().mCharge == 0)
+            return std::make_pair(0, "#{sInventoryMessage1}");
+
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+
+        if (slots_.first.empty())
+            return std::make_pair(0, "");
 
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+        if(race->mData.mFlags & ESM::Race::Beast)
         {
+            std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
 
-            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
-            if(race->mData.mFlags & ESM::Race::Beast)
+            for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
             {
-                std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
-
-                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_Head)
-                        {
-                            return std::make_pair(0, "#{sNotifyMessage13}");
-                        }
-                    }
-                }
-
-                if (*slot == MWWorld::InventoryStore::Slot_Boots)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                        {
-                            return std::make_pair(0, "#{sNotifyMessage14}");
-                        }
-                    }
-                }
+                if((*itr).mPart == ESM::PRT_Head)
+                    return std::make_pair(0, "#{sNotifyMessage13}");
+                if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                    return std::make_pair(0, "#{sNotifyMessage14}");
             }
+        }
 
+        for (std::vector<int>::const_iterator slot=slots_.first.begin();
+            slot!=slots_.first.end(); ++slot)
+        {
+            // If equipping a shield, check if there's a twohanded weapon conflicting with it
             if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
             {
                 MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);

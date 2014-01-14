@@ -25,18 +25,12 @@ ESM::CellRef& MWWorld::Ptr::getCellRef() const
 {
     assert(mRef);
 
-    if (mContainerStore)
-        mContainerStore->flagAsModified();
-
     return mRef->mRef;
 }
 
 MWWorld::RefData& MWWorld::Ptr::getRefData() const
 {
     assert(mRef);
-
-    if (mContainerStore)
-        mContainerStore->flagAsModified();
 
     return mRef->mData;
 }

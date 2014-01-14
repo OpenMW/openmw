@@ -26,16 +26,25 @@ namespace CSVDoc
     template<class SubViewT, class CreatorFactoryT>
     class SubViewFactoryWithCreator : public SubViewFactoryBase
     {
+            bool mSorting;
+
         public:
+
+            SubViewFactoryWithCreator (bool sorting = true);
 
             virtual CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
     };
 
     template<class SubViewT, class CreatorFactoryT>
+    SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::SubViewFactoryWithCreator (bool sorting)
+    : mSorting (sorting)
+    {}
+
+    template<class SubViewT, class CreatorFactoryT>
     CSVDoc::SubView *SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::makeSubView (
         const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     {
-        return new SubViewT (id, document, CreatorFactoryT());
+        return new SubViewT (id, document, CreatorFactoryT(), mSorting);
     }
 }
 

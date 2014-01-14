@@ -19,7 +19,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -348,14 +347,8 @@ namespace MWScript
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
                     store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
-                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), gem);
-
-                    ref.getPtr().getRefData().setCount (1);
-
-                    ref.getPtr().getCellRef().mSoul = creature;
-
-                    MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr(), ptr);
-
+                    MWWorld::Ptr item = *ptr.getClass().getContainerStore(ptr).add(gem, 1, ptr);
+                    item.getCellRef().mSoul = creature;
                 }
         };
 
@@ -374,18 +367,7 @@ namespace MWScript
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
-
-                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                    {
-                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().mSoul, soul))
-                        {
-                            if (iter->getRefData().getCount() <= 1)
-                                iter->getRefData().setCount (0);
-                            else
-                                iter->getRefData().setCount (iter->getRefData().getCount() - 1);
-                            break;
-                        }
-                    }
+                    store.remove(soul, 1, ptr);
                 }
         };
 
@@ -415,24 +397,18 @@ namespace MWScript
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
 
+                    int toRemove = amount;
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
                     {
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
                         {
-                            if(iter->getRefData().getCount() <= amount)
-                            {
-                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
-                                iter->getRefData().setCount(0);
-                            }
-                            else
-                            {
-                                int original = iter->getRefData().getCount();
-                                iter->getRefData().setCount(amount);
-                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
-                                iter->getRefData().setCount(original - amount);
-                            }
+                            int removed = store.remove(*iter, toRemove, ptr);
+                            MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
 
-                            break;
+                            toRemove -= removed;
+
+                            if (toRemove <= 0)
+                                break;
                         }
                     }
                 }
@@ -458,20 +434,8 @@ namespace MWScript
                     {
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().mSoul, soul))
                         {
-
-                            if(iter->getRefData().getCount() <= 1)
-                            {
-                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
-                                iter->getRefData().setCount(0);
-                            }
-                            else
-                            {
-                                int original = iter->getRefData().getCount();
-                                iter->getRefData().setCount(1);
-                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
-                                iter->getRefData().setCount(original - 1);
-                            }
-
+                            MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, 1);
+                            store.remove(*iter, 1, ptr);
                             break;
                         }
                     }
@@ -541,12 +505,7 @@ namespace MWScript
                     runtime.pop();
 
                     if (parameter == 1)
-                    {
-                        if (ptr.isInCell())
-                            MWBase::Environment::get().getWorld()->deleteObject (ptr);
-                        else
-                            ptr.getRefData().setCount(0);
-                    }
+                        MWBase::Environment::get().getWorld()->deleteObject(ptr);
                 }
         };
 

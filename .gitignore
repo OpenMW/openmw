@@ -6,7 +6,6 @@ CMakeFiles
 */CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
-CMakeLists.txt.user
 Makefile
 makefile
 build
@@ -25,6 +24,8 @@ Doxygen
 .project
 .settings
 .directory
+## qt-creator
+CMakeLists.txt.user*
 
 ## resources
 data

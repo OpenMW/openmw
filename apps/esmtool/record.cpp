@@ -740,8 +740,8 @@ void Record<ESM::DialInfo>::print()
     if (mData.mClass != "")
         std::cout << "  Class: " << mData.mClass << std::endl;
     std::cout << "  Factionless: " << mData.mFactionLess << std::endl;
-    if (mData.mNpcFaction != "")
-        std::cout << "  NPC Faction: " << mData.mNpcFaction << std::endl;
+    if (mData.mFaction != "")
+        std::cout << "  NPC Faction: " << mData.mFaction << std::endl;
     if (mData.mData.mRank != -1)
         std::cout << "  NPC Rank: " << (int)mData.mData.mRank << std::endl;
     if (mData.mPcFaction != "")
@@ -989,8 +989,7 @@ void Record<ESM::NPC>::print()
         std::cout << "  Faction: " << mData.mFaction << std::endl;
     std::cout << "  Flags: " << npcFlags(mData.mFlags) << std::endl;
 
-    // Seriously?
-    if (mData.mNpdt52.mGold == -10)
+    if (mData.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
     {
         std::cout << "  Level: " << mData.mNpdt12.mLevel << std::endl;
         std::cout << "  Reputation: " << (int)mData.mNpdt12.mReputation << std::endl;
@@ -1022,7 +1021,7 @@ void Record<ESM::NPC>::print()
         std::cout << "    Luck: " << (int)mData.mNpdt52.mLuck << std::endl;
 
         std::cout << "  Skills:" << std::endl;
-        for (int i = 0; i != 27; i++)
+        for (int i = 0; i != ESM::Skill::Length; i++)
             std::cout << "    " << skillLabel(i) << ": "
                       << (int)((unsigned char)mData.mNpdt52.mSkills[i]) << std::endl;
 

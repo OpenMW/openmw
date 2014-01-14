@@ -50,10 +50,10 @@ struct DialInfo
     // Journal quest indices (introduced with the quest system in Tribunal)
     enum QuestStatus
     {
-        QS_None,
-        QS_Name,
-        QS_Finished,
-        QS_Restart,
+        QS_None = 0,
+        QS_Name = 1,
+        QS_Finished = 2,
+        QS_Restart = 3,
         QS_Deleted
     };
 
@@ -65,7 +65,7 @@ struct DialInfo
     std::string mId, mPrev, mNext;
 
     // Various references used in determining when to select this item.
-    std::string mActor, mRace, mClass, mNpcFaction, mPcFaction, mCell;
+    std::string mActor, mRace, mClass, mFaction, mPcFaction, mCell;
 
     // Sound and text associated with this item
     std::string mSound, mResponse;
@@ -102,6 +102,9 @@ struct DialInfo
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 
 }

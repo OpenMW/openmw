@@ -19,7 +19,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogrenifloader skeleton material mesh
+    ogrenifloader skeleton material mesh particles controller
     )
 
 add_component_dir (nifbullet
@@ -47,8 +47,8 @@ add_component_dir (misc
     )
 
 add_component_dir (files
-    linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
-    filelibrary ogreplugin constrainedfiledatastream lowlevelfile
+    linuxpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    constrainedfiledatastream lowlevelfile
     )
 
 add_component_dir (compiler
@@ -65,17 +65,22 @@ add_component_dir (interpreter
 add_component_dir (translation
     translation
     )
-    
+
 add_component_dir (terrain
     quadtreenode chunk world storage material
     )
-    
+
 add_component_dir (loadinglistener
     loadinglistener
     )
 
+add_component_dir (ogreinit
+	ogreinit ogreplugin
+	)
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
+
 find_package(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)

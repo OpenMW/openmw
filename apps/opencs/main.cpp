@@ -7,6 +7,8 @@
 #include <QApplication>
 #include <QIcon>
 
+#include <components/ogreinit/ogreinit.hpp>
+
 #ifdef Q_OS_MAC
 #include <QDir>
 #endif
@@ -37,7 +39,16 @@ class Application : public QApplication
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE (resources);
+
+    // TODO: Ogre startup shouldn't be here, but it currently has to:
+    // SceneWidget destructor will delete the created render window, which would be called _after_ Root has shut down :(
+
     Application mApplication (argc, argv);
+// temporarily disable OGRE-integration (need to fix path problem first)
+#if 0
+    OgreInit::OgreInit ogreInit;
+    ogreInit.init("./opencsOgre.log"); // TODO log path?
+#endif
 
 #ifdef Q_OS_MAC
     QDir dir(QCoreApplication::applicationDirPath());

@@ -225,64 +225,54 @@ void LocalMap::render(const float x, const float y,
     tex = TextureManager::getSingleton().getByName(texture);
     if (tex.isNull())
     {
-        // try loading from disk
-        //if (boost::filesystem::exists(texture+".jpg"))
-        //{
-            /// \todo
-        //}
-        //else
+        // render
+        tex = TextureManager::getSingleton().createManual(
+                        texture,
+                        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                        TEX_TYPE_2D,
+                        xw*sMapResolution/sSize, yw*sMapResolution/sSize,
+                        0,
+                        PF_R8G8B8,
+                        TU_RENDERTARGET);
+
+        RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
+
+        rtt->setAutoUpdated(false);
+        Viewport* vp = rtt->addViewport(mCellCamera);
+        vp->setOverlaysEnabled(false);
+        vp->setShadowsEnabled(false);
+        vp->setBackgroundColour(ColourValue(0, 0, 0));
+        vp->setVisibilityMask(RV_Map);
+        vp->setMaterialScheme("local_map");
+
+        rtt->update();
+
+        // create "fog of war" texture
+        TexturePtr tex2 = TextureManager::getSingleton().createManual(
+                        texture + "_fog",
+                        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                        TEX_TYPE_2D,
+                        xw*sFogOfWarResolution/sSize, yw*sFogOfWarResolution/sSize,
+                        0,
+                        PF_A8R8G8B8,
+                        TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+
+        // create a buffer to use for dynamic operations
+        std::vector<uint32> buffer;
+        buffer.resize(sFogOfWarResolution*sFogOfWarResolution);
+
+        // initialize to (0, 0, 0, 1)
+        for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
         {
-            // render
-            tex = TextureManager::getSingleton().createManual(
-                            texture,
-                            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                            TEX_TYPE_2D,
-                            xw*sMapResolution/sSize, yw*sMapResolution/sSize,
-                            0,
-                            PF_R8G8B8,
-                            TU_RENDERTARGET);
-
-            RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
-
-            rtt->setAutoUpdated(false);
-            Viewport* vp = rtt->addViewport(mCellCamera);
-            vp->setOverlaysEnabled(false);
-            vp->setShadowsEnabled(false);
-            vp->setBackgroundColour(ColourValue(0, 0, 0));
-            vp->setVisibilityMask(RV_Map);
-            vp->setMaterialScheme("local_map");
-
-            rtt->update();
-
-            // create "fog of war" texture
-            TexturePtr tex2 = TextureManager::getSingleton().createManual(
-                            texture + "_fog",
-                            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                            TEX_TYPE_2D,
-                            xw*sFogOfWarResolution/sSize, yw*sFogOfWarResolution/sSize,
-                            0,
-                            PF_A8R8G8B8,
-                            TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
-
-            // create a buffer to use for dynamic operations
-            std::vector<uint32> buffer;
-            buffer.resize(sFogOfWarResolution*sFogOfWarResolution);
-
-            // initialize to (0, 0, 0, 1)
-            for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
-            {
-                buffer[p] = (255 << 24);
-            }
-
-            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
-            tex2->getBuffer()->unlock();
-
-            mBuffers[texture] = buffer;
-
-            // save to cache for next time
-            //rtt->writeContentsToFile("./" + texture + ".jpg");
+            buffer[p] = (255 << 24);
         }
+
+        memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
+        tex2->getBuffer()->unlock();
+
+        mBuffers[texture] = buffer;
     }
+
     mRenderingManager->enableLights(true);
     mLight->setVisible(false);
 
@@ -338,8 +328,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
         getInteriorMapPosition(pos, u,v, x,y);
 
     Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).yAxis();
-
-    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
 
     if (!mInterior)
     {

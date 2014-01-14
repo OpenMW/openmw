@@ -8,6 +8,39 @@
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
+
+namespace
+{
+    boost::filesystem::path getUserHome()
+    {
+        const char* dir = getenv("HOME");
+        if (dir == NULL)
+        {
+            struct passwd* pwd = getpwuid(getuid());
+            if (pwd != NULL)
+            {
+                dir = pwd->pw_dir;
+            }
+        }
+        if (dir == NULL)
+            return boost::filesystem::path();
+        else
+            return boost::filesystem::path(dir);
+    }
+
+    boost::filesystem::path getEnv(const std::string& envVariable, const boost::filesystem::path& fallback)
+    {
+        const char* result = getenv(envVariable.c_str());
+        if (!result)
+            return fallback;
+        boost::filesystem::path dir(result);
+        if (dir.empty())
+            return fallback;
+        else
+            return dir;
+    }
+}
+
 /**
  * \namespace Files
  */
@@ -19,51 +52,22 @@ LinuxPath::LinuxPath(const std::string& application_name)
 {
 }
 
-boost::filesystem::path LinuxPath::getUserPath() const
+boost::filesystem::path LinuxPath::getUserConfigPath() const
 {
-    boost::filesystem::path userPath(".");
+    return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
+}
 
-    const char* theDir = getenv("HOME");
-    if (theDir == NULL)
-    {
-        struct passwd* pwd = getpwuid(getuid());
-        if (pwd != NULL)
-        {
-            theDir = pwd->pw_dir;
-        }
-    }
-
-    if (theDir != NULL)
-    {
-        userPath = boost::filesystem::path(theDir);
-    }
-
-    return userPath / ".config" / mName;
+boost::filesystem::path LinuxPath::getUserDataPath() const
+{
+    return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
 }
 
 boost::filesystem::path LinuxPath::getCachePath() const
 {
-    boost::filesystem::path userPath(".");
-
-    const char* theDir = getenv("HOME");
-    if (theDir == NULL)
-    {
-        struct passwd* pwd = getpwuid(getuid());
-        if (pwd != NULL)
-        {
-            theDir = pwd->pw_dir;
-        }
-    }
-
-    if (theDir != NULL)
-    {
-        userPath = boost::filesystem::path(theDir);
-    }
-
-    return userPath / ".cache" / mName;
+    return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
 }
 
-boost::filesystem::path LinuxPath::getGlobalPath() const
+boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
     boost::filesystem::path globalPath("/etc/");
     return globalPath / mName;
@@ -84,17 +88,9 @@ boost::filesystem::path LinuxPath::getInstallPath() const
 {
     boost::filesystem::path installPath;
 
-    char *homePath = getenv("HOME");
-    if (homePath == NULL)
-    {
-        struct passwd* pwd = getpwuid(getuid());
-        if (pwd != NULL)
-        {
-            homePath = pwd->pw_dir;
-        }
-    }
+    boost::filesystem::path homePath = getUserHome();
 
-    if (homePath != NULL)
+    if (!homePath.empty())
     {
         boost::filesystem::path wineDefaultRegistry(homePath);
         wineDefaultRegistry /= ".wine/system.reg";

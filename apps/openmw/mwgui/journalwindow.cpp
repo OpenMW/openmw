@@ -137,14 +137,27 @@ namespace
                 getPage (QuestsPage)->adviseLinkClicked (callback);
             }
 
-            adjustButton(OptionsBTN);
+            adjustButton(OptionsBTN, true);
             adjustButton(PrevPageBTN);
             adjustButton(NextPageBTN);
             adjustButton(CloseBTN);
             adjustButton(CancelBTN);
-            adjustButton(ShowAllBTN);
-            adjustButton(ShowActiveBTN);
+            adjustButton(ShowAllBTN, true);
+            adjustButton(ShowActiveBTN, true);
             adjustButton(JournalBTN);
+
+            MWGui::ImageButton* optionsButton = getWidget<MWGui::ImageButton>(OptionsBTN);
+            if (optionsButton->getWidth() == 0)
+            {
+                // If tribunal is not installed (-> no options button), we still want the Topics button available,
+                // so place it where the options button would have been
+                MWGui::ImageButton* topicsButton = getWidget<MWGui::ImageButton>(TopicsBTN);
+                topicsButton->detachFromWidget();
+                topicsButton->attachToWidget(optionsButton->getParent());
+                topicsButton->setPosition(optionsButton->getPosition());
+                topicsButton->eventMouseButtonClick.clear();
+                topicsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &JournalWindowImpl::notifyOptions);
+            }
 
             MWGui::ImageButton* nextButton = getWidget<MWGui::ImageButton>(NextPageBTN);
             if (nextButton->getSize().width == 64)
@@ -155,7 +168,7 @@ namespace
             }
 
             adjustButton(TopicsBTN);
-            adjustButton(QuestsBTN);
+            adjustButton(QuestsBTN, true);
             int width = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width + getWidget<MyGUI::Widget>(QuestsBTN)->getSize().width;
             int topicsWidth = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width;
             int pageWidth = getWidget<MyGUI::Widget>(RightBookPage)->getSize().width;
@@ -167,12 +180,12 @@ namespace
             mAllQuests = false;
         }
 
-        void adjustButton (char const * name)
+        void adjustButton (char const * name, bool optional = false)
         {
             MWGui::ImageButton* button = getWidget<MWGui::ImageButton>(name);
 
-            MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
-            button->setSize(button->getRequestedSize());
+            MyGUI::IntSize diff = button->getSize() - button->getRequestedSize(!optional);
+            button->setSize(button->getRequestedSize(!optional));
 
             if (button->getAlign().isRight())
                 button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));

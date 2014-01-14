@@ -32,15 +32,15 @@ namespace MWWorld
             case 0:
                 return;
             case 2:
-                invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, actor);
                 break;
             case 3:
-                invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
                 break;
         }
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
 
         // retrieve ContainerStoreIterator to the item
         MWWorld::ContainerStoreIterator it = invStore.begin();
@@ -57,14 +57,17 @@ namespace MWWorld
         bool equipped = false;
 
         // equip the item in the first free slot
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        for (std::vector<int>::const_iterator slot=slots_.first.begin();
+            slot!=slots_.first.end(); ++slot)
         {
+            // if the item is equipped already, nothing to do
+            if (invStore.getSlot(*slot) == it)
+                return;
 
             // if all slots are occupied, replace the last slot
-            if (slot == --slots.first.end())
+            if (slot == --slots_.first.end())
             {
-                invStore.equip(*slot, it);
+                invStore.equip(*slot, it, actor);
                 equipped = true;
                 break;
             }
@@ -72,7 +75,7 @@ namespace MWWorld
             if (invStore.getSlot(*slot) == invStore.end())
             {
                 // slot is not occupied
-                invStore.equip(*slot, it);
+                invStore.equip(*slot, it, actor);
                 equipped = true;
                 break;
             }

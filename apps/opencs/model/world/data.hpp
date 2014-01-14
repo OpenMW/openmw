@@ -29,6 +29,7 @@
 #include "cell.hpp"
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
+#include "infocollection.hpp"
 
 class QAbstractItemModel;
 
@@ -51,6 +52,8 @@ namespace CSMWorld
             IdCollection<ESM::Spell> mSpells;
             IdCollection<ESM::Dialogue> mTopics;
             IdCollection<ESM::Dialogue> mJournals;
+            InfoCollection mTopicInfos;
+            InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
@@ -130,6 +133,14 @@ namespace CSMWorld
             const IdCollection<ESM::Dialogue>& getJournals() const;
 
             IdCollection<ESM::Dialogue>& getJournals();
+
+            const InfoCollection& getTopicInfos() const;
+
+            InfoCollection& getTopicInfos();
+
+            const InfoCollection& getJournalInfos() const;
+
+            InfoCollection& getJournalInfos();
 
             const IdCollection<Cell>& getCells() const;
 
