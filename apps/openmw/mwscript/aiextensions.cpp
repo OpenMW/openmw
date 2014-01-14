@@ -17,10 +17,15 @@
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
 #include <iostream>
+
+#include "../mwbase/mechanicsmanager.hpp"
 
 namespace MWScript
 {
@@ -364,6 +369,39 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpGetLineOfSight : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+
+                    MWWorld::Ptr source = R()(runtime);
+
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->getPtr(actorID,true);
+                    bool value = false;
+                    if(dest != MWWorld::Ptr() )
+                    {
+                        value = MWBase::Environment::get().getWorld()->getLOS(source,dest);
+                    }
+                    runtime.push (value);
+                }
+        };
+
+        template<class R>
+        class OpToggleAI : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getMechanicsManager()->toggleAI();   
+                }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -389,6 +427,11 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Ai::opcodeGetCurrentAiPackageExplicit, new OpGetCurrentAIPackage<ExplicitRef>);
             interpreter.installSegment3 (Compiler::Ai::opcodeGetDetected, new OpGetDetected<ImplicitRef>);
             interpreter.installSegment3 (Compiler::Ai::opcodeGetDetectedExplicit, new OpGetDetected<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSight, new OpGetLineOfSight<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSightExplicit, new OpGetLineOfSight<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAI, new OpToggleAI<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAIExplicit, new OpToggleAI<ExplicitRef>);
+
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHello, new OpSetAiSetting<ImplicitRef>(0));
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHelloExplicit, new OpSetAiSetting<ExplicitRef>(0));
             interpreter.installSegment5 (Compiler::Ai::opcodeSetFight, new OpSetAiSetting<ImplicitRef>(1));

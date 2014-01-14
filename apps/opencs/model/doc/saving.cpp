@@ -58,12 +58,9 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Spell> >
         (mDocument.getData().getSpells(), mState));
 
-    /// \todo deal with info records for topcis and journals
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Dialogue> >
-        (mDocument.getData().getTopics(), mState));
+    appendStage (new WriteDialogueCollectionStage (mDocument, mState, false));
 
-    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Dialogue> >
-        (mDocument.getData().getJournals(), mState));
+    appendStage (new WriteDialogueCollectionStage (mDocument, mState, true));
 
     appendStage (new WriteRefIdCollectionStage (mDocument, mState));
 

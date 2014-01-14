@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#include "components/esm/loadcell.hpp"
+#include <stdexcept>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -17,6 +17,8 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/nifogre/ogrenifloader.hpp>
+
+#include <components/esm/loadcell.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -61,10 +63,6 @@ void OMW::Engine::executeLocalScripts()
     }
 
     localScripts.setIgnore (MWWorld::Ptr());
-}
-
-void OMW::Engine::setAnimationVerbose(bool animverbose)
-{
 }
 
 bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
@@ -147,6 +145,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(NULL)
   , mActivationDistanceOverride(-1)
+  , mGrab(true)
 
 {
     std::srand ( std::time(NULL) );
@@ -210,7 +209,9 @@ void OMW::Engine::loadBSA()
         }
         else
         {
-            std::cout << "Archive " << *archive << " not found" << std::endl;
+            std::stringstream message;
+            message << "Archive '" << *archive << "' not found";
+            throw std::runtime_error(message.str());
         }
     }
 }
@@ -296,7 +297,7 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
     // load user settings if they exist, otherwise just load the default settings as user settings
-    const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
+    const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
     else if (boost::filesystem::exists(localdefault))
@@ -337,8 +338,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
-        Settings::Manager::getString("opengl rtt mode", "Video"),
-        false);
+        Settings::Manager::getString("opengl rtt mode", "Video"));
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -369,9 +369,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists);
+    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
@@ -411,13 +411,16 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mVerboseScripts, *mScriptContext));
 
     // Create game mechanics system
-    mEnvironment.setMechanicsManager (new MWMechanics::MechanicsManager);
+    MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
+    mEnvironment.setMechanicsManager (mechanics);
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     mEnvironment.getWorld()->renderPlayer();
+    mechanics->buildPlayer();
+    window->updatePlayer();
 
     if (!mNewGame)
     {
@@ -482,7 +485,8 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
-    mOgre->start();
+    while (!mEnvironment.getRequestExit())
+        Ogre::Root::getSingleton().renderOneFrame();
 
     // Save user settings
     settings.saveUser(settingspath);
@@ -509,6 +513,8 @@ void OMW::Engine::activate()
 
     std::string script = MWWorld::Class::get (ptr).getScript (ptr);
 
+    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
     if (!script.empty())
     {
         MWBase::Environment::get().getWorld()->getLocalScripts().setIgnore (ptr);
@@ -526,7 +532,7 @@ void OMW::Engine::screenshot()
     // Count screenshots.
     int shotCount = 0;
 
-    const std::string screenshotPath = mCfgMgr.getUserPath().string();
+    const std::string& screenshotPath = mCfgMgr.getUserDataPath().string();
 
     // Find the first unused filename with a do-while
     std::ostringstream stream;

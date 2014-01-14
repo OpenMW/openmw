@@ -25,7 +25,7 @@ namespace Compiler
         const int opcodeAiFollowExplicit = 0x20023;
         const int opcodeAiFollowCell = 0x20024;
         const int opcodeAiFollowCellExplicit = 0x20025;
-        const int opcodeSetHello = 0x200015e;
+        const int opcodeSetHello = 0x200015c;
         const int opcodeSetHelloExplicit = 0x200015d;
         const int opcodeSetFight = 0x200015e;
         const int opcodeSetFightExplicit = 0x200015f;
@@ -49,6 +49,10 @@ namespace Compiler
         const int opcodeGetFleeExplicit = 0x20001c4;
         const int opcodeGetAlarm = 0x20001c5;
         const int opcodeGetAlarmExplicit = 0x20001c6;
+        const int opcodeGetLineOfSight = 0x2000222;
+        const int opcodeGetLineOfSightExplicit = 0x2000223;
+        const int opcodeToggleAI = 0x2000224;
+        const int opcodeToggleAIExplicit = 0x2000225;
     }
 
     namespace Animation
@@ -65,7 +69,7 @@ namespace Compiler
     {
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
-        const int opcodeCOE = 0x200008e;
+        const int opcodeCOE = 0x2000226;
         const int opcodeGetInterior = 0x2000131;
         const int opcodeGetPCCell = 0x2000136;
         const int opcodeGetWaterLevel = 0x2000141;

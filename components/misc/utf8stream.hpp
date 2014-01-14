@@ -14,12 +14,12 @@ public:
     static UnicodeChar sBadChar () { return UnicodeChar (0xFFFFFFFF); }
 
     Utf8Stream (Point begin, Point end) :
-        cur (begin), nxt (begin), end (end)
+        cur (begin), nxt (begin), end (end), val(Utf8Stream::sBadChar())
     {
     }
 
     Utf8Stream (std::pair <Point, Point> range) :
-        cur (range.first), nxt (range.first), end (range.second)
+        cur (range.first), nxt (range.first), end (range.second), val(Utf8Stream::sBadChar())
     {
     }
 

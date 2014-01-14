@@ -11,6 +11,8 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include <components/nifogre/ogrenifloader.hpp>
+
 
 #include "../mwworld/weather.hpp"
 
@@ -195,6 +197,8 @@ namespace MWRender
 
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
+
+        std::vector<NifOgre::ObjectScenePtr> mObjects;
 
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;

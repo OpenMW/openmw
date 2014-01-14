@@ -80,9 +80,8 @@ namespace MWGui
     }
 
     void TradeWindow::startTrade(const MWWorld::Ptr& actor)
-    {
+    {        
         mPtr = actor;
-        setTitle(MWWorld::Class::get(actor).getName(actor));
 
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
@@ -99,6 +98,12 @@ namespace MWGui
         mItemView->setModel (mSortModel);
 
         updateLabels();
+
+        // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
+        // or we end up using a possibly invalid model.
+        setTitle(MWWorld::Class::get(actor).getName(actor));
+
+        onFilterChanged(mFilterAll);
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -200,32 +205,17 @@ namespace MWGui
         sellToNpc(item.mBase, count, true);
     }
 
-    void TradeWindow::addOrRemoveGold(int amount)
+    void TradeWindow::addOrRemoveGold(int amount, const MWWorld::Ptr& actor)
     {
-        bool goldFound = false;
-        MWWorld::Ptr gold;
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
+        MWWorld::ContainerStore& store = MWWorld::Class::get(actor).getContainerStore(actor);
 
-        for (MWWorld::ContainerStoreIterator it = playerStore.begin();
-                it != playerStore.end(); ++it)
+        if (amount > 0)
         {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
-            {
-                goldFound = true;
-                gold = *it;
-            }
-        }
-        if (goldFound)
-        {
-            gold.getRefData().setCount(gold.getRefData().getCount() + amount);
+            store.add("gold_001", amount, actor);
         }
         else
         {
-            assert(amount > 0);
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
-            ref.getPtr().getRefData().setCount(amount);
-            playerStore.add(ref.getPtr(), player);
+            store.remove("gold_001", - amount, actor);
         }
     }
 
@@ -280,6 +270,8 @@ namespace MWGui
             return;
         }
 
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
         if(mCurrentBalance > mCurrentMerchantOffer)
         {
             //if npc is a creature: reject (no haggle)
@@ -302,7 +294,6 @@ namespace MWGui
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
 
             const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
-            MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
             float a1 = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
@@ -342,9 +333,12 @@ namespace MWGui
         mTradeModel->transferItems();
         playerItemModel->transferItems();
 
-        // add or remove gold from the player.
+        // transfer the gold
         if (mCurrentBalance != 0)
-            addOrRemoveGold(mCurrentBalance);
+        {
+            addOrRemoveGold(mCurrentBalance, playerPtr);
+            addOrRemoveGold(-mCurrentBalance, mPtr);
+        }
 
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -445,22 +439,13 @@ namespace MWGui
 
     int TradeWindow::getMerchantGold()
     {
-        int merchantGold;
-
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        int merchantGold = 0;
+        MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
+        for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->mBase->mNpdt52.mGold == -10)
-                merchantGold = ref->mBase->mNpdt12.mGold;
-            else
-                merchantGold = ref->mBase->mNpdt52.mGold;
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
+                merchantGold += it->getRefData().getCount();
         }
-        else // ESM::Creature
-        {
-            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantGold = ref->mBase->mData.mGold;
-        }
-
         return merchantGold;
     }
 }

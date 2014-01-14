@@ -29,15 +29,16 @@ namespace MWMechanics
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
+            bool mAI;///< is AI active?
 
             Objects mObjects;
             Actors mActors;
 
+        public:
+
             void buildPlayer();
             ///< build player according to stored class/race/birthsign information. Will
             /// default to the values of the ESM::NPC object, if no explicit information is given.
-
-        public:
 
             MechanicsManager();
 
@@ -62,6 +63,8 @@ namespace MWMechanics
             ///
             /// \param paused In game type does not currently advance (this usually means some GUI
             /// component is up).
+
+            virtual void advanceTime (float duration);
 
             virtual void setPlayerName (const std::string& name);
             ///< Set player name.
@@ -89,7 +92,7 @@ namespace MWMechanics
 
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
-            
+
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
             void toLower(std::string npcFaction);
@@ -100,6 +103,13 @@ namespace MWMechanics
         virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         virtual void skipAnimation(const MWWorld::Ptr& ptr);
         virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName);
+
+            /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
+            /// paused we may want to do it manually (after equipping permanent enchantment)
+            virtual void updateMagicEffects (const MWWorld::Ptr& ptr);
+
+        virtual void toggleAI();
+        virtual bool isAIActive();
     };
 }
 

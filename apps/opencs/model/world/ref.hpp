@@ -16,7 +16,7 @@ namespace CSMWorld
     struct CellRef : public ESM::CellRef
     {
         std::string mId;
-        std::string mCellId;
+        std::string mCell;
 
         void load (ESM::ESMReader &esm, Cell& cell, const std::string& id);
         ///< Load cell ref and register it with \a cell.

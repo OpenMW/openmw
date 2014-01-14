@@ -301,4 +301,22 @@
         </Widget>
     </Resource>
 
+    <Resource type="ResourceLayout" name="MW_ComboBox" version="3.2.0">
+        <Widget type="Widget" skin="" position="65 10 100 26" name="Root">
+            <Property key="MaxListLength" value="200"/>
+            <Property key="SmoothShow" value="true"/>
+            <Property key="ModeDrop" value="true"/>
+
+            <Widget type="Widget" skin="MW_Box" position="0 0 100 26" align="Stretch">
+                <Widget type="TextBox" skin="SandText" position="2 2 75 20" align="Stretch" name="Client">
+                    <Property key="TextAlign" value="Left VCenter"/>
+                </Widget>
+                <Widget type="ListBox" skin="MW_PopupList" position="65 38 100 200" style="Popup" layer="Popup" name="List">
+                    <Property key="Visible" value="false"/>
+                </Widget>
+                <Widget type="Button" skin="MW_ArrowDown" position="79 7 14 11" align="Right VCenter" name="Button"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
 </MyGUI>

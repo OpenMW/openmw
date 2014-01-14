@@ -51,7 +51,7 @@ namespace CSVWorld
         public:
 
             GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id);
+                const CSMWorld::UniversalId& id, bool relaxedIdRules = false);
 
             virtual void setEditLock (bool locked);
 

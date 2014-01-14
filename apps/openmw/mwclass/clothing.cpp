@@ -78,12 +78,12 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
         if (ref->mBase->mData.mType==ESM::Clothing::Ring)
         {
-            slots.push_back (int (MWWorld::InventoryStore::Slot_LeftRing));
-            slots.push_back (int (MWWorld::InventoryStore::Slot_RightRing));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_LeftRing));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_RightRing));
         }
         else
         {
@@ -105,12 +105,12 @@ namespace MWClass
             for (int i=0; i<size; ++i)
                 if (sMapping[i][0]==ref->mBase->mData.mType)
                 {
-                    slots.push_back (int (sMapping[i][1]));
+                    slots_.push_back (int (sMapping[i][1]));
                     break;
                 }
         }
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Clothing::getEquipmentSkill (const MWWorld::Ptr& ptr) const
@@ -191,7 +191,7 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
@@ -227,44 +227,34 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         ref->mBase = record;
+        ref->mRef.mRefID = record->mId;
     }
 
     std::pair<int, std::string> Clothing::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+
+        if (slots_.first.empty())
+            return std::make_pair(0, "");
 
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+        if(race->mData.mFlags & ESM::Race::Beast)
         {
+            std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;
 
-            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
-            if(race->mData.mFlags & ESM::Race::Beast)
+            for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
             {
-                std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;
-
-                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_Head)
-                            return std::make_pair(0, "#{sNotifyMessage13}");
-                    }
-                }
-
-                if (*slot == MWWorld::InventoryStore::Slot_Boots)
-                {
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                            return std::make_pair(0, "#{sNotifyMessage15}");
-                    }
-                }
+                if((*itr).mPart == ESM::PRT_Head)
+                    return std::make_pair(0, "#{sNotifyMessage13}");
+                if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                    return std::make_pair(0, "#{sNotifyMessage15}");
             }
         }
+
         return std::make_pair (1, "");
     }
 

@@ -20,44 +20,34 @@ struct LinuxPath
 
     /**
      * \brief Return path to the user directory.
-     *
-     * \return boost::filesystem::path
      */
-    boost::filesystem::path getUserPath() const;
+    boost::filesystem::path getUserConfigPath() const;
+
+    boost::filesystem::path getUserDataPath() const;
 
     /**
-     * \brief Return path to the global (system) directory where game files could be placed.
-     *
-     * \return boost::filesystem::path
+     * \brief Return path to the global (system) directory where config files can be placed.
      */
-    boost::filesystem::path getGlobalPath() const;
+    boost::filesystem::path getGlobalConfigPath() const;
 
     /**
      * \brief Return path to the runtime configuration directory which is the
      * place where an application was started.
-     *
-     * \return boost::filesystem::path
      */
     boost::filesystem::path getLocalPath() const;
 
     /**
-     * \brief
-     *
-     * \return boost::filesystem::path
+     * \brief Return path to the global (system) directory where game files can be placed.
      */
     boost::filesystem::path getGlobalDataPath() const;
 
     /**
      * \brief
-     *
-     * \return boost::filesystem::path
      */
     boost::filesystem::path getCachePath() const;
 
     /**
      * \brief Gets the path of the installed Morrowind version if there is one.
-     *
-     * \return boost::filesystem::path
      */
     boost::filesystem::path getInstallPath() const;
 

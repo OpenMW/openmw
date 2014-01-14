@@ -19,24 +19,17 @@ namespace MWGui
     class InteractiveMessageBox;
     class MessageBoxManager;
     class MessageBox;
-
-    struct MessageBoxManagerTimer {
-        float current;
-        float max;
-        MessageBox *messageBox;
-    };
-
     class MessageBoxManager
     {
         public:
             MessageBoxManager ();
+            ~MessageBoxManager ();
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message, bool stat = false);
             void removeStaticMessageBox ();
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
             bool isInteractiveMessageBox ();
 
-            void removeMessageBox (float time, MessageBox *msgbox);
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
 
@@ -54,7 +47,6 @@ namespace MWGui
             std::vector<MessageBox*> mMessageBoxes;
             InteractiveMessageBox* mInterMessageBoxe;
             MessageBox* mStaticMessageBox;
-            std::vector<MessageBoxManagerTimer> mTimers;
             float mMessageBoxSpeed;
             int mLastButtonPressed;
     };
@@ -67,14 +59,13 @@ namespace MWGui
             int getHeight ();
             void update (int height);
 
-            bool mMarkedToDelete;
+            float mCurrentTime;
+            float mMaxTime;
 
         protected:
             MessageBoxManager& mMessageBoxManager;
-            int mHeight;
             const std::string& mMessage;
             MyGUI::EditBox* mMessageWidget;
-            int mFixedWidth;
             int mBottomPadding;
             int mNextBoxPadding;
     };

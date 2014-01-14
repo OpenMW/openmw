@@ -145,7 +145,7 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
@@ -155,6 +155,9 @@ namespace MWClass
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
         int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
+
+        static const float fWortChanceValue =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
 
         MWGui::Widgets::SpellEffectList list;
         for (int i=0; i<4; ++i)
@@ -166,10 +169,10 @@ namespace MWClass
             params.mAttribute = ref->mBase->mData.mAttributes[i];
             params.mSkill = ref->mBase->mData.mSkills[i];
 
-            params.mKnown = ( (i == 0 && alchemySkill >= 15)
-                 || (i == 1 && alchemySkill >= 30)
-                 || (i == 2 && alchemySkill >= 45)
-                 || (i == 3 && alchemySkill >= 60));
+            params.mKnown = ( (i == 0 && alchemySkill >= fWortChanceValue)
+                 || (i == 1 && alchemySkill >= fWortChanceValue*2)
+                 || (i == 2 && alchemySkill >= fWortChanceValue*3)
+                 || (i == 3 && alchemySkill >= fWortChanceValue*4));
 
             list.push_back(params);
         }

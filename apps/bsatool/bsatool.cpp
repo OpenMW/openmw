@@ -184,7 +184,7 @@ int list(Bsa::BSAFile& bsa, Arguments& info)
 {
     // List all files
     const Bsa::BSAFile::FileList &files = bsa.getList();
-    for(int i=0; i<files.size(); i++)
+    for(unsigned int i=0; i<files.size(); i++)
     {
         if(info.longformat)
         {

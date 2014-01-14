@@ -36,9 +36,16 @@ namespace MWMechanics
         bool mHostile;
         bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
 
+        float mFallHeight;
+
         int mAttackType;
 
         std::string mLastHitObject; // The last object to hit this actor
+
+        // Do we need to recalculate stats derived from attributes or other factors?
+        bool mRecalcDynamicStats;
+
+        std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
 
     protected:
         bool mIsWerewolf;
@@ -46,6 +53,17 @@ namespace MWMechanics
 
     public:
         CreatureStats();
+
+        bool needToRecalcDynamicStats();
+
+        void addToFallHeight(float height);
+
+        /// Reset the fall height
+        /// @return total fall height
+        float land();
+
+        bool canUsePower (const std::string& power) const;
+        void usePower (const std::string& power);
 
         const Stat<int> & getAttribute(int index) const;
 
@@ -70,8 +88,6 @@ namespace MWMechanics
         int getAiSetting (int index) const;
         ///< 0: hello, 1 fight, 2 flee, 3 alarm
 
-        Stat<int> & getAttribute(int index);
-
         Spells & getSpells();
 
         ActiveSpells & getActiveSpells();
@@ -79,6 +95,8 @@ namespace MWMechanics
         MagicEffects & getMagicEffects();
 
         void setAttribute(int index, const Stat<int> &value);
+        // Shortcut to set only the base
+        void setAttribute(int index, int base);
 
         void setHealth(const DynamicStat<float> &value);
 
@@ -166,6 +184,11 @@ namespace MWMechanics
 
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+
+        // Note, this is just a cache to avoid checking the whole container store every frame TODO: Put it somewhere else?
+        std::set<int> mBoundItems;
+        // Same as above
+        std::map<int, std::string> mSummonedCreatures;
     };
 }
 

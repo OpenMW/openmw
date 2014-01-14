@@ -207,8 +207,11 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
 
     case Qt::CheckStateRole:
     {
-        if (!file->isGameFile())
-            return isChecked(file->filePath());
+        if (file->isGameFile())
+            return QVariant();
+
+        return mCheckStates[file->filePath()];
+
         break;
     }
 

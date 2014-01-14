@@ -87,6 +87,26 @@ namespace MWWorld
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening
 
+            struct ProjectileState
+            {
+                // Id of spell or enchantment to apply when it hits
+                std::string mId;
+
+                // Actor who casted this projectile
+                std::string mActorHandle;
+
+                // Name of item to display as effect source in magic menu (in case we casted an enchantment)
+                std::string mSourceName;
+
+                ESM::EffectList mEffects;
+
+                float mSpeed;
+
+                bool mStack;
+            };
+
+            std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
+            void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
@@ -94,8 +114,7 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-
-            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
+            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos, bool adjustPos=true);
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
@@ -111,6 +130,8 @@ namespace MWWorld
 
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void moveProjectiles(float duration);
 
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
@@ -130,6 +151,11 @@ namespace MWWorld
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
+
+            /// Called when \a object is moved to an inactive cell
+            void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
+
+            float feetToGameUnits(float feet);
 
         public:
 
@@ -178,7 +204,7 @@ namespace MWWorld
             virtual Ogre::Vector2 getNorthVector (CellStore* cell);
             ///< get north vector (OGRE coordinates) for given interior cell
 
-            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell);
+            virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
             virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
@@ -286,7 +312,7 @@ namespace MWWorld
 
             virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
 
-            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -354,14 +380,19 @@ namespace MWWorld
 
             virtual void update (float duration, bool paused);
 
-            virtual bool placeObject (const Ptr& object, float cursorX, float cursorY);
-            ///< place an object into the gameworld at the specified cursor position
+            virtual bool placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
+            ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
+            /// @param number of objects to place
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const Ptr& actor, const Ptr& object);
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount);
+            ///< copy and place an object into the gameworld at the given actor's position
+            /// @param actor giving the dropped object position
+            /// @param object
+            /// @param number of objects to place
 
             virtual bool canPlaceObject(float cursorX, float cursorY);
             ///< @return true if it is possible to place on object at specified cursor location
@@ -420,6 +451,9 @@ namespace MWWorld
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all items in active cells owned by this Npc
 
+            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc);
+            ///< get Line of Sight (morrowind stupid implementation)
+
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
@@ -466,6 +500,40 @@ namespace MWWorld
             virtual bool getGodModeState();
 
             virtual bool toggleGodMode();
+
+            /**
+             * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
+             * @param actor
+             * @return true if the spell can be casted (i.e. the animation should start)
+             */
+            virtual bool startSpellCast (const MWWorld::Ptr& actor);
+
+            /**
+             * @brief Cast the actual spell, should be called mid-animation
+             * @param actor
+             */
+            virtual void castSpell (const MWWorld::Ptr& actor);
+
+            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
+                                           const MWWorld::Ptr& actor, const std::string& sourceName);
+
+            virtual void breakInvisibility (const MWWorld::Ptr& actor);
+            // Are we in an exterior or pseudo-exterior cell and it's night?
+            virtual bool isDark() const;
+
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result);
+
+            /// Teleports \a ptr to the reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
+            /// closest to \a worldPos.
+            /// @note id must be lower case
+            virtual void teleportToClosestMarker (const MWWorld::Ptr& ptr,
+                                                  const std::string& id, Ogre::Vector3 worldPos);
+
+            /// List all references (filtered by \a type) detected by \a ptr. The range
+            /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
+            /// @note This also works for references in containers.
+            virtual void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
+                                                  DetectionType type);
     };
 }
 

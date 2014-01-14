@@ -12,8 +12,6 @@
 #include <SDL.h>
 
 #include "maindialog.hpp"
-// SDL workaround
-#include "graphicspage.hpp"
 
 int main(int argc, char *argv[])
 {

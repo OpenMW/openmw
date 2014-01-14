@@ -44,7 +44,9 @@ namespace CSMWorld
             Display_WeaponType,
             Display_RecordState,
             Display_RefRecordType,
-            Display_DialogueType
+            Display_DialogueType,
+            Display_QuestStatusType,
+            Display_Gender
         };
 
         int mColumnId;

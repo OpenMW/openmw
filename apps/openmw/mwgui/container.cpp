@@ -61,8 +61,9 @@ namespace MWGui
         mDraggedWidget = baseWidget;
         MyGUI::ImageBox* image = baseWidget->createWidget<MyGUI::ImageBox>("ImageBox",
             MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
-        int pos = path.rfind(".");
-        path.erase(pos);
+        size_t pos = path.rfind(".");
+        if (pos != std::string::npos)
+            path.erase(pos);
         path.append(".dds");
         image->setImageTexture(path);
         image->setNeedMouseFocus(false);
@@ -100,6 +101,9 @@ namespace MWGui
 
         finish();
         targetView->update();
+
+        // We need to update the view since an other item could be auto-equipped.
+        mSourceView->update();
     }
 
     void DragAndDrop::finish()
@@ -217,11 +221,13 @@ namespace MWGui
 
         mDisposeCorpseButton->setVisible(loot);
 
-        setTitle(MWWorld::Class::get(container).getName(container));
-
         mSortModel = new SortFilterItemModel(mModel);
 
         mItemView->setModel (mSortModel);
+
+        // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
+        // or we end up using a possibly invalid model.
+        setTitle(MWWorld::Class::get(container).getName(container));
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

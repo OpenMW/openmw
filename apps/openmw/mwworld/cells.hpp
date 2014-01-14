@@ -47,8 +47,15 @@ namespace MWWorld
 
             Ptr getPtr (const std::string& name, CellStore& cellStore, bool searchInContainers = false);
             ///< \param searchInContainers Only affect loaded cells.
+            /// @note name must be lower case
 
+            /// @note name must be lower case
             Ptr getPtr (const std::string& name);
+
+            /// Get all Ptrs referencing \a name in exterior cells
+            /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
+            /// @note name must be lower case
+            void getExteriorPtrs (const std::string& name, std::vector<MWWorld::Ptr>& out);
     };
 }
 

@@ -1,8 +1,9 @@
 #include <iostream>
+#include <cstdio>
 
 #include <components/files/configurationmanager.hpp>
 
-#include <SDL_main.h>
+#include <SDL.h>
 #include "engine.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
@@ -14,6 +15,13 @@
 // makes __argc and __argv available on windows
 #include <cstdlib>
 
+#endif
+
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <csignal>
+extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
+extern int is_debugger_attached(void);
 #endif
 
 // for Ogre::macBundlePath
@@ -113,10 +121,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
-        ("anim-verbose", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "output animation indices files")
-
-        ("nosound", bpo::value<bool>()->implicit_value(true)
+        ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
         ("script-verbose", bpo::value<bool>()->implicit_value(true)
@@ -147,6 +152,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
+        ("no-grab", "Don't grab mouse cursor")
+
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -157,8 +164,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     // Runtime options override settings from all configs
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
-
-    cfgMgr.readConfiguration(variables, desc);
 
     bool run = true;
 
@@ -176,6 +181,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    cfgMgr.readConfiguration(variables, desc);
+
+    engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());
@@ -225,10 +234,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    engine.setSoundUsage(!variables["nosound"].as<bool>());
+    engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
-    engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
@@ -239,6 +247,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
 int main(int argc, char**argv)
 {
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    // Unix crash catcher
+    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
+    {
+        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+        cc_install_handlers(argc, argv, 5, s, "crash.log", NULL);
+        std::cout << "Installing crash catcher" << std::endl;
+    }
+    else
+        std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
+#endif
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // set current dir to bundle path
     boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
@@ -257,7 +277,13 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
-        std::cout << "\nERROR: " << e.what() << std::endl;
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        if (isatty(fileno(stdin)) || !SDL_WasInit(SDL_INIT_VIDEO))
+            std::cerr << "\nERROR: " << e.what() << std::endl;
+        else
+#endif
+            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
         return 1;
     }
 
