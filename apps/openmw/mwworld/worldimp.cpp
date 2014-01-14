@@ -27,6 +27,7 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/levelledlist.hpp"
 
 
 #include "../mwrender/sky.hpp"
@@ -1538,22 +1539,27 @@ namespace MWWorld
     }
 
 
-    Ptr World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos, bool adjustPos)
+    Ptr World::copyObjectToCell(const Ptr &object, CellStore &cell, ESM::Position pos, bool adjustPos)
     {
-        /// \todo add searching correct cell for position specified
-        MWWorld::Ptr dropped =
-            MWWorld::Class::get(object).copyToCell(object, cell, pos);
-
         if (object.getClass().isActor() || adjustPos)
         {
             Ogre::Vector3 min, max;
             if (mPhysics->getObjectAABB(object, min, max)) {
-                float *pos = dropped.getRefData().getPosition().pos;
-                pos[0] -= (min.x + max.x) / 2;
-                pos[1] -= (min.y + max.y) / 2;
-                pos[2] -= min.z;
+                pos.pos[0] -= (min.x + max.x) / 2;
+                pos.pos[1] -= (min.y + max.y) / 2;
+                pos.pos[2] -= min.z;
             }
         }
+
+        if (cell.isExterior())
+        {
+            int cellX, cellY;
+            positionToIndex(pos.pos[0], pos.pos[1], cellX, cellY);
+            cell = *mCells.getExterior(cellX, cellY);
+        }
+
+        MWWorld::Ptr dropped =
+            MWWorld::Class::get(object).copyToCell(object, cell, pos);
 
         if (mWorldScene->isCellActive(cell)) {
             if (dropped.getRefData().isEnabled()) {
@@ -2569,6 +2575,39 @@ namespace MWWorld
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
             MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
+        }
+    }
+
+    void World::spawnRandomCreature(const std::string &creatureList)
+    {
+        const ESM::CreatureLevList* list = getStore().get<ESM::CreatureLevList>().find(creatureList);
+
+        int iNumberCreatures = getStore().get<ESM::GameSetting>().find("iNumberCreatures")->getInt();
+        int numCreatures = 1 + std::rand()/ (static_cast<double> (RAND_MAX) + 1) * iNumberCreatures; // [1, iNumberCreatures]
+
+        for (int i=0; i<numCreatures; ++i)
+        {
+            std::string selectedCreature = MWMechanics::getLevelledItem(list, true);
+            if (selectedCreature.empty())
+                return;
+
+            ESM::Position ipos = mPlayer->getPlayer().getRefData().getPosition();
+            Ogre::Vector3 pos(ipos.pos);
+            Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+            const float distance = 50;
+            pos = pos + distance*rot.yAxis();
+            ipos.pos[0] = pos.x;
+            ipos.pos[1] = pos.y;
+            ipos.pos[2] = pos.z;
+            ipos.rot[0] = 0;
+            ipos.rot[1] = 0;
+            ipos.rot[2] = 0;
+
+            MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
+            MWWorld::ManualRef ref(getStore(), selectedCreature, 1);
+            ref.getPtr().getCellRef().mPos = ipos;
+
+            safePlaceObject(ref.getPtr(),*cell,ipos);
         }
     }
 }

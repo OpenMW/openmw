@@ -20,20 +20,6 @@ class ESMWriter;
 
 struct LeveledListBase
 {
-    enum Flags
-    {
-
-        Each = 0x01,      // Select a new item each time this
-                          // list is instantiated, instead of
-                          // giving several identical items
-                          // (used when a container has more
-                          // than one instance of one leveled
-                          // list.)
-        AllLevels = 0x02  // Calculate from all levels <= player
-                          // level, not just the closest below
-                          // player.
-    };
-
     int mFlags;
     unsigned char mChanceNone; // Chance that none are selected (0-100)
     std::string mId;
@@ -61,6 +47,14 @@ struct CreatureLevList: LeveledListBase
 {
     static unsigned int sRecordId;
 
+    enum Flags
+    {
+
+        AllLevels = 0x01  // Calculate from all levels <= player
+                          // level, not just the closest below
+                          // player.
+    };
+
     CreatureLevList()
     {
         mRecName = "CNAM";
@@ -70,6 +64,20 @@ struct CreatureLevList: LeveledListBase
 struct ItemLevList: LeveledListBase
 {
     static unsigned int sRecordId;
+
+    enum Flags
+    {
+
+        Each = 0x01,      // Select a new item each time this
+                          // list is instantiated, instead of
+                          // giving several identical items
+                          // (used when a container has more
+                          // than one instance of one leveled
+                          // list.)
+        AllLevels = 0x02  // Calculate from all levels <= player
+                          // level, not just the closest below
+                          // player.
+    };
 
     ItemLevList()
     {

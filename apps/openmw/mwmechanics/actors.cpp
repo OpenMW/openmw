@@ -515,7 +515,7 @@ namespace MWMechanics
                 if (magnitude > 0)
                 {
                     ESM::Position ipos = ptr.getRefData().getPosition();
-                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
+                    Ogre::Vector3 pos(ipos.pos);
                     Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
                     const float distance = 50;
                     pos = pos + distance*rot.yAxis();

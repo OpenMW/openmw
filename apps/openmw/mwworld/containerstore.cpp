@@ -321,7 +321,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         }
         else
         {
-            std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase);
+            std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
             if (id.empty())
                 return;
             addInitialItem(id, owner, faction, count, false);

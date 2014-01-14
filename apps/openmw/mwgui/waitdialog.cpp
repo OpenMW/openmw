@@ -48,6 +48,7 @@ namespace MWGui
         , mRemainingTime(0.05)
         , mCurHour(0)
         , mManualHours(1)
+        , mInterruptAt(-1)
     {
         getWidget(mDateTimeText, "DateTimeText");
         getWidget(mRestText, "RestText");
@@ -156,13 +157,38 @@ namespace MWGui
 
     void WaitDialog::startWaiting(int hoursToWait)
     {
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.2);
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        world->getFader ()->fadeOut(0.2);
         setVisible(false);
         mProgressBar.setVisible (true);
 
         mWaiting = true;
         mCurHour = 0;
         mHours = hoursToWait;
+
+        // FIXME: move this somewhere else?
+        mInterruptAt = -1;
+        MWWorld::Ptr player = world->getPlayerPtr();
+        if (mSleeping && player.getCell()->isExterior())
+        {
+            std::string regionstr = player.getCell()->mCell->mRegion;
+            if (!regionstr.empty())
+            {
+                const ESM::Region *region = world->getStore().get<ESM::Region>().find (regionstr);
+                if (!region->mSleepList.empty())
+                {
+                    float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
+                    int x = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * hoursToWait; // [0, hoursRested]
+                    float y = fSleepRandMod * hoursToWait;
+                    if (x > y)
+                    {
+                        float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
+                        mInterruptAt = int(fSleepRestMod * hoursToWait);
+                        mInterruptCreatureList = region->mSleepList;
+                    }
+                }
+            }
+        }
 
         mRemainingTime = 0.05;
         mProgressBar.setProgress (0, mHours);
@@ -205,6 +231,13 @@ namespace MWGui
     {
         if (!mWaiting)
             return;
+
+        if (mCurHour == mInterruptAt)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sSleepInterrupt}");
+            MWBase::Environment::get().getWorld()->spawnRandomCreature(mInterruptCreatureList);
+            stopWaiting();
+        }
 
         mRemainingTime -= dt;
 

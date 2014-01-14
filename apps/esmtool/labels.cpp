@@ -717,16 +717,26 @@ std::string landFlags(int flags)
     return properties;
 }
 
-std::string leveledListFlags(int flags)
+std::string itemListFlags(int flags)
 {
     std::string properties = "";
     if (flags == 0) properties += "[None] ";
-    if (flags & ESM::LeveledListBase::AllLevels) properties += "AllLevels ";
-    // This flag apparently not present on creature lists...
-    if (flags & ESM::LeveledListBase::Each) properties += "Each ";
+    if (flags & ESM::ItemLevList::AllLevels) properties += "AllLevels ";
+    if (flags & ESM::ItemLevList::Each) properties += "Each ";
     int unused = (0xFFFFFFFF ^
-                  (ESM::LeveledListBase::AllLevels|
-                   ESM::LeveledListBase::Each));
+                  (ESM::ItemLevList::AllLevels|
+                   ESM::ItemLevList::Each));
+    if (flags & unused) properties += "Invalid ";
+    properties += str(boost::format("(0x%08X)") % flags);
+    return properties;
+}
+
+std::string creatureListFlags(int flags)
+{
+    std::string properties = "";
+    if (flags == 0) properties += "[None] ";
+    if (flags & ESM::CreatureLevList::AllLevels) properties += "AllLevels ";
+    int unused = (0xFFFFFFFF ^ ESM::CreatureLevList::AllLevels);
     if (flags & unused) properties += "Invalid ";
     properties += str(boost::format("(0x%08X)") % flags);
     return properties;
