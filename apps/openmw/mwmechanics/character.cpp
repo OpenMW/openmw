@@ -315,7 +315,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 }
 
 
-void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group)
+void getWeaponGroup(WeaponType weaptype, std::string &group)
 {
     const WeaponInfo *info = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(weaptype));
     if(info != sWeaponTypeListEnd)
@@ -323,7 +323,7 @@ void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group
 }
 
 
-MWWorld::ContainerStoreIterator CharacterController::getActiveWeapon(NpcStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
+MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
 {
     if(stats.getDrawState() == DrawState_Spell)
     {
@@ -441,6 +441,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             {
                 getWeaponGroup(mWeaponType, mCurrentWeapon);
                 mUpperBodyState = UpperCharState_WeapEquiped;
+                mAnimation->showWeapons(true);
             }
         }
 

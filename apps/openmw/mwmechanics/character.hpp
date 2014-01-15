@@ -168,12 +168,6 @@ class CharacterController
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
-    static void getWeaponGroup(WeaponType weaptype, std::string &group);
-
-    static MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
-                                                           MWWorld::InventoryStore &inv,
-                                                           WeaponType *weaptype);
-
     void clearAnimQueue();
 
     bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
@@ -205,6 +199,10 @@ public:
     void forceStateUpdate();
 };
 
+    void getWeaponGroup(WeaponType weaptype, std::string &group);
+    MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
+                                                           MWWorld::InventoryStore &inv,
+                                                           WeaponType *weaptype);
 }
 
 #endif /* GAME_MWMECHANICS_CHARACTER_HPP */

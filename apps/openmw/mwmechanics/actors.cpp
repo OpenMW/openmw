@@ -13,6 +13,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/actionequip.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -190,7 +191,7 @@ namespace MWMechanics
                     && LOS
                     )
                 {
-                    creatureStats.getAiSequence().stack(AiCombat("player"));
+                    creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()));
                     creatureStats.setHostile(true);
                 }
             }
