@@ -769,7 +769,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
 
         for (int i = 0; i < mRaces.getSize(); ++i)
         {
-            if (dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mName == npc.mRace) //mId in class, mName for race. Stupid.
+            if (Misc::StringUtils::ciEqual(dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mId, npc.mRace))
             {
                 noSuchRace = false;
                 break;
