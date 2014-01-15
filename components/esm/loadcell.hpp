@@ -77,6 +77,8 @@ struct Cell
     float mFogDensity;
   };
 
+  Cell() : mWater(-1) {}
+
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
   std::string mName;
