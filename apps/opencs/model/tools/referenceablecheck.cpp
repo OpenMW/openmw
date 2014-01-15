@@ -765,18 +765,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     }
     else //checking if there is a such race
     {
-        bool noSuchRace(true);
-
-        for (int i = 0; i < mRaces.getSize(); ++i)
-        {
-            if (Misc::StringUtils::ciEqual(dynamic_cast<const ESM::Race&>(mRaces.getRecord(i).get()).mId, npc.mRace))
-            {
-                noSuchRace = false;
-                break;
-            }
-        }
-
-        if (noSuchRace)
+        if ((!mRaces.searchId(npc.mRace)))
         {
             messages.push_back(id.toString() + "|" + npc.mId + " has invalid race");
         }
