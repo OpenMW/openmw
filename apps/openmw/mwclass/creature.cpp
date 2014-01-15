@@ -461,6 +461,26 @@ namespace MWClass
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 
+    int Creature::getSkill(const MWWorld::Ptr &ptr, int skill) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        const ESM::Skill* skillRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skill);
+
+        switch (skillRecord->mData.mSpecialization)
+        {
+        case ESM::Class::Combat:
+            return ref->mBase->mData.mCombat;
+        case ESM::Class::Magic:
+            return ref->mBase->mData.mMagic;
+        case ESM::Class::Stealth:
+            return ref->mBase->mData.mStealth;
+        default:
+            throw std::runtime_error("invalid specialisation");
+        }
+    }
+
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
     const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
 }

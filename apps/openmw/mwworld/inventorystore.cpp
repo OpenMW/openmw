@@ -164,8 +164,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
-    const MWMechanics::NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
-
     TSlots slots_;
     initSlots (slots_);
 
@@ -190,10 +188,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
             continue;
 
-        int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
+        int testSkill = test.getClass().getEquipmentSkill (test);
 
         std::pair<std::vector<int>, bool> itemsSlots =
-            MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
+            iter->getClass().getEquipmentSlots (*iter);
 
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
@@ -210,16 +208,16 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 {
                     // check skill
                     int oldSkill =
-                        MWWorld::Class::get (old).getEquipmentSkill (old);
+                        old.getClass().getEquipmentSkill (old);
 
                     if (testSkill!=-1 && oldSkill==-1)
                         use = true;
                     else if (testSkill!=-1 && oldSkill!=-1 && testSkill!=oldSkill)
                     {
-                        if (stats.getSkill (oldSkill).getModified()>stats.getSkill (testSkill).getModified())
+                        if (actor.getClass().getSkill(actor, oldSkill) > actor.getClass().getSkill (actor, testSkill))
                             continue; // rejected, because old item better matched the NPC's skills.
 
-                        if (stats.getSkill (oldSkill).getModified()<stats.getSkill (testSkill).getModified())
+                        if (actor.getClass().getSkill(actor, oldSkill) < actor.getClass().getSkill (actor, testSkill))
                             use = true;
                     }
                 }
@@ -227,8 +225,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 if (!use)
                 {
                     // check value
-                    if (MWWorld::Class::get (old).getValue (old)>=
-                        MWWorld::Class::get (test).getValue (test))
+                    if (old.getClass().getValue (old)>=
+                        test.getClass().getValue (test))
                     {
                         continue;
                     }

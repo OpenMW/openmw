@@ -101,6 +101,8 @@ namespace MWClass
             }
 
             virtual bool isFlying (const MWWorld::Ptr &ptr) const;
+
+            virtual int getSkill(const MWWorld::Ptr &ptr, int skill) const;
     };
 }
 

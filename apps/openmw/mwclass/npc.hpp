@@ -140,6 +140,8 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
+            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
+
             virtual bool isActor() const {
                 return true;
             }

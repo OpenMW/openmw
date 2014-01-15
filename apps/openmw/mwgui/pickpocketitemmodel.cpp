@@ -9,7 +9,7 @@ namespace MWGui
     PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& thief, ItemModel *sourceModel)
     {
         mSourceModel = sourceModel;
-        int chance = MWWorld::Class::get(thief).getNpcStats(thief).getSkill(ESM::Skill::Sneak).getModified();
+        int chance = thief.getClass().getSkill(thief, ESM::Skill::Sneak);
 
         mSourceModel->update();
         for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)

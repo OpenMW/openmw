@@ -358,4 +358,9 @@ namespace MWWorld
         return false;
     }
 
+    int Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    {
+        throw std::runtime_error("class does not support skills");
+    }
+
 }

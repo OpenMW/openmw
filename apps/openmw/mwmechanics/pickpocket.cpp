@@ -19,7 +19,7 @@ namespace MWMechanics
         NpcStats& stats = ptr.getClass().getNpcStats(ptr);
         float agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
         float luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
-        float sneak = stats.getSkill(ESM::Skill::Sneak).getModified();
+        float sneak = ptr.getClass().getSkill(ptr, ESM::Skill::Sneak);
         return (add + 0.2 * agility + 0.1 * luck + sneak) * stats.getFatigueTerm();
     }
 
@@ -30,8 +30,7 @@ namespace MWMechanics
 
         float t = 2*x - y;
 
-        NpcStats& pcStats = mThief.getClass().getNpcStats(mThief);
-        float pcSneak = pcStats.getSkill(ESM::Skill::Sneak).getModified();
+        float pcSneak = mThief.getClass().getSkill(mThief, ESM::Skill::Sneak);
         int iPickMinChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("iPickMinChance")->getInt();
         int iPickMaxChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()

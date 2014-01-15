@@ -16,9 +16,9 @@
 
 namespace MWMechanics
 {
-    inline int spellSchoolToSkill(int school)
+    inline ESM::Skill::SkillEnum spellSchoolToSkill(int school)
     {
-        std::map<int, int> schoolSkillMap; // maps spell school to skill id
+        std::map<int, ESM::Skill::SkillEnum> schoolSkillMap; // maps spell school to skill id
         schoolSkillMap[0] = ESM::Skill::Alteration;
         schoolSkillMap[1] = ESM::Skill::Conjuration;
         schoolSkillMap[3] = ESM::Skill::Illusion;
@@ -38,10 +38,9 @@ namespace MWMechanics
      */
     inline float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = NULL)
     {
-        NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
-        CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+        CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        if (creatureStats.getMagicEffects().get(ESM::MagicEffect::Silence).mMagnitude)
+        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).mMagnitude)
             return 0;
 
         float y = FLT_MAX;
@@ -63,7 +62,7 @@ namespace MWMechanics
                         "fEffectCostMult")->getFloat();
             x *= fEffectCostMult;
 
-            float s = 2 * stats.getSkill(spellSchoolToSkill(magicEffect->mData.mSchool)).getModified();
+            float s = 2 * actor.getClass().getSkill(actor, spellSchoolToSkill(magicEffect->mData.mSchool));
             if (s - x < y)
             {
                 y = s - x;

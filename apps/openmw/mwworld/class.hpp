@@ -294,6 +294,8 @@ namespace MWWorld
 
             virtual bool isFlying(const MWWorld::Ptr& ptr) const;
 
+            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 

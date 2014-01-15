@@ -1211,6 +1211,11 @@ namespace MWClass
         return MWWorld::Ptr(&cell.mNpcs.insert(*ref), &cell);
     }
 
+    int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    {
+        return ptr.getClass().getNpcStats(ptr).getSkill(skill).getModified();
+    }
+
     const ESM::GameSetting *Npc::fMinWalkSpeed;
     const ESM::GameSetting *Npc::fMaxWalkSpeed;
     const ESM::GameSetting *Npc::fEncumberedMoveEffect;
