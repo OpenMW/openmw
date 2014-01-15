@@ -765,7 +765,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     }
     else //checking if there is a such race
     {
-        if ((!mRaces.searchId(npc.mRace)))
+        if (!mRaces.searchId(npc.mRace))
         {
             messages.push_back(id.toString() + "|" + npc.mId + " has invalid race");
         }
