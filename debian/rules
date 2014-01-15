@@ -21,7 +21,7 @@ CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS) $(CPPFLAGS)
 LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 
 override_dh_auto_configure:
-	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE="Release" -DUSE_SYSTEM_TINYXML="TRUE" -DCMAKE_VERBOSE_MAKEFILE="FALSE" -DBUILD_ESMTOOL="FALSE"  .
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE="Release" -DUSE_SYSTEM_TINYXML="TRUE" -DCMAKE_VERBOSE_MAKEFILE="FALSE" -DBUILD_ESMTOOL="FALSE" -DBUILD_WITH_DPKG="ON" .
 
 override_dh_auto_clean:
 	dh_auto_clean
