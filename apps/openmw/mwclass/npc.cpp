@@ -821,10 +821,6 @@ namespace MWClass
 
                 stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak, force);
                 break;
-
-            case Combat:
-
-                throw std::runtime_error ("combat stance not enforcable for NPCs");
         }
     }
 
@@ -842,12 +838,6 @@ namespace MWClass
             case Sneak:
 
                 stats.setMovementFlag (MWMechanics::NpcStats::Flag_Sneak, set);
-                break;
-
-            case Combat:
-
-                // Combat stance ignored for now; need to be determined based on draw state instead of
-                // being maunally set.
                 break;
         }
     }
@@ -871,10 +861,6 @@ namespace MWClass
                     return true;
 
                 return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Sneak);
-
-            case Combat:
-
-                return false;
         }
 
         return false;

@@ -70,7 +70,7 @@ namespace MWWorld
             /// NPC-stances.
             enum Stance
             {
-                Run, Sneak, Combat
+                Run, Sneak
             };
 
             virtual ~Class();
