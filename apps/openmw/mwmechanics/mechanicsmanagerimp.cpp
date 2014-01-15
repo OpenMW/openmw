@@ -896,7 +896,7 @@ namespace MWMechanics
             return false;
 
         float sneakTerm = 0;
-        if (ptr.getClass().getStance(ptr, MWWorld::Class::Sneak)
+        if (ptr.getClass().getCreatureStats(ptr).getStance(CreatureStats::Stance_Sneak)
                 && !MWBase::Environment::get().getWorld()->isSwimming(ptr)
                 && MWBase::Environment::get().getWorld()->isOnGround(ptr))
         {

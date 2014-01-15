@@ -40,13 +40,13 @@ namespace MWMechanics
 
         if(MWWorld::Class::get(actor).getCreatureStats(actor).getHealth().getCurrent() <= 0) return true;
 
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+
         if(actor.getTypeName() == typeid(ESM::NPC).name())
         {
-            MWWorld::Class::get(actor).
-            MWWorld::Class::get(actor).setStance(actor, MWWorld::Class::Run,true);
-            MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
+            MWMechanics::DrawState_ state = actor.getClass().getNpcStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
+                actor.getClass().getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
             //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
         }
         ESM::Position pos = actor.getRefData().getPosition();

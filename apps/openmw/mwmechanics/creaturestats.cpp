@@ -15,7 +15,8 @@ namespace MWMechanics
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false), mAttackType(AT_Chop),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false)
+          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false),
+          mMovementFlags(0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -425,4 +426,30 @@ namespace MWMechanics
     {
         return mHitRecovery;
     }
+
+    bool CreatureStats::getMovementFlag (Flag flag) const
+    {
+        return mMovementFlags & flag;
+    }
+
+    void CreatureStats::setMovementFlag (Flag flag, bool state)
+    {
+        if (state)
+            mMovementFlags |= flag;
+        else
+            mMovementFlags &= ~flag;
+    }
+
+    bool CreatureStats::getStance(Stance flag) const
+    {
+        switch (flag)
+        {
+            case Stance_Run:
+                return getMovementFlag (Flag_Run) || getMovementFlag (Flag_ForceRun);
+            case Stance_Sneak:
+                return getMovementFlag (Flag_Sneak) || getMovementFlag (Flag_ForceSneak);
+        }
+        return false; // shut up, compiler
+    }
+
 }

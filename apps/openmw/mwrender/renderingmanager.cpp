@@ -347,7 +347,7 @@ void RenderingManager::update (float duration, bool paused)
     }
 
     // Sink the camera while sneaking
-    bool isSneaking = MWWorld::Class::get(player).getStance(player, MWWorld::Class::Sneak);
+    bool isSneaking = player.getClass().getCreatureStats(player).getStance(MWMechanics::CreatureStats::Stance_Sneak);
     bool isInAir = !world->isOnGround(player);
     bool isSwimming = world->isSwimming(player);
 

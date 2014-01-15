@@ -37,6 +37,7 @@ namespace MWMechanics
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mHitRecovery;
+        unsigned int mMovementFlags;
 
         float mFallHeight;
 
@@ -46,6 +47,7 @@ namespace MWMechanics
 
         // Do we need to recalculate stats derived from attributes or other factors?
         bool mRecalcDynamicStats;
+
 
         std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
     protected:
@@ -192,6 +194,24 @@ namespace MWMechanics
         bool getKnockedDown() const;
         void setHitRecovery(bool value);
         bool getHitRecovery() const;
+
+        enum Flag
+        {
+            Flag_ForceRun = 1,
+            Flag_ForceSneak = 2,
+            Flag_Run = 4,
+            Flag_Sneak = 8
+        };
+        enum Stance
+        {
+            Stance_Run,
+            Stance_Sneak
+        };
+
+        bool getMovementFlag (Flag flag) const;
+        void setMovementFlag (Flag flag, bool state);
+        /// Like getMovementFlag, but also takes into account if the flag is Forced
+        bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;

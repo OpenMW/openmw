@@ -775,7 +775,7 @@ namespace MWClass
         }
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(get(actor).getStance(actor, MWWorld::Class::Sneak))
+        if(getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         if(get(ptr).getCreatureStats(ptr).isHostile())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
@@ -806,66 +806,6 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    void Npc::setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const
-    {
-        MWMechanics::NpcStats& stats = getNpcStats (ptr);
-
-        switch (stance)
-        {
-            case Run:
-
-                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceRun, force);
-                break;
-
-            case Sneak:
-
-                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak, force);
-                break;
-        }
-    }
-
-    void Npc::setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const
-    {
-        MWMechanics::NpcStats& stats = getNpcStats (ptr);
-
-        switch (stance)
-        {
-            case Run:
-
-                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Run, set);
-                break;
-
-            case Sneak:
-
-                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Sneak, set);
-                break;
-        }
-    }
-
-    bool Npc::getStance (const MWWorld::Ptr& ptr, Stance stance, bool ignoreForce) const
-    {
-        MWMechanics::NpcStats& stats = getNpcStats (ptr);
-
-        switch (stance)
-        {
-            case Run:
-
-                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun))
-                    return true;
-
-                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Run);
-
-            case Sneak:
-
-                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak))
-                    return true;
-
-                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Sneak);
-        }
-
-        return false;
-    }
-
     float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -874,11 +814,14 @@ namespace MWClass
 
         const float normalizedEncumbrance = Npc::getEncumbrance(ptr) / Npc::getCapacity(ptr);
 
+        bool sneaking = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
+
         float walkSpeed = fMinWalkSpeed->getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
                                                       (fMaxWalkSpeed->getFloat() - fMinWalkSpeed->getFloat());
         walkSpeed *= 1.0f - fEncumberedMoveEffect->getFloat()*normalizedEncumbrance;
         walkSpeed = std::max(0.0f, walkSpeed);
-        if(Npc::getStance(ptr, Sneak, false))
+        if(sneaking)
             walkSpeed *= fSneakSpeedMultiplier->getFloat();
 
         float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
@@ -902,14 +845,14 @@ namespace MWClass
         else if(world->isSwimming(ptr))
         {
             float swimSpeed = walkSpeed;
-            if(Npc::getStance(ptr, Run, false))
+            if(running)
                 swimSpeed = runSpeed;
             swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).mMagnitude;
             swimSpeed *= fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
                                                     fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(Npc::getStance(ptr, Run, false) && !Npc::getStance(ptr, Sneak, false))
+        else if(running && !sneaking)
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
@@ -941,7 +884,7 @@ namespace MWClass
         x += mageffects.get(ESM::MagicEffect::Jump).mMagnitude * 64;
         x *= encumbranceTerm;
 
-        if(Npc::getStance(ptr, Run, false))
+        if(ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
             x *= fJumpRunMultiplier->getFloat();
         x *= npcdata->mNpcStats.getFatigueTerm();
         x -= -627.2f;/*gravity constant*/
