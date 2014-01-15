@@ -1017,14 +1017,16 @@ void CharacterController::update(float duration)
                 cls.getCreatureStats(mPtr).setHealth(health);
                 cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), true);
 
-                // report acrobatics progression
-                if (mPtr.getRefData().getHandle() == "player")
-                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
-
                 const float acrobaticsSkill = cls.getNpcStats(mPtr).getSkill(ESM::Skill::Acrobatics).getModified();
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
                 {
-                    //TODO: actor falls over
+                    cls.getCreatureStats(mPtr).setKnockedDown(true);
+                }
+                else
+                {
+                    // report acrobatics progression
+                    if (mPtr.getRefData().getHandle() == "player")
+                        cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
                 }
             }
         }
