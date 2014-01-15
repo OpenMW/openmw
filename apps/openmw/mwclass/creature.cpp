@@ -301,7 +301,7 @@ namespace MWClass
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
 
-        const float normalizedEncumbrance = 0; //getEncumbrance(ptr) / getCapacity(ptr);
+        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
 
         bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
