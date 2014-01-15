@@ -229,7 +229,8 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
     {
         if(node->hasBounds)
         {
-            if (node->flags & Nif::NiNode::Flag_BBoxCollision)
+            // Checking for BBoxCollision flag causes issues with some actors :/
+            if (!(node->flags & Nif::NiNode::Flag_Hidden))
             {
                 mShape->mBoxTranslation = node->boundPos;
                 mShape->mBoxRotation = node->boundRot;
