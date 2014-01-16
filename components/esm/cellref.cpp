@@ -71,9 +71,12 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
         esm.getHT (mNam0);
 }
 
-void ESM::CellRef::save(ESMWriter &esm) const
+void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum) const
 {
-    esm.writeHNT("FRMR", mRefNum.mIndex);
+    if (wideRefNum)
+        esm.writeHNT ("FRMR", mRefNum, 8);
+    else
+        esm.writeHNT ("FRMR", mRefNum.mIndex, 4);
 
     esm.writeHNCString("NAME", mRefID);
 

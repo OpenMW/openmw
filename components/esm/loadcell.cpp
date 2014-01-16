@@ -230,7 +230,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
     {
         CellId id;
 
-        id.mPaged = (mData.mFlags & Interior);
+        id.mPaged = !(mData.mFlags & Interior);
 
         if (id.mPaged)
         {

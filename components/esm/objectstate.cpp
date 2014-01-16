@@ -27,7 +27,7 @@ void ESM::ObjectState::load (ESMReader &esm)
 
 void ESM::ObjectState::save (ESMWriter &esm) const
 {
-    mRef.save (esm);
+    mRef.save (esm, true);
 
     if (mHasLocals)
     {
