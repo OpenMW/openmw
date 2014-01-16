@@ -149,7 +149,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().mPos.pos[1] = 0;
     item.getCellRef().mPos.pos[2] = 0;
 
-    if (setOwner)
+    if (setOwner && actorPtr.getClass().isActor())
         item.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
 
     std::string script = MWWorld::Class::get(item).getScript(item);
