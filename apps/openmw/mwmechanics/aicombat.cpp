@@ -51,8 +51,9 @@ namespace MWMechanics
         if(actor.getClass().getCreatureStats(actor).getHealth().getCurrent() <= 0)
             return true;
 
-        //update every frame
-        determineAttackType(actor, mMovement);
+        //Update every frame
+        if(mReadyToAttack)
+            determineAttackType(actor, mMovement);
 
         if(mCombatMove)
         {
@@ -77,10 +78,10 @@ namespace MWMechanics
             mTimerReact += duration;
             return false;
         }
-        else
-        {
-            mTimerReact = 0;
-        }
+
+        //Update with period = tReaction
+
+        mTimerReact = 0;
 
         //actual attacking logic
         //TODO: Some skills affect period of strikes.For berserk-like style period ~ 0.25f
@@ -120,9 +121,11 @@ namespace MWMechanics
         const ESM::Weapon *weapon = NULL;
         MWMechanics::WeaponType weaptype;
         float weapRange, weapSpeed = 1.0f;
+
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+
         if(actor.getTypeName() == typeid(ESM::NPC).name())
         {
-            actor.getClass().setStance(actor, MWWorld::Class::Run,true);
             MWMechanics::DrawState_ state = actor.getClass().getNpcStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
                 actor.getClass().getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
@@ -267,7 +270,7 @@ namespace MWMechanics
                     mReadyToAttack = true;
                     if(mTimerAttack <= -attackPeriod)
                     {
-                        mTimerAttack = 0.45f*static_cast<float>(rand())/RAND_MAX;
+                        mTimerAttack = 0.3f*static_cast<float>(rand())/RAND_MAX;
                         mStrike = true;
                     }
                 }
@@ -337,12 +340,17 @@ namespace MWMechanics
 
     int AiCombat::getTypeId() const
     {
-        return 5;
+        return TypeIdCombat;
     }
 
     unsigned int AiCombat::getPriority() const
     {
         return 1;
+    }
+
+    const std::string &AiCombat::getTargetId() const
+    {
+        return mTarget.getRefData().getHandle();
     }
 
     AiCombat *MWMechanics::AiCombat::clone() const
@@ -362,8 +370,22 @@ namespace MWMechanics
 
     static void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
     {
+        //the more damage attackType deals the more probability it has
+
         if (weapon == NULL)
+        {
+            //hand-to-hand deals equal damage
+            float roll = static_cast<float>(rand())/RAND_MAX;
+            if(roll <= 0.333f)  //side punch
+            {
+                movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
+                movement.mPosition[1] = 0;
+            }
+            else if(roll <= 0.666f) //forward punch
+                movement.mPosition[1] = 1;
+
             return;
+        }
 
         int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
         int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
@@ -371,12 +393,13 @@ namespace MWMechanics
 
         float total = slash + chop + thrust;
        
-        if(static_cast<float>(rand())/RAND_MAX <= static_cast<float>(slash)/total)
+        float roll = static_cast<float>(rand())/RAND_MAX;
+        if(roll <= static_cast<float>(slash)/total)
         {
             movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
             movement.mPosition[1] = 0;
         }
-        if (static_cast<float>(rand())/RAND_MAX <= static_cast<float>(thrust)/total)
+        else if(roll <= (static_cast<float>(slash) + static_cast<float>(thrust))/total)
             movement.mPosition[1] = 1;
         //else chop
     }

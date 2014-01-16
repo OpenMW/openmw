@@ -205,4 +205,22 @@ namespace MWMechanics
         }
         mSpellsChanged = true;
     }
+
+    void ActiveSpells::purge(const std::string &actorHandle)
+    {
+        for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); ++it)
+        {
+            for (std::vector<Effect>::iterator effectIt = it->second.mEffects.begin();
+                 effectIt != it->second.mEffects.end();)
+            {
+                const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mKey.mId);
+                if (effect->mData.mFlags & ESM::MagicEffect::CasterLinked
+                        && it->second.mCasterHandle == actorHandle)
+                    effectIt = it->second.mEffects.erase(effectIt);
+                else
+                    effectIt++;
+            }
+        }
+        mSpellsChanged = true;
+    }
 }

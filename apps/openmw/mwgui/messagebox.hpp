@@ -22,7 +22,7 @@ namespace MWGui
     class MessageBoxManager
     {
         public:
-            MessageBoxManager ();
+            MessageBoxManager (float timePerChar);
             ~MessageBoxManager ();
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message, bool stat = false);
@@ -33,7 +33,6 @@ namespace MWGui
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
 
-            void okayPressed();
             int readPressedButton ();
 
             typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
@@ -74,7 +73,6 @@ namespace MWGui
     {
         public:
             InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
-            void okayPressed ();
             void mousePressed (MyGUI::Widget* _widget);
             int readPressedButton ();
 
@@ -82,6 +80,7 @@ namespace MWGui
 
         private:
             void buttonActivated (MyGUI::Widget* _widget);
+            void onKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
             MessageBoxManager& mMessageBoxManager;
             MyGUI::EditBox* mMessageWidget;

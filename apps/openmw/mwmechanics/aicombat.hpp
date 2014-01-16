@@ -25,6 +25,8 @@ namespace MWMechanics
 
             virtual unsigned int getPriority() const;
 
+            const std::string &getTargetId() const;
+
         private:
             PathFinder mPathFinder;
             //controls duration of the actual strike

@@ -54,8 +54,6 @@ namespace MWWorld
 
         assert(it != invStore.end());
 
-        bool equipped = false;
-
         // equip the item in the first free slot
         for (std::vector<int>::const_iterator slot=slots_.first.begin();
             slot!=slots_.first.end(); ++slot)
@@ -68,7 +66,6 @@ namespace MWWorld
             if (slot == --slots_.first.end())
             {
                 invStore.equip(*slot, it, actor);
-                equipped = true;
                 break;
             }
 
@@ -76,15 +73,8 @@ namespace MWWorld
             {
                 // slot is not occupied
                 invStore.equip(*slot, it, actor);
-                equipped = true;
                 break;
             }
         }
-
-        std::string script = MWWorld::Class::get(object).getScript(object);
-        
-        /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
-        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayerPtr() && script != "")
-            object.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }

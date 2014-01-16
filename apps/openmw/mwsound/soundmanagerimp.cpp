@@ -156,10 +156,11 @@ namespace MWSound
                 volume *= mFootstepsVolume;
                 break;
             case Play_TypeMusic:
-            case Play_TypeMovie:
                 volume *= mMusicVolume;
                 break;
             case Play_TypeMask:
+                break;
+            default:
                 break;
         }
         return volume;

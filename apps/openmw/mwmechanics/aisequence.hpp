@@ -34,7 +34,14 @@ namespace MWMechanics
             virtual ~AiSequence();
 
             int getTypeId() const;
-            ///< -1: None, 0: Wanter, 1 Travel, 2 Escort, 3 Follow, 4 Activate, 5 Combat    
+            ///< @see enum AiPackage::TypeId
+
+            bool getCombatTarget (std::string &targetActorId) const;
+            ///< Return true and assign target if combat package is currently
+            /// active, return false otherwise
+
+            void stopCombat();
+            ///< Removes all combat packages until first non-combat or stack empty.
             
             bool isPackageDone() const;
             ///< Has a package been completed during the last update?

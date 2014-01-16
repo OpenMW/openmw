@@ -61,6 +61,14 @@ namespace MWClass
 
                 fMinWalkSpeedCreature = gmst.find("fMinWalkSpeedCreature");
                 fMaxWalkSpeedCreature = gmst.find("fMaxWalkSpeedCreature");
+                fEncumberedMoveEffect = gmst.find("fEncumberedMoveEffect");
+                fSneakSpeedMultiplier = gmst.find("fSneakSpeedMultiplier");
+                fAthleticsRunBonus = gmst.find("fAthleticsRunBonus");
+                fBaseRunMultiplier = gmst.find("fBaseRunMultiplier");
+                fMinFlySpeed = gmst.find("fMinFlySpeed");
+                fMaxFlySpeed = gmst.find("fMaxFlySpeed");
+                fSwimRunBase = gmst.find("fSwimRunBase");
+                fSwimRunAthleticsMult = gmst.find("fSwimRunAthleticsMult");
 
                 inited = true;
             }
@@ -286,10 +294,51 @@ namespace MWClass
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+
         float walkSpeed = fMinWalkSpeedCreature->getFloat() + 0.01 * stats.getAttribute(ESM::Attribute::Speed).getModified()
                 * (fMaxWalkSpeedCreature->getFloat() - fMinWalkSpeedCreature->getFloat());
-        /// \todo what about the rest?
-        return walkSpeed;
+
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
+
+        const float normalizedEncumbrance = 0; //getEncumbrance(ptr) / getCapacity(ptr);
+
+        bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
+
+        float runSpeed = walkSpeed*(0.01f * getSkill(ptr, ESM::Skill::Athletics) *
+                                    fAthleticsRunBonus->getFloat() + fBaseRunMultiplier->getFloat());
+
+        float moveSpeed;
+        if(normalizedEncumbrance >= 1.0f)
+            moveSpeed = 0.0f;
+        else if(mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+                world->isLevitationEnabled())
+        {
+            float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
+                                    mageffects.get(ESM::MagicEffect::Levitate).mMagnitude);
+            flySpeed = fMinFlySpeed->getFloat() + flySpeed*(fMaxFlySpeed->getFloat() - fMinFlySpeed->getFloat());
+            flySpeed *= 1.0f - fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
+            flySpeed = std::max(0.0f, flySpeed);
+            moveSpeed = flySpeed;
+        }
+        else if(world->isSwimming(ptr))
+        {
+            float swimSpeed = walkSpeed;
+            if(running)
+                swimSpeed = runSpeed;
+            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).mMagnitude;
+            swimSpeed *= fSwimRunBase->getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics) *
+                                                    fSwimRunAthleticsMult->getFloat();
+            moveSpeed = swimSpeed;
+        }
+        else if(running)
+            moveSpeed = runSpeed;
+        else
+            moveSpeed = walkSpeed;
+        if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
+            moveSpeed *= 0.75f;
+
+        return moveSpeed;
     }
 
     MWMechanics::Movement& Creature::getMovementSettings (const MWWorld::Ptr& ptr) const
@@ -461,6 +510,35 @@ namespace MWClass
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 
+    int Creature::getSkill(const MWWorld::Ptr &ptr, int skill) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        const ESM::Skill* skillRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skill);
+
+        switch (skillRecord->mData.mSpecialization)
+        {
+        case ESM::Class::Combat:
+            return ref->mBase->mData.mCombat;
+        case ESM::Class::Magic:
+            return ref->mBase->mData.mMagic;
+        case ESM::Class::Stealth:
+            return ref->mBase->mData.mStealth;
+        default:
+            throw std::runtime_error("invalid specialisation");
+        }
+    }
+
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
     const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
+    const ESM::GameSetting *Creature::fEncumberedMoveEffect;
+    const ESM::GameSetting *Creature::fSneakSpeedMultiplier;
+    const ESM::GameSetting *Creature::fAthleticsRunBonus;
+    const ESM::GameSetting *Creature::fBaseRunMultiplier;
+    const ESM::GameSetting *Creature::fMinFlySpeed;
+    const ESM::GameSetting *Creature::fMaxFlySpeed;
+    const ESM::GameSetting *Creature::fSwimRunBase;
+    const ESM::GameSetting *Creature::fSwimRunAthleticsMult;
+
 }

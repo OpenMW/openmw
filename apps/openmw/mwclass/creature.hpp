@@ -16,6 +16,14 @@ namespace MWClass
 
             static const ESM::GameSetting *fMinWalkSpeedCreature;
             static const ESM::GameSetting *fMaxWalkSpeedCreature;
+            static const ESM::GameSetting *fEncumberedMoveEffect;
+            static const ESM::GameSetting *fSneakSpeedMultiplier;
+            static const ESM::GameSetting *fAthleticsRunBonus;
+            static const ESM::GameSetting *fBaseRunMultiplier;
+            static const ESM::GameSetting *fMinFlySpeed;
+            static const ESM::GameSetting *fMaxFlySpeed;
+            static const ESM::GameSetting *fSwimRunBase;
+            static const ESM::GameSetting *fSwimRunAthleticsMult;
 
         public:
 
@@ -101,6 +109,8 @@ namespace MWClass
             }
 
             virtual bool isFlying (const MWWorld::Ptr &ptr) const;
+
+            virtual int getSkill(const MWWorld::Ptr &ptr, int skill) const;
     };
 }
 

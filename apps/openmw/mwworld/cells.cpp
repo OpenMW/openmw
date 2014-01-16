@@ -11,11 +11,12 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
-        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (Misc::StringUtils::lowerCase(cell->mName));
+        std::string lowerName(Misc::StringUtils::lowerCase(cell->mName));
+        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (lowerName);
 
         if (result==mInteriors.end())
         {
-            result = mInteriors.insert (std::make_pair (Misc::StringUtils::lowerCase(cell->mName), Ptr::CellStore (cell))).first;
+            result = mInteriors.insert (std::make_pair (lowerName, Ptr::CellStore (cell))).first;
         }
 
         return &result->second;
@@ -264,6 +265,18 @@ void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorl
 {
     for (std::map<std::pair<int, int>, Ptr::CellStore>::iterator iter = mExteriors.begin();
         iter!=mExteriors.end(); ++iter)
+    {
+        Ptr ptr = getPtrAndCache (name, iter->second);
+        if (!ptr.isEmpty())
+            out.push_back(ptr);
+    }
+
+}
+
+void MWWorld::Cells::getInteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
+{
+    for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
+        iter!=mInteriors.end(); ++iter)
     {
         Ptr ptr = getPtrAndCache (name, iter->second);
         if (!ptr.isEmpty())

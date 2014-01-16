@@ -114,7 +114,7 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos, bool adjustPos=true);
+            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, ESM::Position pos, bool adjustPos=true);
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
@@ -151,6 +151,7 @@ namespace MWWorld
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
+            bool mGoToJail;
 
             /// Called when \a object is moved to an inactive cell
             void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
@@ -229,6 +230,10 @@ namespace MWWorld
             //< Remove the script attached to ref from mLocalScripts
 
             virtual Ptr getPtr (const std::string& name, bool activeOnly);
+            ///< Return a pointer to a liveCellRef with the given name.
+            /// \param activeOnly do non search inactive cells.
+
+            virtual Ptr searchPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
@@ -536,6 +541,14 @@ namespace MWWorld
             /// Update the value of some globals according to the world state, which may be used by dialogue entries.
             /// This should be called when initiating a dialogue.
             virtual void updateDialogueGlobals();
+
+            /// Moves all stolen items from \a ptr to the closest evidence chest.
+            virtual void confiscateStolenItems(const MWWorld::Ptr& ptr);
+
+            virtual void goToJail ();
+
+            /// Spawn a random creature from a levelled list next to the player
+            virtual void spawnRandomCreature(const std::string& creatureList);
     };
 }
 

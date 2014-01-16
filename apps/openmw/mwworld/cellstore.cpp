@@ -204,14 +204,8 @@ namespace MWWorld
             ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
             //ESM::CellRef &ref = const_cast<ESM::CellRef&>(it->second);
 
-            std::string lowerCase;
-
-            std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-                (int(*)(int)) std::tolower);
-
             int rec = store.find(ref.mRefID);
-
-            ref.mRefID = lowerCase;
+            Misc::StringUtils::toLower(ref.mRefID);
 
             /* We can optimize this further by storing the pointer to the
                 record itself in store.all, so that we don't need to look it

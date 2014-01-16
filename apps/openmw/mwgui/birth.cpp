@@ -1,6 +1,5 @@
 #include "birth.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -77,7 +76,7 @@ namespace MWGui
         size_t count = mBirthList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
+            if (Misc::StringUtils::ciEqual(*mBirthList->getItemDataAt<std::string>(i), birthId))
             {
                 mBirthList->setIndexSelected(i);
                 MyGUI::Button* okButton;
@@ -112,7 +111,7 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
-        if (boost::iequals(mCurrentBirthId, *birthId))
+        if (Misc::StringUtils::ciEqual(mCurrentBirthId, *birthId))
             return;
 
         mCurrentBirthId = *birthId;
@@ -148,7 +147,7 @@ namespace MWGui
                 mBirthList->setIndexSelected(index);
                 mCurrentBirthId = it2->first;
             }
-            else if (boost::iequals(it2->first, mCurrentBirthId))
+            else if (Misc::StringUtils::ciEqual(it2->first, mCurrentBirthId))
             {
                 mBirthList->setIndexSelected(index);
             }

@@ -281,6 +281,7 @@ namespace Terrain
                         // normal map (optional)
                         bool useNormalMap = mNormalMapping && !mLayerList[layerOffset+i].mNormalMap.empty() && !renderCompositeMap;
                         bool useParallax = useNormalMap && mParallaxMapping && layer.mParallax;
+                        bool useSpecular = layer.mSpecular;
                         if (useNormalMap)
                         {
                             anyNormalMaps = true;
@@ -292,8 +293,11 @@ namespace Terrain
                                                           sh::makeProperty (new sh::BooleanValue(useNormalMap)));
                         p->mShaderProperties.setProperty ("use_parallax_" + Ogre::StringConverter::toString(i),
                                                           sh::makeProperty (new sh::BooleanValue(useParallax)));
+                        p->mShaderProperties.setProperty ("use_specular_" + Ogre::StringConverter::toString(i),
+                                                          sh::makeProperty (new sh::BooleanValue(useSpecular)));
                         boost::hash_combine(normalMaps, useNormalMap);
                         boost::hash_combine(normalMaps, useNormalMap && layer.mParallax);
+                        boost::hash_combine(normalMaps, useSpecular);
 
                         if (i+layerOffset > 0)
                         {

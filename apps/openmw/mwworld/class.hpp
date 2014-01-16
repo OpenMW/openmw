@@ -70,7 +70,7 @@ namespace MWWorld
             /// NPC-stances.
             enum Stance
             {
-                Run, Sneak, Combat
+                Run, Sneak
             };
 
             virtual ~Class();
@@ -168,15 +168,6 @@ namespace MWWorld
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).
 
-            virtual void setForceStance (const Ptr& ptr, Stance stance, bool force) const;
-            ///< Force or unforce a stance.
-
-            virtual void setStance (const Ptr& ptr, Stance stance, bool set) const;
-            ///< Set or unset a stance.
-
-            virtual bool getStance (const Ptr& ptr, Stance stance, bool ignoreForce = false) const;
-            ///< Check if a stance is active or not.
-
             virtual float getSpeed (const Ptr& ptr) const;
             ///< Return movement speed.
 
@@ -237,11 +228,6 @@ namespace MWWorld
 
             virtual bool isEssential (const MWWorld::Ptr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
-            ///
-            /// (default implementation: return false)
-
-            virtual bool hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const;
-            ///< Has \æ ptr detected \a ptr2?
             ///
             /// (default implementation: return false)
 
@@ -307,6 +293,8 @@ namespace MWWorld
             }
 
             virtual bool isFlying(const MWWorld::Ptr& ptr) const;
+
+            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

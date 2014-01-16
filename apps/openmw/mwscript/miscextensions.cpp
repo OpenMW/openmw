@@ -371,15 +371,20 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
-
-                    store.remove(soul, 1, ptr);
+                    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                    {
+                        if (::Misc::StringUtils::ciEqual(it->getCellRef().mSoul, soul))
+                        {
+                            store.remove(*it, 1, ptr);
+                            return;
+                        }
+                    }
                 }
         };
 
@@ -766,12 +771,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr player = world->getPlayerPtr();
-                world->teleportToClosestMarker(player, "prisonmarker");
-                player.getClass().getNpcStats(player).setBounty(0);
-                // TODO: pass time, change skills, show messagebox
-                // TODO: move stolen items to closest evidence chest
-                // iDaysinPrisonMod
+                world->goToJail();
             }
         };
 
@@ -782,8 +782,7 @@ namespace MWScript
             {
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 player.getClass().getNpcStats(player).setBounty(0);
-
-                // TODO: move stolen items to closest evidence chest
+                MWBase::Environment::get().getWorld()->confiscateStolenItems(player);
             }
         };
 

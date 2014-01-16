@@ -93,8 +93,6 @@ set(OENGINE_GUI
 )
 
 set(OENGINE_BULLET
-    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.cpp
-    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.h
     ${LIBDIR}/openengine/bullet/BtOgre.cpp
     ${LIBDIR}/openengine/bullet/BtOgreExtras.h
     ${LIBDIR}/openengine/bullet/BtOgreGP.h

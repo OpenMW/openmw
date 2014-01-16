@@ -549,3 +549,9 @@ void CSMWorld::RefIdCollection::save (int index, ESM::ESMWriter& writer) const
 {
     mData.save (index, writer);
 }
+
+const CSMWorld::RefIdData& CSMWorld::RefIdCollection::getDataSet() const
+{
+    return mData;
+}
+

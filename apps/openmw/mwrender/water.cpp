@@ -5,6 +5,7 @@
 #include <OgreMeshManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
+#include <OgreCamera.h>
 
 #include "sky.hpp"
 #include "renderingmanager.hpp"

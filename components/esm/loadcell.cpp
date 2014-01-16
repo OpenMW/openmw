@@ -36,8 +36,6 @@ void Cell::load(ESMReader &esm, bool saveContext)
 
     esm.getHNT(mData, "DATA", 12);
 
-    // Water level
-    mWater = -1;
     mNAM0 = 0;
 
     if (mData.mFlags & Interior)

@@ -157,40 +157,40 @@ public:
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
 {
-    //hit recoils/knockdown animations handling
-    if(MWWorld::Class::get(mPtr).isActor())
+    // hit recoils/knockdown animations handling
+    if(mPtr.getClass().isActor())
     {
-        if(MWWorld::Class::get(mPtr).getCreatureStats(mPtr).getAttacked())
+        bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
+        bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
+        if(mHitState == CharState_None)
         {
-            MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setAttacked(false);
-        
-            if(mHitState == CharState_None)
+            if(knockdown)
             {
-                if(mJumpState != JumpState_None && !MWBase::Environment::get().getWorld()->isFlying(mPtr) 
-                        && !MWBase::Environment::get().getWorld()->isSwimming(mPtr) )
+                mHitState = CharState_KnockDown;
+                mCurrentHit = sHitList[sHitListSize-1];
+                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
+            }
+            else if (recovery)
+            {
+                mHitState = CharState_Hit;
+                int iHit = rand() % (sHitListSize-1);
+                mCurrentHit = sHitList[iHit];
+                if(mPtr.getRefData().getHandle()=="player" && !mAnimation->hasAnimation(mCurrentHit))
                 {
-                    mHitState = CharState_KnockDown;
-                    mCurrentHit = sHitList[sHitListSize-1]; 
-                    mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
-                }
-                else
-                {
-                    mHitState = CharState_Hit;
-                    int iHit = rand() % (sHitListSize-1);
+                    //only 3 different hit animations if player is in 1st person
+                    int iHit = rand() % (sHitListSize-3);
                     mCurrentHit = sHitList[iHit];
-                    if(mPtr.getRefData().getHandle()=="player" && !mAnimation->hasAnimation(mCurrentHit))
-                    {
-                        //only 3 different hit animations if player is in 1st person
-                        int iHit = rand() % (sHitListSize-3);
-                        mCurrentHit = sHitList[iHit];
-                    }
-                    mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
                 }
+                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
             }
         }
-        else if(mHitState != CharState_None && !mAnimation->isPlaying(mCurrentHit))
+        else if(!mAnimation->isPlaying(mCurrentHit))
         {
             mCurrentHit.erase();
+            if (knockdown)
+                mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(false);
+            if (recovery)
+                mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
             mHitState = CharState_None;
         }
     }
@@ -599,7 +599,12 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                     const ESM::MagicEffect *effect;
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
-                    const ESM::Static* castStatic = store.get<ESM::Static>().find (effect->mCasting);
+                    const ESM::Static* castStatic;
+                    if (!effect->mCasting.empty())
+                        castStatic = store.get<ESM::Static>().find (effect->mCasting);
+                    else
+                        castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
+
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
 
                     castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
@@ -854,10 +859,11 @@ void CharacterController::update(float duration)
     {
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
-        bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
-        bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
+        bool isrunning = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
+        bool sneak = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
         bool flying = world->isFlying(mPtr);
         Ogre::Vector3 vec = cls.getMovementVector(mPtr);
+        vec.normalise();
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
@@ -896,6 +902,41 @@ void CharacterController::update(float duration)
             }
         }
 
+        // reduce fatigue
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+        float fatigueLoss = 0;
+        static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->getFloat();
+        static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->getFloat();
+        static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->getFloat();
+        static const float fFatigueSwimRunBase = gmst.find("fFatigueSwimRunBase")->getFloat();
+        static const float fFatigueSwimWalkMult = gmst.find("fFatigueSwimWalkMult")->getFloat();
+        static const float fFatigueSwimRunMult = gmst.find("fFatigueSwimRunMult")->getFloat();
+        static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->getFloat();
+        static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->getFloat();
+
+        const float encumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
+        if (encumbrance < 1)
+        {
+            if (sneak)
+                fatigueLoss = fFatigueSneakBase + encumbrance * fFatigueSneakMult;
+            else
+            {
+                if (inwater)
+                {
+                    if (!isrunning)
+                        fatigueLoss = fFatigueSwimWalkBase + encumbrance * fFatigueSwimWalkMult;
+                    else
+                        fatigueLoss = fFatigueSwimRunBase + encumbrance * fFatigueSwimRunMult;
+                }
+                if (isrunning)
+                    fatigueLoss = fFatigueRunBase + encumbrance * fFatigueRunMult;
+            }
+        }
+        fatigueLoss *= duration;
+        DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
+        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
+        cls.getCreatureStats(mPtr).setFatigue(fatigue);
+
         if(sneak || inwater || flying)
             vec.z = 0.0f;
 
@@ -911,8 +952,6 @@ void CharacterController::update(float duration)
                 // SlowFalling spell effect is active, do not keep previous fall height
                 cls.getCreatureStats(mPtr).land();
             }
-
-            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
             forcestateupdate = (mJumpState != JumpState_Falling);
             mJumpState = JumpState_Falling;
@@ -978,14 +1017,16 @@ void CharacterController::update(float duration)
                 cls.getCreatureStats(mPtr).setHealth(health);
                 cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), true);
 
-                // report acrobatics progression
-                if (mPtr.getRefData().getHandle() == "player")
-                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
-
-                const float acrobaticsSkill = cls.getNpcStats(mPtr).getSkill(ESM::Skill::Acrobatics).getModified();
+                const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
                 {
-                    //TODO: actor falls over
+                    cls.getCreatureStats(mPtr).setKnockedDown(true);
+                }
+                else
+                {
+                    // report acrobatics progression
+                    if (mPtr.getRefData().getHandle() == "player")
+                        cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
                 }
             }
         }
@@ -1081,9 +1122,11 @@ void CharacterController::update(float duration)
         else
             moved = Ogre::Vector3(0.0f);
 
-        // Ensure we're moving in generally the right direction
+        // Ensure we're moving in generally the right direction...
         if(mMovementSpeed > 0.f)
         {
+            float l = moved.length();
+
             if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
                (movement.x > 0.0f && movement.x > moved.x*2.0f))
                 moved.x = movement.x;
@@ -1093,7 +1136,12 @@ void CharacterController::update(float duration)
             if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
                (movement.z > 0.0f && movement.z > moved.z*2.0f))
                 moved.z = movement.z;
+            // but keep the original speed
+            float newLength = moved.length();
+            if (newLength > 0)
+                moved *= (l / newLength);
         }
+
         // Update movement
         if(moved.squaredLength() > 1.0f)
             world->queueMovement(mPtr, moved);
