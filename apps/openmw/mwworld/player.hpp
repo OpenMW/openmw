@@ -11,6 +11,8 @@
 namespace ESM
 {
     struct NPC;
+    class ESMWriter;
+    class ESMReader;
 }
 
 namespace MWBase
@@ -88,6 +90,10 @@ namespace MWWorld
         void setTeleported(bool teleported);
 
         void clear();
+
+        void write (ESM::ESMWriter& writer) const;
+
+        bool readRecord (ESM::ESMReader& reader, int32_t type);
     };
 }
 #endif

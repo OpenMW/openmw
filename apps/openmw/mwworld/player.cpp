@@ -1,6 +1,13 @@
 
 #include "player.hpp"
 
+#include <stdexcept>
+
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/player.hpp>
+#include <components/esm/defs.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -34,9 +41,6 @@ namespace MWWorld
     void Player::set(const ESM::NPC *player)
     {
         mPlayer.mBase = player;
-
-        float* playerPos = mPlayer.mData.getPosition().pos;
-        playerPos[0] = playerPos[1] = playerPos[2] = 0;
     }
 
     void Player::setCell (MWWorld::CellStore *cellStore)
@@ -180,5 +184,55 @@ namespace MWWorld
         mAutoMove = false;
         mForwardBackward = 0;
         mTeleported = false;
+    }
+
+    void Player::write (ESM::ESMWriter& writer) const
+    {
+        ESM::Player player;
+
+        mPlayer.save (player.mObject);
+        player.mCellId = mCellStore->mCell->getCellId();
+
+        /// \todo sign
+        /// \todo last know exterior position
+        /// \todo mark
+
+        player.mAutoMove = mAutoMove ? 1 : 0;
+
+        writer.startRecord (ESM::REC_PLAY);
+        player.save (writer);
+        writer.endRecord (ESM::REC_PLAY);
+    }
+
+    bool Player::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        if (type==ESM::REC_PLAY)
+        {
+            ESM::Player player;
+            player.load (reader);
+
+            if (!mPlayer.checkState (player.mObject))
+            {
+                // this is the one object we can not silently drop.
+                throw std::runtime_error ("invalid player state record");
+            }
+
+            mPlayer.load (player.mObject);
+
+            mCellStore = MWBase::Environment::get().getWorld()->getCell (player.mCellId);
+
+            /// \todo sign
+            /// \todo last know exterior position
+            /// \todo mark
+
+            mAutoMove = player.mAutoMove!=0;
+
+            mForwardBackward = 0;
+            mTeleported = false;
+
+            return true;
+        }
+
+        return false;
     }
 }

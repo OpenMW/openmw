@@ -14,6 +14,7 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/esm/cellid.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -309,12 +310,14 @@ namespace MWWorld
     {
         mStore.write (writer);
         mGlobalVariables.write (writer);
+        mPlayer->write (writer);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type)
     {
         if (!mStore.readRecord (reader, type) &&
-            !mGlobalVariables.readRecord (reader, type))
+            !mGlobalVariables.readRecord (reader, type) &&
+            !mPlayer->readRecord (reader, type))
         {
             throw std::runtime_error ("unknown record in saved game");
         }
@@ -400,6 +403,14 @@ namespace MWWorld
     CellStore *World::getInterior (const std::string& name)
     {
         return mCells.getInterior (name);
+    }
+
+    CellStore *World::getCell (const ESM::CellId& id)
+    {
+        if (id.mPaged)
+            return getExterior (id.mIndex.mX, id.mIndex.mY);
+        else
+            return getInterior (id.mWorldspace);
     }
 
     void World::useDeathCamera()
@@ -800,6 +811,14 @@ namespace MWWorld
         removeContainerScripts(getPlayer().getPlayer());
         mWorldScene->changeToExteriorCell(position);
         addContainerScripts(getPlayer().getPlayer(), getPlayer().getPlayer().getCell());
+    }
+
+    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position)
+    {
+        if (cellId.mPaged)
+            changeToExteriorCell (position);
+        else
+            changeToInteriorCell (cellId.mWorldspace, position);
     }
 
     void World::markCellAsUnchanged()

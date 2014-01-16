@@ -181,11 +181,13 @@ namespace MWWorld
             virtual void readRecord (ESM::ESMReader& reader, int32_t type);
 
             virtual OEngine::Render::Fader* getFader();
-            ///< \ŧodo remove this function. Rendering details should not be exposed.
+            ///< \todo remove this function. Rendering details should not be exposed.
 
             virtual CellStore *getExterior (int x, int y);
 
             virtual CellStore *getInterior (const std::string& name);
+
+            virtual CellStore *getCell (const ESM::CellId& id);
 
             //switch to POV before showing player's death animation
             virtual void useDeathCamera();
@@ -313,6 +315,8 @@ namespace MWWorld
 
             virtual void changeToExteriorCell (const ESM::Position& position);
             ///< Move to exterior cell.
+
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position);
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.

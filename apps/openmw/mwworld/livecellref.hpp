@@ -7,6 +7,11 @@
 
 #include "refdata.hpp"
 
+namespace ESM
+{
+    class ObjectState;
+}
+
 namespace MWWorld
 {
     class Ptr;
@@ -29,6 +34,24 @@ namespace MWWorld
         LiveCellRefBase(std::string type, const ESM::CellRef &cref=ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
+
+        protected:
+
+            void loadImp (const ESM::ObjectState& state);
+            ///< Load state into a LiveCellRef, that has already been initialised with base and
+            /// class.
+            ///
+            /// \attention Must not be called with an invalid \a state.
+
+            void saveImp (ESM::ObjectState& state) const;
+            ///< Save LiveCellRef state into \a state.
+
+            static bool checkStateImp (const ESM::ObjectState& state);
+            ///< Check if state is valid and report errors.
+            ///
+            /// \return Valid?
+            ///
+            /// \note Does not check if the RefId exists.
     };
 
     inline bool operator== (const LiveCellRefBase& cellRef, const ESM::CellRef::RefNum refNum)
@@ -55,7 +78,41 @@ namespace MWWorld
 
         // The object that this instance is based on.
         const X* mBase;
+
+        void load (const ESM::ObjectState& state);
+        ///< Load state into a LiveCellRef, that has already been initialised with base and class.
+        ///
+        /// \attention Must not be called with an invalid \a state.
+
+        void save (ESM::ObjectState& state) const;
+        ///< Save LiveCellRef state into \a state.
+
+        static bool checkState (const ESM::ObjectState& state);
+        ///< Check if state is valid and report errors.
+        ///
+        /// \return Valid?
+        ///
+        /// \note Does not check if the RefId exists.
     };
+
+    template <typename X>
+    void LiveCellRef<X>::load (const ESM::ObjectState& state)
+    {
+        loadImp (state);
+    }
+
+    template <typename X>
+    void LiveCellRef<X>::save (ESM::ObjectState& state) const
+    {
+        saveImp (state);
+    }
+
+    template <typename X>
+    bool LiveCellRef<X>::checkState (const ESM::ObjectState& state)
+    {
+        return checkStateImp (state);
+    }
+
 }
 
 #endif

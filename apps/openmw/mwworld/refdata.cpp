@@ -3,6 +3,8 @@
 
 #include <OgreSceneNode.h>
 
+#include <components/esm/objectstate.hpp>
+
 #include "customdata.hpp"
 #include "cellstore.hpp"
 
@@ -52,6 +54,14 @@ namespace MWWorld
         mLocalRotation.rot[2]=0;
     }
 
+    RefData::RefData (const ESM::ObjectState& objectState)
+    : mBaseNode (0), mHasLocals (false), mEnabled (objectState.mEnabled),
+      mCount (objectState.mCount), mPosition (objectState.mPosition), mCustomData (0)
+    {
+        for (int i=0; i<3; ++i)
+            mLocalRotation.rot[i] = objectState.mLocalRotation[i];
+    }
+
     RefData::RefData (const RefData& refData)
     : mBaseNode(0), mCustomData (0)
     {
@@ -64,6 +74,17 @@ namespace MWWorld
             cleanup();
             throw;
         }
+    }
+
+    void RefData::write (ESM::ObjectState& objectState) const
+    {
+        objectState.mHasLocals = false;
+        objectState.mEnabled = mEnabled;
+        objectState.mCount = mCount;
+        objectState.mPosition = mPosition;
+
+        for (int i=0; i<3; ++i)
+            objectState.mLocalRotation[i] = mLocalRotation.rot[i];
     }
 
     RefData& RefData::operator= (const RefData& refData)

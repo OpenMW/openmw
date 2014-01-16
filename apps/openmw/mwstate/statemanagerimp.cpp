@@ -3,6 +3,8 @@
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
+#include <components/esm/cellid.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -216,6 +218,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
             case ESM::REC_SPEL:
             case ESM::REC_WEAP:
             case ESM::REC_GLOB:
+            case ESM::REC_PLAY:
 
                 MWBase::Environment::get().getWorld()->readRecord (reader, n.val);
                 break;
@@ -245,11 +248,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     MWBase::Environment::get().getWindowManager()->updatePlayer();
     MWBase::Environment::get().getMechanicsManager()->playerLoaded();
 
-    // for testing purpose only
-    ESM::Position pos;
-    pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
-    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-    MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+    ESM::CellId cellId = ptr.getCell()->mCell->getCellId();
+
+    MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
