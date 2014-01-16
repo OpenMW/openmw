@@ -109,7 +109,10 @@ void MWMechanics::AiSequence::stack (const AiPackage& package)
     for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); it++)
     {
         if(mPackages.front()->getPriority() <= package.getPriority())
+        {
             mPackages.insert(it,package.clone());
+            return;
+        }
     }
 
     if(mPackages.empty())
