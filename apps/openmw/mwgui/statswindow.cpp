@@ -186,7 +186,7 @@ namespace MWGui
         if (widget)
         {
             int modified = value.getModified(), base = value.getBase();
-            std::string text = boost::lexical_cast<std::string>(std::floor(modified));
+            std::string text = boost::lexical_cast<std::string>(modified);
             std::string state = "normal";
             if (modified > base)
                 state = "increased";
