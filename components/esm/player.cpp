@@ -23,6 +23,8 @@ void ESM::Player::load (ESMReader &esm)
 
     mAutoMove = 0;
     esm.getHNOT (mAutoMove, "AMOV");
+
+    mBirthsign = esm.getHNString ("SIGN");
 }
 
 void ESM::Player::save (ESMWriter &esm) const
@@ -41,4 +43,6 @@ void ESM::Player::save (ESMWriter &esm) const
 
     if (mAutoMove)
         esm.writeHNT ("AMOV", mAutoMove);
+
+    esm.writeHNString ("SIGN", mBirthsign);
 }

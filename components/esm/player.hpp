@@ -23,6 +23,7 @@ namespace ESM
         ESM::Position mMarkedPosition;
         CellId mMarkedCell;
         unsigned char mAutoMove;
+        std::string mBirthsign;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
