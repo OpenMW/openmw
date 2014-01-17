@@ -495,10 +495,10 @@ bool CharacterController::updateCreatureState()
             case CreatureStats::AT_Chop:
                 mCurrentWeapon = "attack1";
                 break;
-            case CreatureStats::AT_Thrust:
+            case CreatureStats::AT_Slash:
                 mCurrentWeapon = "attack2";
                 break;
-            case CreatureStats::AT_Slash:
+            case CreatureStats::AT_Thrust:
                 mCurrentWeapon = "attack3";
                 break;
             }

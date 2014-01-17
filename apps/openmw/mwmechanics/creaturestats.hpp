@@ -116,9 +116,9 @@ namespace MWMechanics
 
         enum AttackType
         {
+            AT_Chop,
             AT_Slash,
-            AT_Thrust,
-            AT_Chop
+            AT_Thrust
         };
         void setAttackType(int attackType) { mAttackType = attackType; }
         int getAttackType() { return mAttackType; }

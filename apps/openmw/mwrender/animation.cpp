@@ -660,13 +660,22 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     else if(evt.compare(off, len, "unequip detach") == 0)
         showWeapons(false);
     else if(evt.compare(off, len, "chop hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
     else if(evt.compare(off, len, "slash hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
     else if(evt.compare(off, len, "thrust hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr);
+    {
+        if (groupname == "attack1")
+            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+        else if (groupname == "attack2")
+            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+        else if (groupname == "attack3")
+            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+        else
+            mPtr.getClass().hit(mPtr);
+    }
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);

@@ -454,7 +454,7 @@ namespace MWClass
         float dist = 100.0f * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                gmst.find("fHandToHandReach")->getFloat());
-        // TODO: Use second to work out the hit angle and where to spawn the blood effect
+        // TODO: Use second to work out the hit angle
         std::pair<MWWorld::Ptr, Ogre::Vector3> result = world->getHitContact(ptr, dist);
         MWWorld::Ptr victim = result.first;
         Ogre::Vector3 hitPosition = result.second;
@@ -604,6 +604,7 @@ namespace MWClass
             }
         }
 
+        // TODO: do not do this if the attack is blocked
         if (healthdmg)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 

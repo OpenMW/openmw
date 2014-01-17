@@ -173,6 +173,62 @@ namespace MWClass
 
     void Creature::hit(const MWWorld::Ptr& ptr, int type) const
     {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        // TODO: where is the distance defined?
+        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, 100);
+        if (result.first.isEmpty())
+            return; // Didn't hit anything
+
+        MWWorld::Ptr victim = result.first;
+
+        if (!victim.getClass().isActor())
+            return; // Can't hit non-actors
+
+        Ogre::Vector3 hitPosition = result.second;
+
+        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
+        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
+        float hitchance = ref->mBase->mData.mCombat +
+                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        hitchance *= stats.getFatigueTerm();
+        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
+                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
+        hitchance -= otherstats.getEvasion();
+
+        if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
+        {
+            victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
+            return;
+        }
+
+        int min,max;
+        switch (type)
+        {
+        case 0:
+            min = ref->mBase->mData.mAttack[0];
+            max = ref->mBase->mData.mAttack[1];
+            break;
+        case 1:
+            min = ref->mBase->mData.mAttack[2];
+            max = ref->mBase->mData.mAttack[3];
+            break;
+        case 2:
+        default:
+            min = ref->mBase->mData.mAttack[4];
+            max = ref->mBase->mData.mAttack[5];
+            break;
+        }
+
+        float damage = min + (max - min) * ::rand()/(RAND_MAX+1.0);
+
+        // TODO: do not do this if the attack is blocked
+        MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+
+        victim.getClass().onHit(victim, damage, true, MWWorld::Ptr(), ptr, true);
     }
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
