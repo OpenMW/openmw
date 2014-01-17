@@ -549,6 +549,9 @@ namespace MWWorld
 
             /// Spawn a random creature from a levelled list next to the player
             virtual void spawnRandomCreature(const std::string& creatureList);
+
+            /// Spawn a blood effect for \a ptr at \a worldPosition
+            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition);
     };
 }
 

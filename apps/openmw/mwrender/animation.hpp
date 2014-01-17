@@ -189,16 +189,18 @@ protected:
     /** Adds an additional light to the given object list using the specified ESM record. */
     void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light);
 
-    static void setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
-                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
-                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
-
     void clearAnimSources();
 
     // TODO: Should not be here
     Ogre::Vector3 getEnchantmentColor(MWWorld::Ptr item);
 
 public:
+    // FIXME: Move outside of this class
+    static void setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
+                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
+                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
+
+
     Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
     virtual ~Animation();
 

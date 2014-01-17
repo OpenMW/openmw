@@ -363,4 +363,8 @@ namespace MWWorld
         throw std::runtime_error("class does not support skills");
     }
 
+    int Class::getBloodTexture (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error("class does not support gore");
+    }
 }

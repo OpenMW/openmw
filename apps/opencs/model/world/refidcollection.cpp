@@ -181,7 +181,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
         unsigned int mFlag;
     } sCreatureFlagTable[] =
     {
-        { Columns::ColumnId_Biped, ESM::Creature::Biped },
+        { Columns::ColumnId_Biped, ESM::Creature::Bipedal },
         { Columns::ColumnId_HasWeapon, ESM::Creature::Weapon },
         { Columns::ColumnId_NoMovement, ESM::Creature::None },
         { Columns::ColumnId_Swims, ESM::Creature::Swims },

@@ -111,6 +111,9 @@ namespace MWClass
             virtual bool isFlying (const MWWorld::Ptr &ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr &ptr, int skill) const;
+
+            /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
+            virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
     };
 }
 

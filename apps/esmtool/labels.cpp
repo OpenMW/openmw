@@ -680,7 +680,7 @@ std::string creatureFlags(int flags)
     if (flags & ESM::Creature::Walks) properties += "Walks ";
     if (flags & ESM::Creature::Swims) properties += "Swims ";
     if (flags & ESM::Creature::Flies) properties += "Flies ";
-    if (flags & ESM::Creature::Biped) properties += "Biped ";   
+    if (flags & ESM::Creature::Bipedal) properties += "Bipedal ";
     if (flags & ESM::Creature::Respawn) properties += "Respawn ";
     if (flags & ESM::Creature::Weapon) properties += "Weapon ";
     if (flags & ESM::Creature::Skeleton) properties += "Skeleton ";
@@ -691,7 +691,7 @@ std::string creatureFlags(int flags)
                    ESM::Creature::Walks|
                    ESM::Creature::Swims|
                    ESM::Creature::Flies|
-                   ESM::Creature::Biped|
+                   ESM::Creature::Bipedal|
                    ESM::Creature::Respawn|
                    ESM::Creature::Weapon|
                    ESM::Creature::Skeleton|

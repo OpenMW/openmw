@@ -530,6 +530,17 @@ namespace MWClass
         }
     }
 
+    int Creature::getBloodTexture(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
+        if (ref->mBase->mFlags & ESM::Creature::Skeleton)
+            return 1;
+        if (ref->mBase->mFlags & ESM::Creature::Metal)
+            return 2;
+        return 0;
+    }
+
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
     const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
     const ESM::GameSetting *Creature::fEncumberedMoveEffect;
