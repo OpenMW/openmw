@@ -435,10 +435,14 @@ namespace MWScript
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
-                    creatureStats.getAiSequence().stack(MWMechanics::AiCombat(actor));
+                    MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+                    
                     if (actorID == "player")
+                    {
                         creatureStats.setHostile(true);
+                        creatureStats.getAiSequence().stack(
+                            MWMechanics::AiCombat(MWBase::Environment::get().getWorld()->getPtr(actorID,true)));
+                    }
                 }
         };
 

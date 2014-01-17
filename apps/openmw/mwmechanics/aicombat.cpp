@@ -151,6 +151,11 @@ namespace MWMechanics
             }
             weapRange *= 100.0f;
         }
+        else //is creature
+        {
+            weaptype = WeapType_HandToHand; //doesn't matter, should only reflect if it is melee or distant weapon
+            weapRange = 100; //TODO: use true attack range (the same problem in Creature::hit)
+        }
 
         //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
 
@@ -381,6 +386,7 @@ void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement
 
     if (weapon == NULL)
     {
+        //hand-to-hand and creatures' attacks handled here
         //hand-to-hand deals equal damage
         float roll = static_cast<float>(rand())/RAND_MAX;
         if(roll <= 0.333f)  //side punch
