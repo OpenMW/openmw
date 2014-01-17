@@ -604,7 +604,8 @@ namespace MWClass
             }
         }
 
-        MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+        if (healthdmg)
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
