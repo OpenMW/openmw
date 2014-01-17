@@ -45,10 +45,6 @@ namespace MWMechanics
 
             void buildNewPath(const MWWorld::Ptr& actor);
     };
-
-    static void determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement);
-    //chooses an attack depending on probability to avoid uniformity
-    static void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
 }
 
 #endif

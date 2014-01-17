@@ -26,6 +26,10 @@ namespace
             return 1.0;
         return -1.0;
     }
+
+    void determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement);
+    //chooses an attack depending on probability to avoid uniformity
+    void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
 }
 
 namespace MWMechanics
@@ -256,7 +260,7 @@ namespace MWMechanics
                 //less than in time of playing weapon anim from 'start' to 'hit' tags (t_swing)
                 //then start attacking
                 float speed1 = cls.getSpeed(actor);
-                float speed2 = cls.getSpeed(mTarget);
+                float speed2 = mTarget.getClass().getSpeed(mTarget);
                 if(actor.getClass().getMovementSettings(mTarget).mPosition[0] == 0
                         && actor.getClass().getMovementSettings(mTarget).mPosition[1] == 0)
                     speed2 = 0;
@@ -357,51 +361,54 @@ namespace MWMechanics
     {
         return new AiCombat(*this);
     }
+}
 
-    void determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement)
+namespace
+{
+void determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement)
+{
+    if (movement.mPosition[0] && !movement.mPosition[1]) //sideway
+        actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Slash);
+    else if (movement.mPosition[1]) //forward
+        actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
+    else
+        actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Chop);
+}
+
+void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
+{
+    //the more damage attackType deals the more probability it has
+
+    if (weapon == NULL)
     {
-        if (movement.mPosition[0] && !movement.mPosition[1]) //sideway
-            actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Slash);
-        else if (movement.mPosition[1]) //forward
-            actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
-        else
-            actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Chop);
-    }
-
-    void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
-    {
-        //the more damage attackType deals the more probability it has
-
-        if (weapon == NULL)
-        {
-            //hand-to-hand deals equal damage
-            float roll = static_cast<float>(rand())/RAND_MAX;
-            if(roll <= 0.333f)  //side punch
-            {
-                movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
-                movement.mPosition[1] = 0;
-            }
-            else if(roll <= 0.666f) //forward punch
-                movement.mPosition[1] = 1;
-
-            return;
-        }
-
-        int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
-        int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
-        int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
-
-        float total = slash + chop + thrust;
-       
+        //hand-to-hand deals equal damage
         float roll = static_cast<float>(rand())/RAND_MAX;
-        if(roll <= static_cast<float>(slash)/total)
+        if(roll <= 0.333f)  //side punch
         {
             movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
             movement.mPosition[1] = 0;
         }
-        else if(roll <= (static_cast<float>(slash) + static_cast<float>(thrust))/total)
+        else if(roll <= 0.666f) //forward punch
             movement.mPosition[1] = 1;
-        //else chop
+
+        return;
     }
+
+    int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
+    int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
+    int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
+
+    float total = slash + chop + thrust;
+       
+    float roll = static_cast<float>(rand())/RAND_MAX;
+    if(roll <= static_cast<float>(slash)/total)
+    {
+        movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
+        movement.mPosition[1] = 0;
+    }
+    else if(roll <= (static_cast<float>(slash) + static_cast<float>(thrust))/total)
+        movement.mPosition[1] = 1;
+    //else chop
 }
 
+}
