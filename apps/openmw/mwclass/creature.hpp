@@ -24,6 +24,10 @@ namespace MWClass
             static const ESM::GameSetting *fMaxFlySpeed;
             static const ESM::GameSetting *fSwimRunBase;
             static const ESM::GameSetting *fSwimRunAthleticsMult;
+            static const ESM::GameSetting *fKnockDownMult;
+            static const ESM::GameSetting *iKnockDownOddsMult;
+            static const ESM::GameSetting *iKnockDownOddsBase;
+
 
         public:
 

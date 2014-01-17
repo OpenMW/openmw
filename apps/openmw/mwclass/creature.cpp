@@ -69,6 +69,9 @@ namespace MWClass
                 fMaxFlySpeed = gmst.find("fMaxFlySpeed");
                 fSwimRunBase = gmst.find("fSwimRunBase");
                 fSwimRunAthleticsMult = gmst.find("fSwimRunAthleticsMult");
+                fKnockDownMult = gmst.find("fKnockDownMult");
+                iKnockDownOddsMult = gmst.find("iKnockDownOddsMult");
+                iKnockDownOddsBase = gmst.find("iKnockDownOddsBase");
 
                 inited = true;
             }
@@ -254,6 +257,19 @@ namespace MWClass
             if(!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
+
+        // Check for knockdown
+        float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
+        float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
+        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+        if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+        {
+            getCreatureStats(ptr).setKnockedDown(true);
+
+        }
+        else
+            getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
         if(ishealth)
         {
@@ -607,5 +623,8 @@ namespace MWClass
     const ESM::GameSetting *Creature::fMaxFlySpeed;
     const ESM::GameSetting *Creature::fSwimRunBase;
     const ESM::GameSetting *Creature::fSwimRunAthleticsMult;
+    const ESM::GameSetting *Creature::fKnockDownMult;
+    const ESM::GameSetting *Creature::iKnockDownOddsMult;
+    const ESM::GameSetting *Creature::iKnockDownOddsBase;
 
 }
