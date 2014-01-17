@@ -583,8 +583,10 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 // This has to be done at the start of the casting animation,
                 // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
                 if (mPtr.getRefData().getHandle() == "player")
-                    stats.getSpells().setSelectedSpell(MWBase::Environment::get().getWindowManager()->getSelectedSpell());
-
+                {
+                    std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+                    stats.getSpells().setSelectedSpell(selectedSpell);
+                }
                 std::string spellid = stats.getSpells().getSelectedSpell();
 
                 if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
