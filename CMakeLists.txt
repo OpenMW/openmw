@@ -186,8 +186,6 @@ if (WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
 else (WIN32)
     set(PLATFORM_INCLUDE_DIR "")
-    find_path (UUID_INCLUDE_DIR uuid/uuid.h)
-    include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
@@ -239,7 +237,6 @@ include_directories("."
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
-    ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
@@ -434,7 +431,7 @@ IF(NOT WIN32 AND NOT APPLE)
         SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
         SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
         SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW opencs;OpenCS bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libqtgui4 (>= 4.7.0)")
 
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
