@@ -193,9 +193,20 @@ namespace MWWorld
         mPlayer.save (player.mObject);
         player.mCellId = mCellStore->mCell->getCellId();
 
-        /// \todo sign
-        /// \todo last know exterior position
-        /// \todo mark
+        player.mBirthsign = mSign;
+
+        player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x;
+        player.mLastKnownExteriorPosition[1] = mLastKnownExteriorPosition.y;
+        player.mLastKnownExteriorPosition[2] = mLastKnownExteriorPosition.z;
+
+        if (mMarkedCell)
+        {
+            player.mHasMark = true;
+            player.mMarkedPosition = mMarkedPosition;
+            player.mMarkedCell = mMarkedCell->mCell->getCellId();
+        }
+        else
+            player.mHasMark = false;
 
         player.mAutoMove = mAutoMove ? 1 : 0;
 
@@ -214,16 +225,43 @@ namespace MWWorld
             if (!mPlayer.checkState (player.mObject))
             {
                 // this is the one object we can not silently drop.
-                throw std::runtime_error ("invalid player state record");
+                throw std::runtime_error ("invalid player state record (object state)");
             }
 
             mPlayer.load (player.mObject);
 
-            mCellStore = MWBase::Environment::get().getWorld()->getCell (player.mCellId);
+            MWBase::World& world = *MWBase::Environment::get().getWorld();
 
-            /// \todo sign
-            /// \todo last know exterior position
-            /// \todo mark
+            mCellStore = world.getCell (player.mCellId);
+
+            if (!player.mBirthsign.empty() &&
+                !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
+                throw std::runtime_error ("invalid player state record (birthsign)");
+
+            mSign = player.mBirthsign;
+
+            mLastKnownExteriorPosition.x = player.mLastKnownExteriorPosition[0];
+            mLastKnownExteriorPosition.y = player.mLastKnownExteriorPosition[1];
+            mLastKnownExteriorPosition.z = player.mLastKnownExteriorPosition[2];
+
+            if (player.mHasMark && !player.mMarkedCell.mPaged)
+            {
+                // interior cell -> need to check if it exists (exterior cell will be
+                // generated on the fly)
+
+                if (!world.getStore().get<ESM::Cell>().search (player.mMarkedCell.mWorldspace))
+                    player.mHasMark = false; // drop mark silently
+            }
+
+            if (player.mHasMark)
+            {
+                mMarkedPosition = player.mMarkedPosition;
+                mMarkedCell = world.getCell (player.mMarkedCell);
+            }
+            else
+            {
+                mMarkedCell = 0;
+            }
 
             mAutoMove = player.mAutoMove!=0;
 
