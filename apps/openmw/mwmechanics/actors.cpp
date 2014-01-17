@@ -131,6 +131,8 @@ namespace MWMechanics
             static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->getFloat();
 
             float creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
+            if (creatureSoulValue == 0)
+                return;
 
             // Use the smallest soulgem that is large enough to hold the soul
             MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
