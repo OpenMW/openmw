@@ -775,10 +775,10 @@ namespace MWClass
         }
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak))
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         if(get(ptr).getCreatureStats(ptr).isHostile())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
+        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
