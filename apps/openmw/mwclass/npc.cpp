@@ -454,8 +454,10 @@ namespace MWClass
         float dist = 100.0f * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                gmst.find("fHandToHandReach")->getFloat());
-        // TODO: Use second to work out the hit angle and where to spawn the blood effect
-        MWWorld::Ptr victim = world->getHitContact(ptr, dist).first;
+        // TODO: Use second to work out the hit angle
+        std::pair<MWWorld::Ptr, Ogre::Vector3> result = world->getHitContact(ptr, dist);
+        MWWorld::Ptr victim = result.first;
+        Ogre::Vector3 hitPosition = result.second;
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
@@ -601,6 +603,10 @@ namespace MWClass
                 }
             }
         }
+
+        // TODO: do not do this if the attack is blocked
+        if (healthdmg)
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
@@ -775,10 +781,10 @@ namespace MWClass
         }
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak))
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         if(get(ptr).getCreatureStats(ptr).isHostile())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
+        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
@@ -1214,6 +1220,17 @@ namespace MWClass
     int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         return ptr.getClass().getNpcStats(ptr).getSkill(skill).getModified();
+    }
+
+    int Npc::getBloodTexture(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+
+        if (ref->mBase->mFlags & ESM::NPC::Skeleton)
+            return 1;
+        if (ref->mBase->mFlags & ESM::NPC::Metal)
+            return 2;
+        return 0;
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

@@ -278,6 +278,9 @@ namespace MWWorld
 
             virtual bool isKey (const MWWorld::Ptr& ptr) const { return false; }
 
+            /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
+            virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
+
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 

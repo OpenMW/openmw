@@ -301,6 +301,12 @@ namespace MWGui
         if (type == Type_Magic)
         {
             std::string spellId = button->getChildAt(0)->getUserString("Spell");
+
+            // Make sure the player still has this spell
+            MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
+            MWMechanics::Spells& spells = stats.getSpells();
+            if (!spells.hasSpell(spellId))
+                return;
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
         }

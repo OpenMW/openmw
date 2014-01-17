@@ -479,9 +479,47 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
     mPtr = ptr;
 }
 
-bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak)
+bool CharacterController::updateCreatureState()
 {
-   const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
+    CreatureStats &stats = cls.getCreatureStats(mPtr);
+
+    if(stats.getAttackingOrSpell())
+    {
+        if(mUpperBodyState == UpperCharState_Nothing && mHitState == CharState_None)
+        {
+            MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
+
+            switch (stats.getAttackType())
+            {
+            case CreatureStats::AT_Chop:
+                mCurrentWeapon = "attack1";
+                break;
+            case CreatureStats::AT_Slash:
+                mCurrentWeapon = "attack2";
+                break;
+            case CreatureStats::AT_Thrust:
+                mCurrentWeapon = "attack3";
+                break;
+            }
+
+            mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, true,
+                             1, "start", "stop",
+                             0.0f, 0);
+            mUpperBodyState = UpperCharState_StartToMinAttack;
+        }
+    }
+
+    bool animPlaying = mAnimation->getInfo(mCurrentWeapon);
+    if (!animPlaying)
+        mUpperBodyState = UpperCharState_Nothing;
+    return false;
+}
+
+bool CharacterController::updateNpcState(bool inwater, bool isrunning)
+{
+    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     NpcStats &stats = cls.getNpcStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
@@ -583,8 +621,10 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 // This has to be done at the start of the casting animation,
                 // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
                 if (mPtr.getRefData().getHandle() == "player")
-                    stats.getSpells().setSelectedSpell(MWBase::Environment::get().getWindowManager()->getSelectedSpell());
-
+                {
+                    std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
+                    stats.getSpells().setSelectedSpell(selectedSpell);
+                }
                 std::string spellid = stats.getSpells().getSelectedSpell();
 
                 if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
@@ -1089,7 +1129,9 @@ void CharacterController::update(float duration)
         }
 
         if(cls.isNpc())
-            forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak) || forcestateupdate;
+            forcestateupdate = updateNpcState(inwater, isrunning) || forcestateupdate;
+        else
+            forcestateupdate = updateCreatureState() || forcestateupdate;
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
 

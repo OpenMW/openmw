@@ -623,6 +623,17 @@ MwIniImporter::MwIniImporter()
         "Moons:Masser Fade Out Finish",
         "Moons:Script Color",
 
+        // blood
+        "Blood:Model 0",
+        "Blood:Model 1",
+        "Blood:Model 2",
+        "Blood:Texture 0",
+        "Blood:Texture 1",
+        "Blood:Texture 2",
+        "Blood:Texture Name 0",
+        "Blood:Texture Name 1",
+        "Blood:Texture Name 2",
+
         0
     };
 

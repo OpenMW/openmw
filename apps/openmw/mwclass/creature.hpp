@@ -24,6 +24,10 @@ namespace MWClass
             static const ESM::GameSetting *fMaxFlySpeed;
             static const ESM::GameSetting *fSwimRunBase;
             static const ESM::GameSetting *fSwimRunAthleticsMult;
+            static const ESM::GameSetting *fKnockDownMult;
+            static const ESM::GameSetting *iKnockDownOddsMult;
+            static const ESM::GameSetting *iKnockDownOddsBase;
+
 
         public:
 
@@ -111,6 +115,9 @@ namespace MWClass
             virtual bool isFlying (const MWWorld::Ptr &ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr &ptr, int skill) const;
+
+            /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
+            virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
     };
 }
 

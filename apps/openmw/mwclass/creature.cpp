@@ -69,6 +69,9 @@ namespace MWClass
                 fMaxFlySpeed = gmst.find("fMaxFlySpeed");
                 fSwimRunBase = gmst.find("fSwimRunBase");
                 fSwimRunAthleticsMult = gmst.find("fSwimRunAthleticsMult");
+                fKnockDownMult = gmst.find("fKnockDownMult");
+                iKnockDownOddsMult = gmst.find("iKnockDownOddsMult");
+                iKnockDownOddsBase = gmst.find("iKnockDownOddsBase");
 
                 inited = true;
             }
@@ -173,6 +176,62 @@ namespace MWClass
 
     void Creature::hit(const MWWorld::Ptr& ptr, int type) const
     {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        // TODO: where is the distance defined?
+        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, 100);
+        if (result.first.isEmpty())
+            return; // Didn't hit anything
+
+        MWWorld::Ptr victim = result.first;
+
+        if (!victim.getClass().isActor())
+            return; // Can't hit non-actors
+
+        Ogre::Vector3 hitPosition = result.second;
+
+        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
+        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
+        float hitchance = ref->mBase->mData.mCombat +
+                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        hitchance *= stats.getFatigueTerm();
+        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
+                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
+        hitchance -= otherstats.getEvasion();
+
+        if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
+        {
+            victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
+            return;
+        }
+
+        int min,max;
+        switch (type)
+        {
+        case 0:
+            min = ref->mBase->mData.mAttack[0];
+            max = ref->mBase->mData.mAttack[1];
+            break;
+        case 1:
+            min = ref->mBase->mData.mAttack[2];
+            max = ref->mBase->mData.mAttack[3];
+            break;
+        case 2:
+        default:
+            min = ref->mBase->mData.mAttack[4];
+            max = ref->mBase->mData.mAttack[5];
+            break;
+        }
+
+        float damage = min + (max - min) * ::rand()/(RAND_MAX+1.0);
+
+        // TODO: do not do this if the attack is blocked
+        MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+
+        victim.getClass().onHit(victim, damage, true, MWWorld::Ptr(), ptr, true);
     }
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
@@ -198,6 +257,19 @@ namespace MWClass
             if(!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
+
+        // Check for knockdown
+        float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
+        float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
+        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+        if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+        {
+            getCreatureStats(ptr).setKnockedDown(true);
+
+        }
+        else
+            getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
         if(ishealth)
         {
@@ -301,7 +373,7 @@ namespace MWClass
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
 
-        const float normalizedEncumbrance = 0; //getEncumbrance(ptr) / getCapacity(ptr);
+        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
 
         bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
@@ -530,6 +602,17 @@ namespace MWClass
         }
     }
 
+    int Creature::getBloodTexture(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
+        if (ref->mBase->mFlags & ESM::Creature::Skeleton)
+            return 1;
+        if (ref->mBase->mFlags & ESM::Creature::Metal)
+            return 2;
+        return 0;
+    }
+
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
     const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
     const ESM::GameSetting *Creature::fEncumberedMoveEffect;
@@ -540,5 +623,8 @@ namespace MWClass
     const ESM::GameSetting *Creature::fMaxFlySpeed;
     const ESM::GameSetting *Creature::fSwimRunBase;
     const ESM::GameSetting *Creature::fSwimRunAthleticsMult;
+    const ESM::GameSetting *Creature::fKnockDownMult;
+    const ESM::GameSetting *Creature::iKnockDownOddsMult;
+    const ESM::GameSetting *Creature::iKnockDownOddsBase;
 
 }

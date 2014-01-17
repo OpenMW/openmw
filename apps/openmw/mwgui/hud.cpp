@@ -267,7 +267,8 @@ namespace MWGui
             else if ((mode == GM_Container) || (mode == GM_Inventory))
             {
                 // pick up object
-                MWBase::Environment::get().getWindowManager()->getInventoryWindow()->pickUpObject(object);
+                if (!object.isEmpty())
+                    MWBase::Environment::get().getWindowManager()->getInventoryWindow()->pickUpObject(object);
             }
         }
     }

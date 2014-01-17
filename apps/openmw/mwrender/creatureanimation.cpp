@@ -24,7 +24,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
         setObjectRoot(model, false);
         setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
-        if((ref->mBase->mFlags&ESM::Creature::Biped))
+        if((ref->mBase->mFlags&ESM::Creature::Bipedal))
             addAnimSource("meshes\\base_anim.nif");
         addAnimSource(model);
     }

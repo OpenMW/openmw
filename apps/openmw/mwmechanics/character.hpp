@@ -170,7 +170,8 @@ class CharacterController
 
     void clearAnimQueue();
 
-    bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
+    bool updateNpcState(bool inwater, bool isrunning);
+    bool updateCreatureState();
 
     void updateVisibility();
 

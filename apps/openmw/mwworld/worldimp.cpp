@@ -2282,7 +2282,8 @@ namespace MWWorld
     void World::breakInvisibility(const Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
-        actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+        if (actor.getClass().isNpc())
+            actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
     }
 
     bool World::isDark() const
@@ -2609,5 +2610,32 @@ namespace MWWorld
 
             safePlaceObject(ref.getPtr(),*cell,ipos);
         }
+    }
+
+    void World::spawnBloodEffect(const Ptr &ptr, const Vector3 &worldPosition)
+    {
+        int type = ptr.getClass().getBloodTexture(ptr);
+        std::string texture;
+        switch (type)
+        {
+        case 2:
+            texture = getFallback()->getFallbackString("Blood_Texture_2");
+            break;
+        case 1:
+            texture = getFallback()->getFallbackString("Blood_Texture_1");
+            break;
+        case 0:
+        default:
+            texture = getFallback()->getFallbackString("Blood_Texture_0");
+            break;
+        }
+
+        std::stringstream modelName;
+        modelName << "Blood_Model_";
+        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 3; // [0, 2]
+        modelName << roll;
+        std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
+
+        mRendering->spawnEffect(model, texture, worldPosition);
     }
 }
