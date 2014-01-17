@@ -358,7 +358,7 @@ namespace MWMechanics
         return new AiCombat(*this);
     }
 
-    void MWMechanics::determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement)
+    void determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement)
     {
         if (movement.mPosition[0] && !movement.mPosition[1]) //sideway
             actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Slash);
@@ -368,7 +368,7 @@ namespace MWMechanics
             actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Chop);
     }
 
-    void MWMechanics::chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
+    void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
     {
         //the more damage attackType deals the more probability it has
 
