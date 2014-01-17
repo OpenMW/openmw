@@ -31,6 +31,9 @@ namespace Wizard
 
         bool removeDirectory(const QString &dirName);
 
+        bool copyFile(const QString &source, const QString &destination, bool keepSource = true);
+        bool copyDirectory(const QString &source, const QString &destination, bool keepSource = true);
+
         bool moveFile(const QString &source, const QString &destination);
         bool moveDirectory(const QString &source, const QString &destination);
 
@@ -39,10 +42,16 @@ namespace Wizard
         void extractCab(const QString &cabFile, const QString &outputDir);
         bool extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter);
 
+        void installDirectories(const QString &source);
+
 
         bool mInstallMorrowind;
         bool mInstallTribunal;
         bool mInstallBloodmoon;
+
+        bool mMorrowindDone;
+        bool mTribunalDone;
+        bool mBloodmoonDone;
 
         QString mPath;
         QString mIniPath;
@@ -58,6 +67,8 @@ namespace Wizard
     signals:
         void finished();
         void textChanged(const QString &text);
+        void logTextChanged(const QString &text);
+
         void error(const QString &text);
         void progressChanged(int progress);
 

@@ -45,8 +45,6 @@ void Wizard::InstallationPage::initializePage()
             installProgressBar->setMaximum(installProgressBar->maximum() + 100);
     }
 
-    installProgressBar->setValue(100);
-
     startInstallation();
 }
 
@@ -74,6 +72,9 @@ void Wizard::InstallationPage::startInstallation()
 
     connect(unshield, SIGNAL(finished()),
             this, SLOT(installationFinished()));
+
+    connect(unshield, SIGNAL(error(QString)),
+            this, SLOT(installationError(QString)));
 
     connect(unshield, SIGNAL(textChanged(QString)),
             installProgressLabel, SLOT(setText(QString)));
@@ -135,6 +136,12 @@ void Wizard::InstallationPage::installationFinished()
     qDebug() << "finished!";
     mFinished = true;
     emit completeChanged();
+
+}
+
+void Wizard::InstallationPage::installationError(const QString &text)
+{
+    qDebug() << "error: " << text;
 }
 
 bool Wizard::InstallationPage::isComplete() const

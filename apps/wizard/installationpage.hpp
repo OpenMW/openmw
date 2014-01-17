@@ -28,6 +28,7 @@ namespace Wizard
 
     private slots:
         void installationFinished();
+        void installationError(const QString &text);
 
     protected:
         void initializePage();
