@@ -32,14 +32,14 @@ protected:
     /* This is the number of *discrete* groups. */
     static const size_t sNumGroups = 4;
 
-    class AnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class AnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     private:
         Animation *mAnimation;
         std::string mAnimationName;
 
     public:
-        AnimationValue(Animation *anim)
+        AnimationTime(Animation *anim)
           : mAnimation(anim)
         { }
 
@@ -52,12 +52,12 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-    class EffectAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class EffectAnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     private:
         float mTime;
     public:
-        EffectAnimationValue() : mTime(0) {  }
+        EffectAnimationTime() : mTime(0) {  }
         void addTime(float time) { mTime += time; }
         void resetTime(float value) { mTime = value; }
 
@@ -67,7 +67,7 @@ protected:
 
 
 
-    class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class NullAnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     public:
         virtual Ogre::Real getValue() const
@@ -134,8 +134,8 @@ protected:
 
     AnimStateMap mStates;
 
-    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
-    Ogre::SharedPtr<NullAnimationValue> mNullAnimationValuePtr;
+    Ogre::SharedPtr<AnimationTime> mAnimationTimePtr[sNumGroups];
+    Ogre::SharedPtr<NullAnimationTime> mNullAnimationTimePtr;
 
     ObjectAttachMap mAttachedObjects;
 

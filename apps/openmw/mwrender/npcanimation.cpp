@@ -61,8 +61,9 @@ std::string getVampireHead(const std::string& race, bool female)
 namespace MWRender
 {
 
-float SayAnimationValue::getValue() const
+float HeadAnimationTime::getValue() const
 {
+    // TODO: Handle eye blinking (time is in the text keys)
     if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
         return 0;
     else
@@ -124,7 +125,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
-    mSayAnimationValue = Ogre::SharedPtr<SayAnimationValue>(new SayAnimationValue(mPtr));
+    mHeadAnimationTime = Ogre::SharedPtr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -595,10 +596,10 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     {
         if(ctrl->getSource().isNull())
         {
-            ctrl->setSource(mNullAnimationValuePtr);
+            ctrl->setSource(mNullAnimationTimePtr);
 
             if (type == ESM::PRT_Head)
-                ctrl->setSource(mSayAnimationValue);
+                ctrl->setSource(mHeadAnimationTime);
         }
     }
 
