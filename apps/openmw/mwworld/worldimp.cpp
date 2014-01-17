@@ -2282,7 +2282,8 @@ namespace MWWorld
     void World::breakInvisibility(const Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
-        actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+        if (actor.getClass().isNpc())
+            actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
     }
 
     bool World::isDark() const
