@@ -261,8 +261,8 @@ namespace MWMechanics
                 //then start attacking
                 float speed1 = cls.getSpeed(actor);
                 float speed2 = mTarget.getClass().getSpeed(mTarget);
-                if(actor.getClass().getMovementSettings(mTarget).mPosition[0] == 0
-                        && actor.getClass().getMovementSettings(mTarget).mPosition[1] == 0)
+                if(mTarget.getClass().getMovementSettings(mTarget).mPosition[0] == 0
+                        && mTarget.getClass().getMovementSettings(mTarget).mPosition[1] == 0)
                     speed2 = 0;
 
                 float s1 = distBetween - weapRange;
