@@ -432,17 +432,14 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
                     MWWorld::Ptr actor = R()(runtime);
-                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string targetID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
                     
-                    if (actorID == "player")
-                    {
-                        creatureStats.setHostile(true);
-                        creatureStats.getAiSequence().stack(
-                            MWMechanics::AiCombat(MWBase::Environment::get().getWorld()->getPtr(actorID,true)));
-                    }
+                    creatureStats.setHostile(true);
+                    creatureStats.getAiSequence().stack(
+                        MWMechanics::AiCombat(MWBase::Environment::get().getWorld()->getPtr(targetID, true) ));
                 }
         };
 
