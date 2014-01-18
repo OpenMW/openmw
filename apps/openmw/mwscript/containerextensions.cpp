@@ -171,6 +171,9 @@ namespace MWScript
 
                     MWWorld::ActionEquip action (*it);
                     action.execute(ptr);
+
+                    if (ptr.getRefData().getHandle() == "player" && !ptr.getClass().getScript(ptr).empty())
+                        ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
                 }
         };
 
