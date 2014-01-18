@@ -276,14 +276,15 @@ namespace MWWorld
 
         mWorldScene->changeToVoid();
 
+        mStore.clearDynamic();
+        mStore.setUp();
+
         if (mPlayer)
         {
             mPlayer->setCell (0);
             mPlayer->getPlayer().getRefData() = RefData();
+            mPlayer->set (mStore.get<ESM::NPC>().find ("player"));
         }
-
-        mStore.clearDynamic();
-        mStore.setUp();
 
         mCells.clear();
 
