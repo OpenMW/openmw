@@ -36,9 +36,6 @@
 
 namespace
 {
-    const Ogre::Radian kOgrePi (Ogre::Math::PI);
-    const Ogre::Radian kOgrePiOverTwo (Ogre::Math::PI / Ogre::Real(2.0));
-
     struct CustomData : public MWWorld::CustomData
     {
         MWMechanics::NpcStats mNpcStats;
