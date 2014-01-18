@@ -161,9 +161,9 @@ void ESMStore::setUp()
         mClasses.write (writer);
         mClothes.write (writer);
         mEnchants.write (writer);
-        mNpcs.write (writer);
         mSpells.write (writer);
         mWeapons.write (writer);
+        mNpcs.write (writer);
     }
 
     bool ESMStore::readRecord (ESM::ESMReader& reader, int32_t type)
@@ -176,11 +176,25 @@ void ESMStore::setUp()
             case ESM::REC_CLAS:
             case ESM::REC_CLOT:
             case ESM::REC_ENCH:
-            case ESM::REC_NPC_:
             case ESM::REC_SPEL:
             case ESM::REC_WEAP:
+            case ESM::REC_NPC_:
 
                 mStores[type]->read (reader);
+
+                if (type==ESM::REC_NPC_)
+                {
+                    // NPC record will always be last and we know that there can be only one
+                    // dynamic NPC record (player) -> We are done here with dynamic record laoding
+                    setUp();
+
+                    const ESM::NPC *player = mNpcs.find ("player");
+
+                    if (!mRaces.find (player->mRace) ||
+                        !mClasses.find (player->mClass))
+                        throw std::runtime_error ("Invalid player record (race or class unavilable");
+                }
+
                 return true;
 
             default:
