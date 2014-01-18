@@ -3,13 +3,17 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/windowmanager.hpp"
-
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"

@@ -3,8 +3,15 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/actionequip.hpp"
+#include "../mwworld/class.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwgui/inventorywindow.hpp"
 #include "../mwgui/bookwindow.hpp"
 #include "../mwgui/scrollwindow.hpp"
@@ -17,8 +24,8 @@ namespace
 {
     bool sortItems(const MWWorld::Ptr& left, const MWWorld::Ptr& right)
     {
-        int cmp = MWWorld::Class::get(left).getName(left).compare(
-                    MWWorld::Class::get(right).getName(right));
+        int cmp = left.getClass().getName(left).compare(
+                    right.getClass().getName(right));
         return cmp < 0;
     }
 
@@ -334,10 +341,7 @@ namespace MWGui
             // equip, if it can be equipped
             if (!MWWorld::Class::get(item).getEquipmentSlots(item).first.empty())
             {
-                // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
-
-                MWWorld::ActionEquip action(item);
-                action.execute (MWBase::Environment::get().getWorld ()->getPlayerPtr());
+                MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
             }
 
             store.setSelectedEnchantItem(it);
