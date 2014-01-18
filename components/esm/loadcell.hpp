@@ -77,7 +77,10 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(-1) {}
+  Cell() : mWater(0), mHasWaterLevelRecord(false) {}
+
+  /// Merge \a modified into \a original
+  static void merge (Cell* original, Cell* modified);
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
@@ -90,6 +93,7 @@ struct Cell
   DATAstruct mData;
   AMBIstruct mAmbi;
   float mWater; // Water level
+  bool mHasWaterLevelRecord;
   bool mWaterInt;
   int mMapColor;
   int mNAM0;

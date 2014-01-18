@@ -47,9 +47,13 @@ void Cell::load(ESMReader &esm, bool saveContext)
             esm.getHT(waterl);
             mWater = (float) waterl;
             mWaterInt = true;
+            mHasWaterLevelRecord = true;
         }
         else if (esm.isNextSub("WHGT"))
+        {
             esm.getHT(mWater);
+            mHasWaterLevelRecord = true;
+        }
 
         // Quasi-exterior cells have a region (which determines the
         // weather), pure interior cells have ambient lighting
@@ -94,7 +98,7 @@ void Cell::save(ESMWriter &esm) const
     esm.writeHNT("DATA", mData, 12);
     if (mData.mFlags & Interior)
     {
-        if (mWater != -1) {
+        if (mHasWaterLevelRecord) {
             if (mWaterInt) {
                 int water =
                     (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
@@ -300,5 +304,18 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;
         mAmbi.mFogDensity = 0;
+    }
+
+    void Cell::merge(Cell *original, Cell *modified)
+    {
+        float waterLevel = original->mWater;
+        if (modified->mHasWaterLevelRecord)
+        {
+            waterLevel = modified->mWater;
+        }
+        // else: keep original water level, instead of resetting to 0
+
+        *original = *modified;
+        original->mWater = waterLevel;
     }
 }

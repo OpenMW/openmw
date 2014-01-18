@@ -56,7 +56,7 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
             // copy list into new cell
             cell->mContextList = oldcell->mContextList;
             // have new cell replace old cell
-            *oldcell = *cell;
+            ESM::Cell::merge(oldcell, cell);
         } else
             mInt[idLower] = *cell;
     }
@@ -83,7 +83,7 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
             }
             cell->mMovedRefs = oldcell->mMovedRefs;
             // have new cell replace old cell
-            *oldcell = *cell;
+            ESM::Cell::merge(oldcell, cell);
         } else
             mExt[std::make_pair(cell->mData.mX, cell->mData.mY)] = *cell;
     }
