@@ -7,6 +7,8 @@ namespace MWClass
 {
     class CreatureLevList : public MWWorld::Class
     {
+        void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
         public:
 
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
@@ -14,6 +16,9 @@ namespace MWClass
             /// can return an empty string.
 
             static void registerSelf();
+
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            ///< Add reference into a cell for rendering
     };
 }
 

@@ -487,7 +487,6 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mItemLists, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mLights, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics, rescale, loadingListener);
@@ -499,6 +498,8 @@ namespace MWWorld
         // Load NPCs and creatures _after_ everything else (important for adjustPosition to work correctly)
         insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale, loadingListener);
+        // Since this adds additional creatures, load afterwards, or they would be loaded twice
+        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale, loadingListener);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)
