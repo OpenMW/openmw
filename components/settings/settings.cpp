@@ -1,7 +1,8 @@
 #include "settings.hpp"
 
-#include <fstream>
 #include <stdexcept>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
@@ -25,7 +26,8 @@ void Manager::loadDefault (const std::string& file)
 
 void Manager::saveUser(const std::string& file)
 {
-    std::fstream fout(file.c_str(), std::ios::out);
+    namespace bfs = boost::filesystem;
+    bfs::ofstream fout(bfs::path(file));
 
     Ogre::ConfigFile::SectionIterator seci = mFile.getSectionIterator();
 
