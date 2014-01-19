@@ -197,7 +197,7 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         // TODO: where is the distance defined?
-        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, 100);
+        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, 200);
         if (result.first.isEmpty())
             return; // Didn't hit anything
 
