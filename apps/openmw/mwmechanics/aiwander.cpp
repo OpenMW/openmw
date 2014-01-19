@@ -191,8 +191,11 @@ namespace MWMechanics
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
                 float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
                 int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-                // TODO: do not show subtitle messagebox if player is too far away? or do not say at all?
-                if (roll < chance)
+
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+                // Don't bother if the player is out of hearing range
+                if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
                     MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
             }
         }
