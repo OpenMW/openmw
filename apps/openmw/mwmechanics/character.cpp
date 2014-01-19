@@ -250,14 +250,16 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
             mAnimation->disable(mCurrentJump);
             mCurrentJump = jump;
-            mAnimation->play(mCurrentJump, Priority_Jump, jumpgroup, false,
+            if (mAnimation->hasAnimation("jump"))
+                mAnimation->play(mCurrentJump, Priority_Jump, jumpgroup, false,
                              1.0f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
         else
         {
             mAnimation->disable(mCurrentJump);
             mCurrentJump.clear();
-            mAnimation->play(jump, Priority_Jump, jumpgroup, true,
+            if (mAnimation->hasAnimation("jump"))
+                mAnimation->play(jump, Priority_Jump, jumpgroup, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
         }
     }
