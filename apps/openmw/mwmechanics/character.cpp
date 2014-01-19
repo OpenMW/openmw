@@ -317,7 +317,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 }
 
 
-void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group)
+void getWeaponGroup(WeaponType weaptype, std::string &group)
 {
     const WeaponInfo *info = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(weaptype));
     if(info != sWeaponTypeListEnd)
@@ -325,7 +325,7 @@ void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group
 }
 
 
-MWWorld::ContainerStoreIterator CharacterController::getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
+MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
 {
     if(stats.getDrawState() == DrawState_Spell)
     {
