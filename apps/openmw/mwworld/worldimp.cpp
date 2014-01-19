@@ -821,6 +821,8 @@ namespace MWWorld
         if(anim != NULL)
         {
             Ogre::Node *node = anim->getNode("Head");
+            if (node == NULL)
+                node = anim->getNode("Bip01 Head");
             if(node != NULL)
                 pos += node->_getDerivedPosition();
         }
