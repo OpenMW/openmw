@@ -148,8 +148,10 @@ namespace MWClass
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
         MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertCreature(ptr);
+        actors.insertCreature(ptr, ref->mBase->mFlags & ESM::Creature::Weapon);
     }
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const

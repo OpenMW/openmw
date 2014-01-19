@@ -76,10 +76,14 @@ void Actors::insertNPC(const MWWorld::Ptr& ptr)
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
 }
-void Actors::insertCreature (const MWWorld::Ptr& ptr)
+void Actors::insertCreature (const MWWorld::Ptr& ptr, bool weaponsShields)
 {
     insertBegin(ptr);
-    CreatureAnimation* anim = new CreatureAnimation(ptr);
+    Animation* anim = NULL;
+    if (weaponsShields)
+        anim = new CreatureWeaponAnimation(ptr);
+    else
+        anim = new CreatureAnimation(ptr);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
