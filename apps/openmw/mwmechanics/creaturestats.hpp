@@ -10,6 +10,7 @@
 #include "spells.hpp"
 #include "activespells.hpp"
 #include "aisequence.hpp"
+#include "drawstate.hpp"
 
 namespace MWMechanics
 {
@@ -18,6 +19,7 @@ namespace MWMechanics
     ///
     class CreatureStats
     {
+        DrawState_ mDrawState;
         AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         int mLevel;
@@ -56,6 +58,9 @@ namespace MWMechanics
 
     public:
         CreatureStats();
+
+        DrawState_ getDrawState() const;
+        void setDrawState(DrawState_ state);
 
         bool needToRecalcDynamicStats();
 

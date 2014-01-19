@@ -22,8 +22,7 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mDrawState (DrawState_Nothing)
-, mBounty (0)
+    : mBounty (0)
 , mLevelProgress(0)
 , mDisposition(0)
 , mReputation(0)
@@ -34,16 +33,6 @@ MWMechanics::NpcStats::NpcStats()
 , mLastDrowningHit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
-}
-
-MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
-{
-    return mDrawState;
-}
-
-void MWMechanics::NpcStats::setDrawState (DrawState_ state)
-{
-    mDrawState = state;
 }
 
 float MWMechanics::NpcStats::getAttackStrength() const

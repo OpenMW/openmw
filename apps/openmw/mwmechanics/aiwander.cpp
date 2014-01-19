@@ -7,8 +7,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
-#include "../mwmechanics/npcstats.hpp"
-
+#include "creaturestats.hpp"
 #include <OgreVector3.h>
 
 namespace
@@ -66,8 +65,7 @@ namespace MWMechanics
 
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
-        if (actor.getClass().isNpc())
-            actor.getClass().getNpcStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {

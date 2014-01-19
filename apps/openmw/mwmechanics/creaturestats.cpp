@@ -16,7 +16,7 @@ namespace MWMechanics
           mAttackingOrSpell(false), mAttackType(AT_Chop),
           mIsWerewolf(false),
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false),
-          mMovementFlags(0)
+          mMovementFlags(0), mDrawState (DrawState_Nothing)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -450,6 +450,16 @@ namespace MWMechanics
                 return getMovementFlag (Flag_Sneak) || getMovementFlag (Flag_ForceSneak);
         }
         return false; // shut up, compiler
+    }
+
+    DrawState_ CreatureStats::getDrawState() const
+    {
+        return mDrawState;
+    }
+
+    void CreatureStats::setDrawState(DrawState_ state)
+    {
+        mDrawState = state;
     }
 
 }
