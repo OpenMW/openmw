@@ -1,4 +1,5 @@
 #include "aicombat.hpp"
+#include "aifollow.hpp"
 
 #include "movement.hpp"
 
@@ -39,7 +40,7 @@ namespace MWMechanics
         mTimerAttack(0), 
         mTimerReact(0), 
         mTimerCombatMove(0),
-        mCloseUp(false),
+        mFollowTarget(false),
         mReadyToAttack(false),
         mStrike(false),
         mCombatMove(false),
@@ -184,7 +185,7 @@ namespace MWMechanics
         Ogre::Vector3 vDir = vDest - vStart;
         float distBetween = vDir.length();
 
-        if(distBetween < rangeMelee || (distBetween <= rangeCloseUp && mCloseUp) )
+        if(distBetween < rangeMelee || (distBetween <= rangeCloseUp && mFollowTarget) )
         {
             //Melee and Close-up combat
             vDir.z = 0;
@@ -194,13 +195,10 @@ namespace MWMechanics
             // TODO: use movement settings instead of rotating directly
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
 
-            if(mPathFinder.isPathConstructed())
-                mPathFinder.clearPath();
-
             //MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
 
             //bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
-            if (mCloseUp && distBetween > rangeMelee)
+            if (mFollowTarget && distBetween > rangeMelee)
             {
                 //Close-up combat: just run up on target
                 mMovement.mPosition[1] = 1;
@@ -216,7 +214,7 @@ namespace MWMechanics
                     mTimerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
                     mCombatMove = true;
                 }
-                else if(!distantCombat || (distantCombat && rangeMelee/5))
+                else if(actor.getClass().isNpc() && (!distantCombat || (distantCombat && rangeMelee/5)))
                 {
                     //apply sideway movement (kind of dodging) with some probability
                     if(static_cast<float>(rand())/RAND_MAX < 0.25)
@@ -234,13 +232,19 @@ namespace MWMechanics
 
                 mReadyToAttack = true;
                 //only once got in melee combat, actor is allowed to use close-up shortcutting
-                mCloseUp = true;
+                mFollowTarget = true;
             }
         }
         else
         {
-            //target is at far distance: build & follow the path
-            mCloseUp = false;
+            //target is at far distance: build path to target OR follow target (if previously actor had reached it once)
+
+            /*
+            //apply when AIFOLLOW package implementation will be existent
+            if(mFollowTarget)
+                actor.getClass().getCreatureStats(actor).getAiSequence().stack(AiFollow(mTarget));*/
+
+            mFollowTarget = false;
 
             buildNewPath(actor);
 
@@ -342,7 +346,8 @@ namespace MWMechanics
                 //maybe here is a mistake (?): PathFinder::getPathSize() returns number of grid points in the path,
                 //not the actual path length. Here we should know if the new path is actually more effective.
                 //if(pathFinder2.getPathSize() < mPathFinder.getPathSize())
-                    mPathFinder = newPathFinder;
+                newPathFinder.syncStart(mPathFinder.getPath());
+                mPathFinder = newPathFinder;
             }
         }
     }

@@ -504,7 +504,7 @@ bool CharacterController::updateCreatureState()
             }
 
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                             MWRender::Animation::Group_UpperBody, true,
+                             MWRender::Animation::Group_All, true,
                              1, "start", "stop",
                              0.0f, 0);
             mUpperBodyState = UpperCharState_StartToMinAttack;
