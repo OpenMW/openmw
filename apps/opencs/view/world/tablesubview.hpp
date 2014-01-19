@@ -33,10 +33,14 @@ namespace CSVWorld
             virtual void updateEditorSetting (const QString& key, const QString& value);
 
             virtual void setStatusBar (bool show);
+            
+        signals:
+            void cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type);
 
         private slots:
 
             void editRequest (int row);
+            void cloneRequest (int row);
     };
 }
 

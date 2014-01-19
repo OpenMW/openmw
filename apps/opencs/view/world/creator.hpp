@@ -2,6 +2,7 @@
 #define CSV_WORLD_CREATOR_H
 
 #include <QWidget>
+#include "../../model/world/universalid.hpp"
 
 class QUndoStack;
 
@@ -23,6 +24,8 @@ namespace CSVWorld
             virtual ~Creator();
 
             virtual void reset() = 0;
+            
+            virtual void cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type) = 0;
 
             virtual void setEditLock (bool locked) = 0;
 

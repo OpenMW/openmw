@@ -2,6 +2,7 @@
 #include "genericcreator.hpp"
 
 #include <memory>
+#include <qt4/QtCore/QString>
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -58,7 +59,7 @@ const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
-: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false)
+: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode(false), mClonedType(CSMWorld::UniversalId::Type_None)
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
@@ -89,6 +90,7 @@ void CSVWorld::GenericCreator::setEditLock (bool locked)
 
 void CSVWorld::GenericCreator::reset()
 {
+    mCloneMode = false;
     mId->setText ("");
     update();
 }
@@ -120,16 +122,30 @@ void CSVWorld::GenericCreator::create()
 {
     if (!mLocked)
     {
-        std::string id = getId();
+        if (mCloneMode)
+        {
+            std::string id = getId();
+        } else {
+            std::string id = getId();
 
-        std::auto_ptr<CSMWorld::CreateCommand> command (new CSMWorld::CreateCommand (
+            std::auto_ptr<CSMWorld::CreateCommand> command (new CSMWorld::CreateCommand (
             dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
 
-        configureCreateCommand (*command);
+            configureCreateCommand (*command);
 
-        mUndoStack.push (command.release());
+            mUndoStack.push (command.release());
 
-        emit done();
-        emit requestFocus (id);
+            emit done();
+            emit requestFocus (id);
+        }
     }
+}
+
+void CSVWorld::GenericCreator::cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type)
+{
+    mCloneMode = true;
+    mClonedId = originid;
+    mClonedType = type;
+    
+    mId->setText(QString::fromStdString(mClonedId));
 }

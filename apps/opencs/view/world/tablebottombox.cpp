@@ -157,3 +157,12 @@ void CSVWorld::TableBottomBox::createRequest()
     setVisible (true);
     mCreating = true;
 }
+
+void CSVWorld::TableBottomBox::cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type)
+{
+    mCreator->reset();
+    mCreator->cloneMode(id, type);
+    mLayout->setCurrentWidget(mCreator);
+    setVisible (true);
+    mCreating = true;
+}

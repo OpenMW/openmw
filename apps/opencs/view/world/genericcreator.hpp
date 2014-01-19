@@ -1,6 +1,7 @@
 #ifndef CSV_WORLD_GENERICCREATOR_H
 #define CSV_WORLD_GENERICCREATOR_H
 
+class QString;
 class QPushButton;
 class QLineEdit;
 class QHBoxLayout;
@@ -28,6 +29,9 @@ namespace CSVWorld
             std::string mErrors;
             QHBoxLayout *mLayout;
             bool mLocked;
+            bool mCloneMode;
+            std::string mClonedId;
+            CSMWorld::UniversalId::Type mClonedType;
 
         protected:
 
@@ -57,6 +61,8 @@ namespace CSVWorld
 
             virtual void reset();
 
+            virtual void cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type);
+            
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.

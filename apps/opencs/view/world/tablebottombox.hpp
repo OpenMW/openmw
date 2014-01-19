@@ -2,6 +2,7 @@
 #define CSV_WORLD_BOTTOMBOX_H
 
 #include <QWidget>
+#include <apps/opencs/model/world/universalid.hpp>
 
 class QLabel;
 class QStackedLayout;
@@ -76,6 +77,7 @@ namespace CSVWorld
             /// \param modified Number of added and modified records
 
             void createRequest();
+            void cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type);
     };
 }
 

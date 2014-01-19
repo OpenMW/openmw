@@ -46,8 +46,13 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     mTable->selectionSizeUpdate();
 
     if (mBottom->canCreateAndDelete())
+    {
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
-
+        
+        connect (mTable, SIGNAL (cloneRequest(int)), this, SLOT(cloneRequest(int)));
+        connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)), 
+                mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+    }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
 
@@ -75,4 +80,10 @@ void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, con
 void CSVWorld::TableSubView::setStatusBar (bool show)
 {
     mBottom->setStatusBar (show);
+}
+
+void CSVWorld::TableSubView::cloneRequest(int row)
+{
+    const CSMWorld::UniversalId& toClone(mTable->getUniversalId(row));
+    emit cloneRequest(toClone.getId(), toClone.getType());
 }
