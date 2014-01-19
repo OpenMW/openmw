@@ -22,7 +22,7 @@ namespace MWMechanics
 {
 
 class Movement;
-class NpcStats;
+class CreatureStats;
 
 enum Priority {
     Priority_Default,
@@ -170,13 +170,13 @@ class CharacterController
 
     static void getWeaponGroup(WeaponType weaptype, std::string &group);
 
-    static MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
+    static MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats,
                                                            MWWorld::InventoryStore &inv,
                                                            WeaponType *weaptype);
 
     void clearAnimQueue();
 
-    bool updateNpcState(bool inwater, bool isrunning);
+    bool updateWeaponState(bool inwater, bool isrunning);
     bool updateCreatureState();
 
     void updateVisibility();

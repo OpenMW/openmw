@@ -42,13 +42,14 @@ namespace MWMechanics
 
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
-        if(actor.getTypeName() == typeid(ESM::NPC).name())
+        if (actor.getClass().hasInventoryStore(actor))
         {
-            MWMechanics::DrawState_ state = actor.getClass().getNpcStats(actor).getDrawState();
+            MWMechanics::DrawState_ state = actor.getClass().getCreatureStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                actor.getClass().getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
+                actor.getClass().getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
             //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
         }
+
         ESM::Position pos = actor.getRefData().getPosition();
         const ESM::Pathgrid *pathgrid =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);

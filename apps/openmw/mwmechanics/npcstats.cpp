@@ -28,21 +28,10 @@ MWMechanics::NpcStats::NpcStats()
 , mReputation(0)
 , mWerewolfKills (0)
 , mProfit(0)
-, mAttackStrength(0.0f)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
-}
-
-float MWMechanics::NpcStats::getAttackStrength() const
-{
-    return mAttackStrength;
-}
-
-void MWMechanics::NpcStats::setAttackStrength(float value)
-{
-    mAttackStrength = value;
 }
 
 int MWMechanics::NpcStats::getBaseDisposition() const

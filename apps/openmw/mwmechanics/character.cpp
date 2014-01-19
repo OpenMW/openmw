@@ -323,7 +323,7 @@ void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group
 }
 
 
-MWWorld::ContainerStoreIterator CharacterController::getActiveWeapon(NpcStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
+MWWorld::ContainerStoreIterator CharacterController::getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
 {
     if(stats.getDrawState() == DrawState_Spell)
     {
@@ -434,15 +434,16 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
          * handle knockout and death which moves the character down. */
         mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
 
-        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
+        if (cls.hasInventoryStore(mPtr))
         {
-            getActiveWeapon(cls.getNpcStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
+            getActiveWeapon(cls.getCreatureStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
             if(mWeaponType != WeapType_None)
             {
                 getWeaponGroup(mWeaponType, mCurrentWeapon);
                 mUpperBodyState = UpperCharState_WeapEquiped;
                 mAnimation->showWeapons(true);
             }
+            mAnimation->showCarriedLeft(mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand);
         }
 
         if(!cls.getCreatureStats(mPtr).isDead())
@@ -517,14 +518,14 @@ bool CharacterController::updateCreatureState()
     return false;
 }
 
-bool CharacterController::updateNpcState(bool inwater, bool isrunning)
+bool CharacterController::updateWeaponState(bool inwater, bool isrunning)
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-    NpcStats &stats = cls.getNpcStats(mPtr);
+    CreatureStats &stats = cls.getCreatureStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
-    const bool isWerewolf = stats.isWerewolf();
+    const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
     bool forcestateupdate = false;
     if(weaptype != mWeaponType && mHitState != CharState_KnockDown)
@@ -613,7 +614,7 @@ bool CharacterController::updateNpcState(bool inwater, bool isrunning)
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
-                mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(false);
+                stats.setAttackingOrSpell(false);
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -1128,8 +1129,8 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(cls.isNpc())
-            forcestateupdate = updateNpcState(inwater, isrunning) || forcestateupdate;
+        if(cls.hasInventoryStore(mPtr))
+            forcestateupdate = updateWeaponState(inwater, isrunning) || forcestateupdate;
         else
             forcestateupdate = updateCreatureState() || forcestateupdate;
 

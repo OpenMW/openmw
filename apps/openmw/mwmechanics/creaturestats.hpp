@@ -40,6 +40,7 @@ namespace MWMechanics
         bool mKnockdown;
         bool mHitRecovery;
         unsigned int mMovementFlags;
+        float mAttackStrength; // Note only some creatures attack with weapons
 
         float mFallHeight;
 
@@ -61,6 +62,10 @@ namespace MWMechanics
 
         DrawState_ getDrawState() const;
         void setDrawState(DrawState_ state);
+
+        /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
+        float getAttackStrength() const;
+        void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
 

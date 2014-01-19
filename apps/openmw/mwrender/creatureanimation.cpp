@@ -34,8 +34,8 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
 
 CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr)
     : Animation(ptr, ptr.getRefData().getBaseNode())
-    , mShowWeapons(true) // TODO: change to false, once charactercontroller handles creature weapons
-    , mShowCarriedLeft(true) // TODO: change to false, once charactercontroller handles creature weapons
+    , mShowWeapons(false)
+    , mShowCarriedLeft(false)
 {
     MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 

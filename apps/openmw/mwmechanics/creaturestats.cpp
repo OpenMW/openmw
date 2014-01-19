@@ -16,7 +16,7 @@ namespace MWMechanics
           mAttackingOrSpell(false), mAttackType(AT_Chop),
           mIsWerewolf(false),
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false),
-          mMovementFlags(0), mDrawState (DrawState_Nothing)
+          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -460,6 +460,16 @@ namespace MWMechanics
     void CreatureStats::setDrawState(DrawState_ state)
     {
         mDrawState = state;
+    }
+
+    float CreatureStats::getAttackStrength() const
+    {
+        return mAttackStrength;
+    }
+
+    void CreatureStats::setAttackStrength(float value)
+    {
+        mAttackStrength = value;
     }
 
 }

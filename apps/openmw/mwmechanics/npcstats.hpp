@@ -59,10 +59,6 @@ namespace MWMechanics
             int getProfit() const;
             void modifyProfit(int diff);
 
-            /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
-            float getAttackStrength() const;
-            void setAttackStrength(float value);
-
             int getBaseDisposition() const;
 
             void setBaseDisposition(int disposition);
