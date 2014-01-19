@@ -62,26 +62,6 @@ struct StateInfo {
     const char groupname[32];
 };
 
-static const std::string sDeathList[] = {
-    "death1" ,
-    "death2" ,
-    "death3" ,
-    "death4" ,
-    "death5" ,
-    "swimdeath",
-};
-static const int sDeathListSize = sizeof(sDeathList)/sizeof(sDeathList[0]);
-
-static const std::string sHitList[] = {
-    "hit1" ,
-    "hit2" ,
-    "hit3" ,
-    "hit4" ,
-    "hit5" ,
-    "knockdown" ,
-};
-static const int sHitListSize = sizeof(sHitList)/sizeof(sHitList[0]);
-
 static const StateInfo sMovementList[] = {
     { CharState_WalkForward, "walkforward" },
     { CharState_WalkBack, "walkback" },
@@ -154,6 +134,17 @@ public:
     { return weap.type == type; }
 };
 
+std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num)
+{
+    int numAnims=0;
+    while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
+        ++numAnims;
+
+    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * numAnims + 1; // [1, numAnims]
+    if (num)
+        *num = roll;
+    return prefix + Ogre::StringConverter::toString(roll);
+}
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
 {
@@ -167,20 +158,13 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             if(knockdown)
             {
                 mHitState = CharState_KnockDown;
-                mCurrentHit = sHitList[sHitListSize-1];
+                mCurrentHit = "knockdown";
                 mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
             }
             else if (recovery)
             {
                 mHitState = CharState_Hit;
-                int iHit = rand() % (sHitListSize-1);
-                mCurrentHit = sHitList[iHit];
-                if(mPtr.getRefData().getHandle()=="player" && !mAnimation->hasAnimation(mCurrentHit))
-                {
-                    //only 3 different hit animations if player is in 1st person
-                    int iHit = rand() % (sHitListSize-3);
-                    mCurrentHit = sHitList[iHit];
-                }
+                mCurrentHit = chooseRandomGroup("hit");
                 mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
             }
         }
@@ -387,28 +371,20 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
 
 void CharacterController::playRandomDeath(float startpoint)
 {
-    if(MWWorld::Class::get(mPtr).isNpc())
+    if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
     {
-        if(MWBase::Environment::get().getWorld()->isSwimming(mPtr))
-        {
-            mDeathState = CharState_SwimDeath;
-            mCurrentDeath = sDeathList[sDeathListSize-1];   //last in the list is 'swimdeath'
-        }
-        else
-        {
-            int num = rand() % (sDeathListSize-1);
-            mDeathState = static_cast<CharacterState>(CharState_Death1 + num);
-            mCurrentDeath = sDeathList[num];
-        }
+        mDeathState = CharState_SwimDeath;
+        mCurrentDeath = "swimdeath";
     }
     else
     {
-        mDeathState = CharState_Death1;
-        mCurrentDeath = "death1";
+        int selected=0;
+        mCurrentDeath = chooseRandomGroup("death", &selected);
+        mDeathState = static_cast<CharacterState>(CharState_Death1 + (selected-1));
     }
 
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                    false, 1.0f, "start", "stop", 0.0f, 0);
+                    false, 1.0f, "start", "stop", startpoint, 0);
 }
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)

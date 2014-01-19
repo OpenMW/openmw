@@ -177,6 +177,10 @@ class CharacterController
 
     void playRandomDeath(float startpoint = 0.0f);
 
+    /// choose a random animation group with \a prefix and numeric suffix
+    /// @param num if non-NULL, the chosen animation number will be written here
+    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
