@@ -2097,7 +2097,6 @@ namespace MWWorld
     void World::castSpell(const Ptr &actor)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
 
         MWWorld::Ptr target = getFacedObject();
 
@@ -2111,9 +2110,11 @@ namespace MWWorld
 
             cast.cast(spell);
         }
-        else if (inv.getSelectedEnchantItem() != inv.end())
+        else if (actor.getClass().hasInventoryStore(actor))
         {
-            cast.cast(*inv.getSelectedEnchantItem());
+            MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+            if (inv.getSelectedEnchantItem() != inv.end())
+                cast.cast(*inv.getSelectedEnchantItem());
         }
     }
 
@@ -2282,7 +2283,7 @@ namespace MWWorld
     void World::breakInvisibility(const Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
-        if (actor.getClass().isNpc())
+        if (actor.getClass().hasInventoryStore(actor))
             actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
     }
 

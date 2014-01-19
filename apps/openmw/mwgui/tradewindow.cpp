@@ -14,7 +14,6 @@
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/npcstats.hpp"
 
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
@@ -293,8 +292,8 @@ namespace MWGui
             float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
 
-            const MWMechanics::NpcStats &sellerStats = mPtr.getClass().getNpcStats(mPtr);
-            const MWMechanics::NpcStats &playerStats = player.getClass().getNpcStats(player);
+            const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
+            const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
 
             float a1 = std::min(player.getClass().getSkill(player, ESM::Skill::Mercantile), 100);
             float b1 = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);

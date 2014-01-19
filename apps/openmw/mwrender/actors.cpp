@@ -75,9 +75,6 @@ void Actors::insertNPC(const MWWorld::Ptr& ptr)
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
-
-    // Create CustomData, will do autoEquip and trigger animation parts update
-    ptr.getClass().getInventoryStore(ptr);
 }
 void Actors::insertCreature (const MWWorld::Ptr& ptr)
 {

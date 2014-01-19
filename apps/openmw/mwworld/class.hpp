@@ -150,6 +150,9 @@ namespace MWWorld
             ///< Return inventory store or throw an exception, if class does not have a
             /// inventory store (default implementation: throw an exceoption)
 
+            virtual bool hasInventoryStore (const Ptr& ptr) const;
+            ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
+
             virtual void lock (const Ptr& ptr, int lockLevel) const;
             ///< Lock object (default implementation: throw an exception)
 

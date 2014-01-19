@@ -26,6 +26,8 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "../mwworld/inventorystore.hpp"
+
 #include "../mwmechanics/npcstats.hpp"
 
 namespace
@@ -33,15 +35,20 @@ namespace
     struct CustomData : public MWWorld::CustomData
     {
         MWMechanics::CreatureStats mCreatureStats;
-        MWWorld::ContainerStore mContainerStore;
+        MWWorld::ContainerStore* mContainerStore; // may be InventoryStore for some creatures
         MWMechanics::Movement mMovement;
 
         virtual MWWorld::CustomData *clone() const;
+
+        CustomData() : mContainerStore(0) {}
+        virtual ~CustomData() { delete mContainerStore; }
     };
 
     MWWorld::CustomData *CustomData::clone() const
     {
-        return new CustomData (*this);
+        CustomData* cloned = new CustomData (*this);
+        cloned->mContainerStore = mContainerStore->clone();
+        return cloned;
     }
 }
 
@@ -106,15 +113,23 @@ namespace MWClass
                 data->mCreatureStats.getSpells().add (*iter);
 
             // inventory
-            data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr), "",
+            if (ref->mBase->mFlags & ESM::Creature::Weapon)
+                data->mContainerStore = new MWWorld::InventoryStore();
+            else
+                data->mContainerStore = new MWWorld::ContainerStore();
+
+            // store
+            ptr.getRefData().setCustomData (data.release());
+
+            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "",
                                        MWBase::Environment::get().getWorld()->getStore());
 
             // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
             // (except for gold you gave him)
-            data->mContainerStore.add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
+            getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
 
-            // store
-            ptr.getRefData().setCustomData (data.release());
+            if (ref->mBase->mFlags & ESM::Creature::Weapon)
+                getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 
@@ -325,18 +340,33 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
-    MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr)
-        const
+    MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return *dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+    }
+
+    MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
+        if (ref->mBase->mFlags & ESM::Creature::Weapon)
+            return dynamic_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
+        else
+            throw std::runtime_error("this creature has no inventory store");
+    }
+
+    bool Creature::hasInventoryStore(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
+        return (ref->mBase->mFlags & ESM::Creature::Weapon);
     }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         return ref->mBase->mScript;
     }

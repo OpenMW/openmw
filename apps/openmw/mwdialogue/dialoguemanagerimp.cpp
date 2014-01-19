@@ -420,7 +420,7 @@ namespace MWDialogue
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
         // Apply disposition change to NPC's base disposition
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        if (mActor.getClass().isNpc())
         {
             MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
             npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);

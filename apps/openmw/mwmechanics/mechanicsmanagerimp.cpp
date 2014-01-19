@@ -196,8 +196,8 @@ namespace MWMechanics
             creatureStats.setDynamic (i, stat);
         }
 
-        // auto-equip again. we need this for when the race is changed to a beast race
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        // auto-equip again. we need this for when the race is changed to a beast race and shoes are no longer equippable
+        MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
         for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
             invStore.unequipAll(ptr);
         invStore.autoEquip(ptr);

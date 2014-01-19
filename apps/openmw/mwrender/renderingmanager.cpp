@@ -892,8 +892,6 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
         mPlayerAnimation->~NpcAnimation();
         new(mPlayerAnimation) NpcAnimation(ptr, ptr.getRefData().getBaseNode(), RV_Actors);
     }
-    // Ensure CustomData -> autoEquip -> animation update
-    ptr.getClass().getInventoryStore(ptr);
 
     mCamera->setAnimation(mPlayerAnimation);
     mWater->removeEmitter(ptr);

@@ -142,7 +142,7 @@ namespace MWRender
     {
         mAnimation->updateParts();
 
-        MWWorld::InventoryStore &inv = MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter);
+        MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         std::string groupname;
         if(iter == inv.end())

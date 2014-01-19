@@ -62,6 +62,8 @@ namespace MWWorld
 
             virtual ~ContainerStore();
 
+            virtual ContainerStore* clone() { return new ContainerStore(*this); }
+
             ContainerStoreIterator begin (int mask = Type_All);
 
             ContainerStoreIterator end();

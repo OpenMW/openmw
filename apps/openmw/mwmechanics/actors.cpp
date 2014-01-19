@@ -47,8 +47,7 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
 
 bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
 {
-    // TODO: remove this check once creatures support inventory store
-    if (ptr.getTypeName() == typeid(ESM::NPC).name())
+    if (ptr.getClass().hasInventoryStore(ptr))
     {
         MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator item =

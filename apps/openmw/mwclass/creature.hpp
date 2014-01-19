@@ -68,6 +68,11 @@ namespace MWClass
                 const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
+            virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;
+            ///< Return inventory store
+
+            virtual bool hasInventoryStore (const MWWorld::Ptr &ptr) const;
+
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 

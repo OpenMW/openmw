@@ -289,7 +289,7 @@ namespace MWClass
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
+        MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
 
         if (ptr.getCellRef().mCharge == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
@@ -300,20 +300,23 @@ namespace MWClass
         if (slots_.first.empty())
             return std::make_pair(0, "");
 
-        std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
-
-        // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
-        if(race->mData.mFlags & ESM::Race::Beast)
+        if (npc.getClass().isNpc())
         {
-            std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
+            std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
-            for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM::Race::Beast)
             {
-                if((*itr).mPart == ESM::PRT_Head)
-                    return std::make_pair(0, "#{sNotifyMessage13}");
-                if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
-                    return std::make_pair(0, "#{sNotifyMessage14}");
+                std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
+
+                for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                {
+                    if((*itr).mPart == ESM::PRT_Head)
+                        return std::make_pair(0, "#{sNotifyMessage13}");
+                    if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                        return std::make_pair(0, "#{sNotifyMessage14}");
+                }
             }
         }
 
