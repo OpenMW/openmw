@@ -198,7 +198,7 @@ namespace MWGui
     void Console::executeFile (const std::string& path)
     {
         namespace bfs = boost::filesystem;
-        bfs::ifstream stream (bfs::path(path));
+        bfs::ifstream stream ((bfs::path(path)));
 
         if (!stream.is_open())
             printError ("failed to open file: " + path);

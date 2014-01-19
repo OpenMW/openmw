@@ -27,7 +27,7 @@ void Manager::loadDefault (const std::string& file)
 void Manager::saveUser(const std::string& file)
 {
     namespace bfs = boost::filesystem;
-    bfs::ofstream fout(bfs::path(file));
+    bfs::ofstream fout((bfs::path(file)));
 
     Ogre::ConfigFile::SectionIterator seci = mFile.getSectionIterator();
 

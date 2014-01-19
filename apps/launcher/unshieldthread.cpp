@@ -201,7 +201,7 @@ namespace
             add_setting("Archives", "Archive 1", "Bloodmoon.bsa", ini);
         }
 
-        bfs::ofstream inistream(ini_path)
+        bfs::ofstream inistream((ini_path));
         inistream << ini;
         inistream.close();
     }
