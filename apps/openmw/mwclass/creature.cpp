@@ -6,6 +6,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -195,9 +196,38 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
+
+        // Get the weapon used (if hand-to-hand, weapon = inv.end())
+        MWWorld::Ptr weapon;
+        if (ptr.getClass().hasInventoryStore(ptr))
+        {
+            MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+            MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponslot != inv.end() && weaponslot->getTypeName() == typeid(ESM::Weapon).name())
+                weapon = *weaponslot;
+        }
+
+        // Reduce fatigue
+        // somewhat of a guess, but using the weapon weight makes sense
+        const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
+        const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
+        const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
+        MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
+        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
+        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
+        if (!weapon.isEmpty())
+            fatigueLoss += weapon.getClass().getWeight(weapon) * stats.getAttackStrength() * fWeaponFatigueMult;
+        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
+        stats.setFatigue(fatigue);
 
         // TODO: where is the distance defined?
-        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, 200);
+        float dist = 200.f;
+        if (!weapon.isEmpty())
+            dist = 100.f * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
+
+        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
         if (result.first.isEmpty())
             return; // Didn't hit anything
 
@@ -208,7 +238,6 @@ namespace MWClass
 
         Ogre::Vector3 hitPosition = result.second;
 
-        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
         MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
         float hitchance = ref->mBase->mData.mCombat +
@@ -243,7 +272,70 @@ namespace MWClass
             break;
         }
 
+        // I think this should be random, since attack1-3 animations don't have an attack strength like NPCs do
         float damage = min + (max - min) * ::rand()/(RAND_MAX+1.0);
+
+        if (!weapon.isEmpty())
+        {
+            const bool weaphashealth = get(weapon).hasItemHealth(weapon);
+            const unsigned char *attack = NULL;
+            if(type == MWMechanics::CreatureStats::AT_Chop)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+            else if(type == MWMechanics::CreatureStats::AT_Slash)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash;
+            else if(type == MWMechanics::CreatureStats::AT_Thrust)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
+            if(attack)
+            {
+                float weaponDamage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                weaponDamage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                if(weaphashealth)
+                {
+                    int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
+                    if(weapon.getCellRef().mCharge == -1)
+                        weapon.getCellRef().mCharge = weapmaxhealth;
+                    weaponDamage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
+                }
+
+                if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                    weapon.getCellRef().mCharge -= std::min(std::max(1,
+                        (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
+
+                // Weapon broken? unequip it
+                if (weapon.getCellRef().mCharge == 0)
+                    weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
+
+                damage += weaponDamage;
+            }
+
+            // Apply "On hit" enchanted weapons
+            std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
+            if (!enchantmentName.empty())
+            {
+                const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                            enchantmentName);
+                if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+                {
+                    // Check if we have enough charges
+                    const float enchantCost = enchantment->mData.mCost;
+                    int eSkill = getSkill(ptr, ESM::Skill::Enchant);
+                    const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
+
+                    if (weapon.getCellRef().mEnchantmentCharge == -1)
+                        weapon.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+                    if (weapon.getCellRef().mEnchantmentCharge < castCost)
+                    {
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                    }
+                    else
+                    {
+                        weapon.getCellRef().mEnchantmentCharge -= castCost;
+                        MWMechanics::CastSpell cast(ptr, victim);
+                        cast.cast(weapon);
+                    }
+                }
+            }
+        }
 
         // TODO: do not do this if the attack is blocked
         MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
