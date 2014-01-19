@@ -39,6 +39,26 @@ namespace CSMWorld
             virtual void undo();
     };
 
+    class CloneCommand : public QUndoCommand
+    {
+            IdTable& mModel;
+            std::string mIdOrigin;
+            std::string mIdDestination;
+            UniversalId::Type mType;
+            std::map<int, QVariant> mValues;
+
+        public:
+
+            CloneCommand (IdTable& model, const std::string& idOrigin, 
+                          const std::string& IdDestination,
+                          UniversalId::Type type,
+                          QUndoCommand* parent = 0);
+            
+            virtual void redo();
+
+//             virtual void undo();
+    };
+    
     class CreateCommand : public QUndoCommand
     {
             IdTable& mModel;

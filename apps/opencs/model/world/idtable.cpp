@@ -124,6 +124,14 @@ void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type
     endInsertRows();
 }
 
+void CSMWorld::IdTable::cloneRecord(const std::string& origin, 
+                                    const std::string& destination,
+                                    CSMWorld::UniversalId::Type type)
+{
+ 
+}
+
+
 QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
 {
     return index (mIdCollection->getIndex (id), column);

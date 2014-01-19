@@ -125,6 +125,8 @@ void CSVWorld::GenericCreator::create()
         if (mCloneMode)
         {
             std::string id = getId();
+            std::auto_ptr<CSMWorld::CloneCommand> command (new CSMWorld::CloneCommand (
+                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType));
         } else {
             std::string id = getId();
 
