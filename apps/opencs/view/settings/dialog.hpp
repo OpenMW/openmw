@@ -24,9 +24,10 @@ namespace CSVSettings {
         QStackedWidget *mStackedWidget;
 
     public:
+
         explicit Dialog(QMainWindow *parent = 0);
 
-    private:
+    protected:
 
         /// Settings are written on close
         void closeEvent (QCloseEvent *event);

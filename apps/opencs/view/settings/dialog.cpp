@@ -12,6 +12,7 @@
 #include <QFile>
 #include <QStackedWidget>
 #include <QGridLayout>
+#include <QtGui>
 
 #include "../../model/settings/usersettings.hpp"
 #include "testharnesspage.hpp"
@@ -88,6 +89,7 @@ void CSVSettings::Dialog::addPage (Page *page)
 
 void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
 {
+    QApplication::focusWidget()->clearFocus();
     CSMSettings::UserSettings::instance().saveSettings();
 }
 

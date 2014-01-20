@@ -86,7 +86,12 @@ namespace CSMSettings
         void displayFileErrorMessage(const QString &message,
                                      bool isReadOnly) const;
 
-        void sortAndDump();
+        void buildModel (PageMap &pageMap);
+
+    private:
+
+        void removeUndeclaredDefinitions (PageMap &pageMap);
+        void validateDefinitions (PageMap &pageMap);
     };
 }
 #endif // CSMSETTINGS_SETTINGMODEL_HPP

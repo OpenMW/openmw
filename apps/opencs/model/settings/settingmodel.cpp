@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QTextCodec>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 
 #include <QDebug>
 
@@ -17,7 +18,57 @@ CSMSettings::SettingModel::SettingModel(QObject *parent) :
                         right permissions and try again.<br>");
 }
 
-void CSMSettings::SettingModel::validate(PageMap &pageMap)
+void CSMSettings::SettingModel::removeUndeclaredDefinitions (PageMap &pageMap)
+{
+    //iterate each definition, ensuring that there is a corresponding
+    //declaration.  Delete unmatched definitions (page / name match only).
+
+    int pageRow = 0;
+
+    QSortFilterProxyModel declaredPages (this);
+    declaredPages.setSourceModel (&mDeclarationModel);
+    declaredPages.setFilterKeyColumn (Setting_Page);
+
+    QSortFilterProxyModel declaredSettings (this);
+    declaredSettings.setSourceModel (&declaredPages);
+    declaredSettings.setFilterKeyColumn (Setting_Name);
+
+    while (pageRow != pageMap.size())
+    {
+        QString pageName = pageMap.keys().at(pageRow);
+
+        declaredPages.setFilterRegExp (pageName);
+
+        if (declaredPages.rowCount() == 0)
+        {
+            pageMap.remove (pageName);
+            continue;
+        }
+
+        int settingRow = 0;
+
+        SettingMap *settingMap = pageMap.value (pageName);
+
+        while (settingRow != settingMap->size())
+        {
+            QString settingName = settingMap->keys().at(settingRow);
+
+            declaredSettings.setFilterRegExp (settingName);
+
+            if (declaredSettings.rowCount() == 0)
+            {
+                settingMap->remove (settingName);
+                continue;
+            }
+
+            settingRow++;
+        }
+
+        pageRow++;
+    }
+}
+
+void CSMSettings::SettingModel::validateDefinitions (PageMap &pageMap)
 {
     //iterate each declared setting, verifying:
     //1. All definitions match against the value list, if provided
@@ -59,6 +110,12 @@ void CSMSettings::SettingModel::validate(PageMap &pageMap)
             }
         }
     }
+}
+
+void CSMSettings::SettingModel::validate (PageMap &pageMap)
+{
+    removeUndeclaredDefinitions (pageMap);
+    validateDefinitions (pageMap);
 }
 
 CSMSettings::PageMap
@@ -226,34 +283,40 @@ void CSMSettings::SettingModel::destroyStream(QTextStream *stream) const
 
 bool CSMSettings::SettingModel::writeFilestream(QTextStream *stream)
 {
-    sortAndDump();
-    return true;
-
     if (!stream)
     {
         displayFileErrorMessage(mReadWriteMessage, false);
         return false;
     }
-/*
-    mDefinitionModel.sort (Setting_Page);
 
-    QString page = "";
+    WriterSortModel sortModel;
 
-    for (int i =0; i < definitionModel().rowCount(); ++i)
+    sortModel.setSourceModel (&mDefinitionModel);
+    sortModel.sort(0);
+
+    QString currPage = "";
+
+    for (int i = 0; i < sortModel.rowCount(); i++)
     {
-        DefinitionListItem dataPair = definitionModel().getItem(i);
+        QModelIndex name_idx = sortModel.index (i, Setting_Name);
+        QModelIndex page_idx = sortModel.index (i, Setting_Page);
+        QModelIndex value_idx = sortModel.index (i, Setting_Value);
 
-        if (page != dataPair.first)
+        QString pageName = sortModel.data (page_idx).toString();
+        QString settingName = sortModel.data (name_idx).toString();
+        QString value = sortModel.data (value_idx).toString();
+
+        if (currPage != pageName)
         {
-            page = dataPair.first;
-            *stream << "[" << page << "]" << "\n";
+            currPage = pageName;
+            *stream << "[" << currPage << "]" << "\n";
         }
 
-        *stream << dataPair.second.first << " = "
-                << dataPair.second.second << "\n";
+        *stream << settingName << " = "
+                << value << "\n";
     }
 
-    destroyStream (stream);*/
+    destroyStream (stream);
     return true;
 }
 
@@ -274,21 +337,20 @@ void CSMSettings::SettingModel::displayFileErrorMessage(const QString &message,
         msgBox.exec();
 }
 
-void CSMSettings::SettingModel::sortAndDump()
+void CSMSettings::SettingModel::buildModel (PageMap &pageMap)
 {
-    WriterSortModel sortModel;
-
-    sortModel.setSourceModel (&mDefinitionModel);
-
-    for (int i = 0; i < sortModel.rowCount(); i++)
+    foreach (const QString &pageName, pageMap.keys())
     {
-        QString row;
-        for (int j = Setting_Name; j < Setting_Value; j++)
-        {
-            QModelIndex idx = sortModel.index (i, j);
-            row += '\t' + sortModel.data (idx).toString();
-        }
+        SettingMap *settingMap = pageMap.value (pageName);
 
-        qDebug() << i << ": " << row;
+        foreach (const QString &settingName, (*settingMap).keys())
+        {
+            QStringList *values = settingMap->value (settingName);
+
+            foreach (const QString &value, *values)
+            {
+                mDefinitionModel.defineSetting (settingName, pageName, value);
+            }
+        }
     }
 }

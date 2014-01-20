@@ -125,23 +125,12 @@ bool CSMSettings::UserSettings::loadSettingsFromFile
             qDebug() << "could not open filepath: " << filepath;
         }
 
-        mergeSettings (totalMap, pageMap);
+        mergeSettings (totalMap, pageMap, Merge_Overwrite);
     }
 
     validate (totalMap);
 
-    qDebug () << "Loaded Definitions: ";
-
-    foreach (const QString &pageKey, totalMap.keys())
-    {
-        SettingMap *settingMap = totalMap[pageKey];
-        qDebug () << "\t[" << pageKey << "]";
-        foreach (const QString &settingKey, settingMap->keys())
-        {
-            foreach (const QString &value, *(settingMap->value(settingKey)))
-                qDebug () << "\t\t" << settingKey << " = " << value;
-        }
-    }
+    buildModel (totalMap);
 
     return success;
 }
