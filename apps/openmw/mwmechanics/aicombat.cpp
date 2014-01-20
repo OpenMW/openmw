@@ -52,7 +52,7 @@ namespace MWMechanics
         //General description
         if(!actor.getClass().getCreatureStats(actor).isHostile())
             return true;
-        if(actor.getClass().getCreatureStats(actor).getHealth().getCurrent() <= 0)
+        if (mTarget.getClass().getCreatureStats(mTarget).isDead())
             return true;
 
         //Update every frame
