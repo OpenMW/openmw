@@ -317,6 +317,14 @@ namespace MWClass
                 autoCalculateSkills(ref->mBase, data->mNpcStats, ptr);
             }
 
+            // race powers
+            const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
+            for (std::vector<std::string>::const_iterator iter (race->mPowers.mList.begin());
+                iter!=race->mPowers.mList.end(); ++iter)
+            {
+                data->mNpcStats.getSpells().add (*iter);
+            }
+
             if (data->mNpcStats.getFactionRanks().size())
             {
                 static const int iAutoRepFacMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
