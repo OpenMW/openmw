@@ -181,11 +181,12 @@ namespace MWMechanics
         : mCaster(caster)
         , mTarget(target)
         , mStack(false)
+        , mHitPosition(0,0,0)
     {
     }
 
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
-                            const ESM::EffectList &effects, ESM::RangeType range, bool reflected)
+                            const ESM::EffectList &effects, ESM::RangeType range, bool reflected, bool exploded)
     {
         // If none of the effects need to apply, we can early-out
         bool found = false;
@@ -375,10 +376,11 @@ namespace MWMechanics
                     if (anim)
                         anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
                 }
-
-                // TODO: For Area effects, launch a growing particle effect that applies the effect to more actors as it hits them. Best managed in World.
             }
         }
+
+        if (!exploded)
+            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, mTarget, effects, caster, mId, mSourceName);
 
         if (reflectedEffects.mList.size())
             inflict(caster, target, reflectedEffects, range, true);
@@ -521,12 +523,11 @@ namespace MWMechanics
 
         mStack = (enchantment->mData.mType == ESM::Enchantment::CastOnce);
 
-        if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
+        // Check if there's enough charge left
+        if (enchantment->mData.mType == ESM::Enchantment::WhenUsed || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
         {
-            // Check if there's enough charge left
             const float enchantCost = enchantment->mData.mCost;
-            MWMechanics::NpcStats &stats = MWWorld::Class::get(mCaster).getNpcStats(mCaster);
-            int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+            int eSkill = mCaster.getClass().getSkill(mCaster, ESM::Skill::Enchant);
             const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
             if (item.getCellRef().mEnchantmentCharge == -1)
@@ -539,9 +540,14 @@ namespace MWMechanics
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
                 return false;
             }
-
             // Reduce charge
             item.getCellRef().mEnchantmentCharge -= castCost;
+        }
+
+        if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
+        {
+            if (mCaster.getRefData().getHandle() == "player")
+                mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
         }
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
             item.getContainerStore()->remove(item, 1, mCaster);
@@ -550,9 +556,6 @@ namespace MWMechanics
             if (mCaster.getRefData().getHandle() == "player")
                 MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
         }
-
-        if (mCaster.getRefData().getHandle() == "player")
-            mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
 
         inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
 

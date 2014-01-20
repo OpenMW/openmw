@@ -576,28 +576,12 @@ namespace MWClass
                         enchantmentName);
             if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
             {
-                // Check if we have enough charges
-                const float enchantCost = enchantment->mData.mCost;
-                int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
-                const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
+                MWMechanics::CastSpell cast(ptr, victim);
+                cast.mHitPosition = hitPosition;
+                bool success = cast.cast(weapon);
 
-                if (weapon.getCellRef().mEnchantmentCharge == -1)
-                    weapon.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
-                if (weapon.getCellRef().mEnchantmentCharge < castCost)
-                {
-                    if (ptr.getRefData().getHandle() == "player")
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
-                }
-                else
-                {
-                    weapon.getCellRef().mEnchantmentCharge -= castCost;
-
-                    MWMechanics::CastSpell cast(ptr, victim);
-                    cast.cast(weapon);
-
-                    if (ptr.getRefData().getHandle() == "player")
-                        skillUsageSucceeded (ptr, ESM::Skill::Enchant, 3);
-                }
+                if (ptr.getRefData().getHandle() == "player" && success)
+                    skillUsageSucceeded (ptr, ESM::Skill::Enchant, 3);
             }
         }
 

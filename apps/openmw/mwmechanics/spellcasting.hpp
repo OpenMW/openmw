@@ -3,6 +3,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include <OgreVector3.h>
+
 namespace MWMechanics
 {
     class EffectKey;
@@ -36,6 +38,7 @@ namespace MWMechanics
         bool mStack;
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
+        Ogre::Vector3 mHitPosition; // Used for spawning area orb
 
     public:
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target);
@@ -49,7 +52,7 @@ namespace MWMechanics
         bool cast (const std::string& id);
 
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-                      const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false);
+                      const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
 
         void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
     };
