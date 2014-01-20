@@ -378,7 +378,7 @@ void RenderingManager::update (float duration, bool paused)
     if(paused)
         return;
 
-    mEffectManager->update(duration);
+    mEffectManager->update(duration, mRendering.getCamera());
 
     mActors->update (mRendering.getCamera());
     mPlayerAnimation->preRender(mRendering.getCamera());
@@ -1024,9 +1024,9 @@ float RenderingManager::getCameraDistance() const
     return mCamera->getCameraDistance();
 }
 
-void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition)
+void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition, float scale)
 {
-    mEffectManager->addEffect(model, texture, worldPosition);
+    mEffectManager->addEffect(model, "", worldPosition, scale);
 }
 
 } // namespace

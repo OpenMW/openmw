@@ -207,7 +207,7 @@ public:
     void stopVideo();
     void frameStarted(float dt, bool paused);
 
-    void spawnEffect (const std::string& model, const std::string& texture, const Ogre::Vector3& worldPosition);
+    void spawnEffect (const std::string& model, const std::string& texture, const Ogre::Vector3& worldPosition, float scale=1.f);
 
 protected:
     virtual void windowResized(int x, int y);

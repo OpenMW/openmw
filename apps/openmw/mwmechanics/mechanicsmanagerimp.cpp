@@ -950,4 +950,10 @@ namespace MWMechanics
 
         return (roll >= target);
     }
+
+    void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    {
+        mActors.getObjectsInRange(position, radius, objects);
+        mObjects.getObjectsInRange(position, radius, objects);
+    }
 }

@@ -26,9 +26,10 @@ EffectManager::EffectManager(Ogre::SceneManager *sceneMgr)
 {
 }
 
-void EffectManager::addEffect(const std::string &model, std::string textureOverride, const Ogre::Vector3 &worldPosition)
+void EffectManager::addEffect(const std::string &model, std::string textureOverride, const Ogre::Vector3 &worldPosition, float scale)
 {
     Ogre::SceneNode* sceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(worldPosition);
+    sceneNode->setScale(scale,scale,scale);
 
     // fix texture extension to .dds
     if (textureOverride.size() > 4)
@@ -78,7 +79,7 @@ void EffectManager::addEffect(const std::string &model, std::string textureOverr
     mEffects.push_back(std::make_pair(sceneNode, scene));
 }
 
-void EffectManager::update(float dt)
+void EffectManager::update(float dt, Ogre::Camera* camera)
 {
     for (std::vector<std::pair<Ogre::SceneNode*, NifOgre::ObjectScenePtr> >::iterator it = mEffects.begin(); it != mEffects.end(); )
     {
@@ -91,6 +92,7 @@ void EffectManager::update(float dt)
 
             objects->mControllers[i].update();
         }
+        objects->rotateBillboardNodes(camera);
 
         // Finished playing?
         if (objects->mControllers[0].getSource()->getValue() >= objects->mMaxControllerLength)

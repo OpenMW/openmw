@@ -919,4 +919,13 @@ namespace MWMechanics
             return iter->second->isAnimPlaying(groupName);
         return false;
     }
+
+    void Actors::getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out)
+    {
+        for (PtrControllerMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+        {
+            if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
+                out.push_back(iter->first);
+        }
+    }
 }

@@ -2174,8 +2174,15 @@ namespace MWWorld
         state.mId = id;
         state.mActorHandle = actor.getRefData().getHandle();
         state.mSpeed = speed;
-        state.mEffects = effects;
         state.mStack = stack;
+
+        // Only interested in "on target" effects
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
+            iter!=effects.mList.end(); ++iter)
+        {
+            if (iter->mRange == ESM::RT_Target)
+                state.mEffects.mList.push_back(*iter);
+        }
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         sndMgr->playSound3D(ptr, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
@@ -2223,30 +2230,68 @@ namespace MWWorld
                     continue;
 
                 explode = true;
-
-                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
-                if (caster.isEmpty())
-                    caster = obstacle;
-                if (obstacle.isEmpty())
-                {
-                    // Terrain
-                }
-                else
-                {
-                    MWMechanics::CastSpell cast(caster, obstacle);
-                    cast.mStack = it->second.mStack;
-                    cast.mId = it->second.mId;
-                    cast.mSourceName = it->second.mSourceName;
-                    cast.inflict(obstacle, caster, it->second.mEffects, ESM::RT_Target, false);
-                }
-
-                deleteObject(ptr);
-                mProjectiles.erase(it++);
             }
 
             if (explode)
             {
-                // TODO: Explode
+                std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
+                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = it->second.mEffects.mList.begin();
+                     effectIt != it->second.mEffects.mList.end(); ++effectIt)
+                {
+                    const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+
+                    // Spawn the explosion orb effect
+                    const ESM::Static* areaStatic;
+                    if (!effect->mCasting.empty())
+                        areaStatic = getStore().get<ESM::Static>().find (effect->mArea);
+                    else
+                        areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
+
+                    mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", Ogre::Vector3(ptr.getRefData().getPosition().pos), effectIt->mArea);
+
+                    // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    if(!effect->mAreaSound.empty())
+                        sndMgr->playSound3D(ptr, effect->mAreaSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+                    else
+                        sndMgr->playSound3D(ptr, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+
+                    // Get the actors in range of the effect
+                    std::vector<MWWorld::Ptr> objects;
+                    MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
+                                Ogre::Vector3(ptr.getRefData().getPosition().pos), feetToGameUnits(effectIt->mArea), objects);
+
+                    for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
+                        toApply[*affected].push_back(*effectIt);
+                }
+
+                // Now apply the appropriate effects to each actor in range
+                for (std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> >::iterator apply = toApply.begin(); apply != toApply.end(); ++apply)
+                {
+                    MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+
+                    // Vanilla-compatible behaviour of never applying the spell to the caster
+                    // (could be changed by mods later)
+                    if (apply->first == caster)
+                        continue;
+
+                    if (caster.isEmpty())
+                        caster = apply->first;
+
+                    MWMechanics::CastSpell cast(caster, apply->first);
+                    cast.mId = it->second.mId;
+                    cast.mSourceName = it->second.mSourceName;
+                    cast.mStack = it->second.mStack;
+                    ESM::EffectList effects;
+                    effects.mList = apply->second;
+                    cast.inflict(apply->first, caster, effects, ESM::RT_Target);
+                }
+
+                deleteObject(ptr);
+                mProjectiles.erase(it++);
                 continue;
             }
 
