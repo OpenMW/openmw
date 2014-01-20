@@ -640,6 +640,15 @@ namespace MWSound
         mListenerUp  = up;
     }
 
+    void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
+    {
+        for (SoundMap::iterator snditer = mActiveSounds.begin(); snditer != mActiveSounds.end(); ++snditer)
+        {
+            if (snditer->second.first == old)
+                snditer->second.first = updated;
+        }
+    }
+
     // Default readAll implementation, for decoders that can't do anything
     // better
     void Sound_Decoder::readAll(std::vector<char> &output)
