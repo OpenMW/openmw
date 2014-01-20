@@ -467,10 +467,11 @@ namespace MWClass
         fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
         getCreatureStats(ptr).setFatigue(fatigue);
 
-
-        float dist = 100.0f * (!weapon.isEmpty() ?
+        const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
+        float dist = fCombatDistance * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                gmst.find("fHandToHandReach")->getFloat());
+
         // TODO: Use second to work out the hit angle
         std::pair<MWWorld::Ptr, Ogre::Vector3> result = world->getHitContact(ptr, dist);
         MWWorld::Ptr victim = result.first;

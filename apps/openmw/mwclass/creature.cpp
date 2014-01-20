@@ -225,8 +225,10 @@ namespace MWClass
         // TODO: where is the distance defined?
         float dist = 200.f;
         if (!weapon.isEmpty())
-            dist = 100.f * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
-
+        {
+            const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
+            dist = fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
+        }
         std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
         if (result.first.isEmpty())
             return; // Didn't hit anything
