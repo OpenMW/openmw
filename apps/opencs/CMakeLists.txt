@@ -56,7 +56,6 @@ opencs_hdrs_noqt (view/doc
     subviewfactoryimp
     )
 
-
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
@@ -83,11 +82,11 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
-    usersettingsdialog
-    settingpage
-    settingview
-    settingfactory
-    optiongroup
+    dialog
+    page
+    view
+    booleanview
+    testharnesspage
     )
 
 opencs_units_noqt (view/settings
@@ -97,13 +96,15 @@ opencs_units_noqt (view/settings
 
 opencs_units (model/settings
     usersettings
-    binarywidgetadapter
+    booleanadapter
+    definitionmodel
+    declarationmodel
     settingmodel
     setting
     )
 
 opencs_units_noqt (model/settings
-    support
+    viewadapter
     )
 
 opencs_units_noqt (model/filter

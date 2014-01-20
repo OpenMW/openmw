@@ -1,0 +1,10 @@
+
+#include "notnode.hpp"
+
+CSMFilter::NotNode::NotNode (boost::shared_ptr<Node> child) : UnaryNode (child, "not") {}
+
+bool CSMFilter::NotNode::test (const CSMWorld::IdTable& table, int row,
+    const std::map<int, int>& columns) const
+{
+    return !getChild().test (table, row, columns);
+}

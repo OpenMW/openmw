@@ -15,7 +15,7 @@
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
-#include "../settings/usersettingsdialog.hpp"
+//#include "../settings/dialog.hpp"
 
 #include "view.hpp"
 
