@@ -917,6 +917,8 @@ class NIFObjectLoader
                 {
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+                    // The keyframe controller will control this bone manually
+                    trgtbone->setManuallyControlled(true);
                     Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
                                                         Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                         Ogre::ControllerValueRealPtr());
