@@ -6,7 +6,7 @@
 #include "../../model/doc/document.hpp"
 
 #include "../filter/filterbox.hpp"
-
+#include "../../model/world/idtable.hpp"
 #include "table.hpp"
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -49,7 +49,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     {
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
         
-        connect (mTable, SIGNAL (cloneRequest(int)), this, SLOT(cloneRequest(int)));
+        connect (mTable, SIGNAL (cloneRequest(int, CSMWorld::IdTable*)), this, SLOT(cloneRequest(int, CSMWorld::IdTable*)));
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)), 
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)));
     }
@@ -82,8 +82,11 @@ void CSVWorld::TableSubView::setStatusBar (bool show)
     mBottom->setStatusBar (show);
 }
 
-void CSVWorld::TableSubView::cloneRequest(int row)
+void CSVWorld::TableSubView::cloneRequest(int row, const CSMWorld::IdTable* table)
 {
     const CSMWorld::UniversalId& toClone(mTable->getUniversalId(row));
-    emit cloneRequest(toClone.getId(), toClone.getType(), toClone.getArgumentType());
+    if (!(table->getRecord(toClone.getId()).isDeleted()))
+    {
+        emit cloneRequest(toClone.getId(), toClone.getType(), toClone.getArgumentType());
+    }
 }

@@ -5,6 +5,11 @@
 
 class QModelIndex;
 
+namespace CSMWorld
+{
+    class IdTable;
+}
+
 namespace CSMDoc
 {
     class Document;
@@ -42,7 +47,7 @@ namespace CSVWorld
         private slots:
 
             void editRequest (int row);
-            void cloneRequest (int row);
+            void cloneRequest (int row, const CSMWorld::IdTable* table);
     };
 }
 
