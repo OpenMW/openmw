@@ -36,6 +36,8 @@ namespace MWClass
             static const ESM::GameSetting *fKnockDownMult;
             static const ESM::GameSetting *iKnockDownOddsMult;
             static const ESM::GameSetting *iKnockDownOddsBase;
+            static const ESM::GameSetting *fDamageStrengthBase;
+            static const ESM::GameSetting *fDamageStrengthMult;
 
         public:
 

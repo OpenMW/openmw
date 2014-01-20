@@ -252,6 +252,8 @@ namespace MWClass
             fKnockDownMult = gmst.find("fKnockDownMult");
             iKnockDownOddsMult = gmst.find("iKnockDownOddsMult");
             iKnockDownOddsBase = gmst.find("iKnockDownOddsBase");
+            fDamageStrengthBase = gmst.find("fDamageStrengthBase");
+            fDamageStrengthMult = gmst.find("fDamageStrengthMult");
 
             inited = true;
         }
@@ -524,7 +526,8 @@ namespace MWClass
             if(attack)
             {
                 damage  = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                damage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                damage *= fDamageStrengthBase->getFloat() +
+                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult->getFloat() * 0.1);
                 if(weaphashealth)
                 {
                     int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
@@ -1254,4 +1257,7 @@ namespace MWClass
     const ESM::GameSetting *Npc::fKnockDownMult;
     const ESM::GameSetting *Npc::iKnockDownOddsMult;
     const ESM::GameSetting *Npc::iKnockDownOddsBase;
+    const ESM::GameSetting *Npc::fDamageStrengthBase;
+    const ESM::GameSetting *Npc::fDamageStrengthMult;
+
 }
