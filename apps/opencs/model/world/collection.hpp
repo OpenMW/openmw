@@ -97,7 +97,12 @@ namespace CSMWorld
             virtual void appendBlankRecord (const std::string& id,
                 UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
-
+            
+            virtual void cloneRecord(const std::string& origin, 
+                                     const std::string& destination,
+                                     const UniversalId::Type type,
+                                     const UniversalId::ArgumentType argumentType);
+                                     
             virtual int searchId (const std::string& id) const;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
@@ -193,6 +198,26 @@ namespace CSMWorld
         return true;
     }
 
+    template<typename ESXRecordT, typename IdAccessorT>
+    void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin, 
+                                                      const std::string& destination,
+                                                      const UniversalId::Type type,
+                                                      const UniversalId::ArgumentType argumentType)
+    {
+       Record<ESXRecordT> copy = getRecord(origin);
+       if (copy.isDeleted())
+       {
+           return;
+       }
+       
+       if (argumentType == UniversalId::ArgumentType_Id)
+       {
+           copy.get().mId = Misc::StringUtils::lowerCase(destination);
+       }
+       
+       insertRecord(copy, getAppendIndex(destination, type));
+    }
+    
     template<typename ESXRecordT, typename IdAccessorT>
     Collection<ESXRecordT, IdAccessorT>::Collection()
     {}

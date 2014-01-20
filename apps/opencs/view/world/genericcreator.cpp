@@ -59,7 +59,8 @@ const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
-: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode(false), mClonedType(CSMWorld::UniversalId::Type_None)
+: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode(false), mClonedType(CSMWorld::UniversalId::Type_None),
+mArgumentType(CSMWorld::UniversalId::ArgumentType_None)
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
@@ -126,7 +127,12 @@ void CSVWorld::GenericCreator::create()
         {
             std::string id = getId();
             std::auto_ptr<CSMWorld::CloneCommand> command (new CSMWorld::CloneCommand (
-                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType));
+                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType, mArgumentType));
+            
+            mUndoStack.push(command.release());
+            
+            emit done();
+            emit requestFocus(id);
         } else {
             std::string id = getId();
 
@@ -143,11 +149,14 @@ void CSVWorld::GenericCreator::create()
     }
 }
 
-void CSVWorld::GenericCreator::cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type)
+void CSVWorld::GenericCreator::cloneMode(const std::string& originid, 
+                                         const CSMWorld::UniversalId::Type type,
+                                         const CSMWorld::UniversalId::ArgumentType argumentType)
 {
     mCloneMode = true;
     mClonedId = originid;
     mClonedType = type;
+    mArgumentType = argumentType;
     
     mId->setText(QString::fromStdString(mClonedId));
 }

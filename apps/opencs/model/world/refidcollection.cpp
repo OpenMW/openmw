@@ -449,6 +449,14 @@ void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
     mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
 }
 
+void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin, 
+                                     const std::string& destination,
+                                     const CSMWorld::UniversalId::Type type,
+                                     const CSMWorld::UniversalId::ArgumentType argumentType)
+{
+    
+}
+
 void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
     UniversalId::Type type)
 {

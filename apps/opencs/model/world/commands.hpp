@@ -45,18 +45,20 @@ namespace CSMWorld
             std::string mIdOrigin;
             std::string mIdDestination;
             UniversalId::Type mType;
+            UniversalId::ArgumentType mArgumentType;
             std::map<int, QVariant> mValues;
 
         public:
 
             CloneCommand (IdTable& model, const std::string& idOrigin, 
                           const std::string& IdDestination,
-                          UniversalId::Type type,
+                          const UniversalId::Type type,
+                          const UniversalId::ArgumentType argumentType,
                           QUndoCommand* parent = 0);
             
             virtual void redo();
 
-//             virtual void undo();
+            virtual void undo();
     };
     
     class CreateCommand : public QUndoCommand

@@ -35,7 +35,9 @@ namespace CSVWorld
             virtual void setStatusBar (bool show);
             
         signals:
-            void cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type);
+            void cloneRequest(const std::string& id, 
+                              const CSMWorld::UniversalId::Type type, 
+                              const CSMWorld::UniversalId::ArgumentType argumentType);
 
         private slots:
 

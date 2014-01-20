@@ -124,11 +124,12 @@ void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type
     endInsertRows();
 }
 
-void CSMWorld::IdTable::cloneRecord(const std::string& origin, 
+void CSMWorld::IdTable::cloneRecord(const std::string& origin,
                                     const std::string& destination,
+                                    CSMWorld::UniversalId::ArgumentType argumentType,
                                     CSMWorld::UniversalId::Type type)
 {
- 
+    mIdCollection->cloneRecord(origin, destination, type, argumentType);
 }
 
 

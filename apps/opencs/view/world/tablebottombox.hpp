@@ -77,7 +77,7 @@ namespace CSVWorld
             /// \param modified Number of added and modified records
 
             void createRequest();
-            void cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type);
+            void cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type, const CSMWorld::UniversalId::ArgumentType argumentType);
     };
 }
 

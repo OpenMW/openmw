@@ -74,6 +74,11 @@ namespace CSMWorld
                 UniversalId::Type type = UniversalId::Type_None) = 0;
             ///< If the record type does not match, an exception is thrown.
 
+            virtual void cloneRecord(const std::string& origin, 
+                                     const std::string& destination,
+                                     const UniversalId::Type type,
+                                     const UniversalId::ArgumentType argumentType) = 0;
+                                     
             virtual const RecordBase& getRecord (const std::string& id) const = 0;
 
             virtual const RecordBase& getRecord (int index) const = 0;

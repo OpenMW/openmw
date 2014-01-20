@@ -69,6 +69,11 @@ namespace CSMWorld
 
             virtual void removeRows (int index, int count);
 
+            virtual void cloneRecord(const std::string& origin, 
+                                     const std::string& destination,
+                                     const UniversalId::Type type,
+                                     const UniversalId::ArgumentType argumentType);
+                                     
             virtual void appendBlankRecord (const std::string& id, UniversalId::Type type);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 

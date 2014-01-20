@@ -32,6 +32,7 @@ namespace CSVWorld
             bool mCloneMode;
             std::string mClonedId;
             CSMWorld::UniversalId::Type mClonedType;
+            CSMWorld::UniversalId::ArgumentType mArgumentType;
 
         protected:
 
@@ -61,12 +62,13 @@ namespace CSVWorld
 
             virtual void reset();
 
-            virtual void cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type);
+            virtual void cloneMode(const std::string& originid, 
+                                   const CSMWorld::UniversalId::Type type, 
+                                   const CSMWorld::UniversalId::ArgumentType argumentType);
             
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
-
 
         private slots:
 
