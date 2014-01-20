@@ -2,7 +2,7 @@
 #include "commands.hpp"
 
 #include <QAbstractItemModel>
-
+#include <components/misc/stringops.hpp>
 #include "idtable.hpp"
 #include "idtable.hpp"
 
@@ -34,7 +34,7 @@ CSMWorld::CloneCommand::CloneCommand(CSMWorld::IdTable& model,
     QUndoCommand(parent),
     mModel(model),
     mIdOrigin(idOrigin),
-    mIdDestination(IdDestination),
+    mIdDestination(Misc::StringUtils::lowerCase(IdDestination)),
     mArgumentType(argumentType),
     mType(type)
 {

@@ -212,7 +212,7 @@ namespace CSMWorld
        
        if (argumentType == UniversalId::ArgumentType_Id)
        {
-           copy.get().mId = Misc::StringUtils::lowerCase(destination);
+           copy.get().mId = destination;
        }
        
        insertRecord(copy, getAppendIndex(destination, type));
