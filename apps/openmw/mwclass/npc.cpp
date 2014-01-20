@@ -141,7 +141,7 @@ namespace
      *
      * and by adding class, race, specialization bonus.
      */
-    void autoCalculateSkills(const ESM::NPC* npc, MWMechanics::NpcStats& npcStats)
+    void autoCalculateSkills(const ESM::NPC* npc, MWMechanics::NpcStats& npcStats, const MWWorld::Ptr& ptr)
     {
         const ESM::Class *class_ =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
@@ -189,6 +189,18 @@ namespace
                 {
                     majorMultiplier = 1.0f;
                     break;
+                }
+                if (class_->mData.mSkills[k][1] == skillIndex)
+                {
+                    // Major skill -> add starting spells for this skill if existing
+                    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                    MWWorld::Store<ESM::Spell>::iterator it = store.get<ESM::Spell>().begin();
+                    for (; it != store.get<ESM::Spell>().end(); ++it)
+                    {
+                        if (it->mData.mFlags & ESM::Spell::F_Autocalc
+                                && MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(&*it, ptr)) == skillIndex)
+                            npcStats.getSpells().add(it->mId);
+                    }
                 }
             }
 
@@ -302,7 +314,7 @@ namespace MWClass
                 data->mNpcStats.setReputation(ref->mBase->mNpdt12.mReputation);
 
                 autoCalculateAttributes(ref->mBase, data->mNpcStats);
-                autoCalculateSkills(ref->mBase, data->mNpcStats);
+                autoCalculateSkills(ref->mBase, data->mNpcStats, ptr);
             }
 
             if (data->mNpcStats.getFactionRanks().size())
