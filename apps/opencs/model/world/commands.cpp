@@ -45,6 +45,9 @@ CSMWorld::CloneCommand::CloneCommand(CSMWorld::IdTable& model,
 void CSMWorld::CloneCommand::redo()
 {
     mModel.cloneRecord(mIdOrigin, mIdDestination, mArgumentType, mType);
+    
+    for (std::map<int, QVariant>::const_iterator iter(mValues.begin()); iter != mValues.end(); ++iter)
+         mModel.setData(mModel.getModelIndex(mIdDestination, iter->first), iter->second);
 }
 
 void CSMWorld::CloneCommand::undo()
