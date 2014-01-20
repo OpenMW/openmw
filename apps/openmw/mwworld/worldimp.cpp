@@ -2177,7 +2177,7 @@ namespace MWWorld
         state.mStack = stack;
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        sndMgr->playSound3D(ptr, sound, 1.0f, 1.0f);
+        sndMgr->playSound3D(ptr, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
 
         mProjectiles[ptr] = state;
     }
