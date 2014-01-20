@@ -657,27 +657,6 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mReferenceables);
 }
 
-bool CSMWorld::Data::recordDeleted(const std::string& id) const
-{
-     return
-        getGlobals().getRecord(id).isDeleted() ||
-        getGmsts().getRecord(id).isDeleted() ||
-        getSkills().getRecord(id).isDeleted() ||
-        getClasses().getRecord(id).isDeleted() ||
-        getFactions().getRecord(id).isDeleted() ||
-        getRaces().getRecord(id).isDeleted() ||
-        getSounds().getRecord(id).isDeleted() ||
-        getScripts().getRecord(id).isDeleted() ||
-        getRegions().getRecord(id).isDeleted() ||
-        getBirthsigns().getRecord(id).isDeleted() ||
-        getSpells().getRecord(id).isDeleted() ||
-        getTopics().getRecord(id).isDeleted() ||
-        getJournals().getRecord(id).isDeleted() ||
-        getCells().getRecord(id).isDeleted() ||
-        getReferenceables().getRecord(id).isDeleted();
-}
-
-
 void CSMWorld::Data::setDescription (const std::string& description)
 {
     mDescription = description;

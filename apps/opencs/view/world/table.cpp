@@ -308,6 +308,7 @@ void CSVWorld::Table::cloneRecord()
     if (!mEditLock)
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
+        
         if (selectedRows.size()==1)
         {
             emit cloneRequest (selectedRows.begin()->row(), mModel);

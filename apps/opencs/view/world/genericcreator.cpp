@@ -125,13 +125,10 @@ void CSVWorld::GenericCreator::create()
     {
         if (mCloneMode)
         {
-            const std::string id = getId();
-            if (mData.recordDeleted(id))
-            {
-                return;
-            }
+            std::string id = getId();
             std::auto_ptr<CSMWorld::CloneCommand> command (new CSMWorld::CloneCommand (
                 dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType, mArgumentType));
+            
             mUndoStack.push(command.release());
             
             emit done();

@@ -49,7 +49,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     {
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
         
-        connect (mTable, SIGNAL (cloneRequest(int, CSMWorld::IdTable*)), this, SLOT(cloneRequest(int, CSMWorld::IdTable*)));
+        connect (mTable, SIGNAL (cloneRequest(int, const CSMWorld::IdTable*)), this, SLOT(cloneRequest(int, const CSMWorld::IdTable*)));
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)), 
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)));
     }
