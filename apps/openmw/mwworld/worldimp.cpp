@@ -2229,6 +2229,23 @@ namespace MWWorld
                 if (obstacle == ptr)
                     continue;
 
+                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                if (caster.isEmpty())
+                    caster = obstacle;
+
+                if (obstacle.isEmpty())
+                {
+                    // Terrain
+                }
+                else
+                {
+                    MWMechanics::CastSpell cast(caster, obstacle);
+                    cast.mId = it->second.mId;
+                    cast.mSourceName = it->second.mSourceName;
+                    cast.mStack = it->second.mStack;
+                    cast.inflict(obstacle, caster, it->second.mEffects, ESM::RT_Target);
+                }
+
                 explode = true;
             }
 
@@ -2239,6 +2256,9 @@ namespace MWWorld
                      effectIt != it->second.mEffects.mList.end(); ++effectIt)
                 {
                     const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+
+                    if (effectIt->mArea <= 0)
+                        continue; // Not an area effect
 
                     // Spawn the explosion orb effect
                     const ESM::Static* areaStatic;
