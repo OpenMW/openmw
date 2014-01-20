@@ -189,6 +189,8 @@ namespace CSMWorld
             void setAuthor (const std::string& author);
 
             std::string getAuthor() const;
+            
+            bool recordDeleted(const std::string& id) const;
 
         signals:
 
