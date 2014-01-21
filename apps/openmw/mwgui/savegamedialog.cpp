@@ -8,6 +8,7 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwstate/character.hpp"
 
@@ -123,6 +124,12 @@ namespace MWGui
         }
 
         setVisible(false);
+
+        if (MWBase::Environment::get().getStateManager()->getState()==
+            MWBase::StateManager::State_NoGame)
+        {
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        }
     }
 
     void SaveGameDialog::onCharacterSelected(MyGUI::ComboBox *sender, size_t pos)
