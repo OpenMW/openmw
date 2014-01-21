@@ -74,7 +74,7 @@ namespace CSVWorld
             /// \param modified Number of added and modified records
 
             void createRequest();
-            void cloneRequest(int row, const CSMWorld::IdTable*);
+            void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:
 

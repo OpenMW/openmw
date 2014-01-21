@@ -40,14 +40,14 @@ namespace CSVWorld
             virtual void setStatusBar (bool show);
             
         signals:
-            void cloneRequest(const std::string& id, 
-                              const CSMWorld::UniversalId::Type type, 
-                              const CSMWorld::UniversalId::ArgumentType argumentType);
+            void cloneRequest(const std::string&, 
+                              const CSMWorld::UniversalId::Type,
+                              const CSMWorld::UniversalId::ArgumentType);
 
         private slots:
 
             void editRequest (int row);
-            void cloneRequest (int row, const CSMWorld::IdTable* table);
+            void cloneRequest (const CSMWorld::UniversalId& toClone);
     };
 }
 

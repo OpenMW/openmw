@@ -49,7 +49,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     {
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
         
-        connect (mTable, SIGNAL (cloneRequest(int, const CSMWorld::IdTable*)), this, SLOT(cloneRequest(int, const CSMWorld::IdTable*)));
+        connect (mTable, SIGNAL (cloneRequest(const CSMWorld::UniversalId&)), this, SLOT(cloneRequest(const CSMWorld::UniversalId&)));
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)), 
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)));
     }
@@ -82,11 +82,7 @@ void CSVWorld::TableSubView::setStatusBar (bool show)
     mBottom->setStatusBar (show);
 }
 
-void CSVWorld::TableSubView::cloneRequest(int row, const CSMWorld::IdTable* table)
+void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
 {
-    const CSMWorld::UniversalId& toClone(mTable->getUniversalId(row));
-    if (!(table->getRecord(toClone.getId()).isDeleted()))
-    {
-        emit cloneRequest(toClone.getId(), toClone.getType(), toClone.getArgumentType());
-    }
+    emit cloneRequest(toClone.getId(), toClone.getType(), toClone.getArgumentType());
 }

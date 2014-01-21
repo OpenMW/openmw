@@ -149,7 +149,7 @@ void CSVWorld::GenericCreator::create()
     }
 }
 
-void CSVWorld::GenericCreator::cloneMode(const std::string& originid, 
+void CSVWorld::GenericCreator::cloneMode(const std::string& originid,
                                          const CSMWorld::UniversalId::Type type,
                                          const CSMWorld::UniversalId::ArgumentType argumentType)
 {

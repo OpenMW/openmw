@@ -16,6 +16,7 @@
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
+#include <qt4/QtCore/qabstractitemmodel.h>
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -308,10 +309,10 @@ void CSVWorld::Table::cloneRecord()
     if (!mEditLock)
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
-        
-        if (selectedRows.size()==1)
+        const CSMWorld::UniversalId& toClone = getUniversalId(selectedRows.begin()->row());
+        if (selectedRows.size()==1 && !mModel->getRecord(toClone.getId()).isDeleted())
         {
-            emit cloneRequest (selectedRows.begin()->row(), mModel);
+            emit cloneRequest (toClone);
         }
     }
 }
