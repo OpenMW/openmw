@@ -205,11 +205,6 @@ namespace CSMWorld
                                                       const UniversalId::ArgumentType argumentType)
     {
        Record<ESXRecordT> copy = getRecord(origin);
-       if (copy.isDeleted())
-       {
-           return;
-       }
-       
        if (argumentType == UniversalId::ArgumentType_Id)
        {
            copy.get().mId = destination;
