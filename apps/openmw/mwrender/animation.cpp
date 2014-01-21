@@ -679,6 +679,9 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
+
+    else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
+        mPtr.getClass().block(mPtr);
 }
 
 void Animation::changeGroups(const std::string &groupname, int groups)

@@ -92,7 +92,8 @@ enum CharacterState {
     CharState_SwimDeath,
 
     CharState_Hit,
-    CharState_KnockDown
+    CharState_KnockDown,
+    CharState_Block
 };
 
 enum WeaponType {

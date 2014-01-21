@@ -15,7 +15,7 @@ namespace MWMechanics
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false), mAttackType(AT_Chop),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false),
+          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
     {
         for (int i=0; i<4; ++i)
@@ -425,6 +425,16 @@ namespace MWMechanics
     bool CreatureStats::getHitRecovery() const
     {
         return mHitRecovery;
+    }
+
+    void CreatureStats::setBlock(bool value)
+    {
+        mBlock = value;
+    }
+
+    bool CreatureStats::getBlock() const
+    {
+        return mBlock;
     }
 
     bool CreatureStats::getMovementFlag (Flag flag) const

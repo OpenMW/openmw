@@ -153,6 +153,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     {
         bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
         bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
+        bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
         if(mHitState == CharState_None)
         {
             if(knockdown)
@@ -167,6 +168,12 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 mCurrentHit = chooseRandomGroup("hit");
                 mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
             }
+            else if (block)
+            {
+                mHitState = CharState_Block;
+                mCurrentHit = "shield";
+                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "block start", "block stop", 0.0f, 0);
+            }
         }
         else if(!mAnimation->isPlaying(mCurrentHit))
         {
@@ -175,6 +182,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(false);
             if (recovery)
                 mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
+            if (block)
+                mPtr.getClass().getCreatureStats(mPtr).setBlock(false);
             mHitState = CharState_None;
         }
     }

@@ -39,6 +39,7 @@ namespace MWMechanics
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mHitRecovery;
+        bool mBlock;
         unsigned int mMovementFlags;
         float mAttackStrength; // Note only some creatures attack with weapons
 
@@ -204,6 +205,8 @@ namespace MWMechanics
         bool getKnockedDown() const;
         void setHitRecovery(bool value);
         bool getHitRecovery() const;
+        void setBlock(bool value);
+        bool getBlock() const;
 
         enum Flag
         {

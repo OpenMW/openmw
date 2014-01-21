@@ -30,6 +30,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/combat.hpp"
 
 namespace
 {
@@ -325,8 +326,11 @@ namespace MWClass
             }
         }
 
-        // TODO: do not do this if the attack is blocked
-        MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+        if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+            damage = 0;
+
+        if (damage > 0)
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         victim.getClass().onHit(victim, damage, true, MWWorld::Ptr(), ptr, true);
     }
@@ -355,31 +359,57 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
-        // Check for knockdown
-        float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
-        float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
-        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-        if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+        if (damage > 0.f)
         {
-            getCreatureStats(ptr).setKnockedDown(true);
+            // Check for knockdown
+            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
+            float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                    * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+            {
+                getCreatureStats(ptr).setKnockedDown(true);
 
-        }
-        else
-            getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
+            }
+            else
+                getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-        if(ishealth)
-        {
-            if(damage > 0.0f)
+            if(ishealth)
+            {
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
-            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
-            setActorHealth(ptr, health, attacker);
+                float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+                setActorHealth(ptr, health, attacker);
+            }
+            else
+            {
+                MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+                fatigue.setCurrent(fatigue.getCurrent() - damage, true);
+                getCreatureStats(ptr).setFatigue(fatigue);
+            }
         }
-        else
+    }
+
+    void Creature::block(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::InventoryStore& inv = getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        if (shield == inv.end())
+            return;
+
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        switch(shield->getClass().getEquipmentSkill(*shield))
         {
-            MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
-            fatigue.setCurrent(fatigue.getCurrent() - damage, true);
-            getCreatureStats(ptr).setFatigue(fatigue);
+            case ESM::Skill::LightArmor:
+                sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
+                break;
+            case ESM::Skill::MediumArmor:
+                sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
+                break;
+            case ESM::Skill::HeavyArmor:
+                sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
+                break;
+            default:
+                return;
         }
     }
 
