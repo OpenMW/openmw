@@ -46,6 +46,8 @@ namespace CSMWorld
         virtual RecordBase& getRecord (int index)= 0;
 
         virtual void appendRecord (const std::string& id) = 0;
+        
+        virtual void insertRecord (RecordBase& record) = 0;
 
         virtual void load (int index,  ESM::ESMReader& reader, bool base) = 0;
 
@@ -68,6 +70,8 @@ namespace CSMWorld
         virtual RecordBase& getRecord (int index);
 
         virtual void appendRecord (const std::string& id);
+        
+        virtual void insertRecord (RecordBase& record);
 
         virtual void load (int index,  ESM::ESMReader& reader, bool base);
 
@@ -78,6 +82,13 @@ namespace CSMWorld
         virtual void save (int index, ESM::ESMWriter& writer) const;
     };
 
+    template<typename RecordT>
+    void RefIdDataContainer<RecordT>::insertRecord(RecordBase& record)
+    {
+        Record<RecordT>& newRecord = dynamic_cast<Record<RecordT>& >(record);
+        mContainer.push_back(newRecord);
+    }
+    
     template<typename RecordT>
     int RefIdDataContainer<RecordT>::getSize() const
     {
@@ -200,6 +211,8 @@ namespace CSMWorld
             LocalIndex searchId (const std::string& id) const;
 
             void erase (int index, int count);
+            
+            void insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id);
 
             const RecordBase& getRecord (const LocalIndex& index) const;
 
