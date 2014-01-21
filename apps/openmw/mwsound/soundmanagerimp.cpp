@@ -705,4 +705,13 @@ namespace MWSound
     {
         return bytes / framesToBytes(1, config, type);
     }
+
+    void SoundManager::clear()
+    {
+        for (SoundMap::iterator iter (mActiveSounds.begin()); iter!=mActiveSounds.end(); ++iter)
+            iter->first->stop();
+
+        mActiveSounds.clear();
+        stopMusic();
+    }
 }

@@ -15,6 +15,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -27,6 +28,7 @@ void MWState::StateManager::cleanup()
 {
     if (mState!=State_NoGame)
     {
+        MWBase::Environment::get().getSoundManager()->clear();
         MWBase::Environment::get().getDialogueManager()->clear();
         MWBase::Environment::get().getJournal()->clear();
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().clear();
