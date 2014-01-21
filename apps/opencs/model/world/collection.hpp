@@ -200,9 +200,9 @@ namespace CSMWorld
 
     template<typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin, 
-                                                      const std::string& destination,
-                                                      const UniversalId::Type type,
-                                                      const UniversalId::ArgumentType argumentType)
+                                                          const std::string& destination,
+                                                          const UniversalId::Type type,
+                                                          const UniversalId::ArgumentType argumentType)
     {
        Record<ESXRecordT> copy = getRecord(origin);
        if (argumentType == UniversalId::ArgumentType_Id)
