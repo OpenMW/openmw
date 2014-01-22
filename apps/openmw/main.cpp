@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 
+#include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include <SDL.h>
@@ -29,8 +30,6 @@ extern int is_debugger_attached(void);
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <OSX/macUtils.h>
 #endif
-
-#include "config.hpp"
 
 #include <boost/version.hpp>
 /**
