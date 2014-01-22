@@ -3,6 +3,8 @@
 #include <components/version/version.hpp>
 
 #include <QLabel>
+#include <QDate>
+#include <QTime>
 #include <QPushButton>
 #include <QFontDatabase>
 #include <QInputDialog>
@@ -74,7 +76,12 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     QString revision(OPENMW_VERSION_COMMIT);
     revision = revision.left(10);
 
+    QDate date(QDate::fromString(__DATE__, QLatin1String("MMM dd yyyy")));
+    QTime time(QTime::fromString(__TIME__, QLatin1String("hh:m:ss")));
+
     versionLabel->setText(tr("OpenMW %0 revision %1").arg(OPENMW_VERSION, revision));
+    versionLabel->setToolTip(tr("Compiled on %0 %1").arg(date.toString(Qt::SystemLocaleShortDate),
+                                                         time.toString(Qt::SystemLocaleShortDate)));
 
     createIcons();
 }
