@@ -267,12 +267,16 @@ bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
 
 int MWMechanics::NpcStats::getBounty() const
 {
-    return mBounty;
+    if (mIsWerewolf)
+        return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt();
+    else
+        return mBounty;
 }
 
 void MWMechanics::NpcStats::setBounty (int bounty)
 {
-    mBounty = bounty;
+    if (!mIsWerewolf)
+        mBounty = bounty;
 }
 
 int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
