@@ -55,13 +55,12 @@ int MWMechanics::AiSequence::getTypeId() const
     return mPackages.front()->getTypeId();
 }
 
-bool MWMechanics::AiSequence::getCombatTarget(std::string &targetActorId) const
+MWWorld::Ptr MWMechanics::AiSequence::getCombatTarget() const
 {
     if (getTypeId() != AiPackage::TypeIdCombat)
-        return false;
+        return MWWorld::Ptr();
     const AiCombat *combat = static_cast<const AiCombat *>(mPackages.front());
-    targetActorId = combat->getTargetId();
-    return true;
+    return combat->getTarget();
 }
 
 void MWMechanics::AiSequence::stopCombat()

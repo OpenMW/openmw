@@ -412,16 +412,10 @@ namespace MWScript
                     std::string testedTargetId = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    const MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
-                    std::string currentTargetId;
+                    const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
 
-                    bool targetsAreEqual = false;
-                    if (creatureStats.getAiSequence().getCombatTarget (currentTargetId))
-                    {
-                        if (currentTargetId == testedTargetId)
-                            targetsAreEqual = true;
-                    }
-                    runtime.push(int(targetsAreEqual));
+                    MWWorld::Ptr target = creatureStats.getAiSequence().getCombatTarget();
+                    runtime.push(Misc::StringUtils::ciEqual(target.getCellRef().mRefID, testedTargetId));
                 }
         };
 

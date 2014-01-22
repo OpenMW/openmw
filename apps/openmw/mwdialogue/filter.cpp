@@ -536,7 +536,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_CreatureTargetted:
 
-            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getCreatureTargetted();
+            return mActor.getClass().getCreatureStats (mActor).getCreatureTargetted();
 
         case SelectWrapper::Function_Werewolf:
 

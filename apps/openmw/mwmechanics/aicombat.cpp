@@ -360,9 +360,9 @@ namespace MWMechanics
         return 1;
     }
 
-    const std::string &AiCombat::getTargetId() const
+    MWWorld::Ptr AiCombat::getTarget() const
     {
-        return mTarget.getRefData().getHandle();
+        return mTarget;
     }
 
     AiCombat *MWMechanics::AiCombat::clone() const

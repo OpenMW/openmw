@@ -348,7 +348,9 @@ namespace MWMechanics
 
     bool CreatureStats::getCreatureTargetted() const
     {
-        return false;
+        if (mAiSequence.getCombatTarget().isEmpty())
+            return false;
+        return mAiSequence.getCombatTarget().getTypeName() == typeid(ESM::Creature).name();
     }
 
     float CreatureStats::getEvasion() const
