@@ -14,15 +14,29 @@ endif (APPLE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
-include (OpenMWMacros)
+include(OpenMWMacros)
 
 # Version
 
-set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 27)
-set (OPENMW_VERSION_RELEASE 0)
+include(GetGitRevisionDescription)
 
-set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+get_git_tag_revision(taghash --tags --max-count=1)
+get_git_head_revision(refspec commithash)
+git_describe(version --tags ${taghash})
+
+string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" match "${version}")
+if (match)
+    string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" OPENMW_VERSION_MAJOR "${version}")
+    string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_MINOR "${version}")
+    string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_RELEASE "${version}")
+
+    set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+    set(OPENMW_VERSION_COMMIT "${commithash}")
+
+    message(STATUS "Configuring OpenMW ${OPENMW_VERSION}...")
+else (match)
+    message(FATAL_ERROR "Failed to get valid version information from Git")
+endif (match)
 
 # doxygen main page
 
@@ -319,7 +333,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
     "${OpenMW_BINARY_DIR}/opencs.cfg")
-    
+
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
 
