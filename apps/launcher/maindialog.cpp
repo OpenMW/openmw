@@ -1,5 +1,8 @@
 #include "maindialog.hpp"
 
+#include <components/version/version.hpp>
+
+#include <QLabel>
 #include <QPushButton>
 #include <QFontDatabase>
 #include <QInputDialog>
@@ -66,6 +69,12 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
 
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    // Add version information to bottom of the window
+    QString revision(OPENMW_VERSION_COMMIT);
+    revision = revision.left(10);
+
+    versionLabel->setText(tr("OpenMW %0 revision %1").arg(OPENMW_VERSION, revision));
 
     createIcons();
 }
