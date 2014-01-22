@@ -652,6 +652,9 @@ namespace MWClass
         if (!attacker.isEmpty())
             MWMechanics::diseaseContact(ptr, attacker);
 
+        if (damage > 0.0f && !object.isEmpty())
+            MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
+
         if(damage > 0.0f)
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying

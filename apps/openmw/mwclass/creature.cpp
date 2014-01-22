@@ -359,6 +359,9 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
+        if (damage > 0.0f && !object.isEmpty())
+            MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
+
         if (damage > 0.f)
         {
             // Check for knockdown

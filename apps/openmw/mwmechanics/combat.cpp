@@ -5,11 +5,13 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+
+#include "../mwbase/windowmanager.hpp"
 
 namespace
 {
@@ -106,6 +108,30 @@ namespace MWMechanics
             return true;
         }
         return false;
+    }
+
+    void resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
+    {
+        MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).mMagnitude
+                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).mMagnitude);
+
+        float multiplier = 0;
+        if (resistance >= 0)
+            multiplier = 1 - resistance / 100.f;
+        else
+            multiplier = -(resistance-100) / 100.f;
+
+        if (!(weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
+              || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
+            damage *= multiplier;
+
+        if (weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
+                & actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+            damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
+
+        if (damage == 0 && attacker.getRefData().getHandle() == "player")
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
     }
 
 }
