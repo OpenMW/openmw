@@ -115,6 +115,7 @@ namespace MWScript
 
                         current = region->mName;
                     }
+                    Misc::StringUtils::toLower(current);
 
                     bool match = current.length()>=name.length() &&
                         current.substr (0, name.length())==name;
