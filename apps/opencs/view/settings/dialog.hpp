@@ -1,22 +1,17 @@
 #ifndef CSVSETTINGS_DIALOG_H
 #define CSVSETTINGS_DIALOG_H
 
-#include <QMainWindow>
-
-#include "../../model/settings/usersettings.hpp"
+#include "settingwindow.hpp"
 
 class QStackedWidget;
 class QListWidget;
 class QListWidgetItem;
-class QDataWidgetMapper;
-class QGroupBox;
 
-namespace CSMSettings { class BinaryWidgetAdapter; }
 namespace CSVSettings {
 
     class Page;
 
-    class Dialog : public QMainWindow
+    class Dialog : public SettingWindow
     {
         Q_OBJECT
 
@@ -32,9 +27,14 @@ namespace CSVSettings {
         /// Settings are written on close
         void closeEvent (QCloseEvent *event);
 
-        void setupStack();
-        Page *createPage (const QString &pageName);
-        void addPage (Page *page);
+        void setupDialog();
+       // void addPage (Page *page);
+
+    private:
+
+        void buildPages();
+        void buildPageListWidget (QWidget *centralWidget);
+        void buildStackedWidget (QWidget *centralWidget);
 
     public slots:
 

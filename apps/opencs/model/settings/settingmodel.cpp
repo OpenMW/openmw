@@ -151,10 +151,6 @@ CSMSettings::PageMap
         //page name found
         if (pageRegEx.exactMatch(line))
         {
-            if (settingMap->count() == 0)
-                qDebug() << "removed " << pageMap.remove(currPage) << "from pagemap";
-
-            qDebug() << "pageMap size: " << pageMap.size();
             currPage = pageRegEx.cap(1).simplified().trimmed();
             settingMap = new SettingMap();
             pageMap[currPage] = settingMap;
@@ -348,9 +344,7 @@ void CSMSettings::SettingModel::buildModel (PageMap &pageMap)
             QStringList *values = settingMap->value (settingName);
 
             foreach (const QString &value, *values)
-            {
                 mDefinitionModel.defineSetting (settingName, pageName, value);
-            }
         }
     }
 }

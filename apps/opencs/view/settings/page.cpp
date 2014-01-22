@@ -82,8 +82,6 @@ void CSVSettings::Page::addView (CSMSettings::DefinitionModel &model,
 
     mViews.append (view);
     mBox->layout()->addWidget (view->viewFrame());
-
-    qDebug() << "Page::addView() definition count = " << model.rowCount();
 }
 
 void CSVSettings::Page::buildFactories()

@@ -1,17 +1,9 @@
 #include "dialog.hpp"
 
-#include <boost/filesystem/path.hpp>
-
 #include <QListWidgetItem>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QWidget>
-#include <QTabWidget>
-#include <QMessageBox>
-#include <QTextCodec>
-#include <QFile>
 #include <QStackedWidget>
-#include <QGridLayout>
 #include <QtGui>
 
 #include "../../model/settings/usersettings.hpp"
@@ -22,11 +14,11 @@
 #include <QDebug>
 
 CSVSettings::Dialog::Dialog(QMainWindow *parent) :
-    QMainWindow (parent), mStackedWidget (0)
+    SettingWindow (parent), mStackedWidget (0)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
 
-    setupStack();
+    setupDialog();
 
     connect (mPageListWidget,
              SIGNAL (currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
@@ -34,66 +26,71 @@ CSVSettings::Dialog::Dialog(QMainWindow *parent) :
              SLOT (slotChangePage (QListWidgetItem*, QListWidgetItem*)));
 }
 
-void CSVSettings::Dialog::setupStack()
+void CSVSettings::Dialog::setupDialog()
 {
     //create central widget with it's layout and immediate children
     QWidget *centralWidget = new QGroupBox (this);
+    centralWidget->setLayout (new QHBoxLayout());
+    setCentralWidget (centralWidget);
+    setDockOptions (QMainWindow::AllowNestedDocks);
 
-  //  QTableView *tv = new QTableView (centralWidget);
+    buildPageListWidget (centralWidget);
+    buildStackedWidget (centralWidget);
+
+    buildPages();
+}
+
+void CSVSettings::Dialog::buildPages()
+{
+    SettingWindow::createPages (CSMSettings::UserSettings::instance());
+
+    QFontMetrics fm (QApplication::font());
+
+    foreach (Page *page, SettingWindow::pages())
+    {
+        QString pageName = page->objectName();
+
+        int textWidth = fm.width(pageName);
+
+        new QListWidgetItem (pageName, mPageListWidget);
+        mPageListWidget->setFixedWidth (textWidth + 50);
+
+        mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
+    }
+
+    resize (mStackedWidget->sizeHint());
+}
+
+void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
+{
     mPageListWidget = new QListWidget (centralWidget);
-    mStackedWidget = new QStackedWidget (centralWidget);
-
-    QHBoxLayout* dialogLayout = new QHBoxLayout();
-
-
     mPageListWidget->setMinimumWidth(50);
     mPageListWidget->setSizePolicy
                             (QSizePolicy::Fixed, QSizePolicy::Expanding);
 
     mPageListWidget->setSelectionBehavior (QAbstractItemView::SelectItems);
 
+    centralWidget->layout()->addWidget(mPageListWidget);
+}
+
+void CSVSettings::Dialog::buildStackedWidget (QWidget *centralWidget)
+{
+    mStackedWidget = new QStackedWidget (centralWidget);
     mStackedWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-
-    dialogLayout->addWidget (mPageListWidget);
-    dialogLayout->addWidget (mStackedWidget);
-
-    centralWidget->setLayout (dialogLayout);
-
-    setCentralWidget (centralWidget);
-    setDockOptions (QMainWindow::AllowNestedDocks);
-}
-
-CSVSettings::Page *CSVSettings::Dialog::createPage (const QString &pageName)
-{
-    return new Page (pageName,
-                     CSMSettings::UserSettings::instance().declarationModel(),
-                     CSMSettings::UserSettings::instance().definitionModel(),
-                     false, this);
-}
-
-void CSVSettings::Dialog::addPage (Page *page)
-{
-    mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
-
-    new QListWidgetItem (page->objectName(), mPageListWidget);
-
-    //finishing touches
-    QFontMetrics fm (QApplication::font());
-    int textWidth = fm.width(page->objectName());
-
-    mPageListWidget->setFixedWidth(textWidth + 50);
-
-    resize (mStackedWidget->sizeHint());
+    centralWidget->layout()->addWidget (mStackedWidget);
 }
 
 void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
 {
-    QApplication::focusWidget()->clearFocus();
+    //SettingWindow::closeEvent() must be called first to ensure
+    //model is updated
+    SettingWindow::closeEvent (event);
     CSMSettings::UserSettings::instance().saveSettings();
 }
 
-void CSVSettings::Dialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)
+void CSVSettings::Dialog::slotChangePage(QListWidgetItem *current,
+                                         QListWidgetItem *previous)
 {
     if (!current)
         current = previous;
@@ -104,13 +101,6 @@ void CSVSettings::Dialog::slotChangePage(QListWidgetItem *current, QListWidgetIt
 
 void CSVSettings::Dialog::show()
 {
-    addPage (createPage ("Display Format"));
-    addPage (createPage ("Window Size"));
-    addPage (new TestHarnessPage (
-                 CSMSettings::UserSettings::instance().declarationModel(),
-                 CSMSettings::UserSettings::instance().definitionModel(),
-                 this));
-
     QRect scr = QApplication::desktop()->screenGeometry();
     QRect rect = geometry();
 

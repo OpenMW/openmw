@@ -120,16 +120,11 @@ bool CSMSettings::UserSettings::loadSettingsFromFile
         if (stream)
             pageMap = SettingModel::readFilestream(stream);
         else
-           {
             success = success && false;
-            qDebug() << "could not open filepath: " << filepath;
-        }
 
         mergeSettings (totalMap, pageMap, Merge_Overwrite);
     }
-
     validate (totalMap);
-
     buildModel (totalMap);
 
     return success;

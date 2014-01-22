@@ -2,6 +2,7 @@
 #include <QVBoxLayout>
 #include <QAbstractItemModel>
 #include <QGroupBox>
+#include <QDataWidgetMapper>
 
 #include "view.hpp"
 #include "support.hpp"
@@ -33,9 +34,4 @@ bool CSVSettings::View::isMultiValue() const
 QStringList CSVSettings::View::valueList() const
 {
     return mSetting->valueList;
-}
-
-void CSVSettings::View::slotMapperChanged()
-{
-    qDebug() << "mapper changed!";
 }

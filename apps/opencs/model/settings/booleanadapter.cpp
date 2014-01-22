@@ -14,9 +14,11 @@ CSMSettings::BooleanAdapter::BooleanAdapter (DefinitionModel &model,
 
     //create a list of QString pairs which represent the setting values and
     //whether or not they are set (true / false)
+
+    setObjectName (settingName() + "_adapter");
     foreach (const QString &listValue, setting->valueList)
     {
-        QPair<QString, QBool *> settingPair(listValue, new QBool(false));
+        QPair<QString, QBool *> settingPair(listValue, new QBool(true));
 
         for (int i = 0; i < filter()->rowCount(); i++)
         {
@@ -76,9 +78,8 @@ void CSMSettings::BooleanAdapter::slotUpdateData()
             if (*data.second == QBool(true))
                 data.second = new QBool (false);
         }
-
         mSettings.replace(i, data);
-        QModelIndex idx = index(i, Setting_Name, QModelIndex());
+        QModelIndex idx = index(i, BooleanSetting_ValueState, QModelIndex());
         emit dataChanged (idx, idx);
     }
 }

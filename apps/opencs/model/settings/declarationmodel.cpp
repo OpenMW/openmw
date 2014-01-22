@@ -194,10 +194,7 @@ CSMSettings::Setting *CSMSettings::DeclarationModel::getSetting
         if (item.first == pageName)
         {
             if (item.second.first == settingName)
-            {
-                qDebug() << "found setting: " << item.second.second->settingName;
                 return item.second.second;
-            }
         }
     }
 

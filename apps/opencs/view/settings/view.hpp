@@ -7,6 +7,7 @@
 
 class QAbstractItemModel;
 class QGroupBox;
+class QDataWidgetMapper;
 
 namespace CSMSettings
 {
@@ -21,8 +22,10 @@ namespace CSVSettings
         Q_OBJECT
 
         QAbstractItemModel *mModel;
-        const CSMSettings::Setting *mSetting;
+
         QGroupBox *mViewFrame;
+
+        const CSMSettings::Setting *mSetting;
 
     public:
 
@@ -36,10 +39,6 @@ namespace CSVSettings
         QAbstractItemModel *model()                         { return mModel; }
         QStringList valueList() const;
         bool isMultiValue() const;
-
-    protected slots:
-
-        void slotMapperChanged();
     };
 
     class IViewFactory

@@ -19,17 +19,20 @@ CSVSettings::BooleanView::BooleanView (QAbstractItemModel *booleanAdapter,
                                        QWidget *parent)
     : View (booleanAdapter, setting, parent)
 {
-    build();
+
+    build (setting->settingName);
 }
 
-void CSVSettings::BooleanView::build()
+void CSVSettings::BooleanView::build(const QString &settingName)
 {
-    createView();
-    createModel();
+    createView (settingName);
+    createModel (settingName);
 }
 
-void CSVSettings::BooleanView::createView()
+void CSVSettings::BooleanView::createView(const QString &settingName)
 {
+    setObjectName (settingName + "_view");
+
     foreach (const QString &value, valueList())
     {
         QWidget *widget = 0;
@@ -39,24 +42,27 @@ void CSVSettings::BooleanView::createView()
         else
             widget = new QRadioButton (value, this);
 
+        widget->setObjectName (value);
+
         viewFrame()->layout()->addWidget (widget);
 
         mWidgets.append (widget);
     }
 }
 
-void CSVSettings::BooleanView::createModel()
+void CSVSettings::BooleanView::createModel (const QString &settingName)
 {
     int i = 0;
 
     foreach (QWidget *widget, mWidgets)
     {
         QDataWidgetMapper *mapper = new QDataWidgetMapper (widget);
+        mapper->setObjectName
+                    (settingName + '.' + widget->objectName() + "_mapper");
         mapper->setModel (model());
         mapper->addMapping (widget, CSMSettings::BooleanSetting_ValueState);
         mapper->setCurrentIndex(i);
         i++;
-
     }
 }
 

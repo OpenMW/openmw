@@ -27,11 +27,12 @@ namespace CSVSettings
                               const CSMSettings::Setting *setting,
                               QWidget *parent = 0);
 
+
     protected:
 
-        void build();
-        void createView();
-        void createModel();
+        void build (const QString &settingName);
+        void createView (const QString &settingName);
+        void createModel (const QString &settingName);
     };
 
     class BooleanViewFactory : public QObject, public IViewFactory

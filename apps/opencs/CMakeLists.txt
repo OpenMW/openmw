@@ -82,6 +82,7 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
+    settingwindow
     dialog
     page
     view

@@ -1,6 +1,8 @@
 #include "definitionmodel.hpp"
 #include "../../view/settings/support.hpp"
 
+#include <QDebug>
+
 CSMSettings::DefinitionModel::DefinitionModel(QObject *parent) :
     QAbstractItemModel(parent)
 {}
