@@ -216,7 +216,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             float ratio = MWWorld::Class::get (player).getCreatureStats (player).getHealth().getCurrent() /
                 MWWorld::Class::get (player).getCreatureStats (player).getHealth().getModified();
 
-            return select.selectCompare (ratio);
+            return select.selectCompare (static_cast<int>(ratio*100));
         }
 
         case SelectWrapper::Function_PcDynamicStat:
