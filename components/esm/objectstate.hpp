@@ -17,8 +17,6 @@ namespace ESM
     ///< \brief Save state for objects, that do not use custom data
     struct ObjectState
     {
-        std::string mId;
-
         CellRef mRef;
 
         unsigned char mHasLocals;
