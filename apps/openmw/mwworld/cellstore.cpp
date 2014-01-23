@@ -49,6 +49,9 @@ namespace
                 iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
             {
+                if (iter->mData.getCount()==0 && iter->mRef.mRefNum.mContentFile==-1)
+                    continue; // deleted file that did not came from a content file -> ignore
+
                 RecordType state;
                 iter->save (state);
 
