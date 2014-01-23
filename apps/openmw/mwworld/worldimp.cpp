@@ -304,13 +304,16 @@ namespace MWWorld
     {
         return
             mStore.countSavedGameRecords()
-            +mGlobalVariables.countSavedGameRecords();
+            +mGlobalVariables.countSavedGameRecords()
+            +1 // player record
+            +mCells.countSavedGameRecords();
     }
 
     void World::write (ESM::ESMWriter& writer) const
     {
         mStore.write (writer);
         mGlobalVariables.write (writer);
+        mCells.write (writer);
         mPlayer->write (writer);
     }
 
@@ -318,7 +321,8 @@ namespace MWWorld
     {
         if (!mStore.readRecord (reader, type) &&
             !mGlobalVariables.readRecord (reader, type) &&
-            !mPlayer->readRecord (reader, type))
+            !mPlayer->readRecord (reader, type) &&
+            !mCells.readRecord (reader, type))
         {
             throw std::runtime_error ("unknown record in saved game");
         }

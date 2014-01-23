@@ -24,9 +24,9 @@
 
 #include "../mwscript/globalscripts.hpp"
 
-void MWState::StateManager::cleanup()
+void MWState::StateManager::cleanup (bool force)
 {
-    if (mState!=State_NoGame)
+    if (mState!=State_NoGame || force)
     {
         MWBase::Environment::get().getSoundManager()->clear();
         MWBase::Environment::get().getDialogueManager()->clear();
@@ -184,77 +184,86 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
 void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
 {
-    cleanup();
-
-    mTimePlayed = slot->mProfile.mTimePlayed;
-
-    ESM::ESMReader reader;
-    reader.open (slot->mPath.string());
-
-    while (reader.hasMoreRecs())
+    try
     {
-        ESM::NAME n = reader.getRecName();
-        reader.getRecHeader();
+        cleanup();
 
-        switch (n.val)
+        mTimePlayed = slot->mProfile.mTimePlayed;
+
+        ESM::ESMReader reader;
+        reader.open (slot->mPath.string());
+
+        while (reader.hasMoreRecs())
         {
-            case ESM::REC_SAVE:
+            ESM::NAME n = reader.getRecName();
+            reader.getRecHeader();
 
-                // don't need to read that here
-                reader.skipRecord();
-                break;
+            switch (n.val)
+            {
+                case ESM::REC_SAVE:
 
-            case ESM::REC_JOUR:
-            case ESM::REC_QUES:
+                    // don't need to read that here
+                    reader.skipRecord();
+                    break;
 
-                MWBase::Environment::get().getJournal()->readRecord (reader, n.val);
-                break;
+                case ESM::REC_JOUR:
+                case ESM::REC_QUES:
 
-            case ESM::REC_ALCH:
-            case ESM::REC_ARMO:
-            case ESM::REC_BOOK:
-            case ESM::REC_CLAS:
-            case ESM::REC_CLOT:
-            case ESM::REC_ENCH:
-            case ESM::REC_NPC_:
-            case ESM::REC_SPEL:
-            case ESM::REC_WEAP:
-            case ESM::REC_GLOB:
-            case ESM::REC_PLAY:
+                    MWBase::Environment::get().getJournal()->readRecord (reader, n.val);
+                    break;
 
-                MWBase::Environment::get().getWorld()->readRecord (reader, n.val);
-                break;
+                case ESM::REC_ALCH:
+                case ESM::REC_ARMO:
+                case ESM::REC_BOOK:
+                case ESM::REC_CLAS:
+                case ESM::REC_CLOT:
+                case ESM::REC_ENCH:
+                case ESM::REC_NPC_:
+                case ESM::REC_SPEL:
+                case ESM::REC_WEAP:
+                case ESM::REC_GLOB:
+                case ESM::REC_PLAY:
+                case ESM::REC_CSTA:
 
-            case ESM::REC_GSCR:
+                    MWBase::Environment::get().getWorld()->readRecord (reader, n.val);
+                    break;
 
-                MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, n.val);
-                break;
+                case ESM::REC_GSCR:
 
-            default:
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord (reader, n.val);
+                    break;
 
-                // ignore invalid records
-                /// \todo log error
-                reader.skipRecord();
+                default:
+
+                    // ignore invalid records
+                    /// \todo log error
+                    reader.skipRecord();
+            }
         }
+
+        mCharacterManager.setCurrentCharacter(character);
+
+        mState = State_Running;
+
+        Settings::Manager::setString ("character", "Saves",
+            slot->mPath.parent_path().filename().string());
+
+        MWBase::Environment::get().getWorld()->setupPlayer();
+        MWBase::Environment::get().getWorld()->renderPlayer();
+        MWBase::Environment::get().getWindowManager()->updatePlayer();
+        MWBase::Environment::get().getMechanicsManager()->playerLoaded();
+
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        ESM::CellId cellId = ptr.getCell()->mCell->getCellId();
+
+        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
     }
-
-    mCharacterManager.setCurrentCharacter(character);
-
-    mState = State_Running;
-
-    Settings::Manager::setString ("character", "Saves",
-        slot->mPath.parent_path().filename().string());
-
-    MWBase::Environment::get().getWorld()->setupPlayer();
-    MWBase::Environment::get().getWorld()->renderPlayer();
-    MWBase::Environment::get().getWindowManager()->updatePlayer();
-    MWBase::Environment::get().getMechanicsManager()->playerLoaded();
-
-    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
-    ESM::CellId cellId = ptr.getCell()->mCell->getCellId();
-
-    MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
+    catch (const std::exception& e)
+    {
+        std::cerr << "failed to load saved game: " << e.what() << std::endl;
+        cleanup (true);
+    }
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)

@@ -7,6 +7,11 @@
 #include "livecellref.hpp"
 #include "esmstore.hpp"
 
+namespace ESM
+{
+    struct CellState;
+}
+
 namespace MWWorld
 {
 
@@ -133,6 +138,10 @@ namespace MWWorld
 
     Ptr searchInContainer (const std::string& id);
 
+        void loadState (const ESM::CellState& state);
+
+        void saveState (ESM::CellState& state) const;
+
   private:
 
     template<class Functor, class List>
@@ -158,7 +167,6 @@ namespace MWWorld
         ///< Make case-adjustments to \a ref and insert it into the respective container.
         ///
         /// Invalid \a ref objects are silently dropped.
-
   };
 }
 

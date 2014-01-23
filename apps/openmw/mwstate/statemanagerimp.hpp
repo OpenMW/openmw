@@ -19,7 +19,7 @@ namespace MWState
 
         private:
 
-            void cleanup();
+            void cleanup (bool force = false);
 
         public:
 

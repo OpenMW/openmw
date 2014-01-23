@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <components/esm/cellstate.hpp>
+#include <components/esm/cellid.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -229,5 +232,23 @@ namespace MWWorld
                 std::cerr
                     << "WARNING: Ignoring reference '" << ref.mRefID << "' of unhandled type\n";
         }
+    }
+
+    void CellStore::loadState (const ESM::CellState& state)
+    {
+        if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
+            mWaterLevel = state.mWaterLevel;
+
+        mWaterLevel = state.mWaterLevel;
+    }
+
+    void CellStore::saveState (ESM::CellState& state) const
+    {
+        state.mId = mCell->getCellId();
+
+        if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
+            state.mWaterLevel = mWaterLevel;
+
+        state.mWaterLevel = mWaterLevel;
     }
 }
