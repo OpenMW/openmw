@@ -49,8 +49,13 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
 {
     std::string errors = GenericCreator::getErrors();
 
+    if (mCloneMode)
+    {
+        return errors;
+    }
+    
     std::string cell = mCell->text().toUtf8().constData();
-
+    
     if (cell.empty())
     {
         if (!errors.empty())
@@ -72,4 +77,16 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
 void CSVWorld::ReferenceCreator::cellChanged()
 {
     update();
+}
+
+void CSVWorld::ReferenceCreator::toggleWidgets(bool active)
+{
+    CSVWorld::GenericCreator::toggleWidgets(active);
+    mCell->setEnabled(active);
+}
+
+void CSVWorld::ReferenceCreator::cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type, const CSMWorld::UniversalId::ArgumentType argumentType)
+{
+    CSVWorld::GenericCreator::cloneMode(originid, type, argumentType);
+    cellChanged(); //otherwise ok button will remain disabled
 }

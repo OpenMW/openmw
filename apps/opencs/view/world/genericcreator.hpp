@@ -29,11 +29,13 @@ namespace CSVWorld
             std::string mErrors;
             QHBoxLayout *mLayout;
             bool mLocked;
-            bool mCloneMode;
             std::string mClonedId;
             CSMWorld::UniversalId::Type mClonedType;
             CSMWorld::UniversalId::ArgumentType mArgumentType;
-
+            
+        protected:
+            bool mCloneMode;
+        
         protected:
 
             void update();
