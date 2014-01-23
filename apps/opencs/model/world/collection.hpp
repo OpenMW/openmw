@@ -204,12 +204,9 @@ namespace CSMWorld
                                                           const UniversalId::Type type,
                                                           const UniversalId::ArgumentType argumentType)
     {
-       Record<ESXRecordT> copy = getRecord(origin);
+       Record<ESXRecordT> copy(getRecord(origin));
        copy.mState = RecordBase::State_ModifiedOnly;
-       if (argumentType == UniversalId::ArgumentType_Id)
-       {
-           copy.get().mId = destination;
-       }
+       copy.get().mId = destination;
        
        insertRecord(copy, getAppendIndex(destination, type));
     }

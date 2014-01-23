@@ -154,14 +154,17 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
     mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
+    mTopics.addColumn (new FixedRecordTypeColumn<ESM::Dialogue> (UniversalId::Type_Topic));
     mTopics.addColumn (new DialogueTypeColumn<ESM::Dialogue>);
 
     mJournals.addColumn (new StringIdColumn<ESM::Dialogue>);
     mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
+    mJournals.addColumn (new FixedRecordTypeColumn<ESM::Dialogue> (UniversalId::Type_Journal));
     mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
 
     mTopicInfos.addColumn (new StringIdColumn<Info> (true));
     mTopicInfos.addColumn (new RecordStateColumn<Info>);
+    mTopicInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_Journal));
     mTopicInfos.addColumn (new TopicColumn<Info> (false));
     mTopicInfos.addColumn (new ActorColumn<Info>);
     mTopicInfos.addColumn (new RaceColumn<Info>);
@@ -178,6 +181,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mJournalInfos.addColumn (new StringIdColumn<Info> (true));
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
+    mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_Journal));
     mJournalInfos.addColumn (new TopicColumn<Info> (true));
     mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
     mJournalInfos.addColumn (new QuestIndexColumn<Info>);
@@ -225,6 +229,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mFilters.addColumn (new StringIdColumn<CSMFilter::Filter>);
     mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new FixedRecordTypeColumn<CSMFilter::Filter> (UniversalId::Type_Filter));
     mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
     mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
     mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
