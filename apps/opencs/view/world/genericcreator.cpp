@@ -157,9 +157,4 @@ void CSVWorld::GenericCreator::cloneMode(const std::string& originid,
     mClonedId = originid;
     mClonedType = type;
     mArgumentType = argumentType;
-    
-    if (argumentType == CSMWorld::UniversalId::ArgumentType_Id)
-    {
-        mId->setText(QString::fromStdString(mClonedId));
-    }
 }

@@ -194,6 +194,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
+    mRefs.addColumn (new FixedRecordTypeColumn<CellRef> (UniversalId::Type_Reference));
     mRefs.addColumn (new CellColumn<CellRef>);
     mRefs.addColumn (new IdColumn<CellRef>);
     mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 0, false));

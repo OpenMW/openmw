@@ -43,10 +43,8 @@ void CSMWorld::RefCollection::cloneRecord(const std::string& origin,
                          const CSMWorld::UniversalId::Type type,
                          const CSMWorld::UniversalId::ArgumentType argumentType)
 {
-       Record<CSMWorld::CellRef> originRecord = getRecord(origin);
-       Record<CSMWorld::CellRef> *copy = dynamic_cast<Record<CSMWorld::CellRef>* >(originRecord.clone());
-       copy->mState = CSMWorld::RecordBase::State_ModifiedOnly;
-       copy->get().mId = getNewId();
-       insertRecord(*copy, getAppendIndex(destination, type));
-       delete copy;
+       Record<CSMWorld::CellRef> clone(getRecord(origin));
+       clone.mState = CSMWorld::RecordBase::State_ModifiedOnly;
+       clone.get().mId = destination;
+       insertRecord(clone, getAppendIndex(destination, type), type);
 }

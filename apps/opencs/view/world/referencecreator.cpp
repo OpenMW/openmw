@@ -40,9 +40,9 @@ CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& 
 
 void CSVWorld::ReferenceCreator::reset()
 {
+    GenericCreator::reset();
     mCell->setText ("");
     mId = getData().getReferences().getNewId();
-    GenericCreator::reset();
 }
 
 std::string CSVWorld::ReferenceCreator::getErrors() const
