@@ -79,3 +79,9 @@ void CSVWorld::CellCreator::valueChanged (int index)
 {
     update();
 }
+
+void CSVWorld::CellCreator::toggleWidgets(bool active)
+{
+    CSVWorld::GenericCreator::toggleWidgets(active);
+    mType->setEnabled(active);
+}

@@ -28,6 +28,8 @@ namespace CSVWorld
             CellCreator (CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
             virtual void reset();
+            
+            virtual void toggleWidgets(bool active = true);
 
         private slots:
 
