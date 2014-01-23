@@ -4,6 +4,8 @@
 
 #include <components/esm/cellstate.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/objectstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -31,6 +33,30 @@ namespace
         }
 
         return MWWorld::Ptr();
+    }
+
+    template<typename RecordType, typename T>
+    void writeReferenceCollection (ESM::ESMWriter& writer,
+        const MWWorld::CellRefList<T>& collection)
+    {
+        if (!collection.mList.empty())
+        {
+            // section header
+            writer.writeHNT ("CSEC", collection.mList.front().mBase->sRecordId);
+
+            // references
+            for (typename MWWorld::CellRefList<T>::List::const_iterator
+                iter (collection.mList.begin());
+                iter!=collection.mList.end(); ++iter)
+            {
+                RecordType state;
+                iter->save (state);
+
+                writer.startRecord (ESM::REC_OBJE);
+                state.save (writer);
+                writer.endRecord (ESM::REC_OBJE);
+            }
+        }
     }
 }
 
@@ -250,5 +276,29 @@ namespace MWWorld
             state.mWaterLevel = mWaterLevel;
 
         state.mWaterLevel = mWaterLevel;
+    }
+
+    void CellStore::writeReferences (ESM::ESMWriter& writer) const
+    {
+        writeReferenceCollection<ESM::ObjectState> (writer, mActivators);
+        writeReferenceCollection<ESM::ObjectState> (writer, mPotions);
+        writeReferenceCollection<ESM::ObjectState> (writer, mAppas);
+        writeReferenceCollection<ESM::ObjectState> (writer, mArmors);
+        writeReferenceCollection<ESM::ObjectState> (writer, mBooks);
+        writeReferenceCollection<ESM::ObjectState> (writer, mClothes);
+        writeReferenceCollection<ESM::ObjectState> (writer, mContainers);
+        writeReferenceCollection<ESM::ObjectState> (writer, mCreatures);
+        writeReferenceCollection<ESM::ObjectState> (writer, mDoors);
+        writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
+        writeReferenceCollection<ESM::ObjectState> (writer, mCreatureLists);
+        writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
+        writeReferenceCollection<ESM::ObjectState> (writer, mLights);
+        writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
+        writeReferenceCollection<ESM::ObjectState> (writer, mMiscItems);
+        writeReferenceCollection<ESM::ObjectState> (writer, mNpcs);
+        writeReferenceCollection<ESM::ObjectState> (writer, mProbes);
+        writeReferenceCollection<ESM::ObjectState> (writer, mRepairs);
+        writeReferenceCollection<ESM::ObjectState> (writer, mStatics);
+        writeReferenceCollection<ESM::ObjectState> (writer, mWeapons);
     }
 }

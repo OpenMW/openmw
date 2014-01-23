@@ -142,6 +142,8 @@ namespace MWWorld
 
         void saveState (ESM::CellState& state) const;
 
+        void writeReferences (ESM::ESMWriter& writer) const;
+
   private:
 
     template<class Functor, class List>

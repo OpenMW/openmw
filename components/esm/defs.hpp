@@ -90,6 +90,7 @@ enum RecNameInts
     REC_GSCR = 0x52435347,
     REC_PLAY = 0x59414c50,
     REC_CSTA = 0x41545343,
+    REC_OBJE = 0x454a424f,
 
     // format 1
     REC_FILT = 0x544C4946

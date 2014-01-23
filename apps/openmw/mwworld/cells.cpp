@@ -73,7 +73,7 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, const CellStore& cell) c
     writer.startRecord (ESM::REC_CSTA);
     cellState.mId.save (writer);
     cellState.save (writer);
-    /// \todo write references
+    cell.writeReferences (writer);
     writer.endRecord (ESM::REC_CSTA);
 }
 
