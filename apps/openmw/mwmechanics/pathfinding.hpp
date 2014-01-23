@@ -22,6 +22,8 @@ namespace MWMechanics
             ///< \Returns true if a way point was reached
             float getZAngleToNext(float x, float y) const;
 
+            float getDistToNext(float x, float y, float z);
+
             bool isPathConstructed() const
             {
                 return mIsPathConstructed;

@@ -490,18 +490,7 @@ bool CharacterController::updateCreatureState()
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
 
-            switch (stats.getAttackType())
-            {
-            case CreatureStats::AT_Chop:
-                mCurrentWeapon = "attack1";
-                break;
-            case CreatureStats::AT_Slash:
-                mCurrentWeapon = "attack2";
-                break;
-            case CreatureStats::AT_Thrust:
-                mCurrentWeapon = "attack3";
-                break;
-            }
+            determineAttackType();
 
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
                              MWRender::Animation::Group_All, true,
@@ -517,7 +506,7 @@ bool CharacterController::updateCreatureState()
     return false;
 }
 
-bool CharacterController::updateNpcState(bool inwater, bool isrunning)
+bool CharacterController::updateNpcState()
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     NpcStats &stats = cls.getNpcStats(mPtr);
@@ -586,7 +575,9 @@ bool CharacterController::updateNpcState(bool inwater, bool isrunning)
     if(isWerewolf)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if(isrunning && !inwater && mWeaponType == WeapType_None)
+        if(cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run)
+            && !MWBase::Environment::get().getWorld()->isSwimming(mPtr)
+            && mWeaponType == WeapType_None)
         {
             if(!sndMgr->getSoundPlaying(mPtr, "WolfRun"))
                 sndMgr->playSound3D(mPtr, "WolfRun", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
@@ -653,12 +644,7 @@ bool CharacterController::updateNpcState(bool inwater, bool isrunning)
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Left Hand", effect->mParticle);
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Right Hand", effect->mParticle);
 
-                    switch(effectentry.mRange)
-                    {
-                        case 0: mAttackType = "self"; break;
-                        case 1: mAttackType = "touch"; break;
-                        case 2: mAttackType = "target"; break;
-                    }
+                    determineAttackType(effectentry.mRange);
 
                     mAnimation->play(mCurrentWeapon, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
@@ -715,13 +701,8 @@ bool CharacterController::updateNpcState(bool inwater, bool isrunning)
                     int attackType = stats.getAttackType();
                     if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
                         attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
-
-                    if (attackType == MWMechanics::CreatureStats::AT_Chop)
-                        mAttackType = "chop";
-                    else if (attackType == MWMechanics::CreatureStats::AT_Slash)
-                        mAttackType = "slash";
                     else
-                        mAttackType = "thrust";
+                        determineAttackType();
                 }
 
                 mAnimation->play(mCurrentWeapon, Priority_Weapon,
@@ -902,7 +883,8 @@ void CharacterController::update(float duration)
         bool isrunning = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
         bool sneak = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
         bool flying = world->isFlying(mPtr);
-        Ogre::Vector3 vec = cls.getMovementVector(mPtr);
+        //Ogre::Vector3 vec = cls.getMovementVector(mPtr);
+        Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
         vec.normalise();
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
@@ -1129,7 +1111,7 @@ void CharacterController::update(float duration)
         }
 
         if(cls.isNpc())
-            forcestateupdate = updateNpcState(inwater, isrunning) || forcestateupdate;
+            forcestateupdate = updateNpcState() || forcestateupdate;
         else
             forcestateupdate = updateCreatureState() || forcestateupdate;
 
@@ -1149,6 +1131,7 @@ void CharacterController::update(float duration)
         }
 
         movement = vec;
+        cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = cls.getMovementSettings(mPtr).mPosition[2] = 0;
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
@@ -1317,6 +1300,59 @@ void CharacterController::updateVisibility()
     }
 
     mAnimation->setAlpha(alpha);
+}
+
+void CharacterController::determineAttackType(int spellRange)
+{
+    if(spellRange == -1)
+    {
+        float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
+    
+        if (move[0] && !move[1]) //sideway
+        {
+            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Slash);
+            if(mPtr.getClass().isNpc())
+                mAttackType = "slash";
+            else
+                mCurrentWeapon = "attack2";
+        }
+        else if (move[1]) //forward
+        {
+            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
+            if(mPtr.getClass().isNpc())
+                mAttackType = "thrust";
+            else
+                mCurrentWeapon = "attack3";
+        }
+        else
+        {
+            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Chop);
+            if(mPtr.getClass().isNpc())
+                mAttackType = "chop";
+            else
+                mCurrentWeapon = "attack1";
+        }
+    
+    }
+    else
+    {
+        switch(spellRange)
+        {
+        case 0: 
+            mAttackType = "self"; 
+            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Self);
+            break;
+        case 1: 
+            mAttackType = "touch"; 
+            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Touch);
+            break;
+        case 2: 
+            mAttackType = "target"; 
+            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Target);
+            break;
+        }
+    }
+    
 }
 
 }

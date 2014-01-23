@@ -118,7 +118,11 @@ namespace MWMechanics
         {
             AT_Chop,
             AT_Slash,
-            AT_Thrust
+            AT_Thrust,
+
+            AT_Self,
+            AT_Touch,
+            AT_Target,
         };
         void setAttackType(int attackType) { mAttackType = attackType; }
         int getAttackType() { return mAttackType; }

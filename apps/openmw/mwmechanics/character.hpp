@@ -165,12 +165,13 @@ class CharacterController
     float mSecondsOfRunning;
 
     std::string mAttackType; // slash, chop or thrust
+    void determineAttackType(int spellRange = -1);
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
     void clearAnimQueue();
 
-    bool updateNpcState(bool inwater, bool isrunning);
+    bool updateNpcState();
     bool updateCreatureState();
 
     void updateVisibility();

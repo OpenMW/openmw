@@ -28,7 +28,6 @@ namespace
         return -1.0;
     }
 
-    void determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement);
     //chooses an attack depending on probability to avoid uniformity
     void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
 }
@@ -57,9 +56,6 @@ namespace MWMechanics
             return true;
 
         //Update every frame
-        if(mReadyToAttack)
-            determineAttackType(actor, mMovement);
-
         if(mCombatMove)
         {
             mTimerCombatMove -= duration;
@@ -155,7 +151,7 @@ namespace MWMechanics
         else //is creature
         {
             weaptype = WeapType_HandToHand; //doesn't matter, should only reflect if it is melee or distant weapon
-            weapRange = 100; //TODO: use true attack range (the same problem in Creature::hit)
+            weapRange = 150; //TODO: use true attack range (the same problem in Creature::hit)
         }
 
         //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
@@ -167,7 +163,9 @@ namespace MWMechanics
         float rangeMelee;
         float rangeCloseUp;
         bool distantCombat = false;
-        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_ThowWeapon) // || WeapType_Spell_OnTarget
+        int attackType = actor.getClass().getCreatureStats(actor).getAttackType();
+        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_ThowWeapon 
+            || attackType==MWMechanics::CreatureStats::AT_Target )
         {
             rangeMelee = 1000; // TODO: should depend on archer skill
             rangeCloseUp = 0; //doesn't needed when attacking from distance
@@ -251,7 +249,11 @@ namespace MWMechanics
             //delete visited path node
             mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
-            zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+            //try shortcut
+            if(vDir.length() < mPathFinder.getDistToNext(pos.pos[0],pos.pos[1],pos.pos[2]) && MWBase::Environment::get().getWorld()->getLOS(actor, mTarget)) 
+                zAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / vDir.length()) * sgn(Ogre::Math::ASin(vDir.x / vDir.length())) ).valueDegrees();
+            else
+                zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
 
             // TODO: use movement settings instead of rotating directly
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
@@ -375,24 +377,12 @@ namespace MWMechanics
 
 namespace
 {
-void determineAttackType(const MWWorld::Ptr& actor, MWMechanics::Movement &movement)
-{
-    if (movement.mPosition[0] && !movement.mPosition[1]) //sideway
-        actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Slash);
-    else if (movement.mPosition[1]) //forward
-        actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
-    else
-        actor.getClass().getCreatureStats(actor).setAttackType(MWMechanics::CreatureStats::AT_Chop);
-}
 
 void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement)
 {
-    //the more damage attackType deals the more probability it has
-
     if (weapon == NULL)
     {
-        //hand-to-hand and creatures' attacks handled here
-        //hand-to-hand deals equal damage
+        //hand-to-hand and creatures' attacks deal equal damage for each type
         float roll = static_cast<float>(rand())/RAND_MAX;
         if(roll <= 0.333f)  //side punch
         {
@@ -401,10 +391,15 @@ void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement
         }
         else if(roll <= 0.666f) //forward punch
             movement.mPosition[1] = 1;
+        else
+        {
+            movement.mPosition[1] = movement.mPosition[0] = 0;
+        }
 
         return;
     }
 
+    //the more damage attackType deals the more probability it has
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
     int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
     int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
@@ -419,7 +414,8 @@ void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement
     }
     else if(roll <= (static_cast<float>(slash) + static_cast<float>(thrust))/total)
         movement.mPosition[1] = 1;
-    //else chop
+    else
+        movement.mPosition[1] = movement.mPosition[0] = 0;
 }
 
 }
