@@ -73,13 +73,19 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     // Add version information to bottom of the window
-    QString revision(OPENMW_VERSION_COMMIT);
-    revision = revision.left(10);
+    QString revision(OPENMW_VERSION_COMMITHASH);
+    QString tag(OPENMW_VERSION_TAGHASH);
 
+    if (revision == tag) {
+        versionLabel->setText(tr("OpenMW %0 release").arg(OPENMW_VERSION));
+    } else {
+        versionLabel->setText(tr("OpenMW unstable, revision %0").arg(revision.left(10)));
+    }
+
+    // Add the compile date and time
     QDate date(QDate::fromString(__DATE__, QLatin1String("MMM dd yyyy")));
     QTime time(QTime::fromString(__TIME__, QLatin1String("hh:m:ss")));
 
-    versionLabel->setText(tr("OpenMW %0 revision %1").arg(OPENMW_VERSION, revision));
     versionLabel->setToolTip(tr("Compiled on %0 %1").arg(date.toString(Qt::SystemLocaleShortDate),
                                                          time.toString(Qt::SystemLocaleShortDate)));
 

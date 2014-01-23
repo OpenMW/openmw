@@ -20,23 +20,24 @@ include(OpenMWMacros)
 
 include(GetGitRevisionDescription)
 
-get_git_tag_revision(taghash --tags --max-count=1)
-get_git_head_revision(refspec commithash)
-git_describe(version --tags ${taghash})
+get_git_tag_revision(TAGHASH --tags --max-count=1)
+get_git_head_revision(REFSPEC COMMITHASH)
+git_describe(VERSION --tags ${TAGHASH})
 
-string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" match "${version}")
-if (match)
-    string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" OPENMW_VERSION_MAJOR "${version}")
-    string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_MINOR "${version}")
-    string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_RELEASE "${version}")
+string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
+if (MATCH)
+    string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" OPENMW_VERSION_MAJOR "${VERSION}")
+    string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_MINOR "${VERSION}")
+    string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_RELEASE "${VERSION}")
 
     set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
-    set(OPENMW_VERSION_COMMIT "${commithash}")
+    set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+    set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
 
     message(STATUS "Configuring OpenMW ${OPENMW_VERSION}...")
-else (match)
+else (MATCH)
     message(FATAL_ERROR "Failed to get valid version information from Git")
-endif (match)
+endif (MATCH)
 
 # doxygen main page
 
