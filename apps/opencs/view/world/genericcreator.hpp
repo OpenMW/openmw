@@ -48,7 +48,7 @@ namespace CSVWorld
             virtual std::string getId() const;
 
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
-
+            
             CSMWorld::Data& getData() const;
 
             const CSMWorld::UniversalId& getCollectionId() const;
@@ -61,6 +61,8 @@ namespace CSVWorld
             virtual void setEditLock (bool locked);
 
             virtual void reset();
+            
+            virtual void toggleWidgets (bool active = true);
 
             virtual void cloneMode(const std::string& originid, 
                                    const CSMWorld::UniversalId::Type type, 

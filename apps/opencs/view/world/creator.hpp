@@ -28,6 +28,8 @@ namespace CSVWorld
             virtual void cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type, const CSMWorld::UniversalId::ArgumentType argumentType) = 0;
 
             virtual void setEditLock (bool locked) = 0;
+            
+            virtual void toggleWidgets(bool active = true) = 0;
 
         signals:
 

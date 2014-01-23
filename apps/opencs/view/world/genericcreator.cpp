@@ -158,3 +158,7 @@ void CSVWorld::GenericCreator::cloneMode(const std::string& originid,
     mClonedType = type;
     mArgumentType = argumentType;
 }
+
+void CSVWorld::GenericCreator::toggleWidgets(bool active)
+{
+}
