@@ -11,7 +11,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/actionequip.hpp"
 
@@ -80,9 +79,26 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
             return true;
         }
     }
-    return true;
+    return false;
 }
 
+void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
+{
+    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+    const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0;
+    int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+
+    health = 0.1 * endurance;
+
+    magicka = 0;
+    if (!stunted)
+    {
+        float fRestMagicMult = settings.find("fRestMagicMult")->getFloat ();
+        magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
+    }
+}
 
 }
 
@@ -158,50 +174,49 @@ namespace MWMechanics
             calculateDynamicStats (ptr);
         calculateCreatureStatModifiers (ptr, duration);
 
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
+        // AI
+        if(MWBase::Environment::get().getMechanicsManager()->isAIActive())
         {
-            // AI
-            if(MWBase::Environment::get().getMechanicsManager()->isAIActive())
+            CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
+            //engage combat or not?
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            if(ptr != player && !creatureStats.isHostile())
             {
-                CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
-                //engage combat or not?
-                if(ptr != MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && !creatureStats.isHostile())
+                ESM::Position playerpos = player.getRefData().getPosition();
+                ESM::Position actorpos = ptr.getRefData().getPosition();
+                float d = sqrt((actorpos.pos[0] - playerpos.pos[0])*(actorpos.pos[0] - playerpos.pos[0])
+                    +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
+                    +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
+                float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified();
+                float disp = 100; //creatures don't have disposition, so set it to 100 by default
+                if(ptr.getTypeName() == typeid(ESM::NPC).name())
                 {
-                    ESM::Position playerpos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
-                    ESM::Position actorpos = ptr.getRefData().getPosition();
-                    float d = sqrt((actorpos.pos[0] - playerpos.pos[0])*(actorpos.pos[0] - playerpos.pos[0])
-                        +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
-                        +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
-                    float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified();
-                    float disp = 100; //creatures don't have disposition, so set it to 100 by default
-                    if(ptr.getTypeName() == typeid(ESM::NPC).name())
-                    {
-                        disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
-                    }
-                    bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-                    if(  ( (fight == 100 )
-                        || (fight >= 95 && d <= 3000)
-                        || (fight >= 90 && d <= 2000)
-                        || (fight >= 80 && d <= 1000)
-                        || (fight >= 80 && disp <= 40)
-                        || (fight >= 70 && disp <= 35 && d <= 1000)
-                        || (fight >= 60 && disp <= 30 && d <= 1000)
-                        || (fight >= 50 && disp == 0)
-                        || (fight >= 40 && disp <= 10 && d <= 500) )
-                        && LOS
-                        )
-                    {
-                        creatureStats.getAiSequence().stack(AiCombat("player"));
-                        creatureStats.setHostile(true);
-                    }
+                    disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
                 }
-
-                creatureStats.getAiSequence().execute (ptr,duration);
+                bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,player)
+                        && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr);
+                if(  ( (fight == 100 )
+                    || (fight >= 95 && d <= 3000)
+                    || (fight >= 90 && d <= 2000)
+                    || (fight >= 80 && d <= 1000)
+                    || (fight >= 80 && disp <= 40)
+                    || (fight >= 70 && disp <= 35 && d <= 1000)
+                    || (fight >= 60 && disp <= 30 && d <= 1000)
+                    || (fight >= 50 && disp == 0)
+                    || (fight >= 40 && disp <= 10 && d <= 500) )
+                    && LOS
+                    )
+                {
+                    creatureStats.getAiSequence().stack(AiCombat("player"));
+                    creatureStats.setHostile(true);
+                }
             }
 
-            // fatigue restoration
-            calculateRestoration(ptr, duration);
+            creatureStats.getAiSequence().execute (ptr,duration);
         }
+
+        // fatigue restoration
+        calculateRestoration(ptr, duration, false);
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
@@ -259,44 +274,37 @@ namespace MWMechanics
         creatureStats.setFatigue(fatigue);
     }
 
-    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
+    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration, bool sleep)
     {
         if (ptr.getClass().getCreatureStats(ptr).isDead())
             return;
-        CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        if (sleep)
+        {
+            float health, magicka;
+            getRestorationPerHourOfSleep(ptr, health, magicka);
+
+            DynamicStat<float> stat = stats.getHealth();
+            stat.setCurrent(stat.getCurrent() + health);
+            stats.setHealth(stat);
+
+            stat = stats.getMagicka();
+            stat.setCurrent(stat.getCurrent() + magicka);
+            stats.setMagicka(stat);
+        }
 
         int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
-        float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
-        float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
+        float capacity = ptr.getClass().getCapacity(ptr);
+        float encumbrance = ptr.getClass().getEncumbrance(ptr);
         float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
         if (normalizedEncumbrance > 1)
             normalizedEncumbrance = 1;
 
-        if (duration == 3600)
-        {
-            // the actor is sleeping, restore health and magicka
-
-            bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0;
-
-            DynamicStat<float> health = stats.getHealth();
-            health.setCurrent (health.getCurrent() + 0.1 * endurance);
-            stats.setHealth (health);
-
-            if (!stunted)
-            {
-                float fRestMagicMult = settings.find("fRestMagicMult")->getFloat ();
-
-                DynamicStat<float> magicka = stats.getMagicka();
-                magicka.setCurrent (magicka.getCurrent()
-                    + fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified());
-                stats.setMagicka (magicka);
-            }
-        }
-
         // restore fatigue
-
         float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
         float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
@@ -307,6 +315,7 @@ namespace MWMechanics
         DynamicStat<float> fatigue = stats.getFatigue();
         fatigue.setCurrent (fatigue.getCurrent() + duration * x);
         stats.setFatigue (fatigue);
+
     }
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
@@ -336,7 +345,7 @@ namespace MWMechanics
             float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).mMagnitude
                     - creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth+i).mMagnitude
                     - creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth+i).mMagnitude;
-            stat.setCurrent(stat.getCurrent() + currentDiff * duration);
+            stat.setCurrent(stat.getCurrent() + currentDiff * duration, i == 2);
 
             creatureStats.setDynamic(i, stat);
         }
@@ -506,7 +515,7 @@ namespace MWMechanics
                 if (magnitude > 0)
                 {
                     ESM::Position ipos = ptr.getRefData().getPosition();
-                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
+                    Ogre::Vector3 pos(ipos.pos);
                     Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
                     const float distance = 50;
                     pos = pos + distance*rot.yAxis();
@@ -527,7 +536,7 @@ namespace MWMechanics
                         ref.getPtr().getCellRef().mPos = ipos;
 
                         // TODO: Add AI to follow player and fight for him
-
+                        // TODO: VFX_SummonStart, VFX_SummonEnd
                         creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
                             MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
                     }
@@ -583,10 +592,11 @@ namespace MWMechanics
             if(timeLeft == 0.0f)
             {
                 // If drowning, apply 3 points of damage per second
-                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - 3.0f*duration);
+                static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
+                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - fSuffocationDamage*duration);
 
                 // Play a drowning sound as necessary for the player
-                if(ptr == world->getPlayer().getPlayer())
+                if(ptr == world->getPlayerPtr())
                 {
                     MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
                     if(!sndmgr->getSoundPlaying(MWWorld::Ptr(), "drown"))
@@ -595,7 +605,10 @@ namespace MWMechanics
             }
         }
         else
-            stats.setTimeToStartDrowning(20);
+        {
+            static const float fHoldBreathTime = world->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+            stats.setTimeToStartDrowning(fHoldBreathTime);
+        }
     }
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
@@ -797,6 +810,14 @@ namespace MWMechanics
                     }
                 }
 
+                // Make sure spell effects with CasterLinked flag are removed
+                // TODO: would be nice not to do this all the time...
+                for(PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
+                {
+                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
+                    spells.purge(iter->first.getRefData().getHandle());
+                }
+
                 if (iter->second->kill())
                 {
                     ++mDeathCount[cls.getId(iter->first)];
@@ -837,10 +858,28 @@ namespace MWMechanics
             }
         }
     }
-    void Actors::restoreDynamicStats()
+    void Actors::restoreDynamicStats(bool sleep)
     {
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-            calculateRestoration(iter->first, 3600);
+            calculateRestoration(iter->first, 3600, sleep);
+    }
+
+    int Actors::getHoursToRest(const MWWorld::Ptr &ptr) const
+    {
+        float healthPerHour, magickaPerHour;
+        getRestorationPerHourOfSleep(ptr, healthPerHour, magickaPerHour);
+
+        CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+
+        float healthHours  = healthPerHour >= 0
+                             ? (stats.getHealth().getModified() - stats.getHealth().getCurrent()) / healthPerHour
+                             : 1.0f;
+        float magickaHours = magickaPerHour >= 0
+                              ? (stats.getMagicka().getModified() - stats.getMagicka().getCurrent()) / magickaPerHour
+                              : 1.0f;
+
+        int autoHours = std::ceil(std::max(1.f, std::max(healthHours, magickaHours)));
+        return autoHours;
     }
 
     int Actors::countDeaths (const std::string& id) const

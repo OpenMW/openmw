@@ -9,7 +9,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -49,6 +48,7 @@ namespace MWGui
         , mRemainingTime(0.05)
         , mCurHour(0)
         , mManualHours(1)
+        , mInterruptAt(-1)
     {
         getWidget(mDateTimeText, "DateTimeText");
         getWidget(mRestText, "RestText");
@@ -103,43 +103,7 @@ namespace MWGui
 
     void WaitDialog::onUntilHealedButtonClicked(MyGUI::Widget* sender)
     {
-        // we need to sleep for a specific time, and since that isn't calculated yet, we'll do it here
-        // I'm making the assumption here that the # of hours rested is calculated when rest is started
-        // TODO: the rougher logic here (calculating the hourly deltas) should really go into helper funcs elsewhere
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWMechanics::CreatureStats stats = MWWorld::Class::get(player).getCreatureStats(player);
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
-        float hourlyHealthDelta  = stats.getAttribute(ESM::Attribute::Endurance).getModified() * 0.1;
-
-        bool stunted = (stats.getMagicEffects().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0);
-        float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat();
-        float hourlyMagickaDelta = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
-
-        // this massive duplication is why it has to be put into helper functions instead
-        float fFatigueReturnBase = store.get<ESM::GameSetting>().find("fFatigueReturnBase")->getFloat();
-        float fFatigueReturnMult = store.get<ESM::GameSetting>().find("fFatigueReturnMult")->getFloat();
-        float fEndFatigueMult = store.get<ESM::GameSetting>().find("fEndFatigueMult")->getFloat();
-        float capacity = MWWorld::Class::get(player).getCapacity(player);
-        float encumbrance = MWWorld::Class::get(player).getEncumbrance(player);
-        float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
-        if (normalizedEncumbrance > 1)
-            normalizedEncumbrance = 1;
-        float hourlyFatigueDelta = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
-        hourlyFatigueDelta *= 3600 * fEndFatigueMult * stats.getAttribute(ESM::Attribute::Endurance).getModified();
-
-        float healthHours  = hourlyHealthDelta  >= 0.0
-                             ? (stats.getHealth().getBase() - stats.getHealth().getCurrent()) / hourlyHealthDelta
-                             : 1.0f;
-        float magickaHours = stunted ? 0.0 :
-                              hourlyMagickaDelta >= 0.0
-                              ? (stats.getMagicka().getBase() - stats.getMagicka().getCurrent()) / hourlyMagickaDelta
-                              : 1.0f;
-        float fatigueHours = hourlyFatigueDelta >= 0.0
-                             ? (stats.getFatigue().getBase() - stats.getFatigue().getCurrent()) / hourlyFatigueDelta
-                             : 1.0f;
-
-        int autoHours = int(std::ceil( std::max(std::max(healthHours, magickaHours), std::max(fatigueHours, 1.0f)) )); // this should use a variadic max if possible
+        int autoHours = MWBase::Environment::get().getMechanicsManager()->getHoursToRest();
 
         startWaiting(autoHours);
     }
@@ -151,13 +115,38 @@ namespace MWGui
 
     void WaitDialog::startWaiting(int hoursToWait)
     {
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.2);
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        world->getFader ()->fadeOut(0.2);
         setVisible(false);
         mProgressBar.setVisible (true);
 
         mWaiting = true;
         mCurHour = 0;
         mHours = hoursToWait;
+
+        // FIXME: move this somewhere else?
+        mInterruptAt = -1;
+        MWWorld::Ptr player = world->getPlayerPtr();
+        if (mSleeping && player.getCell()->isExterior())
+        {
+            std::string regionstr = player.getCell()->mCell->mRegion;
+            if (!regionstr.empty())
+            {
+                const ESM::Region *region = world->getStore().get<ESM::Region>().find (regionstr);
+                if (!region->mSleepList.empty())
+                {
+                    float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
+                    int x = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * hoursToWait; // [0, hoursRested]
+                    float y = fSleepRandMod * hoursToWait;
+                    if (x > y)
+                    {
+                        float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
+                        mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);
+                        mInterruptCreatureList = region->mSleepList;
+                    }
+                }
+            }
+        }
 
         mRemainingTime = 0.05;
         mProgressBar.setProgress (0, mHours);
@@ -176,7 +165,7 @@ namespace MWGui
 
     void WaitDialog::setCanRest (bool canRest)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
                 && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
@@ -201,6 +190,13 @@ namespace MWGui
         if (!mWaiting)
             return;
 
+        if (mCurHour == mInterruptAt)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sSleepInterrupt}");
+            MWBase::Environment::get().getWorld()->spawnRandomCreature(mInterruptCreatureList);
+            stopWaiting();
+        }
+
         mRemainingTime -= dt;
 
         while (mRemainingTime < 0)
@@ -212,8 +208,7 @@ namespace MWGui
             if (mCurHour <= mHours)
             {
                 MWBase::Environment::get().getWorld ()->advanceTime (1);
-                if (mSleeping)
-                    MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
+                MWBase::Environment::get().getMechanicsManager ()->rest (mSleeping);
             }
         }
 
@@ -230,7 +225,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
         mWaiting = false;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &pcstats = MWWorld::Class::get(player).getNpcStats(player);
 
         // trigger levelup if possible

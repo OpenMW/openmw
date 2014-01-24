@@ -3,10 +3,11 @@
 #include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include <OgreVector3.h>
 
@@ -65,6 +66,8 @@ namespace MWMechanics
 
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
+        if (actor.getClass().isNpc())
+            actor.getClass().getNpcStats(actor).setDrawState(DrawState_Nothing);
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {
@@ -183,6 +186,14 @@ namespace MWMechanics
                 playIdle(actor, mPlayedIdle);
                 mChooseAction = false;
                 mIdleNow = true;
+
+                // Play idle voiced dialogue entries randomly
+                const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                // TODO: do not show subtitle messagebox if player is too far away? or do not say at all?
+                if (roll < chance)
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
             }
         }
 
@@ -254,7 +265,7 @@ namespace MWMechanics
 
     int AiWander::getTypeId() const
     {
-        return 0;
+        return TypeIdWander;
     }
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor)

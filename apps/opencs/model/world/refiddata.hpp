@@ -214,7 +214,33 @@ namespace CSMWorld
             /// \param listDeleted include deleted record in the list
 
             void save (int index, ESM::ESMWriter& writer) const;
+
+	    //RECORD CONTAINERS ACCESS METHODS
+	    const RefIdDataContainer<ESM::Book>& getBooks() const;
+	    const RefIdDataContainer<ESM::Activator>& getActivators() const;
+	    const RefIdDataContainer<ESM::Potion>& getPotions() const;
+	    const RefIdDataContainer<ESM::Apparatus>& getApparati() const;
+	    const RefIdDataContainer<ESM::Armor>& getArmors() const;
+	    const RefIdDataContainer<ESM::Clothing>& getClothing() const;
+	    const RefIdDataContainer<ESM::Container>& getContainers() const;
+	    const RefIdDataContainer<ESM::Creature>& getCreatures() const;
+	    const RefIdDataContainer<ESM::Door>& getDoors() const;
+	    const RefIdDataContainer<ESM::Ingredient>& getIngredients() const;
+	    const RefIdDataContainer<ESM::CreatureLevList>& getCreatureLevelledLists() const;
+	    const RefIdDataContainer<ESM::ItemLevList>& getItemLevelledList() const;
+	    const RefIdDataContainer<ESM::Light>& getLights() const;
+	    const RefIdDataContainer<ESM::Lockpick>& getLocpicks() const;
+	    const RefIdDataContainer<ESM::Miscellaneous>& getMiscellaneous() const;
+	    const RefIdDataContainer<ESM::NPC>& getNPCs() const;
+	    const RefIdDataContainer<ESM::Weapon >& getWeapons() const;
+	    const RefIdDataContainer<ESM::Probe >& getProbes() const;
+	    const RefIdDataContainer<ESM::Repair>& getRepairs() const;
+	    const RefIdDataContainer<ESM::Static>& getStatics() const;
     };
 }
 
 #endif
+
+
+
+

@@ -1,9 +1,5 @@
-#include <boost/algorithm/string.hpp>
-
-#include <OgreMath.h>
 #include <OgreSceneNode.h>
 
-#include "../mwworld/esmstore.hpp"
 #include <components/esm/loadcell.hpp>
 
 #include <components/compiler/extensions.hpp>
@@ -16,8 +12,9 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -482,7 +479,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr actor = pc
-                        ? MWBase::Environment::get().getWorld()->getPlayer().getPlayer()
+                        ? MWBase::Environment::get().getWorld()->getPlayerPtr()
                         : R()(runtime);
 
                     std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);

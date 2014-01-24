@@ -371,4 +371,15 @@ op 0x2000230: Resurrect, explicit
 op 0x2000231: GetSpellReadied
 op 0x2000232: GetSpellReadied, explicit
 op 0x2000233: GetPcJumping
-opcodes 0x2000234-0x3ffffff unused
+op 0x2000234: ShowRestMenu, explicit
+op 0x2000235: GoToJail
+op 0x2000236: PayFine
+op 0x2000237: PayFineThief
+op 0x2000238: GetTarget
+op 0x2000239: GetTargetExplicit
+op 0x200023a: StartCombat
+op 0x200023b: StartCombatExplicit
+op 0x200023c: StopCombat
+op 0x200023d: StopCombatExplicit
+
+opcodes 0x200023e-0x3ffffff unused

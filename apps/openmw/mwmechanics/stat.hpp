@@ -231,6 +231,7 @@ namespace MWMechanics
     {
         float mProgress;
     public:
+        SkillValue() : mProgress(0) {}
         float getProgress() const { return mProgress; }
         void setProgress(float progress) { mProgress = progress; }
     };
@@ -242,6 +243,18 @@ namespace MWMechanics
                 && left.getDamage() == right.getDamage();
     }
     inline bool operator!= (const AttributeValue& left, const AttributeValue& right)
+    {
+        return !(left == right);
+    }
+
+    inline bool operator== (const SkillValue& left, const SkillValue& right)
+    {
+        return left.getBase() == right.getBase()
+                && left.getModifier() == right.getModifier()
+                && left.getDamage() == right.getDamage()
+                && left.getProgress() == right.getProgress();
+    }
+    inline bool operator!= (const SkillValue& left, const SkillValue& right)
     {
         return !(left == right);
     }

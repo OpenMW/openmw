@@ -61,12 +61,15 @@ namespace Compiler
             extensions.registerInstruction ("modalarm", "l", opcodeModAlarm, opcodeModAlarmExplicit);
             extensions.registerInstruction ("toggleai", "", opcodeToggleAI, opcodeToggleAI);
             extensions.registerInstruction ("tai", "", opcodeToggleAI, opcodeToggleAI);
+            extensions.registerInstruction("startcombat", "c", opcodeStartCombat, opcodeStartCombatExplicit);
+            extensions.registerInstruction("stopcombat", "", opcodeStopCombat, opcodeStopCombatExplicit);
             extensions.registerFunction ("gethello", 'l', "", opcodeGetHello, opcodeGetHelloExplicit);
             extensions.registerFunction ("getfight", 'l', "", opcodeGetFight, opcodeGetFightExplicit);
             extensions.registerFunction ("getflee", 'l', "", opcodeGetFlee, opcodeGetFleeExplicit);
             extensions.registerFunction ("getalarm", 'l', "", opcodeGetAlarm, opcodeGetAlarmExplicit);
             extensions.registerFunction ("getlineofsight", 'l', "c", opcodeGetLineOfSight, opcodeGetLineOfSightExplicit);
             extensions.registerFunction ("getlos", 'l', "c", opcodeGetLineOfSight, opcodeGetLineOfSightExplicit);
+            extensions.registerFunction("gettarget", 'l', "c", opcodeGetTarget, opcodeGetTargetExplicit);
         }
     }
 
@@ -198,7 +201,7 @@ namespace Compiler
             extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
             extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
 
-            extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);
+            extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu, opcodeShowRestMenuExplicit);
 
             extensions.registerFunction ("getbuttonpressed", 'l', "", opcodeGetButtonPressed);
 
@@ -244,6 +247,9 @@ namespace Compiler
             extensions.registerFunction ("getpcjumping", 'l', "", opcodeGetPcJumping);
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
             extensions.registerInstruction ("playbink", "Sl", opcodePlayBink);
+            extensions.registerInstruction ("payfine", "", opcodePayFine);
+            extensions.registerInstruction ("payfinethief", "", opcodePayFineThief);
+            extensions.registerInstruction ("gotojail", "", opcodeGoToJail);
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "S", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);

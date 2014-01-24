@@ -16,8 +16,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "../mwworld/player.hpp"
-
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -212,11 +210,11 @@ namespace MWGui
 
         if (amount > 0)
         {
-            store.add("gold_001", amount, actor);
+            store.add(MWWorld::ContainerStore::sGoldId, amount, actor);
         }
         else
         {
-            store.remove("gold_001", - amount, actor);
+            store.remove(MWWorld::ContainerStore::sGoldId, - amount, actor);
         }
     }
 
@@ -253,8 +251,11 @@ namespace MWGui
             return;
         }
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
         // check if the player can afford this
-        if (mCurrentBalance < 0 && MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold() < std::abs(mCurrentBalance))
+        if (mCurrentBalance < 0 && playerGold < std::abs(mCurrentBalance))
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
@@ -270,8 +271,6 @@ namespace MWGui
                 messageBox("#{sBarterDialog2}");
             return;
         }
-
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
 
         if(mCurrentBalance > mCurrentMerchantOffer)
         {
@@ -294,13 +293,13 @@ namespace MWGui
             float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
 
-            const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
-            const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+            const MWMechanics::NpcStats &sellerStats = mPtr.getClass().getNpcStats(mPtr);
+            const MWMechanics::NpcStats &playerStats = player.getClass().getNpcStats(player);
 
-            float a1 = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+            float a1 = std::min(player.getClass().getSkill(player, ESM::Skill::Mercantile), 100);
             float b1 = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float c1 = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-            float d1 = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+            float d1 = std::min(mPtr.getClass().getSkill(mPtr, ESM::Skill::Mercantile), 100);
             float e1 = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float f1 = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 
@@ -319,16 +318,18 @@ namespace MWGui
                     messageBox("#{sNotifyMessage9}");
 
                 int iBarterFailDisposition = gmst.find("iBarterFailDisposition")->getInt();
-                MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterFailDisposition);
+                if (mPtr.getClass().isNpc())
+                    MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterFailDisposition);
                 return;
             }
 
             //skill use!
-            MWWorld::Class::get(playerPtr).skillUsageSucceeded(playerPtr, ESM::Skill::Mercantile, 0);
+            player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0);
         }
 
         int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();
-        MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterSuccessDisposition);
+        if (mPtr.getClass().isNpc())
+            MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterSuccessDisposition);
 
         // make the item transfer
         mTradeModel->transferItems();
@@ -337,7 +338,7 @@ namespace MWGui
         // transfer the gold
         if (mCurrentBalance != 0)
         {
-            addOrRemoveGold(mCurrentBalance, playerPtr);
+            addOrRemoveGold(mCurrentBalance, player);
             addOrRemoveGold(-mCurrentBalance, mPtr);
         }
 
@@ -398,7 +399,10 @@ namespace MWGui
 
     void TradeWindow::updateLabels()
     {
-        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
+        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(playerGold));
 
         if (mCurrentBalance > 0)
         {
@@ -447,7 +451,7 @@ namespace MWGui
         MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
                 merchantGold += it->getRefData().getCount();
         }
         return merchantGold;

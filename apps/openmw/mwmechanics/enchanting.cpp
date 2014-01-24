@@ -1,5 +1,4 @@
 #include "enchanting.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -7,7 +6,6 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
-#include <boost/algorithm/string.hpp>
 
 namespace MWMechanics
 {
@@ -53,7 +51,7 @@ namespace MWMechanics
 
     bool Enchanting::create()
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
@@ -61,7 +59,7 @@ namespace MWMechanics
         store.remove(mSoulGemPtr, 1, player);
 
         //Exception for Azura Star, new one will be added after enchanting
-        if(boost::iequals(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
+        if(Misc::StringUtils::ciEqual(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
             store.add("Misc_SoulGem_Azura", 1, player);
 
         if(mSelfEnchanting)
@@ -213,7 +211,7 @@ namespace MWMechanics
             return 0;
 
         const float enchantCost = getEnchantPoints();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::NpcStats &stats = MWWorld::Class::get(player).getNpcStats(player);
         int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
 
@@ -297,9 +295,9 @@ namespace MWMechanics
 
     void Enchanting::payForEnchantment() const
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
 
-        store.remove("gold_001", getEnchantPrice(), player);
+        store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
     }
 }

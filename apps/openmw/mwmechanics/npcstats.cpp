@@ -15,7 +15,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -23,8 +22,7 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mMovementFlags (0)
-, mDrawState (DrawState_Nothing)
+: mDrawState (DrawState_Nothing)
 , mBounty (0)
 , mLevelProgress(0)
 , mDisposition(0)
@@ -35,9 +33,7 @@ MWMechanics::NpcStats::NpcStats()
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
 {
-    mSkillIncreases.resize (ESM::Attribute::Length);
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-        mSkillIncreases[i] = 0;
+    mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
 
 MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
@@ -70,19 +66,6 @@ void MWMechanics::NpcStats::setBaseDisposition(int disposition)
     mDisposition = disposition;
 }
 
-bool MWMechanics::NpcStats::getMovementFlag (Flag flag) const
-{
-    return mMovementFlags & flag;
-}
-
-void MWMechanics::NpcStats::setMovementFlag (Flag flag, bool state)
-{
-    if (state)
-        mMovementFlags |= flag;
-    else
-        mMovementFlags &= ~flag;
-}
-
 const MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index) const
 {
     if (index<0 || index>=ESM::Skill::Length)
@@ -109,14 +92,26 @@ std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
     return mFactionRank;
 }
 
-const std::set<std::string>& MWMechanics::NpcStats::getExpelled() const
+bool MWMechanics::NpcStats::getExpelled(const std::string& factionID) const
 {
-    return mExpelled;
+    return mExpelled.find(Misc::StringUtils::lowerCase(factionID)) != mExpelled.end();
 }
 
-std::set<std::string>& MWMechanics::NpcStats::getExpelled()
+void MWMechanics::NpcStats::expell(const std::string& factionID)
 {
-    return mExpelled;
+    std::string lower = Misc::StringUtils::lowerCase(factionID);
+    if (mExpelled.find(lower) == mExpelled.end())
+    {
+        std::string message = "#{sExpelledMessage}";
+        message += MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID)->mName;
+        MWBase::Environment::get().getWindowManager()->messageBox(message);
+        mExpelled.insert(lower);
+    }
+}
+
+void MWMechanics::NpcStats::clearExpelled(const std::string& factionID)
+{
+    mExpelled.erase(Misc::StringUtils::lowerCase(factionID));
 }
 
 bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
@@ -196,7 +191,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     if(mIsWerewolf)
         return;
 
-    MWMechanics::SkillValue value = getSkill (skillIndex);
+    MWMechanics::SkillValue& value = getSkill (skillIndex);
 
     value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType));
 

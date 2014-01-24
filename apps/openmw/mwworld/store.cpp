@@ -33,8 +33,6 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
         bool deleted = false;
         cell->getNextRef(esm, ref, deleted);
 
-        Misc::StringUtils::toLower (ref.mRefID);
-
         // Add data required to make reference appear in the correct cell.
         // We should not need to test for duplicates, as this part of the code is pre-cell merge.
         cell->mMovedRefs.push_back(cMRef);

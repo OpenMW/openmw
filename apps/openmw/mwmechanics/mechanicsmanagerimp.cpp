@@ -12,13 +12,39 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include <OgreSceneNode.h>
+
 #include "spellcasting.hpp"
+
+namespace
+{
+    /// @return is \a ptr allowed to take/use \a item or is it a crime?
+    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
+    {
+        const std::string& owner = item.getCellRef().mOwner;
+        bool isOwned = !owner.empty();
+
+        const std::string& faction = item.getCellRef().mFaction;
+        bool isFactionOwned = false;
+        if (!faction.empty())
+        {
+            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
+            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
+                isFactionOwned = true;
+        }
+
+        if (!item.getCellRef().mOwner.empty())
+            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().mOwner, true);
+
+        return (!isOwned && !isFactionOwned);
+    }
+}
 
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
     {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
@@ -228,7 +254,7 @@ namespace MWMechanics
     {
         // Uses ingame time, but scaled to real time
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
 
@@ -309,7 +335,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager();
 
             const ESM::NPC *player =
-                world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+                world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
             const ESM::Race *race =
                 world->getStore().get<ESM::Race>().find(player->mRace);
@@ -335,7 +361,7 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
             mActors.removeActor(ptr);
             mActors.addActor(ptr);
         }
@@ -344,9 +370,14 @@ namespace MWMechanics
         mObjects.update(duration, paused);
     }
 
-    void MechanicsManager::restoreDynamicStats()
+    void MechanicsManager::rest(bool sleep)
     {
-        mActors.restoreDynamicStats ();
+        mActors.restoreDynamicStats (sleep);
+    }
+
+    int MechanicsManager::getHoursToRest() const
+    {
+        return mActors.getHoursToRest(mWatched);
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)
@@ -354,7 +385,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mName = name;
 
         world->createRecord(player);
@@ -367,7 +398,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
         player.mRace = race;
         player.mHead = head;
@@ -393,7 +424,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = id;
 
         world->createRecord(player);
@@ -410,7 +441,7 @@ namespace MWMechanics
         const ESM::Class *ptr = world->createRecord(cls);
 
         ESM::NPC player =
-            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+            *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = ptr->mId;
 
         world->createRecord(player);
@@ -422,11 +453,11 @@ namespace MWMechanics
 
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
-        MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        const MWMechanics::NpcStats& npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
         float x = npcSkill.getBaseDisposition();
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
@@ -441,21 +472,23 @@ namespace MWMechanics
         std::string npcFaction = "";
         if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
 
-        if (playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction)) != playerStats.getFactionRanks().end())
+        Misc::StringUtils::toLower(npcFaction);
+
+        if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end(); ++it)
             {
-                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)
-                        && playerStats.getExpelled().find(Misc::StringUtils::lowerCase(it->mFaction)) == playerStats.getExpelled().end())
+                if(Misc::StringUtils::ciEqual(it->mFaction, npcFaction)
+                        && !playerStats.getExpelled(it->mFaction))
                     reaction = it->mReaction;
             }
-            rank = playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
+            rank = playerStats.getFactionRanks().find(npcFaction)->second;
         }
         else if (npcFaction != "")
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end();++it)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end();++it)
             {
                 if(playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerStats.getFactionRanks().end() )
                 {
@@ -494,7 +527,7 @@ namespace MWMechanics
 
         const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
         // I suppose the temporary disposition change _has_ to be considered here,
@@ -537,9 +570,9 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        MWMechanics::NpcStats npcStats = MWWorld::Class::get(npc).getNpcStats(npc);
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(npc).getNpcStats(npc);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
         float persTerm = playerStats.getAttribute(ESM::Attribute::Personality).getModified()
@@ -611,6 +644,8 @@ namespace MWMechanics
                 int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
                                        std::max(0, std::min(100, flee + int(std::max(iPerMinChange, s)))));
+                // TODO: initiate combat and quit dialogue if fight rating is too high
+                // or should setAiSetting handle this?
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
                                        std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
             }
@@ -642,10 +677,9 @@ namespace MWMechanics
 
             float c = std::abs(int(target1 - roll));
 
-            if (roll <= target1)
+            if (success)
             {
                 float s = c * fPerDieRollMult * fPerTempMult;
-
                 int flee = npcStats.getAiSetting (CreatureStats::AI_Flee).getBase();
                 int fight = npcStats.getAiSetting (CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (CreatureStats::AI_Flee,
@@ -732,5 +766,196 @@ namespace MWMechanics
         mClassSelected = true;
         mRaceSelected = true;
         mAI = true;
+    }
+
+    bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
+    {
+        MWWorld::Ptr victim;
+        if (isAllowedToUse(ptr, bed, victim))
+            return false;
+
+        if(commitCrime(ptr, victim, OT_SleepingInOwnedBed))
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage64}");
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void MechanicsManager::objectOpened(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item)
+    {
+        MWWorld::Ptr victim;
+        if (isAllowedToUse(ptr, item, victim))
+            return;
+        commitCrime(ptr, victim, OT_Trespassing);
+    }
+
+    void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
+    {
+        MWWorld::Ptr victim;
+        if (isAllowedToUse(ptr, item, victim))
+            return;
+        commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
+    }
+
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    {
+        if (ptr.getRefData().getHandle() != "player")
+            return false;
+
+        bool reported=false;
+        for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
+        {
+            if (it->first != ptr &&
+                    MWBase::Environment::get().getWorld()->getLOS(ptr, it->first) &&
+                    awarenessCheck(ptr, it->first))
+            {
+                // NPCs will always curse you when they notice you steal their items, even if they don't report the crime
+                if (it->first == victim && type == OT_Theft)
+                {
+                    MWBase::Environment::get().getDialogueManager()->say(victim, "Thief");
+                }
+
+                // Actor has witnessed a crime. Will he report it?
+                // (not sure, is > 0 correct?)
+                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0)
+                {
+                    // TODO: stats.setAlarmed(true) on NPCs within earshot
+                    // fAlarmRadius ?
+                    reported=true;
+                    break;
+                }
+            }
+        }
+
+        if (reported)
+            reportCrime(ptr, victim, type, arg);
+        return reported;
+    }
+
+    void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    {
+        const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        // Bounty for each type of crime
+        if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+            arg = store.find("iCrimeTresspass")->getInt();
+        else if (type == OT_Pickpocket)
+            arg = store.find("iCrimePickPocket")->getInt();
+        else if (type == OT_Assault)
+            arg = store.find("iCrimeAttack")->getInt();
+        else if (type == OT_Murder)
+            arg = store.find("iCrimeKilling")->getInt();
+        else if (type == OT_Theft)
+            arg *= store.find("fCrimeStealing")->getFloat();
+
+        // TODO: In some cases (type == Assault), if no NPCs are within earshot, the report will have no effect.
+        // however other crime types seem to be always produce a bounty.
+
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
+        ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
+                                                  + arg);
+
+        if (!victim.isEmpty())
+        {
+            int fight = 0;
+            // Increase in fight rating for each type of crime
+            if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+                fight = store.find("iFightTrespass")->getFloat();
+            else if (type == OT_Pickpocket)
+                fight = store.find("iFightPickpocket")->getInt();
+            else if (type == OT_Assault)
+                fight = store.find("iFightAttack")->getInt();
+            else if (type == OT_Murder)
+                fight = store.find("iFightKilling")->getInt();
+            else if (type == OT_Theft)
+                fight = store.find("fFightStealing")->getFloat();
+            // Not sure if this should be permanent?
+            fight = victim.getClass().getCreatureStats(victim).getAiSetting(CreatureStats::AI_Fight).getBase() + fight;
+            victim.getClass().getCreatureStats(victim).setAiSetting(CreatureStats::AI_Fight, fight);
+        }
+
+        // If committing a crime against a faction member, expell from the faction
+        if (!victim.isEmpty() && victim.getClass().isNpc())
+        {
+            std::string factionID;
+            if(!victim.getClass().getNpcStats(victim).getFactionRanks().empty())
+                factionID = victim.getClass().getNpcStats(victim).getFactionRanks().begin()->first;
+            if (ptr.getClass().getNpcStats(ptr).isSameFaction(victim.getClass().getNpcStats(victim)))
+            {
+                ptr.getClass().getNpcStats(ptr).expell(factionID);
+            }
+        }
+
+        // TODO: make any guards in the area try to arrest the player
+    }
+
+    bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
+    {
+        if (observer.getClass().getCreatureStats(observer).isDead())
+            return false;
+
+        const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+
+        float invisibility = stats.getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude;
+        if (invisibility > 0)
+            return false;
+
+        float sneakTerm = 0;
+        if (ptr.getClass().getCreatureStats(ptr).getStance(CreatureStats::Stance_Sneak)
+                && !MWBase::Environment::get().getWorld()->isSwimming(ptr)
+                && MWBase::Environment::get().getWorld()->isOnGround(ptr))
+        {
+            static float fSneakSkillMult = store.find("fSneakSkillMult")->getFloat();
+            static float fSneakBootMult = store.find("fSneakBootMult")->getFloat();
+            float sneak = ptr.getClass().getSkill(ptr, ESM::Skill::Sneak);
+            int agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
+            int luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
+            float bootWeight = 0;
+            if (ptr.getClass().isNpc())
+            {
+                MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ContainerStoreIterator it = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                if (it != inv.end())
+                    bootWeight = it->getClass().getWeight(*it);
+            }
+            sneakTerm = fSneakSkillMult * sneak + 0.2 * agility + 0.1 * luck + bootWeight * fSneakBootMult;
+        }
+
+        static float fSneakDistBase = store.find("fSneakDistanceBase")->getFloat();
+        static float fSneakDistMult = store.find("fSneakDistanceMultiplier")->getFloat();
+
+        Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
+        Ogre::Vector3 pos2 (observer.getRefData().getPosition().pos);
+        float distTerm = fSneakDistBase + fSneakDistMult * pos1.distance(pos2);
+
+        float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude;
+        float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
+
+        CreatureStats& observerStats = observer.getClass().getCreatureStats(observer);
+        int obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
+        int obsLuck = observerStats.getAttribute(ESM::Attribute::Luck).getModified();
+        float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
+        int obsSneak = observer.getClass().getSkill(observer, ESM::Skill::Sneak);
+
+        float obsTerm = obsSneak + 0.2 * obsAgility + 0.1 * obsLuck - obsBlind;
+
+        // is ptr behind the observer?
+        static float fSneakNoViewMult = store.find("fSneakNoViewMult")->getFloat();
+        static float fSneakViewMult = store.find("fSneakViewMult")->getFloat();
+        float y = 0;
+        Ogre::Vector3 vec = pos1 - pos2;
+        Ogre::Radian angle = observer.getRefData().getBaseNode()->getOrientation().yAxis().angleBetween(vec);
+        if (angle < Ogre::Degree(90))
+            y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
+        else
+            y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+
+        float target = x - y;
+        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+
+        return (roll >= target);
     }
 }

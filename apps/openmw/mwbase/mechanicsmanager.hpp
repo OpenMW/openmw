@@ -76,8 +76,12 @@ namespace MWBase
             virtual void setPlayerClass (const ESM::Class& class_) = 0;
             ///< Set player class to custom class.
 
-            virtual void restoreDynamicStats() = 0;
-            ///< If the player is sleeping, this should be called every hour.
+            virtual void rest(bool sleep) = 0;
+            ///< If the player is sleeping or waiting, this should be called every hour.
+            /// @param sleep is the player sleeping or waiting?
+
+            virtual int getHoursToRest() const = 0;
+            ///< Calculate how many hours the player needs to rest in order to be fully healed
 
             virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying) = 0;
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
@@ -87,6 +91,36 @@ namespace MWBase
 
             virtual int countDeaths (const std::string& id) const = 0;
             ///< Return the number of deaths for actors with the given ID.
+
+            /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
+            virtual bool awarenessCheck (const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
+
+            enum OffenseType
+            {
+                OT_Theft, // Taking items owned by an NPC or a faction you are not a member of
+                OT_Assault, // Attacking a peaceful NPC
+                OT_Murder, // Murdering a peaceful NPC
+                OT_Trespassing, // Staying in a cell you are not allowed in (where is this defined?)
+                OT_SleepingInOwnedBed, // Sleeping in a bed owned by an NPC or a faction you are not a member of
+                OT_Pickpocket // Entering pickpocket mode, leaving it, and being detected. Any items stolen are a separate crime (Theft)
+            };
+            /**
+             * @brief Commit a crime. If any actors witness the crime and report it,
+             *        reportCrime will be called automatically.
+             * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
+             * @return was the crime reported?
+             */
+            virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+                                      OffenseType type, int arg=0) = 0;
+            virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+                                      OffenseType type, int arg=0) = 0;
+            /// Utility to check if taking this item is illegal and calling commitCrime if so
+            virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count) = 0;
+            /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
+            virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) = 0;
+            /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
+            /// @return was it illegal, and someone saw you doing it?
+            virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) = 0;
 
             enum PersuasionType
             {

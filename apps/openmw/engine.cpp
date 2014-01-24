@@ -172,6 +172,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
         //kindly ask SDL not to trash our OGL context
         //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
         SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+        SDL_SetMainReady();
         if(SDL_Init(flags) != 0)
         {
             throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
@@ -534,13 +535,13 @@ void OMW::Engine::activate()
     MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 
     boost::shared_ptr<MWWorld::Action> action =
-        MWWorld::Class::get (ptr).activate (ptr, MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        MWWorld::Class::get (ptr).activate (ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 
     interpreterContext.activate (ptr, action);
 
     std::string script = MWWorld::Class::get (ptr).getScript (ptr);
 
-    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayerPtr());
 
     if (!script.empty())
     {

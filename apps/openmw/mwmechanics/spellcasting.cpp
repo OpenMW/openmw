@@ -4,11 +4,11 @@
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
-
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/actionteleport.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -57,6 +57,7 @@ namespace MWMechanics
         ESM::EffectList reflectedEffects;
         std::vector<ActiveSpells::Effect> appliedLastingEffects;
         bool firstAppliedEffect = true;
+        bool anyHarmfulEffect = false;
 
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
             effectIt!=effects.mList.end(); ++effectIt)
@@ -77,6 +78,8 @@ namespace MWMechanics
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
             {
+                anyHarmfulEffect = true;
+
                 // If player is attempting to cast a harmful spell, show the target's HP bar
                 if (caster.getRefData().getHandle() == "player" && target != caster)
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
@@ -161,13 +164,14 @@ namespace MWMechanics
                             ActiveSpells::Effect effect_ = effect;
                             effect_.mMagnitude *= -1;
                             effects.push_back(effect_);
+                            // Also make sure to set casterHandle = target, so that the effect on the caster gets purged when the target dies
                             caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                        effects, mSourceName, caster.getRefData().getHandle());
+                                        effects, mSourceName, target.getRefData().getHandle());
                         }
                     }
                 }
                 else
-                    applyInstantEffect(target, EffectKey(*effectIt), magnitude);
+                    applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
 
                 // HACK: Damage attribute/skill actually has a duration, even though the actual effect is instant and permanent.
                 // This was probably just done to have the effect visible in the magic menu for a while
@@ -177,7 +181,7 @@ namespace MWMechanics
                         || effectIt->mEffectID == ESM::MagicEffect::RestoreAttribute
                         || effectIt->mEffectID == ESM::MagicEffect::RestoreSkill
                         )
-                    applyInstantEffect(target, EffectKey(*effectIt), magnitude);
+                    applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
 
                 if (target.getClass().isActor() || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
                 {
@@ -197,15 +201,17 @@ namespace MWMechanics
                     }
 
                     // Add VFX
+                    const ESM::Static* castStatic;
                     if (!magicEffect->mHit.empty())
-                    {
-                        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-                        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
-                        // Note: in case of non actor, a free effect should be fine as well
-                        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
-                        if (anim)
-                            anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
-                    }
+                        castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+                    else
+                        castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
+
+                    bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+                    // Note: in case of non actor, a free effect should be fine as well
+                    MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
+                    if (anim)
+                        anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
                 }
 
                 // TODO: For Area effects, launch a growing particle effect that applies the effect to more actors as it hits them. Best managed in World.
@@ -218,9 +224,13 @@ namespace MWMechanics
         if (appliedLastingEffects.size())
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, caster.getRefData().getHandle());
+
+        if (anyHarmfulEffect && target.getClass().isActor() && target != caster
+                && target.getClass().getCreatureStats(target).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(caster, target, MWBase::MechanicsManager::OT_Assault);
     }
 
-    void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, MWMechanics::EffectKey effect, float magnitude)
+    void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, MWMechanics::EffectKey effect, float magnitude)
     {
         short effectId = effect.mId;
         if (!target.getClass().isActor())
@@ -232,11 +242,13 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
-                // TODO: This is a crime
                 if (target.getCellRef().mLockLevel <= magnitude)
                 {
                     if (target.getCellRef().mLockLevel > 0)
+                    {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
+                        MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
+                    }
                     target.getCellRef().mLockLevel = 0;
                 }
                 else
@@ -287,17 +299,13 @@ namespace MWMechanics
             if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled())
                 return;
 
-            Ogre::Vector3 worldPos;
-            if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(target.getCell(), worldPos))
-                worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
-
             if (effectId == ESM::MagicEffect::DivineIntervention)
             {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker", worldPos);
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker");
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker", worldPos);
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker");
             }
 
             else if (effectId == ESM::MagicEffect::Mark)
@@ -430,8 +438,7 @@ namespace MWMechanics
             DynamicStat<float> fatigue = stats.getFatigue();
             const float normalizedEncumbrance = mCaster.getClass().getEncumbrance(mCaster) / mCaster.getClass().getCapacity(mCaster);
             float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
-            fatigue.setCurrent(std::max(0.f, fatigue.getCurrent() - fatigueLoss));
-            stats.setFatigue(fatigue);
+            fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
 
             bool fail = false;
 

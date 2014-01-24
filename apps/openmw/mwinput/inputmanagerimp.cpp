@@ -198,14 +198,7 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
 
-                if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-                {
-                    if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Container)
-                        toggleContainer ();
-                    else
-                        MWBase::Environment::get().getWindowManager()->activateKeyPressed();
-                }
-                else
+                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
                     activate();
                 break;
             case A_Journal:
@@ -360,7 +353,7 @@ namespace MWInput
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
             {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                 mOverencumberedMessageDelay -= dt;
                 if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
                 {
@@ -516,13 +509,6 @@ namespace MWInput
 
         mInputBinder->keyPressed (arg);
 
-        if((arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER)
-            && MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
-            MWBase::Environment::get().getWindowManager()->enterPressed();
-        }
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
         if (kc != OIS::KC_UNASSIGNED)
@@ -560,7 +546,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
         {
             MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-            if (b)
+            if (b && b->getEnabled())
             {
                 MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
             }
@@ -733,21 +719,6 @@ namespace MWInput
         }
 
         // .. but don't touch any other mode, except container.
-    }
-
-    void InputManager::toggleContainer()
-    {
-        if (MyGUI::InputManager::getInstance ().isModalAny())
-            return;
-
-        if(MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Container)
-                MWBase::Environment::get().getWindowManager()->popGuiMode();
-            else
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container);
-        }
-
     }
 
     void InputManager::toggleConsole()

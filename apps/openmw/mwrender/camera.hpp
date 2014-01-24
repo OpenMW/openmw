@@ -87,7 +87,7 @@ namespace MWRender
         /// As animation is tied to the camera, this needs
         /// to be set each frame after the animation is
         /// applied.
-        void setSneakOffset();
+        void setSneakOffset(float offset);
 
         bool isFirstPerson() const
         { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }

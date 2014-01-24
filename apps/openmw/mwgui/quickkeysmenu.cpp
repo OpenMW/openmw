@@ -2,7 +2,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwmechanics/spellcasting.hpp"
@@ -126,7 +125,7 @@ namespace MWGui
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         mAssignDialog->setVisible (false);
     }
@@ -267,7 +266,7 @@ namespace MWGui
 
         QuickKeyType type = *button->getUserData<QuickKeyType>();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
 
         if (type == Type_Item || type == Type_MagicItem)
@@ -302,6 +301,12 @@ namespace MWGui
         if (type == Type_Magic)
         {
             std::string spellId = button->getChildAt(0)->getUserString("Spell");
+
+            // Make sure the player still has this spell
+            MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
+            MWMechanics::Spells& spells = stats.getSpells();
+            if (!spells.hasSpell(spellId))
+                return;
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
         }
@@ -309,19 +314,7 @@ namespace MWGui
         {
             MWWorld::Ptr item = *button->getChildAt (0)->getUserData<MWWorld::Ptr>();
 
-            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(item).use(item);
-
-            action->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-
-            // this is necessary for books/scrolls: if they are already in the player's inventory,
-            // the "Take" button should not be visible.
-            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-            // without screwing up future book windows
-            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
-            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
-
-            // since we changed equipping status, update the inventory window
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
         }
         else if (type == Type_MagicItem)
         {
@@ -344,7 +337,7 @@ namespace MWGui
                 // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
 
                 MWWorld::ActionEquip action(item);
-                action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
+                action.execute (MWBase::Environment::get().getWorld ()->getPlayerPtr());
             }
 
             store.setSelectedEnchantItem(it);
@@ -430,7 +423,7 @@ namespace MWGui
 
         const int spellHeight = 18;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();

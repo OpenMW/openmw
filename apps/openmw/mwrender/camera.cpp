@@ -107,7 +107,7 @@ namespace MWRender
 
     void Camera::update(float duration, bool paused)
     {
-        if (!mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+        if (mAnimation->allowSwitchViewMode())
         {
             // Now process the view changes we queued earlier
             if (mVanityToggleQueued)
@@ -144,7 +144,7 @@ namespace MWRender
     {
         // Changing the view will stop all playing animations, so if we are playing
         // anything important, queue the view change for later
-        if (mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+        if (!mAnimation->allowSwitchViewMode())
         {
             mViewModeToggleQueued = true;
             return;
@@ -171,7 +171,7 @@ namespace MWRender
     {
         // Changing the view will stop all playing animations, so if we are playing
         // anything important, queue the view change for later
-        if (mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+        if (!mPreviewMode)
         {
             mVanityToggleQueued = true;
             return false;
@@ -205,7 +205,7 @@ namespace MWRender
 
     void Camera::togglePreviewMode(bool enable)
     {
-        if (mAnimation->isPlaying(MWRender::Animation::Group_UpperBody))
+        if (mFirstPersonView && !mAnimation->allowSwitchViewMode())
             return;
 
         if(mPreviewMode == enable)
@@ -226,10 +226,10 @@ namespace MWRender
         mCamera->setPosition(0.f, 0.f, offset);
     }
 
-    void Camera::setSneakOffset()
+    void Camera::setSneakOffset(float offset)
     {
         if(mAnimation)
-            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -9.8f));
+            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -offset));
     }
 
     float Camera::getYaw()
@@ -358,7 +358,7 @@ namespace MWRender
             Ogre::TagPoint *tag = mAnimation->attachObjectToBone("Head", mCamera);
             tag->setInheritOrientation(false);
         }
-        else
+        else 
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
             mCameraNode->attachObject(mCamera);

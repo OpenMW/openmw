@@ -35,6 +35,8 @@ namespace MWWorld
 
             static const int Type_All = 0xffff;
 
+            static const std::string sGoldId;
+
         private:
 
             MWWorld::CellRefList<ESM::Potion>            potions;
@@ -52,7 +54,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance=0, bool topLevel=true);
+            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true);
 
         public:
 
@@ -92,6 +94,9 @@ namespace MWWorld
             void unstack (const Ptr& ptr, const Ptr& container);
             ///< Unstack an item in this container. The item's count will be set to 1, then a new stack will be added with (origCount-1).
 
+            /// @return How many items with refID \a id are in this container?
+            int count (const std::string& id);
+
         protected:
             ContainerStoreIterator addNewStack (const Ptr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
@@ -103,7 +108,7 @@ namespace MWWorld
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
             void clear();
@@ -167,6 +172,8 @@ namespace MWWorld
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon>::List::iterator);
 
+			void copy (const ContainerStoreIterator& src);
+
             void incType();
 
             void nextType();
@@ -183,6 +190,8 @@ namespace MWWorld
 
         public:
 
+            ContainerStoreIterator(const ContainerStoreIterator& src);
+
             Ptr *operator->() const;
 
             Ptr operator*() const;
@@ -190,6 +199,8 @@ namespace MWWorld
             ContainerStoreIterator& operator++();
 
             ContainerStoreIterator operator++ (int);
+
+            ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);			
 
             bool isEqual (const ContainerStoreIterator& iter) const;
 

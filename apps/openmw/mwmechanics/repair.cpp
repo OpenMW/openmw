@@ -8,7 +8,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -20,7 +19,7 @@ namespace MWMechanics
 
 void Repair::repair(const MWWorld::Ptr &itemToRepair)
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWWorld::LiveCellRef<ESM::Repair> *ref =
         mTool.get<ESM::Repair>();
 
@@ -77,7 +76,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     // tool used up?
     if (mTool.getCellRef().mCharge == 0)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
 
         store.remove(mTool, 1, player);

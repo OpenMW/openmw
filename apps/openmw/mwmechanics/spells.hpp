@@ -44,6 +44,8 @@ namespace MWMechanics
 
             TIterator end() const;
 
+            bool hasSpell(const std::string& spell) { return mSpells.find(Misc::StringUtils::lowerCase(spell)) != mSpells.end(); }
+
             void add (const std::string& spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 

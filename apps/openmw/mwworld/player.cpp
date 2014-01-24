@@ -118,14 +118,14 @@ namespace MWWorld
     void Player::setRunState(bool run)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).setStance(ptr, MWWorld::Class::Run, run);
+        ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, run);
     }
 
     void Player::setSneak(bool sneak)
     {
         MWWorld::Ptr ptr = getPlayer();
 
-        MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Sneak, sneak);
+        ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
 
         // TODO show sneak indicator only when the player is not detected by any actor
         MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);

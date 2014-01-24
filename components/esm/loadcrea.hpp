@@ -25,16 +25,20 @@ struct Creature
     // Default is 0x48?
     enum Flags
     {
-        Biped       = 0x001,
-        Respawn     = 0x002,
-        Weapon      = 0x004, // Has weapon and shield
-        None        = 0x008, // ??
+        // Movement types
+        Bipedal       = 0x001,
         Swims       = 0x010,
         Flies       = 0x020, // Don't know what happens if several
         Walks       = 0x040, // of these are set
+
+        Respawn     = 0x002,
+        Weapon      = 0x004, // Has weapon and shield
+        None        = 0x008, // ??
         Essential   = 0x080,
-        Skeleton    = 0x400, // Does not have normal blood
-        Metal       = 0x800  // Has 'golden' blood
+
+        // Blood types
+        Skeleton    = 0x400,
+        Metal       = 0x800
     };
 
     enum Type
@@ -63,10 +67,12 @@ struct Creature
 
         int mHealth, mMana, mFatigue; // Stats
         int mSoul; // The creatures soul value (used with soul gems.)
-        int mCombat, mMagic, mStealth; // Don't know yet.
+        // Creatures have generalized combat, magic and stealth stats which substitute for
+        // the specific skills (in the same way as specializations).
+        int mCombat, mMagic, mStealth;
         int mAttack[6]; // AttackMin1, AttackMax1, ditto2, ditto3
         int mGold;
-    }; // 96 bytes
+    }; // 96 byte
 
     NPDTstruct mData;
 

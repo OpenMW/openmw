@@ -14,7 +14,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -195,6 +194,7 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 

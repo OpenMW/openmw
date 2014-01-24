@@ -5,7 +5,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 
 namespace
 {
@@ -38,7 +37,7 @@ namespace MWMechanics
         Movement &movement = actor.getClass().getMovementSettings(actor);
         const ESM::Cell *cell = actor.getCell()->mCell;
 
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->mCell->mData.mX)
         {
             int sideX = sgn(cell->mData.mX - player.getCell()->mCell->mData.mX);
@@ -106,7 +105,7 @@ namespace MWMechanics
 
     int AiTravel::getTypeId() const
     {
-        return 1;
+        return TypeIdTravel;
     }
 }
 

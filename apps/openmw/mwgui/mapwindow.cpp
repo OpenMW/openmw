@@ -294,7 +294,7 @@ namespace MWGui
         std::vector<MWWorld::Ptr> markers;
         MWBase::World* world = MWBase::Environment::get().getWorld();
         world->listDetectedReferences(
-                    world->getPlayer().getPlayer(),
+                    world->getPlayerPtr(),
                     markers, MWBase::World::DetectionType(type));
         if (markers.empty())
             return;
@@ -515,8 +515,8 @@ namespace MWGui
         // For interiors, position is set by WindowManager via setGlobalMapPlayerPosition
         if (MWBase::Environment::get().getWorld ()->isCellExterior ())
         {
-            Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedPosition ();
-            Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedOrientation ();
+            Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayerPtr().getRefData ().getBaseNode ()->_getDerivedPosition ();
+            Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayerPtr().getRefData ().getBaseNode ()->_getDerivedOrientation ();
             Ogre::Vector2 dir (orient.yAxis ().x, orient.yAxis().y);
 
             float worldX, worldY;

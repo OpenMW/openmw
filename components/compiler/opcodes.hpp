@@ -53,6 +53,12 @@ namespace Compiler
         const int opcodeGetLineOfSightExplicit = 0x2000223;
         const int opcodeToggleAI = 0x2000224;
         const int opcodeToggleAIExplicit = 0x2000225;
+        const int opcodeGetTarget = 0x2000238;
+        const int opcodeGetTargetExplicit = 0x2000239;
+        const int opcodeStartCombat = 0x200023a;
+        const int opcodeStartCombatExplicit = 0x200023b;
+        const int opcodeStopCombat = 0x200023c;
+        const int opcodeStopCombatExplicit = 0x200023d;
     }
 
     namespace Animation
@@ -161,6 +167,7 @@ namespace Compiler
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
         const int opcodeShowRestMenu = 0x2000018;
+        const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;
         const int opcodeToggleFogOfWar = 0x2000145;
         const int opcodeToggleFullHelp = 0x2000151;
@@ -222,6 +229,9 @@ namespace Compiler
         const int opcodeGetStandingActorExplicit = 0x200020f;
         const int opcodeGetWindSpeed = 0x2000212;
         const int opcodePlayBink = 0x20001f7;
+        const int opcodeGoToJail = 0x2000235;
+        const int opcodePayFine = 0x2000236;
+        const int opcodePayFineThief = 0x2000237;
         const int opcodeHitOnMe = 0x2000213;
         const int opcodeHitOnMeExplicit = 0x2000214;
         const int opcodeDisableTeleporting = 0x2000215;
@@ -406,7 +416,7 @@ namespace Compiler
 
         const int opcodePlaceItemCell = 0x200019a;
         const int opcodePlaceItem = 0x200019b;
-        const int opcodePlaceAtPc = 0x200019c;  
+        const int opcodePlaceAtPc = 0x200019c;
         const int opcodePlaceAtMe = 0x200019d;
         const int opcodePlaceAtMeExplicit = 0x200019e;
         const int opcodeModScale = 0x20001e3;

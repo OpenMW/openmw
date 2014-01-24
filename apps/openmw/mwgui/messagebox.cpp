@@ -8,12 +8,12 @@
 namespace MWGui
 {
 
-    MessageBoxManager::MessageBoxManager ()
+    MessageBoxManager::MessageBoxManager (float timePerChar)
     {
-        mMessageBoxSpeed = 0.1;
         mInterMessageBoxe = NULL;
         mStaticMessageBox = NULL;
         mLastButtonPressed = -1;
+        mMessageBoxSpeed = timePerChar;
     }
 
     MessageBoxManager::~MessageBoxManager ()
@@ -62,7 +62,8 @@ namespace MWGui
     {
         MessageBox *box = new MessageBox(*this, message);
         box->mCurrentTime = 0;
-        box->mMaxTime = message.length()*mMessageBoxSpeed;
+        std::string realMessage = MyGUI::LanguageManager::getInstance().replaceTags(message);
+        box->mMaxTime = realMessage.length()*mMessageBoxSpeed;
 
         if(stat)
             mStaticMessageBox = box;
@@ -124,12 +125,6 @@ namespace MWGui
     void MessageBoxManager::setMessageBoxSpeed (int speed)
     {
         mMessageBoxSpeed = speed;
-    }
-
-    void MessageBoxManager::okayPressed ()
-    {
-        if(mInterMessageBoxe != NULL)
-            mInterMessageBoxe->okayPressed();
     }
 
     int MessageBoxManager::readPressedButton ()
@@ -332,23 +327,25 @@ namespace MWGui
             }
 
         }
-    }
 
-    void InteractiveMessageBox::okayPressed()
-    {
-
+        // Set key focus to "Ok" button
         std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));
         std::vector<MyGUI::Button*>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
-            if(Misc::StringUtils::lowerCase((*button)->getCaption()) == ok)
+            if(Misc::StringUtils::ciEqual((*button)->getCaption(), ok))
             {
-                buttonActivated(*button);
-                MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
+                MyGUI::InputManager::getInstance().setKeyFocusWidget(*button);
+                (*button)->eventKeyButtonPressed += MyGUI::newDelegate(this, &InteractiveMessageBox::onKeyPressed);
                 break;
             }
         }
+    }
 
+    void InteractiveMessageBox::onKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    {
+        if (_key == MyGUI::KeyCode::Return || _key == MyGUI::KeyCode::NumpadEnter || _key == MyGUI::KeyCode::Space)
+            buttonActivated(_sender);
     }
 
     void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)

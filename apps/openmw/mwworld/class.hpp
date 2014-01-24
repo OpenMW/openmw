@@ -70,7 +70,7 @@ namespace MWWorld
             /// NPC-stances.
             enum Stance
             {
-                Run, Sneak, Combat
+                Run, Sneak
             };
 
             virtual ~Class();
@@ -168,15 +168,6 @@ namespace MWWorld
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).
 
-            virtual void setForceStance (const Ptr& ptr, Stance stance, bool force) const;
-            ///< Force or unforce a stance.
-
-            virtual void setStance (const Ptr& ptr, Stance stance, bool set) const;
-            ///< Set or unset a stance.
-
-            virtual bool getStance (const Ptr& ptr, Stance stance, bool ignoreForce = false) const;
-            ///< Check if a stance is active or not.
-
             virtual float getSpeed (const Ptr& ptr) const;
             ///< Return movement speed.
 
@@ -240,11 +231,6 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
-            virtual bool hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const;
-            ///< Has \æ ptr detected \a ptr2?
-            ///
-            /// (default implementation: return false)
-
             virtual std::string getUpSoundId (const Ptr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
@@ -292,6 +278,9 @@ namespace MWWorld
 
             virtual bool isKey (const MWWorld::Ptr& ptr) const { return false; }
 
+            /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
+            virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
+
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 
@@ -307,6 +296,8 @@ namespace MWWorld
             }
 
             virtual bool isFlying(const MWWorld::Ptr& ptr) const;
+
+            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

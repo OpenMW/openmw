@@ -79,13 +79,13 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 {
     const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
 
-    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
+    // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if ((actorPtr.getRefData().getHandle() != "player")
             && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf())
             && !actorPtr.getClass().getCreatureStats(actorPtr).isDead())
     {
         std::string type = itemPtr.getTypeName();
-        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()) || (type == typeid(ESM::Weapon).name()))
             autoEquip(actorPtr);
     }
 
@@ -164,9 +164,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
-    const MWMechanics::NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
-    MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
-
     TSlots slots_;
     initSlots (slots_);
 
@@ -185,36 +182,16 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
         // Only autoEquip if we are the original owner of the item.
         // This stops merchants from auto equipping anything you sell to them.
-        if (!Misc::StringUtils::ciEqual(test.getCellRef().mOwner, actor.getCellRef().mRefID))
+        // ...unless this is a companion, he should always equip items given to him.
+        if (!Misc::StringUtils::ciEqual(test.getCellRef().mOwner, actor.getCellRef().mRefID) &&
+                (actor.getClass().getScript(actor).empty() ||
+                !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
             continue;
 
-        int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
+        int testSkill = test.getClass().getEquipmentSkill (test);
 
         std::pair<std::vector<int>, bool> itemsSlots =
-            MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
-
-        // Skip items that have *only* harmful permanent effects
-        if (!test.getClass().getEnchantment(test).empty())
-        {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::Enchantment* enchantment = store.get<ESM::Enchantment>().find(test.getClass().getEnchantment(test));
-            bool harmfulEffect = false;
-            bool usefulEffect = false;
-            if (enchantment->mData.mType == ESM::Enchantment::ConstantEffect)
-            {
-                for (std::vector<ESM::ENAMstruct>::const_iterator it = enchantment->mEffects.mList.begin();
-                     it != enchantment->mEffects.mList.end(); ++it)
-                {
-                    const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(it->mEffectID);
-                    if (effect->mData.mFlags & ESM::MagicEffect::Harmful)
-                        harmfulEffect = true;
-                    else
-                        usefulEffect = true;
-                }
-            }
-            if (harmfulEffect && !usefulEffect)
-                continue;
-        }
+            iter->getClass().getEquipmentSlots (*iter);
 
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
@@ -231,16 +208,16 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 {
                     // check skill
                     int oldSkill =
-                        MWWorld::Class::get (old).getEquipmentSkill (old);
+                        old.getClass().getEquipmentSkill (old);
 
                     if (testSkill!=-1 && oldSkill==-1)
                         use = true;
                     else if (testSkill!=-1 && oldSkill!=-1 && testSkill!=oldSkill)
                     {
-                        if (stats.getSkill (oldSkill).getModified()>stats.getSkill (testSkill).getModified())
+                        if (actor.getClass().getSkill(actor, oldSkill) > actor.getClass().getSkill (actor, testSkill))
                             continue; // rejected, because old item better matched the NPC's skills.
 
-                        if (stats.getSkill (oldSkill).getModified()<stats.getSkill (testSkill).getModified())
+                        if (actor.getClass().getSkill(actor, oldSkill) < actor.getClass().getSkill (actor, testSkill))
                             use = true;
                     }
                 }
@@ -248,8 +225,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 if (!use)
                 {
                     // check value
-                    if (MWWorld::Class::get (old).getValue (old)>=
-                        MWWorld::Class::get (test).getValue (test))
+                    if (old.getClass().getValue (old)>=
+                        test.getClass().getValue (test))
                     {
                         continue;
                     }
@@ -263,10 +240,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 case 0:
                     continue;
                 case 2:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, actor);
+                    slots_[MWWorld::InventoryStore::Slot_CarriedLeft] = end();
                     break;
                 case 3:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
+                    // Prefer keeping twohanded weapon
                     break;
             }
 
@@ -389,7 +366,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // Apply instant effects
                     MWMechanics::CastSpell cast(actor, actor);
                     if (magnitude)
-                        cast.applyInstantEffect(actor, effectIt->mEffectID, magnitude);
+                        cast.applyInstantEffect(actor, actor, effectIt->mEffectID, magnitude);
                 }
 
                 if (magnitude)

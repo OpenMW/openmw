@@ -16,7 +16,7 @@ namespace MWScript
 {
     struct ExplicitRef
     {
-        MWWorld::Ptr operator() (Interpreter::Runtime& runtime) const
+        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required=true) const
         {
             std::string id = runtime.getStringLiteral (runtime[0].mInteger);
             runtime.pop();
@@ -27,12 +27,12 @@ namespace MWScript
 
     struct ImplicitRef
     {
-        MWWorld::Ptr operator() (Interpreter::Runtime& runtime) const
+        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required=true) const
         {
             MWScript::InterpreterContext& context
                 = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
 
-            return context.getReference();
+            return context.getReference(required);
         }
     };
 }

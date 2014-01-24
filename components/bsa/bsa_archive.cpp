@@ -23,6 +23,8 @@
 
 #include "bsa_archive.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include <OgreFileSystem.h>
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>

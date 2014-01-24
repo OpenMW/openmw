@@ -38,7 +38,7 @@ opencs_units (model/tools
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck spellcheck
+    birthsigncheck spellcheck referenceablecheck
     )
 
 

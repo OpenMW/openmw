@@ -32,14 +32,14 @@ protected:
     /* This is the number of *discrete* groups. */
     static const size_t sNumGroups = 4;
 
-    class AnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class AnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     private:
         Animation *mAnimation;
         std::string mAnimationName;
 
     public:
-        AnimationValue(Animation *anim)
+        AnimationTime(Animation *anim)
           : mAnimation(anim)
         { }
 
@@ -52,12 +52,12 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-    class EffectAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class EffectAnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     private:
         float mTime;
     public:
-        EffectAnimationValue() : mTime(0) {  }
+        EffectAnimationTime() : mTime(0) {  }
         void addTime(float time) { mTime += time; }
         void resetTime(float value) { mTime = value; }
 
@@ -67,7 +67,7 @@ protected:
 
 
 
-    class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class NullAnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     public:
         virtual Ogre::Real getValue() const
@@ -134,8 +134,8 @@ protected:
 
     AnimStateMap mStates;
 
-    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
-    Ogre::SharedPtr<NullAnimationValue> mNullAnimationValuePtr;
+    Ogre::SharedPtr<AnimationTime> mAnimationTimePtr[sNumGroups];
+    Ogre::SharedPtr<NullAnimationTime> mNullAnimationTimePtr;
 
     ObjectAttachMap mAttachedObjects;
 
@@ -189,16 +189,18 @@ protected:
     /** Adds an additional light to the given object list using the specified ESM record. */
     void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light);
 
-    static void setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
-                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
-                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
-
     void clearAnimSources();
 
     // TODO: Should not be here
     Ogre::Vector3 getEnchantmentColor(MWWorld::Ptr item);
 
 public:
+    // FIXME: Move outside of this class
+    static void setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
+                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
+                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
+
+
     Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
     virtual ~Animation();
 
@@ -258,7 +260,8 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
-    bool isPlaying(Group group) const;
+    //Checks if playing any animation which shouldn't be stopped when switching camera view modes
+    bool allowSwitchViewMode() const;
 
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
@@ -272,6 +275,7 @@ public:
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
+    void changeGroups(const std::string &groupname, int group);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;

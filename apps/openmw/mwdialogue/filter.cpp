@@ -8,7 +8,6 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
@@ -25,7 +24,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     // actor id
     if (!info.mActor.empty())
     {
-        if ( Misc::StringUtils::lowerCase (info.mActor)!=MWWorld::Class::get (mActor).getId (mActor))
+        if ( !Misc::StringUtils::ciEqual(info.mActor, MWWorld::Class::get (mActor).getId (mActor)))
             return false;
     }
     else if (isCreature)
@@ -42,7 +41,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
-        if (Misc::StringUtils::lowerCase (info.mRace)!= Misc::StringUtils::lowerCase (cellRef->mBase->mRace))
+        if (!Misc::StringUtils::ciEqual(info.mRace, cellRef->mBase->mRace))
             return false;
     }
 
@@ -54,7 +53,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
-        if ( Misc::StringUtils::lowerCase (info.mClass)!= Misc::StringUtils::lowerCase (cellRef->mBase->mClass))
+        if ( !Misc::StringUtils::ciEqual(info.mClass, cellRef->mBase->mClass))
             return false;
     }
 
@@ -93,7 +92,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 {
-    const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
     // check player faction
     if (!info.mPcFaction.empty())
@@ -111,7 +110,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 
     // check cell
     if (!info.mCell.empty())
-        if (Misc::StringUtils::lowerCase (player.getCell()->mCell->mName) != Misc::StringUtils::lowerCase (info.mCell))
+        if (!Misc::StringUtils::ciEqual(player.getCell()->mCell->mName, info.mCell))
             return false;
 
     return true;
@@ -189,7 +188,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             int i = 0;
 
             for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
+                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
                     break;
 
             if (i>=static_cast<int> (script->mVarNames.size()))
@@ -212,7 +211,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
         case SelectWrapper::Function_PcHealthPercent:
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
             float ratio = MWWorld::Class::get (player).getCreatureStats (player).getHealth().getCurrent() /
                 MWWorld::Class::get (player).getCreatureStats (player).getHealth().getModified();
@@ -222,7 +221,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
         case SelectWrapper::Function_PcDynamicStat:
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
             float value = MWWorld::Class::get (player).getCreatureStats (player).
                 getDynamic (select.getArgument()).getCurrent();
@@ -246,7 +245,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
 int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) const
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
     switch (select.getFunction())
     {
@@ -263,7 +262,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             std::string name = select.getName();
 
             for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                if (Misc::StringUtils::lowerCase(iter->getCellRef().mRefID) == name)
+                if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, name))
                     sum += iter->getRefData().getCount();
 
             return sum;
@@ -420,7 +419,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
 bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) const
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
     switch (select.getFunction())
     {
@@ -430,23 +429,23 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotId:
 
-            return select.getName()!=Misc::StringUtils::lowerCase (MWWorld::Class::get (mActor).getId (mActor));
+            return !Misc::StringUtils::ciEqual(MWWorld::Class::get (mActor).getId (mActor), select.getName());
 
         case SelectWrapper::Function_NotFaction:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mFaction)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mFaction, select.getName());
 
         case SelectWrapper::Function_NotClass:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mClass)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mClass, select.getName());
 
         case SelectWrapper::Function_NotRace:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, select.getName());
 
         case SelectWrapper::Function_NotCell:
 
-            return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)!=select.getName();
+            return !Misc::StringUtils::ciEqual(mActor.getCell()->mCell->mName, select.getName());
 
         case SelectWrapper::Function_NotLocal:
         {
@@ -463,7 +462,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             int i = 0;
             for (; i < static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
+                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
                     break;
 
             if (i >= static_cast<int> (script->mVarNames.size()))
@@ -479,8 +478,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_SameRace:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)!=
-                Misc::StringUtils::lowerCase (player.get<ESM::NPC>()->mBase->mRace);
+            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, player.get<ESM::NPC>()->mBase->mRace);
 
         case SelectWrapper::Function_SameFaction:
 
@@ -508,9 +506,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             std::string faction =
                 MWWorld::Class::get (mActor).getNpcStats (mActor).getFactionRanks().begin()->first;
 
-            std::set<std::string>& expelled = MWWorld::Class::get (player).getNpcStats (player).getExpelled();
-
-            return expelled.find (faction)!=expelled.end();
+            return player.getClass().getNpcStats(player).getExpelled(faction);
         }
 
         case SelectWrapper::Function_PcVampire:
@@ -528,7 +524,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_Detected:
 
-            return MWWorld::Class::get (mActor).hasDetected (mActor, player);
+            return MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, mActor);
 
         case SelectWrapper::Function_Attacked:
 

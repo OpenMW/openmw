@@ -3,7 +3,6 @@
 #include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/timestamp.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -83,7 +82,7 @@ namespace MWMechanics
                 return true;
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ESM::Position pos = actor.getRefData().getPosition();
         bool cellChange = actor.getCell()->mCell->mData.mX != cellX || actor.getCell()->mCell->mData.mY != cellY;
         const ESM::Pathgrid *pathgrid =
@@ -179,7 +178,7 @@ namespace MWMechanics
 
     int AiEscort::getTypeId() const
     {
-        return 2;
+        return TypeIdEscort;
     }
 }
 

@@ -8,11 +8,13 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
+#include "../mwscript/interpretercontext.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
@@ -33,7 +35,7 @@ namespace MWGui
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
-        , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
+        , mPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr())
         , mPreviewDirty(true)
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
@@ -84,7 +86,7 @@ namespace MWGui
 
     void InventoryWindow::updatePlayer()
     {
-        mPtr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+        mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel(mSortModel);
@@ -276,7 +278,7 @@ namespace MWGui
 
     void InventoryWindow::open()
     {
-        mPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        mPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         updateEncumbranceBar();
 
@@ -351,6 +353,48 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
 
+    void InventoryWindow::useItem(const MWWorld::Ptr &ptr)
+    {
+        const std::string& script = ptr.getClass().getScript(ptr);
+
+        // If the item has a script, set its OnPcEquip to 1
+        if (!script.empty()
+                // Another morrowind oddity: when an item has skipped equipping and pcskipequip is reset to 0 afterwards,
+                // the next time it is equipped will work normally, but will not set onpcequip
+                && (ptr != mSkippedToEquip || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1))
+            ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
+
+        // Give the script a chance to run once before we do anything else
+        // this is important when setting pcskipequip as a reaction to onpcequip being set (bk_treasuryreport does this)
+        if (!script.empty())
+        {
+            MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
+            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+        }
+
+        if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
+        {
+            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
+
+            action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
+
+            // this is necessary for books/scrolls: if they are already in the player's inventory,
+            // the "Take" button should not be visible.
+            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
+            // without screwing up future book windows
+            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
+
+            mSkippedToEquip = MWWorld::Ptr();
+        }
+        else
+            mSkippedToEquip = ptr;
+
+        mItemView->update();
+
+        notifyContentChanged();
+    }
+
     void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
@@ -369,21 +413,7 @@ namespace MWGui
                 mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
                 ptr = *it;
             }
-
-            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
-
-            action->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-
-            // this is necessary for books/scrolls: if they are already in the player's inventory,
-            // the "Take" button should not be visible.
-            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-            // without screwing up future book windows
-            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
-            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
-
-            mItemView->update();
-
-            notifyContentChanged();
+            useItem(ptr);
         }
         else
         {
@@ -432,7 +462,7 @@ namespace MWGui
 
     void InventoryWindow::updateEncumbranceBar()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         float capacity = MWWorld::Class::get(player).getCapacity(player);
         float encumbrance = MWWorld::Class::get(player).getEncumbrance(player);
@@ -445,19 +475,6 @@ namespace MWGui
             return;
 
         updateEncumbranceBar();
-    }
-
-    int InventoryWindow::getPlayerGold()
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        for (MWWorld::ContainerStoreIterator it = invStore.begin();
-                it != invStore.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
-                return it->getRefData().getCount();
-        }
-        return 0;
     }
 
     void InventoryWindow::setTrading(bool trading)
@@ -512,12 +529,10 @@ namespace MWGui
             return;
 
         int count = object.getRefData().getCount();
-        if (object.getCellRef().mGoldValue > 1)
-            count = object.getCellRef().mGoldValue;
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
@@ -533,6 +548,8 @@ namespace MWGui
         if (i == mTradeModel->getItemCount())
             throw std::runtime_error("Added item not found");
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
+
+        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, count);
     }
 
     MyGUI::IntCoord InventoryWindow::getAvatarScreenCoord ()
