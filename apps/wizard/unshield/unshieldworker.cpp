@@ -2,6 +2,7 @@
 
 #include <QDebug>
 
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QFileInfoListIterator>
 #include <QMessageBox>
@@ -19,6 +20,10 @@ Wizard::UnshieldWorker::UnshieldWorker(QObject *parent) :
     mIniSettings()
 {
     unshield_set_log_level(0);
+
+    mMorrowindPath = QString();
+    mTribunalPath = QString();
+    mBloodmoonPath = QString();
 
     mPath = QString();
     mIniPath = QString();
@@ -42,17 +47,99 @@ Wizard::UnshieldWorker::~UnshieldWorker()
 
 void Wizard::UnshieldWorker::setInstallMorrowind(bool install)
 {
+//    QMutexLocker locker(&mMutex);
     mInstallMorrowind = install;
 }
 
 void Wizard::UnshieldWorker::setInstallTribunal(bool install)
 {
+//    QMutexLocker locker(&mMutex);
     mInstallTribunal = install;
 }
 
 void Wizard::UnshieldWorker::setInstallBloodmoon(bool install)
 {
+//    QMutexLocker locker(&mMutex);
     mInstallBloodmoon = install;
+}
+
+bool Wizard::UnshieldWorker::getInstallMorrowind()
+{
+//    QMutexLocker locker(&mMutex);
+    return mInstallMorrowind;
+}
+
+bool Wizard::UnshieldWorker::getInstallTribunal()
+{
+//    QMutexLocker locker(&mMutex);
+    return mInstallTribunal;
+}
+
+bool Wizard::UnshieldWorker::getInstallBloodmoon()
+{
+//    QMutexLocker locker(&mMutex);
+    return mInstallBloodmoon;
+}
+
+//bool Wizard::UnshieldWorker::getMorrowindDone()
+//{
+//    QMutexLocker locker(&mMutex);
+//    return mMorrowindDone;
+//}
+
+//bool Wizard::UnshieldWorker::tribunalDone()
+//{
+//    QMutexLocker locker(&mMutex);
+//    return mTribunalDone;
+//}
+
+//bool Wizard::UnshieldWorker::bloodmoonDone()
+//{
+//    return mBloodmoonDone;
+//}
+
+void Wizard::UnshieldWorker::setMorrowindPath(const QString &path)
+{
+    qDebug() << "setmorrowindpath!";
+    QMutexLocker locker(&mMutex);
+    mMorrowindPath = path;
+    mWait.wakeAll();
+}
+
+void Wizard::UnshieldWorker::setTribunalPath(const QString &path)
+{
+    //QMutexLocker locker(&mMutex);
+    mTribunalPath = path;
+    mWait.wakeAll();
+
+}
+
+void Wizard::UnshieldWorker::setBloodmoonPath(const QString &path)
+{
+    //QMutexLocker locker(&mMutex);
+    mBloodmoonPath = path;
+    mWait.wakeAll();
+
+}
+
+QString Wizard::UnshieldWorker::getMorrowindPath()
+{
+    qDebug() << "getmorrowindpath!";
+    //QMutexLocker locker(&mMutex);
+    //mWait.wakeAll();
+    return mMorrowindPath;
+}
+
+QString Wizard::UnshieldWorker::getTribunalPath()
+{
+    //QMutexLocker locker(&mMutex);
+    return mTribunalPath;
+}
+
+QString Wizard::UnshieldWorker::getBloodmoonPath()
+{
+    //QMutexLocker locker(&mMutex);
+    return mBloodmoonPath;
 }
 
 void Wizard::UnshieldWorker::setPath(const QString &path)
@@ -224,158 +311,146 @@ void Wizard::UnshieldWorker::installDirectories(const QString &source)
             copyDirectory(info.absoluteFilePath(), mPath + QDir::separator() + info.fileName());
         }
     }
+
+    // Copy the Data Files dir too, but only the subdirectories
+    QFileInfo info(dir.absoluteFilePath("Data Files"));
+    if (info.exists()) {
+        emit textChanged(tr("Extracting: Data Files directory"));
+        copyDirectory(info.absoluteFilePath(), mPath);
+    }
+
 }
+
 
 void Wizard::UnshieldWorker::extract()
 {
-    emit textChanged(QLatin1String("Starting installation"));
-    emit textChanged(QLatin1String("Installation target: ") + mPath);
+    qDebug() << "extract!";
 
-    QString diskPath("/mnt/cdrom/");
-    QDir disk(diskPath);
+    QMutexLocker locker(&mMutex);
 
-    // Create temporary extract directory
-    // TODO: Use QTemporaryDir in Qt 5.0
-    QString tempPath(mPath + QDir::separator() + QLatin1String("extract-temp"));
-    QDir temp;
+    QDir disk;
 
-    // Make sure the temporary folder is empty
-    removeDirectory(tempPath);
+    qDebug() << "hi!";
 
-    if (!temp.mkpath(tempPath)) {
-        qDebug() << "Can't make path";
-        return;
-    }
-
-    temp.setPath(tempPath);
-    disk.setPath(diskPath);
-
-    if (mInstallMorrowind)
+    if (getInstallMorrowind())
     {
-        emit textChanged(QLatin1String("Installing Morrowind\n"));
+        while (!mMorrowindDone)
+        {
+            if (getMorrowindPath().isEmpty()) {
+                qDebug() << "request file dialog";
+                emit requestFileDialog(QLatin1String("Morrowind"));
+                mWait.wait(&mMutex);
+            }
 
-        if (!temp.mkdir(QLatin1String("morrowind"))) {
-            qDebug() << "Can't make dir";
-            return;
+            if (!mMorrowindDone && !getMorrowindPath().isEmpty()) {
+                disk.setPath(getMorrowindPath());
+
+                if (!findFile(disk.absoluteFilePath(QLatin1String("data1.hdr")), QLatin1String("Morrowind.bsa"))) {
+                    qDebug() << "found";
+                    emit requestFileDialog(QLatin1String("Morrowind"));
+                    mWait.wait(&mMutex);
+
+                } else {
+                    qDebug() << "install morrowind!";
+
+                    if (installMorrowind()) {
+                        mMorrowindDone = true;
+                    } else {
+                        qDebug() << "Erorr installing Morrowind";
+                        return;
+                    }
+                }
+            }
         }
-
-        if (!temp.cd(QLatin1String("morrowind"))) {
-            qDebug() << "Can't cd to dir";
-            return;
-        }
-
-        if (!disk.exists(QLatin1String("data1.hdr"))) {
-            qDebug() << "No data found!";
-            return;
-        }
-
-        // Extract the installation files
-        extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath());
-
-        // TODO: Throw error;
-        // Move the files from the temporary path to the destination folder
-
-        //qDebug() << "rename: " << morrowindTempPath << " to: " << mPath;
-        if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), mPath))
-            qDebug() << "failed!";
-
-        // Install files outside of cab archives
-        qDebug() << temp.absolutePath() << disk.absolutePath();
-        installDirectories(disk.absolutePath());
-
-        // Copy Morrowind configuration file
-        QString iniPath(temp.absoluteFilePath(QLatin1String("App Executables")));
-        iniPath.append(QDir::separator() + QLatin1String("Morrowind.ini"));
-
-        QFileInfo info(iniPath);
-
-        qDebug() << info.absoluteFilePath() << mPath;
-
-        if (info.exists()) {
-            emit textChanged(tr("Extracting: Morrowind.ini"));
-            moveFile(info.absoluteFilePath(), mPath + QDir::separator() + QLatin1String("Morrowind.ini"));
-        } else {
-            qDebug() << "Could not find ini file!";
-        }
-
-        mMorrowindDone = true;
-
     }
 
-    temp.setPath(tempPath);
-    disk.setPath(diskPath);
-
-    if (mInstallTribunal)
+    if (getInstallTribunal())
     {
-        emit textChanged(QLatin1String("Installing Tribunal\n"));
+        while (!mTribunalDone)
+        {
+            QDir tribunal(disk);
 
-        if (!temp.mkdir(QLatin1String("tribunal"))) {
-            qDebug() << "Can't make dir";
-            return;
+            if (!tribunal.cd(QLatin1String("Tribunal"))) {
+                qDebug() << "not found on cd!";
+                emit requestFileDialog(QLatin1String("Tribunal"));
+                mWait.wait(&mMutex);
+
+            } else if (tribunal.exists(QLatin1String("data1.hdr"))) {
+                qDebug() << "Exists! " << tribunal.absolutePath();
+                mTribunalPath = tribunal.absolutePath();
+            }
+
+            if (getTribunalPath().isEmpty()) {
+                qDebug() << "request file dialog";
+                emit requestFileDialog(QLatin1String("Tribunal"));
+                mWait.wait(&mMutex);
+            }
+
+            // Make sure the dir is up-to-date
+            tribunal.setPath(getTribunalPath());
+
+            if (!findFile(tribunal.absoluteFilePath(QLatin1String("data1.hdr")), QLatin1String("Tribunal.bsa"))) {
+                qDebug() << "file not found!";
+                emit requestFileDialog(QLatin1String("Tribunal"));
+                mWait.wait(&mMutex);
+
+            } else {
+                qDebug() << "install tribunal!";
+                if (installTribunal()) {
+                    mTribunalDone = true;
+                } else {
+                    qDebug() << "Erorr installing Tribunal";
+                    return;
+                }
+            }
         }
-
-        if (!temp.cd(QLatin1String("tribunal"))) {
-            qDebug() << "Can't cd to dir";
-            return;
-        }
-
-        if (!disk.cd(QLatin1String("Tribunal")))
-            qDebug() << "Show file selector";
-
-        if (!disk.exists(QLatin1String("data1.hdr"))) {
-            qDebug() << "No data found!";
-            return;
-        }
-
-        // Extract the installation files
-        extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath());
-
-        if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), mPath))
-            qDebug() << "failed!";
-
-        // Install files outside of cab archives
-        installDirectories(disk.absolutePath());
-
-        mTribunalDone = true;
     }
 
-    temp.setPath(tempPath);
-    disk.setPath(diskPath);
-
-    if (mInstallBloodmoon)
+    if (getInstallBloodmoon())
     {
-        emit textChanged(QLatin1String("Installing Bloodmoon\n"));
+        while (!mBloodmoonDone)
+        {
+            QDir bloodmoon(disk);
 
-        if (!temp.mkdir(QLatin1String("bloodmoon"))) {
-            qDebug() << "Can't make dir";
-            return;
+            qDebug() << "bloodmoon!: " << bloodmoon.absolutePath();
+
+            if (!bloodmoon.cd(QLatin1String("Bloodmoon"))) {
+                emit requestFileDialog(QLatin1String("Bloodmoon"));
+                mWait.wait(&mMutex);
+
+            } else if (bloodmoon.exists(QLatin1String("data1.hdr"))) {
+                mBloodmoonPath = bloodmoon.absolutePath();
+            }
+
+            if (getBloodmoonPath().isEmpty()) {
+                qDebug() << "request file dialog";
+                emit requestFileDialog(QLatin1String("Bloodmoon"));
+                mWait.wait(&mMutex);
+            }
+
+            // Make sure the dir is up-to-date
+            bloodmoon.setPath(getBloodmoonPath());
+
+            if (!findFile(bloodmoon.absoluteFilePath(QLatin1String("data1.hdr")), QLatin1String("Bloodmoon.bsa"))) {
+                emit requestFileDialog(QLatin1String("Bloodmoon"));
+                mWait.wait(&mMutex);
+
+            } else {
+                qDebug() << "install bloodmoon!";
+                if (installBloodmoon()) {
+                    mBloodmoonDone = true;
+                } else {
+                    qDebug() << "Erorr installing Bloodmoon";
+                    return;
+                }
+            }
         }
-
-        if (!temp.cd(QLatin1String("bloodmoon"))) {
-            qDebug() << "Can't cd to dir";
-            return;
-        }
-
-        if (!disk.cd(QLatin1String("Bloodmoon")))
-            qDebug() << "Show file selector";
-
-        if (!disk.exists(QLatin1String("data1.hdr"))) {
-            qDebug() << "No data found!";
-            return;
-        }
-
-        // Extract the installation files
-        extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath());
-
-        if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), mPath))
-            qDebug() << "failed!";
-
-        // Install files outside of cab archives
-        installDirectories(disk.absolutePath());
-
-        mBloodmoonDone = true;
     }
 
+    // Remove the temporary directory
+    removeDirectory(mPath + QDir::separator() + QLatin1String("extract-temp"));
+
+    locker.unlock();
 
     int total = 0;
 
@@ -392,7 +467,189 @@ void Wizard::UnshieldWorker::extract()
     emit progressChanged(total);
     emit finished();
 
+    qDebug() << "installation finished!";
 }
+
+bool Wizard::UnshieldWorker::installMorrowind()
+{
+    emit textChanged(QLatin1String("Installing Morrowind\n"));
+
+    QDir disk(getMorrowindPath());
+
+    if (!disk.exists())
+        return false;
+
+    // Create temporary extract directory
+    // TODO: Use QTemporaryDir in Qt 5.0
+    QString tempPath(mPath + QDir::separator() + QLatin1String("extract-temp"));
+    QDir temp;
+
+    // Make sure the temporary folder is empty
+    removeDirectory(tempPath);
+
+    if (!temp.mkpath(tempPath)) {
+        qDebug() << "Can't make path";
+        return false;
+    }
+
+    temp.setPath(tempPath);
+
+    QString cabFile(disk.absoluteFilePath(QLatin1String("data1.hdr")));
+
+    if (!temp.mkdir(QLatin1String("morrowind"))) {
+        qDebug() << "Can't make dir";
+        return false;
+    }
+
+    if (!temp.cd(QLatin1String("morrowind"))) {
+        qDebug() << "Can't cd to dir";
+        return false;
+    }
+
+    // Extract the installation files
+    extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath());
+
+    // TODO: Throw error;
+    // Move the files from the temporary path to the destination folder
+    if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), mPath)) {
+        qDebug() << "failed to move files!";
+        return false;
+    }
+
+    // Install files outside of cab archives
+    installDirectories(disk.absolutePath());
+
+    // Copy Morrowind configuration file
+    QString iniPath(temp.absoluteFilePath(QLatin1String("App Executables")));
+    iniPath.append(QDir::separator() + QLatin1String("Morrowind.ini"));
+
+    QFileInfo info(iniPath);
+
+    qDebug() << info.absoluteFilePath() << mPath;
+
+    if (info.exists()) {
+        emit textChanged(tr("Extracting: Morrowind.ini"));
+        moveFile(info.absoluteFilePath(), mPath + QDir::separator() + QLatin1String("Morrowind.ini"));
+    } else {
+        qDebug() << "Could not find ini file!";
+        return false;
+    }
+
+    return true;
+}
+
+bool Wizard::UnshieldWorker::installTribunal()
+{
+    emit textChanged(QLatin1String("Installing Tribunal"));
+
+    QDir disk(getTribunalPath());
+
+    if (!disk.exists()) {
+        qDebug() << "disk does not exist! " << disk.absolutePath() << getTribunalPath();
+        return false;
+    }
+
+    // Create temporary extract directory
+    // TODO: Use QTemporaryDir in Qt 5.0
+    QString tempPath(mPath + QDir::separator() + QLatin1String("extract-temp"));
+    QDir temp;
+
+    // Make sure the temporary folder is empty
+    removeDirectory(tempPath);
+
+    if (!temp.mkpath(tempPath)) {
+        qDebug() << "Can't make path";
+        return false;
+    }
+
+    temp.setPath(tempPath);
+
+    if (!temp.mkdir(QLatin1String("tribunal"))) {
+        qDebug() << "Can't make dir";
+        return false;
+    }
+
+    if (!temp.cd(QLatin1String("tribunal"))) {
+        qDebug() << "Can't cd to dir";
+        return false;
+    }
+
+    // Extract the installation files
+    extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath());
+
+    // TODO: Throw error;
+    // Move the files from the temporary path to the destination folder
+    if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), mPath)) {
+        qDebug() << "failed to move files!";
+        return false;
+    }
+
+    // Install files outside of cab archives
+    installDirectories(disk.absolutePath());
+
+    return true;
+}
+
+bool Wizard::UnshieldWorker::installBloodmoon()
+{
+    emit textChanged(QLatin1String("Installing Bloodmoon"));
+
+    QDir disk(getBloodmoonPath());
+
+    if (!disk.exists()) {
+        qDebug() << "disk does not exist! " << disk.absolutePath() << getTribunalPath();
+        return false;
+    }
+
+    // Create temporary extract directory
+    // TODO: Use QTemporaryDir in Qt 5.0
+    QString tempPath(mPath + QDir::separator() + QLatin1String("extract-temp"));
+    QDir temp;
+
+    // Make sure the temporary folder is empty
+    removeDirectory(tempPath);
+
+    if (!temp.mkpath(tempPath)) {
+        qDebug() << "Can't make path";
+        return false;
+    }
+
+    temp.setPath(tempPath);
+
+    if (!temp.mkdir(QLatin1String("bloodmoon"))) {
+        qDebug() << "Can't make dir";
+        return false;
+    }
+
+    if (!temp.cd(QLatin1String("bloodmoon"))) {
+        qDebug() << "Can't cd to dir";
+        return false;
+    }
+
+    // Extract the installation files
+    extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath());
+
+    // TODO: Throw error;
+    // Move the files from the temporary path to the destination folder
+    if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), mPath)) {
+        qDebug() << "failed to move files!";
+        return false;
+    }
+
+    // Install files outside of cab archives
+    installDirectories(disk.absolutePath());
+
+    QFileInfo patch(temp.absoluteFilePath(QLatin1String("Tribunal Patch") + QDir::separator() + QLatin1String("Tribunal.esm")));
+    QFileInfo original(mPath + QDir::separator() + QLatin1String("Tribunal.esm"));
+
+    if (original.exists() && patch.exists()) {
+        emit textChanged(tr("Extracting: Tribunal patch"));
+        copyFile(patch.absoluteFilePath(), original.absoluteFilePath());
+    }
+
+    return true;
+}
+
 
 bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter)
 {
@@ -444,10 +701,45 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outp
     return success;
 }
 
+bool Wizard::UnshieldWorker::findFile(const QString &cabFile, const QString &fileName)
+{
+    Unshield *unshield;
+    unshield = unshield_open(cabFile.toLatin1().constData());
+
+    // TODO: Proper error
+    if (!unshield) {
+        emit error(tr("Failed to open %1").arg(cabFile));
+        return false;
+    }
+
+    for (int i=0; i<unshield_file_group_count(unshield); ++i)
+    {
+        UnshieldFileGroup *group = unshield_file_group_get(unshield, i);
+
+        for (size_t j=group->first_file; j<=group->last_file; ++j)
+        {
+            QString current(QString::fromLatin1(unshield_file_name(unshield, j)));
+
+            qDebug() << "File is: " << unshield_file_name(unshield, j);
+            if (current == fileName)
+                return true; // File is found!
+        }
+    }
+
+    unshield_close(unshield);
+    return false;
+}
+
 void Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &outputDir)
 {
     Unshield *unshield;
     unshield = unshield_open(cabFile.toLatin1().constData());
+
+    // TODO: Proper error
+    if (!unshield) {
+        emit error(tr("Failed to open %1").arg(cabFile));
+        return;
+    }
 
     int counter = 0;
 

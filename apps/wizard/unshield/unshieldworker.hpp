@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 
 #include <libunshield.h>
 
@@ -22,12 +24,32 @@ namespace Wizard
         void setInstallTribunal(bool install);
         void setInstallBloodmoon(bool install);
 
+        bool getInstallMorrowind();
+        bool getInstallTribunal();
+        bool getInstallBloodmoon();
+
+        void setMorrowindPath(const QString &path);
+        void setTribunalPath(const QString &path);
+        void setBloodmoonPath(const QString &path);
+
+        QString getMorrowindPath();
+        QString getTribunalPath();
+        QString getBloodmoonPath();
+
         void setPath(const QString &path);
         void setIniPath(const QString &path);
 
         void setIniCodec(QTextCodec *codec);
 
     private:
+
+//        void setMorrowindDone(bool done);
+//        void setTribunalDone(bool done);
+//        void setBloodmoonDone(bool done);
+
+//        bool getMorrowindDone();
+//        bool getTribunalDone();
+//        bool getBloodmoonDone();
 
         bool removeDirectory(const QString &dirName);
 
@@ -41,9 +63,13 @@ namespace Wizard
 
         void extractCab(const QString &cabFile, const QString &outputDir);
         bool extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter);
+        bool findFile(const QString &cabFile, const QString &fileName);
 
         void installDirectories(const QString &source);
 
+        bool installMorrowind();
+        bool installTribunal();
+        bool installBloodmoon();
 
         bool mInstallMorrowind;
         bool mInstallTribunal;
@@ -53,6 +79,10 @@ namespace Wizard
         bool mTribunalDone;
         bool mBloodmoonDone;
 
+        QString mMorrowindPath;
+        QString mTribunalPath;
+        QString mBloodmoonPath;
+
         QString mPath;
         QString mIniPath;
 
@@ -60,12 +90,16 @@ namespace Wizard
 
         QTextCodec *mIniCodec;
 
+        QWaitCondition mWait;
+        QMutex mMutex;
 
     public slots:
         void extract();
 
     signals:
         void finished();
+        void requestFileDialog(const QString &component);
+
         void textChanged(const QString &text);
         void logTextChanged(const QString &text);
 

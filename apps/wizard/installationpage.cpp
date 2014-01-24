@@ -2,6 +2,8 @@
 
 #include <QDebug>
 #include <QTextCodec>
+#include <QFileInfo>
+#include <QFileDialog>
 
 #include "mainwizard.hpp"
 #include "inisettings.hpp"
@@ -53,82 +55,161 @@ void Wizard::InstallationPage::startInstallation()
     QStringList components(field("installation.components").toStringList());
     QString path(field("installation.path").toString());
 
-    QThread* thread = new QThread();
-    UnshieldWorker* unshield = new UnshieldWorker();
+    QThread *thread = new QThread();
+    mUnshield = new UnshieldWorker();
 
-    unshield->moveToThread(thread);
+    mUnshield->moveToThread(thread);
 
     connect(thread, SIGNAL(started()),
-            unshield, SLOT(extract()));
+            mUnshield, SLOT(extract()));
 
-    connect(unshield, SIGNAL(finished()),
+    connect(mUnshield, SIGNAL(finished()),
             thread, SLOT(quit()));
 
-    connect(unshield, SIGNAL(finished()),
-            unshield, SLOT(deleteLater()));
+    connect(mUnshield, SIGNAL(finished()),
+            mUnshield, SLOT(deleteLater()));
 
-    connect(unshield, SIGNAL(finished()),
+    connect(mUnshield, SIGNAL(finished()),
             thread, SLOT(deleteLater()));
 
-    connect(unshield, SIGNAL(finished()),
+    connect(mUnshield, SIGNAL(finished()),
             this, SLOT(installationFinished()));
 
-    connect(unshield, SIGNAL(error(QString)),
+    connect(mUnshield, SIGNAL(error(QString)),
             this, SLOT(installationError(QString)));
 
-    connect(unshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield, SIGNAL(textChanged(QString)),
             installProgressLabel, SLOT(setText(QString)));
 
-    connect(unshield, SIGNAL(textChanged(QString)),
+    connect(mUnshield, SIGNAL(textChanged(QString)),
             logTextEdit, SLOT(append(QString)));
 
-    connect(unshield, SIGNAL(progressChanged(int)),
+    connect(mUnshield, SIGNAL(progressChanged(int)),
             installProgressBar, SLOT(setValue(int)));
+
+    connect(mUnshield, SIGNAL(requestFileDialog(QString)),
+            this, SLOT(showFileDialog(QString)));
 
     if (field("installation.new").toBool() == true)
     {
         // Always install Morrowind
-        unshield->setInstallMorrowind(true);
+        mUnshield->setInstallMorrowind(true);
 
         if (components.contains(QLatin1String("Tribunal")))
-            unshield->setInstallTribunal(true);
+            mUnshield->setInstallTribunal(true);
 
         if (components.contains(QLatin1String("Bloodmoon")))
-            unshield->setInstallBloodmoon(true);
+            mUnshield->setInstallBloodmoon(true);
     } else {
         // Morrowind should already be installed
-        unshield->setInstallMorrowind(false);
+        mUnshield->setInstallMorrowind(false);
 
         if (components.contains(QLatin1String("Tribunal"))
                 && mWizard->mInstallations[path]->hasTribunal == false)
-            unshield->setInstallTribunal(true);
+            mUnshield->setInstallTribunal(true);
 
         if (components.contains(QLatin1String("Bloodmoon"))
                 && mWizard->mInstallations[path]->hasBloodmoon == false)
-            unshield->setInstallBloodmoon(true);
+            mUnshield->setInstallBloodmoon(true);
 
         // Set the location of the Morrowind.ini to update
-        unshield->setIniPath(mWizard->mInstallations[path]->iniPath);
+        mUnshield->setIniPath(mWizard->mInstallations[path]->iniPath);
     }
 
     // Set the installation target path
-    unshield->setPath(path);
+    mUnshield->setPath(path);
 
     // Set the right codec to use for Morrowind.ini
     QString language(field("installation.language").toString());
 
     if (language == QLatin1String("Polish")) {
-        unshield->setIniCodec(QTextCodec::codecForName("windows-1250"));
+        mUnshield->setIniCodec(QTextCodec::codecForName("windows-1250"));
     }
     else if (language == QLatin1String("Russian")) {
-        unshield->setIniCodec(QTextCodec::codecForName("windows-1251"));
+        mUnshield->setIniCodec(QTextCodec::codecForName("windows-1251"));
     }
     else {
-        unshield->setIniCodec(QTextCodec::codecForName("windows-1252"));
+        mUnshield->setIniCodec(QTextCodec::codecForName("windows-1252"));
     }
 
     thread->start();
+}
 
+
+
+//void Wizard::InstallationPage::installAddons()
+//{
+//    qDebug() << "component finished";
+
+//    QStringList components(field("installation.components").toStringList());
+
+//    if (components.contains(QLatin1String("Tribunal")) && !mUnshield->tribunalDone())
+//    {
+//        QString fileName = QFileDialog::getOpenFileName(
+//                    this,
+//                    tr("Select Tribunal installation file"),
+//                    QDir::rootPath(),
+//                    tr("InstallShield header files (*.hdr)"));
+
+//        if (fileName.isEmpty()) {
+//            qDebug() << "Cancel was clicked!";
+//            return;
+//        }
+
+//        QFileInfo info(fileName);
+//        mUnshield->installTribunal(info.absolutePath());
+//    }
+
+//    if (components.contains(QLatin1String("Bloodmoon")) && !mUnshield->bloodmoonDone())
+//    {
+//        QString fileName = QFileDialog::getOpenFileName(
+//                    this,
+//                    tr("Select Bloodmoon installation file"),
+//                    QDir::rootPath(),
+//                    tr("InstallShield header files (*.hdr)"));
+
+//        if (fileName.isEmpty()) {
+//            qDebug() << "Cancel was clicked!";
+//            return;
+//        }
+
+//        QFileInfo info(fileName);
+//        mUnshield->installBloodmoon(info.absolutePath());
+//    }
+//}
+
+void Wizard::InstallationPage::showFileDialog(const QString &component)
+{
+    QString fileName;
+
+    if (field("installation.new").toBool() == true)
+    {
+        fileName = QFileDialog::getOpenFileName(
+                    this,
+                    tr("Select %0 installation file").arg(component),
+                    QDir::rootPath(),
+                    tr("InstallShield header files (*.hdr)"));
+
+        if (fileName.isEmpty()) {
+            qDebug() << "Cancel was clicked!";
+            return;
+        }
+
+        QFileInfo info(fileName);
+
+        if (component == QLatin1String("Morrowind"))
+        {
+            mUnshield->setMorrowindPath(info.absolutePath());
+        }
+        else if (component == QLatin1String("Tribunal"))
+        {
+            mUnshield->setTribunalPath(info.absolutePath());
+        }
+        else if (component == QLatin1String("Bloodmoon"))
+        {
+            mUnshield->setBloodmoonPath(info.absolutePath());
+        }
+    }
 }
 
 void Wizard::InstallationPage::installationFinished()
