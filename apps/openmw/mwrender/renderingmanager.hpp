@@ -213,6 +213,7 @@ public:
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
     void frameStarted(float dt, bool paused);
+    void screenshot(Ogre::Image& image, int w, int h);
 
 protected:
     virtual void windowResized(int x, int y);

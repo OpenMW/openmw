@@ -289,6 +289,9 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 void
 RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
+    Ogre::Image im;
+    im.encode(".jpg");
+
     Ogre::SceneNode *child =
         mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 
@@ -966,6 +969,38 @@ Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
     return anim;
 }
 
+void RenderingManager::screenshot(Image &image, int w, int h)
+{
+    // Create a temporary render target. We do not use the RenderWindow since we want a specific size.
+    // Also, the GUI should not be visible (and it is only rendered on the RenderWindow's primary viewport)
+    const std::string tempName = "@temp";
+    Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(tempName,
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, w, h, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET);
+
+    float oldAspect = mRendering.getCamera()->getAspectRatio();
+
+    mRendering.getCamera()->setAspectRatio(w / static_cast<float>(h));
+
+    Ogre::RenderTarget* rt = texture->getBuffer()->getRenderTarget();
+    Ogre::Viewport* vp = rt->addViewport(mRendering.getCamera());
+    vp->setBackgroundColour(mRendering.getViewport()->getBackgroundColour());
+    vp->setOverlaysEnabled(false);
+    vp->setVisibilityMask(mRendering.getViewport()->getVisibilityMask());
+    rt->update();
+
+    Ogre::PixelFormat pf = rt->suggestPixelFormat();
+
+    std::vector<Ogre::uchar> data;
+    data.resize(w * h * Ogre::PixelUtil::getNumElemBytes(pf));
+
+    Ogre::PixelBox pb(w, h, 1, pf, &data[0]);
+    rt->copyContentsToMemory(pb);
+
+    image.loadDynamicImage(&data[0], w, h, pf);
+
+    Ogre::TextureManager::getSingleton().remove(tempName);
+    mRendering.getCamera()->setAspectRatio(oldAspect);
+}
 
 void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
 {

@@ -1810,6 +1810,11 @@ namespace MWWorld
         mRendering->frameStarted(dt, paused);
     }
 
+    void World::screenshot(Ogre::Image &image, int w, int h)
+    {
+        mRendering->screenshot(image, w, h);
+    }
+
     void World::activateDoor(const MWWorld::Ptr& door)
     {
         if (mDoorStates.find(door) != mDoorStates.end())

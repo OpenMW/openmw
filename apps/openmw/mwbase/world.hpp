@@ -412,6 +412,7 @@ namespace MWBase
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
             virtual void stopVideo() = 0;
             virtual void frameStarted (float dt, bool paused) = 0;
+            virtual void screenshot (Ogre::Image& image, int w, int h) = 0;
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise

@@ -1,6 +1,9 @@
 #include "savegamedialog.hpp"
 #include "widgets.hpp"
 
+#include <OgreImage.h>
+#include <OgreTextureManager.h>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>
@@ -166,6 +169,7 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE)
         {
             mInfoText->setCaption("");
+            mScreenshot->setImageTexture("");
             return;
         }
 
@@ -199,5 +203,29 @@ namespace MWGui
             <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mInfoText->setCaptionWithReplacing(text.str());
+
+        // Decode screenshot
+        std::vector<char> data = slot->mProfile.mScreenshot; // MemoryDataStream doesn't work with const data :(
+        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
+        Ogre::Image image;
+        image.load(stream, "jpg");
+
+        const std::string textureName = "@savegame_screenshot";
+        Ogre::TexturePtr texture;
+        texture = Ogre::TextureManager::getSingleton().getByName(textureName);
+        mScreenshot->setImageTexture("");
+        if (texture.isNull())
+        {
+            texture = Ogre::TextureManager::getSingleton().createManual(textureName,
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                Ogre::TEX_TYPE_2D,
+                image.getWidth(), image.getHeight(), 0, Ogre::PF_BYTE_RGBA, Ogre::TU_DYNAMIC_WRITE_ONLY);
+        }
+        texture->unload();
+        texture->setWidth(image.getWidth());
+        texture->setHeight(image.getHeight());
+        texture->loadImage(image);
+
+        mScreenshot->setImageTexture(textureName);
     }
 }

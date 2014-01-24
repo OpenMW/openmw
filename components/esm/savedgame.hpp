@@ -31,8 +31,7 @@ namespace ESM
         TimeStamp mInGameTime;
         double mTimePlayed;
         std::string mDescription;
-
-        /// \todo add field for screenshot
+        std::vector<char> mScreenshot; // raw jpg-encoded data
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

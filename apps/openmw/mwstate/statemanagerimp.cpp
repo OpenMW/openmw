@@ -8,6 +8,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <OgreImage.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -150,6 +152,13 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     profile.mInGameTime.mYear = world.getYear();
     profile.mTimePlayed = mTimePlayed;
     profile.mDescription = description;
+
+    int screenshotW = 259*2, screenshotH = 133*2; // *2 to get some nice antialiasing
+    Ogre::Image screenshot;
+    world.screenshot(screenshot, screenshotW, screenshotH);
+    Ogre::DataStreamPtr encoded = screenshot.encode("jpg");
+    profile.mScreenshot.resize(encoded->size());
+    encoded->read(&profile.mScreenshot[0], encoded->size());
 
     if (!slot)
         slot = mCharacterManager.getCurrentCharacter()->createSlot (profile);

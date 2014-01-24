@@ -19,6 +19,11 @@ void ESM::SavedGame::load (ESMReader &esm)
 
     while (esm.isNextSub ("DEPE"))
         mContentFiles.push_back (esm.getHString());
+
+    esm.getSubNameIs("SCRN");
+    esm.getSubHeader();
+    mScreenshot.resize(esm.getSubSize());
+    esm.getExact(&mScreenshot[0], mScreenshot.size());
 }
 
 void ESM::SavedGame::save (ESMWriter &esm) const
@@ -35,4 +40,7 @@ void ESM::SavedGame::save (ESMWriter &esm) const
          iter!=mContentFiles.end(); ++iter)
          esm.writeHNString ("DEPE", *iter);
 
+    esm.startSubRecord("SCRN");
+    esm.write(&mScreenshot[0], mScreenshot.size());
+    esm.endRecord("SCRN");
 }

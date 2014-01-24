@@ -504,6 +504,7 @@ namespace MWWorld
             virtual void playVideo(const std::string& name, bool allowSkipping);
             virtual void stopVideo();
             virtual void frameStarted (float dt, bool paused);
+            virtual void screenshot (Ogre::Image& image, int w, int h);
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise
