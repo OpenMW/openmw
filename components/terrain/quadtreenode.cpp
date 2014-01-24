@@ -433,6 +433,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
         LayerInfo info;
         info.mDiffuseMap = "textures\\_land_default.dds";
         info.mParallax = false;
+        info.mSpecular = false;
         layer.push_back(info);
         matGen.setLayerList(layer);
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
