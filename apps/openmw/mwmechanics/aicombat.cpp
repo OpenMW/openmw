@@ -97,7 +97,8 @@ namespace MWMechanics
 
             zAngle = Ogre::Radian( Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult)) ).valueDegrees();
             // TODO: use movement settings instead of rotating directly
-            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            //MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            MWWorld::Class::get(actor).getMovementSettings(actor).mRotation[2] = 10*(Ogre::Degree(zAngle).valueRadians()-pos.rot[2]);
 
             mPathFinder.clearPath();
 

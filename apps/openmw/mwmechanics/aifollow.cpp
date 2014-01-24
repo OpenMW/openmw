@@ -5,6 +5,8 @@
 #include "../mwworld/class.hpp"
 #include "movement.hpp"
 
+#include <OgreMath.h>
+
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
 : mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), mTimer(0), mStuckTimer(0)
 {
@@ -53,6 +55,15 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
     dest.mY = target.getRefData().getPosition().pos[1];
     dest.mZ = target.getRefData().getPosition().pos[2];
 
+    ESM::Pathgrid::Point start;
+    start.mX = pos.pos[0];
+    start.mY = pos.pos[1];
+    start.mZ = pos.pos[2];
+
+    if(mPathFinder.getPath().empty())
+        mPathFinder.buildPath(start, dest, actor.getCell(), true);
+
+
     if(mTimer > 0.25)
     {
         if(!mPathFinder.getPath().empty())
@@ -63,10 +74,8 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
                 +(dest.mY - lastPos.mY)*(dest.mY - lastPos.mY)
                 +(dest.mZ - lastPos.mZ)*(dest.mZ - lastPos.mZ)
             > 100*100)
-            mPathFinder.addPointToPath(dest);
+                mPathFinder.addPointToPath(dest);
         }
-        else
-            mPathFinder.addPointToPath(dest);
 
         mTimer = 0;
     }
@@ -75,27 +84,20 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
     {
         if((mStuckPos.pos[0] - pos.pos[0])*(mStuckPos.pos[0] - pos.pos[0])
             +(mStuckPos.pos[1] - pos.pos[1])*(mStuckPos.pos[1] - pos.pos[1])
-            +(mStuckPos.pos[2] - pos.pos[2])*(mStuckPos.pos[2] - pos.pos[2])
-            < 100) //NPC is stuck
-        {
-            ESM::Pathgrid::Point start;
-            start.mX = pos.pos[0];
-            start.mY = pos.pos[1];
-            start.mZ = pos.pos[2];
-
+            +(mStuckPos.pos[2] - pos.pos[2])*(mStuckPos.pos[2] - pos.pos[2]) < 100) //NPC is stuck
             mPathFinder.buildPath(start, dest, actor.getCell(), true);
-        }
+
         mStuckTimer = 0;
         mStuckPos = pos;
     }
 
-    if(mPathFinder.getPath().empty())
-        mPathFinder.addPointToPath(dest);
-
     if(!mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
     {
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+        //MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+        MWWorld::Class::get(actor).getMovementSettings(actor).mRotation[2] = 10*(Ogre::Degree(zAngle).valueRadians()-pos.rot[2]);
+        //std::cout << Ogre::Degree(zAngle).valueDegrees()-Ogre::Radian(actor.getRefData().getPosition().rot[2]).valueDegrees() << " "<< pos.rot[2] << " " << zAngle << "\n";
+        //MWWorld::Class::get(actor).get
     }
 
     if((dest.mX - pos.pos[0])*(dest.mX - pos.pos[0])+(dest.mY - pos.pos[1])*(dest.mY - pos.pos[1])+(dest.mZ - pos.pos[2])*(dest.mZ - pos.pos[2])
