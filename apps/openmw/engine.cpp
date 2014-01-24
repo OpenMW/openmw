@@ -509,6 +509,9 @@ void OMW::Engine::activate()
     if (ptr.isEmpty())
         return;
 
+    if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
+        return;
+
     MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 
     boost::shared_ptr<MWWorld::Action> action =
