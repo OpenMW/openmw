@@ -164,9 +164,9 @@ void CSVWorld::TableBottomBox::cloneRequest(const std::string& id,
                                             const CSMWorld::UniversalId::ArgumentType argumnetType)
 {
     mCreator->reset();
-    mCreator->toggleWidgets(false);
     mCreator->cloneMode(id, type, argumnetType);
     mLayout->setCurrentWidget(mCreator);
+    mCreator->toggleWidgets(false);
     setVisible (true);
     mCreating = true;
 }

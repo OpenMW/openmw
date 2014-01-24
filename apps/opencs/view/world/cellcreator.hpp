@@ -19,6 +19,7 @@ namespace CSVWorld
             QLabel *mYLabel;
             QSpinBox *mY;
 
+            bool mCloningExterior;
         protected:
 
             virtual std::string getId() const;
@@ -30,6 +31,10 @@ namespace CSVWorld
             virtual void reset();
             
             virtual void toggleWidgets(bool active = true);
+            
+            virtual void cloneMode(const std::string& originid, 
+                                   const CSMWorld::UniversalId::Type type, 
+                                   const CSMWorld::UniversalId::ArgumentType argumentType);
 
         private slots:
 
