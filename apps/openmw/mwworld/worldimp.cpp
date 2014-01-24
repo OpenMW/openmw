@@ -2199,6 +2199,7 @@ namespace MWWorld
         {
             if (!mWorldScene->isCellActive(*it->first.getCell()))
             {
+                deleteObject(it->first);
                 mProjectiles.erase(it++);
                 continue;
             }
