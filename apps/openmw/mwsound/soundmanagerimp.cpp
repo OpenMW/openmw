@@ -6,6 +6,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
@@ -607,8 +608,13 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return;
-        updateSounds(duration);
-        updateRegionSound(duration);
+
+        if (MWBase::Environment::get().getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
+        {
+            updateSounds(duration);
+            updateRegionSound(duration);
+        }
     }
 
 
@@ -704,5 +710,14 @@ namespace MWSound
     size_t bytesToFrames(size_t bytes, ChannelConfig config, SampleType type)
     {
         return bytes / framesToBytes(1, config, type);
+    }
+
+    void SoundManager::clear()
+    {
+        for (SoundMap::iterator iter (mActiveSounds.begin()); iter!=mActiveSounds.end(); ++iter)
+            iter->first->stop();
+
+        mActiveSounds.clear();
+        stopMusic();
     }
 }

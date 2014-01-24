@@ -37,6 +37,7 @@ namespace ESM
     struct Potion;
     struct Spell;
     struct NPC;
+    struct CellId;
 }
 
 namespace MWRender
@@ -105,11 +106,13 @@ namespace MWBase
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
 
             virtual OEngine::Render::Fader* getFader() = 0;
-            ///< \ŧodo remove this function. Rendering details should not be exposed.
+            ///< \todo remove this function. Rendering details should not be exposed.
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
+
+            virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
 
             virtual void useDeathCamera() = 0;
 
@@ -235,6 +238,8 @@ namespace MWBase
 
             virtual void changeToExteriorCell (const ESM::Position& position) = 0;
             ///< Move to exterior cell.
+
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position) = 0;
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.

@@ -30,6 +30,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp" // FIXME
 #include "../mwbase/windowmanager.hpp" // FIXME
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -329,6 +330,12 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
 
 void RenderingManager::update (float duration, bool paused)
 {
+    mVideoPlayer->update ();
+
+    if (MWBase::Environment::get().getStateManager()->getState()==
+        MWBase::StateManager::State_NoGame)
+        return;
+
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
     MWWorld::Ptr player = world->getPlayer().getPlayer();
@@ -364,8 +371,6 @@ void RenderingManager::update (float duration, bool paused)
 
 
     mOcclusionQuery->update(duration);
-
-    mVideoPlayer->update ();
 
     mRendering.update(duration);
 

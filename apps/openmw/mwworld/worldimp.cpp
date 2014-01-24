@@ -14,6 +14,7 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/esm/cellid.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -267,6 +268,7 @@ namespace MWWorld
     void World::clear()
     {
         mLocalScripts.clear();
+        mPlayer->clear();
 
         // enable collision
         if (!mPhysics->toggleCollisionMode())
@@ -274,14 +276,15 @@ namespace MWWorld
 
         mWorldScene->changeToVoid();
 
+        mStore.clearDynamic();
+        mStore.setUp();
+
         if (mPlayer)
         {
             mPlayer->setCell (0);
             mPlayer->getPlayer().getRefData() = RefData();
+            mPlayer->set (mStore.get<ESM::NPC>().find ("player"));
         }
-
-        mStore.clearDynamic();
-        mStore.setUp();
 
         mCells.clear();
 
@@ -301,19 +304,25 @@ namespace MWWorld
     {
         return
             mStore.countSavedGameRecords()
-            +mGlobalVariables.countSavedGameRecords();
+            +mGlobalVariables.countSavedGameRecords()
+            +1 // player record
+            +mCells.countSavedGameRecords();
     }
 
     void World::write (ESM::ESMWriter& writer) const
     {
         mStore.write (writer);
         mGlobalVariables.write (writer);
+        mCells.write (writer);
+        mPlayer->write (writer);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type)
     {
         if (!mStore.readRecord (reader, type) &&
-            !mGlobalVariables.readRecord (reader, type))
+            !mGlobalVariables.readRecord (reader, type) &&
+            !mPlayer->readRecord (reader, type) &&
+            !mCells.readRecord (reader, type))
         {
             throw std::runtime_error ("unknown record in saved game");
         }
@@ -399,6 +408,14 @@ namespace MWWorld
     CellStore *World::getInterior (const std::string& name)
     {
         return mCells.getInterior (name);
+    }
+
+    CellStore *World::getCell (const ESM::CellId& id)
+    {
+        if (id.mPaged)
+            return getExterior (id.mIndex.mX, id.mIndex.mY);
+        else
+            return getInterior (id.mWorldspace);
     }
 
     void World::useDeathCamera()
@@ -799,6 +816,14 @@ namespace MWWorld
         removeContainerScripts(getPlayer().getPlayer());
         mWorldScene->changeToExteriorCell(position);
         addContainerScripts(getPlayer().getPlayer(), getPlayer().getPlayer().getCell());
+    }
+
+    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position)
+    {
+        if (cellId.mPaged)
+            changeToExteriorCell (position);
+        else
+            changeToInteriorCell (cellId.mWorldspace, position);
     }
 
     void World::markCellAsUnchanged()
@@ -1314,7 +1339,7 @@ namespace MWWorld
 
         updateWindowManager ();
 
-        if (mPlayer->getPlayer().getCell()->isExterior())
+        if (!paused && mPlayer->getPlayer().getCell()->isExterior())
         {
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
             mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
