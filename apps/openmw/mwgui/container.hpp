@@ -75,6 +75,7 @@ namespace MWGui
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
         void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
+        void onKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
         /// @return is taking the item allowed?
         bool onTakeItem(const ItemStack& item, int count);

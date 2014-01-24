@@ -20,7 +20,7 @@ add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
     characterpreview globalmap videoplayer ripplesimulation refraction
-    terrainstorage renderconst
+    terrainstorage renderconst effectmanager
     )
 
 add_openmw_dir (mwinput
@@ -74,7 +74,7 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
     aiescort aiactivate aicombat repair enchanting pathfinding security spellsuccess spellcasting
-    disease pickpocket
+    disease pickpocket levelledlist
     )
 
 add_openmw_dir (mwbase

@@ -33,6 +33,9 @@ namespace MWClass
             static const ESM::GameSetting *fJumpAcroMultiplier;
             static const ESM::GameSetting *fJumpRunMultiplier;
             static const ESM::GameSetting *fWereWolfRunMult;
+            static const ESM::GameSetting *fKnockDownMult;
+            static const ESM::GameSetting *iKnockDownOddsMult;
+            static const ESM::GameSetting *iKnockDownOddsBase;
 
         public:
 
@@ -80,16 +83,6 @@ namespace MWClass
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
-
-            virtual void setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const;
-            ///< Force or unforce a stance.
-
-            virtual void setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const;
-            ///< Set or unset a stance.
-
-            virtual bool getStance (const MWWorld::Ptr& ptr, Stance stance, bool ignoreForce = false)
-                const;
-            ///< Check if a stance is active or not.
 
             virtual float getSpeed (const MWWorld::Ptr& ptr) const;
             ///< Return movement speed.
@@ -146,6 +139,11 @@ namespace MWClass
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
+
+            /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
+            virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
 
             virtual bool isActor() const {
                 return true;

@@ -403,7 +403,7 @@ void OpenAL_SoundStream::update()
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
-    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();

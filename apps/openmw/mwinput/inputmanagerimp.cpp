@@ -195,14 +195,7 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
 
-                if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-                {
-                    if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Container)
-                        toggleContainer ();
-                    else
-                        MWBase::Environment::get().getWindowManager()->activateKeyPressed();
-                }
-                else
+                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
                     activate();
                 break;
             case A_Journal:
@@ -511,13 +504,6 @@ namespace MWInput
 
         mInputBinder->keyPressed (arg);
 
-        if((arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER)
-            && MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
-            MWBase::Environment::get().getWindowManager()->enterPressed();
-        }
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
         if (kc != OIS::KC_UNASSIGNED)
@@ -728,21 +714,6 @@ namespace MWInput
         }
 
         // .. but don't touch any other mode, except container.
-    }
-
-    void InputManager::toggleContainer()
-    {
-        if (MyGUI::InputManager::getInstance ().isModalAny())
-            return;
-
-        if(MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Container)
-                MWBase::Environment::get().getWindowManager()->popGuiMode();
-            else
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container);
-        }
-
     }
 
     void InputManager::toggleConsole()

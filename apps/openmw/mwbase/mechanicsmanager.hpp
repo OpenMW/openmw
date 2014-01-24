@@ -77,8 +77,12 @@ namespace MWBase
             virtual void setPlayerClass (const ESM::Class& class_) = 0;
             ///< Set player class to custom class.
 
-            virtual void restoreDynamicStats() = 0;
-            ///< If the player is sleeping, this should be called every hour.
+            virtual void rest(bool sleep) = 0;
+            ///< If the player is sleeping or waiting, this should be called every hour.
+            /// @param sleep is the player sleeping or waiting?
+
+            virtual int getHoursToRest() const = 0;
+            ///< Calculate how many hours the player needs to rest in order to be fully healed
 
             virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying) = 0;
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
@@ -113,6 +117,8 @@ namespace MWBase
                                       OffenseType type, int arg=0) = 0;
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count) = 0;
+            /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
+            virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) = 0;
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it?
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) = 0;

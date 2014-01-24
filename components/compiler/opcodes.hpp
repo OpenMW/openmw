@@ -53,6 +53,12 @@ namespace Compiler
         const int opcodeGetLineOfSightExplicit = 0x2000223;
         const int opcodeToggleAI = 0x2000224;
         const int opcodeToggleAIExplicit = 0x2000225;
+        const int opcodeGetTarget = 0x2000238;
+        const int opcodeGetTargetExplicit = 0x2000239;
+        const int opcodeStartCombat = 0x200023a;
+        const int opcodeStartCombatExplicit = 0x200023b;
+        const int opcodeStopCombat = 0x200023c;
+        const int opcodeStopCombatExplicit = 0x200023d;
     }
 
     namespace Animation
@@ -410,7 +416,7 @@ namespace Compiler
 
         const int opcodePlaceItemCell = 0x200019a;
         const int opcodePlaceItem = 0x200019b;
-        const int opcodePlaceAtPc = 0x200019c;  
+        const int opcodePlaceAtPc = 0x200019c;
         const int opcodePlaceAtMe = 0x200019d;
         const int opcodePlaceAtMeExplicit = 0x200019e;
         const int opcodeModScale = 0x20001e3;

@@ -41,6 +41,7 @@
 #include "globalmap.hpp"
 #include "videoplayer.hpp"
 #include "terrainstorage.hpp"
+#include "effectmanager.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -57,9 +58,11 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     , mSunEnabled(0)
     , mPhysicsEngine(engine)
     , mTerrain(NULL)
+    , mEffectManager(NULL)
 {
     mActors = new MWRender::Actors(mRendering, this);
     mObjects = new MWRender::Objects(mRendering);
+    mEffectManager = new EffectManager(mRendering.getScene());
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
     bool glES = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL ES") != std::string::npos);
@@ -193,6 +196,7 @@ RenderingManager::~RenderingManager ()
     delete mVideoPlayer;
     delete mActors;
     delete mObjects;
+    delete mEffectManager;
     delete mFactory;
 }
 
@@ -347,12 +351,14 @@ void RenderingManager::update (float duration, bool paused)
     }
 
     // Sink the camera while sneaking
-    bool isSneaking = MWWorld::Class::get(player).getStance(player, MWWorld::Class::Sneak);
+    bool isSneaking = player.getClass().getCreatureStats(player).getStance(MWMechanics::CreatureStats::Stance_Sneak);
     bool isInAir = !world->isOnGround(player);
     bool isSwimming = world->isSwimming(player);
 
+    static const int i1stPersonSneakDelta = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+            .find("i1stPersonSneakDelta")->getInt();
     if(isSneaking && !(isSwimming || isInAir))
-        mCamera->setSneakOffset();
+        mCamera->setSneakOffset(i1stPersonSneakDelta);
 
 
     mOcclusionQuery->update(duration);
@@ -371,6 +377,8 @@ void RenderingManager::update (float duration, bool paused)
 
     if(paused)
         return;
+
+    mEffectManager->update(duration);
 
     mActors->update (mRendering.getCamera());
     mPlayerAnimation->preRender(mRendering.getCamera());
@@ -673,14 +681,14 @@ Shadows* RenderingManager::getShadows()
 
 void RenderingManager::switchToInterior()
 {
-    // causes light flicker in opengl when moving..
-    //mRendering.getScene()->setCameraRelativeRendering(false);
+    // TODO: also do this when switching worldspace
+    mEffectManager->clear();
 }
 
 void RenderingManager::switchToExterior()
 {
-    // causes light flicker in opengl when moving..
-    //mRendering.getScene()->setCameraRelativeRendering(true);
+    // TODO: also do this when switching worldspace
+    mEffectManager->clear();
 }
 
 Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
@@ -1016,6 +1024,11 @@ void RenderingManager::enableTerrain(bool enable)
 float RenderingManager::getCameraDistance() const
 {
     return mCamera->getCameraDistance();
+}
+
+void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition)
+{
+    mEffectManager->addEffect(model, texture, worldPosition);
 }
 
 } // namespace

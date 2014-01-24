@@ -28,11 +28,7 @@ struct MagicEffect
         UncappedDamage = 0x1000, // Negates multiple cap behaviours. Allows an effect to reduce an attribute below zero; removes the normal minimum effect duration of 1 second.
         NonRecastable = 0x4000,	// Does not land if parent spell is already affecting target. Shows "you cannot re-cast" message for self target.
         Unreflectable = 0x10000, // Cannot be reflected, the effect always lands normally.
-        CasterLinked = 0x20000,	// Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
-        SpellMaking = 0x0200,
-        Enchanting = 0x0400,
-        Negative = 0x0800 // A harmful effect. Will determine whether
-                          // eg. NPCs regard this spell as an attack. (same as 0x10?)
+        CasterLinked = 0x20000	// Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
     };
     enum MagnitudeDisplayType
     {

@@ -16,11 +16,6 @@ MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &ce
 {
 }
 
-MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
-{
-    return new AiFollow(*this);
-}
-
 bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
@@ -117,4 +112,14 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 std::string MWMechanics::AiFollow::getFollowedActor()
 {
     return mActorId;
+}
+
+MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
+{
+    return new AiFollow(*this);
+}
+
+ int MWMechanics::AiFollow::getTypeId() const
+{
+    return TypeIdFollow;
 }

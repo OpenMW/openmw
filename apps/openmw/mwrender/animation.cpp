@@ -30,7 +30,7 @@
 namespace MWRender
 {
 
-Ogre::Real Animation::AnimationValue::getValue() const
+Ogre::Real Animation::AnimationTime::getValue() const
 {
     AnimStateMap::const_iterator iter = mAnimation->mStates.find(mAnimationName);
     if(iter != mAnimation->mStates.end())
@@ -38,16 +38,16 @@ Ogre::Real Animation::AnimationValue::getValue() const
     return 0.0f;
 }
 
-void Animation::AnimationValue::setValue(Ogre::Real)
+void Animation::AnimationTime::setValue(Ogre::Real)
 {
 }
 
-Ogre::Real Animation::EffectAnimationValue::getValue() const
+Ogre::Real Animation::EffectAnimationTime::getValue() const
 {
     return mTime;
 }
 
-void Animation::EffectAnimationValue::setValue(Ogre::Real)
+void Animation::EffectAnimationTime::setValue(Ogre::Real)
 {
 }
 
@@ -60,10 +60,10 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     , mNonAccumRoot(NULL)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
-    , mNullAnimationValuePtr(OGRE_NEW NullAnimationValue)
+    , mNullAnimationTimePtr(OGRE_NEW NullAnimationTime)
 {
     for(size_t i = 0;i < sNumGroups;i++)
-        mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
+        mAnimationTimePtr[i].bind(OGRE_NEW AnimationTime(this));
 }
 
 Animation::~Animation()
@@ -139,7 +139,7 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     for(size_t i = 0;i < mObjectRoot->mControllers.size();i++)
     {
         if(mObjectRoot->mControllers[i].getSource().isNull())
-            mObjectRoot->mControllers[i].setSource(mAnimationValuePtr[0]);
+            mObjectRoot->mControllers[i].setSource(mAnimationTimePtr[0]);
     }
 }
 
@@ -286,7 +286,7 @@ void Animation::addAnimSource(const std::string &model)
             }
         }
 
-        ctrls[i].setSource(mAnimationValuePtr[grp]);
+        ctrls[i].setSource(mAnimationTimePtr[grp]);
         grpctrls[grp].push_back(ctrls[i]);
     }
 }
@@ -296,7 +296,7 @@ void Animation::clearAnimSources()
     mStates.clear();
 
     for(size_t i = 0;i < sNumGroups;i++)
-        mAnimationValuePtr[i]->setAnimName(std::string());
+        mAnimationTimePtr[i]->setAnimName(std::string());
 
     mNonAccumCtrl = NULL;
 
@@ -660,13 +660,22 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     else if(evt.compare(off, len, "unequip detach") == 0)
         showWeapons(false);
     else if(evt.compare(off, len, "chop hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
     else if(evt.compare(off, len, "slash hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
     else if(evt.compare(off, len, "thrust hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr);
+    {
+        if (groupname == "attack1")
+            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+        else if (groupname == "attack2")
+            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+        else if (groupname == "attack3")
+            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+        else
+            mPtr.getClass().hit(mPtr);
+    }
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
@@ -789,7 +798,7 @@ void Animation::resetActiveGroups()
                 active = state;
         }
 
-        mAnimationValuePtr[grp]->setAnimName((active == mStates.end()) ?
+        mAnimationTimePtr[grp]->setAnimName((active == mStates.end()) ?
                                              std::string() : active->first);
     }
     mNonAccumCtrl = NULL;
@@ -797,7 +806,7 @@ void Animation::resetActiveGroups()
     if(!mNonAccumRoot || mAccumulate == Ogre::Vector3(0.0f))
         return;
 
-    AnimStateMap::const_iterator state = mStates.find(mAnimationValuePtr[0]->getAnimName());
+    AnimStateMap::const_iterator state = mStates.find(mAnimationTimePtr[0]->getAnimName());
     if(state == mStates.end())
         return;
 
@@ -869,13 +878,13 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             targetTime = state.mTime + timepassed;
             if(textkey == textkeys.end() || textkey->first > targetTime)
             {
-                if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
+                if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
                     updatePosition(state.mTime, targetTime, movement);
                 state.mTime = std::min(targetTime, state.mStopTime);
             }
             else
             {
-                if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
+                if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
                     updatePosition(state.mTime, textkey->first, movement);
                 state.mTime = textkey->first;
             }
@@ -926,7 +935,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     // Apply group controllers
     for(size_t grp = 0;grp < sNumGroups;grp++)
     {
-        const std::string &name = mAnimationValuePtr[grp]->getAnimName();
+        const std::string &name = mAnimationTimePtr[grp]->getAnimName();
         if(!name.empty() && (stateiter=mStates.find(name)) != mStates.end())
         {
             const Ogre::SharedPtr<AnimSource> &src = stateiter->second.mSource;
@@ -1042,6 +1051,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
     else
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
 
+    // TODO: turn off shadow casting
     setRenderProperties(params.mObjects, RV_Misc,
                         RQG_Main, RQG_Alpha, 0.f, false, NULL);
 
@@ -1052,7 +1062,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
     for(size_t i = 0;i < params.mObjects->mControllers.size();i++)
     {
         if(params.mObjects->mControllers[i].getSource().isNull())
-            params.mObjects->mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationValue> (new EffectAnimationValue()));
+            params.mObjects->mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationTime> (new EffectAnimationTime()));
     }
 
     if (!texture.empty())
@@ -1110,7 +1120,7 @@ void Animation::updateEffects(float duration)
         NifOgre::ObjectScenePtr objects = it->mObjects;
         for(size_t i = 0; i < objects->mControllers.size() ;i++)
         {
-            EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects->mControllers[i].getSource().get());
+            EffectAnimationTime* value = dynamic_cast<EffectAnimationTime*>(objects->mControllers[i].getSource().get());
             if (value)
                 value->addTime(duration);
 
@@ -1125,7 +1135,7 @@ void Animation::updateEffects(float duration)
                 float remainder = objects->mControllers[0].getSource()->getValue() - objects->mMaxControllerLength;
                 for(size_t i = 0; i < objects->mControllers.size() ;i++)
                 {
-                    EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects->mControllers[i].getSource().get());
+                    EffectAnimationTime* value = dynamic_cast<EffectAnimationTime*>(objects->mControllers[i].getSource().get());
                     if (value)
                         value->resetTime(remainder);
                 }

@@ -25,18 +25,6 @@ namespace MWMechanics
 
     class NpcStats : public CreatureStats
     {
-        public:
-
-            enum Flag
-            {
-                Flag_ForceRun = 1,
-                Flag_ForceSneak = 2,
-                Flag_Run = 4,
-                Flag_Sneak = 8
-            };
-
-        private:
-
             /// NPCs other than the player can only have one faction. But for the sake of consistency
             /// we use the same data structure for the PC and the NPCs.
             /// \note the faction key must be in lowercase
@@ -44,7 +32,6 @@ namespace MWMechanics
 
             DrawState_ mDrawState;
             int mDisposition;
-            unsigned int mMovementFlags;
             SkillValue mSkill[27];
             SkillValue mWerewolfSkill[27];
             int mBounty;
@@ -88,10 +75,6 @@ namespace MWMechanics
             int getReputation() const;
 
             void setReputation(int reputation);
-
-            bool getMovementFlag (Flag flag) const;
-
-            void setMovementFlag (Flag flag, bool state);
 
             const SkillValue& getSkill (int index) const;
             SkillValue& getSkill (int index);

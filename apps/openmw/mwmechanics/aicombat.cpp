@@ -7,6 +7,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
@@ -39,13 +40,13 @@ namespace MWMechanics
 
         if(MWWorld::Class::get(actor).getCreatureStats(actor).getHealth().getCurrent() <= 0) return true;
 
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+
         if(actor.getTypeName() == typeid(ESM::NPC).name())
         {
-            MWWorld::Class::get(actor).
-            MWWorld::Class::get(actor).setStance(actor, MWWorld::Class::Run,true);
-            MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
+            MWMechanics::DrawState_ state = actor.getClass().getNpcStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
+                actor.getClass().getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
             //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
         }
         ESM::Position pos = actor.getRefData().getPosition();
@@ -109,6 +110,17 @@ namespace MWMechanics
             }
             if( mTimer > 1)
             {
+                if (actor.getClass().isNpc())
+                {
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
+                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                    if (roll < chance)
+                    {
+                        MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
+                    }
+                }
+
                 MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
                 mTimer = 0;
             }
@@ -125,12 +137,17 @@ namespace MWMechanics
 
     int AiCombat::getTypeId() const
     {
-        return 5;
+        return TypeIdCombat;
     }
 
     unsigned int AiCombat::getPriority() const
     {
         return 1;
+    }
+
+    const std::string &AiCombat::getTargetId() const
+    {
+        return mTargetId;
     }
 
     AiCombat *MWMechanics::AiCombat::clone() const

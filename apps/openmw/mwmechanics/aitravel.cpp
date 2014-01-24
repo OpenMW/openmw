@@ -104,7 +104,7 @@ namespace MWMechanics
 
     int AiTravel::getTypeId() const
     {
-        return 1;
+        return TypeIdTravel;
     }
 }
 

@@ -545,7 +545,7 @@ namespace MWGui
             for (size_t i=0; i<mTopicsList->getItemCount(); ++i)
             {
                 std::string item = mTopicsList->getItemNameAt(i);
-                if (Misc::StringUtils::lowerCase(item) == title)
+                if (Misc::StringUtils::ciEqual(item, title))
                 {
                     realTitle = item;
                     break;

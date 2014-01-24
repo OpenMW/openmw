@@ -51,6 +51,9 @@ namespace MWGui
         int mManualHours; // stores the hours to rest selected via slider
         float mRemainingTime;
 
+        int mInterruptAt;
+        std::string mInterruptCreatureList;
+
         WaitDialogProgressBar mProgressBar;
 
         void onUntilHealedButtonClicked(MyGUI::Widget* sender);

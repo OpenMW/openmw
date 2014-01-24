@@ -1,9 +1,5 @@
-#include <boost/algorithm/string.hpp>
-
-#include <OgreMath.h>
 #include <OgreSceneNode.h>
 
-#include "../mwworld/esmstore.hpp"
 #include <components/esm/loadcell.hpp>
 
 #include <components/compiler/extensions.hpp>
@@ -18,6 +14,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"

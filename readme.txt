@@ -23,8 +23,8 @@ Ubuntu (and most others)
 Download the .deb file and install it in the usual way.
 
 Arch Linux
-There's an OpenMW package available in the AUR Repository:
-http://aur.archlinux.org/packages.php?ID=21419
+There's an OpenMW package available in the [community] Repository:
+https://www.archlinux.org/packages/?sort=&q=openmw
 
 OS X:
 Open DMG file, copy OpenMW folder anywhere, for example in /Applications

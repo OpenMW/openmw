@@ -13,8 +13,8 @@ void printAIPackage(ESM::AIPackage p)
         std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
         std::cout << "    Duration: " << p.mWander.mDuration << std::endl;
         std::cout << "    Time of Day: " << (int)p.mWander.mTimeOfDay << std::endl;
-        if (p.mWander.mUnk != 1)
-            std::cout <<  "    Unknown: " << (int)p.mWander.mUnk << std::endl;
+        if (p.mWander.mShouldRepeat != 1)
+            std::cout <<  "    Should repeat: " << (bool)p.mWander.mShouldRepeat << std::endl;
 
         std::cout << "    Idle: ";
         for (int i = 0; i != 8; i++)
@@ -834,7 +834,7 @@ template<>
 void Record<ESM::CreatureLevList>::print()
 {
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
-    std::cout << "  Flags: " << leveledListFlags(mData.mFlags) << std::endl;
+    std::cout << "  Flags: " << creatureListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
     std::vector<ESM::LeveledListBase::LevelItem>::iterator iit;
     for (iit = mData.mList.begin(); iit != mData.mList.end(); iit++)
@@ -846,11 +846,11 @@ template<>
 void Record<ESM::ItemLevList>::print()
 {
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
-    std::cout << "  Flags: " << leveledListFlags(mData.mFlags) << std::endl;
+    std::cout << "  Flags: " << itemListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
     std::vector<ESM::LeveledListBase::LevelItem>::iterator iit;
     for (iit = mData.mList.begin(); iit != mData.mList.end(); iit++)
-        std::cout << "  Inventory: Count: " << iit->mLevel
+        std::cout << "  Inventory: Level: " << iit->mLevel
                   << " Item: " << iit->mId << std::endl;
 }
 
@@ -958,7 +958,7 @@ void Record<ESM::MagicEffect>::print()
     std::cout << "  RGB Color: " << "("
               << mData.mData.mRed << ","
               << mData.mData.mGreen << ","
-              << mData.mData.mGreen << ")" << std::endl;
+              << mData.mData.mBlue << ")" << std::endl;
 }
 
 template<>
