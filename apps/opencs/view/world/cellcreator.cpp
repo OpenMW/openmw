@@ -22,7 +22,7 @@ std::string CSVWorld::CellCreator::getId() const
 
 CSVWorld::CellCreator::CellCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id)
-: GenericCreator (data, undoStack, id), mCloningExterior(false)
+: GenericCreator (data, undoStack, id)
 {
     mY = new QSpinBox (this);
     mY->setVisible (false);
@@ -61,6 +61,7 @@ void CSVWorld::CellCreator::reset()
     mX->setValue (0);
     mY->setValue (0);
     mType->setCurrentIndex (0);
+    setType(0);
     GenericCreator::reset();
 }
 
@@ -80,14 +81,18 @@ void CSVWorld::CellCreator::valueChanged (int index)
     update();
 }
 
-void CSVWorld::CellCreator::cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type, const CSMWorld::UniversalId::ArgumentType argumentType)
+void CSVWorld::CellCreator::cloneMode(const std::string& originid, 
+                                      const CSMWorld::UniversalId::Type type,
+                                      const CSMWorld::UniversalId::ArgumentType argumentType)
 {
     CSVWorld::GenericCreator::cloneMode(originid, type, argumentType);
     if (*(originid.begin()) == '#') //if originid points to the exterior cell
     {
         setType(1); //enable x and y controls
+        mType->setCurrentIndex(1);
     } else {
         setType(0);
+        mType->setCurrentIndex(0);
     }
 }
 

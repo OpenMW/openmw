@@ -19,7 +19,6 @@ namespace CSVWorld
             QLabel *mYLabel;
             QSpinBox *mY;
 
-            bool mCloningExterior;
         protected:
 
             virtual std::string getId() const;
