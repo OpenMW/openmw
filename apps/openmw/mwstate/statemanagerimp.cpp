@@ -111,23 +111,6 @@ void MWState::StateManager::askLoadRecent()
             mAskLoadRecent = true;
         }
     }
-    else
-    {
-        int iButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
-        if(iButton==0)
-        {
-            mAskLoadRecent = false;
-            //Load last saved game for current character
-            MWState::Character *curCharacter = getCurrentCharacter();
-            MWState::Slot lastSave = *curCharacter->begin();
-            loadGame(curCharacter, &lastSave);
-        }
-        else if(iButton==1)
-        {
-            mAskLoadRecent = false;
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-        }
-    }
 }
 
 MWState::StateManager::State MWState::StateManager::getState() const
@@ -340,4 +323,23 @@ MWState::StateManager::CharacterIterator MWState::StateManager::characterEnd()
 void MWState::StateManager::update (float duration)
 {
     mTimePlayed += duration;
+
+    // Note: It would be nicer to trigger this from InputManager, i.e. the very beginning of the frame update.
+    if (mAskLoadRecent)
+    {
+        int iButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
+        if(iButton==0)
+        {
+            mAskLoadRecent = false;
+            //Load last saved game for current character
+            MWState::Character *curCharacter = getCurrentCharacter();
+            MWState::Slot lastSave = *curCharacter->begin();
+            loadGame(curCharacter, &lastSave);
+        }
+        else if(iButton==1)
+        {
+            mAskLoadRecent = false;
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        }
+    }
 }

@@ -91,6 +91,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
+        // update game state
+        MWBase::Environment::get().getStateManager()->update (frametime);
+
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
@@ -110,9 +113,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             if (!paused)
                 MWBase::Environment::get().getWorld()->advanceTime(
                     frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
-
-            // update game state
-            MWBase::Environment::get().getStateManager()->update (frametime);
         }
 
 

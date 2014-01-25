@@ -1244,7 +1244,6 @@ bool CharacterController::kill()
         //player's death animation is over
         if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) )
         {
-            MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setHealth(0);
             MWBase::Environment::get().getStateManager()->askLoadRecent();
         }
         return false;
