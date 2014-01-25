@@ -37,7 +37,7 @@ namespace MWMechanics
             float mTimerCombatMove;
 
             bool mReadyToAttack, mStrike;
-            bool mFollowTarget;
+            bool mCloseUp;
             bool mCombatMove;
 
             MWMechanics::Movement mMovement;

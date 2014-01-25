@@ -37,11 +37,6 @@ namespace MWMechanics
                 return mPath;
             }
 
-            //When first point of newly created path is the nearest to actor point, then
-            //the cituation can occure when this point is undesirable (if the 2nd point of new path == the 1st point of old path)
-            //This functions deletes that point.
-            void syncStart(const std::list<ESM::Pathgrid::Point> &path);
-
         private:
             std::list<ESM::Pathgrid::Point> mPath;
             bool mIsPathConstructed;
