@@ -201,6 +201,7 @@ namespace MWWorld
         void setUp() {
             //std::sort(mStatic.begin(), mStatic.end(), RecordCmp());
 
+            mShared.clear();
             mShared.reserve(mStatic.size());
             typename std::map<std::string, T>::iterator it = mStatic.begin();
             for (; it != mStatic.end(); ++it) {
