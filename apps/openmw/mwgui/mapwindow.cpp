@@ -434,7 +434,7 @@ namespace MWGui
 
 
         static int _counter=0;
-        MyGUI::Button* markerWidget = mGlobalMapImage->createWidget<MyGUI::Button>("ButtonImage",
+        MyGUI::Button* markerWidget = mGlobalMapOverlay->createWidget<MyGUI::Button>("ButtonImage",
             widgetCoord, MyGUI::Align::Default, "Door" + boost::lexical_cast<std::string>(_counter));
         markerWidget->setImageResource("DoorMarker");
         markerWidget->setUserString("ToolTipType", "Layout");
@@ -499,10 +499,11 @@ namespace MWGui
         mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
         mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
 
-        for (unsigned int i=0; i<mGlobalMapImage->getChildCount (); ++i)
+        // force markers to foreground
+        for (unsigned int i=0; i<mGlobalMapOverlay->getChildCount (); ++i)
         {
-            if (mGlobalMapImage->getChildAt (i)->getName().substr(0,4) == "Door")
-                mGlobalMapImage->getChildAt (i)->castType<MyGUI::Button>()->setImageResource("DoorMarker");
+            if (mGlobalMapOverlay->getChildAt (i)->getName().substr(0,4) == "Door")
+                mGlobalMapOverlay->getChildAt (i)->castType<MyGUI::Button>()->setImageResource("DoorMarker");
         }
 
         globalMapUpdatePlayer();
@@ -571,6 +572,16 @@ namespace MWGui
         MyGUI::IntSize viewsize = mGlobalMap->getSize();
         MyGUI::IntPoint viewoffs(0.5*viewsize.width - x, 0.5*viewsize.height - y);
         mGlobalMap->setViewOffset(viewoffs);
+    }
+
+    void MapWindow::clear()
+    {
+        mGlobalMapRender->clear();
+
+        while (mEventBoxGlobal->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(mEventBoxGlobal->getChildAt(0));
+        while (mGlobalMapOverlay->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(mGlobalMapOverlay->getChildAt(0));
     }
 
 }

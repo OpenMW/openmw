@@ -31,6 +31,9 @@ namespace MWRender
 
         void exploreCell (int cellX, int cellY);
 
+        /// Clears the overlay
+        void clear();
+
     private:
         std::string mCacheDir;
 

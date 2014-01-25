@@ -285,6 +285,9 @@ namespace MWBase
 
             /// Should the cursor be visible?
             virtual bool getCursorVisible() = 0;
+
+            /// Clear all savegame-specific data
+            virtual void clear() = 0;
     };
 }
 

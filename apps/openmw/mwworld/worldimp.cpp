@@ -248,6 +248,7 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
+        // FIXME: this will add cell 0,0 as visible on the global map
         ESM::Position pos;
         const int cellSize = 8192;
         pos.pos[0] = cellSize/2;

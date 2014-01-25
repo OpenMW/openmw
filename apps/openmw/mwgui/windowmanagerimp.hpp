@@ -280,6 +280,9 @@ namespace MWGui
 
     virtual bool getCursorVisible();
 
+    /// Clear all savegame-specific data
+    virtual void clear();
+
   private:
     bool mConsoleOnlyScripts;
 

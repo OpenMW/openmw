@@ -290,9 +290,6 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 void
 RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
-    Ogre::Image im;
-    im.encode(".jpg");
-
     Ogre::SceneNode *child =
         mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 

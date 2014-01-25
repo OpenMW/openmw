@@ -1381,4 +1381,9 @@ namespace MWGui
         Settings::Manager::setFloat(setting + " h", "Windows", h);
     }
 
+    void WindowManager::clear()
+    {
+        mMap->clear();
+    }
+
 }

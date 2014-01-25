@@ -170,21 +170,10 @@ namespace MWRender
         tex->load();
 
 
-
-
         mOverlayTexture = Ogre::TextureManager::getSingleton().createManual("GlobalMapOverlay", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
             Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_A8B8G8R8, Ogre::TU_DYNAMIC_WRITE_ONLY);
 
-
-        std::vector<Ogre::uint32> buffer;
-        buffer.resize(mWidth * mHeight);
-
-        // initialize to (0, 0, 0, 0)
-        for (int p=0; p<mWidth * mHeight; ++p)
-            buffer[p] = 0;
-
-        memcpy(mOverlayTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mWidth*mHeight*4);
-        mOverlayTexture->getBuffer()->unlock();
+        clear();
 
         loadingListener->loadingOff();
     }
@@ -227,9 +216,19 @@ namespace MWRender
 
         if (!localMapTexture.isNull())
         {
-
             mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,512,512),
                          Ogre::Image::Box(originX,originY,originX+24,originY+24));
         }
+    }
+
+    void GlobalMap::clear()
+    {
+        std::vector<Ogre::uint32> buffer;
+        // initialize to (0,0,0,0)
+        buffer.resize(mWidth * mHeight, 0);
+
+        Ogre::PixelBox pb(mWidth, mHeight, 1, Ogre::PF_A8B8G8R8, &buffer[0]);
+
+        mOverlayTexture->getBuffer()->blitFromMemory(pb);
     }
 }
