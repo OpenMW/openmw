@@ -89,6 +89,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (mUseSound)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
+        bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
+
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
@@ -105,7 +107,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             if (changed) // keep change flag for another frame, if cell changed happened in local script
                 MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
-            if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+            if (!paused)
                 MWBase::Environment::get().getWorld()->advanceTime(
                     frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
@@ -116,18 +118,18 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update actors
         MWBase::Environment::get().getMechanicsManager()->update(frametime,
-            MWBase::Environment::get().getWindowManager()->isGuiMode());
+            paused);
 
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
-            MWWorld::Ptr player = mEnvironment.getWorld()->getPlayer().getPlayer();
-            if(MWWorld::Class::get(player).getCreatureStats(player).isDead())
+            MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
+            if(!paused && player.getClass().getCreatureStats(player).isDead())
                 MWBase::Environment::get().getStateManager()->endGame();
         }
             
         // update world
-        MWBase::Environment::get().getWorld()->update(frametime, MWBase::Environment::get().getWindowManager()->isGuiMode());
+        MWBase::Environment::get().getWorld()->update(frametime, paused);
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();

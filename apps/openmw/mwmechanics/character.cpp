@@ -1153,7 +1153,6 @@ void CharacterController::update(float duration)
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
-        MWBase::Environment::get().getWorld()->enableActorCollision(mPtr, false);
         world->queueMovement(mPtr, Ogre::Vector3(0.0f));
     }
 

@@ -771,6 +771,24 @@ namespace MWMechanics
 
     void Actors::update (float duration, bool paused)
     {
+        if(!paused)
+        {
+            // Note: we need to do this before any of the animations are updated.
+            // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
+            // so updating VFX immediately after that would just remove the particle effects instantly.
+            // There needs to be a magic effect update in between.
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+                iter->second->updateContinuousVfx();
+
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
+                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                    iter->second->skipAnim();
+                iter->second->update(duration);
+            }
+        }
+
         if (!paused)
         {
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
@@ -804,7 +822,6 @@ namespace MWMechanics
                             stat.setModified(1, 0);
                             stats.setHealth(stat);
                         }
-
                         stats.resurrect();
                         continue;
                     }
@@ -817,6 +834,9 @@ namespace MWMechanics
                     MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
                     spells.purge(iter->first.getRefData().getHandle());
                 }
+
+                // FIXME: see http://bugs.openmw.org/issues/869
+                MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
 
                 if (iter->second->kill())
                 {
@@ -837,24 +857,6 @@ namespace MWMechanics
                     if(cls.isEssential(iter->first))
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
                 }
-            }
-        }
-
-        if(!paused)
-        {
-            // Note: we need to do this before any of the animations are updated.
-            // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
-            // so updating VFX immediately after that would just remove the particle effects instantly.
-            // There needs to be a magic effect update in between.
-            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-                iter->second->updateContinuousVfx();
-
-            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-            {
-                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
-                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
-                    iter->second->skipAnim();
-                iter->second->update(duration);
             }
         }
     }
