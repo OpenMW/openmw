@@ -17,6 +17,8 @@ void ESM::JournalEntry::load (ESMReader &esm)
         esm.getHNT (mMonth, "JEMO");
         esm.getHNT (mDayOfMonth, "JEDM");
     }
+    else if (mType==Type_Topic)
+        mActorName = esm.getHNOString("ACT_");
 }
 
 void ESM::JournalEntry::save (ESMWriter &esm) const
@@ -32,4 +34,6 @@ void ESM::JournalEntry::save (ESMWriter &esm) const
         esm.writeHNT ("JEMO", mMonth);
         esm.writeHNT ("JEDM", mDayOfMonth);
     }
+    else if (mType==Type_Topic)
+        esm.writeHNString ("ACT_", mActorName);
 }

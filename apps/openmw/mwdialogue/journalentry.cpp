@@ -32,7 +32,7 @@ namespace MWDialogue
         throw std::runtime_error ("unknown info ID " + mInfoId + " for topic " + topic);
     }
 
-    Entry::Entry (const ESM::JournalEntry& record) : mInfoId (record.mInfo), mText (record.mText) {}
+    Entry::Entry (const ESM::JournalEntry& record) : mInfoId (record.mInfo), mText (record.mText), mActorName(record.mActorName) {}
 
     std::string Entry::getText() const
     {
@@ -43,6 +43,7 @@ namespace MWDialogue
     {
         entry.mInfo = mInfoId;
         entry.mText = mText;
+        entry.mActorName = mActorName;
     }
 
 
@@ -53,7 +54,7 @@ namespace MWDialogue
     {}
 
     JournalEntry::JournalEntry (const ESM::JournalEntry& record)
-    : Entry (record), mTopic (record.mTopic)
+        : Entry (record), mTopic (record.mTopic)
     {}
 
     void JournalEntry::write (ESM::JournalEntry& entry) const

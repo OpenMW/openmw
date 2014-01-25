@@ -38,7 +38,7 @@ namespace MWDialogue
             virtual int getJournalIndex (const std::string& id) const;
             ///< Get the journal index.
 
-            virtual void addTopic (const std::string& topicId, const std::string& infoId);
+            virtual void addTopic (const std::string& topicId, const std::string& infoId, const std::string& actorName);
 
             virtual TEntryIter begin() const;
             ///< Iterator pointing to the begin of the main journal.

@@ -23,6 +23,7 @@ namespace ESM
         std::string mTopic;
         std::string mInfo;
         std::string mText;
+        std::string mActorName; // Could also be Actor ID to allow switching of localisation, but since mText is plaintext anyway...
         int mDay; // time stamp
         int mMonth;
         int mDayOfMonth;

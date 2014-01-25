@@ -103,11 +103,13 @@ namespace MWDialogue
         quest.setIndex (index);
     }
 
-    void Journal::addTopic (const std::string& topicId, const std::string& infoId)
+    void Journal::addTopic (const std::string& topicId, const std::string& infoId, const std::string& actorName)
     {
         Topic& topic = getTopic (topicId);
 
-        topic.addEntry (JournalEntry (topicId, infoId));
+        JournalEntry entry(topicId, infoId);
+        entry.mActorName = actorName;
+        topic.addEntry (entry);
     }
 
     int Journal::getJournalIndex (const std::string& id) const

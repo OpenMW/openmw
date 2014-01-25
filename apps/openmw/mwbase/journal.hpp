@@ -54,7 +54,7 @@ namespace MWBase
             virtual int getJournalIndex (const std::string& id) const = 0;
             ///< Get the journal index.
 
-            virtual void addTopic (const std::string& topicId, const std::string& infoId) = 0;
+            virtual void addTopic (const std::string& topicId, const std::string& infoId, const std::string& actorName) = 0;
 
             virtual TEntryIter begin() const = 0;
             ///< Iterator pointing to the begin of the main journal.

@@ -15,6 +15,7 @@ namespace MWDialogue
     {
         std::string mInfoId;
         std::string mText;
+        std::string mActorName; // optional
 
         Entry();
 

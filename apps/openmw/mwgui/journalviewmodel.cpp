@@ -311,8 +311,6 @@ struct JournalViewModelImpl : JournalViewModel
     {
         MWDialogue::Topic const & mTopic;
 
-        mutable std::string source_buffer;
-
         TopicEntryImpl (JournalViewModelImpl const * model, MWDialogue::Topic const & topic, iterator_t itr) :
             BaseEntry (model, itr), mTopic (topic)
         {}
@@ -324,9 +322,7 @@ struct JournalViewModelImpl : JournalViewModel
 
         Utf8Span source () const
         {
-            if (source_buffer.empty ())
-                source_buffer = "someone";
-            return toUtf8Span (source_buffer);
+            return toUtf8Span (itr->mActorName);
         }
 
     };
