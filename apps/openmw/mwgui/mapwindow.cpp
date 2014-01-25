@@ -584,4 +584,21 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mGlobalMapOverlay->getChildAt(0));
     }
 
+    void MapWindow::write(ESM::ESMWriter &writer)
+    {
+        mGlobalMapRender->write(writer);
+    }
+
+    void MapWindow::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        std::vector<std::pair<int, int> > exploredCells;
+        mGlobalMapRender->readRecord(reader, type, exploredCells);
+
+        for (std::vector<std::pair<int, int> >::iterator it = exploredCells.begin(); it != exploredCells.end(); ++it)
+        {
+            const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(it->first, it->second);
+            if (cell && !cell->mName.empty())
+                addVisitedLocation(cell->mName, it->first, it->second);
+        }
+    }
 }

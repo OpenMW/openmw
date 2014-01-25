@@ -40,7 +40,7 @@ add_component_dir (esm
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
-    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate
+    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap
     )
 
 add_component_dir (misc

@@ -33,6 +33,8 @@ namespace OEngine
 namespace ESM
 {
     struct Class;
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace MWWorld
@@ -288,6 +290,9 @@ namespace MWBase
 
             /// Clear all savegame-specific data
             virtual void clear() = 0;
+
+            virtual void write (ESM::ESMWriter& writer) = 0;
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
     };
 }
 
