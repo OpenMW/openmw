@@ -1783,6 +1783,12 @@ namespace MWWorld
     void World::renderPlayer()
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
+
+        // At this point the Animation object is live, and the CharacterController associated with it must be created.
+        // It has to be done at this point: resetCamera below does animation->setViewMode -> CharacterController::forceStateUpdate
+        // so we should make sure not to use a "stale" controller for that.
+        MWBase::Environment::get().getMechanicsManager()->add(mPlayer->getPlayer());
+
         mPhysics->addActor(mPlayer->getPlayer());
         mRendering->resetCamera();
     }
