@@ -36,8 +36,9 @@ namespace MWMechanics
             int getTypeId() const;
             ///< @see enum AiPackage::TypeId
 
-            MWWorld::Ptr getCombatTarget () const;
-            ///< Return the combat target if a combat package is active, or an empty Ptr otherwise
+            bool getCombatTarget (std::string &targetActorId) const;
+            ///< Return true and assign target if combat package is currently
+            /// active, return false otherwise
 
             void stopCombat();
             ///< Removes all combat packages until first non-combat or stack empty.

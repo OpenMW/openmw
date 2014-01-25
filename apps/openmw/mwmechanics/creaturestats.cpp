@@ -348,9 +348,14 @@ namespace MWMechanics
 
     bool CreatureStats::getCreatureTargetted() const
     {
-        if (mAiSequence.getCombatTarget().isEmpty())
-            return false;
-        return mAiSequence.getCombatTarget().getTypeName() == typeid(ESM::Creature).name();
+        std::string target;
+        if (mAiSequence.getCombatTarget(target))
+        {
+            MWWorld::Ptr targetPtr;
+            targetPtr = MWBase::Environment::get().getWorld()->getPtr(target, true);
+            return targetPtr.getTypeName() == typeid(ESM::Creature).name();
+        }
+        return false;
     }
 
     float CreatureStats::getEvasion() const

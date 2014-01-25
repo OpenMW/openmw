@@ -412,10 +412,16 @@ namespace MWScript
                     std::string testedTargetId = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+                    const MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+                    std::string currentTargetId;
 
-                    MWWorld::Ptr target = creatureStats.getAiSequence().getCombatTarget();
-                    runtime.push(Misc::StringUtils::ciEqual(target.getCellRef().mRefID, testedTargetId));
+                    bool targetsAreEqual = false;
+                    if (creatureStats.getAiSequence().getCombatTarget (currentTargetId))
+                    {
+                        if (currentTargetId == testedTargetId)
+                            targetsAreEqual = true;
+                    }
+                    runtime.push(int(targetsAreEqual));
                 }
         };
 
@@ -426,14 +432,13 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
                     MWWorld::Ptr actor = R()(runtime);
-                    std::string targetID = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-                    
-                    creatureStats.setHostile(true);
-                    creatureStats.getAiSequence().stack(
-                        MWMechanics::AiCombat(MWBase::Environment::get().getWorld()->getPtr(targetID, true) ));
+                    MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+                    creatureStats.getAiSequence().stack(MWMechanics::AiCombat(actorID));
+                    if (actorID == "player")
+                        creatureStats.setHostile(true);
                 }
         };
 

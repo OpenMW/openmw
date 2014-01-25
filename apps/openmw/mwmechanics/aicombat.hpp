@@ -7,14 +7,12 @@
 
 #include "movement.hpp"
 
-#include "../mwbase/world.hpp"
-
 namespace MWMechanics
 {
     class AiCombat : public AiPackage
     {
         public:
-            AiCombat(const MWWorld::Ptr& actor);
+            AiCombat(const std::string &targetId);
 
             virtual AiCombat *clone() const;
 
@@ -25,25 +23,15 @@ namespace MWMechanics
 
             virtual unsigned int getPriority() const;
 
-            MWWorld::Ptr getTarget() const;
+            const std::string &getTargetId() const;
 
         private:
+            std::string mTargetId;
+
             PathFinder mPathFinder;
-            //controls duration of the actual strike
-            float mTimerAttack;
-            float mTimerReact;
-            //controls duration of the sideway & forward moves
-            //when mCombatMove is true
-            float mTimerCombatMove;
-
-            bool mReadyToAttack, mStrike;
-            bool mCloseUp;
-            bool mCombatMove;
-
-            MWMechanics::Movement mMovement;
-            MWWorld::Ptr mTarget;
-
-            void buildNewPath(const MWWorld::Ptr& actor);
+            PathFinder mPathFinder2;
+            float mTimer;
+            float mTimer2;
     };
 }
 
