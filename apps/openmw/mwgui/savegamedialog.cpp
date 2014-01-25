@@ -34,7 +34,13 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onCancelButtonClicked);
         mCharacterSelection->eventComboChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
         mSaveList->eventListChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onSlotSelected);
+        mSaveList->eventListSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onSlotActivated);
+    }
 
+    void SaveGameDialog::onSlotActivated(MyGUI::ListBox *sender, size_t pos)
+    {
+        onSlotSelected(sender, pos);
+        onOkButtonClicked(mOkButton);
     }
 
     void SaveGameDialog::open()
@@ -103,6 +109,8 @@ namespace MWGui
 
     void SaveGameDialog::onOkButtonClicked(MyGUI::Widget *sender)
     {
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
+
         // Get the selected slot, if any
         unsigned int i=0;
         const MWState::Slot* slot = NULL;
