@@ -554,7 +554,10 @@ namespace MWMechanics
         else if (enchantment->mData.mType != ESM::Enchantment::WhenStrikes)
         {
             if (mCaster.getRefData().getHandle() == "player")
+            {
                 MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
+                mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
+            }
         }
 
         inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);

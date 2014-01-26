@@ -603,10 +603,7 @@ namespace MWClass
             {
                 MWMechanics::CastSpell cast(ptr, victim);
                 cast.mHitPosition = hitPosition;
-                bool success = cast.cast(weapon);
-
-                if (ptr.getRefData().getHandle() == "player" && success)
-                    skillUsageSucceeded (ptr, ESM::Skill::Enchant, 3);
+                cast.cast(weapon);
             }
         }
 
