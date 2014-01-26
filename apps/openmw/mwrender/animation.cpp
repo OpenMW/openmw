@@ -584,7 +584,11 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
 
     const std::string stoptag = groupname+": "+stop;
     NifOgre::TextKeyMap::const_iterator stopkey(groupstart);
-    while(stopkey != keys.end() && stopkey->second != stoptag)
+    while(stopkey != keys.end()
+          // We have to ignore extra garbage at the end.
+          // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
+          // Why, just why? :(
+          && (stopkey->second.size() < stoptag.size() || stopkey->second.substr(0,stoptag.size()) != stoptag))
         stopkey++;
     if(stopkey == keys.end())
         return false;
