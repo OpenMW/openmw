@@ -25,6 +25,7 @@ namespace MWGui
         void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
         void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
         void onSlotActivated (MyGUI::ListBox* sender, size_t pos);
+        void onEditSelectAccept (MyGUI::EditBox* sender);
 
         void fillSaveList();
 

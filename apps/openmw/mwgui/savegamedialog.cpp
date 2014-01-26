@@ -35,11 +35,17 @@ namespace MWGui
         mCharacterSelection->eventComboChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
         mSaveList->eventListChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onSlotSelected);
         mSaveList->eventListSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onSlotActivated);
+        mSaveNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onEditSelectAccept);
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox *sender, size_t pos)
     {
         onSlotSelected(sender, pos);
+        onOkButtonClicked(mOkButton);
+    }
+
+    void SaveGameDialog::onEditSelectAccept(MyGUI::EditBox *sender)
+    {
         onOkButtonClicked(mOkButton);
     }
 
