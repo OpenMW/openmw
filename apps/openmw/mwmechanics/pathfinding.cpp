@@ -5,30 +5,10 @@
 
 #include "OgreMath.h"
 
-#include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <map>
 
 namespace
 {
-    struct found_path {};
-
-    typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS,
-        boost::property<boost::vertex_index_t, int, ESM::Pathgrid::Point>, boost::property<boost::edge_weight_t, float> >
-        PathGridGraph;
-    typedef boost::property_map<PathGridGraph, boost::edge_weight_t>::type WeightMap;
-    typedef PathGridGraph::vertex_descriptor PointID;
-    typedef PathGridGraph::edge_descriptor PointConnectionID;
-
-    class goalVisited : public boost::default_dijkstra_visitor
-    {
-        public:
-            goalVisited(PointID goal) {mGoal = goal;};
-            void examine_vertex(PointID u, const PathGridGraph g) {if(u == mGoal) throw found_path();};
-
-        private:
-            PointID mGoal;
-    };
-
     float distanceZCorrected(ESM::Pathgrid::Point point, float x, float y, float z)
     {
         x -= point.mX;
@@ -80,74 +60,7 @@ namespace
         return closestIndex;
     }
 
-    PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid, float xCell = 0, float yCell = 0)
-    {
-        PathGridGraph graph;
-
-        for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
-        {
-            PointID pID = boost::add_vertex(graph);
-            graph[pID].mX = pathgrid->mPoints[counter].mX + xCell;
-            graph[pID].mY = pathgrid->mPoints[counter].mY + yCell;
-            graph[pID].mZ = pathgrid->mPoints[counter].mZ;
-        }
-
-        for(unsigned int counterTwo = 0; counterTwo < pathgrid->mEdges.size(); counterTwo++)
-        {
-            PointID u = pathgrid->mEdges[counterTwo].mV0;
-            PointID v = pathgrid->mEdges[counterTwo].mV1;
-
-            PointConnectionID edge;
-            bool done;
-            boost::tie(edge, done) = boost::add_edge(u, v, graph);
-            WeightMap weightmap = boost::get(boost::edge_weight, graph);
-            weightmap[edge] = distance(graph[u], graph[v]);
-        }
-
-        return graph;
-    }
-
-    std::list<ESM::Pathgrid::Point> findPath(PointID start, PointID end,const PathGridGraph& graph)
-    {
-        std::vector<PointID> p(boost::num_vertices(graph));
-        std::vector<float> d(boost::num_vertices(graph));
-        std::list<ESM::Pathgrid::Point> shortest_path;
-
-        try
-        {
-            boost::dijkstra_shortest_paths(graph, start,
-                boost::predecessor_map(&p[0]).distance_map(&d[0]).visitor(goalVisited(end)));
-        }
-
-        catch(found_path& fg)
-        {
-            for(PointID v = end; ; v = p[v])
-            {
-                shortest_path.push_front(graph[v]);
-                if(p[v] == v)
-                    break;
-            }
-        }
-
-        return shortest_path;
-    }
-}
-
-namespace
-{
-    struct Edge
-    {
-        int destination;
-        float cost;
-    };
-    struct Node
-    {
-        int label;
-        std::vector<Edge> edges;
-        int parent;//used in pathfinding
-    };
-
-    std::list<ESM::Pathgrid::Point> reconstructPath(const std::vector<Node>& graph,const ESM::Pathgrid* pathgrid, int lastNode,float xCell, float yCell)
+    /*std::list<ESM::Pathgrid::Point> reconstructPath(const std::vector<MWMechanics::PathFinder::Node>& graph,const ESM::Pathgrid* pathgrid, int lastNode,float xCell, float yCell)
     {
         std::list<ESM::Pathgrid::Point> path;
         while(graph[lastNode].parent != -1)
@@ -160,9 +73,11 @@ namespace
             lastNode = graph[lastNode].parent;
         }
         return path;
-    }
+    }*/
 
-    std::list<ESM::Pathgrid::Point> buildPath2(const ESM::Pathgrid* pathgrid,int start,int goal,float xCell = 0, float yCell = 0)
+
+
+    /*std::list<ESM::Pathgrid::Point> buildPath2(const ESM::Pathgrid* pathgrid,int start,int goal,float xCell = 0, float yCell = 0)
     {
         std::vector<Node> graph;
         for(unsigned int i = 0; i < pathgrid->mPoints.size(); i++)
@@ -234,7 +149,7 @@ namespace
         }
         return reconstructPath(graph,pathgrid,current,xCell,yCell);
 
-    }
+    }*/
 
 }
 
@@ -252,10 +167,106 @@ namespace MWMechanics
         mIsPathConstructed = false;
     }
 
-    void PathFinder::buildPathgridGraph(const ESM::Pathgrid* pathGrid,float xCell, float yCell)
+    void PathFinder::buildPathgridGraph(const ESM::Pathgrid* pathGrid)
     {
-        mGraph = buildGraph(pathGrid, xCell, yCell);
+        mGraph.clear();
+        mGScore.resize(pathGrid->mPoints.size(),-1);
+        mFScore.resize(pathGrid->mPoints.size(),-1);
+        Node defaultNode;
+        defaultNode.label = -1;
+        defaultNode.parent = -1;
+        mGraph.resize(pathGrid->mPoints.size(),defaultNode);
+        for(unsigned int i = 0; i < pathGrid->mPoints.size(); i++)
+        {
+            Node node;
+            node.label = i;
+            node.parent = -1;
+            mGraph[i] = node;
+        }
+        for(unsigned int i = 0; i < pathGrid->mEdges.size(); i++)
+        {
+            Edge edge;
+            edge.destination = pathGrid->mEdges[i].mV1;
+            edge.cost = distance(pathGrid->mPoints[pathGrid->mEdges[i].mV0],pathGrid->mPoints[pathGrid->mEdges[i].mV1]);
+            mGraph[pathGrid->mEdges[i].mV0].edges.push_back(edge);
+            edge.destination = pathGrid->mEdges[i].mV0;
+            mGraph[pathGrid->mEdges[i].mV1].edges.push_back(edge);
+        }
         mIsGraphConstructed = true;
+    }
+
+    void PathFinder::cleanUpAStar()
+    {
+        for(int i=0;i<mGraph.size();i++)
+        {
+            mGraph[i].parent = -1;
+            mGScore[i] = -1;
+            mFScore[i] = -1;
+        }
+    }
+
+    std::list<ESM::Pathgrid::Point> PathFinder::aStarSearch(const ESM::Pathgrid* pathGrid,int start,int goal,float xCell, float yCell)
+    {
+        cleanUpAStar();
+        mGScore[start] = 0;
+        mFScore[start] = distance(pathGrid->mPoints[start],pathGrid->mPoints[goal]);
+
+        std::list<int> openset;
+        std::list<int> closedset;
+        openset.push_back(start);
+
+        int current = -1;
+
+        while(!openset.empty())
+        {
+            current = openset.front();
+            openset.pop_front();
+
+            if(current == goal) break;
+
+            closedset.push_back(current);
+            
+            for(int j = 0;j<mGraph[current].edges.size();j++)
+            {
+                //int next = mGraph[current].edges[j].destination
+                if(std::find(closedset.begin(),closedset.end(),mGraph[current].edges[j].destination) == closedset.end())
+                {
+                    int dest = mGraph[current].edges[j].destination;
+                    float tentative_g = mGScore[current] + mGraph[current].edges[j].cost;
+                    bool isInOpenSet = std::find(openset.begin(),openset.end(),dest) != openset.end();
+                    if(!isInOpenSet
+                        || tentative_g < mGScore[dest] )
+                    {
+                        mGraph[dest].parent = current;
+                        mGScore[dest] = tentative_g;
+                        mFScore[dest] = tentative_g + distance(pathGrid->mPoints[dest],pathGrid->mPoints[goal]);
+                        if(!isInOpenSet)
+                        {
+                            std::list<int>::iterator it = openset.begin();
+                            for(it = openset.begin();it!= openset.end();it++)
+                            {
+                                if(mGScore[*it]>mGScore[dest])
+                                    break;
+                            }
+                            openset.insert(it,dest);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        std::list<ESM::Pathgrid::Point> path;
+        while(mGraph[current].parent != -1)
+        {
+            //std::cout << "not empty" << xCell;
+            ESM::Pathgrid::Point pt = pathGrid->mPoints[current];
+            pt.mX += xCell;
+            pt.mY += yCell;
+            path.push_front(pt);
+            current = mGraph[current].parent;
+        }
+        return path;
     }
 
     void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
@@ -289,9 +300,9 @@ namespace MWMechanics
 
             if(startNode != -1 && endNode != -1)
             {
-                //if(!mIsGraphConstructed) buildPathgridGraph(pathGrid, xCell, yCell);
+                if(!mIsGraphConstructed) buildPathgridGraph(pathGrid);
 
-                mPath = buildPath2(pathGrid,startNode,endNode,xCell,yCell);//findPath(startNode, endNode, mGraph);
+                mPath = aStarSearch(pathGrid,startNode,endNode,xCell,yCell);//findPath(startNode, endNode, mGraph);
 
                 if(!mPath.empty())
                 {
