@@ -266,6 +266,15 @@ namespace MWMechanics
             path.push_front(pt);
             current = mGraph[current].parent;
         }
+
+        if(path.empty())
+        {
+            ESM::Pathgrid::Point pt = pathGrid->mPoints[goal];
+            pt.mX += xCell;
+            pt.mY += yCell;
+            path.push_front(pt);
+        }
+
         return path;
     }
 
