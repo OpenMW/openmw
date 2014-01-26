@@ -200,9 +200,9 @@ namespace MWGui
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w,h);
-        mMap = new MapWindow("");
+        mMap = new MapWindow(mDragAndDrop, "");
         trackWindow(mMap, "map");
-        mStatsWindow = new StatsWindow();
+        mStatsWindow = new StatsWindow(mDragAndDrop);
         trackWindow(mStatsWindow, "stats");
         mConsole = new Console(w,h, mConsoleOnlyScripts);
         trackWindow(mConsole, "console");
@@ -227,7 +227,7 @@ namespace MWGui
         mConfirmationDialog = new ConfirmationDialog();
         mAlchemyWindow = new AlchemyWindow();
         trackWindow(mAlchemyWindow, "alchemy");
-        mSpellWindow = new SpellWindow();
+        mSpellWindow = new SpellWindow(mDragAndDrop);
         trackWindow(mSpellWindow, "spells");
         mQuickKeysMenu = new QuickKeysMenu();
         mLevelupDialog = new LevelupDialog();
@@ -709,7 +709,9 @@ namespace MWGui
 
         mInventoryWindow->onFrame();
 
-        mStatsWindow->onFrame();
+        mStatsWindow->onFrame(frameDuration);
+        mMap->onFrame(frameDuration);
+        mSpellWindow->onFrame(frameDuration);
 
         mWaitDialog->onFrame(frameDuration);
 

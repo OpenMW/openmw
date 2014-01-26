@@ -18,8 +18,9 @@ namespace MWGui
 
     const int StatsWindow::sLineHeight = 18;
 
-    StatsWindow::StatsWindow ()
+    StatsWindow::StatsWindow (DragAndDrop* drag)
       : WindowPinnableBase("openmw_stats_window.layout")
+      , NoDrop(drag, mMainWidget)
       , mSkillView(NULL)
       , mMajorSkills()
       , mMinorSkills()
@@ -219,10 +220,12 @@ namespace MWGui
         updateSkillArea();
     }
 
-    void StatsWindow::onFrame ()
+    void StatsWindow::onFrame (float dt)
     {
         if (!mMainWidget->getVisible())
             return;
+
+        NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);

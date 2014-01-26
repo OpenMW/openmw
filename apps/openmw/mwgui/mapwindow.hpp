@@ -75,10 +75,10 @@ namespace MWGui
         float mLastDirectionY;
     };
 
-    class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
+    class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(const std::string& cacheDir);
+        MapWindow(DragAndDrop* drag, const std::string& cacheDir);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
@@ -91,6 +91,8 @@ namespace MWGui
         void setGlobalMapPlayerPosition (float worldX, float worldY);
 
         virtual void open();
+
+        void onFrame(float dt) { NoDrop::onFrame(dt); }
 
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

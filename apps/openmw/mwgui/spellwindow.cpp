@@ -42,8 +42,9 @@ namespace
 
 namespace MWGui
 {
-    SpellWindow::SpellWindow()
+    SpellWindow::SpellWindow(DragAndDrop* drag)
         : WindowPinnableBase("openmw_spell_window.layout")
+        , NoDrop(drag, mMainWidget)
         , mHeight(0)
         , mWidth(0)
     {

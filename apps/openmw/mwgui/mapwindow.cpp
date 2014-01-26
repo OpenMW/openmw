@@ -373,8 +373,9 @@ namespace MWGui
 
     // ------------------------------------------------------------------------------------------
 
-    MapWindow::MapWindow(const std::string& cacheDir)
-        : MWGui::WindowPinnableBase("openmw_map_window.layout")
+    MapWindow::MapWindow(DragAndDrop* drag, const std::string& cacheDir)
+        : WindowPinnableBase("openmw_map_window.layout")
+        , NoDrop(drag, mMainWidget)
         , mGlobal(false)
         , mGlobalMap(0)
         , mGlobalMapRender(0)
