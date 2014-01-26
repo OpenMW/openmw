@@ -190,22 +190,31 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
 
     base += 1;
 
-    // if this is a major or minor skill of the class, increase level progress
-    bool levelProgress = false;
-    for (int i=0; i<2; ++i)
-        for (int j=0; j<5; ++j)
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    // is this a minor or major skill?
+    int increase = gmst.find("iLevelupMiscMultAttriubte")->getInt(); // Note: GMST has a typo
+    for (int k=0; k<5; ++k)
+    {
+        if (class_.mData.mSkills[k][0] == skillIndex)
         {
-            int skill = class_.mData.mSkills[j][i];
-            if (skill == skillIndex)
-                levelProgress = true;
+            mLevelProgress += gmst.find("iLevelUpMinorMult")->getInt();
+            increase = gmst.find("iLevelUpMajorMultAttribute")->getInt();
         }
+    }
+    for (int k=0; k<5; ++k)
+    {
+        if (class_.mData.mSkills[k][1] == skillIndex)
+        {
+            mLevelProgress += gmst.find("iLevelUpMajorMult")->getInt();
+            increase = gmst.find("iLevelUpMinorMultAttribute")->getInt();
+        }
+    }
 
-    mLevelProgress += levelProgress;
-
-    // check the attribute this skill belongs to
     const ESM::Skill* skill =
         MWBase::Environment::get().getWorld ()->getStore ().get<ESM::Skill>().find(skillIndex);
-    ++mSkillIncreases[skill->mData.mAttribute];
+    mSkillIncreases[skill->mData.mAttribute] += increase;
 
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
@@ -217,7 +226,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
                % static_cast<int> (base);
     MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
 
-    if (mLevelProgress >= 10)
+    if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
     {
         // levelup is possible now
         MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
@@ -263,18 +272,18 @@ void MWMechanics::NpcStats::updateHealth()
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
 {
-    // Source: http://www.uesp.net/wiki/Morrowind:Level#How_to_Level_Up
     int num = mSkillIncreases[attribute];
-    if (num <= 1)
+
+    if (num == 0)
         return 1;
-    else if (num <= 4)
-        return 2;
-    else if (num <= 7)
-        return 3;
-    else if (num <= 9)
-        return 4;
-    else
-        return 5;
+
+    num = std::min(10, num);
+
+    // iLevelUp01Mult - iLevelUp10Mult
+    std::stringstream gmst;
+    gmst << "iLevelUp" << std::setfill('0') << std::setw(2) << num << "Mult";
+
+    return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(gmst.str())->getInt();
 }
 
 void MWMechanics::NpcStats::flagAsUsed (const std::string& id)
