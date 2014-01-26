@@ -34,6 +34,13 @@ void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
 
         mSlots.push_back (slot);
     }
+
+    // some const-trickery, required because of a flaw in the handling of MW-references and the
+    // resulting workarounds
+    std::size_t distance = std::distance (const_cast<InventoryStore&> (store).begin(), const_cast<InventoryStore&> (store).mSelectedEnchantItem);
+    ContainerStoreIterator slot = begin();
+    std::advance (slot, distance);
+    mSelectedEnchantItem = slot;
 }
 
 void MWWorld::InventoryStore::initSlots (TSlots& slots_)
@@ -54,18 +61,19 @@ MWWorld::InventoryStore::InventoryStore()
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 : ContainerStore (store)
  , mSelectedEnchantItem(end())
- , mListener(NULL)
- , mUpdatesEnabled(true)
 {
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
-    mSelectedEnchantItem = store.mSelectedEnchantItem;
+    mListener = store.mListener;
+    mUpdatesEnabled = store.mUpdatesEnabled;
+
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
     copySlots (store);
 }
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
+    mListener = store.mListener;
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
