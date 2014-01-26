@@ -163,9 +163,7 @@ namespace MWMechanics
         float rangeMelee;
         float rangeCloseUp;
         bool distantCombat = false;
-        int attackType = actor.getClass().getCreatureStats(actor).getAttackType();
-        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_ThowWeapon 
-            || attackType==MWMechanics::CreatureStats::AT_Target )
+        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_ThowWeapon)
         {
             rangeMelee = 1000; // TODO: should depend on archer skill
             rangeCloseUp = 0; //doesn't needed when attacking from distance

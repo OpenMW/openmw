@@ -165,7 +165,7 @@ class CharacterController
     float mSecondsOfRunning;
 
     std::string mAttackType; // slash, chop or thrust
-    void determineAttackType(int spellRange = -1);
+    void determineAttackType();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 

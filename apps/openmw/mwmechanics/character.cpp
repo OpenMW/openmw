@@ -644,7 +644,12 @@ bool CharacterController::updateNpcState()
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Left Hand", effect->mParticle);
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Right Hand", effect->mParticle);
 
-                    determineAttackType(effectentry.mRange);
+                    switch(effectentry.mRange)
+                    {
+                        case 0: mAttackType = "self"; break;
+                        case 1: mAttackType = "touch"; break;
+                        case 2: mAttackType = "target"; break;
+                    }
 
                     mAnimation->play(mCurrentWeapon, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
@@ -698,7 +703,7 @@ bool CharacterController::updateNpcState()
                     mAttackType = "shoot";
                 else
                 {
-                    int attackType = stats.getAttackType();
+                    int attackType;
                     if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
                         attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                     else
@@ -1302,57 +1307,34 @@ void CharacterController::updateVisibility()
     mAnimation->setAlpha(alpha);
 }
 
-void CharacterController::determineAttackType(int spellRange)
+void CharacterController::determineAttackType()
 {
-    if(spellRange == -1)
+    float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
+    
+    if (move[0] && !move[1]) //sideway
     {
-        float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
-    
-        if (move[0] && !move[1]) //sideway
-        {
-            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Slash);
-            if(mPtr.getClass().isNpc())
-                mAttackType = "slash";
-            else
-                mCurrentWeapon = "attack2";
-        }
-        else if (move[1]) //forward
-        {
-            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
-            if(mPtr.getClass().isNpc())
-                mAttackType = "thrust";
-            else
-                mCurrentWeapon = "attack3";
-        }
+        mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Slash);
+        if(mPtr.getClass().isNpc())
+            mAttackType = "slash";
         else
-        {
-            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Chop);
-            if(mPtr.getClass().isNpc())
-                mAttackType = "chop";
-            else
-                mCurrentWeapon = "attack1";
-        }
-    
+            mCurrentWeapon = "attack2";
+    }
+    else if (move[1]) //forward
+    {
+        mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
+        if(mPtr.getClass().isNpc())
+            mAttackType = "thrust";
+        else
+            mCurrentWeapon = "attack3";
     }
     else
     {
-        switch(spellRange)
-        {
-        case 0: 
-            mAttackType = "self"; 
-            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Self);
-            break;
-        case 1: 
-            mAttackType = "touch"; 
-            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Touch);
-            break;
-        case 2: 
-            mAttackType = "target"; 
-            mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Target);
-            break;
-        }
+        mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Chop);
+        if(mPtr.getClass().isNpc())
+            mAttackType = "chop";
+        else
+            mCurrentWeapon = "attack1";
     }
-    
 }
 
 }
