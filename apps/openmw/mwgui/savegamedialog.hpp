@@ -20,17 +20,20 @@ namespace MWGui
 
         void setLoadOrSave(bool load);
 
+    private:
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onOkButtonClicked (MyGUI::Widget* sender);
         void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
         void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
         void onSlotActivated (MyGUI::ListBox* sender, size_t pos);
         void onEditSelectAccept (MyGUI::EditBox* sender);
+        void onSaveNameChanged (MyGUI::EditBox* sender);
+        void onConfirmationGiven();
+
+        void accept(bool reallySure=false);
 
         void fillSaveList();
 
-
-    private:
         MyGUI::ImageBox* mScreenshot;
         bool mSaving;
 
