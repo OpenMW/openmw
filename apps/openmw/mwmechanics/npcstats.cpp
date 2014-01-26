@@ -30,6 +30,7 @@ MWMechanics::NpcStats::NpcStats()
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
+, mLevelHealthBonus(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
@@ -237,6 +238,27 @@ void MWMechanics::NpcStats::levelUp()
     mLevelProgress -= 10;
     for (int i=0; i<ESM::Attribute::Length; ++i)
         mSkillIncreases[i] = 0;
+
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+
+    // "When you gain a level, in addition to increasing three primary attributes, your Health
+    // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
+    // the Health increase is calculated from the increased Endurance"
+    mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
+    updateHealth();
+
+    setLevel(getLevel()+1);
+}
+
+void MWMechanics::NpcStats::updateHealth()
+{
+    const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+    const int strength = getAttribute(ESM::Attribute::Strength).getBase();
+
+    setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
 }
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const

@@ -10,7 +10,7 @@
 namespace MWMechanics
 {
     CreatureStats::CreatureStats()
-        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
+        : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false),
@@ -20,35 +20,6 @@ namespace MWMechanics
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
-    }
-
-    float CreatureStats::getLevelHealthBonus () const
-    {
-        return mLevelHealthBonus;
-    }
-
-    void CreatureStats::levelUp()
-    {
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
-        const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
-
-        // "When you gain a level, in addition to increasing three primary attributes, your Health
-        // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
-        // the Health increase is calculated from the increased Endurance"
-        mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
-        updateHealth();
-
-        mLevel++;
-    }
-
-    void CreatureStats::updateHealth()
-    {
-        const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
-        const int strength = getAttribute(ESM::Attribute::Strength).getBase();
-
-        setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
     }
 
     const AiSequence& CreatureStats::getAiSequence() const
