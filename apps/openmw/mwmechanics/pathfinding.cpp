@@ -6,6 +6,7 @@
 #include "OgreMath.h"
 
 #include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <map>
 
 namespace
 {
@@ -132,6 +133,111 @@ namespace
     }
 }
 
+namespace
+{
+    struct Edge
+    {
+        int destination;
+        float cost;
+    };
+    struct Node
+    {
+        int label;
+        std::vector<Edge> edges;
+        int parent;//used in pathfinding
+    };
+
+    std::list<ESM::Pathgrid::Point> reconstructPath(const std::vector<Node>& graph,const ESM::Pathgrid* pathgrid, int lastNode,float xCell, float yCell)
+    {
+        std::list<ESM::Pathgrid::Point> path;
+        while(graph[lastNode].parent != -1)
+        {
+            //std::cout << "not empty" << xCell;
+            ESM::Pathgrid::Point pt = pathgrid->mPoints[lastNode];
+            pt.mX += xCell;
+            pt.mY += yCell;
+            path.push_front(pt);
+            lastNode = graph[lastNode].parent;
+        }
+        return path;
+    }
+
+    std::list<ESM::Pathgrid::Point> buildPath2(const ESM::Pathgrid* pathgrid,int start,int goal,float xCell = 0, float yCell = 0)
+    {
+        std::vector<Node> graph;
+        for(unsigned int i = 0; i < pathgrid->mPoints.size(); i++)
+        {
+            Node node;
+            node.label = i;
+            node.parent = -1;
+            graph.push_back(node);
+        }
+        for(unsigned int i = 0; i < pathgrid->mEdges.size(); i++)
+        {
+            Edge edge;
+            edge.destination = pathgrid->mEdges[i].mV1;
+            edge.cost = distance(pathgrid->mPoints[pathgrid->mEdges[i].mV0],pathgrid->mPoints[pathgrid->mEdges[i].mV1]);
+            graph[pathgrid->mEdges[i].mV0].edges.push_back(edge);
+            edge.destination = pathgrid->mEdges[i].mV0;
+            graph[pathgrid->mEdges[i].mV1].edges.push_back(edge);
+        }
+
+        std::vector<float> g_score(pathgrid->mPoints.size(),-1.);
+        std::vector<float> f_score(pathgrid->mPoints.size(),-1.);
+
+        g_score[start] = 0;
+        f_score[start] = distance(pathgrid->mPoints[start],pathgrid->mPoints[goal]);
+
+        std::list<int> openset;
+        std::list<int> closedset;
+        openset.push_back(start);
+
+        int current = -1;
+
+        while(!openset.empty())
+        {
+            current = openset.front();
+            openset.pop_front();
+
+            if(current == goal) break;
+
+            closedset.push_back(current);
+            
+            for(int j = 0;j<graph[current].edges.size();j++)
+            {
+                //int next = graph[current].edges[j].destination
+                if(std::find(closedset.begin(),closedset.end(),graph[current].edges[j].destination) == closedset.end())
+                {
+                    int dest = graph[current].edges[j].destination;
+                    float tentative_g = g_score[current] + graph[current].edges[j].cost;
+                    bool isInOpenSet = std::find(openset.begin(),openset.end(),dest) != openset.end();
+                    if(!isInOpenSet
+                        || tentative_g < g_score[dest] )
+                    {
+                        graph[dest].parent = current;
+                        g_score[dest] = tentative_g;
+                        f_score[dest] = tentative_g + distance(pathgrid->mPoints[dest],pathgrid->mPoints[goal]);
+                        if(!isInOpenSet)
+                        {
+                            std::list<int>::iterator it = openset.begin();
+                            for(it = openset.begin();it!= openset.end();it++)
+                            {
+                                if(g_score[*it]>g_score[dest])
+                                    break;
+                            }
+                            openset.insert(it,dest);
+                        }
+                    }
+                }
+            }
+
+        }
+        return reconstructPath(graph,pathgrid,current,xCell,yCell);
+
+    }
+
+}
+
 namespace MWMechanics
 {
     PathFinder::PathFinder()
@@ -183,9 +289,9 @@ namespace MWMechanics
 
             if(startNode != -1 && endNode != -1)
             {
-                if(!mIsGraphConstructed) buildPathgridGraph(pathGrid, xCell, yCell);
+                //if(!mIsGraphConstructed) buildPathgridGraph(pathGrid, xCell, yCell);
 
-                mPath = findPath(startNode, endNode, mGraph);
+                mPath = buildPath2(pathGrid,startNode,endNode,xCell,yCell);//findPath(startNode, endNode, mGraph);
 
                 if(!mPath.empty())
                 {
