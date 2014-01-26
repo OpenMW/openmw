@@ -265,6 +265,10 @@ namespace MWRender
             if (bounds.mMaxY-bounds.mMinY <= 0)
                 return;
 
+            if (bounds.mMinX > bounds.mMaxX
+                    || bounds.mMinY > bounds.mMaxY)
+                throw std::runtime_error("invalid map bounds");
+
             Ogre::Image image;
             Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&map.mImageData[0], map.mImageData.size()));
             image.load(stream, "png");
@@ -297,8 +301,14 @@ namespace MWRender
             // If cell bounds of the currently loaded content and the loaded savegame do not match,
             // we need to resize source/dest boxes to accommodate
             // This means nonexisting cells will be dropped silently
-
             int cellImageSizeDst = 24;
+
+            // Completely off-screen? -> no need to blit anything
+            if (bounds.mMaxX < mMinX
+                    || bounds.mMaxY < mMinY
+                    || bounds.mMinX > mMaxX
+                    || bounds.mMinY > mMaxY)
+                return;
 
             int leftDiff = (mMinX - bounds.mMinX);
             int topDiff = (bounds.mMaxY - mMaxY);
