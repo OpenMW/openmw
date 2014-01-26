@@ -132,6 +132,11 @@ namespace MWGui
 
         if (mSaving)
         {
+            if (mSaveNameEdit->getCaption().empty())
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage65}");
+                return;
+            }
             MWBase::Environment::get().getStateManager()->saveGame (mSaveNameEdit->getCaption(), slot);
         }
         else
