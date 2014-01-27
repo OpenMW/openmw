@@ -927,7 +927,7 @@ namespace MWMechanics
             const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
             CreatureStats &stats = cls.getCreatureStats(iter->first);
 
-            if(stats.getAiSequence().getTypeId() == 3)
+            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
             {
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
                 if(package->getFollowedActor() == actor.getCellRef().mRefID)
