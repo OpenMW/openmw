@@ -250,7 +250,10 @@ namespace MWMechanics
     {
         if (itemEmpty())
             return 0;
-        return MWWorld::Class::get(mOldItemPtr).getEnchantmentPoints(mOldItemPtr);
+
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+
+        return mOldItemPtr.getClass().getEnchantmentPoints(mOldItemPtr) * store.get<ESM::GameSetting>().find("fEnchantmentMult")->getFloat();
     }
     bool Enchanting::soulEmpty() const
     {
@@ -274,22 +277,18 @@ namespace MWMechanics
 
     float Enchanting::getEnchantChance() const
     {
-        /*
-        Formula from http://www.uesp.net/wiki/Morrowind:Enchant
-        */
-        const CreatureStats& creatureStats = MWWorld::Class::get (mEnchanter).getCreatureStats (mEnchanter);
         const NpcStats& npcStats = MWWorld::Class::get (mEnchanter).getNpcStats (mEnchanter);
 
         float chance1 = (npcStats.getSkill (ESM::Skill::Enchant).getModified() + 
-        (0.25 * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified())
-        + (0.125 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified()));
+        (0.25 * npcStats.getAttribute (ESM::Attribute::Intelligence).getModified())
+        + (0.125 * npcStats.getAttribute (ESM::Attribute::Luck).getModified()));
 
-        float chance2 = 2.5 * getEnchantPoints();
-        if(mCastStyle==ESM::Enchantment::ConstantEffect)
-        {
-            float constantChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantChanceMult")->getFloat();
-            chance2 /= constantChance;
-        }
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        float chance2 = 7.5 / (gmst.find("fEnchantmentChanceMult")->getFloat() * ((mCastStyle == ESM::Enchantment::ConstantEffect) ?
+                                                                          gmst.find("fEnchantmentConstantChanceMult")->getFloat() : 1 ))
+                * getEnchantPoints();
+
         return (chance1-chance2);
     }
 

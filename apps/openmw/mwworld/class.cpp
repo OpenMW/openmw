@@ -167,7 +167,7 @@ namespace MWWorld
         return 0;
     }
 
-    float Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support enchanting");
     }
