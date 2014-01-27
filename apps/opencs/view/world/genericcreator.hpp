@@ -31,7 +31,6 @@ namespace CSVWorld
             bool mLocked;
             std::string mClonedId;
             CSMWorld::UniversalId::Type mClonedType;
-            CSMWorld::UniversalId::ArgumentType mArgumentType;
             
         protected:
             bool mCloneMode;

@@ -57,9 +57,15 @@ const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
 }
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-    const CSMWorld::UniversalId& id, bool relaxedIdRules)
-: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode(false), mClonedType(CSMWorld::UniversalId::Type_None),
-mArgumentType(CSMWorld::UniversalId::ArgumentType_None)
+    const CSMWorld::UniversalId& id, bool relaxedIdRules): 
+    
+    mData (data),
+    mUndoStack (undoStack),
+    mListId (id),
+    mLocked (false),
+    mCloneMode(false),
+    mClonedType(CSMWorld::UniversalId::Type_None)
+    
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
