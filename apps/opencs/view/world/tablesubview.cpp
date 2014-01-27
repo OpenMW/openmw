@@ -6,7 +6,6 @@
 #include "../../model/doc/document.hpp"
 
 #include "../filter/filterbox.hpp"
-#include "../../model/world/idtable.hpp"
 #include "table.hpp"
 #include "tablebottombox.hpp"
 #include "creator.hpp"
