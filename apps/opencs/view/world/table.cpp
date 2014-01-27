@@ -203,7 +203,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
         mCreateAction = new QAction (tr ("Add Record"), this);
         connect (mCreateAction, SIGNAL (triggered()), this, SIGNAL (createRequest()));
         addAction (mCreateAction);
-        
+
         mCloneAction = new QAction (tr ("Clone Record"), this);
         connect(mCloneAction, SIGNAL (triggered()), this, SLOT (cloneRecord()));
         addAction(mCloneAction);

@@ -53,12 +53,12 @@ namespace CSMWorld
                           const std::string& IdDestination,
                           const UniversalId::Type type,
                           QUndoCommand* parent = 0);
-            
+
             virtual void redo();
 
             virtual void undo();
     };
-    
+
     class CreateCommand : public QUndoCommand
     {
             IdTable& mModel;

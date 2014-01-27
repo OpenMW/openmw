@@ -50,7 +50,7 @@ namespace CSMWorld
             // not implemented
             Collection (const Collection&);
             Collection& operator= (const Collection&);
-            
+
         protected:
 
             const std::map<std::string, int>& getIdMap() const;
@@ -97,11 +97,11 @@ namespace CSMWorld
             virtual void appendBlankRecord (const std::string& id,
                 UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
-            
+
             virtual void cloneRecord(const std::string& origin, 
                                      const std::string& destination,
                                      const UniversalId::Type type);
-                                     
+
             virtual int searchId (const std::string& id) const;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
@@ -149,7 +149,7 @@ namespace CSMWorld
             void setRecord (int index, const Record<ESXRecordT>& record);
             ///< \attention This function must not change the ID.
     };
-    
+
     template<typename ESXRecordT, typename IdAccessorT>
     const std::map<std::string, int>& Collection<ESXRecordT, IdAccessorT>::getIdMap() const
     {
@@ -206,10 +206,10 @@ namespace CSMWorld
        copy.mModified = getRecord(origin).get();
        copy.mState = RecordBase::State_ModifiedOnly;
        copy.get().mId = destination;
-       
+
        insertRecord(copy, getAppendIndex(destination, type));
     }
-    
+
     template<typename ESXRecordT, typename IdAccessorT>
     Collection<ESXRecordT, IdAccessorT>::Collection()
     {}

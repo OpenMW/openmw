@@ -47,11 +47,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     if (mBottom->canCreateAndDelete())
     {
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
-        
+
         connect (mTable, SIGNAL (cloneRequest(const CSMWorld::UniversalId&)), this,
                  SLOT(cloneRequest(const CSMWorld::UniversalId&)));
-        
-        connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)), 
+
+        connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
     }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),

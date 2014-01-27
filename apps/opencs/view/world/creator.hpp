@@ -24,12 +24,12 @@ namespace CSVWorld
             virtual ~Creator();
 
             virtual void reset() = 0;
-            
+
             virtual void cloneMode(const std::string& originId,
                                    const CSMWorld::UniversalId::Type type) = 0;
 
             virtual void setEditLock (bool locked) = 0;
-            
+
             virtual void toggleWidgets(bool active = true) = 0;
 
         signals:

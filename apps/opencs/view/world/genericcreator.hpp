@@ -31,10 +31,10 @@ namespace CSVWorld
             bool mLocked;
             std::string mClonedId;
             CSMWorld::UniversalId::Type mClonedType;
-            
+
         protected:
             bool mCloneMode;
-        
+
         protected:
 
             void update();
@@ -49,7 +49,7 @@ namespace CSVWorld
             virtual std::string getId() const;
 
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
-            
+
             CSMWorld::Data& getData() const;
 
             const CSMWorld::UniversalId& getCollectionId() const;

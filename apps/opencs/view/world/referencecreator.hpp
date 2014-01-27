@@ -27,7 +27,7 @@ namespace CSVWorld
 
             virtual void cloneMode(const std::string& originId, 
                                    const CSMWorld::UniversalId::Type type);
-            
+
             virtual void reset();
             virtual void toggleWidgets(bool active = true);
 

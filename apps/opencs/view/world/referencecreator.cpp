@@ -53,9 +53,9 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
     {
         return errors;
     }
-    
+
     std::string cell = mCell->text().toUtf8().constData();
-    
+
     if (cell.empty())
     {
         if (!errors.empty())

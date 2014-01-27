@@ -77,7 +77,7 @@ namespace CSMWorld
             virtual void cloneRecord(const std::string& origin, 
                                      const std::string& destination,
                                      const UniversalId::Type type) = 0;
-                                     
+
             virtual const RecordBase& getRecord (const std::string& id) const = 0;
 
             virtual const RecordBase& getRecord (int index) const = 0;

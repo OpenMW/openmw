@@ -28,9 +28,9 @@ namespace CSVWorld
             CellCreator (CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
             virtual void reset();
-            
+
             virtual void toggleWidgets(bool active = true);
-            
+
             virtual void cloneMode(const std::string& originId, 
                                    const CSMWorld::UniversalId::Type type);
 
