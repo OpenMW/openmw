@@ -205,7 +205,7 @@ namespace CSMWorld
                                                           const UniversalId::Type type)
     {
        Record<ESXRecordT> copy;
-       copy = getRecord(origin);
+       copy.mModified = getRecord(origin).get();
        copy.mState = RecordBase::State_ModifiedOnly;
        copy.get().mId = destination;
        
