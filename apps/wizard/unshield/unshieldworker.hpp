@@ -11,31 +11,29 @@
 
 #include "../inisettings.hpp"
 
+
 namespace Wizard
 {
+    enum Component {
+        Component_Morrowind,
+        Component_Tribunal,
+        Component_Bloodmoon
+    };
+
+    //Q_DECLARE_METATYPE(Wizard::Component)
+
     class UnshieldWorker : public QObject
     {
         Q_OBJECT
+        Q_ENUMS(Wizard::Component)
 
     public:
         UnshieldWorker(QObject *parent = 0);
         ~UnshieldWorker();
 
-        void setInstallMorrowind(bool install);
-        void setInstallTribunal(bool install);
-        void setInstallBloodmoon(bool install);
+        void setInstallComponent(Wizard::Component component, bool install);
 
-        bool getInstallMorrowind();
-        bool getInstallTribunal();
-        bool getInstallBloodmoon();
-
-        void setMorrowindPath(const QString &path);
-        void setTribunalPath(const QString &path);
-        void setBloodmoonPath(const QString &path);
-
-        QString getMorrowindPath();
-        QString getTribunalPath();
-        QString getBloodmoonPath();
+        void setComponentPath(Wizard::Component component, const QString &path);
 
         void setPath(const QString &path);
         void setIniPath(const QString &path);
@@ -47,13 +45,12 @@ namespace Wizard
 
     private:
 
-        void setMorrowindDone(bool done);
-        void setTribunalDone(bool done);
-        void setBloodmoonDone(bool done);
+        bool getInstallComponent(Component component);
 
-        bool getMorrowindDone();
-        bool getTribunalDone();
-        bool getBloodmoonDone();
+        QString getComponentPath(Component component);
+
+        void setComponentDone(Component component, bool done = true);
+        bool getComponentDone(Component component);
 
         bool removeDirectory(const QString &dirName);
 
@@ -74,6 +71,9 @@ namespace Wizard
         bool installMorrowind();
         bool installTribunal();
         bool installBloodmoon();
+
+        bool installComponent(Component component);
+        void setupAddon(Component component);
 
         bool mInstallMorrowind;
         bool mInstallTribunal;
@@ -104,7 +104,7 @@ namespace Wizard
 
     signals:
         void finished();
-        void requestFileDialog(const QString &component);
+        void requestFileDialog(Wizard::Component component);
 
         void textChanged(const QString &text);
         void logTextChanged(const QString &text);

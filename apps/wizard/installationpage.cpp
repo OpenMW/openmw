@@ -8,7 +8,6 @@
 
 #include "mainwizard.hpp"
 #include "inisettings.hpp"
-#include "unshield/unshieldworker.hpp"
 
 Wizard::InstallationPage::InstallationPage(MainWizard *wizard) :
     QWizardPage(wizard),
@@ -58,8 +57,9 @@ void Wizard::InstallationPage::startInstallation()
 
     QThread *thread = new QThread();
     mUnshield = new UnshieldWorker();
-
     mUnshield->moveToThread(thread);
+
+    qRegisterMetaType<Wizard::Component>("Wizard::Component");
 
     connect(thread, SIGNAL(started()),
             mUnshield, SLOT(extract()));
@@ -88,30 +88,30 @@ void Wizard::InstallationPage::startInstallation()
     connect(mUnshield, SIGNAL(progressChanged(int)),
             installProgressBar, SLOT(setValue(int)),  Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(requestFileDialog(QString)),
-            this, SLOT(showFileDialog(QString)), Qt::QueuedConnection);
+    connect(mUnshield, SIGNAL(requestFileDialog(Wizard::Component)),
+            this, SLOT(showFileDialog(Wizard::Component)), Qt::QueuedConnection);
 
     if (field("installation.new").toBool() == true)
     {
         // Always install Morrowind
-        mUnshield->setInstallMorrowind(true);
+        mUnshield->setInstallComponent(Wizard::Component_Morrowind, true);
 
         if (components.contains(QLatin1String("Tribunal")))
-            mUnshield->setInstallTribunal(true);
+            mUnshield->setInstallComponent(Wizard::Component_Tribunal, true);
 
         if (components.contains(QLatin1String("Bloodmoon")))
-            mUnshield->setInstallBloodmoon(true);
+            mUnshield->setInstallComponent(Wizard::Component_Bloodmoon, true);
     } else {
         // Morrowind should already be installed
-        mUnshield->setInstallMorrowind(false);
+        mUnshield->setInstallComponent(Wizard::Component_Morrowind, false);
 
         if (components.contains(QLatin1String("Tribunal"))
-                && mWizard->mInstallations[path]->hasTribunal == false)
-            mUnshield->setInstallTribunal(true);
+                && !mWizard->mInstallations[path]->hasTribunal)
+            mUnshield->setInstallComponent(Wizard::Component_Tribunal, true);
 
         if (components.contains(QLatin1String("Bloodmoon"))
-                && mWizard->mInstallations[path]->hasBloodmoon == false)
-            mUnshield->setInstallBloodmoon(true);
+                && !mWizard->mInstallations[path]->hasBloodmoon)
+            mUnshield->setInstallComponent(Wizard::Component_Bloodmoon, true);
 
         // Set the location of the Morrowind.ini to update
         mUnshield->setIniPath(mWizard->mInstallations[path]->iniPath);
@@ -136,38 +136,21 @@ void Wizard::InstallationPage::startInstallation()
     thread->start();
 }
 
-void Wizard::InstallationPage::showFileDialog(const QString &component)
+void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 {
-    QString fileName;
-
-    if (field("installation.new").toBool() == true)
-    {
-        fileName = QFileDialog::getOpenFileName(
+    QString fileName = QFileDialog::getOpenFileName(
                     this,
-                    tr("Select %0 installation file").arg(component),
+                    tr("Select installation file"),
                     QDir::rootPath(),
                     tr("InstallShield header files (*.hdr)"));
 
-        if (fileName.isEmpty()) {
-            qDebug() << "Cancel was clicked!";
-            return;
-        }
-
-        QFileInfo info(fileName);
-
-        if (component == QLatin1String("Morrowind"))
-        {
-            mUnshield->setMorrowindPath(info.absolutePath());
-        }
-        else if (component == QLatin1String("Tribunal"))
-        {
-            mUnshield->setTribunalPath(info.absolutePath());
-        }
-        else if (component == QLatin1String("Bloodmoon"))
-        {
-            mUnshield->setBloodmoonPath(info.absolutePath());
-        }
+    if (fileName.isEmpty()) {
+        qDebug() << "Cancel was clicked!";
+        return;
     }
+
+    QFileInfo info(fileName);
+    mUnshield->setComponentPath(component, info.absolutePath());
 }
 
 void Wizard::InstallationPage::installationFinished()

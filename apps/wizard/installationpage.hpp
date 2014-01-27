@@ -3,6 +3,7 @@
 
 #include <QWizardPage>
 
+#include "unshield/unshieldworker.hpp"
 #include "ui_installationpage.h"
 #include "inisettings.hpp"
 
@@ -33,7 +34,7 @@ namespace Wizard
         void startInstallation();
 
     private slots:
-        void showFileDialog(const QString &component);
+        void showFileDialog(Wizard::Component component);
 
         void installationFinished();
         void installationError(const QString &text);
