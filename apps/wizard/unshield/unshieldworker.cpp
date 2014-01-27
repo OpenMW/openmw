@@ -287,7 +287,7 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
         if (info.isDir()) {
             result = moveDirectory(info.absoluteFilePath(), destDir.absolutePath() + relativePath);
         } else {
-             qDebug() << "moving: " << info.absoluteFilePath() <<  " to: " << destDir.absolutePath() + relativePath;
+            qDebug() << "moving: " << info.absoluteFilePath() <<  " to: " << destDir.absolutePath() + relativePath;
 
             result = moveFile(info.absoluteFilePath(), destDir.absolutePath() + relativePath);
         }
@@ -389,6 +389,19 @@ void Wizard::UnshieldWorker::extract()
     {
         while (!getTribunalDone())
         {
+            QDir tribunal(disk);
+
+            if (!tribunal.cd(QLatin1String("Tribunal"))) {
+                qDebug() << "not found on cd!";
+                QReadLocker locker(&mLock);
+                emit requestFileDialog(QLatin1String("Tribunal"));
+                mWait.wait(&mLock);
+
+            } else if (tribunal.exists(QLatin1String("data1.hdr"))) {
+                qDebug() << "Exists! " << tribunal.absolutePath();
+                setTribunalPath(tribunal.absolutePath());
+            }
+
             if (getTribunalPath().isEmpty()) {
                 qDebug() << "request file dialog";
                 QReadLocker locker(&mLock);
@@ -396,10 +409,12 @@ void Wizard::UnshieldWorker::extract()
                 mWait.wait(&mLock);
             }
 
-            if (!getTribunalPath().isEmpty()) {
-                disk.setPath(getTribunalPath());
+            // Make sure the dir is up-to-date
+            tribunal.setPath(getTribunalPath());
 
-                if (!findFile(disk.absoluteFilePath(QLatin1String("data1.hdr")), QLatin1String("Tribunal.bsa")))
+            if (!getTribunalPath().isEmpty()) {
+
+                if (!findFile(tribunal.absoluteFilePath(QLatin1String("data1.hdr")), QLatin1String("Tribunal.bsa")))
                 {
                     qDebug() << "found";
                     QReadLocker locker(&mLock);
@@ -421,6 +436,21 @@ void Wizard::UnshieldWorker::extract()
     {
         while (!getBloodmoonDone())
         {
+            QDir bloodmoon(disk);
+
+            qDebug() << "Test!: " << bloodmoon.absolutePath();
+
+            if (!bloodmoon.cd(QLatin1String("Bloodmoon"))) {
+                qDebug() << "not found on cd!";
+                QReadLocker locker(&mLock);
+                emit requestFileDialog(QLatin1String("Bloodmoon"));
+                mWait.wait(&mLock);
+
+            } else if (bloodmoon.exists(QLatin1String("data1.hdr"))) {
+                qDebug() << "Exists! " << bloodmoon.absolutePath();
+                setBloodmoonPath(bloodmoon.absolutePath());
+            }
+
             if (getBloodmoonPath().isEmpty()) {
                 qDebug() << "request file dialog";
                 QReadLocker locker(&mLock);
@@ -428,35 +458,38 @@ void Wizard::UnshieldWorker::extract()
                 mWait.wait(&mLock);
             }
 
-            if (!getBloodmoonPath().isEmpty()) {
-                disk.setPath(getBloodmoonPath());
+            // Make sure the dir is up-to-date
+            bloodmoon.setPath(getBloodmoonPath());
 
-                if (!findFile(disk.absoluteFilePath(QLatin1String("data1.hdr")), QLatin1String("Bloodmoon.bsa")))
-                {
-                    QReadLocker locker(&mLock);
-                    emit requestFileDialog(QLatin1String("Bloodmoon"));
-                    mWait.wait(&mLock);
+            if (!findFile(bloodmoon.absoluteFilePath(QLatin1String("data1.hdr")), QLatin1String("Bloodmoon.bsa")))
+            {
+                QReadLocker locker(&mLock);
+                emit requestFileDialog(QLatin1String("Bloodmoon"));
+                mWait.wait(&mLock);
+            } else {
+                if (installBloodmoon()) {
+                    setBloodmoonDone(true);
                 } else {
-                    if (installBloodmoon()) {
-                        setBloodmoonDone(true);
-                    } else {
-                        qDebug() << "Erorr installing Bloodmoon";
-                        return;
-                    }
+                    qDebug() << "Erorr installing Bloodmoon";
+                    return;
                 }
             }
         }
     }
 
+    // Remove the temporary directory
+    removeDirectory(mPath + QDir::separator() + QLatin1String("extract-temp"));
+
+    // Fill the progress bar
     int total = 0;
 
-    if (mInstallMorrowind)
+    if (getInstallMorrowind())
         total = 100;
 
-    if (mInstallTribunal)
+    if (getInstallTribunal())
         total = total + 100;
 
-    if (mInstallBloodmoon)
+    if (getInstallBloodmoon())
         total = total + 100;
 
     emit textChanged(tr("Installation finished!"));
@@ -523,8 +556,6 @@ bool Wizard::UnshieldWorker::installMorrowind()
 
     QFileInfo info(iniPath);
 
-    qDebug() << info.absoluteFilePath() << getPath();
-
     if (info.exists()) {
         emit textChanged(tr("Extracting: Morrowind.ini"));
         moveFile(info.absoluteFilePath(), getPath() + QDir::separator() + QLatin1String("Morrowind.ini"));
@@ -579,7 +610,8 @@ bool Wizard::UnshieldWorker::installTribunal()
     // TODO: Throw error;
     // Move the files from the temporary path to the destination folder
     emit textChanged(tr("Moving installation files"));
-    if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), getPath())) {
+    if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), getPath()))
+    {
         qDebug() << "failed to move files!";
         return false;
     }
@@ -686,8 +718,6 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outp
 
     if (getTribunalDone())
         progress = progress + 100;
-
-    qDebug() << progress << counter << unshield_file_count(unshield);
 
     emit textChanged(tr("Extracting: %1").arg(QString::fromLatin1(unshield_file_name(unshield, index))));
     emit progressChanged(progress);

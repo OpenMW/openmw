@@ -4,6 +4,7 @@
 #include <QTextCodec>
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "mainwizard.hpp"
 #include "inisettings.hpp"
@@ -135,49 +136,6 @@ void Wizard::InstallationPage::startInstallation()
     thread->start();
 }
 
-
-
-//void Wizard::InstallationPage::installAddons()
-//{
-//    qDebug() << "component finished";
-
-//    QStringList components(field("installation.components").toStringList());
-
-//    if (components.contains(QLatin1String("Tribunal")) && !mUnshield->tribunalDone())
-//    {
-//        QString fileName = QFileDialog::getOpenFileName(
-//                    this,
-//                    tr("Select Tribunal installation file"),
-//                    QDir::rootPath(),
-//                    tr("InstallShield header files (*.hdr)"));
-
-//        if (fileName.isEmpty()) {
-//            qDebug() << "Cancel was clicked!";
-//            return;
-//        }
-
-//        QFileInfo info(fileName);
-//        mUnshield->installTribunal(info.absolutePath());
-//    }
-
-//    if (components.contains(QLatin1String("Bloodmoon")) && !mUnshield->bloodmoonDone())
-//    {
-//        QString fileName = QFileDialog::getOpenFileName(
-//                    this,
-//                    tr("Select Bloodmoon installation file"),
-//                    QDir::rootPath(),
-//                    tr("InstallShield header files (*.hdr)"));
-
-//        if (fileName.isEmpty()) {
-//            qDebug() << "Cancel was clicked!";
-//            return;
-//        }
-
-//        QFileInfo info(fileName);
-//        mUnshield->installBloodmoon(info.absolutePath());
-//    }
-//}
-
 void Wizard::InstallationPage::showFileDialog(const QString &component)
 {
     QString fileName;
@@ -215,6 +173,15 @@ void Wizard::InstallationPage::showFileDialog(const QString &component)
 void Wizard::InstallationPage::installationFinished()
 {
     qDebug() << "finished!";
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Installation finished"));
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setText(tr("Installation completed sucessfully!"));
+
+    msgBox.exec();
+
     mFinished = true;
     emit completeChanged();
 
