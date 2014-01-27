@@ -204,7 +204,8 @@ namespace CSMWorld
                                                           const std::string& destination,
                                                           const UniversalId::Type type)
     {
-       Record<ESXRecordT> copy(getRecord(origin));
+       Record<ESXRecordT> copy;
+       copy = getRecord(origin);
        copy.mState = RecordBase::State_ModifiedOnly;
        copy.get().mId = destination;
        

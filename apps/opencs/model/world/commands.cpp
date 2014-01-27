@@ -1,7 +1,8 @@
 
 #include "commands.hpp"
-#include <QAbstractItemModel>
+
 #include "idtable.hpp"
+#include <QAbstractItemModel>
 #include <components/misc/stringops.hpp>
 
 CSMWorld::ModifyCommand::ModifyCommand(QAbstractItemModel& model, const QModelIndex& index,
