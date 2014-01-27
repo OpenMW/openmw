@@ -45,13 +45,10 @@ namespace MWMechanics
 
         float mFallHeight;
 
-        int mAttackType;
-
         std::string mLastHitObject; // The last object to hit this actor
 
         // Do we need to recalculate stats derived from attributes or other factors?
         bool mRecalcDynamicStats;
-
 
         std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
     protected:
@@ -124,15 +121,6 @@ namespace MWMechanics
         void setMagicEffects(const MagicEffects &effects);
 
         void setAttackingOrSpell(bool attackingOrSpell);
-
-        enum AttackType
-        {
-            AT_Chop,
-            AT_Slash,
-            AT_Thrust
-        };
-        void setAttackType(int attackType) { mAttackType = attackType; }
-        int getAttackType() { return mAttackType; }
 
         void setLevel(int level);
 

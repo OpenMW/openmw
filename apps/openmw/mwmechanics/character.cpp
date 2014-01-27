@@ -39,17 +39,17 @@
 namespace
 {
 
-int getBestAttack (const ESM::Weapon* weapon)
+std::string getBestAttack (const ESM::Weapon* weapon)
 {
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
     int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
     int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
     if (slash >= chop && slash >= thrust)
-        return MWMechanics::CreatureStats::AT_Slash;
+        return "slash";
     else if (chop >= slash && chop >= thrust)
-        return MWMechanics::CreatureStats::AT_Chop;
+        return "chop";
     else
-        return MWMechanics::CreatureStats::AT_Thrust;
+        return "thrust";
 }
 
 }
@@ -691,9 +691,8 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    int attackType;
                     if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
-                        attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                        mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                     else
                         determineAttackType();
                 }
@@ -1299,27 +1298,21 @@ void CharacterController::determineAttackType()
 {
     float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
     
-    if (move[0] && !move[1]) //sideway
+    if(mPtr.getClass().hasInventoryStore(mPtr))
     {
-        mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Slash);
-        if(mPtr.getClass().hasInventoryStore(mPtr))
+        if (move[0] && !move[1]) //sideway
             mAttackType = "slash";
-        else
-            mCurrentWeapon = "attack2";
-    }
-    else if (move[1]) //forward
-    {
-        mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
-        if(mPtr.getClass().hasInventoryStore(mPtr))
+        else if (move[1]) //forward
             mAttackType = "thrust";
         else
-            mCurrentWeapon = "attack3";
+            mAttackType = "chop";
     }
     else
     {
-        mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Chop);
-        if(mPtr.getClass().hasInventoryStore(mPtr))
-            mAttackType = "chop";
+        if (move[0] && !move[1]) //sideway
+            mCurrentWeapon = "attack2";
+        else if (move[1]) //forward
+            mCurrentWeapon = "attack3";
         else
             mCurrentWeapon = "attack1";
     }
