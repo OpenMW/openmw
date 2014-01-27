@@ -81,11 +81,11 @@ void CSVWorld::CellCreator::valueChanged (int index)
     update();
 }
 
-void CSVWorld::CellCreator::cloneMode(const std::string& originid, 
+void CSVWorld::CellCreator::cloneMode(const std::string& originId, 
                                       const CSMWorld::UniversalId::Type type)
 {
-    CSVWorld::GenericCreator::cloneMode(originid, type);
-    if (*(originid.begin()) == '#') //if originid points to the exterior cell
+    CSVWorld::GenericCreator::cloneMode(originId, type);
+    if (*(originId.begin()) == '#') //if originid points to the exterior cell
     {
         setType(1); //enable x and y controls
         mType->setCurrentIndex(1);
