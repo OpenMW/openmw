@@ -8,7 +8,7 @@
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
-    : QUndoCommand (parent), mModel (model), mIndex (index), mNew (new_)
+: QUndoCommand (parent), mModel (model), mIndex (index), mNew (new_)
 {
     mOld = mModel.data (mIndex, Qt::EditRole);
 
@@ -26,9 +26,9 @@ void CSMWorld::ModifyCommand::undo()
 }
 
 CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-    : QUndoCommand (parent), mModel (model), mId (id), mType (UniversalId::Type_None)
+: QUndoCommand (parent), mModel (model), mId (id), mType (UniversalId::Type_None)
 {
-    setText ( ("Create record " + id).c_str());
+    setText (("Create record " + id).c_str());
 }
 
 void CSMWorld::CreateCommand::addValue (int column, const QVariant& value)
@@ -45,7 +45,7 @@ void CSMWorld::CreateCommand::redo()
 {
     mModel.addRecord (mId, mType);
 
-    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter != mValues.end(); ++iter)
+    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
         mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
 }
 
@@ -55,9 +55,9 @@ void CSMWorld::CreateCommand::undo()
 }
 
 CSMWorld::RevertCommand::RevertCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-    : QUndoCommand (parent), mModel (model), mId (id), mOld (0)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
 {
-    setText ( ("Revert record " + id).c_str());
+    setText (("Revert record " + id).c_str());
 
     mOld = model.getRecord (id).clone();
 }
@@ -74,7 +74,7 @@ void CSMWorld::RevertCommand::redo()
     QModelIndex index = mModel.getModelIndex (mId, column);
     RecordBase::State state = static_cast<RecordBase::State> (mModel.data (index).toInt());
 
-    if (state == RecordBase::State_ModifiedOnly)
+    if (state==RecordBase::State_ModifiedOnly)
     {
         mModel.removeRows (index.row(), 1);
     }
@@ -90,9 +90,9 @@ void CSMWorld::RevertCommand::undo()
 }
 
 CSMWorld::DeleteCommand::DeleteCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-    : QUndoCommand (parent), mModel (model), mId (id), mOld (0)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
 {
-    setText ( ("Delete record " + id).c_str());
+    setText (("Delete record " + id).c_str());
 
     mOld = model.getRecord (id).clone();
 }
@@ -109,7 +109,7 @@ void CSMWorld::DeleteCommand::redo()
     QModelIndex index = mModel.getModelIndex (mId, column);
     RecordBase::State state = static_cast<RecordBase::State> (mModel.data (index).toInt());
 
-    if (state == RecordBase::State_ModifiedOnly)
+    if (state==RecordBase::State_ModifiedOnly)
     {
         mModel.removeRows (index.row(), 1);
     }
@@ -127,7 +127,7 @@ void CSMWorld::DeleteCommand::undo()
 
 CSMWorld::ReorderRowsCommand::ReorderRowsCommand (IdTable& model, int baseIndex,
         const std::vector<int>& newOrder)
-    : mModel (model), mBaseIndex (baseIndex), mNewOrder (newOrder)
+: mModel (model), mBaseIndex (baseIndex), mNewOrder (newOrder)
 {}
 
 void CSMWorld::ReorderRowsCommand::redo()
@@ -140,7 +140,7 @@ void CSMWorld::ReorderRowsCommand::undo()
     int size = static_cast<int> (mNewOrder.size());
     std::vector<int> reverse (size);
 
-    for (int i = 0; i < size; ++i)
+    for (int i=0; i < size; ++i)
         reverse.at (mNewOrder[i]) = i;
 
     mModel.reorderRows (mBaseIndex, reverse);
