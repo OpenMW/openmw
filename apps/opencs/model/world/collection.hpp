@@ -8,7 +8,6 @@
 #include <stdexcept>
 #include <functional>
 #include <cassert>
-#include <boost/lexical_cast.hpp>
 
 #include <QVariant>
 
@@ -54,8 +53,6 @@ namespace CSMWorld
             Collection (const Collection&);
             Collection& operator= (const Collection&);
             
-            void idToCoordiantes(Record<ESXRecordT>& record, const std::string& destination) {} //dose nothing
-
         protected:
 
             const std::map<std::string, int>& getIdMap() const;
@@ -156,23 +153,6 @@ namespace CSMWorld
             ///< \attention This function must not change the ID.
     };
     
-    template<>
-    class Collection <ESM::Cell, IdAccessor<ESM::Cell> > : public CollectionBase //explicit specialisation
-    {
-            void idToCoordiantes(Record<ESM::Cell>& record, const std::string& destination)
-            {
-                if (record.get().isExterior())
-                {
-                    unsigned separator = destination.find(' ');
-                    assert(separator != std::string::npos);
-                    std::string xPos(destination.substr(0, separator));
-                    std::string yPos(destination.substr(separator+1, destination.size()));
-                    record.get().mData.mX = boost::lexical_cast<int>(xPos);
-                    record.get().mData.mY = boost::lexical_cast<int>(yPos);
-                }
-            }
-    };
-    
     template<typename ESXRecordT, typename IdAccessorT>
     const std::map<std::string, int>& Collection<ESXRecordT, IdAccessorT>::getIdMap() const
     {
@@ -229,9 +209,6 @@ namespace CSMWorld
        Record<ESXRecordT> copy(getRecord(origin));
        copy.mState = RecordBase::State_ModifiedOnly;
        copy.get().mId = destination;
-       
-       //the below function has explicit specialization for cells, and does nothing fo other records
-       idToCoordiantes(copy, destination);
        
        insertRecord(copy, getAppendIndex(destination, type));
     }
