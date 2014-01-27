@@ -85,8 +85,9 @@ void CSVWorld::ReferenceCreator::toggleWidgets(bool active)
     mCell->setEnabled(active);
 }
 
-void CSVWorld::ReferenceCreator::cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type, const CSMWorld::UniversalId::ArgumentType argumentType)
+void CSVWorld::ReferenceCreator::cloneMode(const std::string& originid,
+                                           const CSMWorld::UniversalId::Type type)
 {
-    CSVWorld::GenericCreator::cloneMode(originid, type, argumentType);
+    CSVWorld::GenericCreator::cloneMode(originid, type);
     cellChanged(); //otherwise ok button will remain disabled
 }

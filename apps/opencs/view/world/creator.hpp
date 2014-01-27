@@ -25,7 +25,8 @@ namespace CSVWorld
 
             virtual void reset() = 0;
             
-            virtual void cloneMode(const std::string& originid, const CSMWorld::UniversalId::Type type, const CSMWorld::UniversalId::ArgumentType argumentType) = 0;
+            virtual void cloneMode(const std::string& originid,
+                                   const CSMWorld::UniversalId::Type type) = 0;
 
             virtual void setEditLock (bool locked) = 0;
             

@@ -451,15 +451,13 @@ void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
 
 void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin, 
                                      const std::string& destination,
-                                     const CSMWorld::UniversalId::Type type,
-                                     const CSMWorld::UniversalId::ArgumentType argumentType)
+                                     const CSMWorld::UniversalId::Type type)
 {
         RecordBase *newRecord = mData.getRecord(mData.searchId(origin)).clone();
         newRecord->mState = RecordBase::State_ModifiedOnly;
         mAdapters.find(type)->second->setId(*newRecord, destination);
         mData.insertRecord(*newRecord, type, destination);
         delete newRecord;
-        //WIP
 }
 
 void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,

@@ -45,7 +45,6 @@ namespace CSMWorld
             std::string mIdOrigin;
             std::string mIdDestination;
             UniversalId::Type mType;
-            UniversalId::ArgumentType mArgumentType;
             std::map<int, QVariant> mValues;
 
         public:
@@ -53,7 +52,6 @@ namespace CSMWorld
             CloneCommand (IdTable& model, const std::string& idOrigin, 
                           const std::string& IdDestination,
                           const UniversalId::Type type,
-                          const UniversalId::ArgumentType argumentType,
                           QUndoCommand* parent = 0);
             
             virtual void redo();

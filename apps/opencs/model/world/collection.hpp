@@ -102,8 +102,7 @@ namespace CSMWorld
             
             virtual void cloneRecord(const std::string& origin, 
                                      const std::string& destination,
-                                     const UniversalId::Type type,
-                                     const UniversalId::ArgumentType argumentType);
+                                     const UniversalId::Type type);
                                      
             virtual int searchId (const std::string& id) const;
             ////< Search record with \a id.
@@ -203,8 +202,7 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin, 
                                                           const std::string& destination,
-                                                          const UniversalId::Type type,
-                                                          const UniversalId::ArgumentType argumentType)
+                                                          const UniversalId::Type type)
     {
        Record<ESXRecordT> copy(getRecord(origin));
        copy.mState = RecordBase::State_ModifiedOnly;

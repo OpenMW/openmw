@@ -82,10 +82,9 @@ void CSVWorld::CellCreator::valueChanged (int index)
 }
 
 void CSVWorld::CellCreator::cloneMode(const std::string& originid, 
-                                      const CSMWorld::UniversalId::Type type,
-                                      const CSMWorld::UniversalId::ArgumentType argumentType)
+                                      const CSMWorld::UniversalId::Type type)
 {
-    CSVWorld::GenericCreator::cloneMode(originid, type, argumentType);
+    CSVWorld::GenericCreator::cloneMode(originid, type);
     if (*(originid.begin()) == '#') //if originid points to the exterior cell
     {
         setType(1); //enable x and y controls

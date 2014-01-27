@@ -67,8 +67,7 @@ namespace CSVWorld
             virtual void toggleWidgets (bool active = true);
 
             virtual void cloneMode(const std::string& originid, 
-                                   const CSMWorld::UniversalId::Type type, 
-                                   const CSMWorld::UniversalId::ArgumentType argumentType);
+                                   const CSMWorld::UniversalId::Type type);
             
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty

@@ -41,8 +41,7 @@ namespace CSVWorld
             
         signals:
             void cloneRequest(const std::string&, 
-                              const CSMWorld::UniversalId::Type,
-                              const CSMWorld::UniversalId::ArgumentType);
+                              const CSMWorld::UniversalId::Type);
 
         private slots:
 

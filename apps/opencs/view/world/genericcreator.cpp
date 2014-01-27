@@ -127,7 +127,7 @@ void CSVWorld::GenericCreator::create()
         {
             std::string id = getId();
             std::auto_ptr<CSMWorld::CloneCommand> command (new CSMWorld::CloneCommand (
-                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType, mArgumentType));
+                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType));
             
             mUndoStack.push(command.release());
             
@@ -150,13 +150,11 @@ void CSVWorld::GenericCreator::create()
 }
 
 void CSVWorld::GenericCreator::cloneMode(const std::string& originid,
-                                         const CSMWorld::UniversalId::Type type,
-                                         const CSMWorld::UniversalId::ArgumentType argumentType)
+                                         const CSMWorld::UniversalId::Type type)
 {
     mCloneMode = true;
     mClonedId = originid;
     mClonedType = type;
-    mArgumentType = argumentType;
 }
 
 void CSVWorld::GenericCreator::toggleWidgets(bool active)

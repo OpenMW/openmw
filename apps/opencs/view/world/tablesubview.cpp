@@ -49,9 +49,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     {
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
         
-        connect (mTable, SIGNAL (cloneRequest(const CSMWorld::UniversalId&)), this, SLOT(cloneRequest(const CSMWorld::UniversalId&)));
-        connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)), 
-                mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type, const CSMWorld::UniversalId::ArgumentType)));
+        connect (mTable, SIGNAL (cloneRequest(const CSMWorld::UniversalId&)), this,
+                 SLOT(cloneRequest(const CSMWorld::UniversalId&)));
+        
+        connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)), 
+                mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
     }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
@@ -84,5 +86,5 @@ void CSVWorld::TableSubView::setStatusBar (bool show)
 
 void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
 {
-    emit cloneRequest(toClone.getId(), toClone.getType(), toClone.getArgumentType());
+    emit cloneRequest(toClone.getId(), toClone.getType());
 }

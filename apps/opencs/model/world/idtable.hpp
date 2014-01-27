@@ -65,7 +65,6 @@ namespace CSMWorld
 
             void cloneRecord(const std::string& origin, 
                              const std::string& destination, 
-                             UniversalId::ArgumentType argumentType, 
                              UniversalId::Type type = UniversalId::Type_None);
             
             QModelIndex getModelIndex (const std::string& id, int column) const;
