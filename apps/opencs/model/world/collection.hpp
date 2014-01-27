@@ -7,12 +7,10 @@
 #include <cctype>
 #include <stdexcept>
 #include <functional>
-#include <cassert>
 
 #include <QVariant>
 
 #include <components/misc/stringops.hpp>
-#include <components/esm/loadcell.hpp>
 
 #include "columnbase.hpp"
 
