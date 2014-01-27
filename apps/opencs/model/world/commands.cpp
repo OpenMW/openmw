@@ -170,7 +170,7 @@ void CSMWorld::CloneCommand::redo()
 
 void CSMWorld::CloneCommand::undo()
 {
-    mModel.removeRow (mModel.getModelIndex (mIdDestination, 0).row());
+    mModel.removeRow (mModel.getModelIndex (mIdDestination, 0).row()); //should be enough
 }
 
 // kate: indent-mode cstyle; indent-width 4; replace-tabs on; 
