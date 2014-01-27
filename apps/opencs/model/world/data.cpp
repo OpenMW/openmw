@@ -164,7 +164,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mTopicInfos.addColumn (new StringIdColumn<Info> (true));
     mTopicInfos.addColumn (new RecordStateColumn<Info>);
-    mTopicInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_Journal));
+    mTopicInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_TopicInfo));
     mTopicInfos.addColumn (new TopicColumn<Info> (false));
     mTopicInfos.addColumn (new ActorColumn<Info>);
     mTopicInfos.addColumn (new RaceColumn<Info>);
