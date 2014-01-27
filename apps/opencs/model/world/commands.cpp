@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 
+
 #include "idtable.hpp"
 
 #include <components/misc/stringops.hpp>
