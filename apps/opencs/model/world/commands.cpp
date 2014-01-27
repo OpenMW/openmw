@@ -1,8 +1,10 @@
 
 #include "commands.hpp"
 
-#include "idtable.hpp"
 #include <QAbstractItemModel>
+
+#include "idtable.hpp"
+
 #include <components/misc/stringops.hpp>
 
 CSMWorld::ModifyCommand::ModifyCommand(QAbstractItemModel& model, const QModelIndex& index,
@@ -37,7 +39,6 @@ CSMWorld::CloneCommand::CloneCommand(CSMWorld::IdTable& model,
 {
     setText(("Clone record " + idOrigin + " to the " + IdDestination).c_str());
 }
-
 
 void CSMWorld::CloneCommand::redo()
 {
