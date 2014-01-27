@@ -196,8 +196,8 @@ namespace MWMechanics
             creatureStats.setDynamic (i, stat);
         }
 
-        // auto-equip again. we need this for when the race is changed to a beast race
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        // auto-equip again. we need this for when the race is changed to a beast race and shoes are no longer equippable
+        MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
         for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
             invStore.unequipAll(ptr);
         invStore.autoEquip(ptr);
@@ -949,5 +949,11 @@ namespace MWMechanics
         int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
 
         return (roll >= target);
+    }
+
+    void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    {
+        mActors.getObjectsInRange(position, radius, objects);
+        mObjects.getObjectsInRange(position, radius, objects);
     }
 }

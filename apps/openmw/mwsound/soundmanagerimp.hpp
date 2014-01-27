@@ -148,6 +148,8 @@ namespace MWSound
         virtual void update(float duration);
 
         virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up);
+
+        virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
     };
 }
 

@@ -15,8 +15,8 @@ namespace MWMechanics
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false), mAttackType(AT_Chop),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false),
-          mMovementFlags(0)
+          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false), mBlock(false),
+          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -348,6 +348,13 @@ namespace MWMechanics
 
     bool CreatureStats::getCreatureTargetted() const
     {
+        std::string target;
+        if (mAiSequence.getCombatTarget(target))
+        {
+            MWWorld::Ptr targetPtr;
+            targetPtr = MWBase::Environment::get().getWorld()->getPtr(target, true);
+            return targetPtr.getTypeName() == typeid(ESM::Creature).name();
+        }
         return false;
     }
 
@@ -427,6 +434,16 @@ namespace MWMechanics
         return mHitRecovery;
     }
 
+    void CreatureStats::setBlock(bool value)
+    {
+        mBlock = value;
+    }
+
+    bool CreatureStats::getBlock() const
+    {
+        return mBlock;
+    }
+
     bool CreatureStats::getMovementFlag (Flag flag) const
     {
         return mMovementFlags & flag;
@@ -450,6 +467,26 @@ namespace MWMechanics
                 return getMovementFlag (Flag_Sneak) || getMovementFlag (Flag_ForceSneak);
         }
         return false; // shut up, compiler
+    }
+
+    DrawState_ CreatureStats::getDrawState() const
+    {
+        return mDrawState;
+    }
+
+    void CreatureStats::setDrawState(DrawState_ state)
+    {
+        mDrawState = state;
+    }
+
+    float CreatureStats::getAttackStrength() const
+    {
+        return mAttackStrength;
+    }
+
+    void CreatureStats::setAttackStrength(float value)
+    {
+        mAttackStrength = value;
     }
 
 }

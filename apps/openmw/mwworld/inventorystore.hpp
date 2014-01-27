@@ -113,6 +113,8 @@ namespace MWWorld
 
             InventoryStore& operator= (const InventoryStore& store);
 
+            virtual InventoryStore* clone() { return new InventoryStore(*this); }
+
             virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             /// Auto-equip items if specific conditions are fulfilled (see the implementation).

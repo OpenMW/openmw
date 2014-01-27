@@ -7,8 +7,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
-#include "../mwmechanics/npcstats.hpp"
 
+#include "creaturestats.hpp"
 #include <OgreVector3.h>
 
 namespace
@@ -32,6 +32,7 @@ namespace MWMechanics
       , mX(0)
       , mY(0)
       , mZ(0)
+      , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
         {
@@ -66,8 +67,7 @@ namespace MWMechanics
 
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
-        if (actor.getClass().isNpc())
-            actor.getClass().getNpcStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {
@@ -191,14 +191,49 @@ namespace MWMechanics
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
                 float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
                 int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-                // TODO: do not show subtitle messagebox if player is too far away? or do not say at all?
-                if (roll < chance)
+
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+                // Don't bother if the player is out of hearing range
+                if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
                     MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
             }
         }
 
         if(mIdleNow)
         {
+            // Play a random voice greeting if the player gets too close
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+
+            float hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+            float helloDistance = hello;
+            int iGreetDistanceMultiplier = store.get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
+            helloDistance *= iGreetDistanceMultiplier;
+
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            float playerDist = Ogre::Vector3(player.getRefData().getPosition().pos).distance(
+                        Ogre::Vector3(actor.getRefData().getPosition().pos));
+
+            if (!mSaidGreeting)
+            {
+                // TODO: check if actor is aware / has line of sight
+                if (playerDist <= helloDistance
+                        // Only play a greeting if the player is not moving
+                        && Ogre::Vector3(player.getClass().getMovementSettings(player).mPosition).squaredLength() == 0)
+                {
+                    mSaidGreeting = true;
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                    // TODO: turn to face player and interrupt the idle animation?
+                }
+            }
+            else
+            {
+                float fGreetDistanceReset = store.get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
+                if (playerDist >= fGreetDistanceReset * iGreetDistanceMultiplier)
+                    mSaidGreeting = false;
+            }
+
+            // Check if idle animation finished
             if(!checkIdle(actor, mPlayedIdle))
             {
                 mPlayedIdle = 0;

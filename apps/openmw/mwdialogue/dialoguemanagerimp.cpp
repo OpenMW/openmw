@@ -420,7 +420,7 @@ namespace MWDialogue
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
         // Apply disposition change to NPC's base disposition
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        if (mActor.getClass().isNpc())
         {
             MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
             npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
@@ -586,7 +586,8 @@ namespace MWDialogue
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
             if(winMgr->getSubtitlesEnabled())
                 winMgr->messageBox(info->mResponse);
-            sndMgr->say(actor, info->mSound);
+            if (!info->mSound.empty())
+                sndMgr->say(actor, info->mSound);
         }
     }
 

@@ -10,6 +10,7 @@
 #include "spells.hpp"
 #include "activespells.hpp"
 #include "aisequence.hpp"
+#include "drawstate.hpp"
 
 namespace MWMechanics
 {
@@ -18,6 +19,7 @@ namespace MWMechanics
     ///
     class CreatureStats
     {
+        DrawState_ mDrawState;
         AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         int mLevel;
@@ -37,7 +39,9 @@ namespace MWMechanics
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mHitRecovery;
+        bool mBlock;
         unsigned int mMovementFlags;
+        float mAttackStrength; // Note only some creatures attack with weapons
 
         float mFallHeight;
 
@@ -56,6 +60,13 @@ namespace MWMechanics
 
     public:
         CreatureStats();
+
+        DrawState_ getDrawState() const;
+        void setDrawState(DrawState_ state);
+
+        /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
+        float getAttackStrength() const;
+        void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
 
@@ -194,6 +205,8 @@ namespace MWMechanics
         bool getKnockedDown() const;
         void setHitRecovery(bool value);
         bool getHitRecovery() const;
+        void setBlock(bool value);
+        bool getBlock() const;
 
         enum Flag
         {

@@ -4,11 +4,15 @@
 #include <boost/format.hpp>
 
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/actionequip.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "spellicons.hpp"
 #include "inventorywindow.hpp"
@@ -231,8 +235,7 @@ namespace MWGui
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
 
             float enchantCost = enchant->mData.mCost;
-            MWMechanics::NpcStats &stats = player.getClass().getNpcStats(player);
-            int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+            int eSkill = player.getClass().getSkill(player, ESM::Skill::Enchant);
             int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
             std::string cost = boost::lexical_cast<std::string>(castCost);
@@ -316,13 +319,7 @@ namespace MWGui
         if (_sender->getUserString("Equipped") == "false"
             && !MWWorld::Class::get(item).getEquipmentSlots(item).first.empty())
         {
-            // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
-
-            MWWorld::ActionEquip action(item);
-            action.execute (MWBase::Environment::get().getWorld ()->getPlayerPtr());
-
-            // since we changed equipping status, update the inventory window
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
         }
 
         store.setSelectedEnchantItem(it);

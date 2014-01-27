@@ -287,24 +287,6 @@ namespace MWGui
             else {
                 mainWidgetSize.width = textSize.width + 3*textPadding;
             }
-            mainWidgetSize.height = textSize.height + 2*textPadding + textButtonPadding + buttonHeight * buttons.size() + buttonMainPadding;
-
-            mMainWidget->setSize(mainWidgetSize);
-
-            MyGUI::IntCoord absCoord;
-            absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
-            absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
-
-            mMainWidget->setCoord(absCoord);
-            mMainWidget->setSize(mainWidgetSize);
-
-
-            MyGUI::IntCoord messageWidgetCoord;
-            messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
-            messageWidgetCoord.top = textPadding;
-            mMessageWidget->setCoord(messageWidgetCoord);
-
-            mMessageWidget->setSize(textSize);
 
             MyGUI::IntCoord buttonCord;
             MyGUI::IntSize buttonSize(0, buttonHeight);
@@ -326,6 +308,21 @@ namespace MWGui
                 top += buttonSize.height + 2*buttonTopPadding;
             }
 
+            mainWidgetSize.height = top + buttonMainPadding;
+            mMainWidget->setSize(mainWidgetSize);
+
+            MyGUI::IntPoint absPos;
+            absPos.left = (gameWindowSize.width - mainWidgetSize.width)/2;
+            absPos.top = (gameWindowSize.height - mainWidgetSize.height)/2;
+
+            mMainWidget->setPosition(absPos);
+
+            MyGUI::IntCoord messageWidgetCoord;
+            messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
+            messageWidgetCoord.top = textPadding;
+            messageWidgetCoord.width = textSize.width;
+            messageWidgetCoord.height = textSize.height;
+            mMessageWidget->setCoord(messageWidgetCoord);
         }
 
         // Set key focus to "Ok" button

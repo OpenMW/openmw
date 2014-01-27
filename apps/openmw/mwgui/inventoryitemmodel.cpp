@@ -74,9 +74,9 @@ void InventoryItemModel::update()
 
         ItemStack newItem (item, this, item.getRefData().getCount());
 
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        if (mActor.getClass().hasInventoryStore(mActor))
         {
-            MWWorld::InventoryStore& store = MWWorld::Class::get(mActor).getInventoryStore(mActor);
+            MWWorld::InventoryStore& store = mActor.getClass().getInventoryStore(mActor);
             for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
             {
                 MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);

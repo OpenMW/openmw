@@ -6,6 +6,7 @@
 #include "OgreMath.h"
 #include "OgreVector3.h"
 
+
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
@@ -256,5 +257,6 @@ namespace MWMechanics
         }
 
     }
+
 }
 

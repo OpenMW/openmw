@@ -821,6 +821,8 @@ namespace MWWorld
         if(anim != NULL)
         {
             Ogre::Node *node = anim->getNode("Head");
+            if (node == NULL)
+                node = anim->getNode("Bip01 Head");
             if(node != NULL)
                 pos += node->_getDerivedPosition();
         }
@@ -903,6 +905,7 @@ namespace MWWorld
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell, pos);
 
                     mRendering->updateObjectCell(ptr, copy);
+                    MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, copy);
@@ -2097,13 +2100,14 @@ namespace MWWorld
     void World::castSpell(const Ptr &actor)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
 
         MWWorld::Ptr target = getFacedObject();
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
         MWMechanics::CastSpell cast(actor, target);
+        if (!target.isEmpty())
+            cast.mHitPosition = Ogre::Vector3(target.getRefData().getPosition().pos);
 
         if (!selectedSpell.empty())
         {
@@ -2111,9 +2115,11 @@ namespace MWWorld
 
             cast.cast(spell);
         }
-        else if (inv.getSelectedEnchantItem() != inv.end())
+        else if (actor.getClass().hasInventoryStore(actor))
         {
-            cast.cast(*inv.getSelectedEnchantItem());
+            MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+            if (inv.getSelectedEnchantItem() != inv.end())
+                cast.cast(*inv.getSelectedEnchantItem());
         }
     }
 
@@ -2170,11 +2176,18 @@ namespace MWWorld
         state.mId = id;
         state.mActorHandle = actor.getRefData().getHandle();
         state.mSpeed = speed;
-        state.mEffects = effects;
         state.mStack = stack;
 
+        // Only interested in "on target" effects
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
+            iter!=effects.mList.end(); ++iter)
+        {
+            if (iter->mRange == ESM::RT_Target)
+                state.mEffects.mList.push_back(*iter);
+        }
+
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        sndMgr->playSound3D(ptr, sound, 1.0f, 1.0f);
+        sndMgr->playSound3D(ptr, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
 
         mProjectiles[ptr] = state;
     }
@@ -2186,6 +2199,7 @@ namespace MWWorld
         {
             if (!mWorldScene->isCellActive(*it->first.getCell()))
             {
+                deleteObject(it->first);
                 mProjectiles.erase(it++);
                 continue;
             }
@@ -2218,11 +2232,10 @@ namespace MWWorld
                 if (obstacle == ptr)
                     continue;
 
-                explode = true;
-
                 MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
                 if (caster.isEmpty())
                     caster = obstacle;
+
                 if (obstacle.isEmpty())
                 {
                     // Terrain
@@ -2230,19 +2243,23 @@ namespace MWWorld
                 else
                 {
                     MWMechanics::CastSpell cast(caster, obstacle);
-                    cast.mStack = it->second.mStack;
+                    cast.mHitPosition = pos;
                     cast.mId = it->second.mId;
                     cast.mSourceName = it->second.mSourceName;
-                    cast.inflict(obstacle, caster, it->second.mEffects, ESM::RT_Target, false);
+                    cast.mStack = it->second.mStack;
+                    cast.inflict(obstacle, caster, it->second.mEffects, ESM::RT_Target, false, true);
                 }
 
-                deleteObject(ptr);
-                mProjectiles.erase(it++);
+                explode = true;
             }
 
             if (explode)
             {
-                // TODO: Explode
+                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                explodeSpell(Ogre::Vector3(ptr.getRefData().getPosition().pos), ptr, it->second.mEffects, caster, it->second.mId, it->second.mSourceName);
+
+                deleteObject(ptr);
+                mProjectiles.erase(it++);
                 continue;
             }
 
@@ -2282,7 +2299,7 @@ namespace MWWorld
     void World::breakInvisibility(const Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
-        if (actor.getClass().isNpc())
+        if (actor.getClass().hasInventoryStore(actor))
             actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
     }
 
@@ -2637,5 +2654,68 @@ namespace MWWorld
         std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
 
         mRendering->spawnEffect(model, texture, worldPosition);
+    }
+
+    void World::explodeSpell(const Vector3 &origin, const MWWorld::Ptr& object, const ESM::EffectList &effects, const Ptr &caster,
+                             const std::string& id, const std::string& sourceName)
+    {
+        std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
+        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.mList.begin();
+             effectIt != effects.mList.end(); ++effectIt)
+        {
+            const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+
+            if (effectIt->mArea <= 0)
+                continue; // Not an area effect
+
+            // Spawn the explosion orb effect
+            const ESM::Static* areaStatic;
+            if (!effect->mCasting.empty())
+                areaStatic = getStore().get<ESM::Static>().find (effect->mArea);
+            else
+                areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
+
+            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, effectIt->mArea);
+
+            // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            if(!effect->mAreaSound.empty())
+                sndMgr->playSound3D(object, effect->mAreaSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+            else
+                sndMgr->playSound3D(object, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+
+            // Get the actors in range of the effect
+            std::vector<MWWorld::Ptr> objects;
+            MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
+                        origin, feetToGameUnits(effectIt->mArea), objects);
+
+            for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
+                toApply[*affected].push_back(*effectIt);
+        }
+
+        // Now apply the appropriate effects to each actor in range
+        for (std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> >::iterator apply = toApply.begin(); apply != toApply.end(); ++apply)
+        {
+            MWWorld::Ptr source = caster;
+            // Vanilla-compatible behaviour of never applying the spell to the caster
+            // (could be changed by mods later)
+            if (apply->first == caster)
+                continue;
+
+            if (source.isEmpty())
+                source = apply->first;
+
+            MWMechanics::CastSpell cast(source, apply->first);
+            cast.mHitPosition = origin;
+            cast.mId = id;
+            cast.mSourceName = sourceName;
+            cast.mStack = false;
+            ESM::EffectList effects;
+            effects.mList = apply->second;
+            cast.inflict(apply->first, caster, effects, ESM::RT_Target, false, true);
+        }
     }
 }

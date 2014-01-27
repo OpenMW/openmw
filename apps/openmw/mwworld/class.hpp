@@ -128,6 +128,10 @@ namespace MWWorld
             /// actor responsible for the attack, and \a successful specifies if the hit is
             /// successful or not.
 
+            virtual void block (const Ptr& ptr) const;
+            ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
+            /// (default implementation: throw an exception)
+
             virtual void setActorHealth(const Ptr& ptr, float health, const Ptr& attacker=Ptr()) const;
             ///< Sets a new current health value for the actor, optionally specifying the object causing
             /// the change. Use this instead of using CreatureStats directly as this will make sure the
@@ -149,6 +153,9 @@ namespace MWWorld
             virtual InventoryStore& getInventoryStore (const Ptr& ptr) const;
             ///< Return inventory store or throw an exception, if class does not have a
             /// inventory store (default implementation: throw an exceoption)
+
+            virtual bool hasInventoryStore (const Ptr& ptr) const;
+            ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
 
             virtual void lock (const Ptr& ptr, int lockLevel) const;
             ///< Lock object (default implementation: throw an exception)

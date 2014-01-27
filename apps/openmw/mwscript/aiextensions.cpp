@@ -437,6 +437,7 @@ namespace MWScript
 
                     MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
                     
+
                     creatureStats.setHostile(true);
                     creatureStats.getAiSequence().stack(
                         MWMechanics::AiCombat(MWBase::Environment::get().getWorld()->getPtr(targetID, true) ));

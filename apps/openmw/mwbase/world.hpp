@@ -225,7 +225,7 @@ namespace MWBase
 
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
-            /// use the "Head" node as a basis.
+            /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
             virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
 
             virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
@@ -466,6 +466,9 @@ namespace MWBase
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
+
+            virtual void explodeSpell (const Ogre::Vector3& origin, const MWWorld::Ptr& object, const ESM::EffectList& effects,
+                                       const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
     };
 }
 

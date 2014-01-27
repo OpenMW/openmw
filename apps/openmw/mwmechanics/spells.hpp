@@ -20,7 +20,7 @@ namespace MWMechanics
     /// \brief Spell list
     ///
     /// This class manages known spells as well as abilities, powers and permanent negative effects like
-    /// diseaes.
+    /// diseases.
     class Spells
     {
         public:

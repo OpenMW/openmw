@@ -22,38 +22,16 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mDrawState (DrawState_Nothing)
-, mBounty (0)
+    : mBounty (0)
 , mLevelProgress(0)
 , mDisposition(0)
 , mReputation(0)
 , mWerewolfKills (0)
 , mProfit(0)
-, mAttackStrength(0.0f)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
-}
-
-MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
-{
-    return mDrawState;
-}
-
-void MWMechanics::NpcStats::setDrawState (DrawState_ state)
-{
-    mDrawState = state;
-}
-
-float MWMechanics::NpcStats::getAttackStrength() const
-{
-    return mAttackStrength;
-}
-
-void MWMechanics::NpcStats::setAttackStrength(float value)
-{
-    mAttackStrength = value;
 }
 
 int MWMechanics::NpcStats::getBaseDisposition() const
@@ -289,12 +267,16 @@ bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
 
 int MWMechanics::NpcStats::getBounty() const
 {
-    return mBounty;
+    if (mIsWerewolf)
+        return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt();
+    else
+        return mBounty;
 }
 
 void MWMechanics::NpcStats::setBounty (int bounty)
 {
-    mBounty = bounty;
+    if (!mIsWerewolf)
+        mBounty = bounty;
 }
 
 int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const

@@ -50,9 +50,11 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(!actor.getClass().getCreatureStats(actor).isHostile())
+        if(!actor.getClass().getCreatureStats(actor).isHostile()
+                || actor.getClass().getCreatureStats(actor).getHealth().getCurrent() <= 0)
             return true;
-        if(actor.getClass().getCreatureStats(actor).getHealth().getCurrent() <= 0)
+
+        if(mTarget.getClass().getCreatureStats(mTarget).isDead())
             return true;
 
         //Update every frame
@@ -125,9 +127,9 @@ namespace MWMechanics
 
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
-        if(actor.getTypeName() == typeid(ESM::NPC).name())
+        if (actor.getClass().hasInventoryStore(actor))
         {
-            MWMechanics::DrawState_ state = actor.getClass().getNpcStats(actor).getDrawState();
+            MWMechanics::DrawState_ state = actor.getClass().getCreatureStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
                 actor.getClass().getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
 
@@ -159,6 +161,7 @@ namespace MWMechanics
         ESM::Position pos = actor.getRefData().getPosition();
         
         float zAngle;
+
 
         float rangeMelee;
         float rangeCloseUp;
@@ -367,11 +370,13 @@ namespace MWMechanics
         return mTarget.getRefData().getHandle();
     }
 
+
     AiCombat *MWMechanics::AiCombat::clone() const
     {
         return new AiCombat(*this);
     }
 }
+
 
 namespace
 {

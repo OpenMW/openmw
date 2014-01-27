@@ -206,10 +206,12 @@ struct JournalViewModelImpl : JournalViewModel
             if (active_only && i->second.isFinished ())
                 continue;
 
-            /// \todo quest.getName() is broken? returns empty string
-            //const MWDialogue::Quest& quest = i->second;
-
-            visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (i->first));
+            const MWDialogue::Quest& quest = i->second;
+            // Unfortunately Morrowind.esm has no quest names, since the quest book was added with tribunal.
+            if (quest.getName().empty())
+                visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (i->first));
+            else
+                visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (quest.getName()));
         }
     }
 

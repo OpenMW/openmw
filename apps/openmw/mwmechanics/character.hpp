@@ -22,7 +22,7 @@ namespace MWMechanics
 {
 
 class Movement;
-class NpcStats;
+class CreatureStats;
 
 enum Priority {
     Priority_Default,
@@ -92,7 +92,8 @@ enum CharacterState {
     CharState_SwimDeath,
 
     CharState_Hit,
-    CharState_KnockDown
+    CharState_KnockDown,
+    CharState_Block
 };
 
 enum WeaponType {
@@ -171,12 +172,16 @@ class CharacterController
 
     void clearAnimQueue();
 
-    bool updateNpcState();
+    bool updateWeaponState();
     bool updateCreatureState();
 
     void updateVisibility();
 
     void playRandomDeath(float startpoint = 0.0f);
+
+    /// choose a random animation group with \a prefix and numeric suffix
+    /// @param num if non-NULL, the chosen animation number will be written here
+    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
@@ -202,9 +207,7 @@ public:
 };
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);
-    MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
-                                                           MWWorld::InventoryStore &inv,
-                                                           WeaponType *weaptype);
+    MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
 }
 
 #endif /* GAME_MWMECHANICS_CHARACTER_HPP */

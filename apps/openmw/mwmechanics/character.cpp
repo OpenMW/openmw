@@ -62,26 +62,6 @@ struct StateInfo {
     const char groupname[32];
 };
 
-static const std::string sDeathList[] = {
-    "death1" ,
-    "death2" ,
-    "death3" ,
-    "death4" ,
-    "death5" ,
-    "swimdeath",
-};
-static const int sDeathListSize = sizeof(sDeathList)/sizeof(sDeathList[0]);
-
-static const std::string sHitList[] = {
-    "hit1" ,
-    "hit2" ,
-    "hit3" ,
-    "hit4" ,
-    "hit5" ,
-    "knockdown" ,
-};
-static const int sHitListSize = sizeof(sHitList)/sizeof(sHitList[0]);
-
 static const StateInfo sMovementList[] = {
     { CharState_WalkForward, "walkforward" },
     { CharState_WalkBack, "walkback" },
@@ -154,6 +134,17 @@ public:
     { return weap.type == type; }
 };
 
+std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num)
+{
+    int numAnims=0;
+    while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
+        ++numAnims;
+
+    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * numAnims + 1; // [1, numAnims]
+    if (num)
+        *num = roll;
+    return prefix + Ogre::StringConverter::toString(roll);
+}
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
 {
@@ -162,26 +153,26 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     {
         bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
         bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
+        bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
         if(mHitState == CharState_None)
         {
             if(knockdown)
             {
                 mHitState = CharState_KnockDown;
-                mCurrentHit = sHitList[sHitListSize-1];
+                mCurrentHit = "knockdown";
                 mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
             }
             else if (recovery)
             {
                 mHitState = CharState_Hit;
-                int iHit = rand() % (sHitListSize-1);
-                mCurrentHit = sHitList[iHit];
-                if(mPtr.getRefData().getHandle()=="player" && !mAnimation->hasAnimation(mCurrentHit))
-                {
-                    //only 3 different hit animations if player is in 1st person
-                    int iHit = rand() % (sHitListSize-3);
-                    mCurrentHit = sHitList[iHit];
-                }
+                mCurrentHit = chooseRandomGroup("hit");
                 mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "start", "stop", 0.0f, 0);
+            }
+            else if (block)
+            {
+                mHitState = CharState_Block;
+                mCurrentHit = "shield";
+                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "block start", "block stop", 0.0f, 0);
             }
         }
         else if(!mAnimation->isPlaying(mCurrentHit))
@@ -191,6 +182,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(false);
             if (recovery)
                 mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
+            if (block)
+                mPtr.getClass().getCreatureStats(mPtr).setBlock(false);
             mHitState = CharState_None;
         }
     }
@@ -250,14 +243,16 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
             mAnimation->disable(mCurrentJump);
             mCurrentJump = jump;
-            mAnimation->play(mCurrentJump, Priority_Jump, jumpgroup, false,
+            if (mAnimation->hasAnimation("jump"))
+                mAnimation->play(mCurrentJump, Priority_Jump, jumpgroup, false,
                              1.0f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
         else
         {
             mAnimation->disable(mCurrentJump);
             mCurrentJump.clear();
-            mAnimation->play(jump, Priority_Jump, jumpgroup, true,
+            if (mAnimation->hasAnimation("jump"))
+                mAnimation->play(jump, Priority_Jump, jumpgroup, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
         }
     }
@@ -323,7 +318,7 @@ void getWeaponGroup(WeaponType weaptype, std::string &group)
 }
 
 
-MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
+MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
 {
     if(stats.getDrawState() == DrawState_Spell)
     {
@@ -385,28 +380,20 @@ MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats, MWWorld::Invent
 
 void CharacterController::playRandomDeath(float startpoint)
 {
-    if(MWWorld::Class::get(mPtr).isNpc())
+    if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
     {
-        if(MWBase::Environment::get().getWorld()->isSwimming(mPtr))
-        {
-            mDeathState = CharState_SwimDeath;
-            mCurrentDeath = sDeathList[sDeathListSize-1];   //last in the list is 'swimdeath'
-        }
-        else
-        {
-            int num = rand() % (sDeathListSize-1);
-            mDeathState = static_cast<CharacterState>(CharState_Death1 + num);
-            mCurrentDeath = sDeathList[num];
-        }
+        mDeathState = CharState_SwimDeath;
+        mCurrentDeath = "swimdeath";
     }
     else
     {
-        mDeathState = CharState_Death1;
-        mCurrentDeath = "death1";
+        int selected=0;
+        mCurrentDeath = chooseRandomGroup("death", &selected);
+        mDeathState = static_cast<CharacterState>(CharState_Death1 + (selected-1));
     }
 
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                    false, 1.0f, "start", "stop", 0.0f, 0);
+                    false, 1.0f, "start", "stop", startpoint, 0);
 }
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
@@ -434,15 +421,16 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
          * handle knockout and death which moves the character down. */
         mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
 
-        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
+        if (cls.hasInventoryStore(mPtr))
         {
-            getActiveWeapon(cls.getNpcStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
+            getActiveWeapon(cls.getCreatureStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
             if(mWeaponType != WeapType_None)
             {
                 getWeaponGroup(mWeaponType, mCurrentWeapon);
                 mUpperBodyState = UpperCharState_WeapEquiped;
                 mAnimation->showWeapons(true);
             }
+            mAnimation->showCarriedLeft(mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand);
         }
 
         if(!cls.getCreatureStats(mPtr).isDead())
@@ -506,14 +494,14 @@ bool CharacterController::updateCreatureState()
     return false;
 }
 
-bool CharacterController::updateNpcState()
+bool CharacterController::updateWeaponState()
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-    NpcStats &stats = cls.getNpcStats(mPtr);
+    CreatureStats &stats = cls.getCreatureStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
-    const bool isWerewolf = stats.isWerewolf();
+    const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
     bool forcestateupdate = false;
     if(weaptype != mWeaponType && mHitState != CharState_KnockDown)
@@ -604,7 +592,7 @@ bool CharacterController::updateNpcState()
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
-                mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(false);
+                stats.setAttackingOrSpell(false);
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -1115,8 +1103,8 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(cls.isNpc())
-            forcestateupdate = updateNpcState() || forcestateupdate;
+        if(cls.hasInventoryStore(mPtr))
+            forcestateupdate = updateWeaponState() || forcestateupdate;
         else
             forcestateupdate = updateCreatureState() || forcestateupdate;
 
@@ -1314,7 +1302,7 @@ void CharacterController::determineAttackType()
     if (move[0] && !move[1]) //sideway
     {
         mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Slash);
-        if(mPtr.getClass().isNpc())
+        if(mPtr.getClass().hasInventoryStore(mPtr))
             mAttackType = "slash";
         else
             mCurrentWeapon = "attack2";
@@ -1322,7 +1310,7 @@ void CharacterController::determineAttackType()
     else if (move[1]) //forward
     {
         mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Thrust);
-        if(mPtr.getClass().isNpc())
+        if(mPtr.getClass().hasInventoryStore(mPtr))
             mAttackType = "thrust";
         else
             mCurrentWeapon = "attack3";
@@ -1330,7 +1318,7 @@ void CharacterController::determineAttackType()
     else
     {
         mPtr.getClass().getCreatureStats(mPtr).setAttackType(MWMechanics::CreatureStats::AT_Chop);
-        if(mPtr.getClass().isNpc())
+        if(mPtr.getClass().hasInventoryStore(mPtr))
             mAttackType = "chop";
         else
             mCurrentWeapon = "attack1";

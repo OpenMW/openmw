@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "stat.hpp"
-#include "drawstate.hpp"
 
 #include "creaturestats.hpp"
 
@@ -30,7 +29,6 @@ namespace MWMechanics
             /// \note the faction key must be in lowercase
             std::map<std::string, int> mFactionRank;
 
-            DrawState_ mDrawState;
             int mDisposition;
             SkillValue mSkill[27];
             SkillValue mWerewolfSkill[27];
@@ -60,13 +58,6 @@ namespace MWMechanics
             /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
             int getProfit() const;
             void modifyProfit(int diff);
-
-            DrawState_ getDrawState() const;
-            void setDrawState (DrawState_ state);
-
-            /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
-            float getAttackStrength() const;
-            void setAttackStrength(float value);
 
             int getBaseDisposition() const;
 

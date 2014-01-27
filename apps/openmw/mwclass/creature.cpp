@@ -6,6 +6,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -26,22 +27,30 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "../mwworld/inventorystore.hpp"
+
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/combat.hpp"
 
 namespace
 {
     struct CustomData : public MWWorld::CustomData
     {
         MWMechanics::CreatureStats mCreatureStats;
-        MWWorld::ContainerStore mContainerStore;
+        MWWorld::ContainerStore* mContainerStore; // may be InventoryStore for some creatures
         MWMechanics::Movement mMovement;
 
         virtual MWWorld::CustomData *clone() const;
+
+        CustomData() : mContainerStore(0) {}
+        virtual ~CustomData() { delete mContainerStore; }
     };
 
     MWWorld::CustomData *CustomData::clone() const
     {
-        return new CustomData (*this);
+        CustomData* cloned = new CustomData (*this);
+        cloned->mContainerStore = mContainerStore->clone();
+        return cloned;
     }
 }
 
@@ -106,15 +115,23 @@ namespace MWClass
                 data->mCreatureStats.getSpells().add (*iter);
 
             // inventory
-            data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr), "",
+            if (ref->mBase->mFlags & ESM::Creature::Weapon)
+                data->mContainerStore = new MWWorld::InventoryStore();
+            else
+                data->mContainerStore = new MWWorld::ContainerStore();
+
+            // store
+            ptr.getRefData().setCustomData (data.release());
+
+            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "",
                                        MWBase::Environment::get().getWorld()->getStore());
 
             // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
             // (except for gold you gave him)
-            data->mContainerStore.add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
+            getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
 
-            // store
-            ptr.getRefData().setCustomData (data.release());
+            if (ref->mBase->mFlags & ESM::Creature::Weapon)
+                getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 
@@ -133,8 +150,10 @@ namespace MWClass
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
         MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertCreature(ptr);
+        actors.insertCreature(ptr, ref->mBase->mFlags & ESM::Creature::Weapon);
     }
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
@@ -178,9 +197,40 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
+
+        // Get the weapon used (if hand-to-hand, weapon = inv.end())
+        MWWorld::Ptr weapon;
+        if (ptr.getClass().hasInventoryStore(ptr))
+        {
+            MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+            MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponslot != inv.end() && weaponslot->getTypeName() == typeid(ESM::Weapon).name())
+                weapon = *weaponslot;
+        }
+
+        // Reduce fatigue
+        // somewhat of a guess, but using the weapon weight makes sense
+        const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
+        const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
+        const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
+        MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
+        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
+        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
+        if (!weapon.isEmpty())
+            fatigueLoss += weapon.getClass().getWeight(weapon) * stats.getAttackStrength() * fWeaponFatigueMult;
+        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
+        stats.setFatigue(fatigue);
 
         // TODO: where is the distance defined?
-        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, 100);
+        float dist = 200.f;
+        if (!weapon.isEmpty())
+        {
+            const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
+            dist = fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
+        }
+        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
         if (result.first.isEmpty())
             return; // Didn't hit anything
 
@@ -191,7 +241,6 @@ namespace MWClass
 
         Ogre::Vector3 hitPosition = result.second;
 
-        MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
         MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
         float hitchance = ref->mBase->mData.mCombat +
@@ -226,10 +275,62 @@ namespace MWClass
             break;
         }
 
+        // I think this should be random, since attack1-3 animations don't have an attack strength like NPCs do
         float damage = min + (max - min) * ::rand()/(RAND_MAX+1.0);
 
-        // TODO: do not do this if the attack is blocked
-        MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+        if (!weapon.isEmpty())
+        {
+            const bool weaphashealth = get(weapon).hasItemHealth(weapon);
+            const unsigned char *attack = NULL;
+            if(type == MWMechanics::CreatureStats::AT_Chop)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+            else if(type == MWMechanics::CreatureStats::AT_Slash)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash;
+            else if(type == MWMechanics::CreatureStats::AT_Thrust)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
+            if(attack)
+            {
+                float weaponDamage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                weaponDamage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                if(weaphashealth)
+                {
+                    int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
+                    if(weapon.getCellRef().mCharge == -1)
+                        weapon.getCellRef().mCharge = weapmaxhealth;
+                    weaponDamage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
+                }
+
+                if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                    weapon.getCellRef().mCharge -= std::min(std::max(1,
+                        (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
+
+                // Weapon broken? unequip it
+                if (weapon.getCellRef().mCharge == 0)
+                    weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
+
+                damage += weaponDamage;
+            }
+
+            // Apply "On hit" enchanted weapons
+            std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
+            if (!enchantmentName.empty())
+            {
+                const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                            enchantmentName);
+                if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+                {
+                    MWMechanics::CastSpell cast(ptr, victim);
+                    cast.mHitPosition = hitPosition;
+                    cast.cast(weapon);
+                }
+            }
+        }
+
+        if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+            damage = 0;
+
+        if (damage > 0)
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         victim.getClass().onHit(victim, damage, true, MWWorld::Ptr(), ptr, true);
     }
@@ -258,31 +359,60 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
-        // Check for knockdown
-        float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
-        float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
-        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-        if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
-        {
-            getCreatureStats(ptr).setKnockedDown(true);
+        if (damage > 0.0f && !object.isEmpty())
+            MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
-        }
-        else
-            getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
-
-        if(ishealth)
+        if (damage > 0.f)
         {
-            if(damage > 0.0f)
+            // Check for knockdown
+            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
+            float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                    * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+            {
+                getCreatureStats(ptr).setKnockedDown(true);
+
+            }
+            else
+                getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
+
+            if(ishealth)
+            {
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
-            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
-            setActorHealth(ptr, health, attacker);
+                float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+                setActorHealth(ptr, health, attacker);
+            }
+            else
+            {
+                MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+                fatigue.setCurrent(fatigue.getCurrent() - damage, true);
+                getCreatureStats(ptr).setFatigue(fatigue);
+            }
         }
-        else
+    }
+
+    void Creature::block(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::InventoryStore& inv = getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        if (shield == inv.end())
+            return;
+
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        switch(shield->getClass().getEquipmentSkill(*shield))
         {
-            MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
-            fatigue.setCurrent(fatigue.getCurrent() - damage, true);
-            getCreatureStats(ptr).setFatigue(fatigue);
+            case ESM::Skill::LightArmor:
+                sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
+                break;
+            case ESM::Skill::MediumArmor:
+                sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
+                break;
+            case ESM::Skill::HeavyArmor:
+                sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
+                break;
+            default:
+                return;
         }
     }
 
@@ -325,18 +455,33 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
-    MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr)
-        const
+    MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return *dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+    }
+
+    MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
+        if (ref->mBase->mFlags & ESM::Creature::Weapon)
+            return dynamic_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
+        else
+            throw std::runtime_error("this creature has no inventory store");
+    }
+
+    bool Creature::hasInventoryStore(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
+        return (ref->mBase->mFlags & ESM::Creature::Weapon);
     }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         return ref->mBase->mScript;
     }

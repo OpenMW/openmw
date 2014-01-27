@@ -94,6 +94,8 @@ namespace MWMechanics
         void skipAnimation(const MWWorld::Ptr& ptr);
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
 
+        void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
+
     private:
         PtrControllerMap mActors;
 

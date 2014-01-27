@@ -159,7 +159,7 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ContainerStoreIterator it = invStore.begin();
                     for (; it != invStore.end(); ++it)
                     {
@@ -171,6 +171,9 @@ namespace MWScript
 
                     MWWorld::ActionEquip action (*it);
                     action.execute(ptr);
+
+                    if (ptr.getRefData().getHandle() == "player" && !ptr.getClass().getScript(ptr).empty())
+                        ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
                 }
         };
 

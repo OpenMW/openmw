@@ -6,6 +6,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace MWMechanics
 {

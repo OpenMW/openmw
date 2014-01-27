@@ -157,6 +157,8 @@ namespace MWBase
 
         virtual void toggleAI() = 0;
         virtual bool isAIActive() = 0;
+
+            virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
     };
 }
 

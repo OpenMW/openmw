@@ -216,7 +216,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             float ratio = MWWorld::Class::get (player).getCreatureStats (player).getHealth().getCurrent() /
                 MWWorld::Class::get (player).getCreatureStats (player).getHealth().getModified();
 
-            return select.selectCompare (ratio);
+            return select.selectCompare (static_cast<int>(ratio*100));
         }
 
         case SelectWrapper::Function_PcDynamicStat:
@@ -536,7 +536,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_CreatureTargetted:
 
-            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getCreatureTargetted();
+            return mActor.getClass().getCreatureStats (mActor).getCreatureTargetted();
 
         case SelectWrapper::Function_Werewolf:
 
