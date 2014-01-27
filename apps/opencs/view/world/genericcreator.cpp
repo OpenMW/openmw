@@ -2,7 +2,6 @@
 #include "genericcreator.hpp"
 
 #include <memory>
-#include <qt4/QtCore/QString>
 
 #include <QHBoxLayout>
 #include <QPushButton>

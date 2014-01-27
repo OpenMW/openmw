@@ -16,7 +16,6 @@
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
-#include <qt4/QtCore/qabstractitemmodel.h>
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
