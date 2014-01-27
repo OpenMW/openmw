@@ -3,9 +3,7 @@
 
 #include <QAbstractItemModel>
 
-
 #include "idtable.hpp"
-
 #include <components/misc/stringops.hpp>
 
 CSMWorld::ModifyCommand::ModifyCommand(QAbstractItemModel& model, const QModelIndex& index,
