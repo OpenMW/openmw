@@ -73,7 +73,8 @@ namespace MWWorld
 
             void write (ESM::ESMWriter& writer) const;
 
-            bool readRecord (ESM::ESMReader& reader, int32_t type);
+            bool readRecord (ESM::ESMReader& reader, int32_t type,
+                const std::map<int, int>& contentFileMap);
     };
 }
 

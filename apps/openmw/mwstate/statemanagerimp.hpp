@@ -1,6 +1,8 @@
 #ifndef GAME_STATE_STATEMANAGER_H
 #define GAME_STATE_STATEMANAGER_H
 
+#include <map>
+
 #include "../mwbase/statemanager.hpp"
 
 #include <boost/filesystem/path.hpp>
@@ -20,6 +22,8 @@ namespace MWState
         private:
 
             void cleanup (bool force = false);
+
+            std::map<int, int> buildContentFileIndexMap (const ESM::ESMReader& reader) const;
 
         public:
 

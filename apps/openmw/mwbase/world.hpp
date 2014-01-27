@@ -2,6 +2,7 @@
 #define GAME_MWBASE_WORLD_H
 
 #include <vector>
+#include <map>
 
 #include <components/settings/settings.hpp>
 
@@ -102,7 +103,8 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer) const = 0;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+                const std::map<int, int>& contentFileMap) = 0;
 
             virtual OEngine::Render::Fader* getFader() = 0;
             ///< \todo remove this function. Rendering details should not be exposed.

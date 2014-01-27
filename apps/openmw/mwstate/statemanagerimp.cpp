@@ -6,6 +6,8 @@
 #include <components/esm/cellid.hpp>
 #include <components/esm/loadcell.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include <OgreImage.h>
@@ -41,6 +43,31 @@ void MWState::StateManager::cleanup (bool force)
         mCharacterManager.clearCurrentCharacter();
         mTimePlayed = 0;
     }
+}
+
+std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::ESMReader& reader)
+    const
+{
+    const std::vector<std::string>& current =
+        MWBase::Environment::get().getWorld()->getContentFiles();
+
+    const std::vector<ESM::Header::MasterData>& prev = reader.getGameFiles();
+
+    std::map<int, int> map;
+
+    for (int iPrev = 0; iPrev<static_cast<int> (prev.size()); ++iPrev)
+    {
+        std::string id = Misc::StringUtils::lowerCase (prev[iPrev].name);
+
+        for (int iCurrent = 0; iCurrent<static_cast<int> (current.size()); ++iCurrent)
+            if (id==Misc::StringUtils::lowerCase (current[iCurrent]))
+            {
+                map.insert (std::make_pair (iPrev, iCurrent));
+                break;
+            }
+    }
+
+    return map;
 }
 
 MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::string& game)
@@ -167,7 +194,16 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
 
     std::ofstream stream (slot->mPath.string().c_str());
+
     ESM::ESMWriter writer;
+
+    const std::vector<std::string>& current =
+        MWBase::Environment::get().getWorld()->getContentFiles();
+
+    for (std::vector<std::string>::const_iterator iter (current.begin()); iter!=current.end();
+        ++iter)
+        writer.addMaster (*iter, 0); // not using the size information anyway -> use value of 0
+
     writer.setFormat (ESM::Header::CurrentFormat);
     writer.setRecordCount (
         1 // saved game header
@@ -205,6 +241,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         ESM::ESMReader reader;
         reader.open (slot->mPath.string());
 
+        std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
+
         while (reader.hasMoreRecs())
         {
             ESM::NAME n = reader.getRecName();
@@ -237,7 +275,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_PLAY:
                 case ESM::REC_CSTA:
 
-                    MWBase::Environment::get().getWorld()->readRecord (reader, n.val);
+                    MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
 
                 case ESM::REC_GSCR:

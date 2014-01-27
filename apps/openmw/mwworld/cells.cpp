@@ -352,7 +352,8 @@ void MWWorld::Cells::write (ESM::ESMWriter& writer) const
             writeCell (writer, iter->second);
 }
 
-bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type)
+bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
+    const std::map<int, int>& contentFileMap)
 {
     if (type==ESM::REC_CSTA)
     {
@@ -373,7 +374,11 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type)
 
         state.load (reader);
         cellStore->loadState (state);
-        reader.skipRecord();
+
+        if (cellStore->mState!=CellStore::State_Loaded)
+            cellStore->load (mStore, mReader);
+
+        cellStore->readReferences (reader, contentFileMap);
 
         return true;
     }

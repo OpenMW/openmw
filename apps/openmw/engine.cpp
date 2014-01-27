@@ -127,7 +127,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             if(!paused && player.getClass().getCreatureStats(player).isDead())
                 MWBase::Environment::get().getStateManager()->endGame();
         }
-            
+
         // update world
         MWBase::Environment::get().getWorld()->update(frametime, paused);
 
@@ -282,12 +282,7 @@ void OMW::Engine::setCell (const std::string& cellName)
 
 void OMW::Engine::addContentFile(const std::string& file)
 {
-  if (file.find_last_of(".") == std::string::npos)
-  {
-    throw std::runtime_error("Missing extension in content file!");
-  }
-
-  mContentFiles.push_back(file);
+    mContentFiles.push_back(file);
 }
 
 void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)

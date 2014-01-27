@@ -144,6 +144,8 @@ namespace MWWorld
 
         void writeReferences (ESM::ESMWriter& writer) const;
 
+        void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap);
+
   private:
 
     template<class Functor, class List>

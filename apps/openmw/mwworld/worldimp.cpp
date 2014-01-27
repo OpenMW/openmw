@@ -324,12 +324,13 @@ namespace MWWorld
         mPlayer->write (writer);
     }
 
-    void World::readRecord (ESM::ESMReader& reader, int32_t type)
+    void World::readRecord (ESM::ESMReader& reader, int32_t type,
+        const std::map<int, int>& contentFileMap)
     {
         if (!mStore.readRecord (reader, type) &&
             !mGlobalVariables.readRecord (reader, type) &&
             !mPlayer->readRecord (reader, type) &&
-            !mCells.readRecord (reader, type))
+            !mCells.readRecord (reader, type, contentFileMap))
         {
             throw std::runtime_error ("unknown record in saved game");
         }

@@ -179,7 +179,8 @@ namespace MWWorld
 
             virtual void write (ESM::ESMWriter& writer) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+                const std::map<int, int>& contentFileMap);
 
             virtual OEngine::Render::Fader* getFader();
             ///< \todo remove this function. Rendering details should not be exposed.

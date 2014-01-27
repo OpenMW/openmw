@@ -41,9 +41,6 @@ namespace
     {
         if (!collection.mList.empty())
         {
-            // section header
-            writer.writeHNT ("CSEC", collection.mList.front().mBase->sRecordId);
-
             // references
             for (typename MWWorld::CellRefList<T>::List::const_iterator
                 iter (collection.mList.begin());
@@ -55,11 +52,50 @@ namespace
                 RecordType state;
                 iter->save (state);
 
-                writer.startRecord (ESM::REC_OBJE);
+                writer.writeHNT ("OBJE", collection.mList.front().mBase->sRecordId);
                 state.save (writer);
-                writer.endRecord (ESM::REC_OBJE);
             }
         }
+    }
+
+    template<typename RecordType, typename T>
+    void readReferenceCollection (ESM::ESMReader& reader,
+        MWWorld::CellRefList<T>& collection, const std::map<int, int>& contentFileMap)
+    {
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+
+        RecordType state;
+        state.load (reader);
+
+        std::map<int, int>::const_iterator iter =
+            contentFileMap.find (state.mRef.mRefNum.mContentFile);
+
+        if (iter==contentFileMap.end())
+            return; // content file has been removed -> skip
+
+        state.mRef.mRefNum.mContentFile = iter->second;
+
+        if (!MWWorld::LiveCellRef<T>::checkState (state))
+            return; // not valid anymore with current content files -> skip
+
+        const T *record = esmStore.get<T>().search (state.mRef.mRefID);
+
+        if (!record)
+            return;
+
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
+            iter!=collection.mList.end(); ++iter)
+            if (iter->mRef.mRefNum==state.mRef.mRefNum)
+            {
+                // overwrite existing reference
+                iter->load (state);
+                return;
+            }
+
+        // new reference
+        MWWorld::LiveCellRef<T> ref (record);
+        ref.load (state);
+        collection.mList.push_back (ref);
     }
 }
 
@@ -303,5 +339,122 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mRepairs);
         writeReferenceCollection<ESM::ObjectState> (writer, mStatics);
         writeReferenceCollection<ESM::ObjectState> (writer, mWeapons);
+    }
+
+    void CellStore::readReferences (ESM::ESMReader& reader,
+        const std::map<int, int>& contentFileMap)
+    {
+        while (reader.isNextSub ("OBJE"))
+        {
+            unsigned int id = 0;
+            reader.getHT (id);
+
+            switch (id)
+            {
+                case ESM::REC_ACTI:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mActivators, contentFileMap);
+                    break;
+
+                case ESM::REC_ALCH:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mPotions, contentFileMap);
+                    break;
+
+                case ESM::REC_APPA:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mAppas, contentFileMap);
+                    break;
+
+                case ESM::REC_ARMO:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mArmors, contentFileMap);
+                    break;
+
+                case ESM::REC_BOOK:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mBooks, contentFileMap);
+                    break;
+
+                case ESM::REC_CLOT:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mClothes, contentFileMap);
+                    break;
+
+                case ESM::REC_CONT:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mContainers, contentFileMap);
+                    break;
+
+                case ESM::REC_CREA:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mCreatures, contentFileMap);
+                    break;
+
+                case ESM::REC_DOOR:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mDoors, contentFileMap);
+                    break;
+
+                case ESM::REC_INGR:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mIngreds, contentFileMap);
+                    break;
+
+                case ESM::REC_LEVC:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mCreatureLists, contentFileMap);
+                    break;
+
+                case ESM::REC_LEVI:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mItemLists, contentFileMap);
+                    break;
+
+                case ESM::REC_LIGH:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mLights, contentFileMap);
+                    break;
+
+                case ESM::REC_LOCK:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mLockpicks, contentFileMap);
+                    break;
+
+                case ESM::REC_MISC:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mMiscItems, contentFileMap);
+                    break;
+
+                case ESM::REC_NPC_:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mNpcs, contentFileMap);
+                    break;
+
+                case ESM::REC_PROB:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mProbes, contentFileMap);
+                    break;
+
+                case ESM::REC_REPA:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mRepairs, contentFileMap);
+                    break;
+
+                case ESM::REC_STAT:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mStatics, contentFileMap);
+                    break;
+
+                case ESM::REC_WEAP:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mWeapons, contentFileMap);
+                    break;
+
+                default:
+
+                    throw std::runtime_error ("unknown type in cell reference section");
+            }
+        }
     }
 }
