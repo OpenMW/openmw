@@ -140,7 +140,7 @@ void CSMWorld::ReorderRowsCommand::undo()
     int size = static_cast<int> (mNewOrder.size());
     std::vector<int> reverse (size);
 
-    for (int i=0; i < size; ++i)
+    for (int i=0; i< size; ++i)
         reverse.at (mNewOrder[i]) = i;
 
     mModel.reorderRows (mBaseIndex, reverse);
