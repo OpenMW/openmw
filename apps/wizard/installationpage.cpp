@@ -73,22 +73,22 @@ void Wizard::InstallationPage::startInstallation()
             thread, SLOT(deleteLater()));
 
     connect(mUnshield, SIGNAL(finished()),
-            this, SLOT(installationFinished()));
+            this, SLOT(installationFinished()), Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(error(QString)),
-            this, SLOT(installationError(QString)));
+            this, SLOT(installationError(QString)), Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(textChanged(QString)),
-            installProgressLabel, SLOT(setText(QString)));
+            installProgressLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(textChanged(QString)),
-            logTextEdit, SLOT(append(QString)));
+            logTextEdit, SLOT(append(QString)),  Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(progressChanged(int)),
-            installProgressBar, SLOT(setValue(int)));
+            installProgressBar, SLOT(setValue(int)),  Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(requestFileDialog(QString)),
-            this, SLOT(showFileDialog(QString)));
+            this, SLOT(showFileDialog(QString)), Qt::QueuedConnection);
 
     if (field("installation.new").toBool() == true)
     {

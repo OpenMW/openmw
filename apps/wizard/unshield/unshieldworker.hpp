@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QReadWriteLock>
 
 #include <libunshield.h>
 
@@ -39,17 +40,20 @@ namespace Wizard
         void setPath(const QString &path);
         void setIniPath(const QString &path);
 
+        QString getPath();
+        QString getIniPath();
+
         void setIniCodec(QTextCodec *codec);
 
     private:
 
-//        void setMorrowindDone(bool done);
-//        void setTribunalDone(bool done);
-//        void setBloodmoonDone(bool done);
+        void setMorrowindDone(bool done);
+        void setTribunalDone(bool done);
+        void setBloodmoonDone(bool done);
 
-//        bool getMorrowindDone();
-//        bool getTribunalDone();
-//        bool getBloodmoonDone();
+        bool getMorrowindDone();
+        bool getTribunalDone();
+        bool getBloodmoonDone();
 
         bool removeDirectory(const QString &dirName);
 
@@ -92,6 +96,8 @@ namespace Wizard
 
         QWaitCondition mWait;
         QMutex mMutex;
+
+        QReadWriteLock mLock;
 
     public slots:
         void extract();
