@@ -66,14 +66,6 @@ namespace MWMechanics
         {
             cellX = cell->mData.mX;
             cellY = cell->mData.mY;
-            float xCell = 0;
-            float yCell = 0;
-
-            if(cell->isExterior())
-            {
-                xCell = cell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = cell->mData.mY * ESM::Land::REAL_SIZE;
-            }
 
             ESM::Pathgrid::Point dest;
             dest.mX = mX;

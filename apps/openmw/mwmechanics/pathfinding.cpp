@@ -117,7 +117,7 @@ namespace
             if(current == goal) break;
 
             closedset.push_back(current);
-            
+
             for(int j = 0;j<graph[current].edges.size();j++)
             {
                 //int next = graph[current].edges[j].destination
@@ -197,7 +197,7 @@ namespace MWMechanics
 
     void PathFinder::cleanUpAStar()
     {
-        for(int i=0;i<mGraph.size();i++)
+        for(int i=0;i<static_cast<int> (mGraph.size());i++)
         {
             mGraph[i].parent = -1;
             mGScore[i] = -1;
@@ -225,8 +225,8 @@ namespace MWMechanics
             if(current == goal) break;
 
             closedset.push_back(current);
-            
-            for(int j = 0;j<mGraph[current].edges.size();j++)
+
+            for(int j = 0;j<static_cast<int> (mGraph[current].edges.size());j++)
             {
                 //int next = mGraph[current].edges[j].destination
                 if(std::find(closedset.begin(),closedset.end(),mGraph[current].edges[j].destination) == closedset.end())
