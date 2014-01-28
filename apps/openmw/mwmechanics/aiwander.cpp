@@ -68,6 +68,7 @@ namespace MWMechanics
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {
