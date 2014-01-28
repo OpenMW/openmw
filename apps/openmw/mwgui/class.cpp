@@ -82,8 +82,7 @@ namespace MWGui
 
         getWidget(mClassList, "ClassList");
         mClassList->setScrollVisible(true);
-        mClassList->eventListSelectAccept += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
-        mClassList->eventListMouseItemActivate += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+        mClassList->eventListSelectAccept += MyGUI::newDelegate(this, &PickClassDialog::onAccept);
         mClassList->eventListChangePosition += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
 
         getWidget(mClassImage, "ClassImage");
@@ -150,6 +149,14 @@ namespace MWGui
     void PickClassDialog::onBackClicked(MyGUI::Widget* _sender)
     {
         eventBack();
+    }
+
+    void PickClassDialog::onAccept(MyGUI::ListBox* _sender, size_t _index)
+    {
+        onSelectClass(_sender, _index);
+        if(mClassList->getIndexSelected() == MyGUI::ITEM_NONE)
+            return;
+        eventDone(this);
     }
 
     void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
