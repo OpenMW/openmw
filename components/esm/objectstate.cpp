@@ -47,3 +47,5 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         esm.writeHNT ("LROT", mLocalRotation, 12);
     }
 }
+
+ESM::ObjectState::~ObjectState() {}

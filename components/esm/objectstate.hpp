@@ -26,8 +26,10 @@ namespace ESM
         ESM::Position mPosition;
         float mLocalRotation[3];
 
-        void load (ESMReader &esm);
-        void save (ESMWriter &esm, bool inInventory = false) const;
+        virtual void load (ESMReader &esm);
+        virtual void save (ESMWriter &esm, bool inInventory = false) const;
+
+        virtual ~ObjectState();
     };
 }
 
