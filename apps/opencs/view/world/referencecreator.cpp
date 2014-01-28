@@ -40,14 +40,19 @@ CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& 
 
 void CSVWorld::ReferenceCreator::reset()
 {
+    GenericCreator::reset();
     mCell->setText ("");
     mId = getData().getReferences().getNewId();
-    GenericCreator::reset();
 }
 
 std::string CSVWorld::ReferenceCreator::getErrors() const
 {
     std::string errors = GenericCreator::getErrors();
+
+    if (mCloneMode)
+    {
+        return errors;
+    }
 
     std::string cell = mCell->text().toUtf8().constData();
 
@@ -72,4 +77,17 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
 void CSVWorld::ReferenceCreator::cellChanged()
 {
     update();
+}
+
+void CSVWorld::ReferenceCreator::toggleWidgets(bool active)
+{
+    CSVWorld::GenericCreator::toggleWidgets(active);
+    mCell->setEnabled(active);
+}
+
+void CSVWorld::ReferenceCreator::cloneMode(const std::string& originId,
+                                           const CSMWorld::UniversalId::Type type)
+{
+    CSVWorld::GenericCreator::cloneMode(originId, type);
+    cellChanged(); //otherwise ok button will remain disabled
 }

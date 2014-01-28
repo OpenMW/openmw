@@ -6,7 +6,6 @@
 #include "../../model/doc/document.hpp"
 
 #include "../filter/filterbox.hpp"
-
 #include "table.hpp"
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -46,8 +45,15 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     mTable->selectionSizeUpdate();
 
     if (mBottom->canCreateAndDelete())
+    {
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
 
+        connect (mTable, SIGNAL (cloneRequest(const CSMWorld::UniversalId&)), this,
+                 SLOT(cloneRequest(const CSMWorld::UniversalId&)));
+
+        connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
+                mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+    }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
 
@@ -75,4 +81,9 @@ void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, con
 void CSVWorld::TableSubView::setStatusBar (bool show)
 {
     mBottom->setStatusBar (show);
+}
+
+void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
+{
+    emit cloneRequest(toClone.getId(), toClone.getType());
 }

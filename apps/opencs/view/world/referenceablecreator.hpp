@@ -23,6 +23,7 @@ namespace CSVWorld
                 const CSMWorld::UniversalId& id);
 
             virtual void reset();
+            virtual void toggleWidgets(bool active = true);
 
     };
 }

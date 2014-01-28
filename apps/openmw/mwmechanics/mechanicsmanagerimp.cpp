@@ -956,4 +956,9 @@ namespace MWMechanics
         mActors.getObjectsInRange(position, radius, objects);
         mObjects.getObjectsInRange(position, radius, objects);
     }
+
+    std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
+    {
+        return mActors.getActorsFollowing(actor);
+    }
 }

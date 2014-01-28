@@ -28,6 +28,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "aicombat.hpp"
+#include "aifollow.hpp"
 
 namespace
 {
@@ -795,7 +796,7 @@ namespace MWMechanics
                 }
 
                 // If it's the player and God Mode is turned on, keep it alive
-                if(iter->first.getRefData().getHandle()=="player" && 
+                if(iter->first.getRefData().getHandle()=="player" &&
                     MWBase::Environment::get().getWorld()->getGodModeState())
                 {
                     MWMechanics::DynamicStat<float> stat(stats.getHealth());
@@ -927,5 +928,23 @@ namespace MWMechanics
             if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
                 out.push_back(iter->first);
         }
+    }
+
+    std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
+    {
+        std::list<MWWorld::Ptr> list;
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
+        {
+            const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
+            CreatureStats &stats = cls.getCreatureStats(iter->first);
+
+            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
+            {
+                MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
+                if(package->getFollowedActor() == actor.getCellRef().mRefID)
+                    list.push_front(iter->first);
+            }
+        }
+        return list;
     }
 }

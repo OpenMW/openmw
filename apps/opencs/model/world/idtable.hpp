@@ -63,6 +63,10 @@ namespace CSMWorld
             void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
+            void cloneRecord(const std::string& origin, 
+                             const std::string& destination, 
+                             UniversalId::Type type = UniversalId::Type_None);
+
             QModelIndex getModelIndex (const std::string& id, int column) const;
 
             void setRecord (const std::string& id, const RecordBase& record);

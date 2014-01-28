@@ -3,6 +3,8 @@
 
 #include "aipackage.hpp"
 #include <string>
+#include "pathfinding.hpp"
+#include "../../../components/esm/defs.hpp"
 
 namespace MWMechanics
 {
@@ -17,6 +19,8 @@ namespace MWMechanics
                     ///< \return Package completed?
             virtual int getTypeId() const;
 
+            std::string getFollowedActor();
+
         private:
             float mDuration;
             float mX;
@@ -24,6 +28,14 @@ namespace MWMechanics
             float mZ;
             std::string mActorId;
             std::string mCellId;
+
+            float mTimer;
+            float mStuckTimer;
+            float mTotalTime;
+
+            ESM::Position mStuckPos;
+
+            PathFinder mPathFinder;
     };
 }
 #endif

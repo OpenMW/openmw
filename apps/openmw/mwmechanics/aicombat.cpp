@@ -208,7 +208,7 @@ namespace MWMechanics
                 mMovement.mPosition[1] = 0;
                 chooseBestAttack(weapon, mMovement);
 
-                if(mMovement.mPosition[0] != 0 || mMovement.mPosition[1])
+                if(mMovement.mPosition[0] || mMovement.mPosition[1])
                 {
                     mTimerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
                     mCombatMove = true;
@@ -258,7 +258,8 @@ namespace MWMechanics
 
             // TODO: use movement settings instead of rotating directly
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
-            //MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+            //mMovement.mRotation[2] = 10*(Ogre::Degree(zAngle).valueRadians()-pos.rot[2]);
+            
             mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
         }
@@ -280,7 +281,7 @@ namespace MWMechanics
                 float s1 = distBetween - weapRange;
                 float t = s1/speed1;
                 float s2 = speed2 * t;
-                float t_swing = 0.17f/weapSpeed;//0.17 should be the time of playing weapon anim from 'start' to 'hit' tags
+                float t_swing = 0.17f/weapSpeed;//instead of 0.17 should be the time of playing weapon anim from 'start' to 'hit' tags
                 if (t + s2/speed1 <= t_swing)
                 {
                     mReadyToAttack = true;
@@ -326,24 +327,12 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            const ESM::Pathgrid *pathgrid =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
-                
-            float xCell = 0;
-            float yCell = 0;
-
-            if (actor.getCell()->mCell->isExterior())
-            {
-                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
-            }
-
             if(!mPathFinder.isPathConstructed())
-                mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, isOutside);
+                mPathFinder.buildPath(start, dest, actor.getCell(), isOutside);
             else
             {
                 PathFinder newPathFinder;
-                newPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, isOutside);
+                newPathFinder.buildPath(start, dest, actor.getCell(), isOutside);
 
                 //TO EXPLORE: 
                 //maybe here is a mistake (?): PathFinder::getPathSize() returns number of grid points in the path,

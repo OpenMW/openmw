@@ -28,8 +28,8 @@ namespace MWMechanics
 {
     AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
     : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration)
-    , cellX(std::numeric_limits<int>::max())
-    , cellY(std::numeric_limits<int>::max())
+    , mCellX(std::numeric_limits<int>::max())
+    , mCellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 470;
 
@@ -47,8 +47,8 @@ namespace MWMechanics
 
     AiEscort::AiEscort(const std::string &actorId, const std::string &cellId,int duration, float x, float y, float z)
     : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration)
-    , cellX(std::numeric_limits<int>::max())
-    , cellY(std::numeric_limits<int>::max())
+    , mCellX(std::numeric_limits<int>::max())
+    , mCellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 470;
 
@@ -84,9 +84,7 @@ namespace MWMechanics
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ESM::Position pos = actor.getRefData().getPosition();
-        bool cellChange = actor.getCell()->mCell->mData.mX != cellX || actor.getCell()->mCell->mData.mY != cellY;
-        const ESM::Pathgrid *pathgrid =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+        bool cellChange = actor.getCell()->mCell->mData.mX != mCellX || actor.getCell()->mCell->mData.mY != mCellY;
 
         if(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX)
         {
@@ -116,15 +114,8 @@ namespace MWMechanics
 
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
-            cellX = actor.getCell()->mCell->mData.mX;
-            cellY = actor.getCell()->mCell->mData.mY;
-            float xCell = 0;
-            float yCell = 0;
-            if (actor.getCell()->mCell->isExterior())
-            {
-                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
-            }
+            mCellX = actor.getCell()->mCell->mData.mX;
+            mCellY = actor.getCell()->mCell->mData.mY;
 
             ESM::Pathgrid::Point dest;
             dest.mX = mX;
@@ -136,7 +127,7 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
 
         if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))

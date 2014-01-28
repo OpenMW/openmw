@@ -5,6 +5,8 @@
 
 #include "ref.hpp"
 #include "cell.hpp"
+#include "universalid.hpp"
+#include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base)
 {
@@ -34,4 +36,15 @@ std::string CSMWorld::RefCollection::getNewId()
     std::ostringstream stream;
     stream << "ref#" << mNextId++;
     return stream.str();
+}
+
+void CSMWorld::RefCollection::cloneRecord(const std::string& origin, 
+                         const std::string& destination,
+                         const CSMWorld::UniversalId::Type type,
+                         const CSMWorld::UniversalId::ArgumentType argumentType)
+{
+       Record<CSMWorld::CellRef> clone(getRecord(origin));
+       clone.mState = CSMWorld::RecordBase::State_ModifiedOnly;
+       clone.get().mId = destination;
+       insertRecord(clone, getAppendIndex(destination, type), type);
 }

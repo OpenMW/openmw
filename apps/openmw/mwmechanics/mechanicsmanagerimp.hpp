@@ -136,7 +136,9 @@ namespace MWMechanics
         virtual void toggleAI();
         virtual bool isAIActive();
 
-            virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects);
+        virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects);
+
+        virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
     };
 }
 
