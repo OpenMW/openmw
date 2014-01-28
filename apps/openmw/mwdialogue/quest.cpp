@@ -82,7 +82,8 @@ namespace MWDialogue
         if (index==-1)
             throw std::runtime_error ("unknown journal entry for topic " + mTopic);
 
-        setIndex (index);
+        if (index > mIndex)
+            setIndex (index);
 
         for (TEntryIter iter (mEntries.begin()); iter!=mEntries.end(); ++iter)
             if (*iter==entry.mInfoId)
