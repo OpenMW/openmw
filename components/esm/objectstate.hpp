@@ -27,7 +27,7 @@ namespace ESM
         float mLocalRotation[3];
 
         void load (ESMReader &esm);
-        void save (ESMWriter &esm) const;
+        void save (ESMWriter &esm, bool inInventory = false) const;
     };
 }
 

@@ -25,9 +25,9 @@ void ESM::ObjectState::load (ESMReader &esm)
     esm.getHNT (mLocalRotation, "LROT", 12);
 }
 
-void ESM::ObjectState::save (ESMWriter &esm) const
+void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
 {
-    mRef.save (esm, true);
+    mRef.save (esm, true, inInventory);
 
     if (mHasLocals)
     {
@@ -35,13 +35,15 @@ void ESM::ObjectState::save (ESMWriter &esm) const
         mLocals.save (esm);
     }
 
-    if (!mEnabled)
+    if (!mEnabled && !inInventory)
         esm.writeHNT ("ENAB", mEnabled);
 
     if (mCount!=1)
         esm.writeHNT ("COUN", mCount);
 
-    esm.writeHNT ("POS_", mPosition, 24);
-
-    esm.writeHNT ("LROT", mLocalRotation, 12);
+    if (!inInventory)
+    {
+        esm.writeHNT ("POS_", mPosition, 24);
+        esm.writeHNT ("LROT", mLocalRotation, 12);
+    }
 }

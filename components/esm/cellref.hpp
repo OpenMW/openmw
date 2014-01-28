@@ -89,7 +89,7 @@ namespace ESM
 
             void load (ESMReader& esm, bool wideRefNum = false);
 
-            void save(ESMWriter &esm, bool wideRefNum = false) const;
+            void save (ESMWriter &esm, bool wideRefNum = false, bool inInventory = false) const;
 
             void blank();
     };

@@ -75,7 +75,7 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
         esm.getHT (mNam0);
 }
 
-void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum) const
+void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) const
 {
     if (wideRefNum)
         esm.writeHNT ("FRMR", mRefNum, 8);
@@ -107,29 +107,32 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum) const
         esm.writeHNT("NAM9", mGoldValue);
     }
 
-    if (mTeleport)
+    if (mTeleport && !inInventory)
     {
         esm.writeHNT("DODT", mDoorDest);
         esm.writeHNOCString("DNAM", mDestCell);
     }
 
-    if (mLockLevel != -1) {
+    if (mLockLevel != -1 && !inInventory)
         esm.writeHNT("FLTV", mLockLevel);
-    }
-    esm.writeHNOCString("KNAM", mKey);
-    esm.writeHNOCString("TNAM", mTrap);
 
-    if (mReferenceBlocked != -1) {
+    if (!inInventory)
+        esm.writeHNOCString ("KNAM", mKey);
+
+    if (!inInventory)
+        esm.writeHNOCString ("TNAM", mTrap);
+
+    if (mReferenceBlocked != -1)
         esm.writeHNT("UNAM", mReferenceBlocked);
-    }
-    if (mFltv != 0) {
-        esm.writeHNT("FLTV", mFltv);
-    }
 
-    esm.writeHNT("DATA", mPos, 24);
-    if (mNam0 != 0) {
+    if (mFltv != 0 && !inInventory)
+        esm.writeHNT("FLTV", mFltv);
+
+    if (!inInventory)
+        esm.writeHNT("DATA", mPos, 24);
+
+    if (mNam0 != 0 && !inInventory)
         esm.writeHNT("NAM0", mNam0);
-    }
 }
 
 void ESM::CellRef::blank()
