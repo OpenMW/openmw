@@ -23,6 +23,9 @@ namespace MWMechanics
 
             void copy (const AiSequence& sequence);
 
+            // The type of AI package that ran last
+            int mLastAiPackage;
+
         public:
         
             AiSequence();
@@ -35,6 +38,10 @@ namespace MWMechanics
 
             int getTypeId() const;
             ///< @see enum AiPackage::TypeId
+
+            int getLastRunTypeId() const { return mLastAiPackage; }
+            ///< Get the typeid of the Ai package that ran last, NOT the currently "active" Ai package that will be run in the next frame.
+            /// This difference is important when an Ai package has just finished and been removed.
 
             bool getCombatTarget (std::string &targetActorId) const;
             ///< Return true and assign target if combat package is currently

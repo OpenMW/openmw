@@ -352,7 +352,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().getTypeId ();
+                    Interpreter::Type_Integer value = MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().getLastRunTypeId();
 
                     runtime.push (value);
                 }
