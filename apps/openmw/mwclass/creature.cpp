@@ -332,7 +332,7 @@ namespace MWClass
         if (damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
-        victim.getClass().onHit(victim, damage, true, MWWorld::Ptr(), ptr, true);
+        victim.getClass().onHit(victim, damage, true, weapon, ptr, true);
     }
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
