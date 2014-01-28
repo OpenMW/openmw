@@ -5,6 +5,11 @@
 
 #include "ui_installationtargetpage.h"
 
+namespace Files
+{
+    struct ConfigurationManager;
+}
+
 namespace Wizard
 {
     class MainWizard;
@@ -13,7 +18,7 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        InstallationTargetPage(MainWizard *wizard);
+        InstallationTargetPage(MainWizard *wizard, const Files::ConfigurationManager &cfg);
 
         int nextId() const;
 
@@ -22,6 +27,7 @@ namespace Wizard
 
     private:
         MainWizard *mWizard;
+        const Files::ConfigurationManager &mCfgMgr;
 
     protected:
         void initializePage();

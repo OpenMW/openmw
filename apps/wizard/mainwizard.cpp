@@ -41,7 +41,7 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 
 void Wizard::MainWizard::setupInstallations()
 {
-    QString userPath(QFile::decodeName(mCfgMgr.getUserPath().string().c_str()));
+    QString userPath(QFile::decodeName(mCfgMgr.getUserConfigPath().string().c_str()));
     QString globalPath(QFile::decodeName(mCfgMgr.getGlobalPath().string().c_str()));
 
     QStringList paths;
@@ -122,7 +122,7 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_MethodSelection, new MethodSelectionPage(this));
     setPage(Page_LanguageSelection, new LanguageSelectionPage(this));
     setPage(Page_ExistingInstallation, new ExistingInstallationPage(this));
-    setPage(Page_InstallationTarget, new InstallationTargetPage(this));
+    setPage(Page_InstallationTarget, new InstallationTargetPage(this, mCfgMgr));
     setPage(Page_ComponentSelection, new ComponentSelectionPage(this));
     setPage(Page_Installation, new InstallationPage(this));
     setPage(Page_Import, new ImportPage(this));
@@ -137,7 +137,7 @@ void Wizard::MainWizard::accept()
 
 void Wizard::MainWizard::writeSettings()
 {
-    QString userPath(QFile::decodeName(mCfgMgr.getUserPath().string().c_str()));
+    QString userPath(QFile::decodeName(mCfgMgr.getUserConfigPath().string().c_str()));
     QFile file(userPath + QLatin1String("openmw.cfg"));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
