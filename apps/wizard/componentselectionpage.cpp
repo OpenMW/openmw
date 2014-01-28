@@ -1,7 +1,9 @@
 #include "componentselectionpage.hpp"
 
 #include <QDebug>
+#include <QPushButton>
 #include <QAbstractButton>
+#include <QMessageBox>
 
 #include "mainwizard.hpp"
 
@@ -51,7 +53,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 {
     componentsList->clear();
 
-    QString path = field("installation.path").toString();
+    QString path(field("installation.path").toString());
 
     QListWidgetItem *morrowindItem = new QListWidgetItem(QLatin1String("Morrowind"));
     QListWidgetItem *tribunalItem = new QListWidgetItem(QLatin1String("Tribunal"));
@@ -72,7 +74,7 @@ void Wizard::ComponentSelectionPage::initializePage()
         componentsList->addItem(bloodmoonItem);
     } else {
 
-        if (mWizard->mInstallations[path]->hasMorrowind == true) {
+        if (mWizard->mInstallations[path]->hasMorrowind) {
             morrowindItem->setText(tr("Morrowind\t\t(installed)"));
             morrowindItem->setFlags(morrowindItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
             morrowindItem->setData(Qt::CheckStateRole, Qt::Unchecked);
@@ -83,7 +85,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
         componentsList->addItem(morrowindItem);
 
-        if (mWizard->mInstallations[path]->hasTribunal == true) {
+        if (mWizard->mInstallations[path]->hasTribunal) {
             tribunalItem->setText(tr("Tribunal\t\t(installed)"));
             tribunalItem->setFlags(tribunalItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
             tribunalItem->setData(Qt::CheckStateRole, Qt::Unchecked);
@@ -94,7 +96,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
         componentsList->addItem(tribunalItem);
 
-        if (mWizard->mInstallations[path]->hasBloodmoon == true) {
+        if (mWizard->mInstallations[path]->hasBloodmoon) {
             bloodmoonItem->setText(tr("Bloodmoon\t\t(installed)"));
             bloodmoonItem->setFlags(bloodmoonItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
             bloodmoonItem->setData(Qt::CheckStateRole, Qt::Unchecked);
@@ -107,10 +109,55 @@ void Wizard::ComponentSelectionPage::initializePage()
     }
 }
 
+bool Wizard::ComponentSelectionPage::validatePage()
+{
+    QStringList components(field("installation.components").toStringList());
+    QString path(field("installation.path").toString());
+
+    qDebug() << components << path << mWizard->mInstallations[path];
+
+    if (field("installation.new").toBool() == false) {
+        if (components.contains(QLatin1String("Tribunal")) && !components.contains(QLatin1String("Bloodmoon")))
+        {
+            if (mWizard->mInstallations[path]->hasBloodmoon)
+            {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("About to install Tribunal after Bloodmoon"));
+                msgBox.setIcon(QMessageBox::Information);
+                msgBox.setStandardButtons(QMessageBox::Cancel);
+                msgBox.setText(tr("<html><head/><body><p><b>You are about to install Tribunal</b></p> \
+                                  <p>Bloodmoon is already installed on your computer.</p> \
+                                  <p>However, it is recommended that you install Tribunal before Bloodmoon.</p> \
+                                  <p>Would you like to re-install Bloodmoon?</p></body></html>"));
+
+                QAbstractButton *reinstallButton = msgBox.addButton(tr("Re-install &Bloodmoon"), QMessageBox::ActionRole);
+                msgBox.exec();
+
+
+                if (msgBox.clickedButton() == reinstallButton) {
+                    // Force reinstallation
+                    mWizard->mInstallations[path]->hasBloodmoon = false;
+                    QList<QListWidgetItem*> items = componentsList->findItems(QLatin1String("Bloodmoon"), Qt::MatchStartsWith);
+
+                    foreach (QListWidgetItem *item, items) {
+                        item->setText(QLatin1String("Bloodmoon"));
+                        item->setCheckState(Qt::Checked);
+                    }
+
+                    return true;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
 int Wizard::ComponentSelectionPage::nextId() const
 {
-    if (isCommitPage())
+    if (isCommitPage()) {
         return MainWizard::Page_Installation;
-
-    return MainWizard::Page_Import;
+    } else {
+        return MainWizard::Page_Import;
+    }
 }

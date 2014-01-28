@@ -13,5 +13,9 @@ Wizard::MethodSelectionPage::MethodSelectionPage(MainWizard *wizard) :
 
 int Wizard::MethodSelectionPage::nextId() const
 {
-    return MainWizard::Page_LanguageSelection;
+    if (field("installation.new").toBool() == true) {
+        return MainWizard::Page_InstallationTarget;
+    } else {
+        return MainWizard::Page_ExistingInstallation;
+    }
 }

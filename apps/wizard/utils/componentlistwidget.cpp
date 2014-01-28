@@ -10,15 +10,9 @@ ComponentListWidget::ComponentListWidget(QWidget *parent) :
 
     connect(this, SIGNAL(itemChanged(QListWidgetItem *)),
             this, SLOT(updateCheckedItems(QListWidgetItem *)));
-}
 
-void ComponentListWidget::addItem(QListWidgetItem *item)
-{
-    // The model does not emit a dataChanged signal when items are added
-    // So we need to update manually
-    QListWidget::insertItem(count(), item);
-    updateCheckedItems(item);
-
+    connect(model(), SIGNAL(rowsInserted(QModelIndex, int, int)),
+            this, SLOT(updateCheckedItems(QModelIndex, int, int)));
 }
 
 QStringList ComponentListWidget::checkedItems()
@@ -27,8 +21,16 @@ QStringList ComponentListWidget::checkedItems()
     return mCheckedItems;
 }
 
+void ComponentListWidget::updateCheckedItems(const QModelIndex &index, int start, int end)
+{
+    updateCheckedItems(item(start));
+}
+
 void ComponentListWidget::updateCheckedItems(QListWidgetItem *item)
 {
+    if (!item)
+        return;
+
     QString text = item->text();
 
     if (item->checkState() == Qt::Checked) {

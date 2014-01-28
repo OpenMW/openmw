@@ -138,9 +138,23 @@ void Wizard::InstallationPage::startInstallation()
 
 void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 {
+    QString name;
+    switch (component) {
+
+    case Wizard::Component_Morrowind:
+        name = QLatin1String("Morrowind");
+        break;
+    case Wizard::Component_Tribunal:
+        name = QLatin1String("Tribunal");
+        break;
+    case Wizard::Component_Bloodmoon:
+        name = QLatin1String("Bloodmoon");
+        break;
+    }
+
     QString fileName = QFileDialog::getOpenFileName(
                     this,
-                    tr("Select installation file"),
+                    tr("Select %1 installation file").arg(name),
                     QDir::rootPath(),
                     tr("InstallShield header files (*.hdr)"));
 

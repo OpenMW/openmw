@@ -73,14 +73,10 @@ void Wizard::MainWizard::setupInstallations()
         file.close();
     }
 
-    // Check if the paths actually contain data files
+    // Check if the paths actually contains a Morrowind installation
     foreach (const QString path, mGameSettings.getDataDirs()) {
-        QDir dir(path);
-        QStringList filters;
-        filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
 
-        // Add to Wizard installations
-        if (!dir.entryList(filters).isEmpty())
+        if (findFiles(QLatin1String("Morrowind"), path))
             addInstallation(path);
     }
 
@@ -112,8 +108,10 @@ void Wizard::MainWizard::addInstallation(const QString &path)
     mInstallations.insert(QDir::toNativeSeparators(path), install);
 
     // Add it to the openmw.cfg too
-    mGameSettings.setMultiValue(QString("data"), path);
-    mGameSettings.addDataDir(path);
+    if (!mGameSettings.getDataDirs().contains(path)) {
+        mGameSettings.setMultiValue(QString("data"), path);
+        mGameSettings.addDataDir(path);
+    }
 }
 
 void Wizard::MainWizard::setupPages()
@@ -168,8 +166,7 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
         return false;
 
     // TODO: add MIME handling to make sure the files are real
-    if (dir.exists(name + QLatin1String(".esm")) && dir.exists(name + QLatin1String(".bsa")))
-    {
+    if (dir.exists(name + QLatin1String(".esm")) && dir.exists(name + QLatin1String(".bsa"))) {
         return true;
     } else {
         return false;

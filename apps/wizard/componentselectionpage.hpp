@@ -16,6 +16,7 @@ namespace Wizard
         ComponentSelectionPage(MainWizard *wizard);
 
         int nextId() const;
+        virtual bool validatePage();
 
     private slots:
         void updateButton(QListWidgetItem *item);

@@ -57,7 +57,7 @@ void Wizard::ExistingInstallationPage::textChanged(const QString &text)
     // Set the installation path manually, as registerField doesn't work
     // Because it doesn't accept two widgets operating on a single field
     if (!text.isEmpty())
-        mWizard->setField("installation.path", text);
+        mWizard->setField(QLatin1String("installation.path"), text);
 }
 
 void Wizard::ExistingInstallationPage::initializePage()
@@ -135,7 +135,7 @@ int Wizard::ExistingInstallationPage::nextId() const
     QString path(field("installation.path").toString());
 
     if (path.isEmpty())
-        return MainWizard::Page_ComponentSelection;
+        return MainWizard::Page_LanguageSelection;
 
     if (mWizard->mInstallations[path]->hasMorrowind == true &&
             mWizard->mInstallations[path]->hasTribunal == true &&
@@ -143,6 +143,6 @@ int Wizard::ExistingInstallationPage::nextId() const
     {
         return MainWizard::Page_Import;
     } else {
-        return MainWizard::Page_ComponentSelection;
+        return MainWizard::Page_LanguageSelection;
     }
 }

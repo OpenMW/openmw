@@ -34,7 +34,7 @@ void Wizard::InstallationTargetPage::on_browseButton_clicked()
     QString selectedPath = QFileDialog::getExistingDirectory(
                 this,
                 tr("Select where to install Morrowind"),
-                QDir::currentPath(),
+                QDir::homePath(),
                 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     qDebug() << selectedPath;
@@ -49,5 +49,5 @@ void Wizard::InstallationTargetPage::on_browseButton_clicked()
 
 int Wizard::InstallationTargetPage::nextId() const
 {
-    return MainWizard::Page_ComponentSelection;
+    return MainWizard::Page_LanguageSelection;
 }
