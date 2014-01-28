@@ -1153,7 +1153,7 @@ namespace MWWorld
         std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
         while (it != mDoorStates.end())
         {
-            if (!mWorldScene->isCellActive(*it->first.getCell()))
+            if (!mWorldScene->isCellActive(*it->first.getCell()) || !it->first.getRefData().getBaseNode())
                 mDoorStates.erase(it++);
             else
             {
