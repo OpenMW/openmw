@@ -84,7 +84,7 @@ namespace MWMechanics
 
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed
-            
+
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
@@ -94,7 +94,10 @@ namespace MWMechanics
         void skipAnimation(const MWWorld::Ptr& ptr);
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
 
-        void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
+            void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
+
+            std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
+            ///<return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
 
     private:
         PtrControllerMap mActors;

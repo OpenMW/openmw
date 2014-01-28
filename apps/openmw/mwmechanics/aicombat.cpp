@@ -3,7 +3,7 @@
 #include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -54,17 +54,6 @@ namespace MWMechanics
         }
 
         ESM::Position pos = actor.getRefData().getPosition();
-        const ESM::Pathgrid *pathgrid =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
-
-        float xCell = 0;
-        float yCell = 0;
-
-        if (actor.getCell()->mCell->isExterior())
-        {
-            xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-            yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
-        }
 
         ESM::Pathgrid::Point dest;
         dest.mX = target.getRefData().getPosition().pos[0];
@@ -79,16 +68,17 @@ namespace MWMechanics
         mTimer2 = mTimer2 + duration;
 
         if(!mPathFinder.isPathConstructed())
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         else
         {
-            mPathFinder2.buildPath(start, dest, pathgrid, xCell, yCell, true);
-            ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
-            if((mTimer2 > 0.25)&&(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
-                (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200))
+            if(mTimer2 > 0.25)
             {
                 mTimer2 = 0;
-                mPathFinder = mPathFinder2;
+                mPathFinder2.buildPath(start, dest, actor.getCell(), true);
+                ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
+                if(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
+                    (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200)
+                    mPathFinder = mPathFinder2;
             }
         }
 
@@ -112,7 +102,8 @@ namespace MWMechanics
 
             zAngle = Ogre::Radian( Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult)) ).valueDegrees();
             // TODO: use movement settings instead of rotating directly
-            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            //MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            MWWorld::Class::get(actor).getMovementSettings(actor).mRotation[2] = 10*(Ogre::Degree(zAngle).valueRadians()-pos.rot[2]);
 
             mPathFinder.clearPath();
 

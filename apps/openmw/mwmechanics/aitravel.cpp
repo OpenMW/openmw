@@ -61,7 +61,6 @@ namespace MWMechanics
             }
         }
 
-        const ESM::Pathgrid *pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
         bool cellChange = cell->mData.mX != cellX || cell->mData.mY != cellY;
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
@@ -86,7 +85,7 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
 
         if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))

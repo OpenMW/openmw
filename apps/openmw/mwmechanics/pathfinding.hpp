@@ -3,6 +3,12 @@
 
 #include <components/esm/loadpgrd.hpp>
 #include <list>
+#include <boost/graph/adjacency_list.hpp>
+
+namespace MWWorld
+{
+    class CellStore;
+}
 
 namespace MWMechanics
 {
@@ -12,9 +18,11 @@ namespace MWMechanics
             PathFinder();
 
             void clearPath();
+
+            void buildPathgridGraph(const ESM::Pathgrid* pathGrid);
+
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                           const ESM::Pathgrid* pathGrid, float xCell = 0, float yCell = 0,
-                           bool allowShortcuts = true);
+                           const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
             bool checkPathCompleted(float x, float y, float z);
             ///< \Returns true if the last point of the path has been reached.
@@ -37,9 +45,38 @@ namespace MWMechanics
                 return mPath;
             }
 
+            void addPointToPath(ESM::Pathgrid::Point &point)
+            {
+                mPath.push_back(point);
+            }
+
         private:
-            std::list<ESM::Pathgrid::Point> mPath;
+
+            struct Edge
+            {
+                int destination;
+                float cost;
+            };
+            struct Node
+            {
+                int label;
+                std::vector<Edge> edges;
+                int parent;//used in pathfinding
+            };
+
+            std::vector<float> mGScore;
+            std::vector<float> mFScore;
+
+            std::list<ESM::Pathgrid::Point> aStarSearch(const ESM::Pathgrid* pathGrid,int start,int goal,float xCell = 0, float yCell = 0);
+            void cleanUpAStar();
+
+            std::vector<Node> mGraph;
             bool mIsPathConstructed;
+
+
+            std::list<ESM::Pathgrid::Point> mPath;
+            bool mIsGraphConstructed;
+            const MWWorld::CellStore* mCell;
     };
 }
 
