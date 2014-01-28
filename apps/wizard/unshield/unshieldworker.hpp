@@ -62,7 +62,7 @@ namespace Wizard
 
         void setupSettings();
 
-        void extractCab(const QString &cabFile, const QString &outputDir);
+        bool extractCab(const QString &cabFile, const QString &outputDir);
         bool extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter);
         bool findFile(const QString &cabFile, const QString &fileName);
 
@@ -109,7 +109,7 @@ namespace Wizard
         void textChanged(const QString &text);
         void logTextChanged(const QString &text);
 
-        void error(const QString &text);
+        void error(const QString &text, const QString &details);
         void progressChanged(int progress);
 
 

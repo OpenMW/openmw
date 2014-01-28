@@ -37,7 +37,7 @@ namespace Wizard
         void showFileDialog(Wizard::Component component);
 
         void installationFinished();
-        void installationError(const QString &text);
+        void installationError(const QString &text, const QString &details);
 
     protected:
         void initializePage();

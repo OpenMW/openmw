@@ -185,8 +185,8 @@ void Wizard::UnshieldWorker::setupSettings()
     QFile file(getIniPath());
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        // TODO: Emit error signal
         qDebug() << "Error opening .ini file!";
+        emit error(tr("Failed to open Morrowind configuration file!"), tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
         return;
     }
 
@@ -240,6 +240,7 @@ bool Wizard::UnshieldWorker::copyFile(const QString &source, const QString &dest
         }
     } else {
         qDebug() << "copy failed! " << file.errorString();
+        emit error(tr("Failed to copy file!"), tr("Copying %1 to %2 failed: %3.").arg(source, destination, file.errorString()));
     }
 
     return false;
@@ -274,7 +275,6 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
         if (info.isDir()) {
             result = moveDirectory(info.absoluteFilePath(), destDir.absolutePath() + relativePath);
         } else {
-//            qDebug() << "moving: " << info.absoluteFilePath() <<  " to: " << destDir.absolutePath() + relativePath;
             result = moveFile(info.absoluteFilePath(), destDir.absolutePath() + relativePath);
         }
     }
@@ -363,6 +363,7 @@ void Wizard::UnshieldWorker::extract()
                         setComponentDone(Wizard::Component_Morrowind, true);
                     } else {
                         qDebug() << "Erorr installing Morrowind";
+
                         return;
                     }
                 }
@@ -414,8 +415,10 @@ void Wizard::UnshieldWorker::setupAddon(Component component)
         if (component == Wizard::Component_Bloodmoon)
             name = QLatin1String("Bloodmoon");
 
-        if (name.isEmpty())
-            return; // Not a valid addon
+        if (name.isEmpty()) {
+            emit error(tr("Component parameter is invalid!"), tr("An invalid component parameter was supplied."));
+            return;
+        }
 
         if (!disk.cd(name)) {
             qDebug() << "not found on cd!";
@@ -474,8 +477,10 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
         break;
     }
 
-    if (name.isEmpty())
+    if (name.isEmpty()) {
+        emit error(tr("Component parameter is invalid!"), tr("An invalid component parameter was supplied."));
         return false;
+    }
 
     emit textChanged(tr("Installing %0").arg(name));
 
@@ -483,6 +488,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
 
     if (!disk.exists()) {
         qDebug() << "Component path not set: " << getComponentPath(Wizard::Component_Morrowind);
+        emit error(tr("Component path not set!"), tr("The source path for %0 was not set.").arg(name));
         return false;
     }
 
@@ -496,29 +502,34 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
 
     if (!temp.mkpath(tempPath)) {
         qDebug() << "Can't make path";
+        emit error(tr("Cannot create temporary directory!"), tr("Failed to create %0.").arg(tempPath));
         return false;
     }
 
     temp.setPath(tempPath);
 
     if (!temp.mkdir(name)) {
-        qDebug() << "Can't make dir";
+        emit error(tr("Cannot create temporary directory!"), tr("Failed to create %0.").arg(temp.absoluteFilePath(name)));
         return false;
     }
 
     if (!temp.cd(name)) {
         qDebug() << "Can't cd to dir";
+        emit error(tr("Cannot move into temporary directory!"), tr("Failed to move into %0.").arg(temp.absoluteFilePath(name)));
         return false;
     }
 
     // Extract the installation files
-    extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath());
+    if (!extractCab(disk.absoluteFilePath(QLatin1String("data1.hdr")), temp.absolutePath()))
+        return false;
 
-    // TODO: Throw error;
     // Move the files from the temporary path to the destination folder
     emit textChanged(tr("Moving installation files"));
     if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), getPath())) {
         qDebug() << "failed to move files!";
+        emit error(tr("Moving extracted files failed!"),
+                   tr("Failed to move files from %0 to %1.").arg(temp.absoluteFilePath(QLatin1String("Data Files")),
+                                                                getPath()));
         return false;
     }
 
@@ -538,6 +549,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
             moveFile(info.absoluteFilePath(), getPath() + QDir::separator() + QLatin1String("Morrowind.ini"));
         } else {
             qDebug() << "Could not find ini file!";
+            emit error(tr("Could not find Morrowind configuration file!"), tr("Failed to find %0.").arg(iniPath));
             return false;
         }
     }
@@ -599,7 +611,7 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outp
     success = unshield_file_save(unshield, index, fileName.toLatin1().constData());
 
     if (!success) {
-        emit error(tr("Failed to extract %1").arg(fileName));
+        emit error(tr("Failed to extract %1.").arg(QString::fromLatin1(unshield_file_name(unshield, index))), tr("Complete path: %1.").arg(fileName));
         dir.remove(fileName);
     }
 
@@ -611,9 +623,8 @@ bool Wizard::UnshieldWorker::findFile(const QString &cabFile, const QString &fil
     Unshield *unshield;
     unshield = unshield_open(cabFile.toLatin1().constData());
 
-    // TODO: Proper error
     if (!unshield) {
-        emit error(tr("Failed to open %1").arg(cabFile));
+        emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
         return false;
     }
 
@@ -635,15 +646,16 @@ bool Wizard::UnshieldWorker::findFile(const QString &cabFile, const QString &fil
     return false;
 }
 
-void Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &outputDir)
+bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &outputDir)
 {
+    bool success;
+
     Unshield *unshield;
     unshield = unshield_open(cabFile.toLatin1().constData());
 
-    // TODO: Proper error
     if (!unshield) {
-        emit error(tr("Failed to open %1").arg(cabFile));
-        return;
+        emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
+        return false;
     }
 
     int counter = 0;
@@ -655,11 +667,12 @@ void Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &o
         for (size_t j=group->first_file; j<=group->last_file; ++j)
         {
             if (unshield_file_is_valid(unshield, j)) {
-                extractFile(unshield, outputDir, group->name, j, counter);
+                success = extractFile(unshield, outputDir, group->name, j, counter);
                 ++counter;
             }
         }
     }
 
     unshield_close(unshield);
+    return success;
 }

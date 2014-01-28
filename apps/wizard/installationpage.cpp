@@ -23,8 +23,8 @@ void Wizard::InstallationPage::initializePage()
     QString path(field("installation.path").toString());
     QStringList components(field("installation.components").toStringList());
 
-    logTextEdit->append(QString("Installing to %1").arg(path));
-    logTextEdit->append(QString("Installing %1.").arg(components.join(", ")));
+    logTextEdit->appendPlainText(QString("Installing to %1").arg(path));
+    logTextEdit->appendPlainText(QString("Installing %1.").arg(components.join(", ")));
 
     installProgressBar->setMinimum(0);
 
@@ -39,11 +39,11 @@ void Wizard::InstallationPage::initializePage()
     else
     {
         if (components.contains(QLatin1String("Tribunal"))
-                && mWizard->mInstallations[path]->hasTribunal == false)
+                && !mWizard->mInstallations[path]->hasTribunal)
             installProgressBar->setMaximum(100);
 
         if (components.contains(QLatin1String("Bloodmoon"))
-                && mWizard->mInstallations[path]->hasBloodmoon == false)
+                && !mWizard->mInstallations[path]->hasBloodmoon)
             installProgressBar->setMaximum(installProgressBar->maximum() + 100);
     }
 
@@ -76,14 +76,14 @@ void Wizard::InstallationPage::startInstallation()
     connect(mUnshield, SIGNAL(finished()),
             this, SLOT(installationFinished()), Qt::QueuedConnection);
 
-    connect(mUnshield, SIGNAL(error(QString)),
-            this, SLOT(installationError(QString)), Qt::QueuedConnection);
+    connect(mUnshield, SIGNAL(error(QString, QString)),
+            this, SLOT(installationError(QString, QString)), Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(textChanged(QString)),
             installProgressLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(textChanged(QString)),
-            logTextEdit, SLOT(append(QString)),  Qt::QueuedConnection);
+            logTextEdit, SLOT(appendPlainText(QString)),  Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(progressChanged(int)),
             installProgressBar, SLOT(setValue(int)),  Qt::QueuedConnection);
@@ -170,17 +170,45 @@ void Wizard::InstallationPage::installationFinished()
 
 }
 
-void Wizard::InstallationPage::installationError(const QString &text)
+void Wizard::InstallationPage::installationError(const QString &text, const QString &details)
 {
     qDebug() << "error: " << text;
+
+    installProgressLabel->setText(tr("Installation failed!"));
+
+    logTextEdit->appendHtml(tr("<b><font color='red'>Error: %1</b>").arg(text));
+    logTextEdit->appendHtml(tr("<b><font color='red'>%1</b>").arg(details));
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("An error occurred"));
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setText(tr("<html><head/><body><p><b>The Wizard has encountered an error</b></p> \
+                      <p>The error reported was:</p><p>%1</p> \
+                      <p>Press &quot;Show Details...&quot; for more information.</p></body></html>").arg(text));
+
+    msgBox.setDetailedText(details);
+    msgBox.exec();
+
+    mWizard->mError = true;
+    emit completeChanged();
+
 }
 
 bool Wizard::InstallationPage::isComplete() const
 {
-    return mFinished;
+    if (!mWizard->mError) {
+        return mFinished;
+    } else {
+        return true;
+    }
 }
 
 int Wizard::InstallationPage::nextId() const
 {
-    return MainWizard::Page_Import;
+    if (!mWizard->mError) {
+        return MainWizard::Page_Import;
+    } else {
+        return MainWizard::Page_Conclusion;
+    }
 }

@@ -44,6 +44,8 @@ namespace Wizard
 
         Files::ConfigurationManager mCfgMgr;
 
+        bool mError;
+
     private:
 
         void setupInstallations();

@@ -23,7 +23,7 @@
    <item>
     <widget class="QLabel" name="installProgressLabel">
      <property name="text">
-      <string>Extracting: %1</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -35,7 +35,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="logTextEdit">
+    <widget class="QPlainTextEdit" name="logTextEdit">
      <property name="undoRedoEnabled">
       <bool>false</bool>
      </property>

@@ -13,13 +13,20 @@ Wizard::ConclusionPage::ConclusionPage(MainWizard *wizard) :
 
 void Wizard::ConclusionPage::initializePage()
 {
-    if (field("installation.new").toBool() == true)
+    if (!mWizard->mError)
     {
-        textLabel->setText(tr("The OpenMW Wizard successfully installed Morrowind on your computer.\n\n") +
-                           tr("Click Finish to close the Wizard."));
+        if (field("installation.new").toBool() == true)
+        {
+            textLabel->setText(tr("<html><head/><body><p>The OpenMW Wizard successfully installed Morrowind on your computer.</p> \
+                                  <p>Click Finish to close the Wizard.</p></body></html>"));
+        } else {
+            textLabel->setText(tr("<html><head/><body><p>The OpenMW Wizard successfully modified your existing Morrowind installation.</p> \
+                                  <p>Click Finish to close the Wizard.</p></body></html>"));
+        }
     } else {
-        textLabel->setText(tr("The OpenMW Wizard successfully modified your existing Morrowind installation.\n\n") +
-                           tr("Click Finish to close the Wizard."));
+        textLabel->setText(tr("<html><head/><body><p>The OpenMW Wizard failed to install Morrowind on your computer.</p> \
+                              <p>Please report any bugs you might have encountered to our \
+                              <a href=\"https://bugs.openmw.org\">bug tracker</a>.<br/>Make sure to include the installation log.</p><br/></body></html>"));
     }
 }
 
