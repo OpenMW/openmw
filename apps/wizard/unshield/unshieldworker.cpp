@@ -554,6 +554,17 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
         }
     }
 
+    if (component == Wizard::Component_Tribunal)
+    {
+        QFileInfo sounds(temp.absoluteFilePath(QLatin1String("Sounds")));
+
+        if (sounds.exists()) {
+            emit textChanged(tr("Extracting: Sound directory"));
+            copyDirectory(sounds.absoluteFilePath(), getPath() + QDir::separator() + QLatin1String("Sound"));
+        }
+
+    }
+
     if (component == Wizard::Component_Bloodmoon)
     {
         QFileInfo patch(temp.absoluteFilePath(QLatin1String("Tribunal Patch") + QDir::separator() + QLatin1String("Tribunal.esm")));
