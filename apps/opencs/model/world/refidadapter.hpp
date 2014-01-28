@@ -31,6 +31,7 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
 
             virtual std::string getId (const RecordBase& record) const = 0;
+            virtual void setId(RecordBase& record, const std::string& id) = 0;
     };
 }
 
