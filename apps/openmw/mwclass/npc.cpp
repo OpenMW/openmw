@@ -518,11 +518,11 @@ namespace MWClass
         {
             const bool weaphashealth = get(weapon).hasItemHealth(weapon);
             const unsigned char *attack = NULL;
-            if(type == MWMechanics::CreatureStats::AT_Chop)
+            if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
-            else if(type == MWMechanics::CreatureStats::AT_Slash)
+            else if(type == ESM::Weapon::AT_Slash)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash;
-            else if(type == MWMechanics::CreatureStats::AT_Thrust)
+            else if(type == ESM::Weapon::AT_Thrust)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
