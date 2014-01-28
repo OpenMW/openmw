@@ -2,6 +2,7 @@
 #include "refidcollection.hpp"
 
 #include <stdexcept>
+#include <memory>
 
 #include <components/esm/esmreader.hpp>
 
@@ -453,11 +454,10 @@ void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const CSMWorld::UniversalId::Type type)
 {
-        RecordBase *newRecord = mData.getRecord(mData.searchId(origin)).clone();
+        std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).clone());
         newRecord->mState = RecordBase::State_ModifiedOnly;
         mAdapters.find(type)->second->setId(*newRecord, destination);
         mData.insertRecord(*newRecord, type, destination);
-        delete newRecord;
 }
 
 void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
