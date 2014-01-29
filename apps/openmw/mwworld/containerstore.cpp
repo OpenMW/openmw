@@ -192,13 +192,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        int realCount = ptr.getRefData().getCount();
-        if (ptr.getCellRef().mGoldValue > 1 && realCount == 1)
-            realCount = ptr.getCellRef().mGoldValue;
+        int realCount = count * ptr.getClass().getValue(ptr);
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, MWWorld::ContainerStore::sGoldId))
+            if (Misc::StringUtils::ciEqual((*iter).getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
             {
                 iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
@@ -206,8 +204,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
             }
         }
 
-        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, count);
-        return addNewStack(ref.getPtr(), count);
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, realCount);
+        return addNewStack(ref.getPtr(), realCount);
     }
 
     // determine whether to stack or not
