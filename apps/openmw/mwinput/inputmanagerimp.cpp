@@ -574,8 +574,6 @@ namespace MWInput
 
             double x = arg.xrel * mCameraSensitivity * (1.0f/256.f);
             double y = arg.yrel * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-            float scale = MWBase::Environment::get().getFrameDuration();
-            if(scale <= 0.0f) scale = 1.0f;
 
             float rot[3];
             rot[0] = -y;
@@ -585,8 +583,8 @@ namespace MWInput
             // Only actually turn player when we're not in vanity mode
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
-                mPlayer->yaw(x/scale);
-                mPlayer->pitch(-y/scale);
+                mPlayer->yaw(x);
+                mPlayer->pitch(-y);
             }
 
             if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change

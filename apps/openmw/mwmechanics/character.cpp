@@ -1111,9 +1111,9 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
+            rot *= Ogre::Math::RadiansToDegrees(1.0f);
             if(mHitState != CharState_KnockDown)
             {
-                rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
                 world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
             }
             else //avoid z-rotating for knockdown

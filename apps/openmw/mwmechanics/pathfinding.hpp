@@ -3,7 +3,6 @@
 
 #include <components/esm/loadpgrd.hpp>
 #include <list>
-#include <boost/graph/adjacency_list.hpp>
 
 namespace MWWorld
 {
@@ -26,8 +25,10 @@ namespace MWMechanics
 
             bool checkPathCompleted(float x, float y, float z);
             ///< \Returns true if the last point of the path has been reached.
+
             bool checkWaypoint(float x, float y, float z);
             ///< \Returns true if a way point was reached
+
             float getZAngleToNext(float x, float y) const;
 
             float getDistToNext(float x, float y, float z);

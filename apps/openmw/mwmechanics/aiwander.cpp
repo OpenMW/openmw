@@ -11,6 +11,8 @@
 #include "creaturestats.hpp"
 #include <OgreVector3.h>
 
+#include "steering.hpp"
+
 namespace
 {
     float sgn(float a)
@@ -282,17 +284,18 @@ namespace MWMechanics
 
         if(mWalking)
         {
-            float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            // TODO: use movement settings instead of rotating directly
-            world->rotateObject(actor, 0, 0, zAngle, false);
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
-
             if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
             {
                 stopWalking(actor);
                 mMoveNow = false;
                 mWalking = false;
                 mChooseAction = true;
+            }
+            else
+            {
+                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
             }
         }
 
