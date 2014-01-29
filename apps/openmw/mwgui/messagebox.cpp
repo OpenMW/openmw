@@ -332,7 +332,7 @@ namespace MWGui
         {
             if(Misc::StringUtils::ciEqual((*button)->getCaption(), ok))
             {
-                MyGUI::InputManager::getInstance().setKeyFocusWidget(*button);
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(*button);
                 (*button)->eventKeyButtonPressed += MyGUI::newDelegate(this, &InteractiveMessageBox::onKeyPressed);
                 break;
             }

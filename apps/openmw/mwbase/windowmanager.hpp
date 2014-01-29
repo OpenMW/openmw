@@ -281,6 +281,7 @@ namespace MWBase
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
+            /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
 
             virtual Loading::Listener* getLoadingScreen() = 0;

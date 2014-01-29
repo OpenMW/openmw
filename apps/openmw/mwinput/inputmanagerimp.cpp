@@ -251,8 +251,6 @@ namespace MWInput
 
         mInputManager->capture(loading);
         // inject some fake mouse movement to force updating MyGUI's widget states
-        // this shouldn't do any harm since we're moving back to the original position afterwards
-        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX+1), int(mMouseY+1), mMouseWheel);
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
         // update values of channels (as a result of pressed keys)

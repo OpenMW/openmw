@@ -64,6 +64,8 @@ namespace MWGui
         WindowModal::open();
 
         mSaveNameEdit->setCaption ("");
+        if (mSaving)
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveNameEdit);
 
         center();
 
@@ -130,7 +132,7 @@ namespace MWGui
 
     void SaveGameDialog::accept(bool reallySure)
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
 
         // Get the selected slot, if any
         unsigned int i=0;

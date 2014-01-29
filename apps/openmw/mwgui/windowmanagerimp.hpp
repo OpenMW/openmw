@@ -105,6 +105,7 @@ namespace MWGui
      */
     virtual void update();
 
+    /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
     virtual void setKeyFocusWidget (MyGUI::Widget* widget);
 
     virtual void setNewGame(bool newgame);
