@@ -191,15 +191,18 @@ namespace MWMechanics
                 mIdleNow = true;
 
                 // Play idle voiced dialogue entries randomly
-                const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
-                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+                if (hello > 0)
+                {
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-                // Don't bother if the player is out of hearing range
-                if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+                    // Don't bother if the player is out of hearing range
+                    if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
+                        MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+                }
             }
         }
 
@@ -208,7 +211,7 @@ namespace MWMechanics
             // Play a random voice greeting if the player gets too close
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-            float hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+            int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
             float helloDistance = hello;
             int iGreetDistanceMultiplier = store.get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
             helloDistance *= iGreetDistanceMultiplier;
