@@ -209,7 +209,10 @@ namespace MWMechanics
         mDynamic[index] = value;
 
         if (index == 2 && value.getCurrent() < 0)
+        {
             setKnockedDown(true);
+            mDynamic[2].setCurrent(0);
+        }
 
         if (index==0 && mDynamic[index].getCurrent()<1)
         {

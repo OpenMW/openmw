@@ -764,6 +764,7 @@ bool CharacterController::updateWeaponState()
                 //commenting out following 2 lines will give a bit different combat dynamics(slower)
                 mHitState = CharState_None;
                 mCurrentHit.clear();
+                mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
             }
         }
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
