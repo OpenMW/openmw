@@ -6,6 +6,7 @@
 #include <components/esm/cellid.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/objectstate.hpp>
+#include <components/esm/lightstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -331,7 +332,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
         writeReferenceCollection<ESM::ObjectState> (writer, mCreatureLists);
         writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
-        writeReferenceCollection<ESM::ObjectState> (writer, mLights);
+        writeReferenceCollection<ESM::LightState> (writer, mLights);
         writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
         writeReferenceCollection<ESM::ObjectState> (writer, mMiscItems);
         writeReferenceCollection<ESM::ObjectState> (writer, mNpcs);
@@ -413,7 +414,7 @@ namespace MWWorld
 
                 case ESM::REC_LIGH:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mLights, contentFileMap);
+                    readReferenceCollection<ESM::LightState> (reader, mLights, contentFileMap);
                     break;
 
                 case ESM::REC_LOCK:
