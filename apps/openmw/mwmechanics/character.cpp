@@ -478,7 +478,14 @@ bool CharacterController::updateCreatureState()
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
 
-            determineAttackType();
+            // These are unique animations and not linked to movement type. Just pick one randomly.
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 3; // [0, 2]
+            if (roll == 0)
+                mCurrentWeapon = "attack1";
+            else if (roll == 1)
+                mCurrentWeapon = "attack2";
+            else
+                mCurrentWeapon = "attack3";
 
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
                              MWRender::Animation::Group_All, true,
@@ -1307,15 +1314,6 @@ void CharacterController::determineAttackType()
             mAttackType = "thrust";
         else
             mAttackType = "chop";
-    }
-    else
-    {
-        if (move[0] && !move[1]) //sideway
-            mCurrentWeapon = "attack2";
-        else if (move[1]) //forward
-            mCurrentWeapon = "attack3";
-        else
-            mCurrentWeapon = "attack1";
     }
 }
 

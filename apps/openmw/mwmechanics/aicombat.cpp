@@ -204,7 +204,10 @@ namespace MWMechanics
             {
                 //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
-                chooseBestAttack(weapon, mMovement);
+
+                // When attacking with a weapon, choose between slash, thrust or chop
+                if (actor.getClass().hasInventoryStore(actor))
+                    chooseBestAttack(weapon, mMovement);
 
                 if(mMovement.mPosition[0] || mMovement.mPosition[1])
                 {
@@ -365,7 +368,7 @@ void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement
 {
     if (weapon == NULL)
     {
-        //hand-to-hand and creatures' attacks deal equal damage for each type
+        //hand-to-hand deal equal damage for each type
         float roll = static_cast<float>(rand())/RAND_MAX;
         if(roll <= 0.333f)  //side punch
         {
