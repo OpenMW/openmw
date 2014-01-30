@@ -367,4 +367,8 @@ namespace MWWorld
     {
         throw std::runtime_error("class does not support gore");
     }
+
+    void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
+
+    void Class::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const {}
 }
