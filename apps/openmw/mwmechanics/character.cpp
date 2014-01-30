@@ -691,7 +691,8 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
+                    if(isWeapon && mPtr.getRefData().getHandle() == "player" &&
+                            Settings::Manager::getBool("best attack", "Game"))
                         mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                     else
                         determineAttackType();
