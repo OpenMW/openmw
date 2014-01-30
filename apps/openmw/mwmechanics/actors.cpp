@@ -776,12 +776,19 @@ namespace MWMechanics
     {
         if (!paused)
         {
+            for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            {
+                // Reset last hit object, which is only valid for one frame
+                // Note, the new hit object for this frame may be set by CharacterController::update -> Animation::runAnimation
+                // (below)
+                iter->first.getClass().getCreatureStats(iter->first).setLastHitObject(std::string());
+            }
+
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
             {
                 const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
                 CreatureStats &stats = cls.getCreatureStats(iter->first);
 
-                stats.setLastHitObject(std::string());
                 if(!stats.isDead())
                 {
                     if(iter->second->isDead())
