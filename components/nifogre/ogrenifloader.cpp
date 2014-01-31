@@ -1034,7 +1034,7 @@ class NIFObjectLoader
             e = e->extra;
         }
 
-        if(!node->controller.empty() && (node->parent || node->recType != Nif::RC_NiNode))
+        if(!node->controller.empty())
             createNodeControllers(name, node->controller, scene, animflags);
 
         if(node->recType == Nif::RC_NiCamera)
