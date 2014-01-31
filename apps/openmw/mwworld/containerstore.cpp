@@ -5,6 +5,8 @@
 #include <typeinfo>
 #include <stdexcept>
 
+#include <components/esm/inventorystate.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -54,6 +56,43 @@ namespace
         }
 
         return MWWorld::Ptr();
+    }
+
+    template<typename T>
+    void getState (MWWorld::CellRefList<T>& collection, const ESM::ObjectState& state)
+    {
+        if (!MWWorld::LiveCellRef<T>::checkState (state))
+            return; // not valid anymore with current content files -> skip
+
+        const T *record = MWBase::Environment::get().getWorld()->getStore().
+            get<T>().search (state.mRef.mRefID);
+
+        if (!record)
+            return;
+
+        MWWorld::LiveCellRef<T> ref (record);
+        ref.load (state);
+        ref.mRef.mRefNum.mContentFile = -1;
+        collection.mList.push_back (ref);
+    }
+
+    template<typename T>
+    void storeState (const MWWorld::LiveCellRef<T>& ref, ESM::ObjectState& state)
+    {
+        ref.save (state);
+    }
+
+    template<typename T>
+    void storeStates (const MWWorld::CellRefList<T>& collection,
+        std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states)
+    {
+        for (typename MWWorld::CellRefList<T>::List::const_iterator iter (collection.mList.begin());
+            iter!=collection.mList.end(); ++iter)
+        {
+            ESM::ObjectState state;
+            storeState (*iter, state);
+            states.push_back (std::make_pair (state, std::make_pair (T::sRecordId, -1)));
+        }
     }
 }
 
@@ -493,6 +532,67 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     }
 
     return Ptr();
+}
+
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
+{
+    state.mItems.clear();
+
+    storeStates (potions, state.mItems);
+    storeStates (appas, state.mItems);
+    storeStates (armors, state.mItems);
+    storeStates (books, state.mItems);
+    storeStates (clothes, state.mItems);
+    storeStates (ingreds, state.mItems);
+    storeStates (lockpicks, state.mItems);
+    storeStates (miscItems, state.mItems);
+    storeStates (probes, state.mItems);
+    storeStates (repairs, state.mItems);
+    storeStates (weapons, state.mItems);
+
+    state.mLights.clear();
+
+    for (MWWorld::CellRefList<ESM::Light>::List::const_iterator iter (lights.mList.begin());
+        iter!=lights.mList.end(); ++iter)
+    {
+        ESM::LightState objectState;
+        storeState (*iter, objectState);
+        state.mLights.push_back (std::make_pair (objectState, -1));
+    }
+}
+
+void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
+{
+    clear();
+
+    for (std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >::const_iterator
+        iter (state.mItems.begin()); iter!=state.mItems.end(); ++iter)
+    {
+        switch (iter->second.first)
+        {
+            case ESM::REC_ALCH: getState (potions, iter->first); break;
+            case ESM::REC_APPA: getState (appas, iter->first); break;
+            case ESM::REC_ARMO: getState (armors, iter->first); break;
+            case ESM::REC_BOOK: getState (books, iter->first); break;
+            case ESM::REC_CLOT: getState (clothes, iter->first); break;
+            case ESM::REC_INGR: getState (ingreds, iter->first); break;
+            case ESM::REC_LOCK: getState (lockpicks, iter->first); break;
+            case ESM::REC_MISC: getState (miscItems, iter->first); break;
+            case ESM::REC_PROB: getState (probes, iter->first); break;
+            case ESM::REC_REPA: getState (repairs, iter->first); break;
+            case ESM::REC_WEAP: getState (weapons, iter->first); break;
+
+            default:
+
+                std::cerr << "invalid item type in inventory state" << std::endl;
+        }
+    }
+
+    for (std::vector<std::pair<ESM::LightState, int> >::const_iterator iter (state.mLights.begin());
+        iter!=state.mLights.end(); ++iter)
+    {
+        getState (lights, iter->first);
+    }
 }
 
 

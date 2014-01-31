@@ -35,6 +35,14 @@ namespace MWWorld
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
 
+        virtual void load (const ESM::ObjectState& state) = 0;
+        ///< Load state into a LiveCellRef, that has already been initialised with base and class.
+        ///
+        /// \attention Must not be called with an invalid \a state.
+
+        virtual void save (ESM::ObjectState& state) const = 0;
+        ///< Save LiveCellRef state into \a state.
+
         protected:
 
             void loadImp (const ESM::ObjectState& state);
@@ -79,12 +87,12 @@ namespace MWWorld
         // The object that this instance is based on.
         const X* mBase;
 
-        void load (const ESM::ObjectState& state);
+        virtual void load (const ESM::ObjectState& state);
         ///< Load state into a LiveCellRef, that has already been initialised with base and class.
         ///
         /// \attention Must not be called with an invalid \a state.
 
-        void save (ESM::ObjectState& state) const;
+        virtual void save (ESM::ObjectState& state) const;
         ///< Save LiveCellRef state into \a state.
 
         static bool checkState (const ESM::ObjectState& state);

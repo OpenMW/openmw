@@ -20,9 +20,9 @@ void ESM::ObjectState::load (ESMReader &esm)
     mCount = 1;
     esm.getHNOT (mCount, "COUN");
 
-    esm.getHNT (mPosition, "POS_", 24);
+    esm.getHNOT (mPosition, "POS_", 24);
 
-    esm.getHNT (mLocalRotation, "LROT", 12);
+    esm.getHNOT (mLocalRotation, "LROT", 12);
 }
 
 void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const

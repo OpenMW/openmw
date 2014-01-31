@@ -7,6 +7,7 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/objectstate.hpp>
 #include <components/esm/lightstate.hpp>
+#include <components/esm/containerstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -326,7 +327,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mArmors);
         writeReferenceCollection<ESM::ObjectState> (writer, mBooks);
         writeReferenceCollection<ESM::ObjectState> (writer, mClothes);
-        writeReferenceCollection<ESM::ObjectState> (writer, mContainers);
+        writeReferenceCollection<ESM::ContainerState> (writer, mContainers);
         writeReferenceCollection<ESM::ObjectState> (writer, mCreatures);
         writeReferenceCollection<ESM::ObjectState> (writer, mDoors);
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
@@ -384,7 +385,7 @@ namespace MWWorld
 
                 case ESM::REC_CONT:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mContainers, contentFileMap);
+                    readReferenceCollection<ESM::ContainerState> (reader, mContainers, contentFileMap);
                     break;
 
                 case ESM::REC_CREA:

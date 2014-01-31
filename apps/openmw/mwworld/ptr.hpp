@@ -52,6 +52,8 @@ namespace MWWorld
                 throw std::runtime_error(str.str());
             }
 
+            MWWorld::LiveCellRefBase *getBase() const;
+
             ESM::CellRef& getCellRef() const;
 
             RefData& getRefData() const;

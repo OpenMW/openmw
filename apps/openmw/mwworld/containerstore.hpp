@@ -8,6 +8,7 @@
 namespace ESM
 {
     struct InventoryList;
+    struct InventoryState;
 }
 
 namespace MWWorld
@@ -123,6 +124,10 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
+            void writeState (ESM::InventoryState& state) const;
+
+            void readState (const ESM::InventoryState& state);
+
         friend class ContainerStoreIterator;
     };
 
@@ -172,7 +177,7 @@ namespace MWWorld
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon>::List::iterator);
 
-			void copy (const ContainerStoreIterator& src);
+            void copy (const ContainerStoreIterator& src);
 
             void incType();
 
@@ -200,7 +205,7 @@ namespace MWWorld
 
             ContainerStoreIterator operator++ (int);
 
-            ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);			
+            ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);
 
             bool isEqual (const ContainerStoreIterator& iter) const;
 
