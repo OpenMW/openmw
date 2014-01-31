@@ -311,25 +311,26 @@ public:
 
         static void setVisible(Ogre::Node *node, int vis)
         {
+            // Skinned meshes are attached to the scene node, not the bone.
+            // We use the Node's user data to connect it with the mesh.
+            Ogre::Any customData = node->getUserObjectBindings().getUserAny();
+
+            if (!customData.isEmpty())
+                Ogre::any_cast<Ogre::MovableObject*>(customData)->setVisible(vis);
+
+            Ogre::TagPoint *tag = dynamic_cast<Ogre::TagPoint*>(node);
+            if(tag != NULL)
+            {
+                Ogre::MovableObject *obj = tag->getChildObject();
+                if(obj != NULL)
+                    obj->setVisible(vis);
+            }
+
             Ogre::Node::ChildNodeIterator iter = node->getChildIterator();
             while(iter.hasMoreElements())
             {
                 node = iter.getNext();
                 setVisible(node, vis);
-
-                // Skinned meshes and particle systems are attached to the scene node, not the bone.
-                // We use the Node's user data to connect it with the mesh / particle system.
-                Ogre::Any customData = node->getUserObjectBindings().getUserAny();
-                if (!customData.isEmpty())
-                    Ogre::any_cast<Ogre::MovableObject*>(customData)->setVisible(vis);
-
-                Ogre::TagPoint *tag = dynamic_cast<Ogre::TagPoint*>(node);
-                if(tag != NULL)
-                {
-                    Ogre::MovableObject *obj = tag->getChildObject();
-                    if(obj != NULL)
-                        obj->setVisible(vis);
-                }
             }
         }
 
@@ -622,15 +623,14 @@ class NIFObjectLoader
         scene->mEntities.push_back(entity);
         if(scene->mSkelBase)
         {
+            int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, shape->recIndex);
+            Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+            trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(entity)));
+
             if(entity->hasSkeleton())
                 entity->shareSkeletonInstanceWith(scene->mSkelBase);
             else
-            {
-                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, shape->recIndex);
-                Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
-                trgtbone->getUserObjectBindings().setUserAny(Ogre::Any(static_cast<Ogre::MovableObject*>(entity)));
                 scene->mSkelBase->attachObjectToBone(trgtbone->getName(), entity);
-            }
         }
 
         Nif::ControllerPtr ctrl = node->controller;
