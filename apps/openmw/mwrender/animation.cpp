@@ -532,12 +532,6 @@ static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bo
             bone->setScale(Ogre::Vector3::UNIT_SCALE);
         }
     }
-    else
-    {
-        // No matching bone in the source. Make sure it stays properly offset
-        // from its parent.
-        bone->resetToInitialState();
-    }
 
     Ogre::Node::ChildNodeIterator boneiter = bone->getChildIterator();
     while(boneiter.hasMoreElements())
