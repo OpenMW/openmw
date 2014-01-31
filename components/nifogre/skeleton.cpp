@@ -97,7 +97,7 @@ bool NIFSkeletonLoader::needSkeleton(const Nif::Node *node)
     {
         Nif::ControllerPtr ctrl = node->controller;
         do {
-            if(ctrl->recType == Nif::RC_NiKeyframeController)
+            if(ctrl->recType == Nif::RC_NiKeyframeController && ctrl->flags & Nif::NiNode::ControllerFlag_Active)
                 return true;
         } while(!(ctrl=ctrl->next).empty());
     }

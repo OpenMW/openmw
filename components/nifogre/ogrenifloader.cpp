@@ -636,36 +636,39 @@ class NIFObjectLoader
         Nif::ControllerPtr ctrl = node->controller;
         while(!ctrl.empty())
         {
-            if(ctrl->recType == Nif::RC_NiUVController)
+            if (ctrl->flags & Nif::NiNode::ControllerFlag_Active)
             {
-                const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
+                if(ctrl->recType == Nif::RC_NiUVController)
+                {
+                    const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
 
-                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
-                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                    Ogre::ControllerValueRealPtr());
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(entity, uv->data.getPtr(), &scene->mMaterialControllerMgr));
+                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                        Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                        Ogre::ControllerValueRealPtr());
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(entity, uv->data.getPtr(), &scene->mMaterialControllerMgr));
 
-                UVController::Function* function = OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
-                scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
-                Ogre::ControllerFunctionRealPtr func(function);
+                    UVController::Function* function = OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
+                    Ogre::ControllerFunctionRealPtr func(function);
 
-                scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
-            }
-            else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
-            {
-                const Nif::NiGeomMorpherController *geom = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
+                    scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+                else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+                {
+                    const Nif::NiGeomMorpherController *geom = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
 
-                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
-                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                    Ogre::ControllerValueRealPtr());
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(
-                    entity, geom->data.getPtr(), geom->recIndex));
+                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                        Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                        Ogre::ControllerValueRealPtr());
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(
+                        entity, geom->data.getPtr(), geom->recIndex));
 
-                GeomMorpherController::Function* function = OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
-                scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
-                Ogre::ControllerFunctionRealPtr func(function);
+                    GeomMorpherController::Function* function = OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
+                    Ogre::ControllerFunctionRealPtr func(function);
 
-                scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                    scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
             }
             ctrl = ctrl->next;
         }
@@ -852,7 +855,7 @@ class NIFObjectLoader
         Nif::ControllerPtr ctrl = partnode->controller;
         while(!ctrl.empty())
         {
-            if(ctrl->recType == Nif::RC_NiParticleSystemController)
+            if(ctrl->recType == Nif::RC_NiParticleSystemController && ctrl->flags & Nif::NiNode::ControllerFlag_Active)
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
 
@@ -893,41 +896,44 @@ class NIFObjectLoader
     static void createNodeControllers(const std::string &name, Nif::ControllerPtr ctrl, ObjectScenePtr scene, int animflags)
     {
         do {
-            if(ctrl->recType == Nif::RC_NiVisController)
+            if (ctrl->flags & Nif::NiNode::ControllerFlag_Active)
             {
-                const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
-
-                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
-                Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
-                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
-                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                    Ogre::ControllerValueRealPtr());
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
-
-                VisController::Function* function = OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
-                scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
-                Ogre::ControllerFunctionRealPtr func(function);
-
-                scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
-            }
-            else if(ctrl->recType == Nif::RC_NiKeyframeController)
-            {
-                const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                if(!key->data.empty())
+                if(ctrl->recType == Nif::RC_NiVisController)
                 {
+                    const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
+
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
-                    // The keyframe controller will control this bone manually
-                    trgtbone->setManuallyControlled(true);
                     Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
                                                         Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                         Ogre::ControllerValueRealPtr());
-                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
-                    KeyframeController::Function* function = OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
+
+                    VisController::Function* function = OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
 
                     scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+                else if(ctrl->recType == Nif::RC_NiKeyframeController)
+                {
+                    const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+                    if(!key->data.empty())
+                    {
+                        int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
+                        Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
+                        // The keyframe controller will control this bone manually
+                        trgtbone->setManuallyControlled(true);
+                        Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                            Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                            Ogre::ControllerValueRealPtr());
+                        Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
+                        KeyframeController::Function* function = OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                        scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
+                        Ogre::ControllerFunctionRealPtr func(function);
+
+                        scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                    }
                 }
             }
             ctrl = ctrl->next;
@@ -1150,6 +1156,9 @@ public:
                 nif->warn("Unexpected extra data "+extra->recName+" with controller "+ctrl->recName);
                 continue;
             }
+
+            if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                continue;
 
             const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
             const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
