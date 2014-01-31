@@ -49,13 +49,18 @@ CSMSettings::UserSettings::UserSettings()
 void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
-    {/*
+    {
         Setting *width = declarationModel().singleText
-                                                    (section, "Widget", "1024");
+                                                    (section, "Width", "1024");
+
+        width->widgetWidth = 5;
 
         Setting *height = declarationModel().singleText
                                                     (section, "Height", "768");
 
+        height->widgetWidth = 5;
+        height->viewColumn = 1;
+/*
         QStringList predefValues;
 
         predefValues    << "640 x 480"
@@ -77,8 +82,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 //        preDefined->proxyMap().insert("Height", heightValues);
 
 //      preDefined->setViewType(CSVSettings::ViewType_List);
-//      width->setViewType (CSVSettings::ViewType_Text);
-//      height->setWidgetType (CSVSettings::ViewType_Text);
+
     }
 
     section = "Display Format";

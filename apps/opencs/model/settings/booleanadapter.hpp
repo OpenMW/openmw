@@ -5,13 +5,13 @@
 #include <QPair>
 #include <QSortFilterProxyModel>
 
-#include "viewadapter.hpp"
+#include "adapter.hpp"
 #include "../../view/settings/support.hpp"
 
 namespace CSMSettings
 {
     class DefinitionModel;
-    class BooleanAdapter : public ViewAdapter
+    class BooleanAdapter : public Adapter
     {
         Q_OBJECT
 
@@ -24,7 +24,6 @@ namespace CSMSettings
                                  QObject *parent = 0);
 
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
-        int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
         bool valueExists        (const QString &value) const;
         bool insertValue        (const QString &value);
@@ -36,26 +35,17 @@ namespace CSMSettings
         bool setData            (const QModelIndex &index,
                                  const QVariant &value,
                                  int role = Qt::EditRole);
-
-        Qt::ItemFlags flags     (const QModelIndex &index) const;
-
-        QModelIndex index(int row, int column, const QModelIndex &parent) const;
-
-        QModelIndex valueIndex (const QString &item, SettingColumn column);
-
-        QModelIndex parent(const QModelIndex &child) const
-                                                { return QModelIndex(); }
     private:
 
         bool setSingleValue (const QString &item);
         bool setMultiValue (bool state, const QString &value);
-        bool validIndex (QModelIndex idx) const;
-        bool setSourceValue (bool state, const QString &value);
 
     private slots:
-        void slotUpdateData();
-        void slotDataChanged (const QModelIndex &, const QModelIndex &);
+
+        void slotLayoutChanged();
+        void slotDataChanged(const QModelIndex &, const QModelIndex &) {}
 
     };
 }
 #endif // CSMSETTINGS_BOOLEANADAPTER_HPP
+

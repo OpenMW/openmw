@@ -11,6 +11,7 @@
 #include "../../model/settings/booleanadapter.hpp"
 #include "../../model/settings/setting.hpp"
 #include "../../model/settings/definitionmodel.hpp"
+#include "settingbox.hpp"
 
 #include <QDebug>
 
@@ -19,21 +20,15 @@ CSVSettings::BooleanView::BooleanView (QAbstractItemModel *booleanAdapter,
                                        QWidget *parent)
     : View (booleanAdapter, setting, parent)
 {
-
-    build (setting->settingName);
+    createView (setting);
+    createModel (setting->settingName);
 }
 
-void CSVSettings::BooleanView::build(const QString &settingName)
+void CSVSettings::BooleanView::createView(const CSMSettings::Setting *setting)
 {
-    createView (settingName);
-    createModel (settingName);
-}
+    setObjectName (setting->settingName + "_view");
 
-void CSVSettings::BooleanView::createView(const QString &settingName)
-{
-    setObjectName (settingName + "_view");
-
-    foreach (const QString &value, valueList())
+    foreach (const QString &value, setting->valueList)
     {
         QWidget *widget = 0;
 
@@ -44,7 +39,7 @@ void CSVSettings::BooleanView::createView(const QString &settingName)
 
         widget->setObjectName (value);
 
-        viewFrame()->layout()->addWidget (widget);
+        viewFrame()->addWidget (widget);
 
         mWidgets.append (widget);
     }

@@ -87,6 +87,8 @@ opencs_units (view/settings
     page
     view
     booleanview
+    textview
+    listview
     testharnesspage
     )
 
@@ -98,14 +100,15 @@ opencs_units_noqt (view/settings
 opencs_units (model/settings
     usersettings
     booleanadapter
+    textadapter
     definitionmodel
     declarationmodel
     settingmodel
     setting
+    adapter
     )
 
 opencs_units_noqt (model/settings
-    viewadapter
     )
 
 opencs_units_noqt (model/filter

@@ -30,7 +30,9 @@ void CSVSettings::Dialog::setupDialog()
 {
     //create central widget with it's layout and immediate children
     QWidget *centralWidget = new QGroupBox (this);
+
     centralWidget->setLayout (new QHBoxLayout());
+    centralWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
     setCentralWidget (centralWidget);
     setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -58,6 +60,11 @@ void CSVSettings::Dialog::buildPages()
         mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
     }
 
+    new QListWidgetItem ("Test Harness", mPageListWidget);
+
+    mStackedWidget->addWidget (
+        new TestHarnessPage (CSMSettings::UserSettings::instance(), this));
+
     resize (mStackedWidget->sizeHint());
 }
 
@@ -76,7 +83,7 @@ void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
 void CSVSettings::Dialog::buildStackedWidget (QWidget *centralWidget)
 {
     mStackedWidget = new QStackedWidget (centralWidget);
-    mStackedWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Fixed);
+    mStackedWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     centralWidget->layout()->addWidget (mStackedWidget);
 }

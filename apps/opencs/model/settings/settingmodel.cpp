@@ -274,6 +274,7 @@ QTextStream *CSMSettings::SettingModel::openFilestream (const QString &filePath,
 void CSMSettings::SettingModel::destroyStream(QTextStream *stream) const
 {
     stream->device()->close();
+
     delete stream;
 }
 

@@ -30,8 +30,7 @@ namespace CSVSettings
 
     protected:
 
-        void build (const QString &settingName);
-        void createView (const QString &settingName);
+        void createView (const CSMSettings::Setting *setting);
         void createModel (const QString &settingName);
     };
 

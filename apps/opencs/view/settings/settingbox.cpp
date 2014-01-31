@@ -1,14 +1,13 @@
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-
 #include "settingbox.hpp"
 
-const QString CSVSettings::SettingBox::INVISIBLE_BOX_STYLE =
-        QString::fromUtf8("QSettingBox { border: 0px; padding 0px; margin: 0px;}");
+#include <QDebug>
 
-CSVSettings::SettingBox::SettingBox (bool isHorizontal, bool isVisible,
-                                     QWidget *parent)
-    : QGroupBox (parent)
+const QString CSVSettings::SettingBox::INVISIBLE_BOX_STYLE =
+    QString::fromUtf8("QSettingBox { border: 0px; padding 0px; margin: 0px;}");
+
+CSVSettings::SettingBox::SettingBox (bool isVisible, const QString &title,
+                                                               QWidget *parent)
+    : mIsHorizontal (true), QGroupBox (title, parent)
 {
     setFlat (true);
     mVisibleBoxStyle = styleSheet();
@@ -16,39 +15,28 @@ CSVSettings::SettingBox::SettingBox (bool isHorizontal, bool isVisible,
     if (!isVisible)
         setStyleSheet (INVISIBLE_BOX_STYLE);
 
-    if (isHorizontal)
-        setLayout (new QHBoxLayout);
-    else
-        setLayout (new QVBoxLayout);
+    mLayout = new SettingLayout();
+    setLayout (mLayout);
 }
 
-bool CSVSettings::SettingBox::borderVisibile() const
+void CSVSettings::SettingBox::addWidget (QWidget *widget)
 {
-    return (styleSheet() != INVISIBLE_BOX_STYLE);
-}
-
-void CSVSettings::SettingBox::setTitle (const QString &title)
-{
-    if (borderVisibile() )
+    if (mIsHorizontal)
     {
-        QGroupBox::setTitle (title);
-        setMinimumWidth();
+        mLayout->addWidget (widget, mLayout->rowCount() - 1,
+                            mLayout->columnCount());
     }
-}
-
-void CSVSettings::SettingBox::setBorderVisibility (bool value)
-{
-    if (value)
-        setStyleSheet(mVisibleBoxStyle);
     else
-        setStyleSheet(INVISIBLE_BOX_STYLE);
+        mLayout->addWidget (widget, mLayout->rowCount(), 0);
 }
 
-void CSVSettings::SettingBox::setMinimumWidth()
+void CSVSettings::SettingBox::addWidget (QWidget *widget, int row, int column)
 {
-    //set minimum width to accommodate title, if needed
-    //1.5 multiplier to account for bold title.
-    QFontMetrics fm (font());
-    int minWidth = fm.width(title());
-    QGroupBox::setMinimumWidth (minWidth * 1.5);
+    if (row == -1)
+        row = mLayout->rowCount() - 1;
+
+    if (column == -1)
+        column = 0;
+
+    mLayout->addWidget (widget, row, column, Qt::AlignLeft | Qt::AlignTop);
 }

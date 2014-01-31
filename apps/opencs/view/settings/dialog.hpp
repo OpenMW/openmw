@@ -28,7 +28,6 @@ namespace CSVSettings {
         void closeEvent (QCloseEvent *event);
 
         void setupDialog();
-       // void addPage (Page *page);
 
     private:
 

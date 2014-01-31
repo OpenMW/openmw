@@ -7,6 +7,7 @@
 #include "settingbox.hpp"
 #include "view.hpp"
 #include "booleanview.hpp"
+#include "textview.hpp"
 
 #include "../../model/settings/declarationmodel.hpp"
 #include "../../model/settings/definitionmodel.hpp"
@@ -36,11 +37,12 @@ CSVSettings::Page::Page(const QString &pageName,
 
 void CSVSettings::Page::setupPage (bool isHorizontal)
 {
-    setLayout (new QGridLayout());
+    mBox = new SettingBox (false, "", this);
 
-    mBox = new SettingBox (isHorizontal, false, this);
+    SettingLayout *layout = new SettingLayout();
+    layout->addWidget (mBox, 0, 0);
 
-    layout()->addWidget(mBox);
+    setLayout (layout);
 }
 
 void CSVSettings::Page::setupViews
@@ -81,12 +83,23 @@ void CSVSettings::Page::addView (CSMSettings::DefinitionModel &model,
     }
 
     mViews.append (view);
-    mBox->layout()->addWidget (view->viewFrame());
+
+    int viewRow = setting->viewRow;
+    int viewCol = setting->viewColumn;
+
+    if (viewRow == -1)
+        viewRow = mViews.count() - 1;
+
+    if (viewCol == -1)
+        viewCol = 0;
+
+    mBox->addWidget (view->viewFrame(), viewRow, viewCol);
 }
 
 void CSVSettings::Page::buildFactories()
 {
-    mViewFactories[ViewType_Boolean] = new BooleanViewFactory(this);
+    mViewFactories[ViewType_Boolean] = new BooleanViewFactory (this);
+    mViewFactories[ViewType_Text] = new TextViewFactory (this);
 }
 
 QSortFilterProxyModel *CSVSettings::Page::buildFilter

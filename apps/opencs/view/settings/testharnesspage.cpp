@@ -7,23 +7,16 @@
 
 #include <QDebug>
 
-CSVSettings::TestHarnessPage::TestHarnessPage(
-                            CSMSettings::DeclarationModel &declarationModel,
-                            CSMSettings::DefinitionModel &definitionModel,
+CSVSettings::TestHarnessPage::TestHarnessPage( CSMSettings::SettingModel &model,
                             QWidget *parent)
 
-    : Page ("Test Harness", declarationModel, definitionModel, true, parent)
+    : Page ("Test Harness", model.declarationModel(),
+            model.definitionModel(), true, parent)
 {
     QTableView *sourceView = new QTableView(parent);
 
-    qDebug () << "source view model rowcount: " << definitionModel.rowCount();
-    sourceView->setMinimumWidth(50);
-    sourceView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sourceView->setSelectionBehavior(QAbstractItemView::SelectItems);
-    sourceView->setModel(&definitionModel);
+    sourceView->setModel(&model.definitionModel());
 
     pageFrame()->layout()->addWidget(sourceView);
-
-    //item clicked connection to update the views for the newly selected setting
-    //connect (sourceView, SIGNAL (), this SLOT ());
 }

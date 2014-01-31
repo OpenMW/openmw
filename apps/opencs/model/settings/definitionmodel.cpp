@@ -103,9 +103,7 @@ QModelIndex CSMSettings::DefinitionModel::defineSetting (
     dataPair.first = pageName;
     dataPair.second.first = settingName;
     dataPair.second.second = value;
-
     int settingRow = rowCount();
-
     insertRow (settingRow);
     mDefinitions.replace (settingRow, dataPair);
 

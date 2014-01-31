@@ -5,17 +5,17 @@
 #include "setting.hpp"
 
 #include <QDebug>
+
 CSMSettings::BooleanAdapter::BooleanAdapter (DefinitionModel &model,
                                             const CSMSettings::Setting *setting,
                                             QObject *parent)
 
-    : ViewAdapter (model, setting->pageName, setting->settingName, parent)
+    : Adapter (model, setting->pageName, setting->settingName,
+               setting->isMultiValue, parent)
 {
 
     //create a list of QString pairs which represent the setting values and
     //whether or not they are set (true / false)
-
-    setObjectName (settingName() + "_adapter");
     foreach (const QString &listValue, setting->valueList)
     {
         QPair<QString, QBool *> settingPair(listValue, new QBool(true));
@@ -33,22 +33,12 @@ CSMSettings::BooleanAdapter::BooleanAdapter (DefinitionModel &model,
         }
         mSettings.append(settingPair);
     }
-
-    connect (filter(),
-             SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
-             this,
-             SLOT(slotDataChanged(const QModelIndex &, const QModelIndex &)));
-
-    connect (filter(), SIGNAL(layoutChanged()),
-             this, SLOT(slotUpdateData()));
 }
 
-void CSMSettings::BooleanAdapter::slotDataChanged(const QModelIndex &topLeft, const QModelIndex &botRight)
+void CSMSettings::BooleanAdapter::slotLayoutChanged()
 {
-}
-
-void CSMSettings::BooleanAdapter::slotUpdateData()
-{
+    //iterate settings, updating their state to reflect
+    //the values present / missing in the model
     for (int i = 0; i < mSettings.count(); i++)
     {
         QPair <QString, QBool *> data = mSettings.at(i);
@@ -84,20 +74,6 @@ void CSMSettings::BooleanAdapter::slotUpdateData()
     }
 }
 
-QModelIndex CSMSettings::BooleanAdapter::valueIndex (const QString &value,
-                                                     SettingColumn column)
-{
-    for (int i = 0; i < filter()->rowCount(); i++)
-    {
-        QModelIndex idx = filter()->index(i, column);
-
-        if (filter()->data(idx).toString() == value)
-            return idx;
-    }
-
-    return QModelIndex();
-}
-
 bool CSMSettings::BooleanAdapter::valueExists (const QString &value) const
 {
     bool success = false;
@@ -119,7 +95,7 @@ bool CSMSettings::BooleanAdapter::insertValue(const QString &value)
     if (!valueExists (value))
         return false;
 
-    return ViewAdapter::insertValue (value);
+    return Adapter::insertValue (value);
 }
 
 bool CSMSettings::BooleanAdapter::removeValue (const QString &value)
@@ -128,7 +104,7 @@ bool CSMSettings::BooleanAdapter::removeValue (const QString &value)
     if (!valueExists (value))
         return false;
 
-     return ViewAdapter::removeValue (value);
+     return Adapter::removeValue (value);
 }
 
 QVariant CSMSettings::BooleanAdapter::data(const QModelIndex &index, int role) const
@@ -169,21 +145,6 @@ int CSMSettings::BooleanAdapter::rowCount(const QModelIndex &parent) const
     return mSettings.size();
 }
 
-int CSMSettings::BooleanAdapter::columnCount(const QModelIndex &parent) const
-{
-    return 2;
-}
-
-bool CSMSettings::BooleanAdapter::validIndex(QModelIndex idx) const
-{
-    if (!idx.isValid())
-        return false;
-
-    if (idx.row() < 0 || idx.row() >= rowCount())
-        return false;
-
-    return true;
-}
 
 bool CSMSettings::BooleanAdapter::setData(const QModelIndex &index,
                                           const QVariant &value, int role)
@@ -192,8 +153,14 @@ bool CSMSettings::BooleanAdapter::setData(const QModelIndex &index,
         return false;
 
     QString item = mSettings.at(index.row()).first;
+    bool success = false;
 
-    if (!setSourceValue (value.toBool(), item))
+    if (!isMultiValue())
+        success = setSingleValue(item);
+    else
+        success = setMultiValue(value.toBool(), item);
+
+    if (!success)
         return false;
 
     *(mSettings.at(index.row()).second) = QBool(value.toBool());
@@ -201,15 +168,6 @@ bool CSMSettings::BooleanAdapter::setData(const QModelIndex &index,
     emit dataChanged(index, index);
 
     return true;
-}
-
-bool CSMSettings::BooleanAdapter::setSourceValue (bool state,
-                                                 const QString &value)
-{
-    if (singleValueMode())
-        return setSingleValue(value);
-
-    return setMultiValue(state, value);
 }
 
 bool CSMSettings::BooleanAdapter::setMultiValue (bool state,
@@ -243,21 +201,4 @@ bool CSMSettings::BooleanAdapter::setSingleValue (const QString &value)
     }
 
     return insertValue(value);
-}
-
-Qt::ItemFlags CSMSettings::BooleanAdapter::flags(const QModelIndex &index) const
-{
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
-}
-
-QModelIndex CSMSettings::BooleanAdapter::index(int row, int column,
-                                               const QModelIndex &parent) const
-{
-    if ((row >= 0 && row < rowCount()) &&
-        ( column >= 0 && column < columnCount()))
-    {
-        return createIndex (row, column);
-    }
-
-    return QModelIndex();
 }

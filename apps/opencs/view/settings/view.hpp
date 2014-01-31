@@ -17,22 +17,25 @@ namespace CSMSettings
 
 namespace CSVSettings
 {
+    class SettingBox;
+
     class View : public QWidget
     {
         Q_OBJECT
 
         QAbstractItemModel *mModel;
 
-        QGroupBox *mViewFrame;
+        SettingBox *mViewFrame;
 
-        const CSMSettings::Setting *mSetting;
+       QStringList mValueList;
+        bool mIsMultiValue;
 
     public:
 
-        explicit View(QAbstractItemModel *model,
+        explicit View (QAbstractItemModel *model,
                       const CSMSettings::Setting *setting, QWidget *parent = 0);
 
-        QGroupBox *viewFrame() const                    { return mViewFrame; }
+        SettingBox *viewFrame() const                    { return mViewFrame; }
 
     protected:
 

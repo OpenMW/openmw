@@ -7,31 +7,34 @@
 #include "view.hpp"
 #include "support.hpp"
 #include "../../model/settings/setting.hpp"
+#include "settingbox.hpp"
 
 #include <QDebug>
 
 CSVSettings::View::View(QAbstractItemModel *model,
-                        const CSMSettings::Setting *setting, QWidget *parent)
+                        const CSMSettings::Setting *setting,
+                        QWidget *parent)
 
-    : mModel (model), mSetting (setting), QWidget(parent)
+    : mModel (model), QWidget(parent), mIsMultiValue (setting->isMultiValue),
+      mValueList (setting->valueList)
 {
-    mViewFrame = new QGroupBox(setting->settingName, parent);
+    mViewFrame = new SettingBox(true, setting->settingName, parent);
+    mViewFrame->setFlat (true);
 
-    if (mSetting->isHorizontal)
-        mViewFrame->setLayout (new QHBoxLayout());
+    if (setting->isHorizontal)
+        mViewFrame->setHLayout();
     else
-        mViewFrame->setLayout (new QVBoxLayout());
+        mViewFrame->setVLayout();
 
-    mViewFrame->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    setObjectName (mSetting->settingName);
+    setObjectName (setting->settingName);
 }
 
 bool CSVSettings::View::isMultiValue() const
 {
-    return mSetting->isMultiValue;
+    return mIsMultiValue;
 }
 
 QStringList CSVSettings::View::valueList() const
 {
-    return mSetting->valueList;
+    return mValueList;
 }
