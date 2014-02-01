@@ -236,7 +236,9 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     // Loop through all the references
     ESM::CellRef ref;
     if(!quiet) std::cout << "  References:\n";
-    while(cell.getNextRef(esm, ref))
+
+    bool deleted = false;
+    while(cell.getNextRef(esm, ref, deleted))
     {
         if (save) {
             info.data.mCellRefs[&cell].push_back(ref);
@@ -244,13 +246,14 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
 
         if(quiet) continue;
 
-        std::cout << "    Refnum: " << ref.mRefnum << std::endl;
+        std::cout << "    Refnum: " << ref.mRefNum.mIndex << std::endl;
         std::cout << "    ID: '" << ref.mRefID << "'\n";
         std::cout << "    Owner: '" << ref.mOwner << "'\n";
         std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
         std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
         std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
+        std::cout << "    Deleted: " << deleted << std::endl;
     }
 }
 

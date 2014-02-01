@@ -12,6 +12,8 @@
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
+#include <components/esm/globalmap.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -59,8 +61,6 @@ namespace MWRender
         loadingListener->setLabel("Creating map");
         loadingListener->setProgressRange((mMaxX-mMinX+1) * (mMaxY-mMinY+1));
         loadingListener->setProgress(0);
-
-        mExploredBuffer.resize((mMaxX-mMinX+1) * (mMaxY-mMinY+1) * 4);
 
         //if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
         if (1)
@@ -170,21 +170,10 @@ namespace MWRender
         tex->load();
 
 
-
-
         mOverlayTexture = Ogre::TextureManager::getSingleton().createManual("GlobalMapOverlay", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
             Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_A8B8G8R8, Ogre::TU_DYNAMIC_WRITE_ONLY);
 
-
-        std::vector<Ogre::uint32> buffer;
-        buffer.resize(mWidth * mHeight);
-
-        // initialize to (0, 0, 0, 0)
-        for (int p=0; p<mWidth * mHeight; ++p)
-            buffer[p] = 0;
-
-        memcpy(mOverlayTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mWidth*mHeight*4);
-        mOverlayTexture->getBuffer()->unlock();
+        clear();
 
         loadingListener->loadingOff();
     }
@@ -227,9 +216,114 @@ namespace MWRender
 
         if (!localMapTexture.isNull())
         {
-
             mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,512,512),
                          Ogre::Image::Box(originX,originY,originX+24,originY+24));
+        }
+    }
+
+    void GlobalMap::clear()
+    {
+        std::vector<Ogre::uint32> buffer;
+        // initialize to (0,0,0,0)
+        buffer.resize(mWidth * mHeight, 0);
+
+        Ogre::PixelBox pb(mWidth, mHeight, 1, Ogre::PF_A8B8G8R8, &buffer[0]);
+
+        mOverlayTexture->getBuffer()->blitFromMemory(pb);
+    }
+
+    void GlobalMap::write(ESM::ESMWriter &writer)
+    {
+        ESM::GlobalMap map;
+        map.mBounds.mMinX = mMinX;
+        map.mBounds.mMaxX = mMaxX;
+        map.mBounds.mMinY = mMinY;
+        map.mBounds.mMaxY = mMaxY;
+
+        Ogre::Image image;
+        mOverlayTexture->convertToImage(image);
+        Ogre::DataStreamPtr encoded = image.encode("png");
+        map.mImageData.resize(encoded->size());
+        encoded->read(&map.mImageData[0], encoded->size());
+
+        writer.startRecord(ESM::REC_GMAP);
+        map.save(writer);
+        writer.endRecord(ESM::REC_GMAP);
+    }
+
+    void GlobalMap::readRecord(ESM::ESMReader &reader, int32_t type, std::vector<std::pair<int, int> >& exploredCells)
+    {
+        if (type == ESM::REC_GMAP)
+        {
+            ESM::GlobalMap map;
+            map.load(reader);
+
+            const ESM::GlobalMap::Bounds& bounds = map.mBounds;
+
+            if (bounds.mMaxX-bounds.mMinX <= 0)
+                return;
+            if (bounds.mMaxY-bounds.mMinY <= 0)
+                return;
+
+            Ogre::Image image;
+            Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&map.mImageData[0], map.mImageData.size()));
+            image.load(stream, "png");
+
+            int xLength = (bounds.mMaxX-bounds.mMinX+1);
+            int yLength = (bounds.mMaxY-bounds.mMinY+1);
+
+            // Size of one cell in image space
+            int cellImageSizeSrc = image.getWidth() / xLength;
+            if (int(image.getHeight() / yLength) != cellImageSizeSrc)
+                throw std::runtime_error("cell size must be quadratic");
+
+            // Determine which cells were explored by reading the image data
+            for (int x=0; x < xLength; ++x)
+            {
+                for (int y=0; y < yLength; ++y)
+                {
+                    unsigned int imageX = (x) * cellImageSizeSrc;
+                    // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
+                    unsigned int imageY = (yLength - (y + 1)) * cellImageSizeSrc;
+
+                    assert(imageX < image.getWidth());
+                    assert(imageY < image.getWidth());
+
+                    if (image.getColourAt(imageX, imageY, 0).a > 0)
+                        exploredCells.push_back(std::make_pair(x+bounds.mMinX,y+bounds.mMinY));
+                }
+            }
+
+            // If cell bounds of the currently loaded content and the loaded savegame do not match,
+            // we need to resize source/dest boxes to accommodate
+            // This means nonexisting cells will be dropped silently
+
+            int cellImageSizeDst = 24;
+
+            int leftDiff = (mMinX - bounds.mMinX);
+            int topDiff = (bounds.mMaxY - mMaxY);
+            int rightDiff = (bounds.mMaxX - mMaxX);
+            int bottomDiff =  (mMinY - bounds.mMinY);
+            Ogre::Image::Box srcBox ( std::max(0, leftDiff * cellImageSizeSrc),
+                                      std::max(0, topDiff * cellImageSizeSrc),
+                                      std::min(image.getWidth(), image.getWidth() - rightDiff * cellImageSizeSrc),
+                                      std::min(image.getHeight(), image.getHeight() - bottomDiff * cellImageSizeSrc));
+
+            Ogre::Image::Box destBox ( std::max(0, -leftDiff * cellImageSizeDst),
+                                       std::max(0, -topDiff * cellImageSizeDst),
+                                       std::min(mOverlayTexture->getWidth(), mOverlayTexture->getWidth() + rightDiff * cellImageSizeDst),
+                                       std::min(mOverlayTexture->getHeight(), mOverlayTexture->getHeight() + bottomDiff * cellImageSizeDst));
+
+            // Looks like there is no interface for blitting from memory with src/dst boxes.
+            // So we create a temporary texture for blitting.
+            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().createManual("@temp",
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, image.getWidth(),
+                                                                                     image.getHeight(), 0, Ogre::PF_A8B8G8R8);
+            tex->loadImage(image);
+
+            mOverlayTexture->getBuffer()->blit(tex->getBuffer(), srcBox, destBox);
+
+            Ogre::TextureManager::getSingleton().remove("@temp");
         }
     }
 }

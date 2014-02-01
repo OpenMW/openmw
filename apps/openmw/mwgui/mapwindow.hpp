@@ -8,6 +8,12 @@ namespace MWRender
     class GlobalMap;
 }
 
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
+
 namespace Loading
 {
     class Listener;
@@ -93,6 +99,12 @@ namespace MWGui
         virtual void open();
 
         void onFrame(float dt) { NoDrop::onFrame(dt); }
+
+        /// Clear all savegame-specific data
+        void clear();
+
+        void write (ESM::ESMWriter& writer);
+        void readRecord (ESM::ESMReader& reader, int32_t type);
 
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

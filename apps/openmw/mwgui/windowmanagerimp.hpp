@@ -280,6 +280,12 @@ namespace MWGui
 
     virtual bool getCursorVisible();
 
+    /// Clear all savegame-specific data
+    virtual void clear();
+
+    virtual void write (ESM::ESMWriter& writer);
+    virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+
   private:
     bool mConsoleOnlyScripts;
 

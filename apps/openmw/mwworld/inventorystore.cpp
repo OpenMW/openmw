@@ -49,6 +49,21 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots_)
         slots_.push_back (end());
 }
 
+int MWWorld::InventoryStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+{
+    for (int i = 0; i<static_cast<int> (mSlots.size()); ++i)
+        if (mSlots[i].getType()!=-1 && mSlots[i]->getBase()==&ref)
+            return i;
+
+    return -1;
+}
+
+void MWWorld::InventoryStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot)
+{
+    if (iter!=end() && slot>=0 && slot<Slots)
+        mSlots[slot] = iter;
+}
+
 MWWorld::InventoryStore::InventoryStore()
  : mSelectedEnchantItem(end())
  , mUpdatesEnabled (true)
@@ -636,4 +651,11 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 void MWWorld::InventoryStore::purgeEffect(short effectId)
 {
     mMagicEffects.add(MWMechanics::EffectKey(effectId), -mMagicEffects.get(MWMechanics::EffectKey(effectId)).mMagnitude);
+}
+
+void MWWorld::InventoryStore::clear()
+{
+    mSlots.clear();
+    initSlots (mSlots);
+    ContainerStore::clear();
 }

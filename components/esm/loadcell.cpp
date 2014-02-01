@@ -3,26 +3,52 @@
 #include <string>
 #include <sstream>
 #include <list>
+
 #include <boost/concept_check.hpp>
+
+#include <components/misc/stringops.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "cellid.hpp"
+
+namespace
+{
+    ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
+    void adjustRefNum (ESM::CellRef::RefNum& refNum, ESM::ESMReader& reader)
+    {
+        int local = (refNum.mIndex & 0xff000000) >> 24;
+
+        if (local)
+        {
+            // If the most significant 8 bits are used, then this reference already exists.
+            // In this case, do not spawn a new reference, but overwrite the old one.
+            refNum.mIndex &= 0x00ffffff; // delete old plugin ID
+            refNum.mContentFile = reader.getGameFiles()[local-1].index;
+        }
+        else
+        {
+            // This is an addition by the present plugin. Set the corresponding plugin index.
+            refNum.mContentFile = reader.getIndex();
+        }
+    }
+}
 
 namespace ESM
 {
     unsigned int Cell::sRecordId = REC_CELL;
 
-/// Some overloaded compare operators.
-bool operator==(const MovedCellRef& ref, int pRefnum)
-{
-  return (ref.mRefnum == pRefnum);
-}
+    // Some overloaded compare operators.
+    bool operator== (const MovedCellRef& ref, const CellRef::RefNum& refNum)
+    {
+        return ref.mRefNum == refNum;
+    }
 
-bool operator==(const CellRef& ref, int pRefnum)
-{
-  return (ref.mRefnum == pRefnum);
-}
+    bool operator== (const CellRef& ref, const CellRef::RefNum& refNum)
+    {
+        return ref.mRefNum == refNum;
+    }
 
 
 void Cell::load(ESMReader &esm, bool saveContext)
@@ -143,7 +169,7 @@ std::string Cell::getDescription() const
     }
 }
 
-bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
+bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted)
 {
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
@@ -157,132 +183,28 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // That should be it, I haven't seen any other fields yet.
     }
 
-    // NAM0 sometimes appears here, sometimes further on
-    ref.mNam0 = 0;
-    if (esm.isNextSub("NAM0"))
-    {
-        esm.getHT(ref.mNam0);
-        //esm.getHNOT(NAM0, "NAM0");
-    }
-
-    esm.getHNT(ref.mRefnum, "FRMR");
-    ref.mRefID = esm.getHNString("NAME");
+    ref.load (esm);
 
     // Identify references belonging to a parent file and adapt the ID accordingly.
-    int local = (ref.mRefnum & 0xff000000) >> 24;
-    size_t global = esm.getIndex() + 1;
-    if (local)
+    adjustRefNum (ref.mRefNum, esm);
+
+    if (esm.isNextSub("DELE"))
     {
-        // If the most significant 8 bits are used, then this reference already exists.
-        // In this case, do not spawn a new reference, but overwrite the old one.
-        ref.mRefnum &= 0x00ffffff; // delete old plugin ID
-        const std::vector<Header::MasterData> &masters = esm.getGameFiles();
-        global = masters[local-1].index + 1;
-        ref.mRefnum |= global << 24; // insert global plugin ID
+        esm.skipHSub();
+        deleted = true;
     }
     else
-    {
-        // This is an addition by the present plugin. Set the corresponding plugin index.
-        ref.mRefnum |= global << 24; // insert global plugin ID
-    }
-
-    // getHNOT will not change the existing value if the subrecord is
-    // missing
-    ref.mScale = 1.0;
-    esm.getHNOT(ref.mScale, "XSCL");
-
-    // TODO: support loading references from saves, there are tons of keys not recognized yet.
-    // The following is just an incomplete list.
-    if (esm.isNextSub("ACTN"))
-        esm.skipHSub();
-    if (esm.isNextSub("STPR"))
-        esm.skipHSub();
-    if (esm.isNextSub("ACDT"))
-        esm.skipHSub();
-    if (esm.isNextSub("ACSC"))
-        esm.skipHSub();
-    if (esm.isNextSub("ACSL"))
-        esm.skipHSub();
-    if (esm.isNextSub("CHRD"))
-        esm.skipHSub();
-    else if (esm.isNextSub("CRED")) // ???
-        esm.skipHSub();
-
-    ref.mOwner = esm.getHNOString("ANAM");
-    ref.mGlob = esm.getHNOString("BNAM");
-    ref.mSoul = esm.getHNOString("XSOL");
-
-    ref.mFaction = esm.getHNOString("CNAM");
-    ref.mFactIndex = -2;
-    esm.getHNOT(ref.mFactIndex, "INDX");
-
-    ref.mGoldValue = 1;
-    ref.mCharge = -1;
-    ref.mEnchantmentCharge = -1;
-
-    esm.getHNOT(ref.mEnchantmentCharge, "XCHG");
-
-    esm.getHNOT(ref.mCharge, "INTV");
-
-    esm.getHNOT(ref.mGoldValue, "NAM9");
-
-    // Present for doors that teleport you to another cell.
-    if (esm.isNextSub("DODT"))
-    {
-        ref.mTeleport = true;
-        esm.getHT(ref.mDoorDest);
-        ref.mDestCell = esm.getHNOString("DNAM");
-    } else {
-        ref.mTeleport = false;
-    }
-
-    // Integer, despite the name suggesting otherwise
-    ref.mLockLevel = -1;
-    esm.getHNOT(ref.mLockLevel, "FLTV");
-    ref.mKey = esm.getHNOString("KNAM");
-    ref.mTrap = esm.getHNOString("TNAM");
-
-    ref.mReferenceBlocked = -1;
-    ref.mFltv = 0;
-    esm.getHNOT(ref.mReferenceBlocked, "UNAM");
-    esm.getHNOT(ref.mFltv, "FLTV");
-
-    esm.getHNOT(ref.mPos, "DATA", 24);
-
-    // Number of references in the cell? Maximum once in each cell,
-    // but not always at the beginning, and not always right. In other
-    // words, completely useless.
-    // Update: Well, maybe not completely useless. This might actually be
-    //  number_of_references + number_of_references_moved_here_Across_boundaries,
-    //  and could be helpful for collecting these weird moved references.
-    if (esm.isNextSub("NAM0"))
-    {
-        esm.getHT(ref.mNam0);
-        //esm.getHNOT(NAM0, "NAM0");
-    }
-
-    if (esm.isNextSub("DELE")) {
-        esm.skipHSub();
-        ref.mDeleted = 2; // Deleted, will not respawn.
-        // TODO: find out when references do respawn.
-    } else
-        ref.mDeleted = 0;
+        deleted = false;
 
     return true;
 }
 
 bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
 {
-    esm.getHT(mref.mRefnum);
+    esm.getHT(mref.mRefNum.mIndex);
     esm.getHNOT(mref.mTarget, "CNDT");
 
-    // Identify references belonging to a parent file and adapt the ID accordingly.
-    int local = (mref.mRefnum & 0xff000000) >> 24;
-    size_t global = esm.getIndex() + 1;
-    mref.mRefnum &= 0x00ffffff; // delete old plugin ID
-    const std::vector<Header::MasterData> &masters = esm.getGameFiles();
-    global = masters[local-1].index + 1;
-    mref.mRefnum |= global << 24; // insert global plugin ID
+    adjustRefNum (mref.mRefNum, esm);
 
     return true;
 }
@@ -317,5 +239,25 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
 
         *original = *modified;
         original->mWater = waterLevel;
+    }
+
+    CellId Cell::getCellId() const
+    {
+        CellId id;
+
+        id.mPaged = !(mData.mFlags & Interior);
+
+        if (id.mPaged)
+        {
+            id.mWorldspace = "default";
+            id.mIndex.mX = mData.mX;
+            id.mIndex.mY = mData.mY;
+        }
+        else
+        {
+            id.mWorldspace = Misc::StringUtils::lowerCase (mName);
+        }
+
+        return id;
     }
 }

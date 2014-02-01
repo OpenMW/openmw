@@ -8,6 +8,7 @@
 namespace ESM
 {
     class ESMWriter;
+    class ESMReader;
 
     /* Cell reference. This represents ONE object (of many) inside the
     cell. The cell references are not loaded as part of the normal
@@ -19,8 +20,14 @@ namespace ESM
     {
         public:
 
-            int mRefnum;           // Reference number
-            std::string mRefID;    // ID of object being referenced (must be lowercase)
+            struct RefNum
+            {
+                int mIndex;
+                int mContentFile; // -1 no content file
+            };
+
+            RefNum mRefNum;        // Reference number
+            std::string mRefID;    // ID of object being referenced
 
             float mScale;          // Scale applied to mesh
 
@@ -71,9 +78,6 @@ namespace ESM
             // -1 is not blocked, otherwise it is blocked.
             signed char mReferenceBlocked;
 
-            // Track deleted references. 0 - not deleted, 1 - deleted, but respawns, 2 - deleted and does not respawn.
-            int mDeleted;
-
             // Occurs in Tribunal.esm, eg. in the cell "Mournhold, Plaza
             // Brindisi Dorom", where it has the value 100. Also only for
             // activators.
@@ -83,10 +87,14 @@ namespace ESM
             // Position and rotation of this object within the cell
             Position mPos;
 
-            void save(ESMWriter &esm) const;
+            void load (ESMReader& esm, bool wideRefNum = false);
+
+            void save (ESMWriter &esm, bool wideRefNum = false, bool inInventory = false) const;
 
             void blank();
     };
+
+    bool operator== (const CellRef::RefNum& left, const CellRef::RefNum& right);
 }
 
 #endif

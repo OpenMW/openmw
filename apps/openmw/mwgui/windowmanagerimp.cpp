@@ -14,6 +14,7 @@
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -699,6 +700,10 @@ namespace MWGui
 
         mToolTips->onFrame(frameDuration);
 
+        if (MWBase::Environment::get().getStateManager()->getState()==
+            MWBase::StateManager::State_NoGame)
+            return;
+
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             assert(mDragAndDrop->mDraggedWidget);
@@ -732,30 +737,19 @@ namespace MWGui
         mCompanionWindow->onFrame();
     }
 
-    void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
+    void WindowManager::changeCell(MWWorld::CellStore* cell)
     {
+        std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
+
+        mMap->setCellName( name );
+        mHud->setCellName( name );
+
         if (cell->mCell->isExterior())
         {
-            std::string name;
-            if (cell->mCell->mName != "")
-            {
-                name = cell->mCell->mName;
+            if (!cell->mCell->mName.empty())
                 mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
-            }
-            else
-            {
-                const ESM::Region* region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
-                if (region)
-                    name = region->mName;
-                else
-                    name = getGameSettingString("sDefaultCellname", "Wilderness");
-            }
 
             mMap->cellExplored(cell->mCell->getGridX(), cell->mCell->getGridY());
-
-            mMap->setCellName( name );
-            mHud->setCellName( name );
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
@@ -764,8 +758,6 @@ namespace MWGui
         }
         else
         {
-            mMap->setCellName( cell->mCell->mName );
-            mHud->setCellName( cell->mCell->mName );
             mMap->setCellPrefix( cell->mCell->mName );
             mHud->setCellPrefix( cell->mCell->mName );
 
@@ -776,7 +768,6 @@ namespace MWGui
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
         }
-
     }
 
     void WindowManager::setInteriorMapTexture(const int x, const int y)
@@ -1239,7 +1230,7 @@ namespace MWGui
     bool WindowManager::getRestEnabled()
     {
         //Enable rest dialogue if character creation finished
-        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalVariable ("chargenstate").mFloat==-1)
+        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             mRestAllowed=true;
         return mRestAllowed;
     }
@@ -1390,6 +1381,21 @@ namespace MWGui
         Settings::Manager::setFloat(setting + " y", "Windows", y);
         Settings::Manager::setFloat(setting + " w", "Windows", w);
         Settings::Manager::setFloat(setting + " h", "Windows", h);
+    }
+
+    void WindowManager::clear()
+    {
+        mMap->clear();
+    }
+
+    void WindowManager::write(ESM::ESMWriter &writer)
+    {
+        mMap->write(writer);
+    }
+
+    void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        mMap->readRecord(reader, type);
     }
 
 }

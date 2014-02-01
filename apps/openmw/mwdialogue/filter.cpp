@@ -171,7 +171,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
             // internally all globals are float :(
             return select.selectCompare (
-                MWBase::Environment::get().getWorld()->getGlobalVariable (select.getName()).mFloat);
+                MWBase::Environment::get().getWorld()->getGlobalFloat (select.getName()));
 
         case SelectWrapper::Function_Local:
         {

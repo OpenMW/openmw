@@ -10,7 +10,7 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
     //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
     //  as many exterior cells do not have a name. Instead, we need to search by (x,y) coordinates - and they
     //  are not available until both cells have been loaded! So first, proceed as usual.
-    
+
     // All cells have a name record, even nameless exterior cells.
     std::string idLower = Misc::StringUtils::lowerCase(id);
     ESM::Cell *cell = new ESM::Cell;
@@ -30,13 +30,14 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
 
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
-        cell->getNextRef(esm, ref);
+        bool deleted = false;
+        cell->getNextRef(esm, ref, deleted);
 
         // Add data required to make reference appear in the correct cell.
         // We should not need to test for duplicates, as this part of the code is pre-cell merge.
         cell->mMovedRefs.push_back(cMRef);
         // But there may be duplicates here!
-        ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefnum);
+        ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefNum);
         if (iter == cellAlt->mLeasedRefs.end())
           cellAlt->mLeasedRefs.push_back(ref);
         else
@@ -72,11 +73,11 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
             // merge lists of leased references, use newer data in case of conflict
             for (ESM::MovedCellRefTracker::const_iterator it = cell->mMovedRefs.begin(); it != cell->mMovedRefs.end(); ++it) {
                 // remove reference from current leased ref tracker and add it to new cell
-                ESM::MovedCellRefTracker::iterator itold = std::find(oldcell->mMovedRefs.begin(), oldcell->mMovedRefs.end(), it->mRefnum);
+                ESM::MovedCellRefTracker::iterator itold = std::find(oldcell->mMovedRefs.begin(), oldcell->mMovedRefs.end(), it->mRefNum);
                 if (itold != oldcell->mMovedRefs.end()) {
                     ESM::MovedCellRef target0 = *itold;
                     ESM::Cell *wipecell = const_cast<ESM::Cell*>(search(target0.mTarget[0], target0.mTarget[1]));
-                    ESM::CellRefTracker::iterator it_lease = std::find(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(), it->mRefnum);
+                    ESM::CellRefTracker::iterator it_lease = std::find(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(), it->mRefNum);
                     wipecell->mLeasedRefs.erase(it_lease);
                     *itold = *it;
                 }

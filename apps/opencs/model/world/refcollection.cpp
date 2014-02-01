@@ -16,7 +16,8 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
     CellRef ref;
 
-    while (cell2.getNextRef (reader, ref))
+    bool deleted = false;
+    while (cell2.getNextRef (reader, ref, deleted))
     {
         /// \todo handle deleted and moved references
         ref.load (reader, cell2, getNewId());

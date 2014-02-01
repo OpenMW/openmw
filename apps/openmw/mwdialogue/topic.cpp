@@ -1,6 +1,9 @@
 
 #include "topic.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwworld/esmstore.hpp"
 
 namespace MWDialogue
@@ -9,7 +12,8 @@ namespace MWDialogue
     {}
 
     Topic::Topic (const std::string& topic)
-    : mTopic (topic)
+    : mTopic (topic), mName (
+      MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic)->mId)
     {}
 
     Topic::~Topic()
@@ -20,11 +24,22 @@ namespace MWDialogue
         if (entry.mTopic!=mTopic)
             throw std::runtime_error ("topic does not match: " + mTopic);
 
-        for (TEntryIter iter = begin(); iter!=end(); ++iter)
-            if (*iter==entry.mInfoId)
-                return;
+        mEntries.push_back (entry); // we want slicing here
+    }
 
-        mEntries.push_back (entry.mInfoId);
+    void Topic::insertEntry (const ESM::JournalEntry& entry)
+    {
+        mEntries.push_back (entry);
+    }
+
+    std::string Topic::getTopic() const
+    {
+        return mTopic;
+    }
+
+    std::string Topic::getName() const
+    {
+        return mName;
     }
 
     Topic::TEntryIter Topic::begin() const

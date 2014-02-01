@@ -32,6 +32,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -1135,7 +1136,6 @@ void CharacterController::update(float duration)
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
-        MWBase::Environment::get().getWorld()->enableActorCollision(mPtr, false);
         world->queueMovement(mPtr, Ogre::Vector3(0.0f));
     }
 
@@ -1237,10 +1237,18 @@ void CharacterController::forceStateUpdate()
     }
 }
 
-void CharacterController::kill()
+bool CharacterController::kill()
 {
-    if(mDeathState != CharState_None)
-        return;
+    if( isDead() )
+    {
+        //player's death animation is over
+        if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) )
+        {
+            MWWorld::Class::get(mPtr).getCreatureStats(mPtr).setHealth(0);
+            MWBase::Environment::get().getStateManager()->askLoadRecent();
+        }
+        return false;
+    }
 
     playRandomDeath();
 
@@ -1251,6 +1259,8 @@ void CharacterController::kill()
 
     mIdleState = CharState_None;
     mCurrentIdle.clear();
+
+    return true;
 }
 
 void CharacterController::resurrect()
