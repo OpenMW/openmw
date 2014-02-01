@@ -57,42 +57,43 @@ namespace
 
         return MWWorld::Ptr();
     }
+}
 
-    template<typename T>
-    void getState (MWWorld::CellRefList<T>& collection, const ESM::ObjectState& state)
+template<typename T>
+void MWWorld::ContainerStore::getState (CellRefList<T>& collection, const ESM::ObjectState& state)
+{
+    if (!LiveCellRef<T>::checkState (state))
+        return; // not valid anymore with current content files -> skip
+
+    const T *record = MWBase::Environment::get().getWorld()->getStore().
+        get<T>().search (state.mRef.mRefID);
+
+    if (!record)
+        return;
+
+    LiveCellRef<T> ref (record);
+    ref.load (state);
+    ref.mRef.mRefNum.mContentFile = -1;
+    collection.mList.push_back (ref);
+}
+
+template<typename T>
+void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state)
+    const
+{
+    ref.save (state);
+}
+
+template<typename T>
+void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
+    std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states) const
+{
+    for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
+        iter!=collection.mList.end(); ++iter)
     {
-        if (!MWWorld::LiveCellRef<T>::checkState (state))
-            return; // not valid anymore with current content files -> skip
-
-        const T *record = MWBase::Environment::get().getWorld()->getStore().
-            get<T>().search (state.mRef.mRefID);
-
-        if (!record)
-            return;
-
-        MWWorld::LiveCellRef<T> ref (record);
-        ref.load (state);
-        ref.mRef.mRefNum.mContentFile = -1;
-        collection.mList.push_back (ref);
-    }
-
-    template<typename T>
-    void storeState (const MWWorld::LiveCellRef<T>& ref, ESM::ObjectState& state)
-    {
-        ref.save (state);
-    }
-
-    template<typename T>
-    void storeStates (const MWWorld::CellRefList<T>& collection,
-        std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states)
-    {
-        for (typename MWWorld::CellRefList<T>::List::const_iterator iter (collection.mList.begin());
-            iter!=collection.mList.end(); ++iter)
-        {
-            ESM::ObjectState state;
-            storeState (*iter, state);
-            states.push_back (std::make_pair (state, std::make_pair (T::sRecordId, -1)));
-        }
+        ESM::ObjectState state;
+        storeState (*iter, state);
+        states.push_back (std::make_pair (state, std::make_pair (T::sRecordId, -1)));
     }
 }
 

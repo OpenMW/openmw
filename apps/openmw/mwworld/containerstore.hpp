@@ -57,6 +57,17 @@ namespace MWWorld
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
             void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true);
 
+            template<typename T>
+            void getState (CellRefList<T>& collection, const ESM::ObjectState& state);
+
+            template<typename T>
+            void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
+
+            template<typename T>
+            void storeStates (const CellRefList<T>& collection,
+                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states)
+                const;
+
         public:
 
             ContainerStore();
