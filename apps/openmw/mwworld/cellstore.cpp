@@ -8,6 +8,8 @@
 #include <components/esm/objectstate.hpp>
 #include <components/esm/lightstate.hpp>
 #include <components/esm/containerstate.hpp>
+#include <components/esm/npcstate.hpp>
+#include <components/esm/creaturestate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -328,7 +330,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mBooks);
         writeReferenceCollection<ESM::ObjectState> (writer, mClothes);
         writeReferenceCollection<ESM::ContainerState> (writer, mContainers);
-        writeReferenceCollection<ESM::ObjectState> (writer, mCreatures);
+        writeReferenceCollection<ESM::CreatureState> (writer, mCreatures);
         writeReferenceCollection<ESM::ObjectState> (writer, mDoors);
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
         writeReferenceCollection<ESM::ObjectState> (writer, mCreatureLists);
@@ -336,7 +338,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::LightState> (writer, mLights);
         writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
         writeReferenceCollection<ESM::ObjectState> (writer, mMiscItems);
-        writeReferenceCollection<ESM::ObjectState> (writer, mNpcs);
+        writeReferenceCollection<ESM::NpcState> (writer, mNpcs);
         writeReferenceCollection<ESM::ObjectState> (writer, mProbes);
         writeReferenceCollection<ESM::ObjectState> (writer, mRepairs);
         writeReferenceCollection<ESM::ObjectState> (writer, mStatics);
@@ -390,7 +392,7 @@ namespace MWWorld
 
                 case ESM::REC_CREA:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mCreatures, contentFileMap);
+                    readReferenceCollection<ESM::CreatureState> (reader, mCreatures, contentFileMap);
                     break;
 
                 case ESM::REC_DOOR:
@@ -430,7 +432,7 @@ namespace MWWorld
 
                 case ESM::REC_NPC_:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mNpcs, contentFileMap);
+                    readReferenceCollection<ESM::NpcState> (reader, mNpcs, contentFileMap);
                     break;
 
                 case ESM::REC_PROB:

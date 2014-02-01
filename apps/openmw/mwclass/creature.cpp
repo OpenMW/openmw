@@ -2,6 +2,7 @@
 #include "creature.hpp"
 
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/creaturestate.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
@@ -611,6 +612,28 @@ namespace MWClass
         if (ref->mBase->mFlags & ESM::Creature::Metal)
             return 2;
         return 0;
+    }
+
+    void Creature::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+        const
+    {
+        const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+            readState (state2.mInventory);
+    }
+
+    void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+        const
+    {
+        ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+            writeState (state2.mInventory);
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;

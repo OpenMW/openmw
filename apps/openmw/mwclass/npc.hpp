@@ -131,7 +131,7 @@ namespace MWClass
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
 
             virtual int getServices (const MWWorld::Ptr& actor) const;
-            
+
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
             virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
@@ -152,6 +152,14 @@ namespace MWClass
             virtual bool isNpc() const {
                 return true;
             }
+
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const;
+            ///< Read additional state from \a state into \a ptr.
+
+            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+                const;
+            ///< Write additional state from \a ptr into \a state.
     };
 }
 

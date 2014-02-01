@@ -130,7 +130,7 @@ namespace MWWorld
             void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
-            void clear();
+            virtual void clear();
             ///< Empty container.
 
             float getWeight() const;

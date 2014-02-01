@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "objectstate.hpp"
+#include "npcstate.hpp"
 #include "cellid.hpp"
 #include "defs.hpp"
 
@@ -16,7 +16,7 @@ namespace ESM
 
     struct Player
     {
-        ObjectState mObject;
+        NpcState mObject;
         CellId mCellId;
         float mLastKnownExteriorPosition[3];
         unsigned char mHasMark;
