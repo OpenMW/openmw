@@ -58,15 +58,22 @@ namespace MWWorld
             void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true);
 
             template<typename T>
-            void getState (CellRefList<T>& collection, const ESM::ObjectState& state);
+            ContainerStoreIterator getState (CellRefList<T>& collection,
+                const ESM::ObjectState& state);
 
             template<typename T>
             void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
             template<typename T>
             void storeStates (const CellRefList<T>& collection,
-                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states)
-                const;
+                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states,
+                bool equipable = false) const;
+
+            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+
+            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
 
         public:
 

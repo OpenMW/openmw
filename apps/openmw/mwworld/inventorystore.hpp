@@ -105,6 +105,12 @@ namespace MWWorld
 
             void fireEquipmentChangedEvent();
 
+            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+
+            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
+
         public:
 
             InventoryStore();
@@ -185,6 +191,9 @@ namespace MWWorld
 
             void purgeEffect (short effectId);
             ///< Remove a magic effect
+
+            virtual void clear();
+            ///< Empty container.
     };
 }
 
