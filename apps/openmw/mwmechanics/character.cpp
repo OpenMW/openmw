@@ -781,6 +781,13 @@ bool CharacterController::updateWeaponState()
                 stop = mAttackType+" max attack";
                 mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                 break;
+            case UpperCharState_MinAttackToMaxAttack:
+                //hack to avoid body pos desync when jumping/sneaking in 'max attack' state
+                if(!mAnimation->isPlaying(mCurrentWeapon))
+                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                        MWRender::Animation::Group_UpperBody, false,
+                        0, mAttackType+" min attack", mAttackType+" max attack", 0.999f, 0);
+                break;
             case UpperCharState_MaxAttackToMinHit:
                 if(mAttackType == "shoot")
                 {
@@ -830,6 +837,22 @@ bool CharacterController::updateWeaponState()
         }
     }
     
+     //if playing combat animation and lowerbody is not busy switch to whole body animation
+    if((weaptype != WeapType_None || UpperCharState_UnEquipingWeap) && animPlaying)
+    {
+        if( mMovementState != CharState_None ||
+             mJumpState != JumpState_None ||
+             mHitState != CharState_None ||
+             MWBase::Environment::get().getWorld()->isSwimming(mPtr) ||
+             cls.getCreatureStats(mPtr).getMovementFlag(CreatureStats::Flag_Sneak))
+        {
+            mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_UpperBody);
+        }
+        else
+        {
+            mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_All);
+        }
+    }
 
     MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
