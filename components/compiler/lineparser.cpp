@@ -370,6 +370,12 @@ namespace Compiler
             mState = EndState;
             return true;
         }
+        else if (mState==ShortState || mState==LongState || mState==FloatState)
+        {
+            // allow keywords to be used as local variable names. MW script compiler, you suck!
+            /// \todo option to disable this atrocity.
+            return parseName (loc.mLiteral, loc, scanner);
+        }
 
         if (mAllowExpression)
         {
