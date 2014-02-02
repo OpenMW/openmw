@@ -2,6 +2,7 @@
 #define MWGUI_MAPWINDOW_H
 
 #include "windowpinnablebase.hpp"
+#include <cstdint>
 
 namespace MWRender
 {
