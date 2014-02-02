@@ -18,11 +18,13 @@
 namespace MWScript
 {
     ScriptManager::ScriptManager (const MWWorld::ESMStore& store, bool verbose,
-        Compiler::Context& compilerContext)
+        Compiler::Context& compilerContext, int warningsMode)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
       mOpcodesInstalled (false), mGlobalScripts (store)
-    {}
+    {
+        mErrorHandler.setWarningsMode (warningsMode);
+    }
 
     bool ScriptManager::compile (const std::string& name)
     {

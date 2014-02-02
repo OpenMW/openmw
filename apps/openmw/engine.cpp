@@ -155,6 +155,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mWarningsMode (1)
   , mScriptContext (0)
   , mFSStrict (false)
   , mScriptConsoleMode (false)
@@ -424,7 +425,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mScriptContext->setExtensions (&mExtensions);
 
     mEnvironment.setScriptManager (new MWScript::ScriptManager (MWBase::Environment::get().getWorld()->getStore(),
-        mVerboseScripts, *mScriptContext));
+        mVerboseScripts, *mScriptContext, mWarningsMode));
 
     // Create game mechanics system
     MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
@@ -612,8 +613,12 @@ void OMW::Engine::setStartupScript (const std::string& path)
     mStartupScript = path;
 }
 
-
 void OMW::Engine::setActivationDistanceOverride (int distance)
 {
     mActivationDistanceOverride = distance;
+}
+
+void OMW::Engine::setWarningsMode (int mode)
+{
+    mWarningsMode = mode;
 }
