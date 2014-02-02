@@ -157,7 +157,14 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
         if(mHitState == CharState_None)
         {
-            if(knockdown)
+            if (mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0)
+            {
+                mHitState = CharState_KnockOut;
+                mCurrentHit = "knockout";
+                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, false, 1, "start", "stop", 0.0f, ~0ul);
+                mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(true);
+            }
+            else if(knockdown)
             {
                 mHitState = CharState_KnockDown;
                 mCurrentHit = "knockdown";
@@ -186,6 +193,12 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             if (block)
                 mPtr.getClass().getCreatureStats(mPtr).setBlock(false);
             mHitState = CharState_None;
+        }
+        else if (mHitState == CharState_KnockOut && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0)
+        {
+            mHitState = CharState_KnockDown;
+            mAnimation->disable(mCurrentHit);
+            mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::Group_All, true, 1, "loop stop", "stop", 0.0f, 0);
         }
     }
 
@@ -1121,7 +1134,7 @@ void CharacterController::update(float duration)
         if (!mSkipAnim)
         {
             rot *= Ogre::Math::RadiansToDegrees(1.0f);
-            if(mHitState != CharState_KnockDown)
+            if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)
             {
                 world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
             }

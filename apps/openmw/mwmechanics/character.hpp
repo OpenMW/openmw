@@ -93,6 +93,7 @@ enum CharacterState {
 
     CharState_Hit,
     CharState_KnockDown,
+    CharState_KnockOut,
     CharState_Block
 };
 
