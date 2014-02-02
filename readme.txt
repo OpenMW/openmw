@@ -73,7 +73,7 @@ Allowed options:
                                         1 - show warning but consider script as
                                         correctly compiled anyway
                                         2 - treat warnings as errors
-  --new-game [=arg(=1)] (=0)            activate char gen/new game mechanics
+  --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
   --fs-strict [=arg(=1)] (=0)           strict file system handling (no case
                                         folding)
   --encoding arg (=win1252)             Character encoding used in OpenMW game
