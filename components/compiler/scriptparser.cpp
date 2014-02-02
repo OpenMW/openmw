@@ -32,7 +32,7 @@ namespace Compiler
 
     bool ScriptParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
-        if (keyword==Scanner::K_while || keyword==Scanner::K_if)
+        if (keyword==Scanner::K_while || keyword==Scanner::K_if || keyword==Scanner::K_elseif)
         {
             mControlParser.reset();
             if (mControlParser.parseKeyword (keyword, loc, scanner))

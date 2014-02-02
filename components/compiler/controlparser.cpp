@@ -7,6 +7,7 @@
 
 #include "scanner.hpp"
 #include "generator.hpp"
+#include "errorhandler.hpp"
 
 namespace Compiler
 {
@@ -186,8 +187,11 @@ namespace Compiler
     {
         if (mState==StartState)
         {
-            if (keyword==Scanner::K_if)
+            if (keyword==Scanner::K_if || keyword==Scanner::K_elseif)
             {
+                if (keyword==Scanner::K_elseif)
+                    getErrorHandler().warning ("elseif without matching if", loc);
+
                 mExprParser.reset();
                 scanner.scan (mExprParser);
 
