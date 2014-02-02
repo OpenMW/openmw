@@ -818,6 +818,28 @@ namespace MWScript
             }
         };
 
+        class OpGetPcInJail : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    /// \todo implement jail check
+                    runtime.push (0);
+                }
+        };
+
+        class OpGetPcTraveling : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    /// \todo implement traveling check
+                    runtime.push (0);
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -888,6 +910,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeCastExplicit, new OpCast<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpell, new OpExplodeSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcInJail, new OpGetPcInJail);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcTraveling, new OpGetPcTraveling);
         }
     }
 }

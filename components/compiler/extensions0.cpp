@@ -190,7 +190,7 @@ namespace Compiler
             extensions.registerInstruction ("enableclassmenu", "", opcodeEnableClassMenu);
             extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
             extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
-            extensions.registerInstruction ("enablestatreviewmenu", "", 
+            extensions.registerInstruction ("enablestatreviewmenu", "",
                 opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);
@@ -276,6 +276,8 @@ namespace Compiler
             extensions.registerInstruction("togglegodmode", "", opcodeToggleGodMode);
             extensions.registerInstruction ("disablelevitation", "", opcodeDisableLevitation);
             extensions.registerInstruction ("enablelevitation", "", opcodeEnableLevitation);
+            extensions.registerFunction ("getpcinjail", 'l', "", opcodeGetPcInJail);
+            extensions.registerFunction ("getpctraveling", 'l', "", opcodeGetPcTraveling);
         }
     }
 

@@ -381,5 +381,7 @@ op 0x200023a: StartCombat
 op 0x200023b: StartCombatExplicit
 op 0x200023c: StopCombat
 op 0x200023d: StopCombatExplicit
+op 0x200023e: GetPcInJail
+op 0x200023f: GetPcTraveling
 
-opcodes 0x200023e-0x3ffffff unused
+opcodes 0x2000240-0x3ffffff unused
