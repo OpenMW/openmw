@@ -32,6 +32,9 @@ namespace CSMWorld
             virtual bool isId (const std::string& name) const;
             ///< Does \a name match an ID, that can be referenced?
 
+            virtual bool isJournalId (const std::string& name) const;
+            ///< Does \a name match a journal ID?
+
             void invalidateIds();
     };
 }

@@ -7,6 +7,8 @@
 #include <stack>
 #include <iterator>
 
+#include <components/misc/stringops.hpp>
+
 #include "generator.hpp"
 #include "scanner.hpp"
 #include "errorhandler.hpp"
@@ -14,7 +16,6 @@
 #include "stringparser.hpp"
 #include "extensions.hpp"
 #include "context.hpp"
-#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
@@ -306,6 +307,22 @@ namespace Compiler
                 mNextOperand = false;
                 mOperands.push_back (type=='f' ? 'f' : 'l');
                 return true;
+            }
+
+            // die in a fire, Morrowind script compiler!
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                if (getContext().isJournalId (name2))
+                {
+                    // JournalID used as an argument. Use the index of that JournalID
+                    Generator::pushString (mCode, mLiterals, name2);
+                    int keyword = extensions->searchKeyword ("getjournalindex");
+                    extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit, 0);
+                    mNextOperand = false;
+                    mOperands.push_back ('l');
+
+                    return 2;
+                }
             }
 
             if (mExplicit.empty() && getContext().isId (name2))

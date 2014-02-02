@@ -3,6 +3,8 @@
 
 #include "../mwworld/esmstore.hpp"
 
+#include <components/esm/loaddial.hpp>
+
 #include <components/compiler/locals.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -66,5 +68,15 @@ namespace MWScript
             store.get<ESM::Repair>().search (name) ||
             store.get<ESM::Static>().search (name) ||
             store.get<ESM::Weapon>().search (name);
+    }
+
+    bool CompilerContext::isJournalId (const std::string& name) const
+    {
+        const MWWorld::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Dialogue *topic = store.get<ESM::Dialogue>().search (name);
+
+        return topic && topic->mType==ESM::Dialogue::Journal;
     }
 }

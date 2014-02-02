@@ -38,6 +38,12 @@ bool CSMWorld::ScriptContext::isId (const std::string& name) const
     return std::binary_search (mIds.begin(), mIds.end(), Misc::StringUtils::lowerCase (name));
 }
 
+bool CSMWorld::ScriptContext::isJournalId (const std::string& name) const
+{
+    /// \todo fix this after isId is fixed
+    return isId (name);
+}
+
 void CSMWorld::ScriptContext::invalidateIds()
 {
     mIdsUpdated = false;
