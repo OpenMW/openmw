@@ -301,8 +301,9 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         if(!mCurrentMovement.empty())
         {
             float vel, speedmult = 1.0f;
-            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
+            if(mPtr.getClass().isNpc() && mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
                 speedmult = mMovementSpeed / vel;
+
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
@@ -1120,7 +1121,13 @@ void CharacterController::update(float duration)
             else //avoid z-rotating for knockdown
                 world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
 
-            world->queueMovement(mPtr, vec);
+            // all actual movement in 3rd person controlled by animations, except for jump
+            // !mAnimation->hasAnimation("death1") identifies 1st person mode
+            if(mJumpState != JumpState_None || vec.z > 0 
+                || (mPtr.getRefData().getHandle() == "player" && !mAnimation->hasAnimation("death1")))
+            {
+                world->queueMovement(mPtr, vec);
+            }
         }
 
         movement = vec;
