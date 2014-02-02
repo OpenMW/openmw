@@ -79,15 +79,14 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     if (revision == tag) {
         versionLabel->setText(tr("OpenMW %0 release").arg(OPENMW_VERSION));
     } else {
-        versionLabel->setText(tr("OpenMW unstable, revision %0").arg(revision.left(10)));
+        versionLabel->setText(tr("OpenMW development (%0)").arg(revision.left(10)));
     }
 
     // Add the compile date and time
-    QDate date(QDate::fromString(__DATE__, QLatin1String("MMM dd yyyy")));
-    QTime time(QTime::fromString(__TIME__, QLatin1String("hh:m:ss")));
-
-    versionLabel->setToolTip(tr("Compiled on %0 %1").arg(date.toString(Qt::SystemLocaleShortDate),
-                                                         time.toString(Qt::SystemLocaleShortDate)));
+    versionLabel->setToolTip(tr("Compiled on %0 %1").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
+                                                                                    QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
+                                                         QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
+                                                                                    QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
 
     createIcons();
 }
