@@ -34,12 +34,34 @@ void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
 
         mSlots.push_back (slot);
     }
+
+    // some const-trickery, required because of a flaw in the handling of MW-references and the
+    // resulting workarounds
+    std::size_t distance = std::distance (const_cast<InventoryStore&> (store).begin(), const_cast<InventoryStore&> (store).mSelectedEnchantItem);
+    ContainerStoreIterator slot = begin();
+    std::advance (slot, distance);
+    mSelectedEnchantItem = slot;
 }
 
 void MWWorld::InventoryStore::initSlots (TSlots& slots_)
 {
     for (int i=0; i<Slots; ++i)
         slots_.push_back (end());
+}
+
+int MWWorld::InventoryStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+{
+    for (int i = 0; i<static_cast<int> (mSlots.size()); ++i)
+        if (mSlots[i].getType()!=-1 && mSlots[i]->getBase()==&ref)
+            return i;
+
+    return -1;
+}
+
+void MWWorld::InventoryStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot)
+{
+    if (iter!=end() && slot>=0 && slot<Slots)
+        mSlots[slot] = iter;
 }
 
 MWWorld::InventoryStore::InventoryStore()
@@ -54,18 +76,19 @@ MWWorld::InventoryStore::InventoryStore()
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 : ContainerStore (store)
  , mSelectedEnchantItem(end())
- , mListener(NULL)
- , mUpdatesEnabled(true)
 {
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
-    mSelectedEnchantItem = store.mSelectedEnchantItem;
+    mListener = store.mListener;
+    mUpdatesEnabled = store.mUpdatesEnabled;
+
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
     copySlots (store);
 }
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
+    mListener = store.mListener;
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
@@ -81,7 +104,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 
     // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if ((actorPtr.getRefData().getHandle() != "player")
-            && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf())
+            && !(actorPtr.getClass().isNpc() && actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
             && !actorPtr.getClass().getCreatureStats(actorPtr).isDead())
     {
         std::string type = itemPtr.getTypeName();
@@ -457,7 +480,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     // If an armor/clothing item is removed, try to find a replacement,
     // but not for the player nor werewolves.
     if ((actor.getRefData().getHandle() != "player")
-            && !(MWWorld::Class::get(actor).getNpcStats(actor).isWerewolf()))
+            && !(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf()))
     {
         std::string type = item.getTypeName();
         if (((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
@@ -628,4 +651,11 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 void MWWorld::InventoryStore::purgeEffect(short effectId)
 {
     mMagicEffects.add(MWMechanics::EffectKey(effectId), -mMagicEffects.get(MWMechanics::EffectKey(effectId)).mMagnitude);
+}
+
+void MWWorld::InventoryStore::clear()
+{
+    mSlots.clear();
+    initSlots (mSlots);
+    ContainerStore::clear();
 }

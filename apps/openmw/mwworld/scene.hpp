@@ -56,9 +56,9 @@ namespace MWWorld
             void playerCellChange (CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
 
-            void insertCell (Ptr::CellStore &cell, bool rescale, Loading::Listener* loadingListener);
+            void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
-            int countRefs (const Ptr::CellStore& cell);
+            int countRefs (const CellStore& cell);
 
         public:
 

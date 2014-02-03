@@ -12,7 +12,7 @@ namespace MWGui
 
     void CompanionItemModel::copyItem (const ItemStack& item, size_t count)
     {
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        if (mActor.getClass().isNpc())
         {
             MWMechanics::NpcStats& stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
             stats.modifyProfit(MWWorld::Class::get(item.mBase).getValue(item.mBase) * count);
@@ -23,7 +23,7 @@ namespace MWGui
 
     void CompanionItemModel::removeItem (const ItemStack& item, size_t count)
     {
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        if (mActor.getClass().isNpc())
         {
             MWMechanics::NpcStats& stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
             stats.modifyProfit(-MWWorld::Class::get(item.mBase).getValue(item.mBase) * count);

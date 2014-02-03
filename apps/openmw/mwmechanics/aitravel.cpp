@@ -1,10 +1,11 @@
 #include "aitravel.hpp"
 
-#include "movement.hpp"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
+
+#include "steering.hpp"
+#include "movement.hpp"
 
 namespace
 {
@@ -61,20 +62,11 @@ namespace MWMechanics
             }
         }
 
-        const ESM::Pathgrid *pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
         bool cellChange = cell->mData.mX != cellX || cell->mData.mY != cellY;
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
             cellX = cell->mData.mX;
             cellY = cell->mData.mY;
-            float xCell = 0;
-            float yCell = 0;
-
-            if(cell->isExterior())
-            {
-                xCell = cell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = cell->mData.mY * ESM::Land::REAL_SIZE;
-            }
 
             ESM::Pathgrid::Point dest;
             dest.mX = mX;
@@ -86,7 +78,7 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
 
         if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
@@ -95,9 +87,7 @@ namespace MWMechanics
             return true;
         }
 
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        // TODO: use movement settings instead of rotating directly
-        world->rotateObject(actor, 0, 0, zAngle, false);
+        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
         movement.mPosition[1] = 1;
 
         return false;

@@ -69,12 +69,16 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
     aiescort aiactivate aicombat repair enchanting pathfinding security spellsuccess spellcasting
-    disease pickpocket levelledlist
+    disease pickpocket levelledlist combat steering
+    )
+
+add_openmw_dir (mwstate
+    statemanagerimp charactermanager character
     )
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager windowmanager
+    inputmanager windowmanager statemanager
     )
 
 # Main executable

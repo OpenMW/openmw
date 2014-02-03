@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "stat.hpp"
-#include "drawstate.hpp"
 
 #include "creaturestats.hpp"
 
@@ -30,7 +29,6 @@ namespace MWMechanics
             /// \note the faction key must be in lowercase
             std::map<std::string, int> mFactionRank;
 
-            DrawState_ mDrawState;
             int mDisposition;
             SkillValue mSkill[27];
             SkillValue mWerewolfSkill[27];
@@ -53,6 +51,8 @@ namespace MWMechanics
             /// time since last hit from drowning
             float mLastDrowningHit;
 
+            float mLevelHealthBonus;
+
         public:
 
             NpcStats();
@@ -60,13 +60,6 @@ namespace MWMechanics
             /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
             int getProfit() const;
             void modifyProfit(int diff);
-
-            DrawState_ getDrawState() const;
-            void setDrawState (DrawState_ state);
-
-            /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
-            float getAttackStrength() const;
-            void setAttackStrength(float value);
 
             int getBaseDisposition() const;
 
@@ -106,6 +99,10 @@ namespace MWMechanics
             int getLevelupAttributeMultiplier(int attribute) const;
 
             void levelUp();
+
+            void updateHealth();
+            ///< Calculate health based on endurance and strength.
+            ///  Called at character creation and at level up.
 
             void flagAsUsed (const std::string& id);
 

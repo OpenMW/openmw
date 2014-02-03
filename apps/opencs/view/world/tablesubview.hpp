@@ -5,6 +5,11 @@
 
 class QModelIndex;
 
+namespace CSMWorld
+{
+    class IdTable;
+}
+
 namespace CSMDoc
 {
     class Document;
@@ -34,9 +39,14 @@ namespace CSVWorld
 
             virtual void setStatusBar (bool show);
 
+        signals:
+            void cloneRequest(const std::string&,
+                              const CSMWorld::UniversalId::Type);
+
         private slots:
 
             void editRequest (int row);
+            void cloneRequest (const CSMWorld::UniversalId& toClone);
     };
 }
 

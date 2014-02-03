@@ -235,7 +235,7 @@ namespace MWGui
 
         mItemView->setModel (mSortModel);
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCloseButton);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
         // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
         // or we end up using a possibly invalid model.

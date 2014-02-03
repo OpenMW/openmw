@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
     <Widget type="ExposedWindow" skin="MW_Window_Pinnable" layer="Windows" position="0 0 500 342" name="_Main">
-        <Property key="MinSize" value="300 200"/>
+        <Property key="MinSize" value="40 40"/>
 
         <Widget type="Widget" skin="" name="LeftPane" position="0 0 220 342">
 

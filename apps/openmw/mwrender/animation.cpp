@@ -532,12 +532,6 @@ static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bo
             bone->setScale(Ogre::Vector3::UNIT_SCALE);
         }
     }
-    else
-    {
-        // No matching bone in the source. Make sure it stays properly offset
-        // from its parent.
-        bone->resetToInitialState();
-    }
 
     Ogre::Node::ChildNodeIterator boneiter = bone->getChildIterator();
     while(boneiter.hasMoreElements())
@@ -584,7 +578,11 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
 
     const std::string stoptag = groupname+": "+stop;
     NifOgre::TextKeyMap::const_iterator stopkey(groupstart);
-    while(stopkey != keys.end() && stopkey->second != stoptag)
+    while(stopkey != keys.end()
+          // We have to ignore extra garbage at the end.
+          // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
+          // Why, just why? :(
+          && (stopkey->second.size() < stoptag.size() || stopkey->second.substr(0,stoptag.size()) != stoptag))
         stopkey++;
     if(stopkey == keys.end())
         return false;
@@ -616,6 +614,13 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
     return true;
 }
 
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
 
 void Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
 {
@@ -630,14 +635,29 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     }
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
-        std::string sound = MWWorld::Class::get(mPtr).getSoundIdFromSndGen(mPtr, evt.substr(10));
+        std::string soundgen = evt.substr(10);
+
+        // The event can optionally contain volume and pitch modifiers
+        float volume=1.f, pitch=1.f;
+        if (soundgen.find(" ") != std::string::npos)
+        {
+            std::vector<std::string> tokens;
+            split(soundgen, ' ', tokens);
+            soundgen = tokens[0];
+            if (tokens.size() >= 2)
+                volume = Ogre::StringConverter::parseReal(tokens[1]);
+            if (tokens.size() >= 3)
+                pitch = Ogre::StringConverter::parseReal(tokens[2]);
+        }
+
+        std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
             if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0)
                 type = MWBase::SoundManager::Play_TypeFoot;
-            sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f, type);
+            sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
         }
         return;
     }
@@ -660,25 +680,28 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     else if(evt.compare(off, len, "unequip detach") == 0)
         showWeapons(false);
     else if(evt.compare(off, len, "chop hit") == 0)
-        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
     else if(evt.compare(off, len, "slash hit") == 0)
-        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
     else if(evt.compare(off, len, "thrust hit") == 0)
-        mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
     {
         if (groupname == "attack1")
-            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
         else if (groupname == "attack2")
-            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
         else if (groupname == "attack3")
-            mPtr.getClass().hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
         else
             mPtr.getClass().hit(mPtr);
     }
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
+
+    else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
+        mPtr.getClass().block(mPtr);
 }
 
 void Animation::changeGroups(const std::string &groupname, int groups)

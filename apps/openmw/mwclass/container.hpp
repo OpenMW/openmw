@@ -54,6 +54,14 @@ namespace MWClass
             virtual void unlock (const MWWorld::Ptr& ptr) const;
             ///< Unlock object
 
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const;
+            ///< Read additional state from \a state into \a ptr.
+
+            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+                const;
+            ///< Write additional state from \a ptr into \a state.
+
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;

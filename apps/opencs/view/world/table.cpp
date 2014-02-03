@@ -28,7 +28,11 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
     if (!mEditLock)
     {
         if (selectedRows.size()==1)
+        {
             menu.addAction (mEditAction);
+            if (mCreateAction)
+                menu.addAction(mCloneAction);
+        }
 
         if (mCreateAction)
             menu.addAction (mCreateAction);
@@ -155,7 +159,7 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
     bool createAndDelete, bool sorting)
-    : mUndoStack (undoStack), mCreateAction (0), mEditLock (false), mRecordStatusDisplay (0)
+    : mUndoStack (undoStack), mCreateAction (0), mCloneAction(0), mEditLock (false), mRecordStatusDisplay (0)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
 
@@ -199,6 +203,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
         mCreateAction = new QAction (tr ("Add Record"), this);
         connect (mCreateAction, SIGNAL (triggered()), this, SIGNAL (createRequest()));
         addAction (mCreateAction);
+
+        mCloneAction = new QAction (tr ("Clone Record"), this);
+        connect(mCloneAction, SIGNAL (triggered()), this, SLOT (cloneRecord()));
+        addAction(mCloneAction);
     }
 
     mRevertAction = new QAction (tr ("Revert Record"), this);
@@ -292,6 +300,19 @@ void CSVWorld::Table::editRecord()
 
         if (selectedRows.size()==1)
             emit editRequest (selectedRows.begin()->row());
+    }
+}
+
+void CSVWorld::Table::cloneRecord()
+{
+    if (!mEditLock)
+    {
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
+        const CSMWorld::UniversalId& toClone = getUniversalId(selectedRows.begin()->row());
+        if (selectedRows.size()==1 && !mModel->getRecord(toClone.getId()).isDeleted())
+        {
+            emit cloneRequest (toClone);
+        }
     }
 }
 

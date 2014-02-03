@@ -2,6 +2,7 @@
 #define GAME_MWBASE_WORLD_H
 
 #include <vector>
+#include <map>
 
 #include <components/settings/settings.hpp>
 
@@ -30,12 +31,14 @@ namespace OEngine
 namespace ESM
 {
     class ESMReader;
+    class ESMWriter;
     struct Position;
     struct Cell;
     struct Class;
     struct Potion;
     struct Spell;
     struct NPC;
+    struct CellId;
 }
 
 namespace MWRender
@@ -94,12 +97,25 @@ namespace MWBase
 
             virtual void startNewGame() = 0;
 
+            virtual void clear() = 0;
+
+            virtual int countSavedGameRecords() const = 0;
+
+            virtual void write (ESM::ESMWriter& writer) const = 0;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+                const std::map<int, int>& contentFileMap) = 0;
+
             virtual OEngine::Render::Fader* getFader() = 0;
-            ///< \ŧodo remove this function. Rendering details should not be exposed.
+            ///< \todo remove this function. Rendering details should not be exposed.
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
+
+            virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
+
+            virtual void useDeathCamera() = 0;
 
             virtual void setWaterHeight(const float height) = 0;
 
@@ -139,16 +155,26 @@ namespace MWBase
             virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior) = 0;
             ///< see MWRender::LocalMap::isPositionExplored
 
-            virtual MWWorld::Globals::Data& getGlobalVariable (const std::string& name) = 0;
+            virtual void setGlobalInt (const std::string& name, int value) = 0;
+            ///< Set value independently from real type.
 
-            virtual MWWorld::Globals::Data getGlobalVariable (const std::string& name) const = 0;
+            virtual void setGlobalFloat (const std::string& name, float value) = 0;
+            ///< Set value independently from real type.
+
+            virtual int getGlobalInt (const std::string& name) const = 0;
+            ///< Get value independently from real type.
+
+            virtual float getGlobalFloat (const std::string& name) const = 0;
+            ///< Get value independently from real type.
 
             virtual char getGlobalVariableType (const std::string& name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
 
-            virtual std::vector<std::string> getGlobals () const = 0;
-
-            virtual std::string getCurrentCellName() const = 0;
+            virtual std::string getCellName (const MWWorld::CellStore *cell = 0) const = 0;
+            ///< Return name of the cell.
+            ///
+            /// \note If cell==0, the cell the player is currently in will be used instead to
+            /// generate a name.
 
             virtual void removeRefScript (MWWorld::RefData *ref) = 0;
             //< Remove the script attached to ref from mLocalScripts
@@ -185,8 +211,12 @@ namespace MWBase
             virtual void setDay (int day) = 0;
             ///< Set in-game time day.
 
-            virtual int getDay() = 0;
-            virtual int getMonth() = 0;
+            virtual int getDay() const = 0;
+            virtual int getMonth() const = 0;
+            virtual int getYear() const = 0;
+
+            virtual std::string getMonthName (int month = -1) const = 0;
+            ///< Return name of month (-1: current month)
 
             virtual MWWorld::TimeStamp getTimeStamp() const = 0;
             ///< Return current in-game time stamp.
@@ -215,6 +245,8 @@ namespace MWBase
             virtual void changeToExteriorCell (const ESM::Position& position) = 0;
             ///< Move to exterior cell.
 
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position) = 0;
+
             virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
@@ -225,7 +257,7 @@ namespace MWBase
 
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
-            /// use the "Head" node as a basis.
+            /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
             virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
 
             virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
@@ -336,7 +368,7 @@ namespace MWBase
             virtual bool isSwimming(const MWWorld::Ptr &object) const = 0;
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const = 0;
-            virtual bool isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const = 0;
+            virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;
@@ -384,6 +416,7 @@ namespace MWBase
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
             virtual void stopVideo() = 0;
             virtual void frameStarted (float dt, bool paused) = 0;
+            virtual void screenshot (Ogre::Image& image, int w, int h) = 0;
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise
@@ -428,6 +461,8 @@ namespace MWBase
             virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
 
+            virtual const std::vector<std::string>& getContentFiles() const = 0;
+
             virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
 
             // Are we in an exterior or pseudo-exterior cell and it's night?
@@ -466,6 +501,9 @@ namespace MWBase
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
+
+            virtual void explodeSpell (const Ogre::Vector3& origin, const MWWorld::Ptr& object, const ESM::EffectList& effects,
+                                       const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
     };
 }
 

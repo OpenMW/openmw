@@ -5,6 +5,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 
@@ -294,6 +296,28 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
+        }
+
+        // check if the player is attempting to use a soulstone or item that was stolen from this actor
+        if (mPtr != player)
+        {
+            for (int i=0; i<2; ++i)
+            {
+                MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
+                if (Misc::StringUtils::ciEqual(item.getCellRef().mOwner, mPtr.getCellRef().mRefID))
+                {
+                    std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->getString();
+                    if (msg.find("%s") != std::string::npos)
+                        msg.replace(msg.find("%s"), 2, item.getClass().getName(item));
+                    MWBase::Environment::get().getWindowManager()->messageBox(msg);
+                    MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
+                    MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
+                                                                                  item.getClass().getValue(item));
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+                    return;
+                }
+            }
         }
 
         int result = mEnchanting.create();

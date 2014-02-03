@@ -14,9 +14,6 @@ namespace MWWorld
     {
         public:
 
-            typedef MWWorld::CellStore CellStore;
-            ///< \deprecated
-
             MWWorld::LiveCellRefBase *mRef;
             CellStore *mCell;
             ContainerStore *mContainerStore;
@@ -55,11 +52,13 @@ namespace MWWorld
                 throw std::runtime_error(str.str());
             }
 
+            MWWorld::LiveCellRefBase *getBase() const;
+
             ESM::CellRef& getCellRef() const;
 
             RefData& getRefData() const;
 
-            Ptr::CellStore *getCell() const
+            CellStore *getCell() const
             {
                 assert(mCell);
                 return mCell;

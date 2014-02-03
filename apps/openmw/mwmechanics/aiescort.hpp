@@ -34,8 +34,8 @@ namespace MWMechanics
             unsigned int mDuration;
 
             PathFinder mPathFinder;
-            int cellX;
-            int cellY;
+            int mCellX;
+            int mCellY;
     };
 }
 #endif

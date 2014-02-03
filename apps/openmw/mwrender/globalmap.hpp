@@ -10,6 +10,12 @@ namespace Loading
     class Listener;
 }
 
+namespace ESM
+{
+    class ESMWriter;
+    class ESMReader;
+}
+
 namespace MWRender
 {
 
@@ -31,13 +37,18 @@ namespace MWRender
 
         void exploreCell (int cellX, int cellY);
 
+        /// Clears the overlay
+        void clear();
+
+        void write (ESM::ESMWriter& writer);
+        void readRecord (ESM::ESMReader& reader, int32_t type, std::vector<std::pair<int, int> >& exploredCells);
+
     private:
         std::string mCacheDir;
 
         std::vector< std::pair<int,int> > mExploredCells;
 
         Ogre::TexturePtr mOverlayTexture;
-        std::vector<Ogre::uchar> mExploredBuffer;
 
         int mWidth;
         int mHeight;

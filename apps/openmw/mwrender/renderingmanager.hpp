@@ -94,6 +94,8 @@ public:
 
     SkyManager* getSkyManager();
 
+    MWRender::Camera* getCamera() const;
+
     void toggleLight();
     bool toggleRenderMode(int mode);
 
@@ -206,8 +208,9 @@ public:
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
     void frameStarted(float dt, bool paused);
+    void screenshot(Ogre::Image& image, int w, int h);
 
-    void spawnEffect (const std::string& model, const std::string& texture, const Ogre::Vector3& worldPosition);
+    void spawnEffect (const std::string& model, const std::string& texture, const Ogre::Vector3& worldPosition, float scale=1.f);
 
 protected:
     virtual void windowResized(int x, int y);

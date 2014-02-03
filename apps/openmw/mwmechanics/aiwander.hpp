@@ -32,6 +32,8 @@ namespace MWMechanics
             std::vector<int> mIdle;
             bool mRepeat;
 
+            bool mSaidGreeting;
+
             float mX;
             float mY;
             float mZ;

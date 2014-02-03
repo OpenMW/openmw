@@ -286,7 +286,7 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), title);
-            MWBase::Environment::get().getJournal()->addTopic (topic, info->mId);
+            MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor.getClass().getName(mActor));
 
             executeScript (info->mResultScript);
 
@@ -420,7 +420,7 @@ namespace MWDialogue
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
         // Apply disposition change to NPC's base disposition
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        if (mActor.getClass().isNpc())
         {
             MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
             npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
@@ -451,7 +451,7 @@ namespace MWDialogue
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse (Interpreter::fixDefinesDialog(text, interpreterContext));
-                    MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
+                    MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor.getClass().getName(mActor));
                     executeScript (info->mResultScript);
                 }
             }
@@ -586,7 +586,8 @@ namespace MWDialogue
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
             if(winMgr->getSubtitlesEnabled())
                 winMgr->messageBox(info->mResponse);
-            sndMgr->say(actor, info->mSound);
+            if (!info->mSound.empty())
+                sndMgr->say(actor, info->mSound);
         }
     }
 

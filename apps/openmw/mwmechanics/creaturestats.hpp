@@ -10,6 +10,7 @@
 #include "spells.hpp"
 #include "activespells.hpp"
 #include "aisequence.hpp"
+#include "drawstate.hpp"
 
 namespace MWMechanics
 {
@@ -18,15 +19,14 @@ namespace MWMechanics
     ///
     class CreatureStats
     {
+        DrawState_ mDrawState;
         AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
-        int mLevel;
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
-        float mLevelHealthBonus;
         bool mDead;
         bool mDied;
         int mFriendlyHits;
@@ -37,25 +37,32 @@ namespace MWMechanics
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mHitRecovery;
+        bool mBlock;
         unsigned int mMovementFlags;
+        float mAttackStrength; // Note only some creatures attack with weapons
 
         float mFallHeight;
-
-        int mAttackType;
 
         std::string mLastHitObject; // The last object to hit this actor
 
         // Do we need to recalculate stats derived from attributes or other factors?
         bool mRecalcDynamicStats;
 
-
         std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
     protected:
         bool mIsWerewolf;
         AttributeValue mWerewolfAttributes[8];
+        int mLevel;
 
     public:
         CreatureStats();
+
+        DrawState_ getDrawState() const;
+        void setDrawState(DrawState_ state);
+
+        /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
+        float getAttackStrength() const;
+        void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
 
@@ -114,15 +121,6 @@ namespace MWMechanics
 
         void setAttackingOrSpell(bool attackingOrSpell);
 
-        enum AttackType
-        {
-            AT_Chop,
-            AT_Slash,
-            AT_Thrust
-        };
-        void setAttackType(int attackType) { mAttackType = attackType; }
-        int getAttackType() { return mAttackType; }
-
         void setLevel(int level);
 
         enum AiSetting
@@ -142,14 +140,6 @@ namespace MWMechanics
 
         float getFatigueTerm() const;
         ///< Return effective fatigue
-
-        float getLevelHealthBonus() const;
-
-        void levelUp();
-
-        void updateHealth();
-        ///< Calculate health based on endurance and strength.
-        ///  Called at character creation and at level up.
 
         bool isDead() const;
 
@@ -194,6 +184,8 @@ namespace MWMechanics
         bool getKnockedDown() const;
         void setHitRecovery(bool value);
         bool getHitRecovery() const;
+        void setBlock(bool value);
+        bool getBlock() const;
 
         enum Flag
         {

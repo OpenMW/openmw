@@ -1,6 +1,13 @@
 
 #include "player.hpp"
 
+#include <stdexcept>
+
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/player.hpp>
+#include <components/esm/defs.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -34,9 +41,6 @@ namespace MWWorld
     void Player::set(const ESM::NPC *player)
     {
         mPlayer.mBase = player;
-
-        float* playerPos = mPlayer.mData.getPosition().pos;
-        playerPos[0] = playerPos[1] = playerPos[2] = 0;
     }
 
     void Player::setCell (MWWorld::CellStore *cellStore)
@@ -170,5 +174,103 @@ namespace MWWorld
         markedCell = mMarkedCell;
         if (mMarkedCell)
             markedPosition = mMarkedPosition;
+    }
+
+    void Player::clear()
+    {
+        mCellStore = 0;
+        mSign.clear();
+        mMarkedCell = 0;
+        mAutoMove = false;
+        mForwardBackward = 0;
+        mTeleported = false;
+    }
+
+    void Player::write (ESM::ESMWriter& writer) const
+    {
+        ESM::Player player;
+
+        mPlayer.save (player.mObject);
+        player.mCellId = mCellStore->mCell->getCellId();
+
+        player.mBirthsign = mSign;
+
+        player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x;
+        player.mLastKnownExteriorPosition[1] = mLastKnownExteriorPosition.y;
+        player.mLastKnownExteriorPosition[2] = mLastKnownExteriorPosition.z;
+
+        if (mMarkedCell)
+        {
+            player.mHasMark = true;
+            player.mMarkedPosition = mMarkedPosition;
+            player.mMarkedCell = mMarkedCell->mCell->getCellId();
+        }
+        else
+            player.mHasMark = false;
+
+        player.mAutoMove = mAutoMove ? 1 : 0;
+
+        writer.startRecord (ESM::REC_PLAY);
+        player.save (writer);
+        writer.endRecord (ESM::REC_PLAY);
+    }
+
+    bool Player::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        if (type==ESM::REC_PLAY)
+        {
+            ESM::Player player;
+            player.load (reader);
+
+            if (!mPlayer.checkState (player.mObject))
+            {
+                // this is the one object we can not silently drop.
+                throw std::runtime_error ("invalid player state record (object state)");
+            }
+
+            mPlayer.load (player.mObject);
+
+            MWBase::World& world = *MWBase::Environment::get().getWorld();
+
+            mCellStore = world.getCell (player.mCellId);
+
+            if (!player.mBirthsign.empty() &&
+                !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
+                throw std::runtime_error ("invalid player state record (birthsign)");
+
+            mSign = player.mBirthsign;
+
+            mLastKnownExteriorPosition.x = player.mLastKnownExteriorPosition[0];
+            mLastKnownExteriorPosition.y = player.mLastKnownExteriorPosition[1];
+            mLastKnownExteriorPosition.z = player.mLastKnownExteriorPosition[2];
+
+            if (player.mHasMark && !player.mMarkedCell.mPaged)
+            {
+                // interior cell -> need to check if it exists (exterior cell will be
+                // generated on the fly)
+
+                if (!world.getStore().get<ESM::Cell>().search (player.mMarkedCell.mWorldspace))
+                    player.mHasMark = false; // drop mark silently
+            }
+
+            if (player.mHasMark)
+            {
+                mMarkedPosition = player.mMarkedPosition;
+                mMarkedCell = world.getCell (player.mMarkedCell);
+            }
+            else
+            {
+                mMarkedCell = 0;
+            }
+
+            mAutoMove = player.mAutoMove!=0;
+
+            mForwardBackward = 0;
+            mTeleported = false;
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -70,8 +70,7 @@ namespace MWGui
         setText("RaceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu5", "Race"));
         getWidget(mRaceList, "RaceList");
         mRaceList->setScrollVisible(true);
-        mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
-        mRaceList->eventListMouseItemActivate += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
+        mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onAccept);
         mRaceList->eventListChangePosition += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
         setText("SkillsT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
@@ -239,6 +238,14 @@ namespace MWGui
         updatePreview();
         updateSkills();
         updateSpellPowers();
+    }
+
+    void RaceDialog::onAccept(MyGUI::ListBox *_sender, size_t _index)
+    {
+        onSelectRace(_sender, _index);
+        if(mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
+            return;
+        eventDone(this);
     }
 
     void RaceDialog::getBodyParts (int part, std::vector<std::string>& out)

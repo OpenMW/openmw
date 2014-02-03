@@ -211,6 +211,7 @@ namespace MWGui
                         params.mMagnMin = it->mMagnMin;
                         params.mMagnMax = it->mMagnMax;
                         params.mRange = it->mRange;
+                        params.mArea = it->mArea;
                         params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);

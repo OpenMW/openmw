@@ -18,8 +18,9 @@ namespace MWGui
 
     const int StatsWindow::sLineHeight = 18;
 
-    StatsWindow::StatsWindow ()
+    StatsWindow::StatsWindow (DragAndDrop* drag)
       : WindowPinnableBase("openmw_stats_window.layout")
+      , NoDrop(drag, mMainWidget)
       , mSkillView(NULL)
       , mMajorSkills()
       , mMinorSkills()
@@ -219,10 +220,12 @@ namespace MWGui
         updateSkillArea();
     }
 
-    void StatsWindow::onFrame ()
+    void StatsWindow::onFrame (float dt)
     {
         if (!mMainWidget->getVisible())
             return;
+
+        NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
@@ -231,9 +234,12 @@ namespace MWGui
         MyGUI::Widget* levelWidget;
         for (int i=0; i<2; ++i)
         {
+            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->getInt();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
             levelWidget->setUserString("RangePosition_LevelProgress", boost::lexical_cast<std::string>(PCstats.getLevelProgress()));
-            levelWidget->setUserString("Caption_LevelProgressText", boost::lexical_cast<std::string>(PCstats.getLevelProgress()) + "/10");
+            levelWidget->setUserString("Range_LevelProgress", boost::lexical_cast<std::string>(max));
+            levelWidget->setUserString("Caption_LevelProgressText", boost::lexical_cast<std::string>(PCstats.getLevelProgress()) + "/"
+                                       + boost::lexical_cast<std::string>(max));
         }
 
         setFactions(PCstats.getFactionRanks());

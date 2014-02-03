@@ -8,6 +8,7 @@
 namespace ESM
 {
     struct Script;
+    struct Locals;
 }
 
 namespace MWScript
@@ -23,6 +24,9 @@ namespace MWScript
             bool setVarByInt(const std::string& script, const std::string& var, int val);
             int getIntVar (const std::string& script, const std::string& var); ///< if var does not exist, returns 0
 
+            void write (ESM::Locals& locals, const std::string& script) const;
+
+            void read (const ESM::Locals& locals, const std::string& script);
     };
 }
 

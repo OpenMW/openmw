@@ -23,7 +23,7 @@ void MWMechanics::AiSequence::copy (const AiSequence& sequence)
         mPackages.push_back ((*iter)->clone());
 }
 
-MWMechanics::AiSequence::AiSequence() : mDone (false) {}
+MWMechanics::AiSequence::AiSequence() : mDone (false), mLastAiPackage(-1) {}
 
 MWMechanics::AiSequence::AiSequence (const AiSequence& sequence) : mDone (false)
 {
@@ -84,6 +84,7 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
     {
         if (!mPackages.empty())
         {
+            mLastAiPackage = mPackages.front()->getTypeId();
             if (mPackages.front()->execute (actor,duration))
             {
                 delete *mPackages.begin();
@@ -91,7 +92,9 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                 mDone = true;
             }
             else
+            {
                 mDone = false;    
+            }
         }
     }
 }
@@ -122,6 +125,14 @@ void MWMechanics::AiSequence::stack (const AiPackage& package)
 void MWMechanics::AiSequence::queue (const AiPackage& package)
 {
     mPackages.push_back (package.clone());
+}
+
+MWMechanics::AiPackage* MWMechanics::AiSequence::getActivePackage()
+{
+    if(mPackages.empty())
+        throw std::runtime_error(std::string("No AI Package!"));
+    else
+        return mPackages.front();
 }
 
 void MWMechanics::AiSequence::fill(const ESM::AIPackageList &list)
