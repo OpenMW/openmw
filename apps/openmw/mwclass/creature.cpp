@@ -529,8 +529,8 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
-                world->isLevitationEnabled())
+        else if(isFlying(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+                world->isLevitationEnabled()))
         {
             float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
                                     mageffects.get(ESM::MagicEffect::Levitate).mMagnitude);
