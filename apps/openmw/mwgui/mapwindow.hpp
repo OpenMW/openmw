@@ -1,8 +1,9 @@
 #ifndef MWGUI_MAPWINDOW_H
 #define MWGUI_MAPWINDOW_H
 
+#include <libs/platform/stdint.h>
+
 #include "windowpinnablebase.hpp"
-#include <cstdint>
 
 namespace MWRender
 {
