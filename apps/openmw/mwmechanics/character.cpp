@@ -301,7 +301,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         if(!mCurrentMovement.empty())
         {
             float vel, speedmult = 1.0f;
-            if(mPtr.getClass().isNpc() && mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
+            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
                 speedmult = mMovementSpeed / vel;
 
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
