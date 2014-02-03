@@ -882,6 +882,9 @@ class NIFObjectLoader
                 Ogre::ControllerFunctionRealPtr func(function);
 
                 scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+
+                if (partflags&Nif::NiNode::ParticleFlag_AutoPlay)
+                    partsys->fastForward(1, 0.1);
             }
             ctrl = ctrl->next;
         }
