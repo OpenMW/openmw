@@ -55,7 +55,7 @@ namespace MWGui
         getWidget(mRightPane, "RightPane");
         getWidget(mArmorRating, "ArmorRating");
 
-        mAvatar->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
+        mAvatarImage->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
 
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &InventoryWindow::onItemSelected);
@@ -76,11 +76,12 @@ namespace MWGui
 
     void InventoryWindow::adjustPanes()
     {
-        const float aspect = 0.5; // fixed aspect ratio for the left pane
-        mLeftPane->setSize( (mMainWidget->getSize().height-44) * aspect, mMainWidget->getSize().height-44 );
-        mRightPane->setCoord( mLeftPane->getPosition().left + (mMainWidget->getSize().height-44) * aspect + 4,
+        const float aspect = 0.5; // fixed aspect ratio for the avatar image
+        float leftPaneWidth = (mMainWidget->getSize().height-44-mArmorRating->getHeight()) * aspect;
+        mLeftPane->setSize( leftPaneWidth, mMainWidget->getSize().height-44 );
+        mRightPane->setCoord( mLeftPane->getPosition().left + leftPaneWidth + 4,
                               mRightPane->getPosition().top,
-                              mMainWidget->getSize().width - 12 - (mMainWidget->getSize().height-44) * aspect - 15,
+                              mMainWidget->getSize().width - 12 - leftPaneWidth - 15,
                               mMainWidget->getSize().height-44 );
     }
 
@@ -418,9 +419,9 @@ namespace MWGui
         else
         {
             MyGUI::IntPoint mousePos = MyGUI::InputManager::getInstance ().getLastPressedPosition (MyGUI::MouseButton::Left);
-            MyGUI::IntPoint relPos = mousePos - mAvatar->getAbsolutePosition ();
-            int realX = int(float(relPos.left) / float(mAvatar->getSize().width) * 512.f );
-            int realY = int(float(relPos.top) / float(mAvatar->getSize().height) * 1024.f );
+            MyGUI::IntPoint relPos = mousePos - mAvatarImage->getAbsolutePosition ();
+            int realX = int(float(relPos.left) / float(mAvatarImage->getSize().width) * 512.f );
+            int realY = int(float(relPos.top) / float(mAvatarImage->getSize().height) * 1024.f );
 
             MWWorld::Ptr itemSelected = getAvatarSelectedItem (realX, realY);
             if (itemSelected.isEmpty ())
@@ -487,11 +488,18 @@ namespace MWGui
         if (mPreviewDirty)
         {
             mPreviewDirty = false;
-            MyGUI::IntSize size = mAvatar->getSize();
+            MyGUI::IntSize size = mAvatarImage->getSize();
 
             mPreview.update (size.width, size.height);
-            mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
+
             mAvatarImage->setImageTexture("CharacterPreview");
+            mAvatarImage->setImageCoord(MyGUI::IntCoord(0, 0, std::min(512, size.width), std::min(1024, size.height)));
+            mAvatarImage->setImageTile(MyGUI::IntSize(std::min(512, size.width), std::min(1024, size.height)));
+
+            mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
+                + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
+            if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
+                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
         }
     }
 
@@ -502,9 +510,6 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
 
         mPreviewDirty = true;
-
-        mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
-            + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
     }
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)
@@ -550,10 +555,5 @@ namespace MWGui
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, count);
-    }
-
-    MyGUI::IntCoord InventoryWindow::getAvatarScreenCoord ()
-    {
-        return mAvatar->getAbsoluteCoord ();
     }
 }
