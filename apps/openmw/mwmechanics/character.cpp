@@ -602,6 +602,19 @@ bool CharacterController::updateWeaponState()
     if(isWeapon)
         weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
 
+    // Cancel attack if we no longer have ammunition
+    bool ammunition = true;
+    MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+    if (mWeaponType == WeapType_Crossbow)
+        ammunition = (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt);
+    else if (mWeaponType == WeapType_BowAndArrow)
+        ammunition = (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Arrow);
+    if (!ammunition && mUpperBodyState > UpperCharState_WeapEquiped)
+    {
+        mAnimation->disable(mCurrentWeapon);
+        mUpperBodyState = UpperCharState_WeapEquiped;
+    }
+
     float complete;
     bool animPlaying;
     if(stats.getAttackingOrSpell())
@@ -706,7 +719,7 @@ bool CharacterController::updateWeaponState()
                 if(item.getRefData().getCount())
                     MWBase::Environment::get().getWindowManager()->setSelectedWeapon(item);
             }
-            else
+            else if (ammunition)
             {
                 if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
                    mWeaponType == WeapType_Thrown)
