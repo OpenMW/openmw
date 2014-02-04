@@ -91,6 +91,7 @@ private:
     Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
+    float mPitchFactor;
 
     void updateNpcBase();
 
@@ -126,6 +127,10 @@ public:
     virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
+    /// to indicate the facing orientation of the character.
+    virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool showa);

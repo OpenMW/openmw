@@ -53,7 +53,6 @@ void Animation::EffectAnimationTime::setValue(Ogre::Real)
 
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
-    , mCamera(NULL)
     , mInsert(node)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)

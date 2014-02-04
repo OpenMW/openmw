@@ -773,6 +773,50 @@ bool CharacterController::updateWeaponState()
         }
     }
 
+    mAnimation->setPitchFactor(0.f);
+    if (mWeaponType == WeapType_BowAndArrow || mWeaponType == WeapType_Thrown)
+    {
+        switch (mUpperBodyState)
+        {
+        case UpperCharState_StartToMinAttack:
+            mAnimation->setPitchFactor(complete);
+            break;
+        case UpperCharState_MinAttackToMaxAttack:
+        case UpperCharState_MaxAttackToMinHit:
+        case UpperCharState_MinHitToHit:
+            mAnimation->setPitchFactor(1.f);
+            break;
+        case UpperCharState_FollowStartToFollowStop:
+            if (animPlaying)
+                mAnimation->setPitchFactor(1.f-complete);
+            break;
+        default:
+            break;
+        }
+    }
+    else if (mWeaponType == WeapType_Crossbow)
+    {
+        switch (mUpperBodyState)
+        {
+        case UpperCharState_EquipingWeap:
+            mAnimation->setPitchFactor(complete);
+            break;
+        case UpperCharState_UnEquipingWeap:
+            mAnimation->setPitchFactor(1.f-complete);
+            break;
+        case UpperCharState_WeapEquiped:
+        case UpperCharState_StartToMinAttack:
+        case UpperCharState_MinAttackToMaxAttack:
+        case UpperCharState_MaxAttackToMinHit:
+        case UpperCharState_MinHitToHit:
+        case UpperCharState_FollowStartToFollowStop:
+            mAnimation->setPitchFactor(1.f);
+            break;
+        default:
+            break;
+        }
+    }
+
     if(!animPlaying)
     {
         if(mUpperBodyState == UpperCharState_EquipingWeap ||

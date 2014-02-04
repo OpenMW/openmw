@@ -121,7 +121,6 @@ protected:
     std::vector<EffectParams> mEffects;
 
     MWWorld::Ptr mPtr;
-    Camera *mCamera;
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
@@ -288,6 +287,10 @@ public:
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
 
+    /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
+    /// to indicate the facing orientation of the character.
+    virtual void setPitchFactor(float factor) {}
+
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
@@ -296,9 +299,6 @@ public:
     void enableLights(bool enable);
 
     Ogre::AxisAlignedBox getWorldBounds();
-
-    void setCamera(Camera *cam)
-    { mCamera = cam; }
 
     Ogre::Node *getNode(const std::string &name);
 

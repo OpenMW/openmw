@@ -142,7 +142,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
-    mNpcType(Type_Normal)
+    mNpcType(Type_Normal),
+    mPitchFactor(0)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -522,15 +523,24 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-    if(mViewMode == VM_FirstPerson && mCamera)
+    if(mViewMode == VM_FirstPerson)
     {
-        float pitch = mCamera->getPitch();
+        float pitch = mPtr.getRefData().getPosition().rot[0];
         Ogre::Node *node = baseinst->getBone("Bip01 Neck");
-        node->pitch(Ogre::Radian(pitch*0.75f), Ogre::Node::TS_WORLD);
+        node->pitch(Ogre::Radian(pitch), Ogre::Node::TS_WORLD);
 
         // This has to be done before this function ends;
         // updateSkeletonInstance, below, touches the hands.
         node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
+    }
+    else if (mPitchFactor > 0)
+    {
+        // In third person mode we may still need pitch for ranged weapon targeting
+        float pitch = mPtr.getRefData().getPosition().rot[0] * mPitchFactor;
+        Ogre::Node *node = baseinst->getBone("Bip01 Spine2");
+        node->pitch(Ogre::Radian(pitch/2), Ogre::Node::TS_WORLD);
+        node = baseinst->getBone("Bip01 Spine1");
+        node->pitch(Ogre::Radian(pitch/2), Ogre::Node::TS_WORLD);
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
