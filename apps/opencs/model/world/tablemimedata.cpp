@@ -1,10 +1,10 @@
 #include "tablemimedata.hpp"
 #include "universalid.hpp"
 
-CSMWorld::TableMimeData::TableMimeData (CSMWorld::UniversalId& UniversalId) :
-mUniversalId(UniversalId)
+CSMWorld::TableMimeData::TableMimeData (UniversalId id) :
+mUniversalId(id)
 {
-    mSupportedFormats << UniversalId.toString().c_str();
+    mSupportedFormats << QString::fromStdString("application/Type_" + id.getTypeName());
 }
 
 QStringList CSMWorld::TableMimeData::formats() const

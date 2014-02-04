@@ -412,3 +412,24 @@ void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> fi
 {
     mProxyModel->setFilter (filter);
 }
+
+void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
+{
+ if (event->buttons() & Qt::LeftButton) 
+ {
+     QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+     if (selectedRows.size() == 0)
+     {
+         return;
+     }
+
+     if (selectedRows.size() == 1) //tmp solution
+     {
+        CSMWorld::TableMimeData *mime = new CSMWorld::TableMimeData(getUniversalId(selectedRows.begin()->row()));
+        QDrag *drag = new QDrag(this);
+        drag->setMimeData(mime);
+        drag->start();
+     }
+ }
+}

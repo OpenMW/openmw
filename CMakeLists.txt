@@ -324,7 +324,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
     "${OpenMW_BINARY_DIR}/opencs.cfg")
-    
+
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
 
