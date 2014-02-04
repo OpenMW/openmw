@@ -106,7 +106,7 @@ enum WeaponType {
     WeapType_TwoWide,
     WeapType_BowAndArrow,
     WeapType_Crossbow,
-    WeapType_ThowWeapon,
+    WeapType_Thrown,
     WeapType_PickProbe,
 
     WeapType_Spell

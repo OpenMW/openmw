@@ -119,7 +119,7 @@ static const struct WeaponInfo {
     { WeapType_TwoWide, "2w", "weapontwowide" },
     { WeapType_BowAndArrow, "1h", "bowandarrow" },
     { WeapType_Crossbow, "crossbow", "crossbow" },
-    { WeapType_ThowWeapon, "1h", "throwweapon" },
+    { WeapType_Thrown, "1h", "throwweapon" },
     { WeapType_PickProbe, "1h", "pickprobe" },
     { WeapType_Spell, "spell", "spellcast" },
 };
@@ -380,7 +380,7 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
                         *weaptype = WeapType_Crossbow;
                         break;
                     case ESM::Weapon::MarksmanThrown:
-                        *weaptype = WeapType_ThowWeapon;
+                        *weaptype = WeapType_Thrown;
                         break;
                 }
             }
@@ -709,7 +709,7 @@ bool CharacterController::updateWeaponState()
             else
             {
                 if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
-                   mWeaponType == WeapType_ThowWeapon)
+                   mWeaponType == WeapType_Thrown)
                     mAttackType = "shoot";
                 else
                 {
