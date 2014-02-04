@@ -547,6 +547,7 @@ bool CharacterController::updateWeaponState()
         {
             getWeaponGroup(weaptype, weapgroup);
             mAnimation->showWeapons(false);
+            mAnimation->setWeaponGroup(weapgroup);
             
             mAnimation->play(weapgroup, Priority_Weapon,
                              MWRender::Animation::Group_UpperBody, true,

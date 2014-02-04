@@ -25,6 +25,23 @@ public:
     { }
 };
 
+class WeaponAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+{
+private:
+    Animation* mAnimation;
+    std::string mWeaponGroup;
+    float mStartTime;
+public:
+    WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0) {}
+    void setGroup(const std::string& group);
+    void updateStartTime();
+
+    virtual Ogre::Real getValue() const;
+    virtual void setValue(Ogre::Real value)
+    { }
+};
+
+
 class NpcAnimation : public Animation, public MWWorld::InventoryStoreListener
 {
 public:
@@ -71,6 +88,7 @@ private:
     Ogre::Vector3 mFirstPersonOffset;
 
     Ogre::SharedPtr<HeadAnimationTime> mHeadAnimationTime;
+    Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
 
@@ -104,6 +122,8 @@ public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener = false,
                  ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
+
+    virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
 

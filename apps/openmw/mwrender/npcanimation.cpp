@@ -71,6 +71,27 @@ float HeadAnimationTime::getValue() const
         return 1;
 }
 
+float WeaponAnimationTime::getValue() const
+{
+    if (mWeaponGroup.empty())
+        return 0;
+    float current = mAnimation->getCurrentTime(mWeaponGroup);
+    if (current == -1)
+        return 0;
+    return current - mStartTime;
+}
+
+void WeaponAnimationTime::setGroup(const std::string &group)
+{
+    mWeaponGroup = group;
+    mStartTime = mAnimation->getStartTime(mWeaponGroup);
+}
+
+void WeaponAnimationTime::updateStartTime()
+{
+    setGroup(mWeaponGroup);
+}
+
 static NpcAnimation::PartBoneMap createPartListMap()
 {
     NpcAnimation::PartBoneMap result;
@@ -126,6 +147,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
     mHeadAnimationTime = Ogre::SharedPtr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
+    mWeaponAnimationTime = Ogre::SharedPtr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -223,6 +245,8 @@ void NpcAnimation::updateNpcBase()
     for(size_t i = 0;i < ESM::PRT_Count;i++)
         removeIndividualPart((ESM::PartReferenceType)i);
     updateParts();
+
+    mWeaponAnimationTime->updateStartTime();
 }
 
 void NpcAnimation::updateParts()
@@ -588,9 +612,6 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
     }
 
-    // TODO:
-    // type == ESM::PRT_Weapon should get an animation source based on the current offset
-    // of the weapon attack animation (from its beginning, or start marker?)
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
     for(;ctrl != mObjectParts[type]->mControllers.end();ctrl++)
     {
@@ -600,6 +621,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
 
             if (type == ESM::PRT_Head)
                 ctrl->setSource(mHeadAnimationTime);
+            else if (type == ESM::PRT_Weapon)
+                ctrl->setSource(mWeaponAnimationTime);
         }
     }
 

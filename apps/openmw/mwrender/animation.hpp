@@ -271,11 +271,19 @@ public:
      */
     bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
 
+    /// Get the absolute position in the animation track of the first text key with the given group.
+    float getStartTime(const std::string &groupname) const;
+
+    /// Get the current absolute position in the animation track for the animation that is currently playing from the given group.
+    float getCurrentTime(const std::string& groupname) const;
+
     /** Disables the specified animation group;
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
     void changeGroups(const std::string &groupname, int group);
+
+    virtual void setWeaponGroup(const std::string& group) {}
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
