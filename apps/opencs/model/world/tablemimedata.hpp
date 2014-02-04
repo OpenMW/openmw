@@ -23,6 +23,7 @@ namespace CSMWorld
             virtual QStringList formats() const;
             UniversalId getId(unsigned int index) const;
             std::string getIcon() const;
+            std::vector<UniversalId> getData() const;
 
         private:
             std::vector<UniversalId> mUniversalId;

@@ -62,3 +62,8 @@ std::string CSMWorld::TableMimeData::getIcon() const
     }
     return mUniversalId.begin()->getIcon(); //All objects are of the same type;
 }
+
+std::vector< CSMWorld::UniversalId > CSMWorld::TableMimeData::getData() const
+{
+    return mUniversalId;
+}
