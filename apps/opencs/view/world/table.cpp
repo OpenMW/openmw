@@ -421,7 +421,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
      if (selectedRows.size() == 0)
      {
-         return;
+        return;
      }
 
      if (selectedRows.size() == 1) //tmp solution
@@ -429,6 +429,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
         CSMWorld::TableMimeData *mime = new CSMWorld::TableMimeData(getUniversalId(selectedRows.begin()->row()));
         QDrag *drag = new QDrag(this);
         drag->setMimeData(mime);
+        drag->setPixmap(QString::fromStdString(mime->getIcon()));
         drag->start();
      }
  }
