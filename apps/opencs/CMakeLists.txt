@@ -106,9 +106,13 @@ opencs_units (model/settings
     settingmodel
     setting
     adapter
+oldsettingmodel
+oldsetting
     )
 
 opencs_units_noqt (model/settings
+        declarationitem
+        settingitem
     )
 
 opencs_units_noqt (model/filter

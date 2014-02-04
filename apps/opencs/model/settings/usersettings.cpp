@@ -16,6 +16,7 @@
 
 #include "definitionmodel.hpp"
 #include "../../view/settings/support.hpp"
+#include "declarationitem.hpp"
 
 #include <QDebug>
 
@@ -50,16 +51,13 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
     {
-        Setting *width = declarationModel().singleText
-                                                    (section, "Width", "1024");
+        Setting *width = declareSingleText ("Width", section, "1024");
+        Setting *height = declareSingleText ("Height", section, "768");
 
-        width->widgetWidth = 5;
+        width->setWidgetWidth (5);
 
-        Setting *height = declarationModel().singleText
-                                                    (section, "Height", "768");
-
-        height->widgetWidth = 5;
-        height->viewColumn = 1;
+        height->setWidgetWidth (5);
+        height->setViewColumn (1);
 /*
         QStringList predefValues;
 
@@ -87,16 +85,19 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
     section = "Display Format";
     {
-        QString defaultValue = "Icon and Text";
+        Setting *rsd = declareSingleBool ("Record Status Display",
+                                                        section, defaultValue);
 
+        Settingn *ritd = declareSingleBool ("Referenceable ID Type Display",
+                                                        section, defaultValue);
+
+        QString defaultValue = "Icon and Text";
         QStringList dfValues;
+
         dfValues << defaultValue << "Icon Only" << "Text Only";
 
-        declarationModel().singleBool (section, "Record Status Display",
-                                       dfValues, defaultValue);
-
-        declarationModel().singleBool (section, "Referenceable ID Type Display",
-                                       dfValues, defaultValue);
+        rsd->setValueList (dfValues);
+        ritd->setValueList (dfValues);
     }
 }
 

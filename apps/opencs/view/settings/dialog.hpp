@@ -2,6 +2,7 @@
 #define CSVSETTINGS_DIALOG_H
 
 #include "settingwindow.hpp"
+#include <QStandardItem>
 
 class QStackedWidget;
 class QListWidget;
@@ -10,6 +11,24 @@ class QListWidgetItem;
 namespace CSVSettings {
 
     class Page;
+
+    class StringListItem : public QStandardItem
+    {
+        QStringList mList;
+
+    public:
+        explicit StringListItem(QStringList list)
+            : mList (list), QStandardItem()
+        {}
+
+        int type() const    { return QStandardItem::UserType; }
+
+        QVariant data(int role = Qt::DisplayRole) const
+        { return mList; }
+
+        void setData(const QVariant &value, int role = Qt::DisplayRole)
+        { mList = value.toStringList(); }
+    };
 
     class Dialog : public SettingWindow
     {
@@ -34,6 +53,7 @@ namespace CSVSettings {
         void buildPages();
         void buildPageListWidget (QWidget *centralWidget);
         void buildStackedWidget (QWidget *centralWidget);
+        void addCustomPage();
 
     public slots:
 

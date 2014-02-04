@@ -1,4 +1,5 @@
 #include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 
 #include "adapter.hpp"
 #include "../../view/settings/support.hpp"
@@ -6,18 +7,18 @@
 
 #include <QDebug>
 
-CSMSettings::Adapter::Adapter ( DefinitionModel &model,
+CSMSettings::Adapter::Adapter ( QStandardItemModel &model,
                                         const QString &pageName,
                                         const QString &settingName,
                                         bool isMultiValue,
                                         QObject *parent)
 
-    : mIsMultiValue (isMultiValue), mModel (model),
+    : mIsMultiValue (isMultiValue), mDefModel (model),
       mPageName (pageName), mSettingName (settingName),
       QAbstractItemModel (parent)
 {
     QSortFilterProxyModel *pageFilter =
-                                buildFilter(&mModel, Setting_Page, mPageName);
+                            buildFilter(&mDefModel, Setting_Page, mPageName);
 
     mSettingFilter = buildFilter (pageFilter, Setting_Name, mSettingName);
 
@@ -40,21 +41,6 @@ int CSMSettings::Adapter::columnCount (const QModelIndex &parent) const
     return mSettingFilter->columnCount();
 }
 
-bool CSMSettings::Adapter::valueExists (const QString &value)
-{
-    bool success = false;
-
-    for (int i = 0; i < rowCount(); i++)
-    {
-        success = (valueSourceIndex (value, Setting_Value).isValid());
-
-        if (success)
-            break;
-    }
-
-    return success;
-}
-
 bool CSMSettings::Adapter::validIndex (QModelIndex idx) const
 {
     if (!idx.isValid())
@@ -64,6 +50,18 @@ bool CSMSettings::Adapter::validIndex (QModelIndex idx) const
         return false;
 
     return true;
+}
+QVariant CSMSettings::Adapter::data(const QModelIndex &index, int role) const
+{
+    QModelIndex filterIndex = filter()->index (index.row(), index.column());
+    return filter()->data (filterIndex, role);
+}
+
+bool CSMSettings::Adapter::setData(const QModelIndex &index,
+                                   const QVariant &value, int role)
+{
+    QModelIndex filterIndex = filter()->index (index.row(), index.column());
+    filter()->setData (filterIndex, value, role);
 }
 
 Qt::ItemFlags CSMSettings::Adapter::flags(const QModelIndex &index) const
@@ -109,7 +107,7 @@ bool CSMSettings::Adapter::removeValue (const QString &value)
 
     while (idx.isValid())
     {
-        if (!mModel.removeRows (idx.row(), 1, QModelIndex()))
+        if (!mDefModel.removeRows (idx.row(), 1, QModelIndex()))
             return false;
 
         idx = valueSourceIndex (value, Setting_Value);

@@ -21,27 +21,51 @@ namespace CSMSettings
     typedef QPair <QString, Setting *> DeclarationPair;
     typedef QPair <QString, DeclarationPair> DeclarationListItem;
     typedef QList <DeclarationListItem> DeclarationList;
+
+    int sSettingPropertyCount = 10;
+    int sSettingPropertyListCount = 3;
 }
 
 //Enums
 namespace CSMSettings
 {
-    enum BooleanSettingColumn
+    enum BooleanSettingProperty
     {
-        BooleanSetting_Value = 0,
-        BooleanSetting_ValueState = 1
+        BooleanProperty_Value = 0,
+        BooleanProperty_ValueState = 1
     };
 
-    enum SettingColumn
+    enum SettingProperty
     {
-        Setting_Name = 0,
-        Setting_Page = 1,
-        Setting_Value = 2,
-        Setting_DefaultValue = 3,
-        Setting_ValueList = 4,
-        Setting_ViewType = 5,
-        Setting_ValueCapacity = 6,
-        Setting_Orientation = 7
+        Property_Name = 0,
+        Property_Page = 1,
+        Property_DefaultValue = 2,
+        Property_ViewType = 3,
+        Property_IsMultiValue = 4,
+        Property_IsHorizontal = 5,
+        Property_IsMultiLine = 6,
+        Property_WidgetWidth = 7,
+        Property_ViewRow = 8,
+        Property_ViewColumn = 9,
+    };
+
+    enum SettingPropertyList
+    {
+        PropertyList_DefinedValues = 0,
+        PropertyList_DeclaredValues = 1,
+        PropertyList_Proxy = 2
+    };
+
+    enum SettingType
+    {
+        Type_MultiBool = 0,
+        Type_SingleBool = 1,
+        Type_MultiList = 2,
+        Type_SingleList  = 3,
+        Type_MultiRange = 4,
+        Type_SingleRange = 5,
+        Type_MultiText = 6,
+        Type_SingleText = 7
     };
 
     enum MergeMethod

@@ -13,6 +13,17 @@
 
 #include <QDebug>
 
+//CustomPage includes
+#include <QApplication>
+
+#include <QSplitter>
+
+#include <QTreeView>
+#include <QListView>
+#include <QTableView>
+
+#include <QStandardItemModel>
+
 CSVSettings::Dialog::Dialog(QMainWindow *parent) :
     SettingWindow (parent), mStackedWidget (0)
 {
@@ -65,7 +76,53 @@ void CSVSettings::Dialog::buildPages()
     mStackedWidget->addWidget (
         new TestHarnessPage (CSMSettings::UserSettings::instance(), this));
 
+    addCustomPage();
+
     resize (mStackedWidget->sizeHint());
+}
+
+void CSVSettings::Dialog::addCustomPage()
+{
+  QTreeView *tree = new QTreeView();
+  QListView *list = new QListView();
+  QTableView *table = new QTableView();
+
+  QSplitter *splitter = new QSplitter(this);
+  splitter->addWidget( tree );
+  splitter->addWidget( list );
+  splitter->addWidget( table );
+
+  QStandardItemModel *model = new QStandardItemModel( 5, 2 );
+  for( int r=0; r<5; r++ )
+    for( int c=0; c<2; c++)
+    {
+      QStandardItem *item = new QStandardItem( QString("Row:%0, Column:%1").arg(r).arg(c) );
+
+      if( c == 1 )
+      {
+          QStringList values;
+        for( int i=0; i<3; i++ )
+        {
+            values << QString("Item %0").arg(i);
+        }
+        item->appendRow (new StringListItem(values));
+          //item->appendRow( new QStandardItem( QString("Item %0").arg(i) ) );
+    }
+      model->setItem(r, c, item);
+    }
+
+  tree->setModel( model );
+  list->setModel( model );
+  table->setModel( model );
+
+  list->setSelectionModel( tree->selectionModel() );
+  table->setSelectionModel( tree->selectionModel() );
+
+  mStackedWidget->addWidget(splitter);
+     new QListWidgetItem ("Standard Item Model", mPageListWidget);
+  splitter->show();
+
+  qDebug() << "values for item #2: " << model->item(2,1)->child(0,0)->data(Qt::DisplayRole).toStringList();
 }
 
 void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)

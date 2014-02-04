@@ -1,97 +1,76 @@
 #ifndef CSMSETTINGS_SETTINGMODEL_HPP
 #define CSMSETTINGS_SETTINGMODEL_HPP
 
-#include <QAbstractItemModel>
-#include <QSortFilterProxyModel>
-#include <QMap>
-#include <QStringList>
+#include <QStandardItemModel>
 
+#include "settingitem.hpp"
 #include "setting.hpp"
 #include "../../view/settings/support.hpp"
-#include "declarationmodel.hpp"
-#include "definitionmodel.hpp"
 
 namespace CSMSettings
 {
-
-    class WriterSortModel : public QSortFilterProxyModel
+    class SettingModel : public QStandardItemModel
     {
-        bool lessThan(const QModelIndex &rLeft, const QModelIndex &rRight) const
-        {
-            int const leftRow  = rLeft.row();
-            int const rightRow = rRight.row();
-
-            for (int column = Setting_Page; column >= Setting_Name; --column)
-            {
-                QModelIndex const leftIdx = sourceModel()->index
-                                    (leftRow, column, QModelIndex());
-
-                QModelIndex const rightIdx = sourceModel()->index
-                                    (rightRow, column, QModelIndex());
-
-                QString const leftData = sourceModel()->
-                                                    data(leftIdx).toString();
-
-                QString const rightData = sourceModel()->
-                                                    data(rightIdx).toString();
-
-                int const compare = QString::localeAwareCompare
-                                                        (leftData, rightData);
-                if (compare != 0)
-                    return (compare < 0);
-            }
-            return false;
-        }
-    };
-
-    typedef QMap <QString, QStringList *> SettingMap;
-    typedef QMap <QString, SettingMap *> PageMap;
-
-    class SettingModel : public QObject
-    {
-
         Q_OBJECT
 
-        DefinitionModel mDefinitionModel;
-        DeclarationModel mDeclarationModel;
-
-        QString mReadOnlyMessage;
-        QString mReadWriteMessage;
-
     public:
-
         explicit SettingModel(QObject *parent = 0);
 
-        DeclarationModel &declarationModel()
-                                                { return mDeclarationModel;}
+        ///returns a list of SettingItems for an existing model row
+        Setting *setting (int row);
 
-        DefinitionModel &definitionModel()
-                                                { return mDefinitionModel; }
-    protected:
+        ///boilerplate conveneince functions for creating model rows
+        ///for specific setting properties
+        Setting *declareSingleText (const QString &name,
+                                            const QString &page,
+                                            const QString &defaultValue)
+        { return declareSetting (Type_SingleText, name, page, defaultValue); }
 
-        void validate(PageMap &pageMap);
+        Setting *declareMultiText  (const QString &name,
+                                            const QString &page,
+                                            const QString &defaultValue)
+        { return declareSetting (Type_MultiText, name, page, defaultValue); }
 
-        PageMap readFilestream(QTextStream *stream);
+        Setting *declareSingleBool (const QString &name,
+                                            const QString &page,
+                                            const QString &defaultValue)
+        { return declareSetting (Type_SingleBool, name, page, defaultValue); }
 
-        bool writeFilestream (QTextStream *stream);
+        Setting *declareMultiBool  (const QString &name,
+                                            const QString &page,
+                                            const QString &defaultValue)
+        { return declareSetting (Type_MultiBool, name, page, defaultValue); }
 
-        void mergeSettings (PageMap &destMap, PageMap &srcMap,
-                            MergeMethod mergeMethod = Merge_Accept);
+        Setting *declareSingleRange (const QString &name,
+                                             const QString &page,
+                                             const QString &defaultValue)
+        { return declareSetting (Type_SingleRange, name, page, defaultValue); }
 
-        QTextStream *openFilestream (const QString &filePath,
-                                     bool isReadOnly) const;
+        Setting *declareMultiRange (const QString &name,
+                                            const QString &page,
+                                            const QString &defaultValue)
+        { return declareSetting (Type_SingleRange, name, page, defaultValue); }
 
-        void destroyStream(QTextStream *stream) const;
+        Setting *declareSingleList (const QString &name,
+                                            const QString &page,
+                                            const QString &defaultValue)
+        { return declareSetting (Type_SingleList, name, page, defaultValue); }
 
-        void displayFileErrorMessage(const QString &message,
-                                     bool isReadOnly) const;
+        Setting *declareMultiList (const QString &name,
+                                           const QString &page,
+                                           const QString &defaultValue)
+        { return declareSetting (Type_SingleList, name, page, defaultValue); }
 
-        void buildModel (PageMap &pageMap);
+        ///create a new setting (append a row and return a list of SettingItems)
+        Setting *declareSetting (SettingType typ,
+                                             const QString &name,
+                                             const QString &page,
+                                             const QString &defaultValue);
 
-    private:
+    signals:
 
-        void removeUndeclaredDefinitions (PageMap &pageMap);
-        void validateDefinitions (PageMap &pageMap);
+    public slots:
+
     };
 }
 #endif // CSMSETTINGS_SETTINGMODEL_HPP

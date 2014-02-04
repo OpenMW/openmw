@@ -1,10 +1,36 @@
-#ifndef LISTVIEW_HPP
-#define LISTVIEW_HPP
+#ifndef CSVSETTINGS_LISTVIEW_HPP
+#define CSVSETTINGS_LISTVIEW_HPP
 
-class ListView : public View
+#include "view.hpp"
+
+namespace CSVSettings
 {
-public:
-    ListView();
-};
+    class ListView : public View
+    {
 
-#endif // LISTVIEW_HPP
+        QWidget *mListWidget;
+
+    public:
+        explicit ListView (QAbstractItemModel *listModel,
+                            const CSMSettings::Setting *setting,
+                            QWidget *parent = 0);
+
+    protected:
+
+        void build(const CSMSettings::Setting *setting);
+    };
+
+    class ListViewFactory : public QObject, public IViewFactory
+    {
+        Q_OBJECT
+
+    public:
+        explicit ListViewFactory (QWidget *parent = 0)
+            : QObject (parent)
+        {}
+
+        ListView *createView (CSMSettings::DefinitionModel &model,
+                               const CSMSettings::Setting *setting);
+    };
+}
+#endif // CSVSETTINGS_LISTVIEW_HPP
