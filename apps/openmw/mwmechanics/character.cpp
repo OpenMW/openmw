@@ -836,6 +836,9 @@ bool CharacterController::updateWeaponState()
            mUpperBodyState == UpperCharState_FollowStartToFollowStop ||
            mUpperBodyState == UpperCharState_CastingSpell)
         {
+            if (ammunition && mWeaponType == WeapType_Crossbow)
+                mAnimation->attachArrow();
+
             mUpperBodyState = UpperCharState_WeapEquiped;
             //don't allow to continue playing hit animation on UpperBody after actor had attacked during it
             if(mHitState == CharState_Hit) 

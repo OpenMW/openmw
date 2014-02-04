@@ -135,6 +135,11 @@ public:
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool showa);
 
+    virtual void attachArrow();
+    virtual void releaseArrow();
+
+    NifOgre::ObjectScenePtr mAmmunition;
+
     void setViewMode(ViewMode viewMode);
 
     void updateParts();

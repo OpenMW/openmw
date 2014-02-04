@@ -696,6 +696,17 @@ void NpcAnimation::showWeapons(bool showWeapon)
             std::string mesh = MWWorld::Class::get(*weapon).getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
+
+            if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+            {
+                MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+                if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
+                    attachArrow();
+                else
+                    mAmmunition.setNull();
+            }
+            else
+                mAmmunition.setNull();
         }
     }
     else
@@ -724,6 +735,52 @@ void NpcAnimation::showCarriedLeft(bool show)
     }
     else
         removeIndividualPart(ESM::PRT_Shield);
+}
+
+void NpcAnimation::attachArrow()
+{
+    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    if (weaponSlot != inv.end() && weaponSlot->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+        showWeapons(true);
+    else
+    {
+        NifOgre::ObjectScenePtr weapon = mObjectParts[ESM::PRT_Weapon];
+
+        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+        if (ammo == inv.end())
+            return;
+        std::string model = ammo->getClass().getModel(*ammo);
+
+        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, "ArrowBone", mInsert, model);
+        Ogre::Vector3 glowColor = getEnchantmentColor(*ammo);
+        setRenderProperties(mAmmunition, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
+                            !ammo->getClass().getEnchantment(*ammo).empty(), &glowColor);
+
+        std::for_each(mAmmunition->mEntities.begin(), mAmmunition->mEntities.end(), SetObjectGroup(MWWorld::InventoryStore::Slot_Ammunition));
+        std::for_each(mAmmunition->mParticles.begin(), mAmmunition->mParticles.end(), SetObjectGroup(MWWorld::InventoryStore::Slot_Ammunition));
+    }
+}
+
+void NpcAnimation::releaseArrow()
+{
+    // Thrown weapons get detached now
+    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    if (weapon != inv.end() && weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    {
+        showWeapons(false);
+        inv.remove(*weapon, 1, mPtr);
+    }
+    else
+    {
+        // With bows and crossbows only the used arrow/bolt gets detached
+        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+        if (ammo == inv.end())
+            return;
+        inv.remove(*ammo, 1, mPtr);
+        mAmmunition.setNull();
+    }
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)

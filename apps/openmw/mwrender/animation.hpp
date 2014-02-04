@@ -295,7 +295,8 @@ public:
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show) {}
-
+    virtual void attachArrow() {}
+    virtual void releaseArrow() {}
     void enableLights(bool enable);
 
     Ogre::AxisAlignedBox getWorldBounds();

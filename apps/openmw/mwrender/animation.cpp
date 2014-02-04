@@ -695,6 +695,12 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         else
             mPtr.getClass().hit(mPtr);
     }
+    else if (evt.compare(off, len, "shoot attach") == 0)
+        attachArrow();
+    else if (evt.compare(off, len, "shoot release") == 0)
+        releaseArrow();
+    else if (evt.compare(off, len, "shoot follow attach") == 0)
+        attachArrow();
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
