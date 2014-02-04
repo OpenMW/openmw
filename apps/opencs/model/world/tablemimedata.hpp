@@ -4,27 +4,29 @@
 #ifndef TABLEMIMEDATA_H
 #define TABLEMIMEDATA_H
 
+#include <vector>
+
 #include <qt4/QtCore/QMimeData>
 #include <QStringList>
 
 #include "universalid.hpp"
 
-class QStringList;
 
 namespace CSMWorld
 {
-    class UniversalId;
     class TableMimeData : public QMimeData
     {
         public:
             TableMimeData(UniversalId id);
+            TableMimeData(std::vector<UniversalId>& id);
             ~TableMimeData();
             virtual QStringList formats() const;
-            UniversalId& getId();
+            UniversalId getId(unsigned int index) const;
+            std::string getIcon() const;
 
         private:
-            QStringList mSupportedFormats;
-            UniversalId mUniversalId;
+            std::vector<UniversalId> mUniversalId;
+            QStringList mObjectsFormats;
     };
 }
 #endif // TABLEMIMEDATA_H
