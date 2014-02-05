@@ -21,7 +21,6 @@ namespace CSMWorld
             TableMimeData(std::vector<UniversalId>& id);
             ~TableMimeData();
             virtual QStringList formats() const;
-            UniversalId getId(unsigned int index) const;
             std::string getIcon() const;
             std::vector<UniversalId> getData() const;
 

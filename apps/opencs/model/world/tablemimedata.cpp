@@ -26,15 +26,6 @@ CSMWorld::TableMimeData::~TableMimeData()
 {
 }
 
-CSMWorld::UniversalId CSMWorld::TableMimeData::getId(unsigned int index) const
-{
-    if (mUniversalId.empty())
-    {
-        throw("TableMimeData holds no UniversalId");
-    }
-    return mUniversalId[index];
-}
-
 std::string CSMWorld::TableMimeData::getIcon() const
 {
     if (mUniversalId.empty())
