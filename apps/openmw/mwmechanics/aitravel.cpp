@@ -20,8 +20,8 @@ namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z)
     : mX(x),mY(y),mZ(z),mPathFinder()
-    , cellX(std::numeric_limits<int>::max())
-    , cellY(std::numeric_limits<int>::max())
+    , mCellX(std::numeric_limits<int>::max())
+    , mCellY(std::numeric_limits<int>::max())
     {
     }
 
@@ -61,11 +61,11 @@ namespace MWMechanics
             }
         }
 
-        bool cellChange = cell->mData.mX != cellX || cell->mData.mY != cellY;
+        bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
-            cellX = cell->mData.mX;
-            cellY = cell->mData.mY;
+            mCellX = cell->mData.mX;
+            mCellY = cell->mData.mY;
             float xCell = 0;
             float yCell = 0;
 
