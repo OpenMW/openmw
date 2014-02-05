@@ -415,22 +415,36 @@ void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> fi
 
 void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 {
- if (event->buttons() & Qt::LeftButton) 
- {
-     QModelIndexList selectedRows = selectionModel()->selectedRows();
+    if (event->buttons() & Qt::LeftButton)
+    {
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
 
-     if (selectedRows.size() == 0)
-     {
-        return;
-     }
+        if (selectedRows.size() == 0)
+        {
+            return;
+        }
 
-     if (selectedRows.size() == 1) //tmp solution
-     {
-        CSMWorld::TableMimeData *mime = new CSMWorld::TableMimeData(getUniversalId(selectedRows.begin()->row()));
-        QDrag *drag = new QDrag(this);
-        drag->setMimeData(mime);
-        drag->setPixmap(QString::fromStdString(mime->getIcon()));
+        QDrag* drag = new QDrag (this);
+        CSMWorld::TableMimeData* mime = NULL;
+
+        if (selectedRows.size() == 1)
+        {
+            mime = new CSMWorld::TableMimeData (getUniversalId (selectedRows.begin()->row()));
+        }
+        else
+        {
+            std::vector<CSMWorld::UniversalId> idToDrag;
+
+            foreach (QModelIndex it, selectedRows)
+            {
+                idToDrag.push_back (getUniversalId (it.row()));
+            }
+
+            mime = new CSMWorld::TableMimeData (idToDrag);
+        }
+
+        drag->setMimeData (mime);
+        drag->setPixmap (QString::fromStdString (mime->getIcon()));
         drag->start();
-     }
  }
 }
