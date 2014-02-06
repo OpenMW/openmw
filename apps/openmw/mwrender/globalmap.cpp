@@ -291,7 +291,7 @@ namespace MWRender
                     unsigned int imageY = (yLength - (y + 1)) * cellImageSizeSrc;
 
                     assert(imageX < image.getWidth());
-                    assert(imageY < image.getWidth());
+                    assert(imageY < image.getHeight());
 
                     if (image.getColourAt(imageX, imageY, 0).a > 0)
                         exploredCells.push_back(std::make_pair(x+bounds.mMinX,y+bounds.mMinY));
