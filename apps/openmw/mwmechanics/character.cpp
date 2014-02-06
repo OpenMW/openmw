@@ -315,8 +315,18 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         if(!mCurrentMovement.empty())
         {
             float vel, speedmult = 1.0f;
+
+            bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
+
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
                 speedmult = mMovementSpeed / vel;
+            else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
+                speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
+            else if (mMovementSpeed > 0.0f)
+                // The first person anims don't have any velocity to calculate a speed multiplier from.
+                // We use the third person velocities instead.
+                // FIXME: should be pulled from the actual animation, but it is not presently loaded.
+                speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
