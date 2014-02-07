@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "mainwizard.hpp"
 
@@ -27,6 +28,27 @@ void Wizard::InstallationTargetPage::initializePage()
 
     QDir dir(path);
     targetLineEdit->setText(QDir::toNativeSeparators(dir.absolutePath()));
+}
+
+bool Wizard::InstallationTargetPage::validatePage()
+{
+    QString path(field("installation.path").toString());
+
+    qDebug() << "Validating path: " << path;
+
+    if (mWizard->findFiles(QLatin1String("Morrowind"), path)) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Destination not empty"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<html><head/><body><p><b>The destination directory is not empty</b></p> \
+                          <p>An existing Morrowind installation is present in the specified location.</p> \
+                          <p>Please specify a different location, or go back and select the location as an existing installation.</p></body></html>"));
+        msgBox.exec();
+        return false;
+    }
+
+    return true;
 }
 
 void Wizard::InstallationTargetPage::on_browseButton_clicked()

@@ -37,6 +37,8 @@ Wizard::UnshieldWorker::UnshieldWorker(QObject *parent) :
     mMorrowindDone = false;
     mTribunalDone = false;
     mBloodmoonDone = false;
+
+    qRegisterMetaType<Wizard::Component>("Wizard::Component");
 }
 
 Wizard::UnshieldWorker::~UnshieldWorker()

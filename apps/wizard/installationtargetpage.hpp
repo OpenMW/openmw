@@ -21,6 +21,7 @@ namespace Wizard
         InstallationTargetPage(MainWizard *wizard, const Files::ConfigurationManager &cfg);
 
         int nextId() const;
+        virtual bool validatePage();
 
     private slots:
         void on_browseButton_clicked();

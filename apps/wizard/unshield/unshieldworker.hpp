@@ -20,8 +20,6 @@ namespace Wizard
         Component_Bloodmoon
     };
 
-    //Q_DECLARE_METATYPE(Wizard::Component)
-
     class UnshieldWorker : public QObject
     {
         Q_OBJECT

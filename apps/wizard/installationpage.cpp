@@ -32,12 +32,9 @@ void Wizard::InstallationPage::initializePage()
     // That way installing all three components would yield 300%
     // When one component is done the bar will be filled by 33%
 
-    if (field("installation.new").toBool() == true)
-    {
+    if (field("installation.new").toBool() == true) {
         installProgressBar->setMaximum((components.count() * 100));
-    }
-    else
-    {
+    } else {
         if (components.contains(QLatin1String("Tribunal"))
                 && !mWizard->mInstallations[path]->hasTribunal)
             installProgressBar->setMaximum(100);
@@ -58,8 +55,6 @@ void Wizard::InstallationPage::startInstallation()
     QThread *thread = new QThread();
     mUnshield = new UnshieldWorker();
     mUnshield->moveToThread(thread);
-
-    qRegisterMetaType<Wizard::Component>("Wizard::Component");
 
     connect(thread, SIGNAL(started()),
             mUnshield, SLOT(extract()));
@@ -125,11 +120,9 @@ void Wizard::InstallationPage::startInstallation()
 
     if (language == QLatin1String("Polish")) {
         mUnshield->setIniCodec(QTextCodec::codecForName("windows-1250"));
-    }
-    else if (language == QLatin1String("Russian")) {
+    } else if (language == QLatin1String("Russian")) {
         mUnshield->setIniCodec(QTextCodec::codecForName("windows-1251"));
-    }
-    else {
+    }  else {
         mUnshield->setIniCodec(QTextCodec::codecForName("windows-1252"));
     }
 

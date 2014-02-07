@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
-    <height>298</height>
+    <width>396</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
       <string notr="true">font-weight:bold;</string>
      </property>
      <property name="text">
-      <string>Install to a new location</string>
+      <string>Install Morrowind to a new location</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -94,7 +94,7 @@
       <string notr="true">font-weight:bold</string>
      </property>
      <property name="text">
-      <string>Select an existing installation</string>
+      <string>Select an existing Morrowind installation</string>
      </property>
     </widget>
    </item>
@@ -149,8 +149,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../wizard/wizard.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
