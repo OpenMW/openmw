@@ -20,6 +20,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 using namespace ICS;
@@ -167,7 +168,9 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                toggleMainMenu ();
+                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running 
+                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
+                        toggleMainMenu ();
                 break;
             case A_Screenshot:
                 screenshot();
@@ -248,8 +251,6 @@ namespace MWInput
 
         mInputManager->capture(loading);
         // inject some fake mouse movement to force updating MyGUI's widget states
-        // this shouldn't do any harm since we're moving back to the original position afterwards
-        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX+1), int(mMouseY+1), mMouseWheel);
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
         // update values of channels (as a result of pressed keys)
@@ -280,7 +281,9 @@ namespace MWInput
             return;
 
         // Disable movement in Gui mode
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode()
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running) 
+                return;
 
 
         // Configure player movement according to keyboard input. Actual movement will
@@ -574,8 +577,6 @@ namespace MWInput
 
             double x = arg.xrel * mCameraSensitivity * (1.0f/256.f);
             double y = arg.yrel * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-            float scale = MWBase::Environment::get().getFrameDuration();
-            if(scale <= 0.0f) scale = 1.0f;
 
             float rot[3];
             rot[0] = -y;
@@ -585,8 +586,8 @@ namespace MWInput
             // Only actually turn player when we're not in vanity mode
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
-                mPlayer->yaw(x/scale);
-                mPlayer->pitch(-y/scale);
+                mPlayer->yaw(x);
+                mPlayer->pitch(-y);
             }
 
             if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
@@ -615,7 +616,7 @@ namespace MWInput
 
     void InputManager::windowClosed()
     {
-        MWBase::Environment::setRequestExit();
+        MWBase::Environment::get().getStateManager()->requestQuit();
     }
 
     void InputManager::toggleMainMenu()
@@ -747,7 +748,8 @@ namespace MWInput
 
     void InputManager::showQuickKeysMenu()
     {
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ())
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
+                && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
         else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
             MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);

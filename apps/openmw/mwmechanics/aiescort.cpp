@@ -8,6 +8,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "steering.hpp"
+
 namespace
 {
     float sgn(float a)
@@ -33,7 +35,7 @@ namespace MWMechanics
     {
         mMaxDist = 470;
 
-        // The CS Help File states that if a duration is givin, the AI package will run for that long
+        // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
         if(mX != 0 || mY != 0 || mZ != 0)
             mDuration = 0;
@@ -52,7 +54,7 @@ namespace MWMechanics
     {
         mMaxDist = 470;
 
-        // The CS Help File states that if a duration is givin, the AI package will run for that long
+        // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
         if(mX != 0 || mY != 0 || mZ != 0)
             mDuration = 0;
@@ -89,25 +91,23 @@ namespace MWMechanics
         if(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX)
         {
             int sideX = sgn(actor.getCell()->mCell->mData.mX - player.getCell()->mCell->mData.mX);
-            // Check if actor is near the border of an inactive cell. If so, disable AiEscort.
-            // FIXME: This *should* pause the AiEscort package instead of terminating it.
+            // Check if actor is near the border of an inactive cell. If so, pause walking.
             if(sideX * (pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
                 2.0 - 200)) 
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return true;
+                return false;
             }
         }
         if(actor.getCell()->mCell->mData.mY != player.getCell()->mCell->mData.mY)
         {
             int sideY = sgn(actor.getCell()->mCell->mData.mY - player.getCell()->mCell->mData.mY);
-            // Check if actor is near the border of an inactive cell. If so, disable AiEscort.
-            // FIXME: This *should* pause the AiEscort package instead of terminating it.
+            // Check if actor is near the border of an inactive cell. If so, pause walking.
             if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
                 2.0 - 200)) 
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return true;
+                return false;
             }
         }
 
@@ -151,8 +151,7 @@ namespace MWMechanics
         if(distanceBetweenResult <= mMaxDist * mMaxDist)
         {
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            // TODO: use movement settings instead of rotating directly
-            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            zTurn(actor, Ogre::Degree(zAngle));
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
             mMaxDist = 470;
         }

@@ -11,6 +11,8 @@
 #include "creaturestats.hpp"
 #include <OgreVector3.h>
 
+#include "steering.hpp"
+
 namespace
 {
     float sgn(float a)
@@ -68,6 +70,7 @@ namespace MWMechanics
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {
@@ -188,15 +191,18 @@ namespace MWMechanics
                 mIdleNow = true;
 
                 // Play idle voiced dialogue entries randomly
-                const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
-                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+                if (hello > 0)
+                {
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-                // Don't bother if the player is out of hearing range
-                if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+                    // Don't bother if the player is out of hearing range
+                    if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
+                        MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+                }
             }
         }
 
@@ -205,7 +211,7 @@ namespace MWMechanics
             // Play a random voice greeting if the player gets too close
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-            float hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+            int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
             float helloDistance = hello;
             int iGreetDistanceMultiplier = store.get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
             helloDistance *= iGreetDistanceMultiplier;
@@ -281,17 +287,18 @@ namespace MWMechanics
 
         if(mWalking)
         {
-            float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            // TODO: use movement settings instead of rotating directly
-            world->rotateObject(actor, 0, 0, zAngle, false);
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
-
             if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
             {
                 stopWalking(actor);
                 mMoveNow = false;
                 mWalking = false;
                 mChooseAction = true;
+            }
+            else
+            {
+                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
             }
         }
 

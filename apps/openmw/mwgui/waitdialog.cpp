@@ -87,49 +87,7 @@ namespace MWGui
         onHourSliderChangedPosition(mHourSlider, 0);
         mHourSlider->setScrollPosition (0);
 
-        // http://www.uesp.net/wiki/Lore:Calendar
-        std::string month;
-        int m = MWBase::Environment::get().getWorld ()->getMonth ();
-        switch (m) {
-            case 0:
-                month = "#{sMonthMorningstar}";
-                break;
-            case 1:
-                month = "#{sMonthSunsdawn}";
-                break;
-            case 2:
-                month = "#{sMonthFirstseed}";
-                break;
-            case 3:
-                month = "#{sMonthRainshand}";
-                break;
-            case 4:
-                month = "#{sMonthSecondseed}";
-                break;
-            case 5:
-                month = "#{sMonthMidyear}";
-                break;
-            case 6:
-                month = "#{sMonthSunsheight}";
-                break;
-            case 7:
-                month = "#{sMonthLastseed}";
-                break;
-            case 8:
-                month = "#{sMonthHeartfire}";
-                break;
-            case 9:
-                month = "#{sMonthFrostfall}";
-                break;
-            case 10:
-                month = "#{sMonthSunsdusk}";
-                break;
-            case 11:
-                month = "#{sMonthEveningstar}";
-                break;
-            default:
-                break;
-        }
+        std::string month = MWBase::Environment::get().getWorld ()->getMonthName();
         int hour = MWBase::Environment::get().getWorld ()->getTimeStamp ().getHour ();
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
@@ -271,7 +229,9 @@ namespace MWGui
         const MWMechanics::NpcStats &pcstats = MWWorld::Class::get(player).getNpcStats(player);
 
         // trigger levelup if possible
-        if (mSleeping && pcstats.getLevelProgress () >= 10)
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }

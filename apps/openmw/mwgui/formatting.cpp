@@ -12,6 +12,8 @@
 #include <boost/range/algorithm/copy.hpp>
 #include <OgreUTFString.h>
 
+#include <OgreResourceGroupManager.h>
+
 namespace
 {
     int convertFromHex(std::string hex)
@@ -288,6 +290,16 @@ namespace MWGui
             MyGUI::ImageBox* box = mParent->createWidget<MyGUI::ImageBox> ("ImageBox",
                 MyGUI::IntCoord(0, mHeight, width, height), MyGUI::Align::Left | MyGUI::Align::Top,
                 mParent->getName() + boost::lexical_cast<std::string>(mParent->getChildCount()));
+
+            // Apparently a bug with some morrowind versions, they reference the image without the size suffix.
+            // So if the image isn't found, try appending the size.
+            if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("bookart\\"+image))
+            {
+                std::stringstream str;
+                str << image.substr(0, image.rfind(".")) << "_" << width << "_" << height << image.substr(image.rfind("."));
+                image = str.str();
+            }
+
             box->setImageTexture("bookart\\" + image);
             box->setProperty("NeedMouse", "false");
         }

@@ -2,6 +2,7 @@
 #include "creature.hpp"
 
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/creaturestate.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
@@ -332,7 +333,7 @@ namespace MWClass
         if (damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
-        victim.getClass().onHit(victim, damage, true, MWWorld::Ptr(), ptr, true);
+        victim.getClass().onHit(victim, damage, true, weapon, ptr, true);
     }
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
@@ -528,8 +529,8 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
-                world->isLevitationEnabled())
+        else if(isFlying(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+                world->isLevitationEnabled()))
         {
             float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
                                     mageffects.get(ESM::MagicEffect::Levitate).mMagnitude);
@@ -756,6 +757,28 @@ namespace MWClass
         if (ref->mBase->mFlags & ESM::Creature::Metal)
             return 2;
         return 0;
+    }
+
+    void Creature::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+        const
+    {
+        const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore->
+            readState (state2.mInventory);
+    }
+
+    void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+        const
+    {
+        ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore->
+            writeState (state2.mInventory);
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;

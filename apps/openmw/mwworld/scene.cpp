@@ -118,7 +118,7 @@ namespace MWWorld
         mActiveCells.erase(*iter);
     }
 
-    void Scene::loadCell (Ptr::CellStore *cell, Loading::Listener* loadingListener)
+    void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener)
     {
         std::pair<CellStoreCollection::iterator, bool> result = mActiveCells.insert(cell);
 
@@ -163,7 +163,7 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
     }
 
-    void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
+    void Scene::playerCellChange(CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr old = world->getPlayerPtr();
@@ -441,7 +441,7 @@ namespace MWWorld
         changeCell (x, y, position, true);
     }
 
-    Ptr::CellStore* Scene::getCurrentCell ()
+    CellStore* Scene::getCurrentCell ()
     {
         return mCurrentCell;
     }
@@ -451,7 +451,7 @@ namespace MWWorld
         mCellChanged = false;
     }
 
-    int Scene::countRefs (const Ptr::CellStore& cell)
+    int Scene::countRefs (const CellStore& cell)
     {
         return cell.mActivators.mList.size()
                 + cell.mPotions.mList.size()
@@ -475,7 +475,7 @@ namespace MWWorld
                 + cell.mNpcs.mList.size();
     }
 
-    void Scene::insertCell (Ptr::CellStore &cell, bool rescale, Loading::Listener* loadingListener)
+    void Scene::insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
         // Loop through all references in the cell
         insertCellRefList(mRendering, cell.mActivators, cell, *mPhysics, rescale, loadingListener);

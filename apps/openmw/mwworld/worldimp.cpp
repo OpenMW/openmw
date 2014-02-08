@@ -14,6 +14,7 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/esm/cellid.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -21,7 +22,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -50,30 +50,6 @@ using namespace Ogre;
 
 namespace
 {
-/*  // NOTE this code is never instantiated (proper copy in localscripts.cpp),
-    //      so this commented out to not produce syntactic errors
-
-    template<typename T>
-    void listCellScripts (const MWWorld::ESMStore& store,
-        MWWorld::CellRefList<T>& cellRefList, MWWorld::LocalScripts& localScripts,
-        MWWorld::Ptr::CellStore *cell)
-    {
-        for (typename MWWorld::CellRefList<T>::List::iterator iter (
-            cellRefList.mList.begin());
-            iter!=cellRefList.mList.end(); ++iter)
-        {
-            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
-            {
-                if (const ESM::Script *script = store.get<ESM::Script>().find (iter->mBase->mScript))
-                {
-                    iter->mData.setLocals (*script);
-
-                    localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
-                }
-            }
-        }
-    }
-*/
     template<typename T>
     MWWorld::LiveCellRef<T> *searchViaHandle (const std::string& handle,
         MWWorld::CellRefList<T>& refList)
@@ -127,7 +103,7 @@ namespace MWWorld
           LoadersContainer mLoaders;
     };
 
-    Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
+    Ptr World::getPtrViaHandle (const std::string& handle, CellStore& cell)
     {
         if (MWWorld::LiveCellRef<ESM::Activator> *ref =
             searchViaHandle (handle, cell.mActivators))
@@ -198,9 +174,9 @@ namespace MWWorld
     {
         if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
-            mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
-            mRendering->skySetDate (mGlobalVariables->getInt ("day"),
-                mGlobalVariables->getInt ("month"));
+            mRendering->skySetHour (mGlobalVariables["gamehour"].getFloat());
+            mRendering->skySetDate (mGlobalVariables["day"].getInteger(),
+                mGlobalVariables["month"].getInteger());
 
             mRendering->skyEnable();
         }
@@ -213,11 +189,12 @@ namespace MWWorld
         const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
-    : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+    : mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(false),
-      mFacedDistance(FLT_MAX), mGodMode(false), mGoToJail(false)
+      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(true),
+      mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles),
+      mGoToJail(false)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -253,7 +230,7 @@ namespace MWWorld
         mStore.setUp();
         mStore.movePlayerRecord();
 
-        mGlobalVariables = new Globals (mStore);
+        mGlobalVariables.fill (mStore);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
     }
@@ -263,29 +240,15 @@ namespace MWWorld
         mGoToJail = false;
         mLevitationEnabled = true;
         mTeleportEnabled = true;
-        mWorldScene->changeToVoid();
-
-        mStore.clearDynamic();
-        mStore.setUp();
-
-        mCells.clear();
 
         // Rebuild player
         setupPlayer();
-        mPlayer->setCell(NULL);
-        MWWorld::Ptr player = mPlayer->getPlayer();
-
-        // removes NpcStats, ContainerStore etc
-        player.getRefData().setCustomData(NULL);
 
         renderPlayer();
-        mRendering->resetCamera();
-
-        // make sure to do this so that local scripts from items that were in the players inventory are removed
-        mLocalScripts.clear();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
+        // FIXME: this will add cell 0,0 as visible on the global map
         ESM::Position pos;
         const int cellSize = 8192;
         pos.pos[0] = cellSize/2;
@@ -296,29 +259,82 @@ namespace MWWorld
         pos.rot[2] = 0;
         mWorldScene->changeToExteriorCell(pos);
 
-
-        // enable collision
-        if(!mPhysics->toggleCollisionMode())
-            mPhysics->toggleCollisionMode();
-
         // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
         mPlayIntro = 2;
 
-        // global variables
-        delete mGlobalVariables;
-        mGlobalVariables = new Globals (mStore);
-
         // set new game mark
-        mGlobalVariables->setInt ("chargenstate", 1);
-        mGlobalVariables->setInt ("pcrace", 3);
+        mGlobalVariables["chargenstate"].setInteger (1);
+        mGlobalVariables["pcrace"].setInteger (3);
 
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
+        mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
-
-        MWBase::Environment::get().getScriptManager()->resetGlobalScripts();
     }
 
+    void World::clear()
+    {
+        mLocalScripts.clear();
+        mPlayer->clear();
+
+        // enable collision
+        if (!mPhysics->toggleCollisionMode())
+            mPhysics->toggleCollisionMode();
+
+        mWorldScene->changeToVoid();
+
+        mStore.clearDynamic();
+        mStore.setUp();
+
+        if (mPlayer)
+        {
+            mPlayer->setCell (0);
+            mPlayer->getPlayer().getRefData() = RefData();
+            mPlayer->set (mStore.get<ESM::NPC>().find ("player"));
+        }
+
+        mCells.clear();
+
+        mProjectiles.clear();
+        mDoorStates.clear();
+
+        mGodMode = false;
+        mSky = true;
+        mTeleportEnabled = true;
+        mPlayIntro = 0;
+        mFacedDistance = FLT_MAX;
+
+        mGlobalVariables.fill (mStore);
+    }
+
+    int World::countSavedGameRecords() const
+    {
+        return
+            mStore.countSavedGameRecords()
+            +mGlobalVariables.countSavedGameRecords()
+            +1 // player record
+            +mCells.countSavedGameRecords();
+    }
+
+    void World::write (ESM::ESMWriter& writer) const
+    {
+        mStore.write (writer);
+        mGlobalVariables.write (writer);
+        mCells.write (writer);
+        mPlayer->write (writer);
+    }
+
+    void World::readRecord (ESM::ESMReader& reader, int32_t type,
+        const std::map<int, int>& contentFileMap)
+    {
+        if (!mStore.readRecord (reader, type) &&
+            !mGlobalVariables.readRecord (reader, type) &&
+            !mPlayer->readRecord (reader, type) &&
+            !mCells.readRecord (reader, type, contentFileMap))
+        {
+            throw std::runtime_error ("unknown record in saved game");
+        }
+    }
 
     void World::ensureNeededRecords()
     {
@@ -359,7 +375,6 @@ namespace MWWorld
     {
         delete mWeatherManager;
         delete mWorldScene;
-        delete mGlobalVariables;
         delete mRendering;
         delete mPhysics;
 
@@ -393,14 +408,33 @@ namespace MWWorld
         return &mFallback;
     }
 
-    Ptr::CellStore *World::getExterior (int x, int y)
+    CellStore *World::getExterior (int x, int y)
     {
         return mCells.getExterior (x, y);
     }
 
-    Ptr::CellStore *World::getInterior (const std::string& name)
+    CellStore *World::getInterior (const std::string& name)
     {
         return mCells.getInterior (name);
+    }
+
+    CellStore *World::getCell (const ESM::CellId& id)
+    {
+        if (id.mPaged)
+            return getExterior (id.mIndex.mX, id.mIndex.mY);
+        else
+            return getInterior (id.mWorldspace);
+    }
+
+    void World::useDeathCamera()
+    {
+        if(mRendering->getCamera()->isVanityOrPreviewModeEnabled() )
+        {
+            mRendering->getCamera()->togglePreviewMode(false);
+            mRendering->getCamera()->toggleVanityMode(false);
+        }
+        if(mRendering->getCamera()->isFirstPerson())
+            togglePOV();
     }
 
     MWWorld::Player& World::getPlayer()
@@ -428,60 +462,57 @@ namespace MWWorld
         return mWorldScene->hasCellChanged();
     }
 
-    Globals::Data& World::getGlobalVariable (const std::string& name)
+    void World::setGlobalInt (const std::string& name, int value)
     {
-        return (*mGlobalVariables)[name];
+        if (name=="gamehour")
+            setHour (value);
+        else if (name=="day")
+            setDay (value);
+        else if (name=="month")
+            setMonth (value);
+        else
+            mGlobalVariables[name].setInteger (value);
     }
 
-    Globals::Data World::getGlobalVariable (const std::string& name) const
+    void World::setGlobalFloat (const std::string& name, float value)
     {
-        return (*mGlobalVariables)[name];
+        if (name=="gamehour")
+            setHour (value);
+        else if (name=="day")
+            setDay (value);
+        else if (name=="month")
+            setMonth (value);
+        else
+            mGlobalVariables[name].setFloat (value);
+    }
+
+    int World::getGlobalInt (const std::string& name) const
+    {
+        return mGlobalVariables[name].getInteger();
+    }
+
+    float World::getGlobalFloat (const std::string& name) const
+    {
+        return mGlobalVariables[name].getFloat();
     }
 
     char World::getGlobalVariableType (const std::string& name) const
     {
-        return mGlobalVariables->getType (name);
+        return mGlobalVariables.getType (name);
     }
 
-    std::vector<std::string> World::getGlobals () const
+    std::string World::getCellName (const MWWorld::CellStore *cell) const
     {
-        return mGlobalVariables->getGlobals();
-    }
+        if (!cell)
+            cell = mWorldScene->getCurrentCell();
 
-    std::string World::getCurrentCellName () const
-    {
-        std::string name;
+        if (!cell->mCell->isExterior() || !cell->mCell->mName.empty())
+            return cell->mCell->mName;
 
-        Ptr::CellStore *cell = mWorldScene->getCurrentCell();
-        if (cell->mCell->isExterior())
-        {
-            if (cell->mCell->mName != "")
-            {
-                name = cell->mCell->mName;
-            }
-            else
-            {
-                const ESM::Region* region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
-                if (region)
-                    name = region->mName;
-                else
-                {
-                    const ESM::GameSetting *setting =
-                        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("sDefaultCellname");
+        if (const ESM::Region* region = getStore().get<ESM::Region>().search (cell->mCell->mRegion))
+            return region->mName;
 
-                    if (setting && setting->mValue.getType()==ESM::VT_String)
-                        name = setting->mValue.getString();
-                }
-
-            }
-        }
-        else
-        {
-            name = cell->mCell->mName;
-        }
-
-        return name;
+        return getStore().get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
     }
 
     void World::removeRefScript (MWWorld::RefData *ref)
@@ -510,7 +541,7 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            Ptr::CellStore* cellstore = *iter;
+            CellStore* cellstore = *iter;
             Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, true);
 
             if (!ptr.isEmpty())
@@ -547,7 +578,7 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            Ptr::CellStore* cellstore = *iter;
+            CellStore* cellstore = *iter;
             Ptr ptr = getPtrViaHandle (handle, *cellstore);
 
             if (!ptr.isEmpty())
@@ -557,7 +588,7 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
-    void World::addContainerScripts(const Ptr& reference, Ptr::CellStore * cell)
+    void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
         if( reference.getTypeName()==typeid (ESM::Container).name() ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
@@ -624,14 +655,15 @@ namespace MWWorld
 
         mWeatherManager->advanceTime (hours);
 
-        hours += mGlobalVariables->getFloat ("gamehour");
+        hours += mGlobalVariables["gamehour"].getFloat();
 
         setHour (hours);
 
         int days = hours / 24;
 
         if (days>0)
-            mGlobalVariables->setInt ("dayspassed", days + mGlobalVariables->getInt ("dayspassed"));
+            mGlobalVariables["dayspassed"].setInteger (
+                days + mGlobalVariables["dayspassed"].getInteger());
     }
 
     void World::setHour (double hour)
@@ -643,14 +675,14 @@ namespace MWWorld
 
         hour = std::fmod (hour, 24);
 
-        mGlobalVariables->setFloat ("gamehour", hour);
+        mGlobalVariables["gamehour"].setFloat (hour);
 
         mRendering->skySetHour (hour);
 
         mWeatherManager->setHour (hour);
 
         if (days>0)
-            setDay (days + mGlobalVariables->getInt ("day"));
+            setDay (days + mGlobalVariables["day"].getInteger());
     }
 
     void World::setDay (int day)
@@ -658,7 +690,7 @@ namespace MWWorld
         if (day<1)
             day = 1;
 
-        int month = mGlobalVariables->getInt ("month");
+        int month = mGlobalVariables["month"].getInteger();
 
         while (true)
         {
@@ -673,14 +705,14 @@ namespace MWWorld
             else
             {
                 month = 0;
-                mGlobalVariables->setInt ("year", mGlobalVariables->getInt ("year")+1);
+                mGlobalVariables["year"].setInteger (mGlobalVariables["year"].getInteger()+1);
             }
 
             day -= days;
         }
 
-        mGlobalVariables->setInt ("day", day);
-        mGlobalVariables->setInt ("month", month);
+        mGlobalVariables["day"].setInteger (day);
+        mGlobalVariables["month"].setInteger (month);
 
         mRendering->skySetDate (day, month);
 
@@ -697,31 +729,56 @@ namespace MWWorld
 
         int days = getDaysPerMonth (month);
 
-        if (mGlobalVariables->getInt ("day")>days)
-            mGlobalVariables->setInt ("day", days);
+        if (mGlobalVariables["day"].getInteger()>days)
+            mGlobalVariables["day"].setInteger (days);
 
-        mGlobalVariables->setInt ("month", month);
+        mGlobalVariables["month"].setInteger (month);
 
         if (years>0)
-            mGlobalVariables->setInt ("year", years+mGlobalVariables->getInt ("year"));
+            mGlobalVariables["year"].setInteger (years+mGlobalVariables["year"].getInteger());
 
-        mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
+        mRendering->skySetDate (mGlobalVariables["day"].getInteger(), month);
     }
 
-    int World::getDay()
+    int World::getDay() const
     {
-        return mGlobalVariables->getInt("day");
+        return mGlobalVariables["day"].getInteger();
     }
 
-    int World::getMonth()
+    int World::getMonth() const
     {
-        return mGlobalVariables->getInt("month");
+        return mGlobalVariables["month"].getInteger();
+    }
+
+    int World::getYear() const
+    {
+        return mGlobalVariables["year"].getInteger();
+    }
+
+    std::string World::getMonthName (int month) const
+    {
+        if (month==-1)
+            month = getMonth();
+
+        const int months = 12;
+
+        if (month<0 || month>=months)
+            return "";
+
+        static const char *monthNames[months] =
+        {
+            "sMonthMorningstar", "sMonthSunsdawn", "sMonthFirstseed", "sMonthRainshand",
+            "sMonthSecondseed", "sMonthMidyear", "sMonthSunsheight", "sMonthLastseed",
+            "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar"
+        };
+
+        return getStore().get<ESM::GameSetting>().find (monthNames[month])->mValue.getString();
     }
 
     TimeStamp World::getTimeStamp() const
     {
-        return TimeStamp (mGlobalVariables->getFloat ("gamehour"),
-            mGlobalVariables->getInt ("dayspassed"));
+        return TimeStamp (mGlobalVariables["gamehour"].getFloat(),
+            mGlobalVariables["dayspassed"].getInteger());
     }
 
     bool World::toggleSky()
@@ -757,7 +814,7 @@ namespace MWWorld
 
     float World::getTimeScaleFactor() const
     {
-        return mGlobalVariables->getFloat ("timescale");
+        return mGlobalVariables["timescale"].getFloat();
     }
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
@@ -772,6 +829,14 @@ namespace MWWorld
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToExteriorCell(position);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
+    }
+
+    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position)
+    {
+        if (cellId.mPaged)
+            changeToExteriorCell (position);
+        else
+            changeToInteriorCell (cellId.mWorldspace, position);
     }
 
     void World::markCellAsUnchanged()
@@ -1153,7 +1218,7 @@ namespace MWWorld
         std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
         while (it != mDoorStates.end())
         {
-            if (!mWorldScene->isCellActive(*it->first.getCell()))
+            if (!mWorldScene->isCellActive(*it->first.getCell()) || !it->first.getRefData().getBaseNode())
                 mDoorStates.erase(it++);
             else
             {
@@ -1228,7 +1293,7 @@ namespace MWWorld
                 if (Misc::StringUtils::ciEqual (ids[i], record.mRace))
                     break;
 
-            mGlobalVariables->setInt ("pcrace", (i == ids.size()) ? 0 : i+1);
+            mGlobalVariables["pcrace"].setInteger (i == ids.size() ? 0 : i+1);
 
             const ESM::NPC *player =
                 mPlayer->getPlayer().get<ESM::NPC>()->mBase;
@@ -1293,7 +1358,7 @@ namespace MWWorld
 
         updateWindowManager ();
 
-        if (mPlayer->getPlayer().getCell()->isExterior())
+        if (!paused && mPlayer->getPlayer().getCell()->isExterior())
         {
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
             mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
@@ -1389,7 +1454,7 @@ namespace MWWorld
 
     bool World::isCellExterior() const
     {
-        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
             return currentCell->mCell->isExterior();
@@ -1399,7 +1464,7 @@ namespace MWWorld
 
     bool World::isCellQuasiExterior() const
     {
-        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
             if (!(currentCell->mCell->mData.mFlags & ESM::Cell::QuasiEx))
@@ -1580,7 +1645,7 @@ namespace MWWorld
 
     void World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
     {
-        MWWorld::Ptr::CellStore* cell = actor.getCell();
+        MWWorld::CellStore* cell = actor.getCell();
 
         ESM::Position pos =
             actor.getRefData().getPosition();
@@ -1682,7 +1747,7 @@ namespace MWWorld
     }
 
     bool
-    World::isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const
+    World::isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const
     {
         if (!(cell->mCell->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
@@ -1702,9 +1767,9 @@ namespace MWWorld
         return mRendering->vanityRotateCamera(rot);
     }
 
-    void World::setCameraDistance(float dist, bool adjust, bool override)
+    void World::setCameraDistance(float dist, bool adjust, bool override_)
     {
-        return mRendering->setCameraDistance(dist, adjust, override);;
+        return mRendering->setCameraDistance(dist, adjust, override_);
     }
 
     void World::setupPlayer()
@@ -1722,12 +1787,19 @@ namespace MWWorld
     void World::renderPlayer()
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
+
+        // At this point the Animation object is live, and the CharacterController associated with it must be created.
+        // It has to be done at this point: resetCamera below does animation->setViewMode -> CharacterController::forceStateUpdate
+        // so we should make sure not to use a "stale" controller for that.
+        MWBase::Environment::get().getMechanicsManager()->add(mPlayer->getPlayer());
+
         mPhysics->addActor(mPlayer->getPlayer());
+        mRendering->resetCamera();
     }
 
     int World::canRest ()
     {
-        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        CellStore *currentCell = mWorldScene->getCurrentCell();
 
         Ptr player = mPlayer->getPlayer();
         RefData &refdata = player.getRefData();
@@ -1761,6 +1833,11 @@ namespace MWWorld
     void World::frameStarted (float dt, bool paused)
     {
         mRendering->frameStarted(dt, paused);
+    }
+
+    void World::screenshot(Ogre::Image &image, int w, int h)
+    {
+        mRendering->screenshot(image, w, h);
     }
 
     void World::activateDoor(const MWWorld::Ptr& door)
@@ -2296,6 +2373,11 @@ namespace MWWorld
         }
     }
 
+    const std::vector<std::string>& World::getContentFiles() const
+    {
+        return mContentFiles;
+    }
+
     void World::breakInvisibility(const Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
@@ -2476,13 +2558,13 @@ namespace MWWorld
         int discount = bounty*fCrimeGoldDiscountMult;
         int turnIn = bounty * fCrimeGoldTurnInMult;
 
-        mGlobalVariables->setInt("pchascrimegold", (bounty <= playerGold) ? 1 : 0);
+        mGlobalVariables["pchascrimegold"].setInteger((bounty <= playerGold) ? 1 : 0);
 
-        mGlobalVariables->setInt("pchasgolddiscount", (discount <= playerGold) ? 1 : 0);
-        mGlobalVariables->setInt("crimegolddiscount", discount);
+        mGlobalVariables["pchasgolddiscount"].setInteger((discount <= playerGold) ? 1 : 0);
+        mGlobalVariables["crimegolddiscount"].setInteger(discount);
 
-        mGlobalVariables->setInt("crimegoldturnin", turnIn);
-        mGlobalVariables->setInt("pchasturnin", (turnIn <= playerGold) ? 1 : 0);
+        mGlobalVariables["crimegoldturnin"].setInteger(turnIn);
+        mGlobalVariables["pchasturnin"].setInteger((turnIn <= playerGold) ? 1 : 0);
     }
 
     void World::confiscateStolenItems(const Ptr &ptr)

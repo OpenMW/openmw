@@ -1,6 +1,8 @@
 
 #include "quest.hpp"
 
+#include <components/esm/queststate.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -16,7 +18,11 @@ namespace MWDialogue
     : Topic (topic), mIndex (0), mFinished (false)
     {}
 
-    const std::string Quest::getName() const
+    Quest::Quest (const ESM::QuestState& state)
+    : Topic (state.mTopic), mIndex (state.mState), mFinished (state.mFinished!=0)
+    {}
+
+    std::string Quest::getName() const
     {
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
@@ -82,12 +88,20 @@ namespace MWDialogue
         if (index==-1)
             throw std::runtime_error ("unknown journal entry for topic " + mTopic);
 
-        setIndex (index);
+        if (index > mIndex)
+            setIndex (index);
 
         for (TEntryIter iter (mEntries.begin()); iter!=mEntries.end(); ++iter)
-            if (*iter==entry.mInfoId)
+            if (iter->mInfoId==entry.mInfoId)
                 return;
 
-        mEntries.push_back (entry.mInfoId);
+        mEntries.push_back (entry); // we want slicing here
+    }
+
+    void Quest::write (ESM::QuestState& state) const
+    {
+        state.mTopic = getTopic();
+        state.mState = mIndex;
+        state.mFinished = mFinished;
     }
 }

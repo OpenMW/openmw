@@ -17,8 +17,6 @@
 
                 <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" name="SelectCharacter">
                     <Property key="Caption" value="Select Character"/>
-                    <Property key="AddItem" value="Gandalf (Level 654)"/>
-                    <Property key="AddItem" value="Frodo (Level 3)"/>
                     <UserString key="HStretch" value="true"/>
                 </Widget>
 
@@ -26,11 +24,6 @@
                 <Widget type="ListBox" skin="MW_List" position="0 0 200 200" name="SaveList">
                     <UserString key="HStretch" value="true"/>
                     <UserString key="VStretch" value="true"/>
-                    <Property key="AddItem" value="Quicksave"/>
-                    <Property key="AddItem" value="Autosave"/>
-                    <Property key="AddItem" value="Save 3"/>
-                    <Property key="AddItem" value="Save 2"/>
-                    <Property key="AddItem" value="Save 1"/>
                 </Widget>
 
             </Widget>
@@ -51,8 +44,6 @@
                 <Widget type="AutoSizedEditBox" skin="SandText" position="0 0 263 0" name="InfoText">
                     <Property key="Static" value="true"/>
                     <Property key="MultiLine" value="true"/>
-
-                    <Property key="Caption" value="4:21 AM\nTuesday, November 5, 2013\n\nLevel 23\nBalmora, Guild of Mages\n16 Last Seed (Day 12) 9 a.m. "/>
                 </Widget>
 
 

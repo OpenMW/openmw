@@ -7,6 +7,7 @@
 
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
+#include <components/esm/npcstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -536,7 +537,7 @@ namespace MWClass
                         weapon.getCellRef().mCharge = weapmaxhealth;
                     damage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
                 }
-                
+
                 if (!MWBase::Environment::get().getWorld()->getGodModeState())
                     weapon.getCellRef().mCharge -= std::min(std::max(1,
                         (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
@@ -603,10 +604,7 @@ namespace MWClass
             {
                 MWMechanics::CastSpell cast(ptr, victim);
                 cast.mHitPosition = hitPosition;
-                bool success = cast.cast(weapon);
-
-                if (ptr.getRefData().getHandle() == "player" && success)
-                    skillUsageSucceeded (ptr, ESM::Skill::Enchant, 3);
+                cast.cast(weapon);
             }
         }
 
@@ -726,6 +724,9 @@ namespace MWClass
                     if (armorref.mCharge == 0)
                         inv.unequipItem(armor, ptr);
 
+                    if (ptr.getRefData().getHandle() == "player")
+                        skillUsageSucceeded(ptr, get(armor).getEquipmentSkill(armor), 0);
+
                     switch(get(armor).getEquipmentSkill(armor))
                     {
                         case ESM::Skill::LightArmor:
@@ -739,6 +740,8 @@ namespace MWClass
                             break;
                     }
                 }
+                else if(ptr.getRefData().getHandle() == "player")
+                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
             }
         }
 
@@ -999,7 +1002,7 @@ namespace MWClass
 
         return ref->mBase->mFlags & ESM::NPC::Essential;
     }
-    
+
     void Npc::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Npc);
@@ -1266,6 +1269,28 @@ namespace MWClass
         if (ref->mBase->mFlags & ESM::NPC::Metal)
             return 2;
         return 0;
+    }
+
+    void Npc::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+        const
+    {
+        const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore.
+            readState (state2.mInventory);
+    }
+
+    void Npc::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+        const
+    {
+        ESM::NpcState& state2 = dynamic_cast<ESM::NpcState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore.
+            writeState (state2.mInventory);
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

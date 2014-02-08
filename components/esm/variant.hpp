@@ -33,7 +33,7 @@ namespace ESM
             {
                 Format_Global,
                 Format_Gmst,
-                Format_Info
+                Format_Info // also used for local variables in saved game files
             };
 
             Variant();

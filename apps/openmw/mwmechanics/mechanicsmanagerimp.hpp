@@ -123,22 +123,24 @@ namespace MWMechanics
             /// @return was it illegal, and someone saw you doing it?
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed);
 
-        virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
+            virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
-        virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
-        virtual void skipAnimation(const MWWorld::Ptr& ptr);
-        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName);
+            virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+            virtual void skipAnimation(const MWWorld::Ptr& ptr);
+            virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName);
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)
             virtual void updateMagicEffects (const MWWorld::Ptr& ptr);
 
-        virtual void toggleAI();
-        virtual bool isAIActive();
+            virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects);
 
-        virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects);
+            virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
-        virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
+            virtual void toggleAI();
+            virtual bool isAIActive();
+
+            virtual void playerLoaded();
     };
 }
 

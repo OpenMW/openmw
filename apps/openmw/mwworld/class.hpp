@@ -9,6 +9,11 @@
 
 #include "ptr.hpp"
 
+namespace ESM
+{
+    struct ObjectState;
+}
+
 namespace Ogre
 {
     class Vector3;
@@ -259,7 +264,7 @@ namespace MWWorld
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
             /// (default implementation: return empty string)
 
-            virtual float getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
             ///< @return the number of enchantment points available for possible enchanting
 
             virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
@@ -305,6 +310,14 @@ namespace MWWorld
             virtual bool isFlying(const MWWorld::Ptr& ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
+
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const;
+            ///< Read additional state from \a state into \a ptr.
+
+            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+                const;
+            ///< Write additional state from \a ptr into \a state.
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

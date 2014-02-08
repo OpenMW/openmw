@@ -22,13 +22,11 @@ namespace MWMechanics
         DrawState_ mDrawState;
         AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
-        int mLevel;
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
-        float mLevelHealthBonus;
         bool mDead;
         bool mDied;
         int mFriendlyHits;
@@ -54,6 +52,7 @@ namespace MWMechanics
     protected:
         bool mIsWerewolf;
         AttributeValue mWerewolfAttributes[8];
+        int mLevel;
 
     public:
         CreatureStats();
@@ -141,14 +140,6 @@ namespace MWMechanics
 
         float getFatigueTerm() const;
         ///< Return effective fatigue
-
-        float getLevelHealthBonus() const;
-
-        void levelUp();
-
-        void updateHealth();
-        ///< Calculate health based on endurance and strength.
-        ///  Called at character creation and at level up.
 
         bool isDead() const;
 

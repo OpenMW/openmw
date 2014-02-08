@@ -34,12 +34,34 @@ void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
 
         mSlots.push_back (slot);
     }
+
+    // some const-trickery, required because of a flaw in the handling of MW-references and the
+    // resulting workarounds
+    std::size_t distance = std::distance (const_cast<InventoryStore&> (store).begin(), const_cast<InventoryStore&> (store).mSelectedEnchantItem);
+    ContainerStoreIterator slot = begin();
+    std::advance (slot, distance);
+    mSelectedEnchantItem = slot;
 }
 
 void MWWorld::InventoryStore::initSlots (TSlots& slots_)
 {
     for (int i=0; i<Slots; ++i)
         slots_.push_back (end());
+}
+
+int MWWorld::InventoryStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+{
+    for (int i = 0; i<static_cast<int> (mSlots.size()); ++i)
+        if (mSlots[i].getType()!=-1 && mSlots[i]->getBase()==&ref)
+            return i;
+
+    return -1;
+}
+
+void MWWorld::InventoryStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot)
+{
+    if (iter!=end() && slot>=0 && slot<Slots)
+        mSlots[slot] = iter;
 }
 
 MWWorld::InventoryStore::InventoryStore()
@@ -54,18 +76,19 @@ MWWorld::InventoryStore::InventoryStore()
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 : ContainerStore (store)
  , mSelectedEnchantItem(end())
- , mListener(NULL)
- , mUpdatesEnabled(true)
 {
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
-    mSelectedEnchantItem = store.mSelectedEnchantItem;
+    mListener = store.mListener;
+    mUpdatesEnabled = store.mUpdatesEnabled;
+
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
     copySlots (store);
 }
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
+    mListener = store.mListener;
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
@@ -439,20 +462,22 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem(
 
 int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor)
 {
-    for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-    {
-        if (mSlots[slot] == end())
-            continue;
+    int retCount = ContainerStore::remove(item, count, actor);
 
-        if (*mSlots[slot] == item)
+    if (!item.getRefData().getCount())
+    {
+        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
-            // restacking is disabled cause it may break removal
-            unequipSlot(slot, actor, false);
-            break;
+            if (mSlots[slot] == end())
+                continue;
+
+            if (*mSlots[slot] == item)
+            {
+                unequipSlot(slot, actor);
+                break;
+            }
         }
     }
-
-    int retCount = ContainerStore::remove(item, count, actor);
 
     // If an armor/clothing item is removed, try to find a replacement,
     // but not for the player nor werewolves.
@@ -477,9 +502,9 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     return retCount;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor, bool restack)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
 {
-    ContainerStoreIterator it = getSlot(slot);
+    ContainerStoreIterator it = mSlots[slot];
 
     if (it != end())
     {
@@ -488,17 +513,15 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
         // empty this slot
         mSlots[slot] = end();
 
-        if (restack) {
-            // restack item previously in this slot
-            for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+        // restack the previously equipped item with other (non-equipped) items
+        for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+        {
+            if (stacks(*iter, *it))
             {
-                if (stacks(*iter, *it))
-                {
-                    iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
-                    it->getRefData().setCount(0);
-                    retval = iter;
-                    break;
-                }
+                iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
+                it->getRefData().setCount(0);
+                retval = iter;
+                break;
             }
         }
 
@@ -628,4 +651,11 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 void MWWorld::InventoryStore::purgeEffect(short effectId)
 {
     mMagicEffects.add(MWMechanics::EffectKey(effectId), -mMagicEffects.get(MWMechanics::EffectKey(effectId)).mMagnitude);
+}
+
+void MWWorld::InventoryStore::clear()
+{
+    mSlots.clear();
+    initSlots (mSlots);
+    ContainerStore::clear();
 }

@@ -155,7 +155,6 @@ namespace MWGui
     void LevelupDialog::onOkButtonClicked (MyGUI::Widget* sender)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         if (mSpentAttributes.size() < 3)
@@ -165,15 +164,14 @@ namespace MWGui
             // increase attributes
             for (int i=0; i<3; ++i)
             {
-                MWMechanics::AttributeValue attribute = creatureStats.getAttribute(mSpentAttributes[i]);
+                MWMechanics::AttributeValue attribute = pcStats.getAttribute(mSpentAttributes[i]);
                 attribute.setBase (attribute.getBase () + pcStats.getLevelupAttributeMultiplier (mSpentAttributes[i]));
 
                 if (attribute.getBase() >= 100)
                     attribute.setBase(100);
-                creatureStats.setAttribute(mSpentAttributes[i], attribute);
+                pcStats.setAttribute(mSpentAttributes[i], attribute);
             }
 
-            creatureStats.levelUp();
             pcStats.levelUp ();
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Levelup);

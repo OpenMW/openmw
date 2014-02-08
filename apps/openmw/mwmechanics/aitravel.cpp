@@ -1,10 +1,11 @@
 #include "aitravel.hpp"
 
-#include "movement.hpp"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
+
+#include "steering.hpp"
+#include "movement.hpp"
 
 namespace
 {
@@ -86,9 +87,7 @@ namespace MWMechanics
             return true;
         }
 
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        // TODO: use movement settings instead of rotating directly
-        world->rotateObject(actor, 0, 0, zAngle, false);
+        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
         movement.mPosition[1] = 1;
 
         return false;

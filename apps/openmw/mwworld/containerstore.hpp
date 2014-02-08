@@ -8,6 +8,7 @@
 namespace ESM
 {
     struct InventoryList;
+    struct InventoryState;
 }
 
 namespace MWWorld
@@ -55,6 +56,24 @@ namespace MWWorld
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
             void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true);
+
+            template<typename T>
+            ContainerStoreIterator getState (CellRefList<T>& collection,
+                const ESM::ObjectState& state);
+
+            template<typename T>
+            void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
+
+            template<typename T>
+            void storeStates (const CellRefList<T>& collection,
+                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states,
+                bool equipable = false) const;
+
+            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+
+            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
 
         public:
 
@@ -113,7 +132,7 @@ namespace MWWorld
             void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
-            void clear();
+            virtual void clear();
             ///< Empty container.
 
             float getWeight() const;
@@ -124,6 +143,10 @@ namespace MWWorld
             /// put into a container.
 
             Ptr search (const std::string& id);
+
+            void writeState (ESM::InventoryState& state) const;
+
+            void readState (const ESM::InventoryState& state);
 
         friend class ContainerStoreIterator;
     };
@@ -174,7 +197,7 @@ namespace MWWorld
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon>::List::iterator);
 
-			void copy (const ContainerStoreIterator& src);
+            void copy (const ContainerStoreIterator& src);
 
             void incType();
 
@@ -202,7 +225,7 @@ namespace MWWorld
 
             ContainerStoreIterator operator++ (int);
 
-            ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);			
+            ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);
 
             bool isEqual (const ContainerStoreIterator& iter) const;
 

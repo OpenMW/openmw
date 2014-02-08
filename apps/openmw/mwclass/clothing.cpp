@@ -279,12 +279,12 @@ namespace MWClass
         return MWWorld::Ptr(&cell.mClothes.insert(*ref), &cell);
     }
 
-    float Clothing::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Clothing::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
                 ptr.get<ESM::Clothing>();
 
-        return ref->mBase->mData.mEnchant/10.f;
+        return ref->mBase->mData.mEnchant;
     }
 
     bool Clothing::canSell (const MWWorld::Ptr& item, int npcServices) const

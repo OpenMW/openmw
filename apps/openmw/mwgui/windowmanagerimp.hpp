@@ -105,6 +105,7 @@ namespace MWGui
      */
     virtual void update();
 
+    /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
     virtual void setKeyFocusWidget (MyGUI::Widget* widget);
 
     virtual void setNewGame(bool newgame);
@@ -279,6 +280,12 @@ namespace MWGui
     void onSoulgemDialogButtonPressed (int button);
 
     virtual bool getCursorVisible();
+
+    /// Clear all savegame-specific data
+    virtual void clear();
+
+    virtual void write (ESM::ESMWriter& writer);
+    virtual void readRecord (ESM::ESMReader& reader, int32_t type);
 
   private:
     bool mConsoleOnlyScripts;

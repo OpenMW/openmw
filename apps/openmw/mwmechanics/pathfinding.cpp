@@ -158,7 +158,9 @@ namespace
 namespace MWMechanics
 {
     PathFinder::PathFinder()
-        :mIsPathConstructed(false),mIsGraphConstructed(false)
+        : mIsPathConstructed(false),
+          mIsGraphConstructed(false),
+          mCell(NULL)
     {
     }
 

@@ -149,6 +149,8 @@ namespace MWBase
             virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up) = 0;
 
             virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated) = 0;
+
+            virtual void clear() = 0;
     };
 }
 

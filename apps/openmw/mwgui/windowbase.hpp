@@ -11,6 +11,7 @@ namespace MWBase
 namespace MWGui
 {
     class WindowManager;
+    class DragAndDrop;
 
     class WindowBase: public OEngine::GUI::Layout
     {
@@ -41,6 +42,21 @@ namespace MWGui
         WindowModal(const std::string& parLayout);
         virtual void open();
         virtual void close();
+    };
+
+    /// A window that cannot be the target of a drag&drop action.
+    /// When hovered with a drag item, the window will become transparent and allow click-through.
+    class NoDrop
+    {
+    public:
+        NoDrop(DragAndDrop* drag, MyGUI::Widget* widget);
+
+        void onFrame(float dt);
+
+    private:
+        MyGUI::Widget* mWidget;
+        DragAndDrop* mDrag;
+        bool mTransparent;
     };
 }
 

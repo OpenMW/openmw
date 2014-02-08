@@ -155,11 +155,8 @@ namespace MWClass
         int count = ptr.getRefData().getCount();
 
         bool gold = isGold(ptr);
-
-        if (gold && ptr.getCellRef().mGoldValue != 1)
-            count = ptr.getCellRef().mGoldValue;
-        else if (gold)
-            count *= ref->mBase->mData.mValue;
+        if (gold)
+            count *= getValue(ptr);
 
         std::string countString;
         if (!gold)
@@ -204,7 +201,7 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->getStore();
 
         if (isGold(ptr)) {
-            int goldAmount = ptr.getRefData().getCount();
+            int goldAmount = getValue(ptr) * ptr.getRefData().getCount();
 
             std::string base = "Gold_001";
             if (goldAmount >= 100)
@@ -223,6 +220,7 @@ namespace MWClass
                 newRef.getPtr().get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(&cell.mMiscItems.insert(*ref), &cell);
             newPtr.getCellRef().mGoldValue = goldAmount;
+            newPtr.getRefData().setCount(1);
         } else {
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 ptr.get<ESM::Miscellaneous>();

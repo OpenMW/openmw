@@ -1,23 +1,22 @@
 #include "aicombat.hpp"
-#include "aifollow.hpp"
 
-#include "movement.hpp"
+#include <OgreMath.h>
+#include <OgreVector3.h>
+
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
-#include "character.hpp"
-#include "../mwworld/inventorystore.hpp"
 
-#include "creaturestats.hpp"
 #include "npcstats.hpp"
-
-#include <OgreMath.h>
-#include <OgreVector3.h>
+#include "steering.hpp"
+#include "movement.hpp"
+#include "character.hpp" // fixme: for getActiveWeapon
 
 namespace
 {
@@ -43,7 +42,9 @@ namespace MWMechanics
         mReadyToAttack(false),
         mStrike(false),
         mCombatMove(false),
-        mMovement()
+        mRotate(false),
+        mMovement(),
+        mTargetAngle(0)
     {
     }
 
@@ -68,10 +69,16 @@ namespace MWMechanics
                 mCombatMove = false;
             }
         }
+
         actor.getClass().getMovementSettings(actor) = mMovement;
+
+        if (mRotate)
+        {
+            if (zTurn(actor, Ogre::Degree(mTargetAngle)))
+                mRotate = false;
+        }
         
 
-        //actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mReadyToAttack);
         mTimerAttack -= duration;
         actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mStrike);
 
@@ -156,17 +163,12 @@ namespace MWMechanics
             weapRange = 150; //TODO: use true attack range (the same problem in Creature::hit)
         }
 
-        //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
-
         ESM::Position pos = actor.getRefData().getPosition();
-        
-        float zAngle;
-
 
         float rangeMelee;
         float rangeCloseUp;
         bool distantCombat = false;
-        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_ThowWeapon)
+        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_Thrown)
         {
             rangeMelee = 1000; // TODO: should depend on archer skill
             rangeCloseUp = 0; //doesn't needed when attacking from distance
@@ -189,12 +191,8 @@ namespace MWMechanics
             //Melee and Close-up combat
             vDir.z = 0;
             float dirLen = vDir.length();
-            zAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / dirLen) * sgn(Ogre::Math::ASin(vDir.x / dirLen)) ).valueDegrees();
-
-            // TODO: use movement settings instead of rotating directly
-            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
-
-            //MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+            mTargetAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / dirLen) * sgn(Ogre::Math::ASin(vDir.x / dirLen)) ).valueDegrees();
+            mRotate = true;
 
             //bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
             if (mFollowTarget && distBetween > rangeMelee)
@@ -206,7 +204,10 @@ namespace MWMechanics
             {
                 //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
-                chooseBestAttack(weapon, mMovement);
+
+                // When attacking with a weapon, choose between slash, thrust or chop
+                if (actor.getClass().hasInventoryStore(actor))
+                    chooseBestAttack(weapon, mMovement);
 
                 if(mMovement.mPosition[0] || mMovement.mPosition[1])
                 {
@@ -237,12 +238,6 @@ namespace MWMechanics
         else
         {
             //target is at far distance: build path to target OR follow target (if previously actor had reached it once)
-
-            /*
-            //apply when AIFOLLOW package implementation will be existent
-            if(mFollowTarget)
-                actor.getClass().getCreatureStats(actor).getAiSequence().stack(AiFollow(mTarget));*/
-
             mFollowTarget = false;
 
             buildNewPath(actor);
@@ -252,13 +247,10 @@ namespace MWMechanics
 
             //try shortcut
             if(vDir.length() < mPathFinder.getDistToNext(pos.pos[0],pos.pos[1],pos.pos[2]) && MWBase::Environment::get().getWorld()->getLOS(actor, mTarget)) 
-                zAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / vDir.length()) * sgn(Ogre::Math::ASin(vDir.x / vDir.length())) ).valueDegrees();
+                mTargetAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / vDir.length()) * sgn(Ogre::Math::ASin(vDir.x / vDir.length())) ).valueDegrees();
             else
-                zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-
-            // TODO: use movement settings instead of rotating directly
-            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
-            //mMovement.mRotation[2] = 10*(Ogre::Degree(zAngle).valueRadians()-pos.rot[2]);
+                mTargetAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+            mRotate = true;
             
             mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
@@ -293,6 +285,8 @@ namespace MWMechanics
                 }
             }
         }
+
+        actor.getClass().getMovementSettings(actor) = mMovement;
 
         return false;
     }
@@ -374,7 +368,7 @@ void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement
 {
     if (weapon == NULL)
     {
-        //hand-to-hand and creatures' attacks deal equal damage for each type
+        //hand-to-hand deal equal damage for each type
         float roll = static_cast<float>(rand())/RAND_MAX;
         if(roll <= 0.333f)  //side punch
         {

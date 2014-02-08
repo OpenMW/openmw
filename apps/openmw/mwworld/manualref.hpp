@@ -25,6 +25,8 @@ namespace MWWorld
                 {
                     LiveCellRef<T> ref;
                     ref.mBase = instance;
+                    ref.mRef.mRefNum.mIndex = 0;
+                    ref.mRef.mRefNum.mContentFile = -1;
 
                     mRef = ref;
                     mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);
@@ -64,8 +66,9 @@ namespace MWWorld
 
                 // initialise
                 ESM::CellRef& cellRef = mPtr.getCellRef();
-                cellRef.mRefID = Misc::StringUtils::lowerCase(name);
-                cellRef.mRefnum = -1;
+                cellRef.mRefID = Misc::StringUtils::lowerCase (name);
+                cellRef.mRefNum.mIndex = 0;
+                cellRef.mRefNum.mContentFile = -1;
                 cellRef.mScale = 1;
                 cellRef.mFactIndex = 0;
                 cellRef.mCharge = -1;

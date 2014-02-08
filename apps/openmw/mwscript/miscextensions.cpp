@@ -682,23 +682,43 @@ namespace MWScript
 
             void printGlobalVars(Interpreter::Runtime &runtime)
             {
+                InterpreterContext& context =
+                    static_cast<InterpreterContext&> (runtime.getContext());
+
                 std::stringstream str;
                 str<< "Global variables:";
 
                 MWBase::World *world = MWBase::Environment::get().getWorld();
-                std::vector<std::string> names = world->getGlobals();
+                std::vector<std::string> names = context.getGlobals();
                 for(size_t i = 0;i < names.size();++i)
                 {
-                    char type = world->getGlobalVariableType(names[i]);
-                    if(type == 's')
-                        str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mShort<<" (short)";
-                    else if(type == 'l')
-                        str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mLong<<" (long)";
-                    else if(type == 'f')
-                        str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mFloat<<" (float)";
+                    char type = world->getGlobalVariableType (names[i]);
+                    str << std::endl << " " << names[i] << " = ";
+
+                    switch (type)
+                    {
+                        case 's':
+
+                            str << context.getGlobalShort (names[i]) << " (short)";
+                            break;
+
+                        case 'l':
+
+                            str << context.getGlobalLong (names[i]) << " (long)";
+                            break;
+
+                        case 'f':
+
+                            str << context.getGlobalFloat (names[i]) << " (float)";
+                            break;
+
+                        default:
+
+                            str << "<unknown type>";
+                    }
                 }
 
-                runtime.getContext().report(str.str());
+                context.report (str.str());
             }
 
         public:

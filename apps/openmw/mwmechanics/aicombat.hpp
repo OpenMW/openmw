@@ -29,16 +29,21 @@ namespace MWMechanics
 
         private:
             PathFinder mPathFinder;
-            //controls duration of the actual strike
+            // controls duration of the actual strike
             float mTimerAttack;
             float mTimerReact;
-            //controls duration of the sideway & forward moves
-            //when mCombatMove is true
+            // controls duration of the sideway & forward moves
+            // when mCombatMove is true
             float mTimerCombatMove;
+
+            // the z rotation angle (degrees) we want to reach
+            // used every frame when mRotate is true
+            float mTargetAngle;
 
             bool mReadyToAttack, mStrike;
             bool mFollowTarget;
             bool mCombatMove;
+            bool mRotate;
 
             MWMechanics::Movement mMovement;
             MWWorld::Ptr mTarget;

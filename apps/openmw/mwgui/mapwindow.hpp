@@ -1,11 +1,19 @@
 #ifndef MWGUI_MAPWINDOW_H
 #define MWGUI_MAPWINDOW_H
 
+#include <libs/platform/stdint.h>
+
 #include "windowpinnablebase.hpp"
 
 namespace MWRender
 {
     class GlobalMap;
+}
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace Loading
@@ -75,10 +83,10 @@ namespace MWGui
         float mLastDirectionY;
     };
 
-    class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
+    class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(const std::string& cacheDir);
+        MapWindow(DragAndDrop* drag, const std::string& cacheDir);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
@@ -91,6 +99,14 @@ namespace MWGui
         void setGlobalMapPlayerPosition (float worldX, float worldY);
 
         virtual void open();
+
+        void onFrame(float dt) { NoDrop::onFrame(dt); }
+
+        /// Clear all savegame-specific data
+        void clear();
+
+        void write (ESM::ESMWriter& writer);
+        void readRecord (ESM::ESMReader& reader, int32_t type);
 
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

@@ -760,6 +760,14 @@ namespace MWMechanics
         return mAI;
     }
 
+    void MechanicsManager::playerLoaded()
+    {
+        mUpdatePlayer = true;
+        mClassSelected = true;
+        mRaceSelected = true;
+        mAI = true;
+    }
+
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
     {
         MWWorld::Ptr victim;
