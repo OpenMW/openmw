@@ -5,7 +5,7 @@
 #include <string>
 
 #include <QTableView>
-#include <qt4/QtGui/qevent.h>
+#include <QtGui/qevent.h>
 
 #include "../../model/filter/node.hpp"
 

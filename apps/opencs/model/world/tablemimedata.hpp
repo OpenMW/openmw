@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include <qt4/QtCore/QMimeData>
+#include <QtCore/QMimeData>
 #include <QStringList>
 
 #include "universalid.hpp"
