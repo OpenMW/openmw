@@ -148,4 +148,25 @@ namespace MWScript
 
         return false;
     }
+
+    Locals& GlobalScripts::getLocals (const std::string& name)
+    {
+        std::string name2 = Misc::StringUtils::lowerCase (name);
+        std::map<std::string, std::pair<bool, Locals> >::iterator iter =
+            mScripts.find (name2);
+
+        if (iter==mScripts.end())
+        {
+            if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+            {
+                Locals locals;
+
+                locals.configure (*script);
+
+                iter = mScripts.insert (std::make_pair (name, std::make_pair (false, locals))).first;
+            }
+        }
+
+        return iter->second.second;
+    }
 }

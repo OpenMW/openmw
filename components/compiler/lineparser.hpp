@@ -33,6 +33,7 @@ namespace Compiler
             State mState;
             std::string mName;
             std::string mMemberName;
+            bool mReferenceMember;
             int mButtons;
             std::string mExplicit;
             char mType;

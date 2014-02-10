@@ -113,12 +113,13 @@ namespace Compiler
         if (mState==SetMemberVarState)
         {
             mMemberName = name;
-            char type = getContext().getMemberType (mMemberName, mName);
+            std::pair<char, bool> type = getContext().getMemberType (mMemberName, mName);
 
-            if (type!=' ')
+            if (type.first!=' ')
             {
                 mState = SetMemberVarState2;
-                mType = type;
+                mType = type.first;
+                mReferenceMember = type.second;
                 return true;
             }
 
@@ -353,7 +354,8 @@ namespace Compiler
             std::vector<Interpreter::Type_Code> code;
             char type = mExprParser.append (code);
 
-            Generator::assignToMember (mCode, mLiterals, mType, mMemberName, mName, code, type);
+            Generator::assignToMember (mCode, mLiterals, mType, mMemberName, mName, code, type,
+                !mReferenceMember);
 
             mState = EndState;
             return true;

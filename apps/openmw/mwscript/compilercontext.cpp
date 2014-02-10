@@ -30,16 +30,31 @@ namespace MWScript
         return MWBase::Environment::get().getWorld()->getGlobalVariableType (name);
     }
 
-    char CompilerContext::getMemberType (const std::string& name, const std::string& id) const
+    std::pair<char, bool> CompilerContext::getMemberType (const std::string& name,
+        const std::string& id) const
     {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr (id, false);
+        std::string script;
+        bool reference = false;
 
-        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+        if (const ESM::Script *scriptRecord =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (id))
+        {
+            script = scriptRecord->mId;
+        }
+        else
+        {
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr (id, false);
 
-        if (script.empty())
-            return ' ';
+            script = MWWorld::Class::get (ptr).getScript (ptr);
+            reference = true;
+        }
 
-        return MWBase::Environment::get().getScriptManager()->getLocals (script).getType (name);
+        char type = ' ';
+
+        if (!script.empty())
+            type = MWBase::Environment::get().getScriptManager()->getLocals (script).getType (name);
+
+        return std::make_pair (type, reference);
     }
 
     bool CompilerContext::isId (const std::string& name) const

@@ -204,14 +204,15 @@ namespace Compiler
         std::string name2 = Misc::StringUtils::lowerCase (name);
         std::string id = Misc::StringUtils::lowerCase (mExplicit);
 
-        char type = getContext().getMemberType (name2, id);
+        std::pair<char, bool> type = getContext().getMemberType (name2, id);
 
-        if (type!=' ')
+        if (type.first!=' ')
         {
-            Generator::fetchMember (mCode, mLiterals, type, name2, id);
+            Generator::fetchMember (mCode, mLiterals, type.first, name2, id, !type.second);
+
             mNextOperand = false;
             mExplicit.clear();
-            mOperands.push_back (type=='f' ? 'f' : 'l');
+            mOperands.push_back (type.first=='f' ? 'f' : 'l');
             return true;
         }
 
