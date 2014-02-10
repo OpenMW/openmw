@@ -20,7 +20,6 @@ namespace Compiler
             enum State
             {
                 BeginState,
-                ShortState, LongState, FloatState,
                 SetState, SetLocalVarState, SetGlobalVarState, SetPotentialMemberVarState,
                 SetMemberVarState, SetMemberVarState2,
                 MessageState, MessageCommaState, MessageButtonState, MessageButtonCommaState,

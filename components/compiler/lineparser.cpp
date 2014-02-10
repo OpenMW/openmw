@@ -1,6 +1,8 @@
 
 #include "lineparser.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include "scanner.hpp"
 #include "context.hpp"
 #include "errorhandler.hpp"
@@ -8,7 +10,7 @@
 #include "locals.hpp"
 #include "generator.hpp"
 #include "extensions.hpp"
-#include <components/misc/stringops.hpp>
+#include "declarationparser.hpp"
 
 namespace Compiler
 {
@@ -82,37 +84,6 @@ namespace Compiler
     bool LineParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        if (mState==ShortState || mState==LongState || mState==FloatState)
-        {
-            if (!getContext().canDeclareLocals())
-            {
-                getErrorHandler().error ("local variables can't be declared in this context", loc);
-                SkipParser skip (getErrorHandler(), getContext());
-                scanner.scan (skip);
-                return false;
-            }
-
-            std::string name2 = Misc::StringUtils::lowerCase (name);
-
-            char type = mLocals.getType (name2);
-
-            if (type!=' ')
-            {
-                /// \todo add option to make re-declared local variables an error
-                getErrorHandler().warning ("can't re-declare local variable", loc);
-                SkipParser skip (getErrorHandler(), getContext());
-                scanner.scan (skip);
-                mState = EndState;
-                return true;
-            }
-
-            mLocals.declare (mState==ShortState ? 's' : (mState==LongState ? 'l' : 'f'),
-                name2);
-
-            mState = EndState;
-            return true;
-        }
-
         if (mState==SetState)
         {
             std::string name2 = Misc::StringUtils::lowerCase (name);
@@ -303,9 +274,26 @@ namespace Compiler
         {
             switch (keyword)
             {
-                case Scanner::K_short: mState = ShortState; return true;
-                case Scanner::K_long: mState = LongState; return true;
-                case Scanner::K_float: mState = FloatState; return true;
+                case Scanner::K_short:
+                case Scanner::K_long:
+                case Scanner::K_float:
+                {
+                    if (!getContext().canDeclareLocals())
+                    {
+                        getErrorHandler().error (
+                            "local variables can't be declared in this context", loc);
+                        SkipParser skip (getErrorHandler(), getContext());
+                        scanner.scan (skip);
+                        return true;
+                    }
+
+                    DeclarationParser declaration (getErrorHandler(), getContext(), mLocals);
+                    if (declaration.parseKeyword (keyword, loc, scanner))
+                        scanner.scan (declaration);
+
+                    return true;
+                }
+
                 case Scanner::K_set: mState = SetState; return true;
                 case Scanner::K_messagebox: mState = MessageState; return true;
 
@@ -369,12 +357,6 @@ namespace Compiler
 
             mState = EndState;
             return true;
-        }
-        else if (mState==ShortState || mState==LongState || mState==FloatState)
-        {
-            // allow keywords to be used as local variable names. MW script compiler, you suck!
-            /// \todo option to disable this atrocity.
-            return parseName (loc.mLiteral, loc, scanner);
         }
 
         if (mAllowExpression)
