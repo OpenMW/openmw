@@ -593,7 +593,7 @@ namespace Compiler
             else if (offset<0)
                 opJumpBackward (code, -offset);
             else
-                throw std::logic_error ("inifite loop");
+                throw std::logic_error ("infinite loop");
         }
 
         void jumpOnZero (CodeContainer& code, int offset)
