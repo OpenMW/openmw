@@ -85,7 +85,7 @@ std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
         QModelIndexList selectedRows = selectionModel()->selectedRows();
 
         for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
-             ++iter)
+            ++iter)
         {
             QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
 
@@ -228,6 +228,8 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
 
     connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
         this, SLOT (selectionSizeUpdate ()));
+
+    setAcceptDrops(true);
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -384,10 +386,10 @@ void CSVWorld::Table::tableSizeUpdate()
 
             switch (state)
             {
-                case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
-                case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
-                case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
-                case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+            case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
+            case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
+            case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
+            case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
             }
         }
     }
@@ -445,6 +447,22 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
-        drag->start();
- }
+        drag->exec();
+        std::cout << "startdrag";
+    }
+
+}
+
+void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
+{
+    //if (event->mimeData()->hasFormat("text/plain"))
+    std::cout << "accept drag event";
+    event->acceptProposedAction();
+
+}
+
+void CSVWorld::Table::dropEvent(QDropEvent *event)
+{
+    std::cout << "drop";
+    event->acceptProposedAction();
 }

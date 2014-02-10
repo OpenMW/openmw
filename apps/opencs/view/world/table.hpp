@@ -52,6 +52,10 @@ namespace CSVWorld
 
             void mouseMoveEvent(QMouseEvent *event);
 
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dropEvent(QDropEvent *event);
+
         public:
 
             Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete, bool sorting);
