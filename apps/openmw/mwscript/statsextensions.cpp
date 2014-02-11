@@ -17,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -451,6 +452,14 @@ namespace MWScript
                     runtime.pop();
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().remove (id);
+
+                    MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                        id == wm->getSelectedSpell())
+                    {
+                        wm->unsetSelectedSpell();
+                    }
                 }
         };
 
