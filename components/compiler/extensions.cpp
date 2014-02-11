@@ -38,7 +38,7 @@ namespace Compiler
     }
 
     bool Extensions::isInstruction (int keyword, std::string& argumentType,
-        bool explicitReference) const
+        bool& explicitReference) const
     {
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
 
@@ -46,7 +46,7 @@ namespace Compiler
             return false;
 
         if (explicitReference && iter->second.mCodeExplicit==-1)
-            return false;
+            explicitReference = false;
 
         argumentType = iter->second.mArguments;
         return true;

@@ -52,8 +52,10 @@ namespace Compiler
             /// types.
 
             bool isInstruction (int keyword, std::string& argumentType,
-                bool explicitReference) const;
+                bool& explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return argument types.
+            /// \param explicitReference In: has explicit reference; Out: set to false, if
+            /// explicit reference is not available for this instruction.
 
             void registerFunction (const std::string& keyword, char returnType,
                 const std::string& argumentType, int code, int codeExplicit = -1);

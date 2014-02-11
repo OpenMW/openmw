@@ -234,8 +234,15 @@ namespace Compiler
             {
                 std::string argumentType;
 
-                if (extensions->isInstruction (keyword, argumentType, mState==ExplicitState))
+                bool hasExplicit = mState==ExplicitState;
+                if (extensions->isInstruction (keyword, argumentType, hasExplicit))
                 {
+                    if (!hasExplicit && mState==ExplicitState)
+                    {
+                        getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+                        mExplicit.clear();
+                    }
+
                     int optionals = mExprParser.parseArguments (argumentType, scanner, mCode, true);
 
                     extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit, optionals);
@@ -269,6 +276,14 @@ namespace Compiler
                     }
                 }
             }
+        }
+
+        if (mState==ExplicitState)
+        {
+            // drop stray explicit reference
+            getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+            mState = BeginState;
+            mExplicit.clear();
         }
 
         if (mState==BeginState)
