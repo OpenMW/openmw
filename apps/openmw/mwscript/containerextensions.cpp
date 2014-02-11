@@ -70,7 +70,7 @@ namespace MWScript
                             msgBox = boost::str(boost::format(msgBox) % count % itemName);
                         }
                         std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, /*showInDialogueModeOnly*/ true);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
@@ -142,7 +142,7 @@ namespace MWScript
                             msgBox = boost::str (boost::format(msgBox) % itemName);
                         }
                         std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, /*showInDialogueModeOnly*/ true);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
