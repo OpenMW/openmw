@@ -435,7 +435,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
         {
             std::vector<CSMWorld::UniversalId> idToDrag;
 
-            foreach (QModelIndex it, selectedRows)
+            foreach (QModelIndex it, selectedRows) //I had a dream. Dream where you could use C++11 in OpenMW.
             {
                 idToDrag.push_back (getUniversalId (it.row()));
             }
@@ -445,6 +445,6 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
-        drag->start();
+        drag->exec();
  }
 }
