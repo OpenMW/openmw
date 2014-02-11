@@ -7,11 +7,14 @@
 #include <exception>
 
 #include <components/esm/loadscpt.hpp>
-#include "../mwworld/esmstore.hpp"
+
+#include <components/misc/stringops.hpp>
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
 #include <components/compiler/exception.hpp>
+
+#include "../mwworld/esmstore.hpp"
 
 #include "extensions.hpp"
 
@@ -140,15 +143,17 @@ namespace MWScript
 
     Compiler::Locals& ScriptManager::getLocals (const std::string& name)
     {
+        std::string name2 = Misc::StringUtils::lowerCase (name);
+
         {
-            ScriptCollection::iterator iter = mScripts.find (name);
+            ScriptCollection::iterator iter = mScripts.find (name2);
 
             if (iter!=mScripts.end())
                 return iter->second.second;
         }
 
         {
-            std::map<std::string, Compiler::Locals>::iterator iter = mOtherLocals.find (name);
+            std::map<std::string, Compiler::Locals>::iterator iter = mOtherLocals.find (name2);
 
             if (iter!=mOtherLocals.end())
                 return iter->second;
@@ -156,7 +161,7 @@ namespace MWScript
 
         Compiler::Locals locals;
 
-        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name2))
         {
             int index = 0;
 
@@ -170,7 +175,7 @@ namespace MWScript
                 locals.declare ('f', script->mVarNames[index++]);
 
             std::map<std::string, Compiler::Locals>::iterator iter =
-                mOtherLocals.insert (std::make_pair (name, locals)).first;
+                mOtherLocals.insert (std::make_pair (name2, locals)).first;
 
             return iter->second;
         }
