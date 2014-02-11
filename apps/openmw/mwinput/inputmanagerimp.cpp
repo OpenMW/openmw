@@ -646,6 +646,10 @@ namespace MWInput
         if (!mControlSwitch["playermagic"])
             return;
 
+        // Not allowed if no spell selected
+        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty())
+            return;
+
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
             mPlayer->setDrawState(MWMechanics::DrawState_Spell);
