@@ -4,6 +4,10 @@
 #include <map>
 #include <string>
 
+#include "../mwworld/ptr.hpp"
+
+#include "magiceffects.hpp"
+
 namespace ESM
 {
     struct Spell;
@@ -16,12 +20,12 @@ namespace MWMechanics
     /// \brief Spell list
     ///
     /// This class manages known spells as well as abilities, powers and permanent negative effects like
-    /// diseaes.
+    /// diseases.
     class Spells
     {
         public:
 
-            typedef std::map<std::string, float> TContainer; // ID, normalised magnitude
+            typedef std::map<std::string, std::vector<float> > TContainer; // ID, normalised magnitudes
             typedef TContainer::const_iterator TIterator;
 
         private:
@@ -31,9 +35,16 @@ namespace MWMechanics
 
         public:
 
+            void purgeCommonDisease();
+            void purgeBlightDisease();
+            void purgeCorprusDisease();
+            void purgeCurses();
+
             TIterator begin() const;
 
             TIterator end() const;
+
+            bool hasSpell(const std::string& spell) { return mSpells.find(Misc::StringUtils::lowerCase(spell)) != mSpells.end(); }
 
             void add (const std::string& spell);
             ///< Adding a spell that is already listed in *this is a no-op.
@@ -57,6 +68,8 @@ namespace MWMechanics
             bool hasCommonDisease() const;
 
             bool hasBlightDisease() const;
+
+            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
     };
 }
 

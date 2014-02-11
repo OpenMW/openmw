@@ -8,9 +8,10 @@
 #include "adapter.hpp"
 #include "../../view/settings/support.hpp"
 
+class QStandardItemModel;
+
 namespace CSMSettings
 {
-    class DefinitionModel;
     class BooleanAdapter : public Adapter
     {
         Q_OBJECT
@@ -19,7 +20,7 @@ namespace CSMSettings
 
     public:
 
-        explicit BooleanAdapter (DefinitionModel &model,
+        explicit BooleanAdapter (QStandardItemModel &model,
                                  const CSMSettings::Setting *setting,
                                  QObject *parent = 0);
 

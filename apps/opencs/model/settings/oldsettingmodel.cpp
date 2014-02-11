@@ -4,7 +4,6 @@
 #include <QSortFilterProxyModel>
 
 #include "oldsettingmodel.hpp"
-#include "declarationitem.hpp"
 
 #include <QDebug>
 
@@ -23,9 +22,9 @@ CSMSettings::SettingModel::SettingModel(QObject *parent) :
 bool CSMSettings::SettingModel::defineSetting
     (const QString &settingName, const QString &pageName, const QString &value)
 {
-    mStdDefModel.
+  //  mStdDefModel.
 }
-
+/*
 CSMSettings::DeclarationItem
                     *CSMSettings::SettingModel::declareSetting
                         (SettingType typ, const QString &page,
@@ -80,11 +79,11 @@ void CSMSettings::SettingModel::removeUndeclaredDefinitions (PageMap &pageMap)
 
     QSortFilterProxyModel declaredPages (this);
     declaredPages.setSourceModel (&mDeclarationModel);
-    declaredPages.setFilterKeyColumn (Setting_Page);
+    declaredPages.setFilterKeyColumn (Property_Page);
 
     QSortFilterProxyModel declaredSettings (this);
     declaredSettings.setSourceModel (&declaredPages);
-    declaredSettings.setFilterKeyColumn (Setting_Name);
+    declaredSettings.setFilterKeyColumn (Property_Name);
 
     while (pageRow != pageMap.size())
     {
@@ -348,9 +347,9 @@ bool CSMSettings::SettingModel::writeFilestream(QTextStream *stream)
 
     for (int i = 0; i < sortModel.rowCount(); i++)
     {
-        QModelIndex name_idx = sortModel.index (i, Setting_Name);
-        QModelIndex page_idx = sortModel.index (i, Setting_Page);
-        QModelIndex value_idx = sortModel.index (i, Setting_Value);
+        QModelIndex name_idx = sortModel.index (i, Property_Name);
+        QModelIndex page_idx = sortModel.index (i, Property_Page);
+        QModelIndex value_idx = sortModel.index (i, Static_cast<SettingProperty>(2));
 
         QString pageName = sortModel.data (page_idx).toString();
         QString settingName = sortModel.data (name_idx).toString();
@@ -401,4 +400,4 @@ void CSMSettings::SettingModel::buildModel (PageMap &pageMap)
                defineSetting (settingName, pageName, value);
         }
     }
-}
+}*/

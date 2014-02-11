@@ -2,6 +2,7 @@
 #include "refidcollection.hpp"
 
 #include <stdexcept>
+#include <memory>
 
 #include <components/esm/esmreader.hpp>
 
@@ -181,7 +182,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
         unsigned int mFlag;
     } sCreatureFlagTable[] =
     {
-        { Columns::ColumnId_Biped, ESM::Creature::Biped },
+        { Columns::ColumnId_Biped, ESM::Creature::Bipedal },
         { Columns::ColumnId_HasWeapon, ESM::Creature::Weapon },
         { Columns::ColumnId_NoMovement, ESM::Creature::None },
         { Columns::ColumnId_Swims, ESM::Creature::Swims },
@@ -449,6 +450,16 @@ void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
     mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
 }
 
+void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin, 
+                                     const std::string& destination,
+                                     const CSMWorld::UniversalId::Type type)
+{
+        std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).clone());
+        newRecord->mState = RecordBase::State_ModifiedOnly;
+        mAdapters.find(type)->second->setId(*newRecord, destination);
+        mData.insertRecord(*newRecord, type, destination);
+}
+
 void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
     UniversalId::Type type)
 {
@@ -530,7 +541,7 @@ void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, Univers
     }
 }
 
-int CSMWorld::RefIdCollection::getAppendIndex (UniversalId::Type type) const
+int CSMWorld::RefIdCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const
 {
     return mData.getAppendIndex (type);
 }
@@ -540,7 +551,18 @@ std::vector<std::string> CSMWorld::RefIdCollection::getIds (bool listDeleted) co
     return mData.getIds (listDeleted);
 }
 
+bool CSMWorld::RefIdCollection::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+{
+    return false;
+}
+
 void CSMWorld::RefIdCollection::save (int index, ESM::ESMWriter& writer) const
 {
     mData.save (index, writer);
 }
+
+const CSMWorld::RefIdData& CSMWorld::RefIdCollection::getDataSet() const
+{
+    return mData;
+}
+

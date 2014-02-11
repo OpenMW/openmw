@@ -42,10 +42,7 @@ void InventoryItemModel::copyItem (const ItemStack& item, size_t count)
 {
     if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    int origCount = item.mBase.getRefData().getCount();
-    item.mBase.getRefData().setCount(count);
-    mActor.getClass().getContainerStore(mActor).add(item.mBase, mActor);
-    item.mBase.getRefData().setCount(origCount);
+    mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor);
 }
 
 
@@ -56,7 +53,7 @@ void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
 
     if (removed == 0)
         throw std::runtime_error("Item to remove not found in container store");
-    else if (removed < count)
+    else if (removed < static_cast<int>(count))
         throw std::runtime_error("Not enough items in the stack to remove");
 }
 
@@ -72,14 +69,14 @@ void InventoryItemModel::update()
         // NOTE: Don't show WerewolfRobe objects in the inventory, or allow them to be taken.
         // Vanilla likely uses a hack like this since there's no other way to prevent it from
         // being shown or taken.
-        if(item.getCellRef().mRefID == "WerewolfRobe")
+        if(item.getCellRef().mRefID == "werewolfrobe")
             continue;
 
         ItemStack newItem (item, this, item.getRefData().getCount());
 
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        if (mActor.getClass().hasInventoryStore(mActor))
         {
-            MWWorld::InventoryStore& store = MWWorld::Class::get(mActor).getInventoryStore(mActor);
+            MWWorld::InventoryStore& store = mActor.getClass().getInventoryStore(mActor);
             for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
             {
                 MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);

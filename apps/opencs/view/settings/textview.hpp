@@ -5,6 +5,7 @@
 #include "../../model/settings/setting.hpp"
 
 class QLineEdit;
+class QStandardItemModel;
 
 namespace CSVSettings
 {
@@ -33,7 +34,7 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        TextView *createView (CSMSettings::DefinitionModel &model,
+        TextView *createView (QStandardItemModel &model,
                                const CSMSettings::Setting *setting);
     };
 }

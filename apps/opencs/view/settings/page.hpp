@@ -49,7 +49,7 @@ namespace CSVSettings
                          CSMSettings::DefinitionModel &definitionModel);
 
         QSortFilterProxyModel *buildFilter (QAbstractItemModel &model,
-                                            CSMSettings::SettingColumn column,
+                                            CSMSettings::SettingProperty column,
                                             const QString &expression);
         void buildFactories();
     };

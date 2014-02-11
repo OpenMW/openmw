@@ -31,8 +31,6 @@ namespace MWGui
 
             void pickUpObject (MWWorld::Ptr object);
 
-            int getPlayerGold();
-
             MyGUI::IntCoord getAvatarScreenCoord();
 
             MWWorld::Ptr getAvatarSelectedItem(int x, int y);
@@ -47,6 +45,8 @@ namespace MWGui
             void updateItemView();
 
             void updatePlayer();
+
+            void useItem(const MWWorld::Ptr& ptr);
 
             void setGuiMode(GuiMode mode);
 
@@ -76,10 +76,7 @@ namespace MWGui
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
 
-            MyGUI::IntCoord mPositionInventory;
-            MyGUI::IntCoord mPositionContainer;
-            MyGUI::IntCoord mPositionCompanion;
-            MyGUI::IntCoord mPositionBarter;
+            MWWorld::Ptr mSkippedToEquip;
 
             GuiMode mGuiMode;
 
@@ -105,6 +102,8 @@ namespace MWGui
 
             void updateEncumbranceBar();
             void notifyContentChanged();
+
+            void adjustPanes();
     };
 }
 

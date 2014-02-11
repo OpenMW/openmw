@@ -7,7 +7,6 @@
 #include <QtGui>
 
 #include "../../model/settings/usersettings.hpp"
-#include "testharnesspage.hpp"
 
 #include "page.hpp"
 
@@ -23,11 +22,21 @@
 #include <QTableView>
 
 #include <QStandardItemModel>
+#include <QStandardItem>
 
 CSVSettings::Dialog::Dialog(QMainWindow *parent) :
-    SettingWindow (parent), mStackedWidget (0)
+    SettingWindow (parent), mStackedWidget (0), mDebugMode (false), mModel (0)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
+
+    QStandardItem item;
+
+    item.setData("Display data", Qt::DisplayRole);
+    item.setData("User Data", Qt::UserRole);
+    item.setData("User Data1", Qt::UserRole + 1);
+
+    qDebug() << "Item data: " << item.data(Qt::DisplayRole) << ','
+             << item.data(Qt::UserRole) << ',' << item.data(Qt::UserRole + 1);
 
     setupDialog();
 
@@ -71,58 +80,19 @@ void CSVSettings::Dialog::buildPages()
         mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
     }
 
-    new QListWidgetItem ("Test Harness", mPageListWidget);
-
-    mStackedWidget->addWidget (
-        new TestHarnessPage (CSMSettings::UserSettings::instance(), this));
-
-    addCustomPage();
+    addDebugPage();
 
     resize (mStackedWidget->sizeHint());
 }
 
-void CSVSettings::Dialog::addCustomPage()
+void CSVSettings::Dialog::addDebugPage()
 {
   QTreeView *tree = new QTreeView();
-  QListView *list = new QListView();
-  QTableView *table = new QTableView();
 
-  QSplitter *splitter = new QSplitter(this);
-  splitter->addWidget( tree );
-  splitter->addWidget( list );
-  splitter->addWidget( table );
+  tree->setModel( &CSMSettings::UserSettings::instance() );
 
-  QStandardItemModel *model = new QStandardItemModel( 5, 2 );
-  for( int r=0; r<5; r++ )
-    for( int c=0; c<2; c++)
-    {
-      QStandardItem *item = new QStandardItem( QString("Row:%0, Column:%1").arg(r).arg(c) );
-
-      if( c == 1 )
-      {
-          QStringList values;
-        for( int i=0; i<3; i++ )
-        {
-            values << QString("Item %0").arg(i);
-        }
-        item->appendRow (new StringListItem(values));
-          //item->appendRow( new QStandardItem( QString("Item %0").arg(i) ) );
-    }
-      model->setItem(r, c, item);
-    }
-
-  tree->setModel( model );
-  list->setModel( model );
-  table->setModel( model );
-
-  list->setSelectionModel( tree->selectionModel() );
-  table->setSelectionModel( tree->selectionModel() );
-
-  mStackedWidget->addWidget(splitter);
+  mStackedWidget->addWidget(tree);
      new QListWidgetItem ("Standard Item Model", mPageListWidget);
-  splitter->show();
-
-  qDebug() << "values for item #2: " << model->item(2,1)->child(0,0)->data(Qt::DisplayRole).toStringList();
 }
 
 void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)

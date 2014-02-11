@@ -22,8 +22,8 @@ namespace CSMSettings
     typedef QPair <QString, DeclarationPair> DeclarationListItem;
     typedef QList <DeclarationListItem> DeclarationList;
 
-    int sSettingPropertyCount = 10;
-    int sSettingPropertyListCount = 3;
+    static int sSettingPropertyCount = 12;
+    static int sSettingPropertyListCount = 3;
 }
 
 //Enums
@@ -47,13 +47,14 @@ namespace CSMSettings
         Property_WidgetWidth = 7,
         Property_ViewRow = 8,
         Property_ViewColumn = 9,
+        Property_Delimiter
     };
 
     enum SettingPropertyList
     {
-        PropertyList_DefinedValues = 0,
-        PropertyList_DeclaredValues = 1,
-        PropertyList_Proxy = 2
+        PropertyList_DefinedValues = 100,
+        PropertyList_DeclaredValues = 101,
+        PropertyList_Proxy = 102
     };
 
     enum SettingType
@@ -80,11 +81,11 @@ namespace CSVSettings
 {
     enum ViewType
     {
-        ViewType_Boolean,
-        ViewType_List,
-        ViewType_Range,
-        ViewType_Text,
-        ViewType_Undefined
+        ViewType_Boolean = 0,
+        ViewType_List = 1,
+        ViewType_Range = 2,
+        ViewType_Text = 3,
+        ViewType_Undefined = 4
     };
 
     enum Alignment

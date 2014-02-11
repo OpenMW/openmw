@@ -67,10 +67,10 @@ namespace CSMSettings
     private:
 
         QModelIndex valueSourceIndex    (const QString &value,
-                                        SettingColumn column) const;
+                                        SettingProperty column) const;
 
         QSortFilterProxyModel *buildFilter (QAbstractItemModel *model,
-                                            SettingColumn column,
+                                            SettingProperty column,
                                             const QString &expression);
     private slots:
 

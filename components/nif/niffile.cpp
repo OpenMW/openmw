@@ -210,7 +210,7 @@ static const RecordFactoryEntry recordFactories [] = {
     { "AvoidNode",                  &construct <NiNode                      >, RC_AvoidNode                     },
     { "NiBSParticleNode",           &construct <NiNode                      >, RC_NiBSParticleNode              },
     { "NiBSAnimationNode",          &construct <NiNode                      >, RC_NiBSAnimationNode             },
-    { "NiBillboardNode",            &construct <NiNode                      >, RC_NiNode                        },
+    { "NiBillboardNode",            &construct <NiNode                      >, RC_NiBillboardNode               },
     { "NiTriShape",                 &construct <NiTriShape                  >, RC_NiTriShape                    },
     { "NiRotatingParticles",        &construct <NiRotatingParticles         >, RC_NiRotatingParticles           },
     { "NiAutoNormalParticles",      &construct <NiAutoNormalParticles       >, RC_NiAutoNormalParticles         },

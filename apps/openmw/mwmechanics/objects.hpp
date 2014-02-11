@@ -21,6 +21,7 @@ namespace MWMechanics
 
     public:
         Objects();
+        ~Objects();
 
         void addObject (const MWWorld::Ptr& ptr);
         ///< Register an animated object
@@ -39,6 +40,8 @@ namespace MWMechanics
 
         void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         void skipAnimation(const MWWorld::Ptr& ptr);
+
+        void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
     };
 }
 

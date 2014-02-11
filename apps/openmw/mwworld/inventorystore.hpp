@@ -12,6 +12,25 @@ namespace MWMechanics
 
 namespace MWWorld
 {
+    class InventoryStoreListener
+    {
+    public:
+        /**
+         * Fired when items are equipped or unequipped
+         */
+        virtual void equipmentChanged () {}
+
+        /**
+         * @param effect
+         * @param isNew Is this effect new (e.g. the item for it was just now manually equipped)
+         *              or was it loaded from a savegame / initial game state? \n
+         *              If it isn't new, non-looping VFX should not be played.
+         * @param playSound Play effect sound?
+         */
+        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew, bool playSound) {}
+
+    };
+
     ///< \brief Variant of the ContainerStore for NPCs
     class InventoryStore : public ContainerStore
     {
@@ -43,22 +62,54 @@ namespace MWWorld
 
         private:
 
-            mutable MWMechanics::MagicEffects mMagicEffects;
-            mutable bool mMagicEffectsUpToDate;
-            bool mActorModelUpdateEnabled;
+            MWMechanics::MagicEffects mMagicEffects;
+
+            InventoryStoreListener* mListener;
+
+            // Enables updates of magic effects and actor model whenever items are equipped or unequipped.
+            // This is disabled during autoequip to avoid excessive updates
+            bool mUpdatesEnabled;
+
+            bool mFirstAutoEquip;
+
+            // Vanilla allows permanent effects with a random magnitude, so it needs to be stored here.
+            // We also need this to only play sounds and particle effects when the item is equipped, rather than on every update.
+            struct EffectParams
+            {
+                // Modifier to scale between min and max magnitude
+                float mRandom;
+                // Multiplier for when an effect was fully or partially resisted
+                float mMultiplier;
+            };
+
+            typedef std::map<std::string, std::vector<EffectParams> > TEffectMagnitudes;
+            TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
             typedef std::vector<ContainerStoreIterator> TSlots;
 
-            mutable TSlots mSlots;
+            TSlots mSlots;
 
             // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
             ContainerStoreIterator mSelectedEnchantItem;
 
+            // (item, max charge)
+            typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
+            TRechargingItems mRechargingItems;
+
             void copySlots (const InventoryStore& store);
 
-            void initSlots (TSlots& slots);
+            void initSlots (TSlots& slots_);
 
-            void updateActorModel (const Ptr& actor);
+            void updateMagicEffects(const Ptr& actor);
+            void updateRechargingItems();
+
+            void fireEquipmentChangedEvent();
+
+            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+
+            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
 
         public:
 
@@ -68,7 +119,9 @@ namespace MWWorld
 
             InventoryStore& operator= (const InventoryStore& store);
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
+            virtual InventoryStore* clone() { return new InventoryStore(*this); }
+
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             /// Auto-equip items if specific conditions are fulfilled (see the implementation).
             ///
@@ -76,6 +129,8 @@ namespace MWWorld
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
+            ///
+            /// @param setOwner Set the owner of the added item to \a actorPtr?
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
@@ -95,21 +150,18 @@ namespace MWWorld
             void unequipAll(const MWWorld::Ptr& actor);
             ///< Unequip all currently equipped items.
 
-            void autoEquip (const MWWorld::Ptr& npc);
+            void autoEquip (const MWWorld::Ptr& actor);
             ///< Auto equip items according to stats and item value.
 
-            const MWMechanics::MagicEffects& getMagicEffects();
+            const MWMechanics::MagicEffects& getMagicEffects() const;
             ///< Return magic effects from worn items.
-            ///
-            /// \todo make this const again, after the constness of Ptrs and iterators has been addressed.
 
             virtual void flagAsModified();
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 
-            virtual bool stacks (const Ptr& stack, const Ptr& item);
+            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
-            /// @note stack is the item that is already in this container (it may be equipped)
 
             virtual int remove(const Ptr& item, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a item from this inventory.
@@ -130,6 +182,20 @@ namespace MWWorld
             /// @return an iterator to the item that was previously in the slot
             /// (it can be re-stacked so its count may be different than when it
             /// was equipped).
+
+            void setListener (InventoryStoreListener* listener, const Ptr& actor);
+            ///< Set a listener for various events, see \a InventoryStoreListener
+
+            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
+
+            void rechargeItems (float duration);
+            ///< Restore charge on enchanted items. Note this should only be done for the player.
+
+            void purgeEffect (short effectId);
+            ///< Remove a magic effect
+
+            virtual void clear();
+            ///< Empty container.
     };
 }
 

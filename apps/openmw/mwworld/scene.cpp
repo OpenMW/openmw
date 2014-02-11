@@ -111,15 +111,15 @@ namespace MWWorld
         mRendering.removeCell(*iter);
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
+
         MWBase::Environment::get().getMechanicsManager()->drop (*iter);
+
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
         mActiveCells.erase(*iter);
     }
 
-    void Scene::loadCell (Ptr::CellStore *cell, Loading::Listener* loadingListener)
+    void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener)
     {
-        // register local scripts
-        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
         std::pair<CellStoreCollection::iterator, bool> result = mActiveCells.insert(cell);
 
         if(result.second)
@@ -157,14 +157,19 @@ namespace MWWorld
             mRendering.requestMap(cell);
             mRendering.configureAmbient(*cell);
         }
+
+        // register local scripts
+        // ??? Should this go into the above if block ???
+        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
     }
 
-    void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
+    void Scene::playerCellChange(CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr old = world->getPlayerPtr();
         world->getPlayer().setCell(cell);
 
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         mRendering.updatePlayerPtr(player);
 
         if (adjustPlayerPos) {
@@ -181,7 +186,7 @@ namespace MWWorld
         MWBase::MechanicsManager *mechMgr =
             MWBase::Environment::get().getMechanicsManager();
 
-        mechMgr->add(player);
+        mechMgr->updateCell(old, player);
         mechMgr->watchActor(player);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
@@ -198,13 +203,11 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
+        mRendering.enableTerrain(true);
         Nif::NIFFile::CacheLock cachelock;
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
-
-        // remove active
-        MWBase::Environment::get().getMechanicsManager()->remove(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
@@ -347,6 +350,7 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        Nif::NIFFile::CacheLock lock;
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
 
         mRendering.enableTerrain(false);
@@ -365,14 +369,14 @@ namespace MWWorld
         if(!loadcell)
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            world->moveObject(world->getPlayer().getPlayer(), position.pos[0], position.pos[1], position.pos[2]);
+            world->moveObject(world->getPlayerPtr(), position.pos[0], position.pos[1], position.pos[2]);
 
             float x = Ogre::Radian(position.rot[0]).valueDegrees();
             float y = Ogre::Radian(position.rot[1]).valueDegrees();
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
-            world->rotateObject(world->getPlayer().getPlayer(), x, y, z);
+            world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            MWWorld::Class::get(world->getPlayer().getPlayer()).adjustPosition(world->getPlayer().getPlayer());
+            MWWorld::Class::get(world->getPlayerPtr()).adjustPosition(world->getPlayerPtr());
             world->getFader()->fadeIn(0.5f);
             return;
         }
@@ -434,12 +438,10 @@ namespace MWWorld
 
         MWBase::Environment::get().getWorld()->positionToIndex (position.pos[0], position.pos[1], x, y);
 
-        mRendering.enableTerrain(true);
-
         changeCell (x, y, position, true);
     }
 
-    Ptr::CellStore* Scene::getCurrentCell ()
+    CellStore* Scene::getCurrentCell ()
     {
         return mCurrentCell;
     }
@@ -449,7 +451,7 @@ namespace MWWorld
         mCellChanged = false;
     }
 
-    int Scene::countRefs (const Ptr::CellStore& cell)
+    int Scene::countRefs (const CellStore& cell)
     {
         return cell.mActivators.mList.size()
                 + cell.mPotions.mList.size()
@@ -473,7 +475,7 @@ namespace MWWorld
                 + cell.mNpcs.mList.size();
     }
 
-    void Scene::insertCell (Ptr::CellStore &cell, bool rescale, Loading::Listener* loadingListener)
+    void Scene::insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
         // Loop through all references in the cell
         insertCellRefList(mRendering, cell.mActivators, cell, *mPhysics, rescale, loadingListener);
@@ -485,7 +487,6 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mItemLists, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mLights, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics, rescale, loadingListener);
@@ -497,6 +498,8 @@ namespace MWWorld
         // Load NPCs and creatures _after_ everything else (important for adjustPosition to work correctly)
         insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale, loadingListener);
         insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale, loadingListener);
+        // Since this adds additional creatures, load afterwards, or they would be loaded twice
+        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale, loadingListener);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

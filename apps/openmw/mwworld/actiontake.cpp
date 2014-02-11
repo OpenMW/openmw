@@ -4,6 +4,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "class.hpp"
 #include "containerstore.hpp"
@@ -14,11 +15,9 @@ namespace MWWorld
 
     void ActionTake::executeImp (const Ptr& actor)
     {
-        // insert into player's inventory
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPtr ("player", true);
-
-        MWWorld::Class::get (player).getContainerStore (player).add (getTarget(), player);
-
+        MWBase::Environment::get().getMechanicsManager()->itemTaken(
+                    actor, getTarget(), getTarget().getRefData().getCount());
+        actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
     }
 }

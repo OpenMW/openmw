@@ -3,6 +3,8 @@
 
 #include "adapter.hpp"
 
+class QStandardItemModel;
+
 namespace CSMSettings
 {
     class TextAdapter : public Adapter
@@ -13,7 +15,7 @@ namespace CSMSettings
 
     public:
 
-        TextAdapter(DefinitionModel &model,
+        TextAdapter(QStandardItemModel &model,
                     const CSMSettings::Setting *setting,
                     QObject *parent = 0);
 

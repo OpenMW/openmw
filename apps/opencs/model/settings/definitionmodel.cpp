@@ -25,7 +25,7 @@ QVariant CSMSettings::DefinitionModel::data(const QModelIndex &idx,
 
     DefinitionListItem dataPair = mDefinitions.at(idx.row());
 
-    SettingColumn columnEnum = static_cast<SettingColumn>(idx.column());
+    SettingProperty columnEnum = static_cast<SettingProperty>(idx.column());
 
     switch (role)
     {
@@ -34,15 +34,15 @@ QVariant CSMSettings::DefinitionModel::data(const QModelIndex &idx,
 
         switch (columnEnum)
         {
-        case Setting_Name:
+        case Property_Name:
             return dataPair.second.first;
         break;
 
-        case Setting_Page:
+        case Property_Page:
             return dataPair.first;
         break;
 
-        case Setting_Value:
+        case 2:
             return dataPair.second.second;
         break;
 
@@ -87,7 +87,7 @@ Qt::ItemFlags CSMSettings::DefinitionModel::flags
 
     Qt::ItemFlags defaultFlags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-    if (static_cast<SettingColumn>(index.column()) == Setting_Value)
+    if (static_cast<SettingProperty>(index.column()) == 2)
         return defaultFlags | Qt::ItemIsEditable;
 
     return defaultFlags;
@@ -108,7 +108,7 @@ QModelIndex CSMSettings::DefinitionModel::defineSetting (
     mDefinitions.replace (settingRow, dataPair);
 
     QModelIndex idx = index (settingRow,
-                            static_cast<int>(Setting_Name),
+                            static_cast<int>(Property_Name),
                             QModelIndex());
 
     emit layoutChanged();

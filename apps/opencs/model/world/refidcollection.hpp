@@ -69,6 +69,10 @@ namespace CSMWorld
 
             virtual void removeRows (int index, int count);
 
+            virtual void cloneRecord(const std::string& origin, 
+                                     const std::string& destination,
+                                     const UniversalId::Type type);
+
             virtual void appendBlankRecord (const std::string& id, UniversalId::Type type);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
@@ -92,7 +96,7 @@ namespace CSMWorld
 
             void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
-            virtual int getAppendIndex (UniversalId::Type type) const;
+            virtual int getAppendIndex (const std::string& id, UniversalId::Type type) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual std::vector<std::string> getIds (bool listDeleted) const;
@@ -100,8 +104,17 @@ namespace CSMWorld
             ///
             /// \param listDeleted include deleted record in the list
 
+            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
+
             void save (int index, ESM::ESMWriter& writer) const;
+
+	    const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
     };
 }
 
 #endif
+

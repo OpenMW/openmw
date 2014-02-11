@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "stat.hpp"
-#include "drawstate.hpp"
 
 #include "creaturestats.hpp"
 
@@ -25,32 +24,17 @@ namespace MWMechanics
 
     class NpcStats : public CreatureStats
     {
-        public:
-
-            enum Flag
-            {
-                Flag_ForceRun = 1,
-                Flag_ForceSneak = 2,
-                Flag_Run = 4,
-                Flag_Sneak = 8
-            };
-
-        private:
-
             /// NPCs other than the player can only have one faction. But for the sake of consistency
             /// we use the same data structure for the PC and the NPCs.
             /// \note the faction key must be in lowercase
             std::map<std::string, int> mFactionRank;
 
-            DrawState_ mDrawState;
             int mDisposition;
-            unsigned int mMovementFlags;
-            Stat<float> mSkill[27];
-            Stat<float> mWerewolfSkill[27];
+            SkillValue mSkill[27];
+            SkillValue mWerewolfSkill[27];
             int mBounty;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
-            bool mVampire;
             int mReputation;
             int mWerewolfKills;
             int mProfit;
@@ -67,6 +51,8 @@ namespace MWMechanics
             /// time since last hit from drowning
             float mLastDrowningHit;
 
+            float mLevelHealthBonus;
+
         public:
 
             NpcStats();
@@ -74,13 +60,6 @@ namespace MWMechanics
             /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
             int getProfit() const;
             void modifyProfit(int diff);
-
-            DrawState_ getDrawState() const;
-            void setDrawState (DrawState_ state);
-
-            /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
-            float getAttackStrength() const;
-            void setAttackStrength(float value);
 
             int getBaseDisposition() const;
 
@@ -90,18 +69,16 @@ namespace MWMechanics
 
             void setReputation(int reputation);
 
-            bool getMovementFlag (Flag flag) const;
-
-            void setMovementFlag (Flag flag, bool state);
-
-            const Stat<float>& getSkill (int index) const;
-            Stat<float>& getSkill (int index);
+            const SkillValue& getSkill (int index) const;
+            SkillValue& getSkill (int index);
 
             const std::map<std::string, int>& getFactionRanks() const;
             std::map<std::string, int>& getFactionRanks();
 
-            const std::set<std::string>& getExpelled() const;
-            std::set<std::string>& getExpelled();
+            const std::set<std::string>& getExpelled() const { return mExpelled; }
+            bool getExpelled(const std::string& factionID) const;
+            void expell(const std::string& factionID);
+            void clearExpelled(const std::string& factionID);
 
             bool isSameFaction (const NpcStats& npcStats) const;
             ///< Do *this and \a npcStats share a faction?
@@ -123,6 +100,10 @@ namespace MWMechanics
 
             void levelUp();
 
+            void updateHealth();
+            ///< Calculate health based on endurance and strength.
+            ///  Called at character creation and at level up.
+
             void flagAsUsed (const std::string& id);
 
             bool hasBeenUsed (const std::string& id) const;
@@ -134,10 +115,6 @@ namespace MWMechanics
             int getFactionReputation (const std::string& faction) const;
 
             void setFactionReputation (const std::string& faction, int value);
-
-            bool isVampire() const;
-
-            void setVampire (bool set);
 
             bool hasSkillsForRank (const std::string& factionId, int rank) const;
 

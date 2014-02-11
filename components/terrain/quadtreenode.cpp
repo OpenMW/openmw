@@ -140,17 +140,19 @@ namespace
 }
 
 QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
-    : mSize(size)
-    , mCenter(center)
-    , mParent(parent)
-    , mDirection(dir)
+    : mMaterialGenerator(NULL)
+    , mIsActive(false)
     , mIsDummy(false)
-    , mSceneNode(NULL)
-    , mTerrain(terrain)
-    , mChunk(NULL)
-    , mMaterialGenerator(NULL)
+    , mSize(size)
+    , mLodLevel(Log2(mSize))
     , mBounds(Ogre::AxisAlignedBox::BOX_NULL)
     , mWorldBounds(Ogre::AxisAlignedBox::BOX_NULL)
+    , mDirection(dir)
+    , mCenter(center)
+    , mSceneNode(NULL)
+    , mParent(parent)
+    , mTerrain(terrain)
+    , mChunk(NULL)
 {
     mBounds.setNull();
     for (int i=0; i<4; ++i)
@@ -167,8 +169,6 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
         pos = mParent->getCenter();
     pos = mCenter - pos;
     mSceneNode->setPosition(Ogre::Vector3(pos.x*8192, pos.y*8192, 0));
-
-    mLodLevel = Log2(mSize);
 
     mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
 }
@@ -371,7 +371,7 @@ void QuadTreeNode::destroyChunks(bool children)
             for (std::vector<Ogre::TexturePtr>::const_iterator it = list.begin(); it != list.end(); ++it)
                 Ogre::TextureManager::getSingleton().remove((*it)->getName());
             mMaterialGenerator->setBlendmapList(std::vector<Ogre::TexturePtr>());
-            mMaterialGenerator->setLayerList(std::vector<std::string>());
+            mMaterialGenerator->setLayerList(std::vector<LayerInfo>());
             mMaterialGenerator->setCompositeMap("");
         }
 
@@ -414,7 +414,7 @@ void QuadTreeNode::ensureLayerInfo()
         return;
 
     std::vector<Ogre::TexturePtr> blendmaps;
-    std::vector<std::string> layerList;
+    std::vector<LayerInfo> layerList;
     mTerrain->getStorage()->getBlendmaps(mSize, mCenter, mTerrain->getShadersEnabled(), blendmaps, layerList);
 
     mMaterialGenerator->setLayerList(layerList);
@@ -427,11 +427,14 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
 
     if (mIsDummy)
     {
-        // TODO - why is this completely black?
         // TODO - store this default material somewhere instead of creating one for each empty cell
         MaterialGenerator matGen(mTerrain->getShadersEnabled());
-        std::vector<std::string> layer;
-        layer.push_back("_land_default.dds");
+        std::vector<LayerInfo> layer;
+        LayerInfo info;
+        info.mDiffuseMap = "textures\\_land_default.dds";
+        info.mParallax = false;
+        info.mSpecular = false;
+        layer.push_back(info);
         matGen.setLayerList(layer);
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
         return;

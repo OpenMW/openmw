@@ -172,7 +172,7 @@ bool Objects::deleteObject (const MWWorld::Ptr& ptr)
 }
 
 
-void Objects::removeCell(MWWorld::Ptr::CellStore* store)
+void Objects::removeCell(MWWorld::CellStore* store)
 {
     for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();)
     {
@@ -212,7 +212,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
     }
 }
 
-void Objects::buildStaticGeometry(MWWorld::Ptr::CellStore& cell)
+void Objects::buildStaticGeometry(MWWorld::CellStore& cell)
 {
     if(mStaticGeometry.find(&cell) != mStaticGeometry.end())
     {
@@ -226,7 +226,7 @@ void Objects::buildStaticGeometry(MWWorld::Ptr::CellStore& cell)
     }
 }
 
-Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
+Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
 {
     return mBounds[cell];
 }
@@ -245,11 +245,16 @@ void Objects::disableLights()
         it->second->enableLights(false);
 }
 
-void Objects::update(const float dt)
+void Objects::update(float dt, Ogre::Camera* camera)
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
     for(;it != mObjects.end();it++)
         it->second->runAnimation(dt);
+
+    it = mObjects.begin();
+    for(;it != mObjects.end();it++)
+        it->second->preRender(camera);
+
 }
 
 void Objects::rebuildStaticGeometry()
@@ -278,6 +283,24 @@ void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     } else {
         node = mCellSceneNodes[newCell];
     }
+
     node->addChild(cur.getRefData().getBaseNode());
+
+    PtrAnimationMap::iterator iter = mObjects.find(old);
+    if(iter != mObjects.end())
+    {
+        ObjectAnimation *anim = iter->second;
+        mObjects.erase(iter);
+        anim->updatePtr(cur);
+        mObjects[cur] = anim;
+    }
+}
+
+ObjectAnimation* Objects::getAnimation(const MWWorld::Ptr &ptr)
+{
+    PtrAnimationMap::const_iterator iter = mObjects.find(ptr);
+    if(iter != mObjects.end())
+        return iter->second;
+    return NULL;
 }
 

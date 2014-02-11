@@ -18,9 +18,9 @@ CSMSettings::Adapter::Adapter ( QStandardItemModel &model,
       QAbstractItemModel (parent)
 {
     QSortFilterProxyModel *pageFilter =
-                            buildFilter(&mDefModel, Setting_Page, mPageName);
+                            buildFilter(&mDefModel, Property_Page, mPageName);
 
-    mSettingFilter = buildFilter (pageFilter, Setting_Name, mSettingName);
+    mSettingFilter = buildFilter (pageFilter, Property_Name, mSettingName);
 
     connect (mSettingFilter,
              SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
@@ -70,7 +70,7 @@ Qt::ItemFlags CSMSettings::Adapter::flags(const QModelIndex &index) const
 }
 
 QModelIndex CSMSettings::Adapter::valueSourceIndex
-                            (const QString &value, SettingColumn column) const
+                            (const QString &value, SettingProperty column) const
 {
     QModelIndex idx;
 
@@ -88,19 +88,19 @@ QModelIndex CSMSettings::Adapter::valueSourceIndex
 
 bool CSMSettings::Adapter::insertValue (const QString &value)
 {
-    QModelIndex idx = valueSourceIndex (value, Setting_Value);
+    QModelIndex idx = valueSourceIndex (value, static_cast<SettingProperty>(2));
 
     //abort if the adapter manages a single-vlaued setting and the
     //setting already has a definition in the source model.
     if (idx.isValid() && !mIsMultiValue)
         return false;
 
-    return mModel.defineSetting (mSettingName, mPageName, value).isValid();
+    return false ;//mModel.defineSetting (mSettingName, mPageName, value).isValid();
 }
 
 bool CSMSettings::Adapter::removeValue (const QString &value)
 {
-    QModelIndex idx = valueSourceIndex (value, Setting_Value);
+    QModelIndex idx = valueSourceIndex (value, static_cast<SettingProperty>(2));
 
     if (!idx.isValid())
         return false;
@@ -110,14 +110,14 @@ bool CSMSettings::Adapter::removeValue (const QString &value)
         if (!mDefModel.removeRows (idx.row(), 1, QModelIndex()))
             return false;
 
-        idx = valueSourceIndex (value, Setting_Value);
+        idx = valueSourceIndex (value, static_cast<SettingProperty>(2));
     }
 
     return true;
 }
 
 QSortFilterProxyModel *CSMSettings::Adapter::buildFilter
-    (QAbstractItemModel *model, SettingColumn column, const QString &expression)
+    (QAbstractItemModel *model, SettingProperty column, const QString &expression)
 {
 
     QSortFilterProxyModel *filter = new QSortFilterProxyModel (this);

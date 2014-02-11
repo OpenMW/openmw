@@ -5,11 +5,13 @@
 #include <QVariant>
 
 #include "../../view/settings/support.hpp"
-#include "settingitem.hpp"
+
+class QStandardItem;
 
 namespace CSMSettings
 {
-    typedef QList <SettingItem *> SettingRowList;
+
+    typedef QList <QStandardItem *> SettingRowList;
 
     class Setting : public QObject
     {
@@ -21,50 +23,96 @@ namespace CSMSettings
         explicit Setting(QObject *parent = 0);
 
         ///boilerplate convenience functions
-        const QString &name() const
-            { return item (Property_Name); }
+        QString name() const
+            { return property (Property_Name).toString(); }
 
-        const QString &page() const
-            { return item (Property_Page); }
+        void setName (const QString &value)
+            { setProperty(Property_Name, value); }
 
-        const QString &defaultValue() const
-            { return item (Property_DefaultValue); }
+        QString page() const
+            { return property (Property_Page).toString(); }
+
+        void setPage (const QString &value)
+            { setProperty (Property_Page, value); }
+
+        QString defaultValue() const
+            { return property (Property_DefaultValue).toString(); }
+
+        void setDefaultValue (const QString &value)
+            { setProperty (Property_DefaultValue, value); }
+
+        QString delimiter() const
+        { return property (Property_Delimiter).toString(); }
+
+        void setDelimiter (const QString &value)
+        { setProperty (Property_Delimiter, value); }
 
         CSVSettings::ViewType viewType() const
-            { return item (Property_ViewType); }
+            { return static_cast<CSVSettings::ViewType>
+                                       (property (Property_ViewType).toInt()); }
+
+        void setViewType (CSVSettings::ViewType value)
+            { setProperty (Property_ViewType,
+                          QVariant(static_cast<int>(value)).toString()); }
 
         int viewRow() const
-            { return item (Property_ViewRow); }
+            { return property (Property_ViewRow).toInt(); }
+
+        void setViewRow (int value)
+            { setProperty (Property_ViewRow, QVariant(value).toString()); }
 
         int viewColumn() const
-            { return item (Property_ViewColumn); }
+            { return property (Property_ViewColumn).toInt(); }
+
+        void setViewColumn (int value)
+            { setProperty (Property_ViewColumn, QVariant(value).toString()); }
 
         int widgetWidth() const
-            { return item (Property_WidgetWidth); }
+            { return property (Property_WidgetWidth).toInt(); }
+
+        void setWidgetWidth (int value)
+            { setProperty (Property_WidgetWidth, QVariant(value).toString()); }
 
         bool isMultiValue() const
-            { return item (Property_IsMultiValue); }
+            { return property (Property_IsMultiValue).toBool(); }
+
+        void setMultiValue (bool value)
+            { setProperty (Property_IsMultiValue, QVariant(value).toString()); }
 
         bool isMultiLine() const
-            { return item (Property_IsMultiLine); }
+            { return property (Property_IsMultiLine).toBool(); }
+
+        void setMultiLine (bool value)
+            { setProperty (Property_IsMultiLine, QVariant(value).toString()); }
 
         bool isHorizontal() const
-            { return item (Property_IsHorizontal); }
+            { return property (Property_IsHorizontal).toBool(); }
+
+        void setHorizontal (bool value)
+            { setProperty (Property_IsHorizontal, QVariant(value).toString()); }
 
         const QStringList &declaredValues() const
-            { return itemList (PropertyList_DeclaredValues); }
+            { return propertyList (PropertyList_DeclaredValues); }
 
         const QStringList &definedValues() const
-            { return itemList (PropertyList_DefinedValues); }
+            { return propertyList (PropertyList_DefinedValues); }
 
         ///returns the specified property value
-        QVariant item (SettingProperty prop) const;
+        const QVariant &property (SettingProperty prop) const;
 
         ///returns the QStringList corresponding to the child of the first
-        ///setting item of the row
-        QStringList &itemList (SettingPropertyList) const;
+        ///setting property of the row
+        const QStringList &propertyList (SettingPropertyList) const;
 
-        bool setRowItem (int column);
+        ///returns the entire setting values (a model row)
+        const SettingRowList &settingRow () const
+                                                        { return mSettingRow; }
+
+        void setPropertyList (CSMSettings::SettingPropertyList propertyList,
+                          const QStringList &list);
+
+        void setProperty (int column, QString value);
+        bool setProperty (int column, QStandardItem *item);
     };
 }
 

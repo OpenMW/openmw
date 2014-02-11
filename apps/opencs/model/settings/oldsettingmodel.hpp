@@ -11,7 +11,6 @@
 #include "../../view/settings/support.hpp"
 #include "declarationmodel.hpp"
 #include "definitionmodel.hpp"
-#include "declarationitem.hpp"
 
 namespace CSMSettings
 {
@@ -23,7 +22,7 @@ namespace CSMSettings
             int const leftRow  = rLeft.row();
             int const rightRow = rRight.row();
 
-            for (int column = Setting_Page; column >= Setting_Name; --column)
+            for (int column = Property_Page; column >= Property_Name; --column)
             {
                 QModelIndex const leftIdx = sourceModel()->index
                                     (leftRow, column, QModelIndex());
@@ -46,8 +45,7 @@ namespace CSMSettings
         }
     };
 
-    typedef QMap <QString, QStringList *> SettingMap;
-    typedef QMap <QString, SettingMap *> PageMap;
+
 
     class SettingModel : public QObject
     {
@@ -70,7 +68,7 @@ namespace CSMSettings
         bool defineSetting (const QString &settingName,
                              const QString &pageName,
                              const QString &value);
-
+/*
         ISettingDeclaration *declareSingleText (const QString &name,
                                             const QString &page,
                                             const QString &defaultValue)
@@ -115,13 +113,13 @@ namespace CSMSettings
                                              const QString &name,
                                              const QString &page,
                                              const QString &defaultValue);
-/*
+
         DeclarationModel &declarationModel()
                                                 { return mDeclarationModel;}
 
         DefinitionModel &definitionModel()
                                                 { return mDefinitionModel; }
-                                                */
+
     protected:
 
         void validate(PageMap &pageMap);
@@ -146,7 +144,7 @@ namespace CSMSettings
     private:
 
         void removeUndeclaredDefinitions (PageMap &pageMap);
-        void validateDefinitions (PageMap &pageMap);
+        void validateDefinitions (PageMap &pageMap);*/
     };
 }
 #endif // CSMSETTINGS_OLDSETTINGMODEL_HPP

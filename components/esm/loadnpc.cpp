@@ -10,7 +10,7 @@ namespace ESM
 
 void NPC::load(ESMReader &esm)
 {
-    mNpdt52.mGold = -10;
+    //mNpdt52.mGold = -10;
 
     mPersistent = esm.getRecordFlags() & 0x0400;
 
@@ -29,12 +29,12 @@ void NPC::load(ESMReader &esm)
     esm.getSubHeader();
     if (esm.getSubSize() == 52)
     {
-        mNpdtType = 52;
+        mNpdtType = NPC_DEFAULT;
         esm.getExact(&mNpdt52, 52);
     }
     else if (esm.getSubSize() == 12)
     {
-        mNpdtType = 12;
+        mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
         esm.getExact(&mNpdt12, 12);
     }
     else
@@ -76,9 +76,9 @@ void NPC::save(ESMWriter &esm) const
     esm.writeHNCString("KNAM", mHair);
     esm.writeHNOCString("SCRI", mScript);
 
-    if (mNpdtType == 52)
+    if (mNpdtType == NPC_DEFAULT)
         esm.writeHNT("NPDT", mNpdt52, 52);
-    else if (mNpdtType == 12)
+    else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
         esm.writeHNT("NPDT", mNpdt12, 12);
 
     esm.writeHNT("FLAG", mFlags);
@@ -114,7 +114,7 @@ void NPC::save(ESMWriter &esm) const
         mNpdt52.mLevel = 0;
         mNpdt52.mStrength = mNpdt52.mIntelligence = mNpdt52.mWillpower = mNpdt52.mAgility =
             mNpdt52.mSpeed = mNpdt52.mEndurance = mNpdt52.mPersonality = mNpdt52.mLuck = 0;
-        for (int i=0; i<27; ++i) mNpdt52.mSkills[i] = 0;
+        for (int i=0; i< Skill::Length; ++i) mNpdt52.mSkills[i] = 0;
         mNpdt52.mReputation = 0;
         mNpdt52.mHealth = mNpdt52.mMana = mNpdt52.mFatigue = 0;
         mNpdt52.mDisposition = 0;

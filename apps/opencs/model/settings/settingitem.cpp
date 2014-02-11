@@ -6,9 +6,9 @@ CSMSettings::SettingItem::SettingItem (const QString &value) :
     QStandardItem (value)
 {}
 
-CSMSettings::SettingItem::setChildValues (QStringList values)
+void CSMSettings::SettingItem::setChildValues (const QStringList &values)
 {
-    foreach (const QString &value, valueList)
+    foreach (const QString &value, values)
         appendRow(new SettingItem(value));
 }
 
@@ -24,7 +24,7 @@ const QStringList &CSMSettings::SettingItem::childValues
 }
 
 QStringList CSMSettings::SettingItem::childValues
-                                        (SettingPropertyList propertyList) const
+                                        (SettingPropertyList propertyList)
 {
     SettingItem *childItem = static_cast<SettingItem *>(child(propertyList));
 

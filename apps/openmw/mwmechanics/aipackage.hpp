@@ -12,16 +12,28 @@ namespace MWMechanics
     class AiPackage
     {
         public:
-    
+            enum TypeId {
+                TypeIdNone = -1,
+                TypeIdWander = 0,
+                TypeIdTravel = 1,
+                TypeIdEscort = 2,
+                TypeIdFollow = 3,
+                TypeIdActivate = 4,
+                TypeIdCombat = 5
+            };
+
             virtual ~AiPackage();
       
             virtual AiPackage *clone() const = 0;
             
-            virtual bool execute (const MWWorld::Ptr& actor) = 0;
+            virtual bool execute (const MWWorld::Ptr& actor,float duration) = 0;
             ///< \return Package completed?
             
             virtual int getTypeId() const = 0;
-            ///< 0: Wanter, 1 Travel, 2 Escort, 3 Follow, 4 Activate
+            ///< @see enum TypeId
+
+            virtual unsigned int getPriority() const {return 0;}
+            ///< higher number is higher priority (0 beeing the lowest)
     };
 }
 

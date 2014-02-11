@@ -71,7 +71,7 @@ namespace OMW
             std::vector<std::string> mContentFiles;
             int mFpsLevel;
             bool mVerboseScripts;
-            bool mNewGame;
+            bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
             std::string mFocusName;
@@ -79,6 +79,8 @@ namespace OMW
             bool mScriptConsoleMode;
             std::string mStartupScript;
             int mActivationDistanceOverride;
+            // Grab mouse?
+            bool mGrab;
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
@@ -149,8 +151,9 @@ namespace OMW
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
 
-            /// Start as a new game.
-            void setNewGame(bool newGame);
+            void setSkipMenu (bool skipMenu);
+
+            void setGrabMouse(bool grab) { mGrab = grab; }
 
             /// Initialise and enter main loop.
             void go();
@@ -166,8 +169,6 @@ namespace OMW
 
             /// Font encoding
             void setEncoding(const ToUTF8::FromType& encoding);
-
-            void setAnimationVerbose(bool animverbose);
 
             void setFallbackValues(std::map<std::string,std::string> map);
 

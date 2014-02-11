@@ -110,11 +110,6 @@ namespace MWGui
 
             else
             {
-    	    const MyGUI::IntPoint& lastPressed = MyGUI::InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
-
-                if (mousePos == lastPressed) // mouseclick makes tooltip disappear
-                    return;
-
                 if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
                 {
                     mRemainingDelay -= frameDuration;
@@ -216,6 +211,7 @@ namespace MWGui
                         params.mMagnMin = it->mMagnMin;
                         params.mMagnMax = it->mMagnMax;
                         params.mRange = it->mRange;
+                        params.mArea = it->mArea;
                         params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);

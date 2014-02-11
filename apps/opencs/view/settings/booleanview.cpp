@@ -6,6 +6,7 @@
 #include <QGroupBox>
 
 #include <QDataWidgetMapper>
+#include <QStandardItemModel>
 
 #include "booleanview.hpp"
 #include "../../model/settings/booleanadapter.hpp"
@@ -21,13 +22,13 @@ CSVSettings::BooleanView::BooleanView (QAbstractItemModel *booleanAdapter,
     : View (booleanAdapter, setting, parent)
 {
     createView (setting);
-    createModel (setting->settingName);
+    //createModel (setting->settingName);
 }
 
 void CSVSettings::BooleanView::createView(const CSMSettings::Setting *setting)
 {
-    setObjectName (setting->settingName + "_view");
-
+   // setObjectName (setting->settingName + "_view");
+/*
     foreach (const QString &value, setting->valueList)
     {
         QWidget *widget = 0;
@@ -42,7 +43,7 @@ void CSVSettings::BooleanView::createView(const CSMSettings::Setting *setting)
         viewFrame()->addWidget (widget);
 
         mWidgets.append (widget);
-    }
+    }*/
 }
 
 void CSVSettings::BooleanView::createModel (const QString &settingName)
@@ -55,14 +56,14 @@ void CSVSettings::BooleanView::createModel (const QString &settingName)
         mapper->setObjectName
                     (settingName + '.' + widget->objectName() + "_mapper");
         mapper->setModel (model());
-        mapper->addMapping (widget, CSMSettings::BooleanSetting_ValueState);
+        mapper->addMapping (widget, CSMSettings::BooleanProperty_ValueState);
         mapper->setCurrentIndex(i);
         i++;
     }
 }
 
 CSVSettings::BooleanView *CSVSettings::BooleanViewFactory::createView
-    (CSMSettings::DefinitionModel &model, const CSMSettings::Setting *setting)
+    (QStandardItemModel &model, const CSMSettings::Setting *setting)
 {
     QWidget *widgParent = static_cast<QWidget *>(parent());
 

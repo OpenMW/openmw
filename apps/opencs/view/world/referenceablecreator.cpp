@@ -41,3 +41,9 @@ void CSVWorld::ReferenceableCreator::reset()
     mType->setCurrentIndex (0);
     GenericCreator::reset();
 }
+
+void CSVWorld::ReferenceableCreator::toggleWidgets(bool active)
+{
+    CSVWorld::GenericCreator::toggleWidgets(active);
+    mType->setEnabled(active);
+}

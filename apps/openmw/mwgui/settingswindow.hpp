@@ -33,6 +33,7 @@ namespace MWGui
             MyGUI::Button* mSubtitlesButton;
             MyGUI::Button* mCrosshairButton;
             MyGUI::Button* mBestAttackButton;
+            MyGUI::Button* mGrabCursorButton;
 
             // graphics
             MyGUI::ListBox* mResolutionList;

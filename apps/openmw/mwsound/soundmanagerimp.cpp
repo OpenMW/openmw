@@ -6,9 +6,9 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"
@@ -157,10 +157,11 @@ namespace MWSound
                 volume *= mFootstepsVolume;
                 break;
             case Play_TypeMusic:
-            case Play_TypeMovie:
                 volume *= mMusicVolume;
                 break;
             case Play_TypeMask:
+                break;
+            default:
                 break;
         }
         return volume;
@@ -248,14 +249,13 @@ namespace MWSound
             return;
         try
         {
-            // The range values are not tested
             float basevol = volumeFromType(Play_TypeVoice);
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getRefData().getPosition();
-            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+            const Ogre::Vector3 objpos(pos.pos);
 
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
-                                                          20.0f, 12750.0f, Play_Normal|Play_TypeVoice, 0);
+                                                          20.0f, 1500.0f, Play_Normal|Play_TypeVoice, 0);
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
         }
         catch(std::exception &e)
@@ -354,7 +354,7 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();
-            const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+            const Ogre::Vector3 objpos(pos.pos);
 
             sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|type, offset);
             if((mode&Play_NoTrack))
@@ -399,7 +399,7 @@ namespace MWSound
         }
     }
 
-    void SoundManager::stopSound(const MWWorld::Ptr::CellStore *cell)
+    void SoundManager::stopSound(const MWWorld::CellStore *cell)
     {
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -479,7 +479,7 @@ namespace MWSound
         static std::string regionName = "";
         static float sTimePassed = 0.0;
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        const MWWorld::Ptr player = world->getPlayer().getPlayer();
+        const MWWorld::Ptr player = world->getPlayerPtr();
         const ESM::Cell *cell = player.getCell()->mCell;
 
         sTimePassed += duration;
@@ -547,7 +547,7 @@ namespace MWSound
             startRandomTitle();
 
         MWWorld::Ptr player =
-            MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWBase::Environment::get().getWorld()->getPlayerPtr();
         const ESM::Cell *cell = player.getCell()->mCell;
 
         Environment env = Env_Normal;
@@ -584,7 +584,7 @@ namespace MWSound
                 if(!ptr.isEmpty())
                 {
                     const ESM::Position &pos = ptr.getRefData().getPosition();
-                    const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+                    const Ogre::Vector3 objpos(pos.pos);
                     snditer->first->setPosition(objpos);
                 }
                 //update fade out
@@ -595,7 +595,7 @@ namespace MWSound
                         soundDuration=snditer->first->mFadeOutTime;
                     snditer->first->setVolume(snditer->first->mVolume
                                     - soundDuration / snditer->first->mFadeOutTime * snditer->first->mVolume);
-                    snditer->first->mFadeOutTime -= soundDuration;               
+                    snditer->first->mFadeOutTime -= soundDuration;
                 }
                 snditer->first->update();
                 ++snditer;
@@ -607,8 +607,13 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return;
-        updateSounds(duration);
-        updateRegionSound(duration);
+
+        if (MWBase::Environment::get().getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
+        {
+            updateSounds(duration);
+            updateRegionSound(duration);
+        }
     }
 
 
@@ -639,6 +644,15 @@ namespace MWSound
         mListenerPos = pos;
         mListenerDir = dir;
         mListenerUp  = up;
+    }
+
+    void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
+    {
+        for (SoundMap::iterator snditer = mActiveSounds.begin(); snditer != mActiveSounds.end(); ++snditer)
+        {
+            if (snditer->second.first == old)
+                snditer->second.first = updated;
+        }
     }
 
     // Default readAll implementation, for decoders that can't do anything
@@ -704,5 +718,14 @@ namespace MWSound
     size_t bytesToFrames(size_t bytes, ChannelConfig config, SampleType type)
     {
         return bytes / framesToBytes(1, config, type);
+    }
+
+    void SoundManager::clear()
+    {
+        for (SoundMap::iterator iter (mActiveSounds.begin()); iter!=mActiveSounds.end(); ++iter)
+            iter->first->stop();
+
+        mActiveSounds.clear();
+        stopMusic();
     }
 }

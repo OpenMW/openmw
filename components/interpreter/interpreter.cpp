@@ -166,31 +166,37 @@ namespace Interpreter
 
     void Interpreter::installSegment0 (int code, Opcode1 *opcode)
     {
+        assert(mSegment0.find(code) == mSegment0.end());
         mSegment0.insert (std::make_pair (code, opcode));
     }
 
     void Interpreter::installSegment1 (int code, Opcode2 *opcode)
     {
+        assert(mSegment1.find(code) == mSegment1.end());
         mSegment1.insert (std::make_pair (code, opcode));
     }
 
     void Interpreter::installSegment2 (int code, Opcode1 *opcode)
     {
+        assert(mSegment2.find(code) == mSegment2.end());
         mSegment2.insert (std::make_pair (code, opcode));
     }
 
     void Interpreter::installSegment3 (int code, Opcode1 *opcode)
     {
+        assert(mSegment3.find(code) == mSegment3.end());
         mSegment3.insert (std::make_pair (code, opcode));
     }
 
     void Interpreter::installSegment4 (int code, Opcode2 *opcode)
     {
+        assert(mSegment4.find(code) == mSegment4.end());
         mSegment4.insert (std::make_pair (code, opcode));
     }
 
     void Interpreter::installSegment5 (int code, Opcode0 *opcode)
     {
+        assert(mSegment5.find(code) == mSegment5.end());
         mSegment5.insert (std::make_pair (code, opcode));
     }
 

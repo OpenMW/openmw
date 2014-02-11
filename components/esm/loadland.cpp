@@ -14,7 +14,7 @@ void Land::LandData::save(ESMWriter &esm)
         esm.writeHNT("VNML", mNormals, sizeof(VNML));
     }
     if (mDataTypes & Land::DATA_VHGT) {
-        static VHGT offsets;
+        VHGT offsets;
         offsets.mHeightOffset = mHeights[0] / HEIGHT_SCALE;
         offsets.mUnk1 = mUnk1;
         offsets.mUnk2 = mUnk2;
@@ -160,10 +160,10 @@ void Land::loadData(int flags)
     }
     mEsm->restoreContext(mContext);
 
-    memset(mLandData->mNormals, 0, LAND_NUM_VERTS * 3);
+    memset(mLandData->mNormals, 0, sizeof(mLandData->mNormals));
 
     if (mEsm->isNextSub("VNML")) {
-        condLoad(actual, DATA_VNML, mLandData->mNormals, sizeof(VNML));
+        condLoad(actual, DATA_VNML, mLandData->mNormals, sizeof(mLandData->mNormals));
     }
 
     if (mEsm->isNextSub("VHGT")) {

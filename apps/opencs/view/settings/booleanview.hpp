@@ -10,6 +10,7 @@
 class QDataWidgetMapper;
 class QAbstractItemModel;
 class QSortFilterProxyModel;
+class QStandardItemModel;
 
 namespace CSMSettings {
     class IViewAdapter;
@@ -43,7 +44,7 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        BooleanView *createView (CSMSettings::DefinitionModel &model,
+        BooleanView *createView (QStandardItemModel &model,
                                  const CSMSettings::Setting *setting);
     };
 }

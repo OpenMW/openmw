@@ -5,6 +5,7 @@
 #include <QDataWidgetMapper>
 #include <QDebug>
 #include <QApplication>
+#include <QStandardItemModel>
 
 #include "textview.hpp"
 #include "../../model/settings/setting.hpp"
@@ -22,7 +23,7 @@ CSVSettings::TextView::TextView(QAbstractItemModel *textAdapter,
 }
 
 void CSVSettings::TextView::buildView(const CSMSettings::Setting *setting)
-{
+{/*
     setObjectName (setting->settingName + "_view");
 
     QWidget *widget = 0;
@@ -43,10 +44,11 @@ void CSVSettings::TextView::buildView(const CSMSettings::Setting *setting)
     mTextWidget->setObjectName (setting->settingName + "_textWidget");
 
     viewFrame()->addWidget (mTextWidget, setting->viewRow, setting->viewColumn);
+    */
 }
 
 void CSVSettings::TextView::buildModel (const CSMSettings::Setting *setting)
-{
+{/*
     QByteArray propName;
 
     if (setting->isMultiLineText)
@@ -62,12 +64,12 @@ void CSVSettings::TextView::buildModel (const CSMSettings::Setting *setting)
                  mTextWidget->objectName() + "_mapper");
 
     mapper->setModel (model());
-    mapper->addMapping (mTextWidget, CSMSettings::Setting_Value, propName);
-    mapper->setCurrentIndex(0);
+    mapper->addMapping (mTextWidget, CSMSettings::Static_cast<SettingProperty>(2), propName);
+    mapper->setCurrentIndex(0);*/
 }
 
 CSVSettings::TextView *CSVSettings::TextViewFactory::createView
-    (CSMSettings::DefinitionModel &model, const CSMSettings::Setting *setting)
+    (QStandardItemModel &model, const CSMSettings::Setting *setting)
 {
     QWidget *widgParent = static_cast<QWidget *>(parent());
 

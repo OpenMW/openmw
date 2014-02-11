@@ -62,7 +62,7 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
 {
     bool magnitude = !(flags & ESM::MagicEffect::NoMagnitude);
     bool duration = !(flags & ESM::MagicEffect::NoDuration);
-    bool negative = flags & (ESM::MagicEffect::Negative | ESM::MagicEffect::Harmful);
+    bool negative = flags & (ESM::MagicEffect::Harmful);
 
     int tool = negative ? ESM::Apparatus::Retort : ESM::Apparatus::Albemic;
 
@@ -287,8 +287,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
         record = MWBase::Environment::get().getWorld()->createRecord (newRecord);
     }
 
-    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
-    MWWorld::Class::get (mAlchemist).getContainerStore (mAlchemist).add (ref.getPtr(), mAlchemist);
+    mAlchemist.getClass().getContainerStore (mAlchemist).add (record->mId, 1, mAlchemist);
 }
 
 void MWMechanics::Alchemy::increaseSkill()

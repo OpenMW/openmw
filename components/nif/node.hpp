@@ -137,7 +137,11 @@ struct NiNode : Node
         AnimFlag_AutoPlay = 0x0020
     };
     enum BSParticleFlags {
-        ParticleFlag_AutoPlay = 0x0020
+        ParticleFlag_AutoPlay = 0x0020,
+        ParticleFlag_LocalSpace = 0x0080
+    };
+    enum ControllerFlags {
+        ControllerFlag_Active = 0x8
     };
 
     void read(NIFStream *nif)

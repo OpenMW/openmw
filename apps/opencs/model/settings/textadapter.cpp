@@ -4,15 +4,16 @@
 
 #include <QSortFilterProxyModel>
 #include <QDebug>
+#include <QStandardItemModel>
 
-CSMSettings::TextAdapter::TextAdapter(DefinitionModel &model,
+CSMSettings::TextAdapter::TextAdapter(QStandardItemModel &model,
                                       const CSMSettings::Setting *setting,
                                       QObject *parent)
-    : mDelimiter (setting->delimiter),
-      Adapter (model, setting->pageName, setting->settingName,
-               setting->isMultiValue, parent)
+    : mDelimiter (setting->delimiter()),
+      Adapter (model, setting->page(), setting->name(), setting->isMultiValue()
+               , parent)
 {
-    if (setting->isMultiLineText)
+    if (setting->isMultiLine())
         mDelimiter = '\n';
 }
 
@@ -36,7 +37,7 @@ QVariant CSMSettings::TextAdapter::data (const QModelIndex &index,
             qDebug() << "returning single-value...";
             concatenation = filter()->data (
                                 filter()->index (
-                                    filter()->rowCount()-1, Setting_Value
+                                    filter()->rowCount()-1, 2
                                 )
                             ).toString();
             qDebug() << "\t" << concatenation;
@@ -47,7 +48,7 @@ QVariant CSMSettings::TextAdapter::data (const QModelIndex &index,
         //a string, delimited by the user-defined delimiter.
         for (int i = 0; i < filter()->rowCount(); i++)
         {
-            QModelIndex idx = filter()->index (i, Setting_Value);
+            QModelIndex idx = filter()->index (i, 2);
 
             if (!concatenation.isEmpty())
                 concatenation += mDelimiter;
@@ -99,7 +100,7 @@ bool CSMSettings::TextAdapter::setData (const QModelIndex &index,
     //model definitions
     for (int i = 0; i < filter()->rowCount(); i++)
     {
-        QModelIndex idx = filter()->index(i, Setting_Value);
+        QModelIndex idx = filter()->index(i, 2);
         isDifferent = !valueList.contains(filter()->data (idx).toString());
 
         if (isDifferent)
@@ -117,7 +118,7 @@ bool CSMSettings::TextAdapter::setData (const QModelIndex &index,
             for (int i = 0; i < filter()->rowCount(); i++)
             {
                 valueFound = (value == filter()->data (
-                                  filter()->index (i, Setting_Value)).toString());
+                                  filter()->index (i, 2)).toString());
 
                 if (valueFound)
                     break;
@@ -135,14 +136,14 @@ bool CSMSettings::TextAdapter::setData (const QModelIndex &index,
     foreach (const QString &value, valueList)
     {
         qDebug() << "\tinserting value: " << value;
-        model().defineSetting (settingName(), pageName(), value);
+       // model().defineSetting (settingName(), pageName(), value);
     }
     return true;
 }
 
 void CSMSettings::TextAdapter::slotLayoutChanged()
 {
-    QModelIndex idx = index(0, Setting_Value, QModelIndex());
+    QModelIndex idx = index(0, 2, QModelIndex());
     emit dataChanged (idx, idx);
 }
 

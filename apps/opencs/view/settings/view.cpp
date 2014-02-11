@@ -15,9 +15,9 @@ CSVSettings::View::View(QAbstractItemModel *model,
                         const CSMSettings::Setting *setting,
                         QWidget *parent)
 
-    : mModel (model), QWidget(parent), mIsMultiValue (setting->isMultiValue),
-      mValueList (setting->valueList)
-{
+    : mModel (model), QWidget(parent) //, mIsMultiValue (setting->isMultiValue)
+      //mValueList (setting->valueList)
+{/*
     mViewFrame = new SettingBox(true, setting->settingName, parent);
     mViewFrame->setFlat (true);
 
@@ -26,7 +26,7 @@ CSVSettings::View::View(QAbstractItemModel *model,
     else
         mViewFrame->setVLayout();
 
-    setObjectName (setting->settingName);
+    setObjectName (setting->settingName);*/
 }
 
 bool CSVSettings::View::isMultiValue() const

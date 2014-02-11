@@ -8,11 +8,11 @@
 class QAbstractItemModel;
 class QGroupBox;
 class QDataWidgetMapper;
+class QStandardItemModel;
 
 namespace CSMSettings
 {
     class Setting;
-    class DefinitionModel;
 }
 
 namespace CSVSettings
@@ -47,7 +47,7 @@ namespace CSVSettings
     class IViewFactory
     {
     public:
-        virtual View *createView (CSMSettings::DefinitionModel &model,
+        virtual View *createView (QStandardItemModel &model,
                                   const CSMSettings::Setting *setting) = 0;
     };
 }

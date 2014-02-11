@@ -1,5 +1,10 @@
 #include "maindialog.hpp"
 
+#include <components/version/version.hpp>
+
+#include <QLabel>
+#include <QDate>
+#include <QTime>
 #include <QPushButton>
 #include <QFontDatabase>
 #include <QInputDialog>
@@ -66,6 +71,22 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
 
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    // Add version information to bottom of the window
+    QString revision(OPENMW_VERSION_COMMITHASH);
+    QString tag(OPENMW_VERSION_TAGHASH);
+
+    if (revision == tag) {
+        versionLabel->setText(tr("OpenMW %0 release").arg(OPENMW_VERSION));
+    } else {
+        versionLabel->setText(tr("OpenMW development (%0)").arg(revision.left(10)));
+    }
+
+    // Add the compile date and time
+    versionLabel->setToolTip(tr("Compiled on %0 %1").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
+                                                                                    QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
+                                                         QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
+                                                                                    QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
 
     createIcons();
 }
@@ -219,7 +240,7 @@ bool Launcher::MainDialog::showFirstRunDialog()
         }
 
         // Create the file if it doesn't already exist, else the importer will fail
-        QString path = QString::fromStdString(mCfgMgr.getUserPath().string()) + QString("openmw.cfg");
+        QString path = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + QString("openmw.cfg");
         QFile file(path);
 
         if (!file.exists()) {
@@ -334,7 +355,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
 
     QStringList paths;
     paths.append(QString("launcher.cfg"));
@@ -440,9 +461,35 @@ bool Launcher::expansions(Launcher::UnshieldThread& cd)
 
 bool Launcher::MainDialog::setupGameSettings()
 {
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
+    // Load the user config file first, separately
+    // So we can write it properly, uncontaminated
+    QString path = userPath + QLatin1String("openmw.cfg");
+    QFile file(path);
+
+    qDebug() << "Loading config file:" << qPrintable(path);
+
+    if (file.exists()) {
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                       Please make sure you have the right permissions \
+                                       and try again.<br>").arg(file.fileName()));
+                                       msgBox.exec();
+            return false;
+        }
+        QTextStream stream(&file);
+        stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+        mGameSettings.readUserFile(stream);
+    }
+
+    // Now the rest
     QStringList paths;
     paths.append(userPath + QString("openmw.cfg"));
     paths.append(QString("openmw.cfg"));
@@ -565,7 +612,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
 {
     mGraphicsSettings.setMultiValueEnabled(false);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
     QFile localDefault(QString("settings-default.cfg"));
@@ -652,7 +699,7 @@ bool Launcher::MainDialog::writeSettings()
     mGraphicsPage->saveSettings();
     mDataFilesPage->saveSettings();
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QDir dir(userPath);
 
     if (!dir.exists()) {

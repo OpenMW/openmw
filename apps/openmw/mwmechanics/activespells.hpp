@@ -11,35 +11,8 @@
 
 #include <components/esm/defs.hpp>
 
-namespace ESM
-{
-    struct Spell;
-    struct EffectList;
-}
-
-namespace MWWorld
-{
-    class Ptr;
-}
-
 namespace MWMechanics
 {
-    struct ActiveSpellParams
-    {
-        // Only apply effects of this range type
-        ESM::RangeType mRange;
-
-        // When the spell was added
-        MWWorld::TimeStamp mTimeStamp;
-
-        // Random factor for each effect
-        std::vector<float> mRandom;
-
-        // Display name, we need this for enchantments, which don't have a name - so you need to supply the
-        // name of the item with the enchantment to addSpell
-        std::string mName;
-    };
-
     /// \brief Lasting spell effects
     ///
     /// \note The name of this class is slightly misleading, since it also handels lasting potion
@@ -48,12 +21,32 @@ namespace MWMechanics
     {
         public:
 
+            // Parameters of an effect concerning lasting effects.
+            // Note we are not using ENAMstruct since the magnitude may be modified by magic resistance, etc.
+            // It could also be a negative magnitude, in case of inversing an effect, e.g. Absorb spell causes damage on target, but heals the caster.
+            struct Effect
+            {
+                float mMagnitude;
+                EffectKey mKey;
+                float mDuration;
+            };
+
+            struct ActiveSpellParams
+            {
+                std::vector<Effect> mEffects;
+                MWWorld::TimeStamp mTimeStamp;
+                std::string mDisplayName;
+
+                // Handle to the caster that that inflicted this spell on us
+                std::string mCasterHandle;
+            };
+
             typedef std::multimap<std::string, ActiveSpellParams > TContainer;
             typedef TContainer::const_iterator TIterator;
 
         private:
 
-            mutable TContainer mSpells; // spellId, (time of casting, relative magnitude)
+            mutable TContainer mSpells;
             mutable MagicEffects mEffects;
             mutable bool mSpellsChanged;
             mutable MWWorld::TimeStamp mLastUpdate;
@@ -62,29 +55,9 @@ namespace MWMechanics
             
             void rebuildEffects() const;
 
-            std::pair<ESM::EffectList, std::pair<bool, bool> > getEffectList (const std::string& id) const;
-            ///< @return (EffectList, (isIngredient, stacks))
-
-        public:
-
-            ActiveSpells();
-
-            bool addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range = ESM::RT_Self, const std::string& name = "");
-            ///< Overwrites an existing spell with the same ID. If the spell does not have any
-            /// non-instant effects, it is ignored.
-            /// @param id
-            /// @param actor
-            /// @param range Only effects with range type \a range will be applied
-            /// @param name Display name for enchantments, since they don't have a name in their record
-            ///
-            /// \return Has the spell been added?
-
-            void removeSpell (const std::string& id);
-
-            bool isSpellActive (std::string id) const;
-            ///< case insensitive
-
-            const MagicEffects& getMagicEffects() const;
+            double timeToExpire (const TIterator& iterator) const;
+            ///< Returns time (in in-game hours) until the spell pointed to by \a iterator
+            /// expires.
 
             const TContainer& getActiveSpells() const;
 
@@ -92,9 +65,41 @@ namespace MWMechanics
 
             TIterator end() const;
 
-            double timeToExpire (const TIterator& iterator) const;
-            ///< Returns time (in in-game hours) until the spell pointed to by \a iterator
-            /// expires.
+        public:
+
+            ActiveSpells();
+
+            /// Add lasting effects
+            ///
+            /// \brief addSpell
+            /// \param id ID for stacking purposes.
+            /// \param stack If false, the spell is not added if one with the same ID exists already.
+            /// \param effects
+            /// \param displayName Name for display in magic menu.
+            /// \param casterHandle
+            ///
+            void addSpell (const std::string& id, bool stack, std::vector<Effect> effects,
+                           const std::string& displayName, const std::string& casterHandle);
+
+            /// Removes the active effects from this spell/potion/.. with \a id
+            void removeEffects (const std::string& id);
+
+            /// Remove all active effects with this effect id
+            void purgeEffect (short effectId);
+
+            /// Remove all active effects, if roll succeeds (for each effect)
+            void purgeAll (float chance);
+
+            /// Remove all effects with CASTER_LINKED flag that were cast by \a actorHandle
+            void purge (const std::string& actorHandle);
+
+            bool isSpellActive (std::string id) const;
+            ///< case insensitive
+
+            const MagicEffects& getMagicEffects() const;
+
+            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
+
     };
 }
 

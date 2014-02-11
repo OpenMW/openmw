@@ -18,6 +18,8 @@
 #include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include <components/esm/loadgmst.hpp>
 #include "../mwworld/esmstore.hpp"
 
@@ -106,7 +108,7 @@ namespace MWWorld
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
-                                  bool isFlying, float waterlevel, OEngine::Physic::PhysicEngine *engine)
+                                  bool isFlying, float waterlevel, float slowFall, OEngine::Physic::PhysicEngine *engine)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -227,7 +229,10 @@ namespace MWWorld
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
-                inertia.z += time*-627.2f;
+                float diff = time*-627.2f;
+                if (inertia.z < 0)
+                    diff *= slowFall;
+                inertia.z += diff;
                 physicActor->setInertialForce(inertia);
             }
             physicActor->setOnGround(isOnGround);
@@ -573,9 +578,39 @@ namespace MWWorld
                 if(cell->hasWater())
                     waterlevel = cell->mWater;
 
+                float oldHeight = iter->first.getRefData().getPosition().pos[2];
+
+                const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
+
+                bool waterCollision = false;
+                if (effects.get(ESM::MagicEffect::WaterWalking).mMagnitude
+                        && cell->hasWater()
+                        && !world->isUnderwater(iter->first.getCell(),
+                                               Ogre::Vector3(iter->first.getRefData().getPosition().pos)))
+                    waterCollision = true;
+
+                btStaticPlaneShape planeShape(btVector3(0,0,1), waterlevel);
+                btCollisionObject object;
+                object.setCollisionShape(&planeShape);
+
+                if (waterCollision)
+                    mEngine->dynamicsWorld->addCollisionObject(&object);
+
+                // 100 points of slowfall reduce gravity by 90% (this is just a guess)
+                float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).mMagnitude / 100.f) * 0.9f), 0.9f);
+
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
-                                                            waterlevel, mEngine);
+                                                            waterlevel, slowFall, mEngine);
+
+                if (waterCollision)
+                    mEngine->dynamicsWorld->removeCollisionObject(&object);
+
+                float heightDiff = newpos.z - oldHeight;
+
+                if (heightDiff < 0)
+                    iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
+
                 mMovementResults.push_back(std::make_pair(iter->first, newpos));
             }
 

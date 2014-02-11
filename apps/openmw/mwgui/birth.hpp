@@ -38,6 +38,7 @@ namespace MWGui
     protected:
         void onSelectBirth(MyGUI::ListBox* _sender, size_t _index);
 
+        void onAccept(MyGUI::ListBox* _sender, size_t index);
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
 

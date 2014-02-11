@@ -1,5 +1,5 @@
-#ifndef _COMPONENTS_SETTINGS_H
-#define _COMPONENTS_SETTINGS_H
+#ifndef COMPONENTS_SETTINGS_H
+#define COMPONENTS_SETTINGS_H
 
 #include <OgreConfigFile.h>
 

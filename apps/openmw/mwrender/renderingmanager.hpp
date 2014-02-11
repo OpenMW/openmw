@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDERING_MANAGER_H
-#define _GAME_RENDERING_MANAGER_H
+#ifndef GAME_RENDERING_MANAGER_H
+#define GAME_RENDERING_MANAGER_H
 
 #include "sky.hpp"
 #include "debugging.hpp"
@@ -21,10 +21,7 @@
 
 namespace Ogre
 {
-    class SceneManager;
     class SceneNode;
-    class Quaternion;
-    class Vector3;
 }
 
 namespace MWWorld
@@ -48,11 +45,10 @@ namespace MWRender
     class Shadows;
     class LocalMap;
     class Water;
-    class Compositors;
-    class ExternalRendering;
     class GlobalMap;
     class VideoPlayer;
     class Animation;
+    class EffectManager;
 
 class RenderingManager: private RenderingInterface, public Ogre::RenderTargetListener, public OEngine::Render::WindowSizeListener
 {
@@ -91,12 +87,14 @@ public:
 
     bool vanityRotateCamera(const float *rot);
     void setCameraDistance(float dist, bool adjust = false, bool override = true);
+    float getCameraDistance() const;
 
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
-    Compositors* getCompositors();
+
+    MWRender::Camera* getCamera() const;
 
     void toggleLight();
     bool toggleRenderMode(int mode);
@@ -140,9 +138,6 @@ public:
     /// Currently for NPCs only. Rebuilds the NPC, updating their root model, animation sources,
     /// and equipment.
     void rebuildPtr(const MWWorld::Ptr &ptr);
-
-    /// Update actor model parts.
-    void updateAnimParts(const MWWorld::Ptr &ptr);
 
     void update (float duration, bool paused);
 
@@ -208,13 +203,14 @@ public:
     bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored
 
-    void setupExternalRendering (MWRender::ExternalRendering& rendering);
-
     Animation* getAnimation(const MWWorld::Ptr &ptr);
 
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
     void frameStarted(float dt, bool paused);
+    void screenshot(Ogre::Image& image, int w, int h);
+
+    void spawnEffect (const std::string& model, const std::string& texture, const Ogre::Vector3& worldPosition, float scale=1.f);
 
 protected:
     virtual void windowResized(int x, int y);
@@ -226,8 +222,6 @@ private:
     void applyFog(bool underwater);
 
     void setMenuTransparency(float val);
-
-    void applyCompositors();
 
     bool mSunEnabled;
 
@@ -245,8 +239,10 @@ private:
 
     OEngine::Render::OgreRenderer &mRendering;
 
-    MWRender::Objects mObjects;
-    MWRender::Actors mActors;
+    MWRender::Objects* mObjects;
+    MWRender::Actors* mActors;
+
+    MWRender::EffectManager* mEffectManager;
 
     MWRender::NpcAnimation *mPlayerAnimation;
 
@@ -271,8 +267,6 @@ private:
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
-
-    MWRender::Compositors* mCompositors;
 
     VideoPlayer* mVideoPlayer;
 };

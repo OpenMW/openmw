@@ -50,12 +50,12 @@ void CSVSettings::Page::setupViews
                          CSMSettings::DefinitionModel &definitionModel)
 {
     QSortFilterProxyModel *filter = buildFilter
-            (declarationModel, CSMSettings::Setting_Page, objectName());
+            (declarationModel, CSMSettings::Property_Page, objectName());
 
     for (int i = 0; i < filter->rowCount(); i++)
     {
         QString settingName = filter->data (filter->index
-                                    (i, CSMSettings::Setting_Name)).toString();
+                                    (i, CSMSettings::Property_Name)).toString();
 
         const CSMSettings::Setting *setting =
            declarationModel.getSetting (objectName(), settingName);
@@ -67,7 +67,7 @@ void CSVSettings::Page::setupViews
 void CSVSettings::Page::addView (CSMSettings::DefinitionModel &model,
                                  const CSMSettings::Setting *setting)
 {
-    if (setting->viewType == ViewType_Undefined)
+   /* if (setting->viewType == ViewType_Undefined)
         return;
 
     View *view = 0;
@@ -93,7 +93,7 @@ void CSVSettings::Page::addView (CSMSettings::DefinitionModel &model,
     if (viewCol == -1)
         viewCol = 0;
 
-    mBox->addWidget (view->viewFrame(), viewRow, viewCol);
+    mBox->addWidget (view->viewFrame(), viewRow, viewCol);*/
 }
 
 void CSVSettings::Page::buildFactories()
@@ -104,7 +104,7 @@ void CSVSettings::Page::buildFactories()
 
 QSortFilterProxyModel *CSVSettings::Page::buildFilter
                                              (QAbstractItemModel &model,
-                                              CSMSettings::SettingColumn column,
+                                              CSMSettings::SettingProperty column,
                                               const QString &expression)
 {
     QSortFilterProxyModel *filter = new QSortFilterProxyModel (this);

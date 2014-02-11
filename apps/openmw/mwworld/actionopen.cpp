@@ -5,6 +5,8 @@
 
 #include "../mwgui/container.hpp"
 
+#include "../mwmechanics/disease.hpp"
+
 #include "class.hpp"
 #include "containerstore.hpp"
 
@@ -20,6 +22,8 @@ namespace MWWorld
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;
+
+        MWMechanics::diseaseContact(actor, getTarget());
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container);
         MWBase::Environment::get().getWindowManager()->getContainerWindow()->open(getTarget(), mLoot);

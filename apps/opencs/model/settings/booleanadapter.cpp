@@ -1,4 +1,5 @@
 #include <QStringList>
+#include <QStandardItemModel>
 
 #include "definitionmodel.hpp"
 #include "booleanadapter.hpp"
@@ -6,24 +7,24 @@
 
 #include <QDebug>
 
-CSMSettings::BooleanAdapter::BooleanAdapter (DefinitionModel &model,
+CSMSettings::BooleanAdapter::BooleanAdapter (QStandardItemModel &model,
                                             const CSMSettings::Setting *setting,
                                             QObject *parent)
 
-    : Adapter (model, setting->pageName, setting->settingName,
-               setting->isMultiValue, parent)
+    : Adapter (model, setting->page(), setting->name(),
+               setting->isMultiValue(), parent)
 {
 
     //create a list of QString pairs which represent the setting values and
     //whether or not they are set (true / false)
-    foreach (const QString &listValue, setting->valueList)
+    foreach (const QString &listValue, setting->declaredValues())
     {
         QPair<QString, QBool *> settingPair(listValue, new QBool(true));
 
         for (int i = 0; i < filter()->rowCount(); i++)
         {
             QString modelValue = filter()->data(
-                                filter()->index (i, Setting_Value)).toString();
+                                filter()->index (i, 2)).toString();
 
             if (modelValue == listValue)
             {
@@ -50,7 +51,7 @@ void CSMSettings::BooleanAdapter::slotLayoutChanged()
         for (int j = 0; j < filter()->rowCount(); j++)
         {
             QString filterValue = filter()->data (
-                        filter()->index(j, Setting_Value)
+                        filter()->index(j, 2)
                         ).toString();
 
             settingFound = ( filterValue  == settingValue);
@@ -69,7 +70,7 @@ void CSMSettings::BooleanAdapter::slotLayoutChanged()
                 data.second = new QBool (false);
         }
         mSettings.replace(i, data);
-        QModelIndex idx = index(i, BooleanSetting_ValueState, QModelIndex());
+        QModelIndex idx = index(i, BooleanProperty_ValueState, QModelIndex());
         emit dataChanged (idx, idx);
     }
 }
@@ -112,7 +113,7 @@ QVariant CSMSettings::BooleanAdapter::data(const QModelIndex &index, int role) c
     if (!validIndex(index))
         return QVariant();
 
-    SettingColumn column = static_cast<SettingColumn> (index.column());
+    SettingProperty column = static_cast<SettingProperty> (index.column());
 
     switch (role)
     {
@@ -121,11 +122,11 @@ QVariant CSMSettings::BooleanAdapter::data(const QModelIndex &index, int role) c
 
         switch (column)
         {
-        case BooleanSetting_Value:
+        case BooleanProperty_Value:
             return mSettings.at(index.row()).first;
         break;
 
-        case BooleanSetting_ValueState: // (true / false)
+        case BooleanProperty_ValueState: // (true / false)
             return QVariant(*(mSettings.at(index.row()).second));
         break;
 

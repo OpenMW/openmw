@@ -19,12 +19,12 @@ namespace MWWorld
     void ActionEquip::executeImp (const Ptr& actor)
     {
         MWWorld::Ptr object = getTarget();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
+        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
 
-        std::pair <int, std::string> result = MWWorld::Class::get (object).canBeEquipped (object, actor);
+        std::pair <int, std::string> result = object.getClass().canBeEquipped (object, actor);
 
         // display error message if the player tried to equip something
-        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
             MWBase::Environment::get().getWindowManager()->messageBox(result.second);
 
         switch(result.first)
@@ -40,7 +40,7 @@ namespace MWWorld
         }
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
 
         // retrieve ContainerStoreIterator to the item
         MWWorld::ContainerStoreIterator it = invStore.begin();
@@ -54,18 +54,18 @@ namespace MWWorld
 
         assert(it != invStore.end());
 
-        bool equipped = false;
-
         // equip the item in the first free slot
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        for (std::vector<int>::const_iterator slot=slots_.first.begin();
+            slot!=slots_.first.end(); ++slot)
         {
+            // if the item is equipped already, nothing to do
+            if (invStore.getSlot(*slot) == it)
+                return;
 
             // if all slots are occupied, replace the last slot
-            if (slot == --slots.first.end())
+            if (slot == --slots_.first.end())
             {
                 invStore.equip(*slot, it, actor);
-                equipped = true;
                 break;
             }
 
@@ -73,15 +73,8 @@ namespace MWWorld
             {
                 // slot is not occupied
                 invStore.equip(*slot, it, actor);
-                equipped = true;
                 break;
             }
         }
-
-        std::string script = MWWorld::Class::get(object).getScript(object);
-        
-        /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
-        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && script != "")
-            object.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }

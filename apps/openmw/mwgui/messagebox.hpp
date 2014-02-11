@@ -19,28 +19,20 @@ namespace MWGui
     class InteractiveMessageBox;
     class MessageBoxManager;
     class MessageBox;
-
-    struct MessageBoxManagerTimer {
-        float current;
-        float max;
-        MessageBox *messageBox;
-    };
-
     class MessageBoxManager
     {
         public:
-            MessageBoxManager ();
+            MessageBoxManager (float timePerChar);
+            ~MessageBoxManager ();
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message, bool stat = false);
             void removeStaticMessageBox ();
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
             bool isInteractiveMessageBox ();
 
-            void removeMessageBox (float time, MessageBox *msgbox);
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
 
-            void okayPressed();
             int readPressedButton ();
 
             typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
@@ -54,7 +46,6 @@ namespace MWGui
             std::vector<MessageBox*> mMessageBoxes;
             InteractiveMessageBox* mInterMessageBoxe;
             MessageBox* mStaticMessageBox;
-            std::vector<MessageBoxManagerTimer> mTimers;
             float mMessageBoxSpeed;
             int mLastButtonPressed;
     };
@@ -67,14 +58,13 @@ namespace MWGui
             int getHeight ();
             void update (int height);
 
-            bool mMarkedToDelete;
+            float mCurrentTime;
+            float mMaxTime;
 
         protected:
             MessageBoxManager& mMessageBoxManager;
-            int mHeight;
             const std::string& mMessage;
             MyGUI::EditBox* mMessageWidget;
-            int mFixedWidth;
             int mBottomPadding;
             int mNextBoxPadding;
     };
@@ -83,7 +73,6 @@ namespace MWGui
     {
         public:
             InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
-            void okayPressed ();
             void mousePressed (MyGUI::Widget* _widget);
             int readPressedButton ();
 
@@ -91,6 +80,7 @@ namespace MWGui
 
         private:
             void buttonActivated (MyGUI::Widget* _widget);
+            void onKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
             MessageBoxManager& mMessageBoxManager;
             MyGUI::EditBox* mMessageWidget;

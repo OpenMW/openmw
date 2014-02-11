@@ -3,6 +3,8 @@
 
 #include "view.hpp"
 
+class QStandardItemModel;
+
 namespace CSVSettings
 {
     class ListView : public View
@@ -29,7 +31,7 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        ListView *createView (CSMSettings::DefinitionModel &model,
+        ListView *createView (QStandardItemModel &model,
                                const CSMSettings::Setting *setting);
     };
 }

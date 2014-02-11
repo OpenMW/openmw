@@ -16,7 +16,6 @@
 
 #include "definitionmodel.hpp"
 #include "../../view/settings/support.hpp"
-#include "declarationitem.hpp"
 
 #include <QDebug>
 
@@ -85,19 +84,21 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
     section = "Display Format";
     {
+        QString defaultValue = "Icon and Text";
+
         Setting *rsd = declareSingleBool ("Record Status Display",
                                                         section, defaultValue);
 
-        Settingn *ritd = declareSingleBool ("Referenceable ID Type Display",
+        Setting *ritd = declareSingleBool ("Referenceable ID Type Display",
                                                         section, defaultValue);
 
-        QString defaultValue = "Icon and Text";
+
         QStringList dfValues;
 
         dfValues << defaultValue << "Icon Only" << "Text Only";
 
-        rsd->setValueList (dfValues);
-        ritd->setValueList (dfValues);
+        rsd->setPropertyList (CSMSettings::PropertyList_DefinedValues, dfValues);
+        ritd->setPropertyList (CSMSettings::PropertyList_DefinedValues, dfValues);
     }
 }
 
@@ -146,10 +147,9 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     //local
     filepaths << QString::fromStdString
                                 (mCfgMgr.getLocalPath().string()) + fileName;
-
     //user
     filepaths << QString::fromStdString
-                                (mCfgMgr.getUserPath().string()) + fileName;
+                            (mCfgMgr.getUserConfigPath().string()) + fileName;
 
     bool success = loadSettingsFromFile (filepaths);
 

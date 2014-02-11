@@ -84,7 +84,7 @@ namespace MWClass
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 
-            virtual float getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
     };
 }
 

@@ -1,37 +1,58 @@
 #include "setting.hpp"
 
+#include <QDebug>
+#include <QStandardItem>
+
 CSMSettings::Setting::Setting(QObject *parent) : QObject(parent)
 {
     //create a list with the required number of entries for a setting
     for (int i = 0; i < sSettingPropertyCount; i++)
-        mSettingRow.append(0);
+        mSettingRow.append(new QStandardItem());
 }
 
-QVariant CSMSettings::Setting::item (SettingProperty prop) const
+const QVariant &CSMSettings::Setting::property (SettingProperty prop) const
 {
-    SettingItem *item = mSettingRow.at(prop);
+    const QStandardItem *item = mSettingRow.at(prop);
 
     if (item)
-        return item->data();
+        return item->data(Qt::DisplayRole);
 
     return QVariant();
 }
 
-QStringList &CSMSettings::Setting::itemList
-                                        (SettingPropertyList propertyList) const
+const QStringList &CSMSettings::Setting::propertyList
+                                        (SettingPropertyList propertyRow) const
 {
-    SettingItem *item = mSettingRow.at(0);
+    const QStandardItem *item = mSettingRow.at(0);
 
     if (item)
-        return item->childValues(propertyList);
+        return item->data(Qt::UserRole).toStringList();
 
     return QStringList();
 }
 
-bool CSMSettings::Setting::setRowItem(int column, SettingItem *item)
+void CSMSettings::Setting::setProperty (int column, QString value)
+{
+    QStandardItem *item = new QStandardItem();
+    item->setData(value, Qt::DisplayRole);
+    setProperty(column, item);
+    qDebug() << "set property " << column << " = " << value;
+    qDebug() << "stored value = " << item->data(Qt::DisplayRole);
+}
+
+bool CSMSettings::Setting::setProperty(int column, QStandardItem *item)
 {
     if (column < 0 || column >= mSettingRow.size())
         return false;
 
     mSettingRow.replace(column, item);
+}
+
+void CSMSettings::Setting::setPropertyList (SettingPropertyList propList,
+                                                        const QStringList &list)
+{
+    QStandardItem *item = mSettingRow.at(0);
+
+    if (propList > -1 && propList < item->rowCount())
+        item->child(propList)->setData(list);
 }

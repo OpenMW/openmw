@@ -16,20 +16,20 @@ void CSVSettings::SettingWindow::createPages (CSMSettings::SettingModel &model)
 {
     QStringList builtPages;
 
-    CSMSettings::DeclarationModel &decModel = model.declarationModel();
-    CSMSettings::DefinitionModel &defModel = model.definitionModel();
+    //CSMSettings::DeclarationModel &decModel = model.declarationModel();
+    //CSMSettings::DefinitionModel &defModel = model.definitionModel();
 
-    for (int i = 0; i < decModel.rowCount(); i++)
+//    for (int i = 0; i < decModel.rowCount(); i++)
     {
-        QModelIndex idx = decModel.index (i, CSMSettings::Setting_Page);
-        QString pageName = decModel.data (idx).toString();
+       // QModelIndex idx = decModel.index (i, CSMSettings::Property_Page);
+       // QString pageName = decModel.data (idx).toString();
 
-        if (builtPages.contains (pageName))
-            continue;
+   //     if (builtPages.contains (pageName))
+   //         continue;
 
-        builtPages << pageName;
+  //      builtPages << pageName;
 
-        mPages << new Page (pageName, decModel, defModel, false, this);
+     //   mPages << new Page (pageName, decModel, defModel, false, this);
     }
 }
 

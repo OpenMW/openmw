@@ -36,10 +36,16 @@ namespace CSVSettings {
 
         QListWidget *mPageListWidget;
         QStackedWidget *mStackedWidget;
+        QStandardItemModel *mModel;
+        bool mDebugMode;
 
     public:
 
         explicit Dialog(QMainWindow *parent = 0);
+
+        ///Enables setting debug mode.  When the dialog opens, a page is created
+        ///which displays the SettingModel's contents in a Tree view.
+        void enableDebugMode (bool state, QStandardItemModel *model = 0);
 
     protected:
 
@@ -53,7 +59,7 @@ namespace CSVSettings {
         void buildPages();
         void buildPageListWidget (QWidget *centralWidget);
         void buildStackedWidget (QWidget *centralWidget);
-        void addCustomPage();
+        void addDebugPage();
 
     public slots:
 

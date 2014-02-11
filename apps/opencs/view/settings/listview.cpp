@@ -6,11 +6,12 @@
 #include <QListView>
 #include <QComboBox>
 #include <QApplication>
+#include <QStandardItemModel>
 CSVSettings::ListView::ListView(QAbstractItemModel *listModel,
                                 const CSMSettings::Setting *setting,
                                 QWidget *parent)
     : View(listModel, setting, parent)
-{
+{/*
     setObjectName (setting->settingName + "_view");
 
     QWidget *widget = 0;
@@ -37,7 +38,7 @@ CSVSettings::ListView::ListView(QAbstractItemModel *listModel,
     mListWidget->setObjectName (setting->settingName + "_listWidget");
 
     viewFrame()->addWidget (mListWidget, setting->viewRow, setting->viewColumn);
-    build(setting);
+    build(setting);*/
 }
 
 void CSVSettings::ListView::build(const CSMSettings::Setting *setting)
@@ -46,12 +47,12 @@ void CSVSettings::ListView::build(const CSMSettings::Setting *setting)
 }
 
 CSVSettings::ListView *CSVSettings::ListViewFactory::createView
-    (CSMSettings::DefinitionModel &model,const CSMSettings::Setting *setting)
-{
+    (QStandardItemModel &model,const CSMSettings::Setting *setting)
+{/*
     //create a generic adapter just for the setting filter it
     //maintains internally.
     CSMSettings::Adapter *adapter = new CSMSettings::Adapter(model,
         setting->pageName,setting->settingName, setting->isMultiValue, this);
-
+*/
   //  return new ListView(adapter->filter(), setting, this);
 }

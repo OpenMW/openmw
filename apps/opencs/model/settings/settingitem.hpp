@@ -12,7 +12,7 @@ namespace CSMSettings
         QStringList mValues;
 
     public:
-        explicit SettingItem();
+        explicit SettingItem(const QString &data);
 
         void setChildValues (const QStringList &list);
 
@@ -21,6 +21,13 @@ namespace CSMSettings
 
         const QStringList   &values() const;
         QStringList         values();
+
+        QVariant data(int role = Qt::UserRole + 1) const
+                                            { return QStandardItem::data(); }
+
+        void setData (const QVariant &value, int role = Qt::UserRole + 1)
+                                       { QStandardItem::setData (value, role); }
+
 
     };
 }

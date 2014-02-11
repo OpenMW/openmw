@@ -3,7 +3,7 @@
 #include "setting.hpp"
 
 #include <QDebug>
-
+#include <QStringList>
 
 CSMSettings::DeclarationModel::DeclarationModel(QObject *parent) :
     QAbstractItemModel(parent)
@@ -26,7 +26,7 @@ QVariant CSMSettings::DeclarationModel::data(const QModelIndex &index, int role)
 
     Setting *setting = mDeclarations.at(index.row()).second.second;
 
-    SettingColumn columnEnum = static_cast<SettingColumn>(index.column());
+    SettingProperty columnEnum = static_cast<SettingProperty>(index.column());
 
     switch (role)
     {
@@ -35,32 +35,32 @@ QVariant CSMSettings::DeclarationModel::data(const QModelIndex &index, int role)
 
         switch (columnEnum)
         {
-        case Setting_Name:
-            return setting->settingName;
+        case Property_Name:
+            return setting->name();
         break;
 
-        case Setting_Page:
-            return setting->pageName;
+        case Property_Page:
+            return setting->page();
         break;
 
-        case Setting_DefaultValue:
-            return setting->defaultValue;
+        case Property_DefaultValue:
+            return setting->defaultValue();
         break;
 
-        case Setting_ValueList:
-            return setting->valueList;
+        case PropertyList_DeclaredValues:
+            return setting->propertyList(PropertyList_DeclaredValues);
         break;
 
-        case Setting_ViewType:
-            return static_cast<int> (setting->viewType);
+        case Property_ViewType:
+            return static_cast<int> (setting->viewType());
         break;
 
-        case Setting_ValueCapacity:
-            return setting->isMultiValue;
+        case Property_IsMultiValue:
+            return setting->isMultiValue();
         break;
 
-        case Setting_Orientation:
-            return setting->isHorizontal;
+        case Property_IsHorizontal:
+            return setting->isHorizontal();
         break;
 
         default:
@@ -147,7 +147,7 @@ CSMSettings::Setting *CSMSettings::DeclarationModel::declareSetting (
         const QString &pageName, const QString &settingName,
         const QStringList &valueList, const QString &defaultValue,
         const QString &inputMask, bool isHorizontal)
-{
+{/*
     Setting *setting =
             new Setting(viewType, settingName, pageName);
 
@@ -167,7 +167,8 @@ CSMSettings::Setting *CSMSettings::DeclarationModel::declareSetting (
 
     mDeclarations.append(decListItem);
 
-    return setting;
+    return setting;*/
+    return 0;
 }
 
 

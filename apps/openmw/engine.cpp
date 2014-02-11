@@ -1,11 +1,13 @@
 #include "engine.hpp"
 
-#include "components/esm/loadcell.hpp"
+#include <stdexcept>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
 #include <MyGUI_WidgetManager.h>
+
+#include <SDL.h>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -17,6 +19,8 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/nifogre/ogrenifloader.hpp>
+
+#include <components/esm/loadcell.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -39,8 +43,7 @@
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
-
-#include <SDL.h>
+#include "mwstate/statemanagerimp.hpp"
 
 void OMW::Engine::executeLocalScripts()
 {
@@ -61,10 +64,6 @@ void OMW::Engine::executeLocalScripts()
     }
 
     localScripts.setIgnore (MWWorld::Ptr());
-}
-
-void OMW::Engine::setAnimationVerbose(bool animverbose)
-{
 }
 
 bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
@@ -90,31 +89,47 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (mUseSound)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
-        // global scripts
-        MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+        bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
-        bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
+        // update game state
+        MWBase::Environment::get().getStateManager()->update (frametime);
 
-        // local scripts
-        executeLocalScripts(); // This does not handle the case where a global script causes a cell
-                               // change, followed by a cell change in a local script during the same
-                               // frame.
+        if (MWBase::Environment::get().getStateManager()->getState()==
+            MWBase::StateManager::State_Running)
+        {
+            // global scripts
+            MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
-        // passing of time
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWorld()->advanceTime(
-                frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
+            bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
 
+            // local scripts
+            executeLocalScripts(); // This does not handle the case where a global script causes a
+                                    // cell change, followed by a cell change in a local script during
+                                    // the same frame.
 
-        if (changed) // keep change flag for another frame, if cell changed happend in local script
-            MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+            if (changed) // keep change flag for another frame, if cell changed happened in local script
+                MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+
+            if (!paused)
+                MWBase::Environment::get().getWorld()->advanceTime(
+                    frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
+        }
+
 
         // update actors
         MWBase::Environment::get().getMechanicsManager()->update(frametime,
-            MWBase::Environment::get().getWindowManager()->isGuiMode());
+            paused);
+
+        if (MWBase::Environment::get().getStateManager()->getState()==
+            MWBase::StateManager::State_Running)
+        {
+            MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
+            if(!paused && player.getClass().getCreatureStats(player).isDead())
+                MWBase::Environment::get().getStateManager()->endGame();
+        }
 
         // update world
-        MWBase::Environment::get().getWorld()->update(frametime, MWBase::Environment::get().getWindowManager()->isGuiMode());
+        MWBase::Environment::get().getWorld()->update(frametime, paused);
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -137,7 +152,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mFpsLevel(0)
   , mVerboseScripts (false)
-  , mNewGame (false)
+  , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
   , mScriptContext (0)
@@ -147,6 +162,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(NULL)
   , mActivationDistanceOverride(-1)
+  , mGrab(true)
 
 {
     std::srand ( std::time(NULL) );
@@ -158,6 +174,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
         //kindly ask SDL not to trash our OGL context
         //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
         SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+        SDL_SetMainReady();
         if(SDL_Init(flags) != 0)
         {
             throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
@@ -210,7 +227,9 @@ void OMW::Engine::loadBSA()
         }
         else
         {
-            std::cout << "Archive " << *archive << " not found" << std::endl;
+            std::stringstream message;
+            message << "Archive '" << *archive << "' not found";
+            throw std::runtime_error(message.str());
         }
     }
 }
@@ -263,12 +282,7 @@ void OMW::Engine::setCell (const std::string& cellName)
 
 void OMW::Engine::addContentFile(const std::string& file)
 {
-  if (file.find_last_of(".") == std::string::npos)
-  {
-    throw std::runtime_error("Missing extension in content file!");
-  }
-
-  mContentFiles.push_back(file);
+    mContentFiles.push_back(file);
 }
 
 void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
@@ -276,9 +290,9 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
     mVerboseScripts = scriptsVerbosity;
 }
 
-void OMW::Engine::setNewGame(bool newGame)
+void OMW::Engine::setSkipMenu (bool skipMenu)
 {
-    mNewGame = newGame;
+    mSkipMenu = skipMenu;
 }
 
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
@@ -296,7 +310,7 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
     // load user settings if they exist, otherwise just load the default settings as user settings
-    const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
+    const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
     else if (boost::filesystem::exists(localdefault))
@@ -308,18 +322,25 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 
     // load nif overrides
     NifOverrides::Overrides nifOverrides;
-    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg"))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
-    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
-
-    settings.setBool("hardware cursors", "GUI", true);
+    std::string transparencyOverrides = "/transparency-overrides.cfg";
+    std::string materialOverrides = "/material-overrides.cfg";
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + transparencyOverrides))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + transparencyOverrides);
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + transparencyOverrides))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + transparencyOverrides);
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + materialOverrides))
+        nifOverrides.loadMaterialOverrides(mCfgMgr.getLocalPath().string() + materialOverrides);
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + materialOverrides))
+        nifOverrides.loadMaterialOverrides(mCfgMgr.getGlobalPath().string() + materialOverrides);
 
     return settingspath;
 }
 
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
+    mEnvironment.setStateManager (
+        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
+
     Nif::NIFFile::CacheLock cachelock;
 
     std::string renderSystem = settings.getString("render system", "Video");
@@ -368,9 +389,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists);
+    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
@@ -386,10 +407,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->initUI();
-    if (mNewGame)
-        // still redundant work here: recreate CharacterCreation(),
-        // double update visibility etc.
-        window->setNewGame(true);
     window->renderWorldMap();
 
     //Load translation data
@@ -397,7 +414,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     for (size_t i = 0; i < mContentFiles.size(); i++)
       mTranslationDataStorage.loadTranslationData(mFileCollections, mContentFiles[i]);
 
-    Compiler::registerExtensions (mExtensions); 
+    Compiler::registerExtensions (mExtensions);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -410,20 +427,23 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mVerboseScripts, *mScriptContext));
 
     // Create game mechanics system
-    mEnvironment.setMechanicsManager (new MWMechanics::MechanicsManager);
+    MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
+    mEnvironment.setMechanicsManager (mechanics);
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     mEnvironment.getWorld()->renderPlayer();
+    mechanics->buildPlayer();
+    window->updatePlayer();
 
-    if (!mNewGame)
+    // load cell
+    ESM::Position pos;
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+
+    if (!mCellName.empty())
     {
-        // load cell
-        ESM::Position pos;
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-
         if (world->findExteriorPosition(mCellName, pos)) {
             world->changeToExteriorCell (pos);
         }
@@ -433,7 +453,11 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         }
     }
     else
-        mEnvironment.getWorld()->startNewGame();
+    {
+        pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+        pos.rot[0] = pos.rot[1] = pos.pos[2] = 0;
+        world->changeToExteriorCell (pos);
+    }
 
     Ogre::FrameEvent event;
     event.timeSinceLastEvent = 0;
@@ -459,7 +483,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
 void OMW::Engine::go()
 {
-    assert (!mCellName.empty());
     assert (!mContentFiles.empty());
     assert (!mOgre);
 
@@ -480,8 +503,14 @@ void OMW::Engine::go()
     if (!mStartupScript.empty())
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
+    // start in main menu
+    if (!mSkipMenu)
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+    else
+        MWBase::Environment::get().getStateManager()->newGame (true);
+
     // Start the main rendering loop
-    while (!mEnvironment.getRequestExit())
+    while (!mEnvironment.get().getStateManager()->hasQuitRequest())
         Ogre::Root::getSingleton().renderOneFrame();
 
     // Save user settings
@@ -500,14 +529,19 @@ void OMW::Engine::activate()
     if (ptr.isEmpty())
         return;
 
+    if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
+        return;
+
     MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 
     boost::shared_ptr<MWWorld::Action> action =
-        MWWorld::Class::get (ptr).activate (ptr, MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        MWWorld::Class::get (ptr).activate (ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 
     interpreterContext.activate (ptr, action);
 
     std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayerPtr());
 
     if (!script.empty())
     {
@@ -526,7 +560,7 @@ void OMW::Engine::screenshot()
     // Count screenshots.
     int shotCount = 0;
 
-    const std::string screenshotPath = mCfgMgr.getUserPath().string();
+    const std::string& screenshotPath = mCfgMgr.getUserDataPath().string();
 
     // Find the first unused filename with a do-while
     std::ostringstream stream;

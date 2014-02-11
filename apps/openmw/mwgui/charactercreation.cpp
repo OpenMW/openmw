@@ -10,10 +10,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
-#include "../mwworld/player.hpp"
 
 namespace
 {
@@ -47,10 +46,9 @@ namespace
 
     void updatePlayerHealth()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats(player);
-
-        creatureStats.updateHealth();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats(player);
+        npcStats.updateHealth();
     }
 }
 
@@ -75,7 +73,7 @@ namespace MWGui
         mGenerateClassSpecializations[2] = 0;
     }
 
-    void CharacterCreation::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void CharacterCreation::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         if (mReviewDialog)
         {
@@ -113,7 +111,7 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+    void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         if (mReviewDialog)
             mReviewDialog->setSkillValue(parSkill, value);
@@ -220,8 +218,8 @@ namespace MWGui
                 mReviewDialog->setBirthSign(mPlayerBirthSignId);
 
                 {
-                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-                    MWMechanics::CreatureStats stats = MWWorld::Class::get(player).getCreatureStats(player);
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
 
                     mReviewDialog->setHealth ( stats.getHealth()  );
                     mReviewDialog->setMagicka( stats.getMagicka() );
@@ -229,8 +227,8 @@ namespace MWGui
                 }
 
                 {
-                    std::map<int, MWMechanics::Stat<int> > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
-                    for (std::map<int, MWMechanics::Stat<int> >::iterator it = attributes.begin();
+                    std::map<int, MWMechanics::AttributeValue > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
+                    for (std::map<int, MWMechanics::AttributeValue >::iterator it = attributes.begin();
                         it != attributes.end(); ++it)
                     {
                         mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (it->first), it->second);
@@ -238,8 +236,8 @@ namespace MWGui
                 }
 
                 {
-                    std::map<int, MWMechanics::Stat<float> > skills = MWBase::Environment::get().getWindowManager()->getPlayerSkillValues();
-                    for (std::map<int, MWMechanics::Stat<float> >::iterator it = skills.begin();
+                    std::map<int, MWMechanics::SkillValue > skills = MWBase::Environment::get().getWindowManager()->getPlayerSkillValues();
+                    for (std::map<int, MWMechanics::SkillValue >::iterator it = skills.begin();
                         it != skills.end(); ++it)
                     {
                         mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (it->first), it->second);
