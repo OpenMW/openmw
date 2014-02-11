@@ -329,7 +329,10 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
+
+            mMovementAnimVelocity = vel;
         }
+        else mMovementAnimVelocity = 0.0f;
     }
 }
 
@@ -426,6 +429,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mIdleState(CharState_None)
     , mMovementState(CharState_None)
     , mMovementSpeed(0.0f)
+    , mMovementAnimVelocity(0.0f)
     , mDeathState(CharState_None)
     , mHitState(CharState_None)
     , mUpperBodyState(UpperCharState_Nothing)
@@ -857,6 +861,7 @@ bool CharacterController::updateWeaponState()
                 //commenting out following 2 lines will give a bit different combat dynamics(slower)
                 mHitState = CharState_None;
                 mCurrentHit.clear();
+                mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
             }
         }
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
@@ -871,6 +876,13 @@ bool CharacterController::updateWeaponState()
                 start = mAttackType+" min attack";
                 stop = mAttackType+" max attack";
                 mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
+                break;
+            case UpperCharState_MinAttackToMaxAttack:
+                //hack to avoid body pos desync when jumping/sneaking in 'max attack' state
+                if(!mAnimation->isPlaying(mCurrentWeapon))
+                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                        MWRender::Animation::Group_UpperBody, false,
+                        0, mAttackType+" min attack", mAttackType+" max attack", 0.999f, 0);
                 break;
             case UpperCharState_MaxAttackToMinHit:
                 if(mAttackType == "shoot")
@@ -921,6 +933,22 @@ bool CharacterController::updateWeaponState()
         }
     }
     
+     //if playing combat animation and lowerbody is not busy switch to whole body animation
+    if((weaptype != WeapType_None || UpperCharState_UnEquipingWeap) && animPlaying)
+    {
+        if( mMovementState != CharState_None ||
+             mJumpState != JumpState_None ||
+             mHitState != CharState_None ||
+             MWBase::Environment::get().getWorld()->isSwimming(mPtr) ||
+             cls.getCreatureStats(mPtr).getMovementFlag(CreatureStats::Flag_Sneak))
+        {
+            mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_UpperBody);
+        }
+        else
+        {
+            mAnimation->changeGroups(mCurrentWeapon, MWRender::Animation::Group_All);
+        }
+    }
 
     MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
@@ -1212,7 +1240,12 @@ void CharacterController::update(float duration)
             else //avoid z-rotating for knockdown
                 world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
 
-            world->queueMovement(mPtr, vec);
+            // always control actual movement by animation unless this:
+            // FIXME: actor falling/landing should be controlled by physics engine
+            if(mMovementAnimVelocity == 0.0f && (vec.length() > 0.0f || mJumpState != JumpState_None))
+            {
+                world->queueMovement(mPtr, vec);
+            }
         }
 
         movement = vec;

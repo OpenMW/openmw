@@ -1070,9 +1070,8 @@ bool Animation::allowSwitchViewMode() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mGroups == Group_UpperBody 
-                || (stateiter->first.size()==4 && stateiter->first.find("hit") != std::string::npos)
-                || (stateiter->first.find("knock") != std::string::npos) )
+        if(stateiter->second.mPriority > MWMechanics::Priority_Movement 
+                && stateiter->second.mPriority < MWMechanics::Priority_Torch)
             return false;
     }
     return true;
