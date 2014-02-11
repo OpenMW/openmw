@@ -9,6 +9,7 @@
 #include "generator.hpp"
 #include "errorhandler.hpp"
 
+#include <iostream>
 namespace Compiler
 {
     bool ControlParser::parseIfBody (int keyword, const TokenLoc& loc, Scanner& scanner)
@@ -107,7 +108,7 @@ namespace Compiler
             Codes expr;
             mExprParser.append (expr);
 
-            Generator::jump (loop, -static_cast<int> (mCodeBlock.size()-expr.size()));
+            Generator::jump (loop, -static_cast<int> (mCodeBlock.size()+expr.size()));
 
             std::copy (expr.begin(), expr.end(), std::back_inserter (mCode));
 
@@ -121,7 +122,7 @@ namespace Compiler
 
             Codes loop2;
 
-            Generator::jump (loop2, -static_cast<int> (mCodeBlock.size()-expr.size()-skip.size()));
+            Generator::jump (loop2, -static_cast<int> (mCodeBlock.size()+expr.size()+skip.size()));
 
             if (loop.size()!=loop2.size())
                 throw std::logic_error (
