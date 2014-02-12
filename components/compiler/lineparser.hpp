@@ -23,7 +23,7 @@ namespace Compiler
                 SetState, SetLocalVarState, SetGlobalVarState, SetPotentialMemberVarState,
                 SetMemberVarState, SetMemberVarState2,
                 MessageState, MessageCommaState, MessageButtonState, MessageButtonCommaState,
-                EndState,
+                EndState, PotentialEndState /* may have a stray string argument */,
                 PotentialExplicitState, ExplicitState, MemberState
             };
 

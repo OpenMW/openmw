@@ -84,6 +84,13 @@ namespace Compiler
     bool LineParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
+        if (mState==PotentialEndState)
+        {
+            getErrorHandler().warning ("stay string argument (ignoring it)", loc);
+            mState = EndState;
+            return true;
+        }
+
         if (mState==SetState)
         {
             std::string name2 = Misc::StringUtils::lowerCase (name);
@@ -219,13 +226,13 @@ namespace Compiler
                 case Scanner::K_enable:
 
                     Generator::enable (mCode, mLiterals, mExplicit);
-                    mState = EndState;
+                    mState = PotentialEndState;
                     return true;
 
                 case Scanner::K_disable:
 
                     Generator::disable (mCode, mLiterals, mExplicit);
-                    mState = EndState;
+                    mState = PotentialEndState;
                     return true;
             }
 
@@ -406,7 +413,8 @@ namespace Compiler
 
     bool LineParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
-        if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
+        if (code==Scanner::S_newline &&
+            (mState==EndState || mState==BeginState || mState==PotentialEndState))
             return false;
 
         if (code==Scanner::S_comma && mState==MessageState)
