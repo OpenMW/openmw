@@ -66,7 +66,7 @@ namespace MWScript
         {
             const MWWorld::Ptr ptr = getReference (id, false);
 
-            std::string id = MWWorld::Class::get (ptr).getScript (ptr);
+             id = MWWorld::Class::get (ptr).getScript (ptr);
 
             ptr.getRefData().setLocals (
                 *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
@@ -86,7 +86,7 @@ namespace MWScript
         {
             const MWWorld::Ptr ptr = getReference (id, false);
 
-            std::string id = MWWorld::Class::get (ptr).getScript (ptr);
+            id = MWWorld::Class::get (ptr).getScript (ptr);
 
             ptr.getRefData().setLocals (
                 *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
