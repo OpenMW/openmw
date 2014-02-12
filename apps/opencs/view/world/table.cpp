@@ -465,6 +465,8 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
     std::cout << "drop";
     event->acceptProposedAction();
+    QModelIndex index = indexAt(event->pos());
+    std::cout << index.row();
 }
 
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
