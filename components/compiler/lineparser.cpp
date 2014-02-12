@@ -219,6 +219,14 @@ namespace Compiler
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==SetPotentialMemberVarState && keyword==Scanner::K_to)
+        {
+            getErrorHandler().warning ("unknown variable (ignoring set instruction)", loc);
+            SkipParser skip (getErrorHandler(), getContext());
+            scanner.scan (skip);
+            return false;
+        }
+
         if (mState==SetState)
         {
             // allow keywords to be used as variable names when assigning a value to a variable.
