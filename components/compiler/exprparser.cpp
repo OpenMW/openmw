@@ -344,6 +344,17 @@ namespace Compiler
 
     bool ExprParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (const Extensions *extensions = getContext().getExtensions())
+        {
+            std::string argumentType; // ignored
+            bool hasExplicit = false; // ignored
+            if (extensions->isInstruction (keyword, argumentType, hasExplicit))
+            {
+                // pretend this is not a keyword
+                return parseName (loc.mLiteral, loc, scanner);
+            }
+        }
+
         mFirst = false;
 
         if (!mExplicit.empty())
