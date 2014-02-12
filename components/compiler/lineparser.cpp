@@ -332,6 +332,18 @@ namespace Compiler
                     Generator::stopScript (mCode);
                     mState = EndState;
                     return true;
+
+                case Scanner::K_else:
+
+                    getErrorHandler().warning ("stay else (ignoring it)", loc);
+                    mState = EndState;
+                    return true;
+
+                case Scanner::K_endif:
+
+                    getErrorHandler().warning ("stay endif (ignoring it)", loc);
+                    mState = EndState;
+                    return true;
             }
         }
         else if (mState==SetLocalVarState && keyword==Scanner::K_to)
