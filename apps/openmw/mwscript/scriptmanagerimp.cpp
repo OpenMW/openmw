@@ -221,8 +221,10 @@ namespace MWScript
                 throw std::runtime_error ("invalid variable type");
         }
 
+        std::string variable2 = Misc::StringUtils::lowerCase (variable);
+
         for (int i=0; i<size; ++i)
-            if (script->mVarNames.at (i+offset)==variable)
+            if (Misc::StringUtils::lowerCase (script->mVarNames.at (i+offset))==variable2)
                 return i;
 
         throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);
