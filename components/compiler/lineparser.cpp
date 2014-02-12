@@ -219,6 +219,12 @@ namespace Compiler
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==SetState)
+        {
+            // allow keywords to be used as variable names when assigning a value to a variable.
+            return parseName (loc.mLiteral, loc, scanner);
+        }
+
         if (mState==BeginState || mState==ExplicitState)
         {
             switch (keyword)
