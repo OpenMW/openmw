@@ -22,7 +22,7 @@ namespace Compiler
     }
 
     bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType,
-        bool explicitReference) const
+        bool& explicitReference) const
     {
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
 
@@ -30,7 +30,7 @@ namespace Compiler
             return false;
 
         if (explicitReference && iter->second.mCodeExplicit==-1)
-            return false;
+            explicitReference = false;
 
         returnType = iter->second.mReturn;
         argumentType = iter->second.mArguments;

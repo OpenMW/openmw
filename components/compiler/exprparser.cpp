@@ -397,8 +397,15 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
 
-                    if (extensions->isFunction (keyword, returnType, argumentType, true))
+                    bool hasExplicit = true;
+                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
                     {
+                        if (!hasExplicit)
+                        {
+                            getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+                            mExplicit.clear();
+                        }
+
                         start();
 
                         mTokenLoc = loc;
@@ -519,7 +526,9 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
 
-                    if (extensions->isFunction (keyword, returnType, argumentType, false))
+                    bool hasExplicit = false;
+
+                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
                     {
                         mTokenLoc = loc;
                         int optionals = parseArguments (argumentType, scanner);

@@ -47,9 +47,11 @@ namespace Compiler
             /// - keyword must be all lower case.
 
             bool isFunction (int keyword, char& returnType, std::string& argumentType,
-                bool explicitReference) const;
+                bool& explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return return and argument
             /// types.
+            /// \param explicitReference In: has explicit reference; Out: set to false, if
+            /// explicit reference is not available for this instruction.
 
             bool isInstruction (int keyword, std::string& argumentType,
                 bool& explicitReference) const;

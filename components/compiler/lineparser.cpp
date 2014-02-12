@@ -279,9 +279,16 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
 
-                    if (extensions->isFunction (keyword, returnType, argumentType,
-                        !mExplicit.empty()))
+                    bool hasExplicit = !mExplicit.empty();
+
+                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
                     {
+                        if (!hasExplicit && !mExplicit.empty())
+                        {
+                            getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+                            mExplicit.clear();
+                        }
+
                         scanner.putbackKeyword (keyword, loc);
                         parseExpression (scanner, loc);
                         mState = EndState;
