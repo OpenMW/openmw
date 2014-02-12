@@ -41,7 +41,7 @@ namespace Compiler
                 opcodeAiEscortCellExplicit);
             extensions.registerInstruction ("aiwander", "fff/llllllllll", opcodeAiWander,
                 opcodeAiWanderExplicit);
-            extensions.registerInstruction ("aifollow", "cffff/l", opcodeAiFollow,
+            extensions.registerInstruction ("aifollow", "cffff/ll", opcodeAiFollow,
                 opcodeAiFollowExplicit);
             extensions.registerInstruction ("aifollowcell", "ccffff/l", opcodeAiFollowCell,
                 opcodeAiFollowCellExplicit);
