@@ -52,7 +52,8 @@ namespace MWScript
         char type = ' ';
 
         if (!script.empty())
-            type = MWBase::Environment::get().getScriptManager()->getLocals (script).getType (name);
+            type = MWBase::Environment::get().getScriptManager()->getLocals (script).getType (
+                Misc::StringUtils::lowerCase (name));
 
         return std::make_pair (type, reference);
     }
