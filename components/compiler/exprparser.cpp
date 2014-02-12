@@ -705,11 +705,11 @@ namespace Compiler
             {
                 optional = true;
             }
-            else if (*iter=='S' || *iter=='c')
+            else if (*iter=='S' || *iter=='c' || *iter=='x')
             {
                 stringParser.reset();
 
-                if (optional)
+                if (optional || *iter=='x')
                     stringParser.setOptional (true);
 
                 if (*iter=='c') stringParser.smashCase();
@@ -718,18 +718,21 @@ namespace Compiler
                 if (optional && stringParser.isEmpty())
                     break;
 
-                if (invert)
+                if (*iter!='x')
                 {
-                    std::vector<Interpreter::Type_Code> tmp;
-                    stringParser.append (tmp);
+                    if (invert)
+                    {
+                        std::vector<Interpreter::Type_Code> tmp;
+                        stringParser.append (tmp);
 
-                    stack.push (tmp);
+                        stack.push (tmp);
+                    }
+                    else
+                        stringParser.append (code);
+
+                    if (optional)
+                        ++optionalCount;
                 }
-                else
-                    stringParser.append (code);
-
-                if (optional)
-                    ++optionalCount;
             }
             else
             {

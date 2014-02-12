@@ -101,6 +101,7 @@ namespace Compiler
             /// \param arguments Each character represents one arguments ('l': integer,
             /// 'f': float, 'S': string, 'c': string (case smashed), '/': following arguments are
             /// optional)
+            /// 'x': optional string that will be ignored (die in a fire, MW script compiler!)
             /// \param invert Store arguments in reverted order.
             /// \return number of optional arguments
     };
