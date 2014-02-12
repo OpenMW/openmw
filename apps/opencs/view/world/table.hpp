@@ -5,7 +5,7 @@
 #include <string>
 
 #include <QTableView>
-#include <qt4/QtGui/qevent.h>
+#include <QtGui/qevent.h>
 
 #include "../../model/filter/node.hpp"
 
@@ -51,6 +51,13 @@ namespace CSVWorld
             std::vector<std::string> listDeletableSelectedIds() const;
 
             void mouseMoveEvent(QMouseEvent *event);
+
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dropEvent(QDropEvent *event);
+
+            void dragMoveEvent(QDragMoveEvent *event);
+
 
         public:
 
