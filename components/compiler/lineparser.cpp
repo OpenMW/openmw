@@ -357,6 +357,12 @@ namespace Compiler
                     getErrorHandler().warning ("stay endif (ignoring it)", loc);
                     mState = EndState;
                     return true;
+
+                case Scanner::K_begin:
+
+                    getErrorHandler().warning ("stay begin (ignoring it)", loc);
+                    mState = EndState;
+                    return true;
             }
         }
         else if (mState==SetLocalVarState && keyword==Scanner::K_to)
