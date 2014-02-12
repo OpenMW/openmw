@@ -35,6 +35,13 @@ struct Weapon
         Bolt = 13
     };
 
+    enum AttackType
+    {
+        AT_Chop,
+        AT_Slash,
+        AT_Thrust
+    };
+
     enum Flags
     {
         Magical = 0x01,

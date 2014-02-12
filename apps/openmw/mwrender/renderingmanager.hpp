@@ -21,10 +21,7 @@
 
 namespace Ogre
 {
-    class SceneManager;
     class SceneNode;
-    class Quaternion;
-    class Vector3;
 }
 
 namespace MWWorld
@@ -51,6 +48,7 @@ namespace MWRender
     class GlobalMap;
     class VideoPlayer;
     class Animation;
+    class EffectManager;
 
 class RenderingManager: private RenderingInterface, public Ogre::RenderTargetListener, public OEngine::Render::WindowSizeListener
 {
@@ -95,6 +93,8 @@ public:
     void renderPlayer(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
+
+    MWRender::Camera* getCamera() const;
 
     void toggleLight();
     bool toggleRenderMode(int mode);
@@ -208,6 +208,9 @@ public:
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
     void frameStarted(float dt, bool paused);
+    void screenshot(Ogre::Image& image, int w, int h);
+
+    void spawnEffect (const std::string& model, const std::string& texture, const Ogre::Vector3& worldPosition, float scale=1.f);
 
 protected:
     virtual void windowResized(int x, int y);
@@ -238,6 +241,8 @@ private:
 
     MWRender::Objects* mObjects;
     MWRender::Actors* mActors;
+
+    MWRender::EffectManager* mEffectManager;
 
     MWRender::NpcAnimation *mPlayerAnimation;
 

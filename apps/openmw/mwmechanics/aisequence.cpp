@@ -23,7 +23,7 @@ void MWMechanics::AiSequence::copy (const AiSequence& sequence)
         mPackages.push_back ((*iter)->clone());
 }
 
-MWMechanics::AiSequence::AiSequence() : mDone (false) {}
+MWMechanics::AiSequence::AiSequence() : mDone (false), mLastAiPackage(-1) {}
 
 MWMechanics::AiSequence::AiSequence (const AiSequence& sequence) : mDone (false)
 {
@@ -67,7 +67,10 @@ bool MWMechanics::AiSequence::getCombatTarget(std::string &targetActorId) const
 void MWMechanics::AiSequence::stopCombat()
 {
     while (getTypeId() == AiPackage::TypeIdCombat)
+    {
+        delete *mPackages.begin();
         mPackages.erase (mPackages.begin());
+    }
 }
 
 bool MWMechanics::AiSequence::isPackageDone() const
@@ -81,13 +84,17 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
     {
         if (!mPackages.empty())
         {
+            mLastAiPackage = mPackages.front()->getTypeId();
             if (mPackages.front()->execute (actor,duration))
             {
+                delete *mPackages.begin();
                 mPackages.erase (mPackages.begin());
                 mDone = true;
             }
             else
+            {
                 mDone = false;    
+            }
         }
     }
 }
@@ -105,7 +112,10 @@ void MWMechanics::AiSequence::stack (const AiPackage& package)
     for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); it++)
     {
         if(mPackages.front()->getPriority() <= package.getPriority())
+        {
             mPackages.insert(it,package.clone());
+            return;
+        }
     }
 
     if(mPackages.empty())
@@ -115,6 +125,14 @@ void MWMechanics::AiSequence::stack (const AiPackage& package)
 void MWMechanics::AiSequence::queue (const AiPackage& package)
 {
     mPackages.push_back (package.clone());
+}
+
+MWMechanics::AiPackage* MWMechanics::AiSequence::getActivePackage()
+{
+    if(mPackages.empty())
+        throw std::runtime_error(std::string("No AI Package!"));
+    else
+        return mPackages.front();
 }
 
 void MWMechanics::AiSequence::fill(const ESM::AIPackageList &list)

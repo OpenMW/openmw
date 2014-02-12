@@ -1,7 +1,3 @@
-
-# config file
-configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp")
-
 # local files
 set(GAME
     main.cpp
@@ -12,7 +8,6 @@ if(NOT WIN32)
 endif()
 set(GAME_HEADER
     engine.hpp
-    config.hpp
 )
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
@@ -20,7 +15,7 @@ add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
     characterpreview globalmap videoplayer ripplesimulation refraction
-    terrainstorage renderconst
+    terrainstorage renderconst effectmanager
     )
 
 add_openmw_dir (mwinput
@@ -74,12 +69,16 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
     aiescort aiactivate aicombat repair enchanting pathfinding security spellsuccess spellcasting
-    disease pickpocket levelledlist
+    disease pickpocket levelledlist combat steering
+    )
+
+add_openmw_dir (mwstate
+    statemanagerimp charactermanager character
     )
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager windowmanager
+    inputmanager windowmanager statemanager
     )
 
 # Main executable

@@ -67,7 +67,7 @@ int CSMWorld::InfoCollection::getIndex (const std::string& id, const std::string
     std::pair<RecordConstIterator, RecordConstIterator> range = getTopicRange (topic);
 
     for (; range.first!=range.second; ++range.first)
-        if (Misc::StringUtils::lowerCase (range.first->get().mId)==fullId)
+        if (Misc::StringUtils::ciEqual(range.first->get().mId, fullId))
             return std::distance (getRecords().begin(), range.first);
 
     return -1;
@@ -177,7 +177,7 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
     RecordConstIterator end = begin;
 
     for (; end!=getRecords().end(); ++end)
-        if (Misc::StringUtils::lowerCase (end->get().mTopicId)!=topic2)
+        if (!Misc::StringUtils::ciEqual(end->get().mTopicId, topic2))
             break;
 
     return Range (begin, end);

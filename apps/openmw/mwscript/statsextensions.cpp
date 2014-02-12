@@ -3,8 +3,6 @@
 
 #include <cmath>
 
-#include <boost/algorithm/string.hpp>
-
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -19,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -308,9 +307,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
-                        getModified();
+                    Interpreter::Type_Integer value = ptr.getClass().getSkill(ptr, mIndex);
 
                     runtime.push (value);
                 }
@@ -455,6 +452,14 @@ namespace MWScript
                     runtime.pop();
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().remove (id);
+
+                    MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                        id == wm->getSelectedSpell())
+                    {
+                        wm->unsetSelectedSpell();
+                    }
                 }
         };
 

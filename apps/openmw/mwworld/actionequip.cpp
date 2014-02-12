@@ -19,9 +19,9 @@ namespace MWWorld
     void ActionEquip::executeImp (const Ptr& actor)
     {
         MWWorld::Ptr object = getTarget();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
+        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
 
-        std::pair <int, std::string> result = MWWorld::Class::get (object).canBeEquipped (object, actor);
+        std::pair <int, std::string> result = object.getClass().canBeEquipped (object, actor);
 
         // display error message if the player tried to equip something
         if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())

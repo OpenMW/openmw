@@ -14,7 +14,6 @@
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/npcstats.hpp"
 
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
@@ -272,6 +271,25 @@ namespace MWGui
             return;
         }
 
+        // check if the player is attempting to sell back an item stolen from this actor
+        for (std::vector<ItemStack>::iterator it = merchantBought.begin(); it != merchantBought.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(it->mBase.getCellRef().mOwner, mPtr.getCellRef().mRefID))
+            {
+                std::string msg = gmst.find("sNotifyMessage49")->getString();
+                if (msg.find("%s") != std::string::npos)
+                    msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
+                MWBase::Environment::get().getWindowManager()->messageBox(msg);
+                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
+                MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
+                                                                              it->mBase.getClass().getValue(it->mBase)
+                                                                              * it->mCount);
+                onCancelButtonClicked(mCancelButton);
+                MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+                return;
+            }
+        }
+
         if(mCurrentBalance > mCurrentMerchantOffer)
         {
             //if npc is a creature: reject (no haggle)
@@ -293,13 +311,13 @@ namespace MWGui
             float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
 
-            const MWMechanics::NpcStats &sellerStats = mPtr.getClass().getNpcStats(mPtr);
-            const MWMechanics::NpcStats &playerStats = player.getClass().getNpcStats(player);
+            const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
+            const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
 
-            float a1 = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+            float a1 = std::min(player.getClass().getSkill(player, ESM::Skill::Mercantile), 100);
             float b1 = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float c1 = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-            float d1 = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+            float d1 = std::min(mPtr.getClass().getSkill(mPtr, ESM::Skill::Mercantile), 100);
             float e1 = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float f1 = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 

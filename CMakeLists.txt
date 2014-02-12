@@ -14,15 +14,30 @@ endif (APPLE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
-include (OpenMWMacros)
+include(OpenMWMacros)
 
 # Version
 
-set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 27)
-set (OPENMW_VERSION_RELEASE 0)
+include(GetGitRevisionDescription)
 
-set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+get_git_tag_revision(TAGHASH --tags --max-count=1)
+get_git_head_revision(REFSPEC COMMITHASH)
+git_describe(VERSION --tags ${TAGHASH})
+
+string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
+if (MATCH)
+    string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" OPENMW_VERSION_MAJOR "${VERSION}")
+    string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_MINOR "${VERSION}")
+    string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_RELEASE "${VERSION}")
+
+    set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+    set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+    set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+
+    message(STATUS "Configuring OpenMW ${OPENMW_VERSION}...")
+else (MATCH)
+    message(FATAL_ERROR "Failed to get valid version information from Git")
+endif (MATCH)
 
 # doxygen main page
 
@@ -93,8 +108,6 @@ set(OENGINE_GUI
 )
 
 set(OENGINE_BULLET
-    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.cpp
-    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.h
     ${LIBDIR}/openengine/bullet/BtOgre.cpp
     ${LIBDIR}/openengine/bullet/BtOgreExtras.h
     ${LIBDIR}/openengine/bullet/BtOgreGP.h
@@ -188,8 +201,6 @@ if (WIN32)
     add_definitions(-DSDL_MAIN_HANDLED)
 else (WIN32)
     set(PLATFORM_INCLUDE_DIR "")
-    find_path (UUID_INCLUDE_DIR uuid/uuid.h)
-    include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
@@ -241,7 +252,6 @@ include_directories("."
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
-    ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
@@ -411,46 +421,6 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
     INSTALL(DIRECTORY DESTINATION "${DATADIR}/data" COMPONENT "Resources")
-
-    IF (DPKG_PROGRAM)
-        ## Debian Specific
-        IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
-            EXEC_PROGRAM("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
-            STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
-            EXEC_PROGRAM("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
-            EXEC_PROGRAM("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
-            SET(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
-        ELSE()
-            SET(VERSION_STRING "${OPENMW_VERSION}")
-            SET(PACKAGE_MAINTAINER "unknown")
-        ENDIF()
-
-        SET(CPACK_GENERATOR "DEB")
-        SET(CPACK_PACKAGE_NAME "openmw")
-        SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.org")
-        SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
-        SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
- OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
- Data files from the original game is required to run it.")
-        SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
-        SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW opencs;OpenCS bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
-
-        SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
-
-        STRING(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
-        EXECUTE_PROCESS(
-            COMMAND ${DPKG_PROGRAM} --print-architecture
-            OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
-
-
-        INCLUDE(CPack)
-    ENDIF(DPKG_PROGRAM)
 ENDIF(NOT WIN32 AND NOT APPLE)
 
 if(WIN32)

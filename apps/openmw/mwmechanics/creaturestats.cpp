@@ -10,44 +10,16 @@
 namespace MWMechanics
 {
     CreatureStats::CreatureStats()
-        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
+        : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
-          mAttackingOrSpell(false), mAttackType(AT_Chop),
+          mAttackingOrSpell(false),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false)
+          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false), mBlock(false),
+          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
-    }
-
-    float CreatureStats::getLevelHealthBonus () const
-    {
-        return mLevelHealthBonus;
-    }
-
-    void CreatureStats::levelUp()
-    {
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
-        const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
-
-        // "When you gain a level, in addition to increasing three primary attributes, your Health
-        // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
-        // the Health increase is calculated from the increased Endurance"
-        mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
-        updateHealth();
-
-        mLevel++;
-    }
-
-    void CreatureStats::updateHealth()
-    {
-        const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
-        const int strength = getAttribute(ESM::Attribute::Strength).getBase();
-
-        setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
     }
 
     const AiSequence& CreatureStats::getAiSequence() const
@@ -207,9 +179,6 @@ namespace MWMechanics
 
         mDynamic[index] = value;
 
-        if (index == 2 && value.getCurrent() < 0)
-            setKnockedDown(true);
-
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
             if (!mDead)
@@ -347,6 +316,13 @@ namespace MWMechanics
 
     bool CreatureStats::getCreatureTargetted() const
     {
+        std::string target;
+        if (mAiSequence.getCombatTarget(target))
+        {
+            MWWorld::Ptr targetPtr;
+            targetPtr = MWBase::Environment::get().getWorld()->getPtr(target, true);
+            return targetPtr.getTypeName() == typeid(ESM::Creature).name();
+        }
         return false;
     }
 
@@ -425,4 +401,60 @@ namespace MWMechanics
     {
         return mHitRecovery;
     }
+
+    void CreatureStats::setBlock(bool value)
+    {
+        mBlock = value;
+    }
+
+    bool CreatureStats::getBlock() const
+    {
+        return mBlock;
+    }
+
+    bool CreatureStats::getMovementFlag (Flag flag) const
+    {
+        return mMovementFlags & flag;
+    }
+
+    void CreatureStats::setMovementFlag (Flag flag, bool state)
+    {
+        if (state)
+            mMovementFlags |= flag;
+        else
+            mMovementFlags &= ~flag;
+    }
+
+    bool CreatureStats::getStance(Stance flag) const
+    {
+        switch (flag)
+        {
+            case Stance_Run:
+                return getMovementFlag (Flag_Run) || getMovementFlag (Flag_ForceRun);
+            case Stance_Sneak:
+                return getMovementFlag (Flag_Sneak) || getMovementFlag (Flag_ForceSneak);
+        }
+        return false; // shut up, compiler
+    }
+
+    DrawState_ CreatureStats::getDrawState() const
+    {
+        return mDrawState;
+    }
+
+    void CreatureStats::setDrawState(DrawState_ state)
+    {
+        mDrawState = state;
+    }
+
+    float CreatureStats::getAttackStrength() const
+    {
+        return mAttackStrength;
+    }
+
+    void CreatureStats::setAttackStrength(float value)
+    {
+        mAttackStrength = value;
+    }
+
 }

@@ -3,9 +3,14 @@
 
 #include "topic.hpp"
 
+namespace ESM
+{
+    struct QuestState;
+}
+
 namespace MWDialogue
 {
-    /// \brief A quest in progress or a compelted quest
+    /// \brief A quest in progress or a completed quest
     class Quest : public Topic
     {
             int mIndex;
@@ -17,13 +22,15 @@ namespace MWDialogue
 
             Quest (const std::string& topic);
 
-            const std::string getName() const;
+            Quest (const ESM::QuestState& state);
+
+            virtual std::string getName() const;
             ///< May be an empty string
 
             int getIndex() const;
 
             void setIndex (int index);
-            ///< Calling this function with a non-existant index while throw an exception.
+            ///< Calling this function with a non-existent index will throw an exception.
 
             bool isFinished() const;
 
@@ -31,6 +38,8 @@ namespace MWDialogue
             ///< Add entry and adjust index accordingly.
             ///
             /// \note Redundant entries are ignored, but the index is still adjusted.
+
+            void write (ESM::QuestState& state) const;
     };
 }
 

@@ -71,7 +71,7 @@ namespace OMW
             std::vector<std::string> mContentFiles;
             int mFpsLevel;
             bool mVerboseScripts;
-            bool mNewGame;
+            bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
             std::string mFocusName;
@@ -151,8 +151,7 @@ namespace OMW
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
 
-            /// Start as a new game.
-            void setNewGame(bool newGame);
+            void setSkipMenu (bool skipMenu);
 
             void setGrabMouse(bool grab) { mGrab = grab; }
 

@@ -1,8 +1,6 @@
 
 #include "guiextensions.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 

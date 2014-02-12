@@ -10,7 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
 
@@ -47,9 +47,8 @@ namespace
     void updatePlayerHealth()
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats(player);
-
-        creatureStats.updateHealth();
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats(player);
+        npcStats.updateHealth();
     }
 }
 

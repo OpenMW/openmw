@@ -220,9 +220,4 @@ namespace MWScript
 
         throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);
     }
-
-    void ScriptManager::resetGlobalScripts()
-    {
-        mGlobalScripts.reset();
-    }
 }

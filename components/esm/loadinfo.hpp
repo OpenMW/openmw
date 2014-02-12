@@ -70,7 +70,7 @@ struct DialInfo
     // Sound and text associated with this item
     std::string mSound, mResponse;
 
-    // Result script (uncomiled) to run whenever this dialog item is
+    // Result script (uncompiled) to run whenever this dialog item is
     // selected
     std::string mResultScript;
 

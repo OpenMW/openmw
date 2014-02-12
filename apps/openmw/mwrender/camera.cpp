@@ -338,11 +338,9 @@ namespace MWRender
         if(mAnimation && mAnimation != anim)
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
-            mAnimation->setCamera(NULL);
             mAnimation->detachObjectFromBone(mCamera);
         }
         mAnimation = anim;
-        mAnimation->setCamera(this);
 
         processViewChange();
     }

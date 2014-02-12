@@ -5,6 +5,8 @@
 #include <typeinfo>
 #include <stdexcept>
 
+#include <components/esm/inventorystate.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -45,7 +47,7 @@ namespace
         for (typename MWWorld::CellRefList<T>::List::iterator iter (list.mList.begin());
              iter!=list.mList.end(); ++iter)
         {
-            if (Misc::StringUtils::lowerCase (iter->mBase->mId)==id2)
+            if (Misc::StringUtils::ciEqual(iter->mBase->mId, id2))
             {
                 MWWorld::Ptr ptr (&*iter, 0);
                 ptr.setContainerStore (store);
@@ -56,6 +58,54 @@ namespace
         return MWWorld::Ptr();
     }
 }
+
+template<typename T>
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState (CellRefList<T>& collection,
+    const ESM::ObjectState& state)
+{
+    if (!LiveCellRef<T>::checkState (state))
+        return ContainerStoreIterator (this); // not valid anymore with current content files -> skip
+
+    const T *record = MWBase::Environment::get().getWorld()->getStore().
+        get<T>().search (state.mRef.mRefID);
+
+    if (!record)
+        return ContainerStoreIterator (this);
+
+    LiveCellRef<T> ref (record);
+    ref.load (state);
+    ref.mRef.mRefNum.mContentFile = -1;
+    collection.mList.push_back (ref);
+
+    return ContainerStoreIterator (this, --collection.mList.end());
+}
+
+template<typename T>
+void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const
+{
+    ref.save (state);
+}
+
+template<typename T>
+void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
+    std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states, bool equipable) const
+{
+    for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
+        iter!=collection.mList.end(); ++iter)
+    {
+        ESM::ObjectState state;
+        storeState (*iter, state);
+        int slot = equipable ? getSlot (*iter) : -1;
+        states.push_back (std::make_pair (state, std::make_pair (T::sRecordId, slot)));
+    }
+}
+
+int MWWorld::ContainerStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+{
+    return -1;
+}
+
+void MWWorld::ContainerStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot) {}
 
 const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
 
@@ -149,7 +199,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().mPos.pos[1] = 0;
     item.getCellRef().mPos.pos[2] = 0;
 
-    if (setOwner)
+    if (setOwner && actorPtr.getClass().isActor())
         item.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
 
     std::string script = MWWorld::Class::get(item).getScript(item);
@@ -192,13 +242,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        int realCount = ptr.getRefData().getCount();
-        if (ptr.getCellRef().mGoldValue > 1 && realCount == 1)
-            realCount = ptr.getCellRef().mGoldValue;
+        int realCount = count * ptr.getClass().getValue(ptr);
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, MWWorld::ContainerStore::sGoldId))
+            if (Misc::StringUtils::ciEqual((*iter).getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
             {
                 iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
@@ -206,8 +254,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
             }
         }
 
-        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, count);
-        return addNewStack(ref.getPtr(), count);
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, realCount);
+        return addNewStack(ref.getPtr(), realCount);
     }
 
     // determine whether to stack or not
@@ -493,6 +541,69 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     }
 
     return Ptr();
+}
+
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
+{
+    state.mItems.clear();
+
+    storeStates (potions, state.mItems);
+    storeStates (appas, state.mItems);
+    storeStates (armors, state.mItems, true);
+    storeStates (books, state.mItems);
+    storeStates (clothes, state.mItems, true);
+    storeStates (ingreds, state.mItems);
+    storeStates (lockpicks, state.mItems, true);
+    storeStates (miscItems, state.mItems);
+    storeStates (probes, state.mItems, true);
+    storeStates (repairs, state.mItems);
+    storeStates (weapons, state.mItems, true);
+
+    state.mLights.clear();
+
+    for (MWWorld::CellRefList<ESM::Light>::List::const_iterator iter (lights.mList.begin());
+        iter!=lights.mList.end(); ++iter)
+    {
+        ESM::LightState objectState;
+        storeState (*iter, objectState);
+        state.mLights.push_back (std::make_pair (objectState, getSlot (*iter)));
+    }
+}
+
+void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
+{
+    clear();
+
+    for (std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >::const_iterator
+        iter (state.mItems.begin()); iter!=state.mItems.end(); ++iter)
+    {
+        int slot = iter->second.second;
+
+        switch (iter->second.first)
+        {
+            case ESM::REC_ALCH: getState (potions, iter->first); break;
+            case ESM::REC_APPA: getState (appas, iter->first); break;
+            case ESM::REC_ARMO: setSlot (getState (armors, iter->first), slot); break;
+            case ESM::REC_BOOK: getState (books, iter->first); break;
+            case ESM::REC_CLOT: setSlot (getState (clothes, iter->first), slot); break;
+            case ESM::REC_INGR: getState (ingreds, iter->first); break;
+            case ESM::REC_LOCK: setSlot (getState (lockpicks, iter->first), slot); break;
+            case ESM::REC_MISC: getState (miscItems, iter->first); break;
+            case ESM::REC_PROB: setSlot (getState (probes, iter->first), slot); break;
+            case ESM::REC_REPA: getState (repairs, iter->first); break;
+            case ESM::REC_WEAP: setSlot (getState (weapons, iter->first), slot); break;
+
+            default:
+
+                std::cerr << "invalid item type in inventory state" << std::endl;
+        }
+    }
+
+    for (std::vector<std::pair<ESM::LightState, int> >::const_iterator iter (state.mLights.begin());
+        iter!=state.mLights.end(); ++iter)
+    {
+        getState (lights, iter->first);
+    }
 }
 
 

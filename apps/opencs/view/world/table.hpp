@@ -33,6 +33,7 @@ namespace CSVWorld
             QUndoStack& mUndoStack;
             QAction *mEditAction;
             QAction *mCreateAction;
+            QAction *mCloneAction;
             QAction *mRevertAction;
             QAction *mDeleteAction;
             QAction *mMoveUpAction;
@@ -83,6 +84,7 @@ namespace CSVWorld
             /// \param modified Number of added and modified records
 
             void createRequest();
+            void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:
 
@@ -91,6 +93,8 @@ namespace CSVWorld
             void deleteRecord();
 
             void editRecord();
+
+            void cloneRecord();
 
             void moveUpRecord();
 

@@ -104,10 +104,10 @@ namespace CSMDoc
                 /// \todo make endianess agnostic (change ESMWriter interface?)
                 type += reinterpret_cast<const char *> (&mCollection.getRecord (stage).mModified.sRecordId)[i];
 
-            mState.getWriter().startRecord (type);
+            mState.getWriter().startRecord (mCollection.getRecord (stage).mModified.sRecordId);
             mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
             mCollection.getRecord (stage).mModified.save (mState.getWriter());
-            mState.getWriter().endRecord (type);
+            mState.getWriter().endRecord (mCollection.getRecord (stage).mModified.sRecordId);
         }
         else if (state==CSMWorld::RecordBase::State_Deleted)
         {

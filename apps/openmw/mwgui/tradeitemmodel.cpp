@@ -162,7 +162,7 @@ namespace MWGui
                 }
 
                 // don't show equipped items
-                if(mMerchant.getTypeName() == typeid(ESM::NPC).name())
+                if(mMerchant.getClass().hasInventoryStore(mMerchant))
                 {
                     bool isEquipped = false;
                     MWWorld::InventoryStore& store = MWWorld::Class::get(mMerchant).getInventoryStore(mMerchant);

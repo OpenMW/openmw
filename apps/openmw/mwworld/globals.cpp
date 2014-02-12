@@ -3,21 +3,15 @@
 
 #include <stdexcept>
 
+#include <components/misc/stringops.hpp>
+
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/esmreader.hpp>
+
 #include "esmstore.hpp"
 
 namespace MWWorld
 {
-    std::vector<std::string> Globals::getGlobals () const
-    {
-        std::vector<std::string> retval;
-        Collection::const_iterator it;
-        for(it = mVariables.begin(); it != mVariables.end(); ++it){
-            retval.push_back(it->first);
-        }
-
-        return retval;
-    }
-
     Globals::Collection::const_iterator Globals::find (const std::string& name) const
     {
         Collection::const_iterator iter = mVariables.find (name);
@@ -38,112 +32,27 @@ namespace MWWorld
         return iter;
     }
 
-    Globals::Globals (const MWWorld::ESMStore& store)
+    void Globals::fill (const MWWorld::ESMStore& store)
     {
-        const MWWorld::Store<ESM::Global> &globals = store.get<ESM::Global>();
-        MWWorld::Store<ESM::Global>::iterator iter = globals.begin();
-        for (; iter != globals.end(); ++iter)
+        mVariables.clear();
+
+        const MWWorld::Store<ESM::Global>& globals = store.get<ESM::Global>();
+
+        for (MWWorld::Store<ESM::Global>::iterator iter = globals.begin(); iter!=globals.end();
+            ++iter)
         {
-            char type = ' ';
-            Data value;
-
-            switch (iter->mValue.getType())
-            {
-                case ESM::VT_Short:
-
-                    type = 's';
-                    value.mShort = iter->mValue.getInteger();
-                    break;
-
-                case ESM::VT_Long:
-
-                    type = 'l';
-                    value.mLong = iter->mValue.getInteger();
-                    break;
-
-                case ESM::VT_Float:
-
-                    type = 'f';
-                    value.mFloat = iter->mValue.getFloat();
-                    break;
-
-                default:
-
-                    throw std::runtime_error ("unsupported global variable type");
-            }
-
-            mVariables.insert (std::make_pair (iter->mId, std::make_pair (type, value)));
+            mVariables.insert (std::make_pair (iter->mId, iter->mValue));
         }
     }
 
-    const Globals::Data& Globals::operator[] (const std::string& name) const
+    const ESM::Variant& Globals::operator[] (const std::string& name) const
     {
-        Collection::const_iterator iter = find (name);
-
-        return iter->second.second;
+        return find (name)->second;
     }
 
-    Globals::Data& Globals::operator[] (const std::string& name)
+    ESM::Variant& Globals::operator[] (const std::string& name)
     {
-        Collection::iterator iter = find (name);
-
-        return iter->second.second;
-    }
-
-    void Globals::setInt (const std::string& name, int value)
-    {
-        Collection::iterator iter = find (name);
-
-        switch (iter->second.first)
-        {
-            case 's': iter->second.second.mShort = value; break;
-            case 'l': iter->second.second.mLong = value; break;
-            case 'f': iter->second.second.mFloat = value; break;
-
-            default: throw std::runtime_error ("unsupported global variable type");
-        }
-    }
-
-    void Globals::setFloat (const std::string& name, float value)
-    {
-        Collection::iterator iter = find (name);
-
-        switch (iter->second.first)
-        {
-            case 's': iter->second.second.mShort = value; break;
-            case 'l': iter->second.second.mLong = value; break;
-            case 'f': iter->second.second.mFloat = value; break;
-
-            default: throw std::runtime_error ("unsupported global variable type");
-        }
-    }
-
-    int Globals::getInt (const std::string& name) const
-    {
-        Collection::const_iterator iter = find (name);
-
-        switch (iter->second.first)
-        {
-            case 's': return iter->second.second.mShort;
-            case 'l': return iter->second.second.mLong;
-            case 'f': return iter->second.second.mFloat;
-
-            default: throw std::runtime_error ("unsupported global variable type");
-        }
-    }
-
-    float Globals::getFloat (const std::string& name) const
-    {
-        Collection::const_iterator iter = find (name);
-
-        switch (iter->second.first)
-        {
-            case 's': return iter->second.second.mShort;
-            case 'l': return iter->second.second.mLong;
-            case 'f': return iter->second.second.mFloat;
-
-            default: throw std::runtime_error ("unsupported global variable type");
-        }
+        return find (name)->second;
     }
 
     char Globals::getType (const std::string& name) const
@@ -153,7 +62,48 @@ namespace MWWorld
         if (iter==mVariables.end())
             return ' ';
 
-        return iter->second.first;
+        switch (iter->second.getType())
+        {
+            case ESM::VT_Short: return 's';
+            case ESM::VT_Long: return 'l';
+            case ESM::VT_Float: return 'f';
+
+            default: return ' ';
+        }
+    }
+
+    int Globals::countSavedGameRecords() const
+    {
+        return mVariables.size();
+    }
+
+    void Globals::write (ESM::ESMWriter& writer) const
+    {
+        for (Collection::const_iterator iter (mVariables.begin()); iter!=mVariables.end(); ++iter)
+        {
+            writer.startRecord (ESM::REC_GLOB);
+            writer.writeHNString ("NAME", iter->first);
+            iter->second.write (writer, ESM::Variant::Format_Global);
+            writer.endRecord (ESM::REC_GLOB);
+        }
+    }
+
+    bool Globals::readRecord (ESM::ESMReader& reader,  int32_t type)
+    {
+        if (type==ESM::REC_GLOB)
+        {
+            std::string id = reader.getHNString ("NAME");
+
+            Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (id));
+
+            if (iter!=mVariables.end())
+                iter->second.read (reader, ESM::Variant::Format_Global);
+            else
+                reader.skipHRecord();
+
+            return true;
+        }
+
+        return false;
     }
 }
-

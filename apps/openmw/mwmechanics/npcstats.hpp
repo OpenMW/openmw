@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "stat.hpp"
-#include "drawstate.hpp"
 
 #include "creaturestats.hpp"
 
@@ -25,26 +24,12 @@ namespace MWMechanics
 
     class NpcStats : public CreatureStats
     {
-        public:
-
-            enum Flag
-            {
-                Flag_ForceRun = 1,
-                Flag_ForceSneak = 2,
-                Flag_Run = 4,
-                Flag_Sneak = 8
-            };
-
-        private:
-
             /// NPCs other than the player can only have one faction. But for the sake of consistency
             /// we use the same data structure for the PC and the NPCs.
             /// \note the faction key must be in lowercase
             std::map<std::string, int> mFactionRank;
 
-            DrawState_ mDrawState;
             int mDisposition;
-            unsigned int mMovementFlags;
             SkillValue mSkill[27];
             SkillValue mWerewolfSkill[27];
             int mBounty;
@@ -66,6 +51,8 @@ namespace MWMechanics
             /// time since last hit from drowning
             float mLastDrowningHit;
 
+            float mLevelHealthBonus;
+
         public:
 
             NpcStats();
@@ -74,13 +61,6 @@ namespace MWMechanics
             int getProfit() const;
             void modifyProfit(int diff);
 
-            DrawState_ getDrawState() const;
-            void setDrawState (DrawState_ state);
-
-            /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
-            float getAttackStrength() const;
-            void setAttackStrength(float value);
-
             int getBaseDisposition() const;
 
             void setBaseDisposition(int disposition);
@@ -88,10 +68,6 @@ namespace MWMechanics
             int getReputation() const;
 
             void setReputation(int reputation);
-
-            bool getMovementFlag (Flag flag) const;
-
-            void setMovementFlag (Flag flag, bool state);
 
             const SkillValue& getSkill (int index) const;
             SkillValue& getSkill (int index);
@@ -123,6 +99,10 @@ namespace MWMechanics
             int getLevelupAttributeMultiplier(int attribute) const;
 
             void levelUp();
+
+            void updateHealth();
+            ///< Calculate health based on endurance and strength.
+            ///  Called at character creation and at level up.
 
             void flagAsUsed (const std::string& id);
 

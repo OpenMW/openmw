@@ -7,13 +7,15 @@ namespace MWGui
 {
     class SpellIcons;
 
-    class SpellWindow : public WindowPinnableBase
+    class SpellWindow : public WindowPinnableBase, public NoDrop
     {
     public:
-        SpellWindow();
+        SpellWindow(DragAndDrop* drag);
         virtual ~SpellWindow();
 
         void updateSpells();
+
+        void onFrame(float dt) { NoDrop::onFrame(dt); }
 
     protected:
         MyGUI::ScrollView* mSpellView;

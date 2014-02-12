@@ -1,5 +1,5 @@
 #ifndef COMPILER_EXTENSIONS_H_INCLUDED
-#define COMPILER_EXTENSINOS_H_INCLUDED
+#define COMPILER_EXTENSIONS_H_INCLUDED
 
 #include <string>
 #include <map>

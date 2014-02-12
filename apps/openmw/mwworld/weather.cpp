@@ -1,6 +1,5 @@
 #include "weather.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"

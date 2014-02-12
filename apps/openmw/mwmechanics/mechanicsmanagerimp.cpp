@@ -196,8 +196,8 @@ namespace MWMechanics
             creatureStats.setDynamic (i, stat);
         }
 
-        // auto-equip again. we need this for when the race is changed to a beast race
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        // auto-equip again. we need this for when the race is changed to a beast race and shoes are no longer equippable
+        MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
         for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
             invStore.unequipAll(ptr);
         invStore.autoEquip(ptr);
@@ -472,21 +472,23 @@ namespace MWMechanics
         std::string npcFaction = "";
         if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
 
-        if (playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction)) != playerStats.getFactionRanks().end())
+        Misc::StringUtils::toLower(npcFaction);
+
+        if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end(); ++it)
             {
-                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)
+                if(Misc::StringUtils::ciEqual(it->mFaction, npcFaction)
                         && !playerStats.getExpelled(it->mFaction))
                     reaction = it->mReaction;
             }
-            rank = playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
+            rank = playerStats.getFactionRanks().find(npcFaction)->second;
         }
         else if (npcFaction != "")
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end();++it)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end();++it)
             {
                 if(playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerStats.getFactionRanks().end() )
                 {
@@ -758,6 +760,14 @@ namespace MWMechanics
         return mAI;
     }
 
+    void MechanicsManager::playerLoaded()
+    {
+        mUpdatePlayer = true;
+        mClassSelected = true;
+        mRaceSelected = true;
+        mAI = true;
+    }
+
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
     {
         MWWorld::Ptr victim;
@@ -894,18 +904,13 @@ namespace MWMechanics
             return false;
 
         float sneakTerm = 0;
-        if (ptr.getClass().getStance(ptr, MWWorld::Class::Sneak)
+        if (ptr.getClass().getCreatureStats(ptr).getStance(CreatureStats::Stance_Sneak)
                 && !MWBase::Environment::get().getWorld()->isSwimming(ptr)
                 && MWBase::Environment::get().getWorld()->isOnGround(ptr))
         {
             static float fSneakSkillMult = store.find("fSneakSkillMult")->getFloat();
             static float fSneakBootMult = store.find("fSneakBootMult")->getFloat();
-            float sneak = 0;
-            // TODO: According to Hrnchamd Research:Movement, "Creatures have generalized combat, magic and stealth
-            // stats which substitute for the specific skills (in the same way as specializations)."
-            // This probably applies to a large part of the code base.
-            if (ptr.getClass().isNpc())
-                sneak = ptr.getClass().getNpcStats(ptr).getSkill(ESM::Skill::Sneak).getModified();
+            float sneak = ptr.getClass().getSkill(ptr, ESM::Skill::Sneak);
             int agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
             int luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
             float bootWeight = 0;
@@ -933,9 +938,7 @@ namespace MWMechanics
         int obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
         int obsLuck = observerStats.getAttribute(ESM::Attribute::Luck).getModified();
         float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
-        int obsSneak = 0;
-        if (observer.getClass().isNpc())
-            obsSneak = observer.getClass().getNpcStats(observer).getSkill(ESM::Skill::Sneak).getModified();
+        int obsSneak = observer.getClass().getSkill(observer, ESM::Skill::Sneak);
 
         float obsTerm = obsSneak + 0.2 * obsAgility + 0.1 * obsLuck - obsBlind;
 
@@ -954,5 +957,16 @@ namespace MWMechanics
         int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
 
         return (roll >= target);
+    }
+
+    void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    {
+        mActors.getObjectsInRange(position, radius, objects);
+        mObjects.getObjectsInRange(position, radius, objects);
+    }
+
+    std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
+    {
+        return mActors.getActorsFollowing(actor);
     }
 }

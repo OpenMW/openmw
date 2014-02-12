@@ -29,6 +29,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp" // FIXME
 #include "../mwbase/windowmanager.hpp" // FIXME
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -41,6 +42,7 @@
 #include "globalmap.hpp"
 #include "videoplayer.hpp"
 #include "terrainstorage.hpp"
+#include "effectmanager.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -57,9 +59,11 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     , mSunEnabled(0)
     , mPhysicsEngine(engine)
     , mTerrain(NULL)
+    , mEffectManager(NULL)
 {
     mActors = new MWRender::Actors(mRendering, this);
     mObjects = new MWRender::Objects(mRendering);
+    mEffectManager = new EffectManager(mRendering.getScene());
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
     bool glES = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL ES") != std::string::npos);
@@ -193,6 +197,7 @@ RenderingManager::~RenderingManager ()
     delete mVideoPlayer;
     delete mActors;
     delete mObjects;
+    delete mEffectManager;
     delete mFactory;
 }
 
@@ -213,7 +218,12 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
-void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
+ MWRender::Camera* RenderingManager::getCamera() const
+{
+    return mCamera;
+}
+
+void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
     mObjects->removeCell(store);
     mActors->removeCell(store);
@@ -230,7 +240,7 @@ void RenderingManager::toggleWater()
     mWater->toggle();
 }
 
-void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
+void RenderingManager::cellAdded (MWWorld::CellStore *store)
 {
     mObjects->buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
@@ -321,6 +331,12 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
 
 void RenderingManager::update (float duration, bool paused)
 {
+    mVideoPlayer->update ();
+
+    if (MWBase::Environment::get().getStateManager()->getState()==
+        MWBase::StateManager::State_NoGame)
+        return;
+
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
     MWWorld::Ptr player = world->getPlayerPtr();
@@ -347,7 +363,7 @@ void RenderingManager::update (float duration, bool paused)
     }
 
     // Sink the camera while sneaking
-    bool isSneaking = MWWorld::Class::get(player).getStance(player, MWWorld::Class::Sneak);
+    bool isSneaking = player.getClass().getCreatureStats(player).getStance(MWMechanics::CreatureStats::Stance_Sneak);
     bool isInAir = !world->isOnGround(player);
     bool isSwimming = world->isSwimming(player);
 
@@ -358,8 +374,6 @@ void RenderingManager::update (float duration, bool paused)
 
 
     mOcclusionQuery->update(duration);
-
-    mVideoPlayer->update ();
 
     mRendering.update(duration);
 
@@ -373,6 +387,8 @@ void RenderingManager::update (float duration, bool paused)
 
     if(paused)
         return;
+
+    mEffectManager->update(duration, mRendering.getCamera());
 
     mActors->update (mRendering.getCamera());
     mPlayerAnimation->preRender(mRendering.getCamera());
@@ -404,7 +420,7 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
     mOcclusionQuery->setActive(false);
 }
 
-void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
+void RenderingManager::waterAdded (MWWorld::CellStore *store)
 {
     if(store->mCell->mData.mFlags & ESM::Cell::HasWater)
     {
@@ -482,7 +498,7 @@ bool RenderingManager::toggleRenderMode(int mode)
     }
 }
 
-void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
+void RenderingManager::configureFog(MWWorld::CellStore &mCell)
 {
     Ogre::ColourValue color;
     color.setAsABGR (mCell.mCell->mAmbi.mFog);
@@ -535,7 +551,7 @@ void RenderingManager::setAmbientMode()
     }
 }
 
-void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
+void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
 {
     if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
         mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
@@ -632,7 +648,7 @@ void RenderingManager::setGlare(bool glare)
     mSkyManager->setGlare(glare);
 }
 
-void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
+void RenderingManager::requestMap(MWWorld::CellStore* cell)
 {
     if (cell->mCell->isExterior())
     {
@@ -651,7 +667,7 @@ void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
         mLocalMap->requestMap(cell, mObjects->getDimensions(cell));
 }
 
-void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
+void RenderingManager::preCellChange(MWWorld::CellStore* cell)
 {
     mLocalMap->saveFogOfWar(cell);
 }
@@ -675,14 +691,14 @@ Shadows* RenderingManager::getShadows()
 
 void RenderingManager::switchToInterior()
 {
-    // causes light flicker in opengl when moving..
-    //mRendering.getScene()->setCameraRelativeRendering(false);
+    // TODO: also do this when switching worldspace
+    mEffectManager->clear();
 }
 
 void RenderingManager::switchToExterior()
 {
-    // causes light flicker in opengl when moving..
-    //mRendering.getScene()->setCameraRelativeRendering(true);
+    // TODO: also do this when switching worldspace
+    mEffectManager->clear();
 }
 
 Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
@@ -886,8 +902,6 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
         mPlayerAnimation->~NpcAnimation();
         new(mPlayerAnimation) NpcAnimation(ptr, ptr.getRefData().getBaseNode(), RV_Actors);
     }
-    // Ensure CustomData -> autoEquip -> animation update
-    ptr.getClass().getInventoryStore(ptr);
 
     mCamera->setAnimation(mPlayerAnimation);
     mWater->removeEmitter(ptr);
@@ -945,6 +959,38 @@ Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
     return anim;
 }
 
+void RenderingManager::screenshot(Image &image, int w, int h)
+{
+    // Create a temporary render target. We do not use the RenderWindow since we want a specific size.
+    // Also, the GUI should not be visible (and it is only rendered on the RenderWindow's primary viewport)
+    const std::string tempName = "@temp";
+    Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(tempName,
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, w, h, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET);
+
+    float oldAspect = mRendering.getCamera()->getAspectRatio();
+
+    mRendering.getCamera()->setAspectRatio(w / static_cast<float>(h));
+
+    Ogre::RenderTarget* rt = texture->getBuffer()->getRenderTarget();
+    Ogre::Viewport* vp = rt->addViewport(mRendering.getCamera());
+    vp->setBackgroundColour(mRendering.getViewport()->getBackgroundColour());
+    vp->setOverlaysEnabled(false);
+    vp->setVisibilityMask(mRendering.getViewport()->getVisibilityMask());
+    rt->update();
+
+    Ogre::PixelFormat pf = rt->suggestPixelFormat();
+
+    std::vector<Ogre::uchar> data;
+    data.resize(w * h * Ogre::PixelUtil::getNumElemBytes(pf));
+
+    Ogre::PixelBox pb(w, h, 1, pf, &data[0]);
+    rt->copyContentsToMemory(pb);
+
+    image.loadDynamicImage(&data[0], w, h, pf);
+
+    Ogre::TextureManager::getSingleton().remove(tempName);
+    mRendering.getCamera()->setAspectRatio(oldAspect);
+}
 
 void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
 {
@@ -1018,6 +1064,11 @@ void RenderingManager::enableTerrain(bool enable)
 float RenderingManager::getCameraDistance() const
 {
     return mCamera->getCameraDistance();
+}
+
+void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition, float scale)
+{
+    mEffectManager->addEffect(model, "", worldPosition, scale);
 }
 
 } // namespace

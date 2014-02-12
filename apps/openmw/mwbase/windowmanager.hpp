@@ -33,6 +33,8 @@ namespace OEngine
 namespace ESM
 {
     struct Class;
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace MWWorld
@@ -55,6 +57,12 @@ namespace MWGui
     class InventoryWindow;
     class ContainerWindow;
     class DialogueWindow;
+
+    enum ShowInDialogueMode {
+        ShowInDialogueMode_IfPossible,
+        ShowInDialogueMode_Only,
+        ShowInDialogueMode_Never
+    };
 }
 
 namespace SFO
@@ -224,7 +232,7 @@ namespace MWBase
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.
 
-            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false) = 0;
+            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
             virtual int readPressedButton() = 0;
@@ -279,12 +287,19 @@ namespace MWBase
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
+            /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
 
             virtual Loading::Listener* getLoadingScreen() = 0;
 
             /// Should the cursor be visible?
             virtual bool getCursorVisible() = 0;
+
+            /// Clear all savegame-specific data
+            virtual void clear() = 0;
+
+            virtual void write (ESM::ESMWriter& writer) = 0;
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
     };
 }
 
