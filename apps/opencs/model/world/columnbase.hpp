@@ -44,8 +44,6 @@ namespace CSMWorld
             Display_Race,
             Display_Sounds,
             Display_Sound,
-            Display_Scripts,
-            Display_Script,
             Display_Regions,
             Display_Region,
             Display_Birthsigns,
