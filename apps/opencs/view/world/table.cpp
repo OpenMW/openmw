@@ -466,3 +466,8 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
     std::cout << "drop";
     event->acceptProposedAction();
 }
+
+void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->accept();
+}
