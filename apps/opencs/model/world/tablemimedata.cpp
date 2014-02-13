@@ -49,7 +49,7 @@ std::string CSMWorld::TableMimeData::getIcon() const
 
         if (tmpIcon != mUniversalId[i].getIcon())
         {
-            return ""; //should return multiple types icon, but at the moment we don't have one
+            return ":/multitype.png"; //icon stolen from gnome
         }
 
         tmpIcon = mUniversalId[i].getIcon();
