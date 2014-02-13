@@ -3,6 +3,7 @@
 
 #include "universalid.hpp"
 #include "columnbase.hpp"
+#include <iostream>
 
 CSMWorld::TableMimeData::TableMimeData (UniversalId id)
 {
@@ -76,8 +77,9 @@ bool CSMWorld::TableMimeData::holdsType (CSMWorld::UniversalId::Type type) const
     return false;
 }
 
-bool CSMWorld::TableMimeData::holdsType (CSMWorld::ColumnBase::Display type)
+bool CSMWorld::TableMimeData::holdsType (CSMWorld::ColumnBase::Display type) const
 {
+    std::cout<<type<<std::endl;
     for (std::vector<UniversalId>::const_iterator it = mUniversalId.begin(); it != mUniversalId.end(); ++it)
     {
         if (it->getType() == convertEnums (type))
@@ -102,7 +104,7 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::Univers
     throw ("TableMimeData object does not hold object of the seeked type");
 }
 
-CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnBase::Display type)
+CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnBase::Display type) const
 {
     for (std::vector<UniversalId>::const_iterator it = mUniversalId.begin(); it != mUniversalId.end(); ++it)
     {
@@ -115,15 +117,10 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnB
     throw ("TableMimeData object does not hold object of the seeked type");
 }
 
-CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::ColumnBase::Display type)
+CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::ColumnBase::Display type) const
 {
     switch (type)
     {
-        default:
-            throw ("This type is not handled");
-            return CSMWorld::UniversalId::Type_None;
-            break;
-
         case CSMWorld::ColumnBase::Display_Race:
             return CSMWorld::UniversalId::Type_Race;
             break;
@@ -270,6 +267,14 @@ CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::Col
 
         case CSMWorld::ColumnBase::Display_Scene:
             return CSMWorld::UniversalId::Type_Scene;
+            break;
+
+        case CSMWorld::ColumnBase::Display_Script:
+            return CSMWorld::UniversalId::Type_Script;
+            break;
+
+        default:
+            return CSMWorld::UniversalId::Type_None;
             break;
     }
 }

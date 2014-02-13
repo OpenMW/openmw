@@ -1485,7 +1485,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct RaceColumn : public Column<ESXRecordT>
     {
-        RaceColumn() : Column<ESXRecordT> (Columns::ColumnId_Race, ColumnBase::Display_String) {}
+        RaceColumn() : Column<ESXRecordT> (Columns::ColumnId_Race, ColumnBase::Display_Race) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

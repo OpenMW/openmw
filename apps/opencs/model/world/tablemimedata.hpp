@@ -25,15 +25,15 @@ namespace CSMWorld
             std::string getIcon() const;
             std::vector<UniversalId> getData() const;
             bool holdsType(UniversalId::Type type) const;
-            bool holdsType(CSMWorld::ColumnBase::Display type);
+            bool holdsType(CSMWorld::ColumnBase::Display type) const;
             UniversalId returnMatching(UniversalId::Type type) const;
-            UniversalId returnMatching(CSMWorld::ColumnBase::Display type);
+            UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
 
         private:
             std::vector<UniversalId> mUniversalId;
             QStringList mObjectsFormats;
 
-            CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);
+            CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type) const;
     };
 }
 #endif // TABLEMIMEDATA_H

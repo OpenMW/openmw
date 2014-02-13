@@ -11,7 +11,6 @@
 namespace CSMWorld
 {
     class CollectionBase;
-    class ColumnsBase;
     class RecordBase;
 
     class IdTable : public QAbstractItemModel
@@ -87,8 +86,6 @@ namespace CSMWorld
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
 
             Reordering getReordering() const;
-
-            CSMWorld::ColumnBase::Display getColumnDisplay(int index) const;
     };
 }
 
