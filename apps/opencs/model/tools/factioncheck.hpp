@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that faction records are internally consistent
-    class FactionCheckStage : public Stage
+    class FactionCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
 

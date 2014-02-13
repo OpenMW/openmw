@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Miscellaneous::sRecordId = REC_MISC;
 
 void Miscellaneous::load(ESMReader &esm)
 {
@@ -14,7 +16,7 @@ void Miscellaneous::load(ESMReader &esm)
     mScript = esm.getHNOString("SCRI");
     mIcon = esm.getHNOString("ITEX");
 }
-void Miscellaneous::save(ESMWriter &esm)
+void Miscellaneous::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);

@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that race records are internally consistent
-    class RaceCheckStage : public Stage
+    class RaceCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
             bool mPlayable;

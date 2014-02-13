@@ -2,6 +2,7 @@
 #include "container.hpp"
 
 #include <components/esm/loadcont.hpp>
+#include <components/esm/containerstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -13,10 +14,9 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/actionapply.hpp"
 #include "../mwworld/actionopen.hpp"
+#include "../mwworld/actiontrap.hpp"
 #include "../mwworld/physicssystem.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -53,7 +53,7 @@ namespace MWClass
                 ptr.get<ESM::Container>();
 
             data->mContainerStore.fill(
-                ref->mBase->mInventory, ptr.getCellRef().mOwner, MWBase::Environment::get().getWorld()->getStore());
+                ref->mBase->mInventory, ptr.getCellRef().mOwner, ptr.getCellRef().mFaction, MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -108,7 +108,7 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
         bool needKey = ptr.getCellRef().mLockLevel>0;
@@ -147,11 +147,9 @@ namespace MWClass
             }
             else
             {
-                // Trap activation goes here
-                std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionApply(actor, ptr.getCellRef().mTrap));
+                // Activate trap
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().mTrap, ptr));
                 action->setSound(trapActivationSound);
-                ptr.getCellRef().mTrap = "";
                 return action;
             }
         }
@@ -218,6 +216,7 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -259,5 +258,27 @@ namespace MWClass
             ptr.get<ESM::Container>();
 
         return MWWorld::Ptr(&cell.mContainers.insert(*ref), &cell);
+    }
+
+    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+        const
+    {
+        const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+            readState (state2.mInventory);
+    }
+
+    void Container::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+        const
+    {
+        ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+            writeState (state2.mInventory);
     }
 }

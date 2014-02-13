@@ -76,10 +76,7 @@ void ContainerItemModel::copyItem (const ItemStack& item, size_t count)
     const MWWorld::Ptr& source = mItemSources[mItemSources.size()-1];
     if (item.mBase.getContainerStore() == &source.getClass().getContainerStore(source))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    int origCount = item.mBase.getRefData().getCount();
-    item.mBase.getRefData().setCount(count);
-    source.getClass().getContainerStore(source).add(item.mBase, source);
-    item.mBase.getRefData().setCount(origCount);
+    source.getClass().getContainerStore(source).add(item.mBase, count, source);
 }
 
 void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
@@ -94,9 +91,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
         {
             if (stacks(*it, item.mBase))
             {
-                int refCount = it->getRefData().getCount();
-                it->getRefData().setCount(std::max(0, refCount - toRemove));
-                toRemove -= refCount;
+                toRemove -= store.remove(*it, toRemove, *source);
                 if (toRemove <= 0)
                     return;
             }

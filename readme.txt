@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.26.0
+Version: 0.27.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -23,8 +23,8 @@ Ubuntu (and most others)
 Download the .deb file and install it in the usual way.
 
 Arch Linux
-There's an OpenMW package available in the AUR Repository:
-http://aur.archlinux.org/packages.php?ID=21419
+There's an OpenMW package available in the [community] Repository:
+https://www.archlinux.org/packages/?sort=&q=openmw
 
 OS X:
 Open DMG file, copy OpenMW folder anywhere, for example in /Applications
@@ -36,51 +36,86 @@ https://wiki.openmw.org/index.php?title=Development_Environment_Setup
 
 THE DATA PATH
 
-The data path tells OpenMW where to find your Morrowind files. From 0.12.0 on OpenMW should be able to
+The data path tells OpenMW where to find your Morrowind files. If you run the launcher, OpenMW should be able to
 pick up the location of these files on its own, if both Morrowind and OpenMW are installed properly
 (installing Morrowind under WINE is considered a proper install).
-
-If that does not work for you, please check if you have any leftover openmw.cfg files from versions earlier than 0.12.0. These can interfere with the configuration process, so try to remove then.
-
-If you are running OpenMW without installing it, you still need to manually adjust the data path. Create a text file named openmw.cfg in the location of the binary and enter the following line:
-
-data=path to your data directory
-
-(where you replace "path to your data directory" with the actual location of your data directory)
-
 
 COMMAND LINE OPTIONS
 
 Syntax: openmw <options>
 Allowed options:
-  --help                           print help message
-  --version                        print version information and quit
-  --data arg (=data)               set data directories (later directories have higher priority)
-  --data-local arg                 set local data directory (highest priority)
-  --resources arg (=resources)     set resources directory
-  --start arg (=Beshara)           set initial cell
-  --master arg                     master file(s)
-  --plugin arg                     plugin file(s)
-  --anim-verbose [=arg(=1)] (=0)   output animation indices files
-  --debug [=arg(=1)] (=0)          debug mode
-  --nosound [=arg(=1)] (=0)        disable all sounds
-  --script-verbose [=arg(=1)] (=0) verbose script output
-  --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scripts) at startup
-  --script-console [=arg(=1)] (=0) enable console-only script functionality
-  --script-run arg                 select a file containing a list of console commands that is executed on startup
-  --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
-  --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding)
-  --encoding arg (=win1252)        Character encoding used in OpenMW game messages:
-
-                                   win1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages
-
-                                   win1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
-
-                                   win1252 - Western European (Latin) alphabet, used by default
-
-  --fallback arg                   fallback values
+  --help                                print help message
+  --version                             print version information and quit
+  --data arg (=data)                    set data directories (later directories
+                                        have higher priority)
+  --data-local arg                      set local data directory (highest 
+                                        priority)
+  --fallback-archive arg (=fallback-archive)
+                                        set fallback BSA archives (later 
+                                        archives have higher priority)
+  --resources arg (=resources)          set resources directory
+  --start arg (=Beshara)                set initial cell
+  --content arg                         content file(s): esm/esp, or 
+                                        omwgame/omwaddon
+  --anim-verbose [=arg(=1)] (=0)        output animation indices files
+  --no-sound [=arg(=1)] (=0)            disable all sounds
+  --script-verbose [=arg(=1)] (=0)      verbose script output
+  --script-all [=arg(=1)] (=0)          compile all scripts (excluding dialogue
+                                        scripts) at startup
+  --script-console [=arg(=1)] (=0)      enable console-only script 
+                                        functionality
+  --script-run arg                      select a file containing a list of 
+                                        console commands that is executed on 
+                                        startup
+  --new-game [=arg(=1)] (=0)            activate char gen/new game mechanics
+  --fs-strict [=arg(=1)] (=0)           strict file system handling (no case 
+                                        folding)
+  --encoding arg (=win1252)             Character encoding used in OpenMW game 
+                                        messages:
+                                        
+                                        win1250 - Central and Eastern European 
+                                        such as Polish, Czech, Slovak, 
+                                        Hungarian, Slovene, Bosnian, Croatian, 
+                                        Serbian (Latin script), Romanian and 
+                                        Albanian languages
+                                        
+                                        win1251 - Cyrillic alphabet such as 
+                                        Russian, Bulgarian, Serbian Cyrillic 
+                                        and other languages
+                                        
+                                        win1252 - Western European (Latin) 
+                                        alphabet, used by default
+  --fallback arg                        fallback values
+  --no-grab                             Don't grab mouse cursor
+  --activate-dist arg (=-1)             activation distance override
 
 CHANGELOG
+
+0.27.0
+
+Bug #597: Assertion `dialogue->mId == id' failed in esmstore.cpp
+Bug #794: incorrect display of decimal numbers
+Bug #840: First-person sneaking camera height
+Bug #887: Ambient sounds playing while paused
+Bug #902: Problems with Polish character encoding
+Bug #907: Entering third person using the mousewheel is possible even if it's impossible using the key
+Bug #910: Some CDs not working correctly with Unshield installer
+Bug #917: Quick character creation plugin does not work
+Bug #918: Fatigue does not refill
+Bug #919: The PC falls dead in Beshara - OpenMW nightly Win64 (708CDE2)
+Feature #57: Acrobatics Skill
+Feature #462: Editor: Start Dialogue
+Feature #546: Modify ESX selector to handle new content file scheme
+Feature #588: Editor: Adjust name/path of edited content files
+Feature #644: Editor: Save
+Feature #710: Editor: Configure script compiler context
+Feature #790: God Mode
+Feature #881: Editor: Allow only one instance of OpenCS
+Feature #889: Editor: Record filtering
+Feature #895: Extinguish torches
+Feature #898: Breath meter enhancements
+Feature #901: Editor: Default record filter
+Feature #913: Merge --master and --plugin switches
 
 0.26.0
 

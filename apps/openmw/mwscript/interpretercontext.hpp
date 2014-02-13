@@ -33,9 +33,9 @@ namespace MWScript
             bool mActivationHandled;
             boost::shared_ptr<MWWorld::Action> mAction;
 
-            MWWorld::Ptr getReference (const std::string& id, bool activeOnly);
+            MWWorld::Ptr getReference (const std::string& id, bool activeOnly, bool doThrow=true);
 
-            const MWWorld::Ptr getReference (const std::string& id, bool activeOnly) const;
+            const MWWorld::Ptr getReference (const std::string& id, bool activeOnly, bool doThrow=true) const;
 
         public:
 
@@ -150,7 +150,7 @@ namespace MWScript
 
             virtual void setMemberFloat (const std::string& id, const std::string& name, float value);
 
-            MWWorld::Ptr getReference();
+            MWWorld::Ptr getReference(bool required=true);
             ///< Reference, that the script is running from (can be empty)
     };
 }

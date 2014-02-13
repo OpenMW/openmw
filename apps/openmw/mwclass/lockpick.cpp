@@ -74,11 +74,11 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Lockpick::getEquipmentSlots (const MWWorld::Ptr& ptr) const
     {
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
-        slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
+        slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Lockpick::getValue (const MWWorld::Ptr& ptr) const
@@ -86,7 +86,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Lockpick> *ref =
             ptr.get<ESM::Lockpick>();
 
-        return ref->mBase->mData.mValue;
+        if (ptr.getCellRef().mCharge == -1)
+            return ref->mBase->mData.mValue;
+        else
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Lockpick::registerSelf()
@@ -138,10 +141,11 @@ namespace MWClass
         text += "\n#{sUses}: " + MWGui::ToolTips::toString(remainingUses);
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 

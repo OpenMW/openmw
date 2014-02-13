@@ -8,7 +8,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -20,24 +19,16 @@ namespace MWMechanics
 
 void Repair::repair(const MWWorld::Ptr &itemToRepair)
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     MWWorld::LiveCellRef<ESM::Repair> *ref =
         mTool.get<ESM::Repair>();
+
+    // unstack tool if required
+    player.getClass().getContainerStore(player).unstack(mTool, player);
 
     // reduce number of uses left
     int uses = (mTool.getCellRef().mCharge != -1) ? mTool.getCellRef().mCharge : ref->mBase->mData.mUses;
     mTool.getCellRef().mCharge = uses-1;
-
-    // unstack tool if required
-    if (mTool.getRefData().getCount() > 1 && uses == ref->mBase->mData.mUses)
-    {
-        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
-        MWWorld::ContainerStoreIterator it = store.add(mTool, player);
-        it->getRefData().setCount(mTool.getRefData().getCount()-1);
-        it->getCellRef().mCharge = -1;
-
-        mTool.getRefData().setCount(1);
-    }
 
     MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
     MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats(player);
@@ -85,7 +76,10 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     // tool used up?
     if (mTool.getCellRef().mCharge == 0)
     {
-        mTool.getRefData().setCount(0);
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+
+        store.remove(mTool, 1, player);
 
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("sNotifyMessage51")->getString();
@@ -93,8 +87,6 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         MWBase::Environment::get().getWindowManager()->messageBox((boost::format(message) % MWWorld::Class::get(mTool).getName(mTool)).str());
 
         // try to find a new tool of the same ID
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
         for (MWWorld::ContainerStoreIterator iter (store.begin());
              iter!=store.end(); ++iter)
         {

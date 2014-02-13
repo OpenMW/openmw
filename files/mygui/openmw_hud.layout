@@ -45,6 +45,7 @@
             <Widget type="ProgressBar" skin="MW_Progress_Loading" position="12 36 196 8" align="Center Top" name="Drowning">
                 <Property key="NeedMouse" value="false"/>
             </Widget>
+            <Widget type="Widget" skin="MW_Progress_Drowning" position="14 38 192 4" align="Center Top" name="Flash"/>
         </Widget>
 
         <!-- Equipped weapon/selected spell name display for a few seconds after it changes -->

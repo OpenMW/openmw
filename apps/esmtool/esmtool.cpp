@@ -236,7 +236,9 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     // Loop through all the references
     ESM::CellRef ref;
     if(!quiet) std::cout << "  References:\n";
-    while(cell.getNextRef(esm, ref))
+
+    bool deleted = false;
+    while(cell.getNextRef(esm, ref, deleted))
     {
         if (save) {
             info.data.mCellRefs[&cell].push_back(ref);
@@ -244,13 +246,14 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
 
         if(quiet) continue;
 
-        std::cout << "    Refnum: " << ref.mRefnum << std::endl;
+        std::cout << "    Refnum: " << ref.mRefNum.mIndex << std::endl;
         std::cout << "    ID: '" << ref.mRefID << "'\n";
         std::cout << "    Owner: '" << ref.mOwner << "'\n";
         std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
         std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
         std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
+        std::cout << "    Deleted: " << deleted << std::endl;
     }
 }
 
@@ -305,14 +308,14 @@ int load(Arguments& info)
 
         info.data.author = esm.getAuthor();
         info.data.description = esm.getDesc();
-        info.data.masters = esm.getMasters();
+        info.data.masters = esm.getGameFiles();
 
         if (!quiet)
         {
             std::cout << "Author: " << esm.getAuthor() << std::endl
                  << "Description: " << esm.getDesc() << std::endl
                  << "File format version: " << esm.getFVer() << std::endl;
-            std::vector<ESM::Header::MasterData> m = esm.getMasters();
+            std::vector<ESM::Header::MasterData> m = esm.getGameFiles();
             if (!m.empty())
             {
                 std::cout << "Masters:" << std::endl;
@@ -339,6 +342,8 @@ int load(Arguments& info)
             }
 
             std::string id = esm.getHNOString("NAME");
+            if (id.empty())
+                id = esm.getHNOString("INAM");
 
             if(!quiet && interested)
                 std::cout << "\nRecord: " << n.toString()

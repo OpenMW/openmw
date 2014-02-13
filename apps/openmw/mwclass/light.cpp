@@ -2,6 +2,7 @@
 #include "light.hpp"
 
 #include <components/esm/loadligh.hpp>
+#include <components/esm/lightstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -16,11 +17,33 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/customdata.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+
+namespace
+{
+    struct CustomData : public MWWorld::CustomData
+    {
+        float mTime;
+        ///< Time remaining
+
+        CustomData(MWWorld::Ptr ptr)
+        {
+            MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+            mTime = ref->mBase->mData.mTime;
+        }
+        ///< Constructs this CustomData from the base values for Ptr.
+
+        virtual MWWorld::CustomData *clone() const
+        {
+            return new CustomData (*this);
+        }
+    };
+}
 
 namespace MWClass
 {
@@ -99,12 +122,12 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
         if (ref->mBase->mData.mFlags & ESM::Light::Carry)
-            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedLeft));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedLeft));
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Light::getValue (const MWWorld::Ptr& ptr) const
@@ -161,10 +184,11 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -182,6 +206,21 @@ namespace MWClass
         return action;
     }
 
+    void Light::setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const
+    {
+        ensureCustomData(ptr);
+
+        float &timeRemaining = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        timeRemaining = duration;
+    }
+
+    float Light::getRemainingUsageTime (const MWWorld::Ptr& ptr) const
+    {
+        ensureCustomData(ptr);
+
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+    }
+
     MWWorld::Ptr
     Light::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
@@ -189,6 +228,12 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         return MWWorld::Ptr(&cell.mLights.insert(*ref), &cell);
+    }
+
+    void Light::ensureCustomData (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+            ptr.getRefData().setCustomData(new CustomData(ptr));
     }
 
     bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
@@ -224,5 +269,25 @@ namespace MWClass
             return std::make_pair(3,"");
         }
         return std::make_pair(1,"");
+    }
+
+    void Light::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+        const
+    {
+        const ESM::LightState& state2 = dynamic_cast<const ESM::LightState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime = state2.mTime;
+    }
+
+    void Light::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+        const
+    {
+        ESM::LightState& state2 = dynamic_cast<ESM::LightState&> (state);
+
+        ensureCustomData (ptr);
+
+        state2.mTime = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 }

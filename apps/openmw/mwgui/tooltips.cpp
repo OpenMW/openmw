@@ -110,11 +110,6 @@ namespace MWGui
 
             else
             {
-    	    const MyGUI::IntPoint& lastPressed = MyGUI::InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
-
-                if (mousePos == lastPressed) // mouseclick makes tooltip disappear
-                    return;
-
                 if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
                 {
                     mRemainingDelay -= frameDuration;
@@ -187,7 +182,7 @@ namespace MWGui
                 }
                 else if (type == "AvatarItemSelection")
                 {
-                    MyGUI::IntCoord avatarPos = MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getAvatarScreenCoord ();
+                    MyGUI::IntCoord avatarPos = focus->getAbsoluteCoord();
                     MyGUI::IntPoint relMousePos = MyGUI::InputManager::getInstance ().getMousePosition () - MyGUI::IntPoint(avatarPos.left, avatarPos.top);
                     int realX = int(float(relMousePos.left) / float(avatarPos.width) * 512.f );
                     int realY = int(float(relMousePos.top) / float(avatarPos.height) * 1024.f );
@@ -216,6 +211,7 @@ namespace MWGui
                         params.mMagnMin = it->mMagnMin;
                         params.mMagnMax = it->mMagnMax;
                         params.mRange = it->mRange;
+                        params.mArea = it->mArea;
                         params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);
@@ -467,7 +463,7 @@ namespace MWGui
                 }
                 Widgets::MWDynamicStatPtr chargeWidget = enchantArea->createWidget<Widgets::MWDynamicStat>
                     ("MW_ChargeBar", chargeCoord, MyGUI::Align::Default, "ToolTipEnchantCharge");
-                chargeWidget->setValue(charge, charge);
+                chargeWidget->setValue(charge, maxCharge);
                 totalSize.height += 24;
             }
         }

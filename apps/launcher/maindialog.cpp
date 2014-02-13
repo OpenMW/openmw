@@ -1,5 +1,11 @@
 #include "maindialog.hpp"
 
+#include <components/version/version.hpp>
+
+#include <QLabel>
+#include <QDate>
+#include <QTime>
+#include <QPushButton>
 #include <QFontDatabase>
 #include <QInputDialog>
 #include <QFileDialog>
@@ -23,8 +29,8 @@
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"
 
-MainDialog::MainDialog()
-    : mGameSettings(mCfgMgr)
+Launcher::MainDialog::MainDialog(QWidget *parent)
+    : mGameSettings(mCfgMgr), QMainWindow (parent)
 {
     // Install the stylesheet font
     QFile file;
@@ -66,10 +72,26 @@ MainDialog::MainDialog()
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
+    // Add version information to bottom of the window
+    QString revision(OPENMW_VERSION_COMMITHASH);
+    QString tag(OPENMW_VERSION_TAGHASH);
+
+    if (revision == tag) {
+        versionLabel->setText(tr("OpenMW %0 release").arg(OPENMW_VERSION));
+    } else {
+        versionLabel->setText(tr("OpenMW development (%0)").arg(revision.left(10)));
+    }
+
+    // Add the compile date and time
+    versionLabel->setToolTip(tr("Compiled on %0 %1").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
+                                                                                    QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
+                                                         QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
+                                                                                    QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
+
     createIcons();
 }
 
-void MainDialog::createIcons()
+void Launcher::MainDialog::createIcons()
 {
     if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
@@ -101,15 +123,15 @@ void MainDialog::createIcons()
 
 }
 
-void MainDialog::createPages()
+void Launcher::MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
-    mPlayPage->setProfilesComboBoxModel(mDataFilesPage->profilesComboBoxModel());
-    mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->profilesComboBoxIndex());
+    mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
+    mPlayPage->setProfilesIndex(mDataFilesPage->profilesIndex());
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);
@@ -121,12 +143,12 @@ void MainDialog::createPages()
 
     connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
 
-    connect(mPlayPage, SIGNAL(profileChanged(int)), mDataFilesPage, SLOT(setProfilesComboBoxIndex(int)));
-    connect(mDataFilesPage, SIGNAL(profileChanged(int)), mPlayPage, SLOT(setProfilesComboBoxIndex(int)));
+    connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
+    connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
 
 }
 
-bool MainDialog::showFirstRunDialog()
+bool Launcher::MainDialog::showFirstRunDialog()
 {
     QStringList iniPaths;
 
@@ -218,7 +240,7 @@ bool MainDialog::showFirstRunDialog()
         }
 
         // Create the file if it doesn't already exist, else the importer will fail
-        QString path = QString::fromStdString(mCfgMgr.getUserPath().string()) + QString("openmw.cfg");
+        QString path = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + QString("openmw.cfg");
         QFile file(path);
 
         if (!file.exists()) {
@@ -261,19 +283,11 @@ bool MainDialog::showFirstRunDialog()
         // Add a new profile
         if (msgBox.isChecked()) {
             mLauncherSettings.setValue(QString("Profiles/currentprofile"), QString("Imported"));
+            mLauncherSettings.remove(QString("Profiles/Imported/content"));
 
-            mLauncherSettings.remove(QString("Profiles/Imported/master"));
-            mLauncherSettings.remove(QString("Profiles/Imported/plugin"));
-
-            QStringList masters = mGameSettings.values(QString("master"));
-            QStringList plugins = mGameSettings.values(QString("plugin"));
-
-            foreach (const QString &master, masters) {
-                mLauncherSettings.setMultiValue(QString("Profiles/Imported/master"), master);
-            }
-
-            foreach (const QString &plugin, plugins) {
-                mLauncherSettings.setMultiValue(QString("Profiles/Imported/plugin"), plugin);
+            QStringList contents = mGameSettings.values(QString("content"));
+            foreach (const QString &content, contents) {
+                mLauncherSettings.setMultiValue(QString("Profiles/Imported/content"), content);
             }
         }
 
@@ -282,7 +296,7 @@ bool MainDialog::showFirstRunDialog()
     return true;
 }
 
-bool MainDialog::setup()
+bool Launcher::MainDialog::setup()
 {
     if (!setupLauncherSettings())
         return false;
@@ -311,19 +325,37 @@ bool MainDialog::setup()
     return true;
 }
 
-void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
+void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
         current = previous;
 
-    pagesWidget->setCurrentIndex(iconWidget->row(current));
+    int currentIndex = iconWidget->row(current);
+    int previousIndex = iconWidget->row(previous);
+
+    pagesWidget->setCurrentIndex(currentIndex);
+
+    DataFilesPage *previousPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(previousIndex));
+    DataFilesPage *currentPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(currentIndex));
+
+    //special call to update/save data files page list view when it's displayed/hidden.
+    if (previousPage)
+    {
+        if (previousPage->objectName() == "DataFilesPage")
+            previousPage->saveSettings();
+    }
+    else if (currentPage)
+    {
+        if (currentPage->objectName() == "DataFilesPage")
+            currentPage->loadSettings();
+    }
 }
 
-bool MainDialog::setupLauncherSettings()
+bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
 
     QStringList paths;
     paths.append(QString("launcher.cfg"));
@@ -356,7 +388,7 @@ bool MainDialog::setupLauncherSettings()
 }
 
 #ifndef WIN32
-bool expansions(UnshieldThread& cd)
+bool Launcher::expansions(Launcher::UnshieldThread& cd)
 {
     if(cd.BloodmoonDone())
     {
@@ -367,7 +399,7 @@ bool expansions(UnshieldThread& cd)
     QMessageBox expansionsBox;
     expansionsBox.setText(QObject::tr("<br>Would you like to install expansions now ? (make sure you have the disc)<br> \
                                        If you want to install both Bloodmoon and Tribunal, you have to install Tribunal first.<br>"));
-    
+
     QAbstractButton* tribunalButton = NULL;
     if(!cd.TribunalDone())
         tribunalButton = expansionsBox.addButton(QObject::tr("&Tribunal"), QMessageBox::ActionRole);
@@ -386,7 +418,7 @@ bool expansions(UnshieldThread& cd)
     {
 
         TextSlotMsgBox cdbox;
-        cdbox.setStandardButtons(QMessageBox::Cancel); 
+        cdbox.setStandardButtons(QMessageBox::Cancel);
 
         QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
         QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
@@ -405,7 +437,7 @@ bool expansions(UnshieldThread& cd)
     {
 
         TextSlotMsgBox cdbox;
-        cdbox.setStandardButtons(QMessageBox::Cancel); 
+        cdbox.setStandardButtons(QMessageBox::Cancel);
 
         QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
         QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
@@ -427,11 +459,37 @@ bool expansions(UnshieldThread& cd)
 }
 #endif // WIN32
 
-bool MainDialog::setupGameSettings()
+bool Launcher::MainDialog::setupGameSettings()
 {
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
+    // Load the user config file first, separately
+    // So we can write it properly, uncontaminated
+    QString path = userPath + QLatin1String("openmw.cfg");
+    QFile file(path);
+
+    qDebug() << "Loading config file:" << qPrintable(path);
+
+    if (file.exists()) {
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                       Please make sure you have the right permissions \
+                                       and try again.<br>").arg(file.fileName()));
+                                       msgBox.exec();
+            return false;
+        }
+        QTextStream stream(&file);
+        stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+        mGameSettings.readUserFile(stream);
+    }
+
+    // Now the rest
     QStringList paths;
     paths.append(userPath + QString("openmw.cfg"));
     paths.append(QString("openmw.cfg"));
@@ -467,7 +525,7 @@ bool MainDialog::setupGameSettings()
     foreach (const QString path, mGameSettings.getDataDirs()) {
         QDir dir(path);
         QStringList filters;
-        filters << "*.esp" << "*.esm";
+        filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
 
         if (!dir.entryList(filters).isEmpty())
             dataDirs.append(path);
@@ -485,12 +543,12 @@ bool MainDialog::setupGameSettings()
 
         QAbstractButton *dirSelectButton =
                 msgBox.addButton(QObject::tr("Browse to &Install..."), QMessageBox::ActionRole);
-        
+
         #ifndef WIN32
-            QAbstractButton *cdSelectButton = 
+            QAbstractButton *cdSelectButton =
                     msgBox.addButton(QObject::tr("Browse to &CD..."), QMessageBox::ActionRole);
         #endif
-        
+
 
          msgBox.exec();
 
@@ -505,14 +563,14 @@ bool MainDialog::setupGameSettings()
         #ifndef WIN32
         else if(msgBox.clickedButton() == cdSelectButton) {
             UnshieldThread cd;
-                
+
             {
                 TextSlotMsgBox cdbox;
-                cdbox.setStandardButtons(QMessageBox::Cancel); 
+                cdbox.setStandardButtons(QMessageBox::Cancel);
 
                 QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
                 QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
-     
+
                 cd.SetMorrowindPath(
                     QFileDialog::getOpenFileName(
                         NULL,
@@ -526,11 +584,11 @@ bool MainDialog::setupGameSettings()
                         QObject::tr("Select where to extract files to"),
                         QDir::currentPath(),
                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks).toUtf8().constData());
-                
+
                 cd.start();
                 cdbox.exec();
             }
-            
+
             while(expansions(cd));
 
             selectedFile = QString::fromStdString(cd.GetMWEsmPath());
@@ -550,11 +608,11 @@ bool MainDialog::setupGameSettings()
     return true;
 }
 
-bool MainDialog::setupGraphicsSettings()
+bool Launcher::MainDialog::setupGraphicsSettings()
 {
     mGraphicsSettings.setMultiValueEnabled(false);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
     QFile localDefault(QString("settings-default.cfg"));
@@ -604,7 +662,7 @@ bool MainDialog::setupGraphicsSettings()
     return true;
 }
 
-void MainDialog::loadSettings()
+void Launcher::MainDialog::loadSettings()
 {
     int width = mLauncherSettings.value(QString("General/MainWindow/width")).toInt();
     int height = mLauncherSettings.value(QString("General/MainWindow/height")).toInt();
@@ -616,7 +674,7 @@ void MainDialog::loadSettings()
     move(posX, posY);
 }
 
-void MainDialog::saveSettings()
+void Launcher::MainDialog::saveSettings()
 {
     QString width = QString::number(this->width());
     QString height = QString::number(this->height());
@@ -634,14 +692,14 @@ void MainDialog::saveSettings()
 
 }
 
-bool MainDialog::writeSettings()
+bool Launcher::MainDialog::writeSettings()
 {
     // Now write all config files
     saveSettings();
     mGraphicsPage->saveSettings();
     mDataFilesPage->saveSettings();
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QDir dir(userPath);
 
     if (!dir.exists()) {
@@ -727,13 +785,13 @@ bool MainDialog::writeSettings()
     return true;
 }
 
-void MainDialog::closeEvent(QCloseEvent *event)
+void Launcher::MainDialog::closeEvent(QCloseEvent *event)
 {
     writeSettings();
     event->accept();
 }
 
-void MainDialog::play()
+void Launcher::MainDialog::play()
 {
     if (!writeSettings()) {
         qApp->quit();
@@ -742,11 +800,11 @@ void MainDialog::play()
 
     if(!mGameSettings.hasMaster()) {
             QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("No master file selected"));
+            msgBox.setWindowTitle(tr("No game file selected"));
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>You do not have any master files selected.</b><br><br> \
-                              OpenMW will not start without a master file selected.<br>"));
+            msgBox.setText(tr("<br><b>You do not have no game file selected.</b><br><br> \
+                              OpenMW will not start without a game file selected.<br>"));
             msgBox.exec();
             return;
     }
@@ -756,7 +814,7 @@ void MainDialog::play()
     qApp->quit();
 }
 
-bool MainDialog::startProgram(const QString &name, const QStringList &arguments, bool detached)
+bool Launcher::MainDialog::startProgram(const QString &name, const QStringList &arguments, bool detached)
 {
     QString path = name;
 #ifdef Q_OS_WIN

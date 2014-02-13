@@ -2,13 +2,14 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int DialInfo::sRecordId = REC_INFO;
 
 void DialInfo::load(ESMReader &esm)
 {
-    mId = esm.getHNString("INAM");
     mPrev = esm.getHNString("PNAM");
     mNext = esm.getHNString("NNAM");
 
@@ -48,8 +49,8 @@ void DialInfo::load(ESMReader &esm)
     mFactionLess = false;
     if (subName.val == REC_FNAM)
     {
-        mNpcFaction = esm.getHString();
-        if (mNpcFaction == "FFFF")
+        mFaction = esm.getHString();
+        if (mFaction == "FFFF")
             mFactionLess = true;
         if (esm.isEmptyOrGetName())
             return;
@@ -120,22 +121,21 @@ void DialInfo::load(ESMReader &esm)
         esm.skipRecord();
 }
 
-void DialInfo::save(ESMWriter &esm)
+void DialInfo::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("INAM", mId);
     esm.writeHNCString("PNAM", mPrev);
     esm.writeHNCString("NNAM", mNext);
     esm.writeHNT("DATA", mData, 12);
     esm.writeHNOCString("ONAM", mActor);
     esm.writeHNOCString("RNAM", mRace);
     esm.writeHNOCString("CNAM", mClass);
-    esm.writeHNOCString("FNAM", mNpcFaction);
+    esm.writeHNOCString("FNAM", mFaction);
     esm.writeHNOCString("ANAM", mCell);
     esm.writeHNOCString("DNAM", mPcFaction);
     esm.writeHNOCString("SNAM", mSound);
     esm.writeHNOString("NAME", mResponse);
 
-    for (std::vector<SelectStruct>::iterator it = mSelects.begin(); it != mSelects.end(); ++it)
+    for (std::vector<SelectStruct>::const_iterator it = mSelects.begin(); it != mSelects.end(); ++it)
     {
         esm.writeHNString("SCVR", it->mSelectRule);
         it->mValue.write (esm, Variant::Format_Info);
@@ -153,4 +153,28 @@ void DialInfo::save(ESMWriter &esm)
     }
 }
 
+    void DialInfo::blank()
+    {
+        mData.mUnknown1 = 0;
+        mData.mDisposition = 0;
+        mData.mRank = 0;
+        mData.mGender = 0;
+        mData.mPCrank = 0;
+        mData.mUnknown2 = 0;
+
+        mSelects.clear();
+        mPrev.clear();
+        mNext.clear();
+        mActor.clear();
+        mRace.clear();
+        mClass.clear();
+        mFaction.clear();
+        mPcFaction.clear();
+        mCell.clear();
+        mSound.clear();
+        mResponse.clear();
+        mResultScript.clear();
+        mFactionLess = false;
+        mQuestStatus = QS_None;
+    }
 }

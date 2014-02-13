@@ -16,11 +16,17 @@
 #include "../mwmechanics/aifollow.hpp"
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
+#include "../mwmechanics/aicombat.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
 #include <iostream>
+
+#include "../mwbase/mechanicsmanager.hpp"
 
 namespace MWScript
 {
@@ -220,7 +226,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (mIndex));
+                    runtime.push(MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (
+                                     (MWMechanics::CreatureStats::AiSetting)mIndex).getModified());
                 }
         };
         template<class R>
@@ -236,8 +243,11 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (mIndex,
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (mIndex) + value);
+                    MWMechanics::CreatureStats::AiSetting setting
+                            = MWMechanics::CreatureStats::AiSetting(mIndex);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (setting,
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSetting (setting).getBase() + value);
                 }
         };
         template<class R>
@@ -253,8 +263,11 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (mIndex,
-                        value);
+                    MWMechanics::CreatureStats::AiSetting setting = (MWMechanics::CreatureStats::AiSetting)mIndex;
+
+                    MWMechanics::Stat<int> stat = ptr.getClass().getCreatureStats(ptr).getAiSetting(setting);
+                    stat.setModified(value, 0);
+                    ptr.getClass().getCreatureStats(ptr).setAiSetting(setting, stat);
                 }
         };
 
@@ -339,31 +352,121 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().getTypeId ();
+                    Interpreter::Type_Integer value = MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().getLastRunTypeId();
 
                     runtime.push (value);
                 }
         };
 
         template<class R>
-        class OpGetDetected : public Interpreter::Opcode1
+        class OpGetDetected : public Interpreter::Opcode0
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                virtual void execute (Interpreter::Runtime& runtime)
                 {
-
+                    MWWorld::Ptr observer = R()(runtime);
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    Interpreter::Type_Integer value = false; // TODO replace with implementation
+                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
-                    std::cout << "AiGetDetected: " << actorID << ", " << value << std::endl;
+                    Interpreter::Type_Integer value =
+                            MWBase::Environment::get().getWorld()->getLOS(observer, actor) &&
+                            MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, observer);
 
                     runtime.push (value);
                 }
         };
 
+        template<class R>
+        class OpGetLineOfSight : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+
+                    MWWorld::Ptr source = R()(runtime);
+
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->getPtr(actorID,true);
+                    bool value = false;
+                    if(dest != MWWorld::Ptr() )
+                    {
+                        value = MWBase::Environment::get().getWorld()->getLOS(source,dest);
+                    }
+                    runtime.push (value);
+                }
+        };
+
+        template<class R>
+        class OpGetTarget : public Interpreter::Opcode0
+        {
+            public:
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr actor = R()(runtime);
+                    std::string testedTargetId = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    const MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+                    std::string currentTargetId;
+
+                    bool targetsAreEqual = false;
+                    if (creatureStats.getAiSequence().getCombatTarget (currentTargetId))
+                    {
+                        if (currentTargetId == testedTargetId)
+                            targetsAreEqual = true;
+                    }
+                    runtime.push(int(targetsAreEqual));
+                }
+        };
+
+        template<class R>
+        class OpStartCombat : public Interpreter::Opcode0
+        {
+            public:
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr actor = R()(runtime);
+                    std::string targetID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+                    
+
+                    creatureStats.setHostile(true);
+                    creatureStats.getAiSequence().stack(
+                        MWMechanics::AiCombat(MWBase::Environment::get().getWorld()->getPtr(targetID, true) ));
+                }
+        };
+
+        template<class R>
+        class OpStopCombat : public Interpreter::Opcode0
+        {
+            public:
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr actor = R()(runtime);
+                    MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+                    creatureStats.getAiSequence().stopCombat();
+                    creatureStats.setHostile(false);
+                }
+        };
+
+        template<class R>
+        class OpToggleAI : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getMechanicsManager()->toggleAI();   
+                }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -387,8 +490,19 @@ namespace MWScript
                 new OpGetAiPackageDone<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeGetCurrentAiPackage, new OpGetCurrentAIPackage<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeGetCurrentAiPackageExplicit, new OpGetCurrentAIPackage<ExplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeGetDetected, new OpGetDetected<ImplicitRef>);
-            interpreter.installSegment3 (Compiler::Ai::opcodeGetDetectedExplicit, new OpGetDetected<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetDetected, new OpGetDetected<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetDetectedExplicit, new OpGetDetected<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSight, new OpGetLineOfSight<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSightExplicit, new OpGetLineOfSight<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetTarget, new OpGetTarget<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeGetTargetExplicit, new OpGetTarget<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStartCombat, new OpStartCombat<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStartCombatExplicit, new OpStartCombat<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStopCombat, new OpStopCombat<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeStopCombatExplicit, new OpStopCombat<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAI, new OpToggleAI<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAIExplicit, new OpToggleAI<ExplicitRef>);
+
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHello, new OpSetAiSetting<ImplicitRef>(0));
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHelloExplicit, new OpSetAiSetting<ExplicitRef>(0));
             interpreter.installSegment5 (Compiler::Ai::opcodeSetFight, new OpSetAiSetting<ImplicitRef>(1));

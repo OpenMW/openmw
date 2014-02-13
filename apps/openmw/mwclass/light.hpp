@@ -10,6 +10,8 @@ namespace MWClass
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
+            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
         public:
 
              virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
@@ -56,6 +58,12 @@ namespace MWClass
                 const;
             ///< Generate action for using via inventory menu
 
+            virtual void setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const;
+            ///< Sets the remaining duration of the object.
+
+            virtual float getRemainingUsageTime (const MWWorld::Ptr& ptr) const;
+            ///< Returns the remaining duration of the object.
+
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
@@ -63,6 +71,14 @@ namespace MWClass
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
 
             std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const;
+            ///< Read additional state from \a state into \a ptr.
+
+            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+                const;
+            ///< Write additional state from \a ptr into \a state.
     };
 }
 

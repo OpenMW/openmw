@@ -1,6 +1,5 @@
 #include "birth.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -34,8 +33,7 @@ namespace MWGui
 
         getWidget(mBirthList, "BirthsignList");
         mBirthList->setScrollVisible(true);
-        mBirthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-        mBirthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+        mBirthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onAccept);
         mBirthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
         MyGUI::Button* backButton;
@@ -77,7 +75,7 @@ namespace MWGui
         size_t count = mBirthList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
+            if (Misc::StringUtils::ciEqual(*mBirthList->getItemDataAt<std::string>(i), birthId))
             {
                 mBirthList->setIndexSelected(i);
                 MyGUI::Button* okButton;
@@ -98,6 +96,14 @@ namespace MWGui
         eventDone(this);
     }
 
+    void BirthDialog::onAccept(MyGUI::ListBox *_sender, size_t _index)
+    {
+        onSelectBirth(_sender, _index);
+        if(mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
+            return;
+        eventDone(this);
+    }
+
     void BirthDialog::onBackClicked(MyGUI::Widget* _sender)
     {
         eventBack();
@@ -112,7 +118,7 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
-        if (boost::iequals(mCurrentBirthId, *birthId))
+        if (Misc::StringUtils::ciEqual(mCurrentBirthId, *birthId))
             return;
 
         mCurrentBirthId = *birthId;
@@ -148,7 +154,7 @@ namespace MWGui
                 mBirthList->setIndexSelected(index);
                 mCurrentBirthId = it2->first;
             }
-            else if (boost::iequals(it2->first, mCurrentBirthId))
+            else if (Misc::StringUtils::ciEqual(it2->first, mCurrentBirthId))
             {
                 mBirthList->setIndexSelected(index);
             }

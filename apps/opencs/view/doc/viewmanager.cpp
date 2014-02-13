@@ -74,7 +74,10 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_ArmorType, CSMWorld::Columns::ColumnId_ArmorType, false },
         { CSMWorld::ColumnBase::Display_ClothingType, CSMWorld::Columns::ColumnId_ClothingType, false },
         { CSMWorld::ColumnBase::Display_CreatureType, CSMWorld::Columns::ColumnId_CreatureType, false },
-        { CSMWorld::ColumnBase::Display_WeaponType, CSMWorld::Columns::ColumnId_WeaponType, false }
+        { CSMWorld::ColumnBase::Display_WeaponType, CSMWorld::Columns::ColumnId_WeaponType, false },
+        { CSMWorld::ColumnBase::Display_DialogueType, CSMWorld::Columns::ColumnId_DialogueType, false },
+        { CSMWorld::ColumnBase::Display_QuestStatusType, CSMWorld::Columns::ColumnId_QuestStatusType, false },
+        { CSMWorld::ColumnBase::Display_Gender, CSMWorld::Columns::ColumnId_Gender, true }
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)

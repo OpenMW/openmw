@@ -150,10 +150,10 @@ namespace GUI
       MyGUI::IntSize size = button->getTextSize();
       button->setSize(size.width + 24, button->getSize().height);
     }
+    MyGUI::Widget* mMainWidget;
 
   protected:
 
-    MyGUI::Widget* mMainWidget;
     std::string mPrefix;
     std::string mLayoutName;
     MyGUI::VectorWidgetPtr mListWindowRoot;

@@ -4,20 +4,19 @@
 #include <QMessageBox>
 #include <QDir>
 
-#ifdef __APPLE__
+#ifdef MAC_OS_X_VERSION_MIN_REQUIRED
+#undef MAC_OS_X_VERSION_MIN_REQUIRED
 // We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-#endif
-#include <SDL.h>
+#endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-#include <cstdlib>
+#include <SDL.h>
 
 #include <boost/math/common_factor.hpp>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/files/ogreplugin.hpp>
 
-#include <components/fileorderlist/utils/naturalsort.hpp>
+#include <components/contentselector/model/naturalsort.hpp>
 
 #include "settings/graphicssettings.hpp"
 
@@ -33,11 +32,12 @@ QString getAspect(int x, int y)
     return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
 }
 
-GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
+Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
     : mCfgMgr(cfg)
     , mGraphicsSettings(graphicsSetting)
     , QWidget(parent)
 {
+    setObjectName ("GraphicsPage");
     setupUi(this);
 
     // Set the maximum res we can set in windowed mode
@@ -52,15 +52,11 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
 
 }
 
-bool GraphicsPage::setupOgre()
+bool Launcher::GraphicsPage::setupOgre()
 {
-    // Create a log manager so we can surpress debug text to stdout/stderr
-    Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
-    logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
-
     try
     {
-        mOgre = new Ogre::Root("", "", "./launcherOgre.log");
+        mOgre = mOgreInit.init(mCfgMgr.getLogPath().string() + "/launcherOgre.log");
     }
     catch(Ogre::Exception &ex)
     {
@@ -77,40 +73,6 @@ bool GraphicsPage::setupOgre()
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
         return false;
     }
-
-
-    std::string pluginDir;
-    const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
-    if (pluginEnv)
-        pluginDir = pluginEnv;
-    else
-    {
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        pluginDir = ".\\";
-#endif
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        pluginDir = OGRE_PLUGIN_DIR;
-#endif
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-        pluginDir = OGRE_PLUGIN_DIR_REL;
-#endif
-    }
-
-    QDir dir(QString::fromStdString(pluginDir));
-    pluginDir = dir.absolutePath().toStdString();
-
-    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
-    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mOgre);
-    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
-
-#ifdef ENABLE_PLUGIN_GL
-    mGLPlugin = new Ogre::GLPlugin();
-    mOgre->installPlugin(mGLPlugin);
-#endif
-#ifdef ENABLE_PLUGIN_Direct3D9
-    mD3D9Plugin = new Ogre::D3D9Plugin();
-    mOgre->installPlugin(mD3D9Plugin);
-#endif
 
     // Get the available renderers and put them in the combobox
     const Ogre::RenderSystemList &renderers = mOgre->getAvailableRenderers();
@@ -133,7 +95,7 @@ bool GraphicsPage::setupOgre()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not select a valid render system</b><br><br> \
-                          Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
+                          Please make sure Ogre plugins were installed correctly.<br>"));
         msgBox.exec();
         return false;
     }
@@ -156,7 +118,7 @@ bool GraphicsPage::setupOgre()
     return true;
 }
 
-bool GraphicsPage::setupSDL()
+bool Launcher::GraphicsPage::setupSDL()
 {
     int displays = SDL_GetNumVideoDisplays();
 
@@ -179,7 +141,7 @@ bool GraphicsPage::setupSDL()
     return true;
 }
 
-bool GraphicsPage::loadSettings()
+bool Launcher::GraphicsPage::loadSettings()
 {
     if (!setupSDL())
         return false;
@@ -218,7 +180,7 @@ bool GraphicsPage::loadSettings()
     return true;
 }
 
-void GraphicsPage::saveSettings()
+void Launcher::GraphicsPage::saveSettings()
 {
     vSyncCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/vsync"), QString("true"))
                                  : mGraphicsSettings.setValue(QString("Video/vsync"), QString("false"));
@@ -245,7 +207,7 @@ void GraphicsPage::saveSettings()
     mGraphicsSettings.setValue(QString("Video/screen"), QString::number(screenComboBox->currentIndex()));
 }
 
-QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
+QStringList Launcher::GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
 {
     QStringList result;
 
@@ -278,7 +240,7 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     return result;
 }
 
-QStringList GraphicsPage::getAvailableResolutions(int screen)
+QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
 {
     QStringList result;
     SDL_DisplayMode mode;
@@ -325,7 +287,7 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
     return result;
 }
 
-QRect GraphicsPage::getMaximumResolution()
+QRect Launcher::GraphicsPage::getMaximumResolution()
 {
     QRect max;
     int screens = QApplication::desktop()->screenCount();
@@ -340,7 +302,7 @@ QRect GraphicsPage::getMaximumResolution()
     return max;
 }
 
-void GraphicsPage::rendererChanged(const QString &renderer)
+void Launcher::GraphicsPage::rendererChanged(const QString &renderer)
 {
     mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
 
@@ -349,7 +311,7 @@ void GraphicsPage::rendererChanged(const QString &renderer)
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
 }
 
-void GraphicsPage::screenChanged(int screen)
+void Launcher::GraphicsPage::screenChanged(int screen)
 {
     if (screen >= 0) {
         resolutionComboBox->clear();
@@ -357,7 +319,7 @@ void GraphicsPage::screenChanged(int screen)
     }
 }
 
-void GraphicsPage::slotFullScreenChanged(int state)
+void Launcher::GraphicsPage::slotFullScreenChanged(int state)
 {
     if (state == Qt::Checked) {
         standardRadioButton->toggle();
@@ -371,7 +333,7 @@ void GraphicsPage::slotFullScreenChanged(int state)
     }
 }
 
-void GraphicsPage::slotStandardToggled(bool checked)
+void Launcher::GraphicsPage::slotStandardToggled(bool checked)
 {
     if (checked) {
         resolutionComboBox->setEnabled(true);

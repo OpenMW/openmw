@@ -114,10 +114,8 @@ namespace MWScript
             }
             catch (const std::exception& e)
             {
-                std::cerr << "execution of script " << name << " failed." << std::endl;
-
-                if (mVerbose)
-                    std::cerr << "(" << e.what() << ")" << std::endl;
+                std::cerr << "Execution of script " << name << " failed:" << std::endl;
+                std::cerr << e.what() << std::endl;
 
                 iter->second.first.clear(); // don't execute again.
             }
@@ -221,10 +219,5 @@ namespace MWScript
                 return i;
 
         throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);
-    }
-
-    void ScriptManager::resetGlobalScripts()
-    {
-        mGlobalScripts.reset();
     }
 }

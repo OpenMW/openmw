@@ -5,6 +5,7 @@
 #include <OgreMeshManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
+#include <OgreCamera.h>
 
 #include "sky.hpp"
 #include "renderingmanager.hpp"
@@ -292,6 +293,7 @@ Water::~Water()
 
     delete mReflection;
     delete mRefraction;
+    delete mSimulation;
 }
 
 void Water::changeCell(const ESM::Cell* cell)

@@ -7,8 +7,6 @@ namespace CSMFilter
 {
     class AndNode : public NAryNode
     {
-            bool mAnd;
-
         public:
 
             AndNode (const std::vector<boost::shared_ptr<Node> >& nodes);

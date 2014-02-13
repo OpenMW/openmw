@@ -61,6 +61,7 @@ void CSVWorld::CellCreator::reset()
     mX->setValue (0);
     mY->setValue (0);
     mType->setCurrentIndex (0);
+    setType(0);
     GenericCreator::reset();
 }
 
@@ -78,4 +79,25 @@ void CSVWorld::CellCreator::setType (int index)
 void CSVWorld::CellCreator::valueChanged (int index)
 {
     update();
+}
+
+void CSVWorld::CellCreator::cloneMode(const std::string& originId, 
+                                      const CSMWorld::UniversalId::Type type)
+{
+    CSVWorld::GenericCreator::cloneMode(originId, type);
+    if (*(originId.begin()) == '#') //if originid points to the exterior cell
+    {
+        setType(1); //enable x and y controls
+        mType->setCurrentIndex(1);
+    } else {
+        setType(0);
+        mType->setCurrentIndex(0);
+    }
+}
+
+
+void CSVWorld::CellCreator::toggleWidgets(bool active)
+{
+    CSVWorld::GenericCreator::toggleWidgets(active);
+    mType->setEnabled(active);
 }

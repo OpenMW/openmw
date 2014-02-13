@@ -1,4 +1,8 @@
 project (Components)
+set (CMAKE_BUILD_TYPE DEBUG)
+
+# Version file
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp")
 
 # source files
 
@@ -19,7 +23,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogrenifloader skeleton material mesh
+    ogrenifloader skeleton material mesh particles controller
     )
 
 add_component_dir (nifbullet
@@ -40,6 +44,7 @@ add_component_dir (esm
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
+    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate
     )
 
 add_component_dir (misc
@@ -47,8 +52,8 @@ add_component_dir (misc
     )
 
 add_component_dir (files
-    linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
-    filelibrary ogreplugin constrainedfiledatastream lowlevelfile
+    linuxpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    constrainedfiledatastream lowlevelfile
     )
 
 add_component_dir (compiler
@@ -65,30 +70,43 @@ add_component_dir (interpreter
 add_component_dir (translation
     translation
     )
-    
+
 add_component_dir (terrain
     quadtreenode chunk world storage material
     )
-    
+
 add_component_dir (loadinglistener
     loadinglistener
+    )
+
+add_component_dir (ogreinit
+    ogreinit ogreplugin
+    )
+
+add_component_dir (version
+    version
+    )
+
+set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
 find_package(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
-   add_component_qt_dir (fileorderlist
-       model/modelitem model/datafilesmodel model/pluginsproxymodel model/esm/esmfile
-       utils/profilescombobox utils/comboboxlineedit utils/lineedit utils/naturalsort
+   add_component_qt_dir (contentselector
+        model/modelitem model/esmfile
+        model/naturalsort model/contentmodel
+        view/combobox view/contentselector
        )
 
    include(${QT_USE_FILE})
+    QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
    QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
 endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
 
-include_directories(${BULLET_INCLUDE_DIRS})
+include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS})
+add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
 

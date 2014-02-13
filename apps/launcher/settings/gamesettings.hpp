@@ -8,55 +8,72 @@
 
 #include <boost/filesystem/path.hpp>
 
-namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
-                  struct ConfigurationManager;}
-
-class GameSettings
+namespace Files
 {
-public:
-    GameSettings(Files::ConfigurationManager &cfg);
-    ~GameSettings();
+  typedef std::vector<boost::filesystem::path> PathContainer;
+  struct ConfigurationManager;
+}
 
-    inline QString value(const QString &key, const QString &defaultValue = QString())
+namespace Launcher
+{
+    class GameSettings
     {
-        return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
-    }
+    public:
+        GameSettings(Files::ConfigurationManager &cfg);
+        ~GameSettings();
+
+        inline QString value(const QString &key, const QString &defaultValue = QString())
+        {
+            return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
+        }
 
 
-    inline void setValue(const QString &key, const QString &value)
-    {
-        mSettings.insert(key, value);
-    }
+        inline void setValue(const QString &key, const QString &value)
+        {
+            mSettings.insert(key, value);
+            mUserSettings.insert(key, value);
+        }
 
-    inline void setMultiValue(const QString &key, const QString &value)
-    {
-        QStringList values = mSettings.values(key);
-        if (!values.contains(value))
-            mSettings.insertMulti(key, value);
-    }
+        inline void setMultiValue(const QString &key, const QString &value)
+        {
+            QStringList values = mSettings.values(key);
+            if (!values.contains(value))
+                mSettings.insertMulti(key, value);
 
-    inline void remove(const QString &key)
-    {
-        mSettings.remove(key);
-    }
+            values = mUserSettings.values(key);
+            if (!values.contains(value))
+                mUserSettings.insertMulti(key, value);
+        }
 
-    inline QStringList getDataDirs() { return mDataDirs; }
-    inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
-    inline QString getDataLocal() {return mDataLocal; }
-    inline bool hasMaster() { return mSettings.count(QString("master")) > 0; }
+        inline void remove(const QString &key)
+        {
+            mSettings.remove(key);
+            mUserSettings.remove(key);
+        }
 
-    QStringList values(const QString &key, const QStringList &defaultValues = QStringList());
-    bool readFile(QTextStream &stream);
-    bool writeFile(QTextStream &stream);
+        inline QStringList getDataDirs() { return mDataDirs; }
+        inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
+        inline QString getDataLocal() {return mDataLocal; }
 
-private:
-    Files::ConfigurationManager &mCfgMgr;
+        bool hasMaster();
 
-    void validatePaths();
-    QMap<QString, QString> mSettings;
+        QStringList values(const QString &key, const QStringList &defaultValues = QStringList());
 
-    QStringList mDataDirs;
-    QString mDataLocal;
-};
+        bool readFile(QTextStream &stream);
+        bool readFile(QTextStream &stream, QMap<QString, QString> &settings);
+        bool readUserFile(QTextStream &stream);
 
+        bool writeFile(QTextStream &stream);
+
+    private:
+        Files::ConfigurationManager &mCfgMgr;
+
+        void validatePaths();
+        QMap<QString, QString> mSettings;
+        QMap<QString, QString> mUserSettings;
+
+        QStringList mDataDirs;
+        QString mDataLocal;
+    };
+}
 #endif // GAMESETTINGS_HPP

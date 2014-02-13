@@ -25,6 +25,8 @@ namespace MWWorld
                 {
                     LiveCellRef<T> ref;
                     ref.mBase = instance;
+                    ref.mRef.mRefNum.mIndex = 0;
+                    ref.mRef.mRefNum.mContentFile = -1;
 
                     mRef = ref;
                     mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);
@@ -37,7 +39,7 @@ namespace MWWorld
 
         public:
 
-            ManualRef (const MWWorld::ESMStore& store, const std::string& name)
+            ManualRef (const MWWorld::ESMStore& store, const std::string& name, const int count=1)
             {
                 // create
                 if (!create (store.get<ESM::Activator>(), name) &&
@@ -64,8 +66,9 @@ namespace MWWorld
 
                 // initialise
                 ESM::CellRef& cellRef = mPtr.getCellRef();
-                cellRef.mRefID = name;
-                cellRef.mRefnum = -1;
+                cellRef.mRefID = Misc::StringUtils::lowerCase (name);
+                cellRef.mRefNum.mIndex = 0;
+                cellRef.mRefNum.mContentFile = -1;
                 cellRef.mScale = 1;
                 cellRef.mFactIndex = 0;
                 cellRef.mCharge = -1;
@@ -74,6 +77,7 @@ namespace MWWorld
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
                 cellRef.mReferenceBlocked = 0;
+                mPtr.getRefData().setCount(count);
             }
 
             const Ptr& getPtr() const

@@ -140,17 +140,19 @@ namespace
 }
 
 QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
-    : mSize(size)
-    , mCenter(center)
-    , mParent(parent)
-    , mDirection(dir)
+    : mMaterialGenerator(NULL)
+    , mIsActive(false)
     , mIsDummy(false)
-    , mSceneNode(NULL)
-    , mTerrain(terrain)
-    , mChunk(NULL)
-    , mMaterialGenerator(NULL)
+    , mSize(size)
+    , mLodLevel(Log2(mSize))
     , mBounds(Ogre::AxisAlignedBox::BOX_NULL)
     , mWorldBounds(Ogre::AxisAlignedBox::BOX_NULL)
+    , mDirection(dir)
+    , mCenter(center)
+    , mSceneNode(NULL)
+    , mParent(parent)
+    , mTerrain(terrain)
+    , mChunk(NULL)
 {
     mBounds.setNull();
     for (int i=0; i<4; ++i)
@@ -166,9 +168,8 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
     if (mParent)
         pos = mParent->getCenter();
     pos = mCenter - pos;
-    mSceneNode->setPosition(Ogre::Vector3(pos.x*8192, pos.y*8192, 0));
-
-    mLodLevel = Log2(mSize);
+    float cellWorldSize = mTerrain->getStorage()->getCellWorldSize();
+    mSceneNode->setPosition(Ogre::Vector3(pos.x*cellWorldSize, pos.y*cellWorldSize, 0));
 
     mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
 }
@@ -203,6 +204,7 @@ void QuadTreeNode::initNeighbours()
 
 void QuadTreeNode::initAabb()
 {
+    float cellWorldSize = mTerrain->getStorage()->getCellWorldSize();
     if (hasChildren())
     {
         for (int i=0; i<4; ++i)
@@ -210,11 +212,11 @@ void QuadTreeNode::initAabb()
             mChildren[i]->initAabb();
             mBounds.merge(mChildren[i]->getBoundingBox());
         }
-        mBounds = Ogre::AxisAlignedBox (Ogre::Vector3(-mSize/2*8192, -mSize/2*8192, mBounds.getMinimum().z),
-                                        Ogre::Vector3(mSize/2*8192, mSize/2*8192, mBounds.getMaximum().z));
+        mBounds = Ogre::AxisAlignedBox (Ogre::Vector3(-mSize/2*cellWorldSize, -mSize/2*cellWorldSize, mBounds.getMinimum().z),
+                                        Ogre::Vector3(mSize/2*cellWorldSize, mSize/2*cellWorldSize, mBounds.getMaximum().z));
     }
-    mWorldBounds = Ogre::AxisAlignedBox(mBounds.getMinimum() + Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0),
-                                        mBounds.getMaximum() + Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0));
+    mWorldBounds = Ogre::AxisAlignedBox(mBounds.getMinimum() + Ogre::Vector3(mCenter.x*cellWorldSize, mCenter.y*cellWorldSize, 0),
+                                        mBounds.getMaximum() + Ogre::Vector3(mCenter.x*cellWorldSize, mCenter.y*cellWorldSize, 0));
 }
 
 void QuadTreeNode::setBoundingBox(const Ogre::AxisAlignedBox &box)
@@ -371,7 +373,7 @@ void QuadTreeNode::destroyChunks(bool children)
             for (std::vector<Ogre::TexturePtr>::const_iterator it = list.begin(); it != list.end(); ++it)
                 Ogre::TextureManager::getSingleton().remove((*it)->getName());
             mMaterialGenerator->setBlendmapList(std::vector<Ogre::TexturePtr>());
-            mMaterialGenerator->setLayerList(std::vector<std::string>());
+            mMaterialGenerator->setLayerList(std::vector<LayerInfo>());
             mMaterialGenerator->setCompositeMap("");
         }
 
@@ -414,7 +416,7 @@ void QuadTreeNode::ensureLayerInfo()
         return;
 
     std::vector<Ogre::TexturePtr> blendmaps;
-    std::vector<std::string> layerList;
+    std::vector<LayerInfo> layerList;
     mTerrain->getStorage()->getBlendmaps(mSize, mCenter, mTerrain->getShadersEnabled(), blendmaps, layerList);
 
     mMaterialGenerator->setLayerList(layerList);
@@ -427,11 +429,10 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
 
     if (mIsDummy)
     {
-        // TODO - why is this completely black?
         // TODO - store this default material somewhere instead of creating one for each empty cell
         MaterialGenerator matGen(mTerrain->getShadersEnabled());
-        std::vector<std::string> layer;
-        layer.push_back("_land_default.dds");
+        std::vector<LayerInfo> layer;
+        layer.push_back(mTerrain->getStorage()->getDefaultLayer());
         matGen.setLayerList(layer);
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
         return;

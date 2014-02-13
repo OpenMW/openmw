@@ -19,6 +19,8 @@ class ESMWriter;
 
 struct Skill
 {
+    static unsigned int sRecordId;
+
     std::string mId;
 
   struct SKDTstruct
@@ -75,7 +77,7 @@ struct Skill
   static const boost::array<SkillEnum, Length> sSkillIds;
 
   void load(ESMReader &esm);
-  void save(ESMWriter &esm);
+  void save(ESMWriter &esm) const;
 
     void blank();
      ///< Set record to default state (does not touch the ID/index).

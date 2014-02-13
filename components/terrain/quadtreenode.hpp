@@ -108,7 +108,7 @@ namespace Terrain
         void destroyChunks(bool children);
 
         /// Get the effective LOD level if this node was rendered in one chunk
-        /// with ESM::Land::LAND_SIZE^2 vertices
+        /// with Storage::getCellVertices^2 vertices
         size_t getNativeLodLevel() { return mLodLevel; }
 
         /// Get the effective current LOD level used by the chunk rendering this node

@@ -11,9 +11,26 @@
  * FIXME: Someone with MacOS system should check this and correct if necessary
  */
 
-/**
- * \namespace Files
- */
+namespace
+{
+    boost::filesystem::path getUserHome()
+    {
+        const char* dir = getenv("HOME");
+        if (dir == NULL)
+        {
+            struct passwd* pwd = getpwuid(getuid());
+            if (pwd != NULL)
+            {
+                dir = pwd->pw_dir;
+            }
+        }
+        if (dir == NULL)
+            return boost::filesystem::path();
+        else
+            return boost::filesystem::path(dir);
+    }
+}
+
 namespace Files
 {
 
@@ -22,28 +39,24 @@ MacOsPath::MacOsPath(const std::string& application_name)
 {
 }
 
-boost::filesystem::path MacOsPath::getUserPath() const
+boost::filesystem::path MacOsPath::getUserConfigPath() const
 {
-    boost::filesystem::path userPath(".");
-
-    const char* theDir = getenv("HOME");
-    if (theDir == NULL)
-    {
-        struct passwd* pwd = getpwuid(getuid());
-        if (pwd != NULL)
-        {
-            theDir = pwd->pw_dir;
-        }
-    }
-    if (theDir != NULL)
-    {
-        userPath = boost::filesystem::path(theDir) / "Library/Preferences/";
-    }
+    boost::filesystem::path userPath (getUserHome());
+    userPath /= "Library/Preferences/";
 
     return userPath / mName;
 }
 
-boost::filesystem::path MacOsPath::getGlobalPath() const
+boost::filesystem::path MacOsPath::getUserDataPath() const
+{
+    // TODO: probably wrong?
+    boost::filesystem::path userPath (getUserHome());
+    userPath /= "Library/Preferences/";
+
+    return userPath / mName;
+}
+
+boost::filesystem::path MacOsPath::getGlobalConfigPath() const
 {
     boost::filesystem::path globalPath("/Library/Preferences/");
     return globalPath / mName;
@@ -51,23 +64,9 @@ boost::filesystem::path MacOsPath::getGlobalPath() const
 
 boost::filesystem::path MacOsPath::getCachePath() const
 {
-    boost::filesystem::path userPath(".");
-
-    const char* theDir = getenv("HOME");
-    if (theDir == NULL)
-    {
-        struct passwd* pwd = getpwuid(getuid());
-        if (pwd != NULL)
-        {
-            theDir = pwd->pw_dir;
-        }
-    }
-    if (theDir != NULL)
-    {
-        userPath = boost::filesystem::path(theDir) / "Library/Caches" / mName;
-    }
-
-    return userPath;
+    boost::filesystem::path userPath (getUserHome());
+    userPath /= "Library/Caches";
+    return userPath / mName;
 }
 
 boost::filesystem::path MacOsPath::getLocalPath() const
@@ -85,17 +84,9 @@ boost::filesystem::path MacOsPath::getInstallPath() const
 {
     boost::filesystem::path installPath;
 
-    char *homePath = getenv("HOME");
-    if (homePath == NULL)
-    {
-        struct passwd* pwd = getpwuid(getuid());
-        if (pwd != NULL)
-        {
-            homePath = pwd->pw_dir;
-        }
-    }
+    boost::filesystem::path homePath = getUserHome();
 
-    if (homePath != NULL)
+    if (!homePath.empty())
     {
         boost::filesystem::path wineDefaultRegistry(homePath);
         wineDefaultRegistry /= ".wine/system.reg";

@@ -24,6 +24,7 @@ Chris Robinson (KittyCat)
 Cory F. Cohen (cfcohen)
 Cris Mihalache (Mirceam)
 darkf
+Dmitry Shkurskiy (endorph)
 Douglas Diniz (Dgdiniz)
 Douglas Mencken (dougmencken)
 Edmondo Tommasina (edmondo)

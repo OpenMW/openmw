@@ -78,13 +78,15 @@ class ESMWriter;
 
 struct LoadNPCC
 {
+    static unsigned int sRecordId;
+
     std::string mId;
 
   void load(ESMReader &esm)
   {
     esm.skipRecord();
   }
-  void save(ESMWriter &esm)
+  void save(ESMWriter &esm) const
   {
   }
 };

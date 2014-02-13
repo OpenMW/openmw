@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Land
 {
+    static unsigned int sRecordId;
+
     Land();
     ~Land();
 
@@ -70,13 +72,13 @@ struct Land
     };
 #pragma pack(pop)
 
-    typedef signed char VNML[LAND_NUM_VERTS * 3];
+    typedef signed char VNML;
 
     struct LandData
     {
         float mHeightOffset;
         float mHeights[LAND_NUM_VERTS];
-        VNML mNormals;
+        VNML mNormals[LAND_NUM_VERTS * 3];
         uint16_t mTextures[LAND_NUM_TEXTURES];
 
         bool mUsingColours;
@@ -94,7 +96,7 @@ struct Land
     LandData *mLandData;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     /**
      * Actually loads data

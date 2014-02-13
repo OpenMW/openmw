@@ -57,14 +57,21 @@ const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
 }
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-    const CSMWorld::UniversalId& id)
-: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false)
+    const CSMWorld::UniversalId& id, bool relaxedIdRules):
+
+    mData (data),
+    mUndoStack (undoStack),
+    mListId (id),
+    mLocked (false),
+    mCloneMode(false),
+    mClonedType(CSMWorld::UniversalId::Type_None)
+
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
 
     mId = new QLineEdit;
-    mId->setValidator (new IdValidator (this));
+    mId->setValidator (new IdValidator (relaxedIdRules, this));
     mLayout->addWidget (mId, 1);
 
     mCreate = new QPushButton ("Create");
@@ -89,6 +96,7 @@ void CSVWorld::GenericCreator::setEditLock (bool locked)
 
 void CSVWorld::GenericCreator::reset()
 {
+    mCloneMode = false;
     mId->setText ("");
     update();
 }
@@ -120,16 +128,40 @@ void CSVWorld::GenericCreator::create()
 {
     if (!mLocked)
     {
-        std::string id = getId();
+        if (mCloneMode)
+        {
+            std::string id = getId();
+            std::auto_ptr<CSMWorld::CloneCommand> command (new CSMWorld::CloneCommand (
+                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType));
+            
+            mUndoStack.push(command.release());
+            
+            emit done();
+            emit requestFocus(id);
+        } else {
+            std::string id = getId();
 
-        std::auto_ptr<CSMWorld::CreateCommand> command (new CSMWorld::CreateCommand (
+            std::auto_ptr<CSMWorld::CreateCommand> command (new CSMWorld::CreateCommand (
             dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
 
-        configureCreateCommand (*command);
+            configureCreateCommand (*command);
 
-        mUndoStack.push (command.release());
+            mUndoStack.push (command.release());
 
-        emit done();
-        emit requestFocus (id);
+            emit done();
+            emit requestFocus (id);
+        }
     }
+}
+
+void CSVWorld::GenericCreator::cloneMode(const std::string& originId,
+                                         const CSMWorld::UniversalId::Type type)
+{
+    mCloneMode = true;
+    mClonedId = originId;
+    mClonedType = type;
+}
+
+void CSVWorld::GenericCreator::toggleWidgets(bool active)
+{
 }

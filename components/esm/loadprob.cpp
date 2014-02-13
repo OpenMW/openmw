@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Probe::sRecordId = REC_PROB;
 
 void Probe::load(ESMReader &esm)
 {
@@ -17,7 +19,7 @@ void Probe::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
 }
 
-void Probe::save(ESMWriter &esm)
+void Probe::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);
