@@ -72,7 +72,7 @@ namespace Compiler
             }
             else if (keyword==Scanner::K_else)
             {
-                mState = IfElseEndState;
+                mState = IfElseBodyState; /// \todo should be IfElseEndState; add an option for that
             }
 
             return true;
