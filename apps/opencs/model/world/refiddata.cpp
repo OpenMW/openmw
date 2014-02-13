@@ -331,3 +331,17 @@ const CSMWorld::RefIdDataContainer< ESM::Static >& CSMWorld::RefIdData::getStati
 {
     return mStatics;
 }
+
+void CSMWorld::RefIdData::insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id)
+{
+  std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
+        mRecordContainers.find (type);
+
+    if (iter==mRecordContainers.end())
+        throw std::logic_error ("invalid local index type");
+
+    iter->second->insertRecord(record);
+
+    mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id),
+        LocalIndex (iter->second->getSize()-1, type)));
+}

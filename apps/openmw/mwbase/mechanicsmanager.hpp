@@ -136,31 +136,35 @@ namespace MWBase
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange) = 0;
             ///< Perform a persuasion action on NPC
 
-        virtual void forceStateUpdate(const MWWorld::Ptr &ptr) = 0;
-        ///< Forces an object to refresh its animation state.
+            virtual void forceStateUpdate(const MWWorld::Ptr &ptr) = 0;
+            ///< Forces an object to refresh its animation state.
 
-        virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
-        ///< Run animation for a MW-reference. Calls to this function for references that are currently not
-        /// in the scene should be ignored.
-        ///
-        /// \param mode 0 normal, 1 immediate start, 2 immediate loop
-        /// \param count How many times the animation should be run
+            virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
+            ///< Run animation for a MW-reference. Calls to this function for references that are currently not
+            /// in the scene should be ignored.
+            ///
+            /// \param mode 0 normal, 1 immediate start, 2 immediate loop
+            /// \param count How many times the animation should be run
 
-        virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
-        ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
-        /// references that are currently not in the scene should be ignored.
+            virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
+            ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
+            /// references that are currently not in the scene should be ignored.
 
-        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
+            virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
 
-        /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
-        /// paused we may want to do it manually (after equipping permanent enchantment)
-        virtual void updateMagicEffects (const MWWorld::Ptr& ptr) = 0;
+            /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
+            /// paused we may want to do it manually (after equipping permanent enchantment)
+            virtual void updateMagicEffects (const MWWorld::Ptr& ptr) = 0;
 
-        virtual void toggleAI() = 0;
-        virtual bool isAIActive() = 0;
+            virtual void toggleAI() = 0;
+            virtual bool isAIActive() = 0;
 
-        ///return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
-        virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
+            virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
+
+            ///return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
+            virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
+
+            virtual void playerLoaded() = 0;
     };
 }
 

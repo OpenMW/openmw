@@ -67,6 +67,7 @@ namespace MWGui
         void onSelectNextHair(MyGUI::Widget* _sender);
 
         void onSelectRace(MyGUI::ListBox* _sender, size_t _index);
+        void onAccept(MyGUI::ListBox* _sender, size_t _index);
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);

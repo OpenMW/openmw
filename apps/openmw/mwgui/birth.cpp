@@ -33,8 +33,7 @@ namespace MWGui
 
         getWidget(mBirthList, "BirthsignList");
         mBirthList->setScrollVisible(true);
-        mBirthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-        mBirthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+        mBirthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onAccept);
         mBirthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
         MyGUI::Button* backButton;
@@ -92,6 +91,14 @@ namespace MWGui
 
     void BirthDialog::onOkClicked(MyGUI::Widget* _sender)
     {
+        if(mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
+            return;
+        eventDone(this);
+    }
+
+    void BirthDialog::onAccept(MyGUI::ListBox *_sender, size_t _index)
+    {
+        onSelectBirth(_sender, _index);
         if(mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
             return;
         eventDone(this);

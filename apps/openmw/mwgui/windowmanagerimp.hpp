@@ -105,6 +105,7 @@ namespace MWGui
      */
     virtual void update();
 
+    /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
     virtual void setKeyFocusWidget (MyGUI::Widget* widget);
 
     virtual void setNewGame(bool newgame);
@@ -219,7 +220,7 @@ namespace MWGui
 
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false);
+    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
     virtual void staticMessageBox(const std::string& message);
     virtual void removeStaticMessageBox();
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
@@ -279,6 +280,12 @@ namespace MWGui
     void onSoulgemDialogButtonPressed (int button);
 
     virtual bool getCursorVisible();
+
+    /// Clear all savegame-specific data
+    virtual void clear();
+
+    virtual void write (ESM::ESMWriter& writer);
+    virtual void readRecord (ESM::ESMReader& reader, int32_t type);
 
   private:
     bool mConsoleOnlyScripts;

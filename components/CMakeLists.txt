@@ -1,5 +1,9 @@
 project (Components)
 set (CMAKE_BUILD_TYPE DEBUG)
+
+# Version file
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp")
+
 # source files
 
 add_component_dir (settings
@@ -40,6 +44,7 @@ add_component_dir (esm
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
+    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate
     )
 
 add_component_dir (misc
@@ -75,8 +80,12 @@ add_component_dir (loadinglistener
     )
 
 add_component_dir (ogreinit
-	ogreinit ogreplugin
-	)
+    ogreinit ogreplugin
+    )
+
+add_component_dir (version
+    version
+    )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )

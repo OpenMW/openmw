@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 
+#include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include <SDL.h>
@@ -29,8 +30,6 @@ extern int is_debugger_attached(void);
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <OSX/macUtils.h>
 #endif
-
-#include "config.hpp"
 
 #include <boost/version.hpp>
 /**
@@ -116,7 +115,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("resources", bpo::value<std::string>()->default_value("resources"),
             "set resources directory")
 
-        ("start", bpo::value<std::string>()->default_value("Beshara"),
+        ("start", bpo::value<std::string>()->default_value(""),
             "set initial cell")
 
         ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
@@ -137,8 +136,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-run", bpo::value<std::string>()->default_value(""),
             "select a file containing a list of console commands that is executed on startup")
 
-        ("new-game", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "activate char gen/new game mechanics")
+        ("skip-menu", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "skip main menu on game startup")
 
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
@@ -232,7 +231,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setNewGame(variables["new-game"].as<bool>());
+    engine.setSkipMenu (variables["skip-menu"].as<bool>());
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());

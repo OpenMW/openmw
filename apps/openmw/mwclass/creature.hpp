@@ -56,6 +56,8 @@ namespace MWClass
 
             virtual void hit(const MWWorld::Ptr& ptr, int type) const;
 
+            virtual void block(const MWWorld::Ptr &ptr) const;
+
             virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
 
             virtual void setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const;
@@ -67,6 +69,11 @@ namespace MWClass
             virtual MWWorld::ContainerStore& getContainerStore (
                 const MWWorld::Ptr& ptr) const;
             ///< Return container store
+
+            virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;
+            ///< Return inventory store
+
+            virtual bool hasInventoryStore (const MWWorld::Ptr &ptr) const;
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
@@ -84,7 +91,7 @@ namespace MWClass
 
             virtual bool isEssential (const MWWorld::Ptr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
-            
+
             virtual int getServices (const MWWorld::Ptr& actor) const;
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
@@ -118,6 +125,14 @@ namespace MWClass
 
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
+
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const;
+            ///< Read additional state from \a state into \a ptr.
+
+            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+                const;
+            ///< Write additional state from \a ptr into \a state.
     };
 }
 

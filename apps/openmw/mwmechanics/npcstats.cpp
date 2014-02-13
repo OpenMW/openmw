@@ -22,38 +22,17 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mDrawState (DrawState_Nothing)
-, mBounty (0)
+    : mBounty (0)
 , mLevelProgress(0)
 , mDisposition(0)
 , mReputation(0)
 , mWerewolfKills (0)
 , mProfit(0)
-, mAttackStrength(0.0f)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
+, mLevelHealthBonus(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
-}
-
-MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
-{
-    return mDrawState;
-}
-
-void MWMechanics::NpcStats::setDrawState (DrawState_ state)
-{
-    mDrawState = state;
-}
-
-float MWMechanics::NpcStats::getAttackStrength() const
-{
-    return mAttackStrength;
-}
-
-void MWMechanics::NpcStats::setAttackStrength(float value)
-{
-    mAttackStrength = value;
 }
 
 int MWMechanics::NpcStats::getBaseDisposition() const
@@ -211,37 +190,48 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
 
     base += 1;
 
-    // if this is a major or minor skill of the class, increase level progress
-    bool levelProgress = false;
-    for (int i=0; i<2; ++i)
-        for (int j=0; j<5; ++j)
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    // is this a minor or major skill?
+    int increase = gmst.find("iLevelupMiscMultAttriubte")->getInt(); // Note: GMST has a typo
+    for (int k=0; k<5; ++k)
+    {
+        if (class_.mData.mSkills[k][0] == skillIndex)
         {
-            int skill = class_.mData.mSkills[j][i];
-            if (skill == skillIndex)
-                levelProgress = true;
+            mLevelProgress += gmst.find("iLevelUpMinorMult")->getInt();
+            increase = gmst.find("iLevelUpMajorMultAttribute")->getInt();
         }
+    }
+    for (int k=0; k<5; ++k)
+    {
+        if (class_.mData.mSkills[k][1] == skillIndex)
+        {
+            mLevelProgress += gmst.find("iLevelUpMajorMult")->getInt();
+            increase = gmst.find("iLevelUpMinorMultAttribute")->getInt();
+        }
+    }
 
-    mLevelProgress += levelProgress;
-
-    // check the attribute this skill belongs to
     const ESM::Skill* skill =
         MWBase::Environment::get().getWorld ()->getStore ().get<ESM::Skill>().find(skillIndex);
-    ++mSkillIncreases[skill->mData.mAttribute];
+    mSkillIncreases[skill->mData.mAttribute] += increase;
 
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
 
+    std::vector <std::string> noButtons;
+
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), noButtons, MWGui::ShowInDialogueMode_Never);
 
-    if (mLevelProgress >= 10)
+    if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", noButtons, MWGui::ShowInDialogueMode_Never);
     }
 
     getSkill (skillIndex).setBase (base);
@@ -259,22 +249,43 @@ void MWMechanics::NpcStats::levelUp()
     mLevelProgress -= 10;
     for (int i=0; i<ESM::Attribute::Length; ++i)
         mSkillIncreases[i] = 0;
+
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+
+    // "When you gain a level, in addition to increasing three primary attributes, your Health
+    // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
+    // the Health increase is calculated from the increased Endurance"
+    mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
+    updateHealth();
+
+    setLevel(getLevel()+1);
+}
+
+void MWMechanics::NpcStats::updateHealth()
+{
+    const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+    const int strength = getAttribute(ESM::Attribute::Strength).getBase();
+
+    setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
 }
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
 {
-    // Source: http://www.uesp.net/wiki/Morrowind:Level#How_to_Level_Up
     int num = mSkillIncreases[attribute];
-    if (num <= 1)
+
+    if (num == 0)
         return 1;
-    else if (num <= 4)
-        return 2;
-    else if (num <= 7)
-        return 3;
-    else if (num <= 9)
-        return 4;
-    else
-        return 5;
+
+    num = std::min(10, num);
+
+    // iLevelUp01Mult - iLevelUp10Mult
+    std::stringstream gmst;
+    gmst << "iLevelUp" << std::setfill('0') << std::setw(2) << num << "Mult";
+
+    return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(gmst.str())->getInt();
 }
 
 void MWMechanics::NpcStats::flagAsUsed (const std::string& id)
@@ -289,12 +300,16 @@ bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
 
 int MWMechanics::NpcStats::getBounty() const
 {
-    return mBounty;
+    if (mIsWerewolf)
+        return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt();
+    else
+        return mBounty;
 }
 
 void MWMechanics::NpcStats::setBounty (int bounty)
 {
-    mBounty = bounty;
+    if (!mIsWerewolf)
+        mBounty = bounty;
 }
 
 int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const

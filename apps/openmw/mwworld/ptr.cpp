@@ -21,6 +21,14 @@ const std::string& MWWorld::Ptr::getTypeName() const
     throw std::runtime_error("Can't get type name from an empty object.");
 }
 
+MWWorld::LiveCellRefBase *MWWorld::Ptr::getBase() const
+{
+    if (!mRef)
+        throw std::runtime_error ("Can't access cell ref pointed to by null Ptr");
+
+    return mRef;
+}
+
 ESM::CellRef& MWWorld::Ptr::getCellRef() const
 {
     assert(mRef);

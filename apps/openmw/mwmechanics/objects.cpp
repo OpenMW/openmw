@@ -55,7 +55,7 @@ void Objects::updateObject(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     }
 }
 
-void Objects::dropObjects (const MWWorld::Ptr::CellStore *cellStore)
+void Objects::dropObjects (const MWWorld::CellStore *cellStore)
 {
     PtrControllerMap::iterator iter = mObjects.begin();
     while(iter != mObjects.end())
@@ -90,6 +90,15 @@ void Objects::skipAnimation(const MWWorld::Ptr& ptr)
     PtrControllerMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
         iter->second->skipAnim();
+}
+
+void Objects::getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out)
+{
+    for (PtrControllerMap::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
+    {
+        if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
+            out.push_back(iter->first);
+    }
 }
 
 }

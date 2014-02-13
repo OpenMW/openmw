@@ -429,12 +429,12 @@ namespace MWClass
         return MWWorld::Ptr(&cell.mWeapons.insert(*ref), &cell);
     }
 
-    float Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
                 ptr.get<ESM::Weapon>();
 
-        return ref->mBase->mData.mEnchant/10.f;
+        return ref->mBase->mData.mEnchant;
     }
 
     bool Weapon::canSell (const MWWorld::Ptr& item, int npcServices) const

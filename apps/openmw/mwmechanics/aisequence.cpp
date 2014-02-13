@@ -23,7 +23,7 @@ void MWMechanics::AiSequence::copy (const AiSequence& sequence)
         mPackages.push_back ((*iter)->clone());
 }
 
-MWMechanics::AiSequence::AiSequence() : mDone (false) {}
+MWMechanics::AiSequence::AiSequence() : mDone (false), mLastAiPackage(-1) {}
 
 MWMechanics::AiSequence::AiSequence (const AiSequence& sequence) : mDone (false)
 {
@@ -84,6 +84,7 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
     {
         if (!mPackages.empty())
         {
+            mLastAiPackage = mPackages.front()->getTypeId();
             if (mPackages.front()->execute (actor,duration))
             {
                 delete *mPackages.begin();
@@ -91,7 +92,9 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                 mDone = true;
             }
             else
+            {
                 mDone = false;    
+            }
         }
     }
 }

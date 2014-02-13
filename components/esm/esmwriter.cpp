@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    ESMWriter::ESMWriter() : mRecordCount (0), mCounting (true) {}
+    ESMWriter::ESMWriter() : mEncoder (0), mRecordCount (0), mCounting (true) {}
 
     unsigned int ESMWriter::getVersion() const
     {
@@ -51,12 +51,6 @@ namespace ESM
         mHeader.mMaster.push_back(d);
     }
 
-    void ESMWriter::save(const std::string& file)
-    {
-        std::ofstream fs(file.c_str(), std::ios_base::out | std::ios_base::trunc);
-        save(fs);
-    }
-
     void ESMWriter::save(std::ostream& file)
     {
         mRecordCount = 0;
@@ -94,6 +88,16 @@ namespace ESM
         assert(mRecords.back().size == 0);
     }
 
+    void ESMWriter::startRecord (uint32_t name, uint32_t flags)
+    {
+        std::string type;
+        for (int i=0; i<4; ++i)
+            /// \todo make endianess agnostic
+            type += reinterpret_cast<const char *> (&name)[i];
+
+        startRecord (type, flags);
+    }
+
     void ESMWriter::startSubRecord(const std::string& name)
     {
         writeName(name);
@@ -121,6 +125,16 @@ namespace ESM
 
         mStream->seekp(0, std::ios::end);
 
+    }
+
+    void ESMWriter::endRecord (uint32_t name)
+    {
+        std::string type;
+        for (int i=0; i<4; ++i)
+            /// \todo make endianess agnostic
+            type += reinterpret_cast<const char *> (&name)[i];
+
+        endRecord (type);
     }
 
     void ESMWriter::writeHNString(const std::string& name, const std::string& data)
@@ -152,9 +166,9 @@ namespace ESM
         else
         {
             // Convert to UTF8 and return
-            std::string ascii = mEncoder->getLegacyEnc(data);
+            std::string string = mEncoder ? mEncoder->getLegacyEnc(data) : data;
 
-            write(ascii.c_str(), ascii.size());
+            write(string.c_str(), string.size());
         }
     }
 

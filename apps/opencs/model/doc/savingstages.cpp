@@ -133,16 +133,10 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, std::vector<std::
         state==CSMWorld::RecordBase::State_ModifiedOnly ||
         infoModified)
     {
-        // always write the topic record
-        std::string type;
-        for (int i=0; i<4; ++i)
-            /// \todo make endianess agnostic (change ESMWriter interface?)
-            type += reinterpret_cast<const char *> (&topic.mModified.sRecordId)[i];
-
-        mState.getWriter().startRecord (type);
+        mState.getWriter().startRecord (topic.mModified.sRecordId);
         mState.getWriter().writeHNCString ("NAME", topic.mModified.mId);
         topic.mModified.save (mState.getWriter());
-        mState.getWriter().endRecord (type);
+        mState.getWriter().endRecord (topic.mModified.sRecordId);
 
         // write modified selected info records
         for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second;
@@ -178,15 +172,10 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, std::vector<std::
                         next->mModified.mId.substr (next->mModified.mId.find_last_of ('#')+1);
                 }
 
-                std::string type;
-                for (int i=0; i<4; ++i)
-                    /// \todo make endianess agnostic (change ESMWriter interface?)
-                    type += reinterpret_cast<const char *> (&info.sRecordId)[i];
-
-                mState.getWriter().startRecord (type);
+                mState.getWriter().startRecord (info.sRecordId);
                 mState.getWriter().writeHNCString ("INAM", info.mId);
                 info.save (mState.getWriter());
-                mState.getWriter().endRecord (type);
+                mState.getWriter().endRecord (info.sRecordId);
             }
         }
     }

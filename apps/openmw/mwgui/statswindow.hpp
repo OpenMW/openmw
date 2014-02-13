@@ -10,17 +10,17 @@ namespace MWGui
 {
     class WindowManager;
 
-    class StatsWindow : public WindowPinnableBase
+    class StatsWindow : public WindowPinnableBase, public NoDrop
     {
         public:
             typedef std::map<std::string, int> FactionList;
 
             typedef std::vector<int> SkillList;
 
-            StatsWindow();
+            StatsWindow(DragAndDrop* drag);
 
             /// automatically updates all the data in the stats window, but only if it has changed.
-            void onFrame();
+            void onFrame(float dt);
 
             void setBar(const std::string& name, const std::string& tname, int val, int max);
             void setPlayerName(const std::string& playerName);

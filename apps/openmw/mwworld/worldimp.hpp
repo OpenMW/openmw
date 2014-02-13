@@ -11,6 +11,7 @@
 #include "localscripts.hpp"
 #include "timestamp.hpp"
 #include "fallback.hpp"
+#include "globals.hpp"
 
 #include "../mwbase/world.hpp"
 
@@ -41,6 +42,7 @@ namespace MWRender
     class SkyManager;
     class CellRender;
     class Animation;
+    class Camera;
 }
 
 struct ContentLoader;
@@ -64,7 +66,7 @@ namespace MWWorld
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
-            MWWorld::Globals *mGlobalVariables;
+            MWWorld::Globals mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
 
@@ -73,12 +75,13 @@ namespace MWWorld
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
             bool mGodMode;
+            std::vector<std::string> mContentFiles;
 
             // not implemented
             World (const World&);
             World& operator= (const World&);
 
-            Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
+            Ptr getPtrViaHandle (const std::string& handle, CellStore& cellStore);
 
             int mActivationDistanceOverride;
             std::string mFacedHandle;
@@ -125,7 +128,7 @@ namespace MWWorld
             float getObjectActivationDistance ();
 
             void removeContainerScripts(const Ptr& reference);
-            void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
+            void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
 
             void processDoors(float duration);
@@ -170,12 +173,26 @@ namespace MWWorld
 
             virtual void startNewGame();
 
+            virtual void clear();
+
+            virtual int countSavedGameRecords() const;
+
+            virtual void write (ESM::ESMWriter& writer) const;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+                const std::map<int, int>& contentFileMap);
+
             virtual OEngine::Render::Fader* getFader();
-            ///< \ŧodo remove this function. Rendering details should not be exposed.
+            ///< \todo remove this function. Rendering details should not be exposed.
 
             virtual CellStore *getExterior (int x, int y);
 
             virtual CellStore *getInterior (const std::string& name);
+
+            virtual CellStore *getCell (const ESM::CellId& id);
+
+            //switch to POV before showing player's death animation
+            virtual void useDeathCamera();
 
             virtual void setWaterHeight(const float height);
 
@@ -215,16 +232,26 @@ namespace MWWorld
             virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
             ///< see MWRender::LocalMap::isPositionExplored
 
-            virtual Globals::Data& getGlobalVariable (const std::string& name);
+            virtual void setGlobalInt (const std::string& name, int value);
+            ///< Set value independently from real type.
 
-            virtual Globals::Data getGlobalVariable (const std::string& name) const;
+            virtual void setGlobalFloat (const std::string& name, float value);
+            ///< Set value independently from real type.
+
+            virtual int getGlobalInt (const std::string& name) const;
+            ///< Get value independently from real type.
+
+            virtual float getGlobalFloat (const std::string& name) const;
+            ///< Get value independently from real type.
 
             virtual char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.
 
-            virtual std::vector<std::string> getGlobals () const;
-
-            virtual std::string getCurrentCellName () const;
+            virtual std::string getCellName (const MWWorld::CellStore *cell = 0) const;
+            ///< Return name of the cell.
+            ///
+            /// \note If cell==0, the cell the player is currently in will be used instead to
+            /// generate a name.
 
             virtual void removeRefScript (MWWorld::RefData *ref);
             //< Remove the script attached to ref from mLocalScripts
@@ -262,8 +289,12 @@ namespace MWWorld
             virtual void setDay (int day);
             ///< Set in-game time day.
 
-            virtual int getDay();
-            virtual int getMonth();
+            virtual int getDay() const;
+            virtual int getMonth() const;
+            virtual int getYear() const;
+
+            virtual std::string getMonthName (int month = -1) const;
+            ///< Return name of month (-1: current month)
 
             virtual TimeStamp getTimeStamp() const;
             ///< Return current in-game time stamp.
@@ -291,6 +322,8 @@ namespace MWWorld
 
             virtual void changeToExteriorCell (const ESM::Position& position);
             ///< Move to exterior cell.
+
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position);
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
@@ -410,7 +443,7 @@ namespace MWWorld
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
-            virtual bool isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const;
+            virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual void togglePOV() {
@@ -476,6 +509,7 @@ namespace MWWorld
             virtual void playVideo(const std::string& name, bool allowSkipping);
             virtual void stopVideo();
             virtual void frameStarted (float dt, bool paused);
+            virtual void screenshot (Ogre::Image& image, int w, int h);
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise
@@ -521,6 +555,9 @@ namespace MWWorld
             virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
 
+
+            virtual const std::vector<std::string>& getContentFiles() const;
+
             virtual void breakInvisibility (const MWWorld::Ptr& actor);
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const;
@@ -552,6 +589,9 @@ namespace MWWorld
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition);
+
+            virtual void explodeSpell (const Ogre::Vector3& origin, const MWWorld::Ptr& object, const ESM::EffectList& effects,
+                                       const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName);
     };
 }
 

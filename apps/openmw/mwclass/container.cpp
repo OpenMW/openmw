@@ -2,6 +2,7 @@
 #include "container.hpp"
 
 #include <components/esm/loadcont.hpp>
+#include <components/esm/containerstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -257,5 +258,27 @@ namespace MWClass
             ptr.get<ESM::Container>();
 
         return MWWorld::Ptr(&cell.mContainers.insert(*ref), &cell);
+    }
+
+    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+        const
+    {
+        const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+            readState (state2.mInventory);
+    }
+
+    void Container::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+        const
+    {
+        ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+            writeState (state2.mInventory);
     }
 }

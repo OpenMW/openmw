@@ -25,6 +25,23 @@ public:
     { }
 };
 
+class WeaponAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+{
+private:
+    Animation* mAnimation;
+    std::string mWeaponGroup;
+    float mStartTime;
+public:
+    WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0) {}
+    void setGroup(const std::string& group);
+    void updateStartTime();
+
+    virtual Ogre::Real getValue() const;
+    virtual void setValue(Ogre::Real value)
+    { }
+};
+
+
 class NpcAnimation : public Animation, public MWWorld::InventoryStoreListener
 {
 public:
@@ -71,8 +88,10 @@ private:
     Ogre::Vector3 mFirstPersonOffset;
 
     Ogre::SharedPtr<HeadAnimationTime> mHeadAnimationTime;
+    Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
+    float mPitchFactor;
 
     void updateNpcBase();
 
@@ -105,10 +124,21 @@ public:
                  ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
+    virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
+
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
+    /// to indicate the facing orientation of the character.
+    virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool showa);
+
+    virtual void attachArrow();
+    virtual void releaseArrow();
+
+    NifOgre::ObjectScenePtr mAmmunition;
 
     void setViewMode(ViewMode viewMode);
 

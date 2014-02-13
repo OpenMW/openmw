@@ -14,9 +14,9 @@ namespace MWRender
         ~EffectManager() { clear(); }
 
         /// Add an effect. When it's finished playing, it will be removed automatically.
-        void addEffect (const std::string& model, std::string textureOverride, const Ogre::Vector3& worldPosition);
+        void addEffect (const std::string& model, std::string textureOverride, const Ogre::Vector3& worldPosition, float scale);
 
-        void update(float dt);
+        void update(float dt, Ogre::Camera* camera);
 
         /// Remove all effects
         void clear();

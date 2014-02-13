@@ -18,6 +18,7 @@ namespace ESM
 {
 class ESMReader;
 class ESMWriter;
+    class CellId;
 
 /* Moved cell reference tracking object. This mainly stores the target cell
         of the reference, so we can easily know where it has been moved when another
@@ -27,7 +28,7 @@ class ESMWriter;
 class MovedCellRef
 {
 public:
-    int mRefnum;
+    CellRef::RefNum mRefNum;
 
     // Target cell (if exterior)
     int mTarget[2];
@@ -37,9 +38,9 @@ public:
     //  introduces a henchman (which no one uses), so we may need this as well.
 };
 
-/// Overloaded copare operator used to search inside a list of cell refs.
-bool operator==(const MovedCellRef& ref, int pRefnum);
-bool operator==(const CellRef& ref, int pRefnum);
+/// Overloaded compare operator used to search inside a list of cell refs.
+bool operator==(const MovedCellRef& ref, const CellRef::RefNum& refNum);
+bool operator==(const CellRef& ref, const CellRef::RefNum& refNum);
 
 typedef std::list<MovedCellRef> MovedCellRefTracker;
 typedef std::list<CellRef> CellRefTracker;
@@ -77,7 +78,10 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(-1) {}
+  Cell() : mWater(0), mHasWaterLevelRecord(false) {}
+
+  /// Merge \a modified into \a original
+  static void merge (Cell* original, Cell* modified);
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
@@ -90,6 +94,7 @@ struct Cell
   DATAstruct mData;
   AMBIstruct mAmbi;
   float mWater; // Water level
+  bool mHasWaterLevelRecord;
   bool mWaterInt;
   int mMapColor;
   int mNAM0;
@@ -143,7 +148,7 @@ struct Cell
      All fields of the CellRef struct are overwritten. You can safely
      reuse one memory location without blanking it between calls.
   */
-  static bool getNextRef(ESMReader &esm, CellRef &ref);
+  static bool getNextRef(ESMReader &esm, CellRef &ref, bool& deleted);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.
@@ -152,6 +157,8 @@ struct Cell
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).
+
+    CellId getCellId() const;
 };
 }
 #endif

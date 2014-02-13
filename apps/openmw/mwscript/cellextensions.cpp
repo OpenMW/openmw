@@ -115,6 +115,7 @@ namespace MWScript
 
                         current = region->mName;
                     }
+                    Misc::StringUtils::toLower(current);
 
                     bool match = current.length()>=name.length() &&
                         current.substr (0, name.length())==name;
@@ -129,7 +130,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
                     if (cell->mCell->hasWater())
                         runtime.push (cell->mWaterLevel);
                     else
@@ -145,7 +146,7 @@ namespace MWScript
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
                     if (cell->mCell->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");
@@ -163,7 +164,7 @@ namespace MWScript
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
                     if (cell->mCell->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");

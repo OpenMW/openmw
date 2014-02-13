@@ -14,6 +14,7 @@ namespace ESM
 {
     class Script;
     class CellRef;
+    struct ObjectState;
 }
 
 namespace MWWorld
@@ -48,14 +49,24 @@ namespace MWWorld
 
         public:
 
+            RefData();
+
             /// @param cellRef Used to copy constant data such as position into this class where it can
             /// be altered without effecting the original data. This makes it possible
             /// to reset the position as the orignal data is still held in the CellRef
             RefData (const ESM::CellRef& cellRef);
 
+            RefData (const ESM::ObjectState& objectState);
+            ///< Ignores local variables and custom data (not enough context available here to
+            /// perform these operations).
+
             RefData (const RefData& refData);
 
             ~RefData();
+
+            void write (ESM::ObjectState& objectState) const;
+            ///< Ignores local variables and custom data (not enough context available here to
+            /// perform these operations).
 
             RefData& operator= (const RefData& refData);
 

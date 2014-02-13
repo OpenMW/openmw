@@ -92,6 +92,11 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
+    void Class::block(const Ptr &ptr) const
+    {
+        throw std::runtime_error("class cannot block");
+    }
+
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker, bool successful) const
     {
         throw std::runtime_error("class cannot be hit");
@@ -120,6 +125,11 @@ namespace MWWorld
     InventoryStore& Class::getInventoryStore (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have an inventory store");
+    }
+
+    bool Class::hasInventoryStore(const Ptr &ptr) const
+    {
+        return false;
     }
 
     void Class::lock (const Ptr& ptr, int lockLevel) const
@@ -157,7 +167,7 @@ namespace MWWorld
         return 0;
     }
 
-    float Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support enchanting");
     }
@@ -367,4 +377,8 @@ namespace MWWorld
     {
         throw std::runtime_error("class does not support gore");
     }
+
+    void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
+
+    void Class::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const {}
 }

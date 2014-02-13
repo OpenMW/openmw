@@ -7,6 +7,8 @@
 
 #include <OgreMath.h>
 
+#include "steering.hpp"
+
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
 : mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), mTimer(0), mStuckTimer(0)
 {
@@ -88,18 +90,14 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
     if(!mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
     {
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        //MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
-        MWWorld::Class::get(actor).getMovementSettings(actor).mRotation[2] = 10*(Ogre::Degree(zAngle).valueRadians()-pos.rot[2]);
-        //std::cout << Ogre::Degree(zAngle).valueDegrees()-Ogre::Radian(actor.getRefData().getPosition().rot[2]).valueDegrees() << " "<< pos.rot[2] << " " << zAngle << "\n";
-        //MWWorld::Class::get(actor).get
+        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
     }
 
     if((dest.mX - pos.pos[0])*(dest.mX - pos.pos[0])+(dest.mY - pos.pos[1])*(dest.mY - pos.pos[1])+(dest.mZ - pos.pos[2])*(dest.mZ - pos.pos[2])
         < 100*100)
-        MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     else
-        MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
     return false;
 }

@@ -128,7 +128,7 @@ namespace MWRender
 
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
-        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 62, -200), Ogre::Vector3(0, 62, 0))
+        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
         , mSelectionBuffer(NULL)
     {
     }
@@ -142,7 +142,7 @@ namespace MWRender
     {
         mAnimation->updateParts();
 
-        MWWorld::InventoryStore &inv = MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter);
+        MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         std::string groupname;
         if(iter == inv.end())
@@ -160,7 +160,10 @@ namespace MWRender
                 if(type == ESM::Weapon::ShortBladeOneHand ||
                    type == ESM::Weapon::LongBladeOneHand ||
                    type == ESM::Weapon::BluntOneHand ||
-                   type == ESM::Weapon::AxeOneHand)
+                   type == ESM::Weapon::AxeOneHand ||
+                   type == ESM::Weapon::MarksmanThrown ||
+                   type == ESM::Weapon::MarksmanCrossbow ||
+                   type == ESM::Weapon::MarksmanBow)
                     groupname = "inventoryweapononehand";
                 else if(type == ESM::Weapon::LongBladeTwoHand ||
                         type == ESM::Weapon::BluntTwoClose ||
