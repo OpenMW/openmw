@@ -20,7 +20,7 @@ include(OpenMWMacros)
 
 include(GetGitRevisionDescription)
 
-get_git_tag_revision(TAGHASH --tags --max-count=1)
+get_git_tag_revision(TAGHASH --tags --max-count=1 "HEAD...")
 get_git_head_revision(REFSPEC COMMITHASH)
 git_describe(VERSION --tags ${TAGHASH})
 

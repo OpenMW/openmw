@@ -4,17 +4,17 @@ compiler:
 branches:
   only:
     - master
-    - next
+    - /openmw-.*$/
 before_install:
  - pwd
- - git submodule update --init --recursive
+ - git fetch --tags
  - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
  - echo "yes" | sudo apt-add-repository ppa:openmw/openmw
  - sudo apt-get update -qq
- - sudo apt-get install -qq libboost-all-dev libgtest-dev google-mock libzzip-dev uuid-dev
- - sudo apt-get install -qq libqt4-dev libxaw7-dev libxrandr-dev libfreeimage-dev libpng-dev
- - sudo apt-get install -qq libopenal-dev libmpg123-dev libsndfile1-dev
- - sudo apt-get install -qq libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev
+ - sudo apt-get install -qq libboost-all-dev libgtest-dev google-mock
+ - sudo apt-get install -qq libqt4-dev
+ - sudo apt-get install -qq libopenal-dev
+ - sudo apt-get install -qq libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
  - sudo apt-get install -qq libbullet-dev libogre-1.9-dev libmygui-dev libsdl2-dev libunshield-dev
  - sudo mkdir /usr/src/gtest/build
  - cd /usr/src/gtest/build
@@ -37,3 +37,9 @@ notifications:
   email:
     on_success: change
     on_failure: always
+  irc:
+    channels:
+      - "chat.freenode.net#openmw"
+    on_success: change
+    on_failure: always
+
