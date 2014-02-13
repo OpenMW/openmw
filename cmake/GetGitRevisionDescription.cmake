@@ -122,7 +122,6 @@ function(git_describe _var)
                     res
                     OUTPUT_VARIABLE
                     out
-                    ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if(NOT res EQUAL 0)
@@ -147,7 +146,6 @@ function(get_git_tag_revision _var)
                     res
                     OUTPUT_VARIABLE
                     out
-                    ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(NOT res EQUAL 0)
         set(out "${out}-${res}-NOTFOUND")
