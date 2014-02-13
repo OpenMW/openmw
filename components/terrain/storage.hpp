@@ -1,9 +1,6 @@
 #ifndef COMPONENTS_TERRAIN_STORAGE_H
 #define COMPONENTS_TERRAIN_STORAGE_H
 
-#include <components/esm/loadland.hpp>
-#include <components/esm/loadltex.hpp>
-
 #include <OgreAxisAlignedBox.h>
 
 #include <OgreHardwareVertexBuffer.h>

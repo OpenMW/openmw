@@ -1,6 +1,9 @@
 #ifndef MWRENDER_TERRAINSTORAGE_H
 #define MWRENDER_TERRAINSTORAGE_H
 
+#include <components/esm/loadland.hpp>
+#include <components/esm/loadltex.hpp>
+
 #include <components/terrain/storage.hpp>
 
 namespace MWRender
