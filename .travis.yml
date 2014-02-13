@@ -4,6 +4,7 @@ compiler:
 branches:
   only:
     - master
+    - /openmw-.*$/
 before_install:
  - pwd
  - git fetch --tags
