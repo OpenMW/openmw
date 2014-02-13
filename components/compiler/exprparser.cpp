@@ -366,7 +366,8 @@ namespace Compiler
         {
             if (mRefOp && mNextOperand)
             {
-                if (keyword==Scanner::K_getdisabled)
+                if (keyword==Scanner::K_getdisabled ||
+                    keyword==Scanner::K_disable) /// \todo add option to disable this
                 {
                     start();
 
@@ -509,7 +510,8 @@ namespace Compiler
                 mNextOperand = false;
                 return true;
             }
-            else if (keyword==Scanner::K_getdisabled)
+            else if (keyword==Scanner::K_getdisabled ||
+                keyword==Scanner::K_disable) /// \todo add option to disable this
             {
                 start();
 
