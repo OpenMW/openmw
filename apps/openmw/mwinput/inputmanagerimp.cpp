@@ -452,7 +452,7 @@ namespace MWInput
         mInputBinder->adjustMouseRegion(width, height);
     }
 
-    bool InputManager::keyPressed( const SDL_KeyboardEvent &arg )
+    void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
         // Cut, copy & paste
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
@@ -498,7 +498,6 @@ namespace MWInput
 
         if (kc != OIS::KC_UNASSIGNED)
             MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-        return true;
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
@@ -509,23 +508,21 @@ namespace MWInput
             MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::None, *it);
     }
 
-    bool InputManager::keyReleased(const SDL_KeyboardEvent &arg )
+    void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
         mInputBinder->keyReleased (arg);
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
         MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
-
-        return true;
     }
 
-    bool InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
+    void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
         mInputBinder->mousePressed (arg, id);
 
         if (id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)
-            return true; // MyGUI has no use for these events
+            return; // MyGUI has no use for these events
 
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
@@ -536,20 +533,16 @@ namespace MWInput
                 MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
             }
         }
-
-        return true;
     }
 
-    bool InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
+    void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
         mInputBinder->mouseReleased (arg, id);
 
         MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-
-        return true;
     }
 
-    bool InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
+    void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
     {
         mInputBinder->mouseMoved (arg);
 
@@ -597,8 +590,6 @@ namespace MWInput
                 MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
             }
         }
-
-        return true;
     }
 
     void InputManager::windowFocusChange(bool have_focus)

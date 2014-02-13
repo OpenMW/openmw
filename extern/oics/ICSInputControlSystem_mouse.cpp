@@ -219,7 +219,7 @@ namespace ICS
 	}
 
 	// mouse Listeners
-	bool InputControlSystem::mouseMoved(const SFO::MouseMotionEvent& evt)
+    void InputControlSystem::mouseMoved(const SFO::MouseMotionEvent& evt)
 	{
 		if(mActive)
 		{
@@ -304,11 +304,9 @@ namespace ICS
 				}
 			}
 		}
-
-		return true;
 	}
 
-	bool InputControlSystem::mousePressed(const SDL_MouseButtonEvent &evt, Uint8 btn)
+    void InputControlSystem::mousePressed(const SDL_MouseButtonEvent &evt, Uint8 btn)
 	{
 		if(mActive)
 		{
@@ -341,11 +339,9 @@ namespace ICS
 					mDetectingBindingControl, btn, mDetectingBindingDirection);
 			}
 		}
-
-		return true;
 	}
 
-	bool InputControlSystem::mouseReleased(const SDL_MouseButtonEvent &evt, Uint8 btn)
+    void InputControlSystem::mouseReleased(const SDL_MouseButtonEvent &evt, Uint8 btn)
 	{		
 		if(mActive)
 		{
@@ -355,8 +351,6 @@ namespace ICS
 				it->second.control->setChangingDirection(Control::STOP);
 			}
 		}
-
-		return true;
 	}
 
 	// mouse auto bindings
