@@ -37,3 +37,9 @@ notifications:
   email:
     on_success: change
     on_failure: always
+  irc:
+    channels:
+      - "chat.freenode.net#openmw"
+    on_success: change
+    on_failure: always
+
