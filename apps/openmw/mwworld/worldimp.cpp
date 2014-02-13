@@ -610,6 +610,10 @@ namespace MWWorld
 
     void World::enable (const Ptr& reference)
     {
+        // enable is a no-op for items in containers
+        if (!reference.isInCell())
+            return;
+
         if (!reference.getRefData().isEnabled())
         {
             reference.getRefData().enable();
@@ -640,6 +644,10 @@ namespace MWWorld
 
     void World::disable (const Ptr& reference)
     {
+        // disable is a no-op for items in containers
+        if (!reference.isInCell())
+            return;
+
         if (reference.getRefData().isEnabled())
         {
             reference.getRefData().disable();
