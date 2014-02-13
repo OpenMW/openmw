@@ -27,8 +27,7 @@ bool Compiler::DeclarationParser::parseName (const std::string& name, const Toke
             /// \todo add option to make re-declared local variables an error
             getErrorHandler().warning ("can't re-declare local variable (ignoring declaration)",
                 loc);
-            SkipParser skip (getErrorHandler(), getContext());
-            scanner.scan (skip);
+
             mState = State_End;
             return true;
         }
