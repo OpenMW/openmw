@@ -529,12 +529,6 @@ namespace MWWorld
             return mPlayer->getPlayer();
         }
 
-        Ptr ptr = Class::get (mPlayer->getPlayer()).
-            getContainerStore (mPlayer->getPlayer()).search (name);
-
-        if (!ptr.isEmpty())
-            return ptr;
-
         std::string lowerCaseName = Misc::StringUtils::lowerCase(name);
 
         // active cells
@@ -547,6 +541,12 @@ namespace MWWorld
             if (!ptr.isEmpty())
                 return ptr;
         }
+
+        Ptr ptr = Class::get (mPlayer->getPlayer()).
+            getContainerStore (mPlayer->getPlayer()).search (lowerCaseName);
+
+        if (!ptr.isEmpty())
+            return ptr;
 
         if (!activeOnly)
         {
