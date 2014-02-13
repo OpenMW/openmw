@@ -355,6 +355,11 @@ namespace Compiler
             }
         }
 
+        if (keyword==Scanner::K_end)
+        {
+            return parseName (loc.mLiteral, loc, scanner);
+        }
+
         mFirst = false;
 
         if (!mExplicit.empty())
