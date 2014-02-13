@@ -41,7 +41,7 @@ namespace Compiler
                 opcodeAiEscortCellExplicit);
             extensions.registerInstruction ("aiwander", "fff/llllllllll", opcodeAiWander,
                 opcodeAiWanderExplicit);
-            extensions.registerInstruction ("aifollow", "cffff/ll", opcodeAiFollow,
+            extensions.registerInstruction ("aifollow", "cffff/llllllll", opcodeAiFollow,
                 opcodeAiFollowExplicit);
             extensions.registerInstruction ("aifollowcell", "ccffff/l", opcodeAiFollowCell,
                 opcodeAiFollowCellExplicit);
@@ -253,7 +253,7 @@ namespace Compiler
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "S", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
-            extensions.registerInstruction ("removesoulgem", "c", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
+            extensions.registerInstruction ("removesoulgem", "c/l", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
             extensions.registerInstruction ("drop", "cl", opcodeDrop, opcodeDropExplicit);
             extensions.registerInstruction ("dropsoulgem", "c", opcodeDropSoulGem, opcodeDropSoulGemExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
