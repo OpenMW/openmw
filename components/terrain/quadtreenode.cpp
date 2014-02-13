@@ -430,11 +430,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
         // TODO - store this default material somewhere instead of creating one for each empty cell
         MaterialGenerator matGen(mTerrain->getShadersEnabled());
         std::vector<LayerInfo> layer;
-        LayerInfo info;
-        info.mDiffuseMap = "textures\\_land_default.dds";
-        info.mParallax = false;
-        info.mSpecular = false;
-        layer.push_back(info);
+        layer.push_back(mTerrain->getStorage()->getDefaultLayer());
         matGen.setLayerList(layer);
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
         return;
