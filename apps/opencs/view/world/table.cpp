@@ -6,6 +6,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QContextMenuEvent>
+#include <QString>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
@@ -477,27 +478,28 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
 void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
 {
-//     QModelIndex index = indexAt (event->pos());
-
-//     if (dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->holdsType (mModel->getColumnDisplay (index.column())))
-//     {
         event->acceptProposedAction();
-//     }
 }
 
 void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
     QModelIndex index = indexAt (event->pos());
 
-    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>(mModel->headerData(index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
+    (mModel->headerData(index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+
     if (dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData())->holdsType(display))
     {
-        event->acceptProposedAction();
-        std::cout<<"Dropped/n";
-    } else {std::cout<<"Not Dropped\n";}
+        const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData());
+        CSMWorld::UniversalId record(mime->returnMatching(display));
+        mUndoStack.push (new CSMWorld::ModifyCommand ( *mModel,
+                                                       index,
+                                                       QVariant(record.getId().c_str())
+                                                     ));
+    }
 }
 
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
 {
-    event->accept();
+        event->accept();
 }

@@ -3,7 +3,6 @@
 
 #include "universalid.hpp"
 #include "columnbase.hpp"
-#include <iostream>
 
 CSMWorld::TableMimeData::TableMimeData (UniversalId id)
 {
@@ -79,7 +78,6 @@ bool CSMWorld::TableMimeData::holdsType (CSMWorld::UniversalId::Type type) const
 
 bool CSMWorld::TableMimeData::holdsType (CSMWorld::ColumnBase::Display type) const
 {
-    std::cout<<type<<std::endl;
     for (std::vector<UniversalId>::const_iterator it = mUniversalId.begin(); it != mUniversalId.end(); ++it)
     {
         if (it->getType() == convertEnums (type))
