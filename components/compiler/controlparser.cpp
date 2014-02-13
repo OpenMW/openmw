@@ -9,7 +9,6 @@
 #include "generator.hpp"
 #include "errorhandler.hpp"
 
-#include <iostream>
 namespace Compiler
 {
     bool ControlParser::parseIfBody (int keyword, const TokenLoc& loc, Scanner& scanner)
