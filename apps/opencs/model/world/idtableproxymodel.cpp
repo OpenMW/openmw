@@ -33,7 +33,9 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelI
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel (QObject *parent)
 : QSortFilterProxyModel (parent)
-{}
+{
+    setSortCaseSensitivity (Qt::CaseInsensitive);
+}
 
 QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, int column) const
 {
