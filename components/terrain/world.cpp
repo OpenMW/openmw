@@ -113,9 +113,10 @@ namespace Terrain
             // We arrived at a leaf
             float minZ,maxZ;
             Ogre::Vector2 center = node->getCenter();
+            float cellWorldSize = getStorage()->getCellWorldSize();
             if (mStorage->getMinMaxHeights(node->getSize(), center, minZ, maxZ))
-                node->setBoundingBox(Ogre::AxisAlignedBox(Ogre::Vector3(-halfSize*8192, -halfSize*8192, minZ),
-                                                          Ogre::Vector3(halfSize*8192, halfSize*8192, maxZ)));
+                node->setBoundingBox(Ogre::AxisAlignedBox(Ogre::Vector3(-halfSize*cellWorldSize, -halfSize*cellWorldSize, minZ),
+                                                          Ogre::Vector3(halfSize*cellWorldSize, halfSize*cellWorldSize, maxZ)));
             else
                 node->markAsDummy(); // no data available for this node, skip it
             return;
@@ -168,8 +169,9 @@ namespace Terrain
             return Ogre::AxisAlignedBox::BOX_NULL;
         QuadTreeNode* node = findNode(center, mRootNode);
         Ogre::AxisAlignedBox box = node->getBoundingBox();
-        box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * 8192,
-                       box.getMaximum() + Ogre::Vector3(center.x, center.y, 0) * 8192);
+        float cellWorldSize = getStorage()->getCellWorldSize();
+        box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize,
+                       box.getMaximum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize);
         return box;
     }
 
