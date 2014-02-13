@@ -6,6 +6,10 @@
 #include <OgreParticleEmitterFactory.h>
 #include <OgreParticleSystemManager.h>
 
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <OSX/macUtils.h>
+#endif
+
 #include <components/nifogre/particles.hpp>
 
 #include "ogreplugin.hpp"
@@ -127,6 +131,9 @@ namespace OgreInit
     #endif
     #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
             pluginDir = OGRE_PLUGIN_DIR;
+            // if path is not specified try to find plugins inside the app bundle
+            if (pluginDir.empty())
+                pluginDir = Ogre::macPluginPath();
     #endif
     #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
             pluginDir = OGRE_PLUGIN_DIR_REL;
