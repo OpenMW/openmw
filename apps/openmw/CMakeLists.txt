@@ -1,7 +1,3 @@
-
-# config file
-configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp")
-
 # local files
 set(GAME
     main.cpp
@@ -12,7 +8,6 @@ if(NOT WIN32)
 endif()
 set(GAME_HEADER
     engine.hpp
-    config.hpp
 )
 source_group(game FILES ${GAME} ${GAME_HEADER})
 

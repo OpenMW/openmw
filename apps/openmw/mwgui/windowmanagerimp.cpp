@@ -648,19 +648,14 @@ namespace MWGui
         mGarbageDialogs.push_back(dialog);
     }
 
-    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, bool showInDialogueModeOnly)
+    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
     {
         if (buttons.empty()) {
             /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-            if (getMode() == GM_Dialogue) {
+            if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
                 mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-            } else {
-                if (showInDialogueModeOnly) {
-                    if (getMode() == GM_Dialogue)
-                        mMessageBoxManager->createMessageBox(message);
-                } else {
-                    mMessageBoxManager->createMessageBox(message);
-                }
+            } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
+                mMessageBoxManager->createMessageBox(message);
             }
         } else {
             mMessageBoxManager->createInteractiveMessageBox(message, buttons);
@@ -1035,6 +1030,11 @@ namespace MWGui
     {
         mSelectedSpell = "";
         mHud->unsetSelectedSpell();
+
+        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+        if (player->getDrawState() == MWMechanics::DrawState_Spell)
+            player->setDrawState(MWMechanics::DrawState_Nothing);
+
         mSpellWindow->setTitle("#{sNone}");
     }
 

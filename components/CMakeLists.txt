@@ -1,5 +1,9 @@
 project (Components)
 set (CMAKE_BUILD_TYPE DEBUG)
+
+# Version file
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp")
+
 # source files
 
 add_component_dir (settings
@@ -76,8 +80,12 @@ add_component_dir (loadinglistener
     )
 
 add_component_dir (ogreinit
-	ogreinit ogreplugin
-	)
+    ogreinit ogreplugin
+    )
+
+add_component_dir (version
+    version
+    )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )

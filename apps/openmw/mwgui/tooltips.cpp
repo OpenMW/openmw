@@ -182,7 +182,7 @@ namespace MWGui
                 }
                 else if (type == "AvatarItemSelection")
                 {
-                    MyGUI::IntCoord avatarPos = MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getAvatarScreenCoord ();
+                    MyGUI::IntCoord avatarPos = focus->getAbsoluteCoord();
                     MyGUI::IntPoint relMousePos = MyGUI::InputManager::getInstance ().getMousePosition () - MyGUI::IntPoint(avatarPos.left, avatarPos.top);
                     int realX = int(float(relMousePos.left) / float(avatarPos.width) * 512.f );
                     int realY = int(float(relMousePos.top) / float(avatarPos.height) * 1024.f );

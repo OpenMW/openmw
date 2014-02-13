@@ -14,7 +14,7 @@ namespace ESM
 {
     class Script;
     class CellRef;
-    class ObjectState;
+    struct ObjectState;
 }
 
 namespace MWWorld

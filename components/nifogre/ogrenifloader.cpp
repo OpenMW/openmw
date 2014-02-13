@@ -749,8 +749,8 @@ class NIFObjectLoader
         emitter->setParticleVelocity(partctrl->velocity - partctrl->velocityRandom*0.5f,
                                      partctrl->velocity + partctrl->velocityRandom*0.5f);
         emitter->setEmissionRate(partctrl->emitRate);
-        emitter->setTimeToLive(partctrl->lifetime - partctrl->lifetimeRandom*0.5f,
-                               partctrl->lifetime + partctrl->lifetimeRandom*0.5f);
+        emitter->setTimeToLive(partctrl->lifetime,
+                               partctrl->lifetime + partctrl->lifetimeRandom);
         emitter->setParameter("width", Ogre::StringConverter::toString(partctrl->offsetRandom.x));
         emitter->setParameter("height", Ogre::StringConverter::toString(partctrl->offsetRandom.y));
         emitter->setParameter("depth", Ogre::StringConverter::toString(partctrl->offsetRandom.z));
@@ -882,6 +882,9 @@ class NIFObjectLoader
                 Ogre::ControllerFunctionRealPtr func(function);
 
                 scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+
+                if (partflags&Nif::NiNode::ParticleFlag_AutoPlay)
+                    partsys->fastForward(1, 0.1);
             }
             ctrl = ctrl->next;
         }

@@ -232,6 +232,24 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effectIt->mEffectID);
 
+            if (!MWBase::Environment::get().getWorld()->isLevitationEnabled() && effectIt->mEffectID == ESM::MagicEffect::Levitate)
+            {
+                if (caster.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sLevitateDisabled}");
+                continue;
+            }
+
+            if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled() &&
+                (effectIt->mEffectID == ESM::MagicEffect::AlmsiviIntervention ||
+                 effectIt->mEffectID == ESM::MagicEffect::DivineIntervention ||
+                 effectIt->mEffectID == ESM::MagicEffect::Mark ||
+                 effectIt->mEffectID == ESM::MagicEffect::Recall))
+            {
+                if (caster.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                continue;
+            }
+
             // If player is healing someone, show the target's HP bar
             if (caster.getRefData().getHandle() == "player" && target != caster
                     && effectIt->mEffectID == ESM::MagicEffect::RestoreHealth

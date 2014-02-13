@@ -646,6 +646,10 @@ namespace MWInput
         if (!mControlSwitch["playermagic"])
             return;
 
+        // Not allowed if no spell selected
+        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty())
+            return;
+
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
             mPlayer->setDrawState(MWMechanics::DrawState_Spell);
@@ -748,7 +752,8 @@ namespace MWInput
 
     void InputManager::showQuickKeysMenu()
     {
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ())
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
+                && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
         else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
             MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);

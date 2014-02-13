@@ -53,7 +53,6 @@ void Animation::EffectAnimationTime::setValue(Ogre::Real)
 
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
-    , mCamera(NULL)
     , mInsert(node)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
@@ -696,6 +695,12 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         else
             mPtr.getClass().hit(mPtr);
     }
+    else if (evt.compare(off, len, "shoot attach") == 0)
+        attachArrow();
+    else if (evt.compare(off, len, "shoot release") == 0)
+        releaseArrow();
+    else if (evt.compare(off, len, "shoot follow attach") == 0)
+        attachArrow();
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
@@ -870,6 +875,27 @@ bool Animation::getInfo(const std::string &groupname, float *complete, float *sp
     return true;
 }
 
+float Animation::getStartTime(const std::string &groupname) const
+{
+    AnimSourceList::const_iterator iter(mAnimSources.begin());
+    for(;iter != mAnimSources.end();iter++)
+    {
+        const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
+        NifOgre::TextKeyMap::const_iterator found = findGroupStart(keys, groupname);
+        if(found != keys.end())
+            return found->first;
+    }
+    return -1.f;
+}
+
+float Animation::getCurrentTime(const std::string &groupname) const
+{
+    AnimStateMap::const_iterator iter = mStates.find(groupname);
+    if(iter == mStates.end())
+        return -1.f;
+
+    return iter->second.mTime;
+}
 
 void Animation::disable(const std::string &groupname)
 {
@@ -1044,9 +1070,8 @@ bool Animation::allowSwitchViewMode() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mGroups == Group_UpperBody 
-                || (stateiter->first.size()==4 && stateiter->first.find("hit") != std::string::npos)
-                || (stateiter->first.find("knock") != std::string::npos) )
+        if(stateiter->second.mPriority > MWMechanics::Priority_Movement 
+                && stateiter->second.mPriority < MWMechanics::Priority_Torch)
             return false;
     }
     return true;

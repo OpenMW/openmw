@@ -57,6 +57,12 @@ namespace MWGui
     class InventoryWindow;
     class ContainerWindow;
     class DialogueWindow;
+
+    enum ShowInDialogueMode {
+        ShowInDialogueMode_IfPossible,
+        ShowInDialogueMode_Only,
+        ShowInDialogueMode_Never
+    };
 }
 
 namespace SFO
@@ -226,7 +232,7 @@ namespace MWBase
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.
 
-            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false) = 0;
+            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
             virtual int readPressedButton() = 0;

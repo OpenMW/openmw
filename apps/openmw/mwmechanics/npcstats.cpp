@@ -220,16 +220,18 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
 
+    std::vector <std::string> noButtons;
+
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), noButtons, MWGui::ShowInDialogueMode_Never);
 
     if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", noButtons, MWGui::ShowInDialogueMode_Never);
     }
 
     getSkill (skillIndex).setBase (base);

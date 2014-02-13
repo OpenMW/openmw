@@ -462,20 +462,22 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem(
 
 int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor)
 {
-    for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-    {
-        if (mSlots[slot] == end())
-            continue;
+    int retCount = ContainerStore::remove(item, count, actor);
 
-        if (*mSlots[slot] == item)
+    if (!item.getRefData().getCount())
+    {
+        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
-            // restacking is disabled cause it may break removal
-            unequipSlot(slot, actor, false);
-            break;
+            if (mSlots[slot] == end())
+                continue;
+
+            if (*mSlots[slot] == item)
+            {
+                unequipSlot(slot, actor);
+                break;
+            }
         }
     }
-
-    int retCount = ContainerStore::remove(item, count, actor);
 
     // If an armor/clothing item is removed, try to find a replacement,
     // but not for the player nor werewolves.
@@ -500,9 +502,9 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     return retCount;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor, bool restack)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
 {
-    ContainerStoreIterator it = getSlot(slot);
+    ContainerStoreIterator it = mSlots[slot];
 
     if (it != end())
     {
@@ -511,17 +513,15 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
         // empty this slot
         mSlots[slot] = end();
 
-        if (restack) {
-            // restack item previously in this slot
-            for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+        // restack the previously equipped item with other (non-equipped) items
+        for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+        {
+            if (stacks(*iter, *it))
             {
-                if (stacks(*iter, *it))
-                {
-                    iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
-                    it->getRefData().setCount(0);
-                    retval = iter;
-                    break;
-                }
+                iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
+                it->getRefData().setCount(0);
+                retval = iter;
+                break;
             }
         }
 
