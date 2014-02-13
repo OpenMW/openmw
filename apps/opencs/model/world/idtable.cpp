@@ -189,3 +189,8 @@ CSMWorld::IdTable::Reordering CSMWorld::IdTable::getReordering() const
 {
     return mReordering;
 }
+
+CSMWorld::ColumnBase::Display CSMWorld::IdTable::getColumnDisplay (int index) const
+{
+    return mIdCollection->getColumn(index).mDisplayType;
+}
