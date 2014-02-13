@@ -10,6 +10,7 @@
 #include <QStringList>
 
 #include "universalid.hpp"
+#include "columnbase.hpp"
 
 
 namespace CSMWorld
@@ -23,10 +24,16 @@ namespace CSMWorld
             virtual QStringList formats() const;
             std::string getIcon() const;
             std::vector<UniversalId> getData() const;
+            bool holdsType(UniversalId::Type type) const;
+            bool holdsType(CSMWorld::ColumnBase::Display type);
+            UniversalId returnMatching(UniversalId::Type type) const;
+            UniversalId returnMatching(CSMWorld::ColumnBase::Display type);
 
         private:
             std::vector<UniversalId> mUniversalId;
             QStringList mObjectsFormats;
+
+            CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);
     };
 }
 #endif // TABLEMIMEDATA_H

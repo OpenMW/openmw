@@ -373,7 +373,7 @@ namespace CSMWorld
         SkillsColumn (int index, bool typePrefix = false, bool major = false)
         : Column<ESXRecordT> ((typePrefix ? (
             major ? Columns::ColumnId_MajorSkill1 : Columns::ColumnId_MinorSkill1) :
-            Columns::ColumnId_Skill1) + index, ColumnBase::Display_Skills),
+            Columns::ColumnId_Skill1) + index, ColumnBase::Display_Skill),
             mIndex (index), mMajor (major)
         {}
 

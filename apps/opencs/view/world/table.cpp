@@ -469,25 +469,19 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
         drag->exec();
-        std::cout << "startdrag\n";
     }
 
 }
 
 void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
 {
-    //if (event->mimeData()->hasFormat("text/plain"))
-    std::cout << "accept drag event\n";
     event->acceptProposedAction();
-
 }
 
 void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
-    std::cout << "drop\n";
     event->acceptProposedAction();
     QModelIndex index = indexAt(event->pos());
-    std::cout << index.row();
 }
 
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
