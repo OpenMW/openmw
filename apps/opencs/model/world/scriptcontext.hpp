@@ -3,8 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <components/compiler/context.hpp>
+#include <components/compiler/locals.hpp>
 
 namespace CSMWorld
 {
@@ -15,6 +17,7 @@ namespace CSMWorld
             const Data& mData;
             mutable std::vector<std::string> mIds;
             mutable bool mIdsUpdated;
+            mutable std::map<std::string, Compiler::Locals> mLocals;
 
         public:
 
