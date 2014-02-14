@@ -109,8 +109,7 @@ bool CSMWorld::ScriptContext::isId (const std::string& name) const
 
 bool CSMWorld::ScriptContext::isJournalId (const std::string& name) const
 {
-    /// \todo fix this after isId is fixed
-    return isId (name);
+    return mData.getJournals().searchId (name)!=-1;
 }
 
 void CSMWorld::ScriptContext::invalidateIds()
