@@ -117,19 +117,19 @@ namespace MWClass
             {
                 // teleport door
                 /// \todo remove this if clause once ActionTeleport can also support other actors
-                if (MWBase::Environment::get().getWorld()->getPlayerPtr()==actor)
-                {
+                //if (MWBase::Environment::get().getWorld()->getPlayerPtr()==actor)
+                //{
                     boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->mRef.mDestCell, ref->mRef.mDoorDest));
 
                     action->setSound(openSound);
 
                     return action;
-                }
+                /*}
                 else
                 {
                     // another NPC or a creature is using the door
                     return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction);
-                }
+                }*/
             }
             else
             {

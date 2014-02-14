@@ -6,6 +6,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/action.hpp"
 
 namespace
 {
@@ -64,19 +65,11 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     {
         mCellX = cell->mData.mX;
         mCellY = cell->mData.mY;
-        float xCell = 0;
-        float yCell = 0;
-
-        if(cell->isExterior())
-        {
-            xCell = cell->mData.mX * ESM::Land::REAL_SIZE;
-            yCell = cell->mData.mY * ESM::Land::REAL_SIZE;
-        }
 
         ESM::Pathgrid::Point dest;
         dest.mX = targetPos.pos[0];
-        dest.mY = targetPos.pos[0];
-        dest.mZ = targetPos.pos[0];
+        dest.mY = targetPos.pos[1];
+        dest.mZ = targetPos.pos[2];
 
         ESM::Pathgrid::Point start;
         start.mX = pos.pos[0];
@@ -92,7 +85,8 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     {
         movement.mPosition[1] = 0;
         MWWorld::Ptr target = world->getPtr(mObjectId,false);
-        MWWorld::Class::get(target).activate(target,actor);
+        MWWorld::Class::get(target).activate(target,actor).get()->execute(actor);
+        std::cout << "activated";
         return true;
     }
 
@@ -100,7 +94,8 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     {
         movement.mPosition[1] = 0;
         MWWorld::Ptr target = world->getPtr(mObjectId,false);
-        MWWorld::Class::get(target).activate(target,actor);
+        MWWorld::Class::get(target).activate(target,actor).get()->execute(actor);
+        std::cout << "activated";
         return true;
     }
 
