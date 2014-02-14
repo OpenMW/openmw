@@ -219,6 +219,20 @@ namespace Compiler
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==SetMemberVarState)
+        {
+            mMemberName = loc.mLiteral;
+            std::pair<char, bool> type = getContext().getMemberType (mMemberName, mName);
+
+            if (type.first!=' ')
+            {
+                mState = SetMemberVarState2;
+                mType = type.first;
+                mReferenceMember = type.second;
+                return true;
+            }
+        }
+
         if (mState==SetPotentialMemberVarState && keyword==Scanner::K_to)
         {
             getErrorHandler().warning ("unknown variable (ignoring set instruction)", loc);
