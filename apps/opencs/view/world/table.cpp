@@ -410,10 +410,10 @@ void CSVWorld::Table::tableSizeUpdate()
 
             switch (state)
             {
-            case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
-            case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
-            case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
-            case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
+                case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
+                case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
+                case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
             }
         }
     }
@@ -490,10 +490,14 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 
     if (dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData())->holdsType(display))
     {
-        const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+        const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>
+                (event->mimeData());
+
         CSMWorld::UniversalId record (mime->returnMatching (display));
+
         std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
                 (*mProxyModel, index, QVariant (QString::fromStdString (record.getId()))));
+
         mUndoStack.push (command.release());
     }
 }
