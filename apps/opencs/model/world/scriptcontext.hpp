@@ -43,6 +43,9 @@ namespace CSMWorld
             ///< Does \a name match a journal ID?
 
             void invalidateIds();
+
+            void clear();
+            ///< Remove all cached data.
     };
 }
 

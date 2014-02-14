@@ -15,7 +15,7 @@ CSMWorld::ScriptContext::ScriptContext (const Data& data) : mData (data), mIdsUp
 
 bool CSMWorld::ScriptContext::canDeclareLocals() const
 {
-    return false;
+    return true;
 }
 
 char CSMWorld::ScriptContext::getGlobalType (const std::string& name) const
@@ -115,4 +115,11 @@ bool CSMWorld::ScriptContext::isJournalId (const std::string& name) const
 void CSMWorld::ScriptContext::invalidateIds()
 {
     mIdsUpdated = false;
+}
+
+void CSMWorld::ScriptContext::clear()
+{
+    mIds.clear();
+    mIdsUpdated = false;
+    mLocals.clear();
 }
