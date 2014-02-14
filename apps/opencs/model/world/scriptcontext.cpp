@@ -16,6 +16,20 @@ bool CSMWorld::ScriptContext::canDeclareLocals() const
 
 char CSMWorld::ScriptContext::getGlobalType (const std::string& name) const
 {
+    int index = mData.getGlobals().searchId (name);
+
+    if (index!=-1)
+    {
+        switch (mData.getGlobals().getRecord (index).get().mValue.getType())
+        {
+            case ESM::VT_Short: return 's';
+            case ESM::VT_Long: return 'l';
+            case ESM::VT_Float: return 'f';
+
+            default: return ' ';
+        }
+    }
+
     return ' ';
 }
 
