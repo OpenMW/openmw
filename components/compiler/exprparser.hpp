@@ -58,7 +58,7 @@ namespace Compiler
 
         public:
 
-            ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+            ExprParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
                 Literals& literals, bool argument = false);
             ///< constructor
             /// \param argument Parser is used to parse function- or instruction-

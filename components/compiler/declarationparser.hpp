@@ -20,7 +20,7 @@ namespace Compiler
 
         public:
 
-            DeclarationParser (ErrorHandler& errorHandler, Context& context, Locals& locals);
+            DeclarationParser (ErrorHandler& errorHandler, const Context& context, Locals& locals);
 
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);

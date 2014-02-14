@@ -50,7 +50,7 @@ namespace Compiler
         }
     }
 
-    LineParser::LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+    LineParser::LineParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
         Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
        mState (BeginState), mExprParser (errorHandler, context, locals, literals),

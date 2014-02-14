@@ -4,7 +4,7 @@
 #include "skipparser.hpp"
 #include "scanner.hpp"
 
-Compiler::QuickFileParser::QuickFileParser (ErrorHandler& errorHandler, Context& context,
+Compiler::QuickFileParser::QuickFileParser (ErrorHandler& errorHandler, const Context& context,
     Locals& locals)
 : Parser (errorHandler, context), mDeclarationParser (errorHandler, context, locals)
 {}

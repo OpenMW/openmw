@@ -15,7 +15,7 @@ namespace Compiler
 
         public:
 
-            QuickFileParser (ErrorHandler& errorHandler, Context& context, Locals& locals);
+            QuickFileParser (ErrorHandler& errorHandler, const Context& context, Locals& locals);
 
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);

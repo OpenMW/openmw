@@ -154,7 +154,7 @@ namespace Compiler
         }
     }
 
-    ControlParser::ControlParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+    ControlParser::ControlParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
       mLineParser (errorHandler, context, locals, literals, mCodeBlock),

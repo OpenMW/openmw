@@ -219,7 +219,7 @@ namespace Compiler
         return false;
     }
 
-    ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+    ExprParser::ExprParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
         Literals& literals, bool argument)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
       mNextOperand (true), mFirst (true), mArgument (argument), mRefOp (false), mMemberOp (false)

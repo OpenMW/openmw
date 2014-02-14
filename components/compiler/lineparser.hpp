@@ -44,7 +44,7 @@ namespace Compiler
 
         public:
 
-            LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+            LineParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
                 Literals& literals, std::vector<Interpreter::Type_Code>& code,
                 bool allowExpression = false);
             ///< \param allowExpression Allow lines consisting of a naked expression

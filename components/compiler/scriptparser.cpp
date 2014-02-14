@@ -7,7 +7,7 @@
 
 namespace Compiler
 {
-    ScriptParser::ScriptParser (ErrorHandler& errorHandler, Context& context,
+    ScriptParser::ScriptParser (ErrorHandler& errorHandler, const Context& context,
         Locals& locals, bool end)
     : Parser (errorHandler, context), mOutput (locals),
       mLineParser (errorHandler, context, locals, mOutput.getLiterals(), mOutput.getCode()),

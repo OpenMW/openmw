@@ -8,7 +8,7 @@
 #include "skipparser.hpp"
 #include "locals.hpp"
 
-Compiler::DeclarationParser::DeclarationParser (ErrorHandler& errorHandler, Context& context,
+Compiler::DeclarationParser::DeclarationParser (ErrorHandler& errorHandler, const Context& context,
     Locals& locals)
 : Parser (errorHandler, context), mLocals (locals), mState (State_Begin), mType (0)
 {}

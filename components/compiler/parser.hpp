@@ -17,7 +17,7 @@ namespace Compiler
     class Parser
     {
             ErrorHandler& mErrorHandler;
-            Context& mContext;
+            const Context& mContext;
             bool mOptional;
             bool mEmpty;
 
@@ -38,14 +38,14 @@ namespace Compiler
             ErrorHandler& getErrorHandler();
             ///< Return error handler
 
-            Context& getContext();
+            const Context& getContext() const;
             ///< Return context
 
             static std::string toLower (const std::string& name);
 
         public:
 
-            Parser (ErrorHandler& errorHandler, Context& context);
+            Parser (ErrorHandler& errorHandler, const Context& context);
             ///< constructor
 
             virtual ~Parser();
