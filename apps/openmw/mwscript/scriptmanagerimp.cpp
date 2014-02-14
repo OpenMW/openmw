@@ -13,6 +13,7 @@
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
 #include <components/compiler/exception.hpp>
+#include <components/compiler/quickfileparser.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -159,20 +160,14 @@ namespace MWScript
                 return iter->second;
         }
 
-        Compiler::Locals locals;
-
         if (const ESM::Script *script = mStore.get<ESM::Script>().find (name2))
         {
-            int index = 0;
+            Compiler::Locals locals;
 
-            for (int i=0; i<script->mData.mNumShorts; ++i)
-                locals.declare ('s', script->mVarNames[index++]);
-
-            for (int i=0; i<script->mData.mNumLongs; ++i)
-                locals.declare ('l', script->mVarNames[index++]);
-
-            for (int i=0; i<script->mData.mNumFloats; ++i)
-                locals.declare ('f', script->mVarNames[index++]);
+            std::istringstream stream (script->mScriptText);
+            Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
+            Compiler::Scanner scanner (mErrorHandler, stream, mCompilerContext.getExtensions());
+            scanner.scan (parser);
 
             std::map<std::string, Compiler::Locals>::iterator iter =
                 mOtherLocals.insert (std::make_pair (name2, locals)).first;

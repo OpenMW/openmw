@@ -1,26 +1,21 @@
-#ifndef COMPILER_DECLARATIONPARSER_H_INCLUDED
-#define COMPILER_DECLARATIONPARSER_H_INCLUDED
+#ifndef COMPILER_QUICKFILEPARSER_H_INCLUDED
+#define COMPILER_QUICKFILEPARSER_H_INCLUDED
 
 #include "parser.hpp"
+#include "declarationparser.hpp"
 
 namespace Compiler
 {
     class Locals;
 
-    class DeclarationParser : public Parser
+    /// \brief File parser variant that ignores everything but variable declarations
+    class QuickFileParser : public Parser
     {
-            enum State
-            {
-                State_Begin, State_Name, State_End
-            };
-
-            Locals& mLocals;
-            State mState;
-            char mType;
+            DeclarationParser mDeclarationParser;
 
         public:
 
-            DeclarationParser (ErrorHandler& errorHandler, Context& context, Locals& locals);
+            QuickFileParser (ErrorHandler& errorHandler, Context& context, Locals& locals);
 
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);
@@ -35,9 +30,10 @@ namespace Compiler
             ///< Handle a special character token.
             /// \return fetch another token?
 
-            void reset();
-
+            virtual void parseEOF (Scanner& scanner);
+            ///< Handle EOF token.
     };
 }
 
 #endif
+

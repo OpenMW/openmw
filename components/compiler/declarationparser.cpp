@@ -76,3 +76,8 @@ bool Compiler::DeclarationParser::parseSpecial (int code, const TokenLoc& loc, S
 
     return Parser::parseSpecial (code, loc, scanner);
 }
+
+void Compiler::DeclarationParser::reset()
+{
+    mState = State_Begin;
+}
