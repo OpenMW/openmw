@@ -4,6 +4,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 
 namespace
 {
@@ -186,7 +187,6 @@ CSMWorld::UniversalId::UniversalId (Type type, const std::string& id)
             mClass = sIdArg[i].mClass;
             return;
         }
-
     throw std::logic_error ("invalid ID argument UniversalId type");
 }
 

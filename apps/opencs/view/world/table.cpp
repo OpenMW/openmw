@@ -6,6 +6,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QContextMenuEvent>
+#include <QString>
+#include <qt4/QtCore/qnamespace.h>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
@@ -13,6 +15,8 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
 #include "../../model/world/columns.hpp"
+#include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -88,7 +92,7 @@ std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
         QModelIndexList selectedRows = selectionModel()->selectedRows();
 
         for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
-             ++iter)
+            ++iter)
         {
             QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
 
@@ -235,6 +239,8 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
 
     connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
         this, SLOT (selectionSizeUpdate ()));
+
+    setAcceptDrops(true);
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -431,4 +437,72 @@ void CSVWorld::Table::requestFocus (const std::string& id)
 void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter)
 {
     mProxyModel->setFilter (filter);
+}
+
+void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
+{
+    if (event->buttons() & Qt::LeftButton)
+    {
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+        if (selectedRows.size() == 0)
+        {
+            return;
+        }
+
+        QDrag* drag = new QDrag (this);
+        CSMWorld::TableMimeData* mime = NULL;
+
+        if (selectedRows.size() == 1)
+        {
+            mime = new CSMWorld::TableMimeData (getUniversalId (selectedRows.begin()->row()));
+        }
+        else
+        {
+            std::vector<CSMWorld::UniversalId> idToDrag;
+
+            foreach (QModelIndex it, selectedRows) //I had a dream. Dream where you could use C++11 in OpenMW.
+            {
+                idToDrag.push_back (getUniversalId (it.row()));
+            }
+
+            mime = new CSMWorld::TableMimeData (idToDrag);
+        }
+
+        drag->setMimeData (mime);
+        drag->setPixmap (QString::fromStdString (mime->getIcon()));
+        drag->exec();
+    }
+
+}
+
+void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
+{
+        event->acceptProposedAction();
+}
+
+void CSVWorld::Table::dropEvent(QDropEvent *event)
+{
+    QModelIndex index = indexAt (event->pos());
+
+    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
+    (mModel->headerData(index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+
+    if (dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData())->holdsType(display))
+    {
+        const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>
+                (event->mimeData());
+
+        CSMWorld::UniversalId record (mime->returnMatching (display));
+
+        std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
+                (*mProxyModel, index, QVariant (QString::fromStdString (record.getId()))));
+
+        mUndoStack.push (command.release());
+    }
+}
+
+void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
+{
+        event->accept();
 }
