@@ -1,5 +1,3 @@
-/*This class provides way to construct mimedata object holding the reference to the 
-* universalid. universalid is used in the majority of the tables to store type, id, argument types*/
 
 #ifndef TABLEMIMEDATA_H
 #define TABLEMIMEDATA_H
@@ -15,6 +13,14 @@
 
 namespace CSMWorld
 {
+
+/// \brief Subclass of QmimeData, augmented to contain and transport UniversalIds.
+///
+/// This class provides way to construct mimedata object holding the universalid copy
+/// Universalid is used in the majority of the tables to store type, id, argument types.
+/// This way universalid grants a way to retrive record from the concrete table.
+/// Please note, that tablemimedata object can hold multiple universalIds in the vector.
+
     class TableMimeData : public QMimeData
     {
         public:

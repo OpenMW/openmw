@@ -187,7 +187,6 @@ CSMWorld::UniversalId::UniversalId (Type type, const std::string& id)
             mClass = sIdArg[i].mClass;
             return;
         }
-    std::cout<<type<<std::endl;
     throw std::logic_error ("invalid ID argument UniversalId type");
 }
 

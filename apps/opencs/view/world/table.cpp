@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
+#include <qt4/QtCore/qnamespace.h>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
@@ -15,11 +16,10 @@
 #include "../../model/world/record.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
-#include <qt4/QtCore/qnamespace.h>
-#include "../../model/world/tablemimedata.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
