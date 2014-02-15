@@ -529,12 +529,6 @@ namespace MWWorld
             return mPlayer->getPlayer();
         }
 
-        Ptr ptr = Class::get (mPlayer->getPlayer()).
-            getContainerStore (mPlayer->getPlayer()).search (name);
-
-        if (!ptr.isEmpty())
-            return ptr;
-
         std::string lowerCaseName = Misc::StringUtils::lowerCase(name);
 
         // active cells
@@ -547,6 +541,12 @@ namespace MWWorld
             if (!ptr.isEmpty())
                 return ptr;
         }
+
+        Ptr ptr = Class::get (mPlayer->getPlayer()).
+            getContainerStore (mPlayer->getPlayer()).search (lowerCaseName);
+
+        if (!ptr.isEmpty())
+            return ptr;
 
         if (!activeOnly)
         {
@@ -610,6 +610,10 @@ namespace MWWorld
 
     void World::enable (const Ptr& reference)
     {
+        // enable is a no-op for items in containers
+        if (!reference.isInCell())
+            return;
+
         if (!reference.getRefData().isEnabled())
         {
             reference.getRefData().enable();
@@ -640,6 +644,10 @@ namespace MWWorld
 
     void World::disable (const Ptr& reference)
     {
+        // disable is a no-op for items in containers
+        if (!reference.isInCell())
+            return;
+
         if (reference.getRefData().isEnabled())
         {
             reference.getRefData().disable();
