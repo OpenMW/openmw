@@ -485,16 +485,14 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
     QModelIndex index = indexAt (event->pos());
 
-    if (dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->fromDocument (mDocument))
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (mime->fromDocument (mDocument))
     {
         CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
                                                 (mModel->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-        if (dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->holdsType (display))
+        if (mime->holdsType (display))
         {
-            const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>
-                                                  (event->mimeData());
-
             CSMWorld::UniversalId record (mime->returnMatching (display));
 
             std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
