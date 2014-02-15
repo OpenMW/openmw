@@ -24,7 +24,8 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
         stream << "warning ";
 
     stream
-        << "line " << loc.mLine << ", column " << loc.mColumn
+        << "script " << mFile
+        << ", line " << loc.mLine << ", column " << loc.mColumn
         << " (" << loc.mLiteral << "): " << message;
 
     mMessages->push_back (stream.str());
@@ -74,6 +75,7 @@ void CSMTools::ScriptCheckStage::perform (int stage, std::vector<std::string>& m
 
     try
     {
+        mFile = mData.getScripts().getRecord (stage).get().mId;
         std::istringstream input (mData.getScripts().getRecord (stage).get().mScriptText);
 
         Compiler::Scanner scanner (*this, input, mContext.getExtensions());

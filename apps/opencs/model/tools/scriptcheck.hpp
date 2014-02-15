@@ -17,6 +17,7 @@ namespace CSMTools
             Compiler::Extensions mExtensions;
             CSMWorld::ScriptContext mContext;
             std::string mId;
+            std::string mFile;
             std::vector<std::string> *mMessages;
 
             virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
