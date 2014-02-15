@@ -570,6 +570,14 @@ namespace Compiler
     {
         if (!mExplicit.empty())
         {
+            if (mRefOp && code==Scanner::S_open)
+            {
+                /// \todo add option to disable this workaround
+                mOperators.push_back ('(');
+                mTokenLoc = loc;
+                return true;
+            }
+
             if (!mRefOp && code==Scanner::S_ref)
             {
                 mRefOp = true;
