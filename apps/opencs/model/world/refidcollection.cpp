@@ -432,7 +432,7 @@ void CSMWorld::RefIdCollection::removeRows (int index, int count)
 
 void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
 {
-    mData.appendRecord (type, id);
+    mData.appendRecord (type, id, false);
 }
 
 int CSMWorld::RefIdCollection::searchId (const std::string& id) const
@@ -450,7 +450,7 @@ void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
     mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
 }
 
-void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin, 
+void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const CSMWorld::UniversalId::Type type)
 {
@@ -467,7 +467,7 @@ void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
 
     int index = mData.getAppendIndex (type);
 
-    mData.appendRecord (type, id);
+    mData.appendRecord (type, id, false);
 
     mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
 }
@@ -515,7 +515,7 @@ void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, Univers
         {
             // new record
             int index = mData.getAppendIndex (type);
-            mData.appendRecord (type, id);
+            mData.appendRecord (type, id, base);
 
             RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
 
