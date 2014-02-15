@@ -61,7 +61,7 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
     {
         if (mAllowedTypes.contains (it->getType()))
         {
-            QString::fromStdString ('"' + it->getId() + '"'));
+            QString::fromStdString ('"' + it->getId() + '"');
         }
     }
 }
