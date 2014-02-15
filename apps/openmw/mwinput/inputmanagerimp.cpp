@@ -17,6 +17,7 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -647,7 +648,9 @@ namespace MWInput
             return;
 
         // Not allowed if no spell selected
-        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty())
+        MWWorld::InventoryStore& inventory = MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer());
+        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty() &&
+            inventory.getSelectedEnchantItem() == inventory.end())
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
