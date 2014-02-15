@@ -61,8 +61,7 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
     {
         if (mAllowedTypes.contains (it->getType()))
         {
-            insertPlainText (QString::fromStdString (it->getId() + " "));
+            QString::fromStdString ('"' + it->getId() + '"'));
         }
     }
 }
-// kate: indent-mode cstyle; indent-width 4; replace-tabs on; 
