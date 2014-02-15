@@ -4,14 +4,15 @@
 #include "universalid.hpp"
 #include "columnbase.hpp"
 
-CSMWorld::TableMimeData::TableMimeData (UniversalId id)
+CSMWorld::TableMimeData::TableMimeData (UniversalId id, const CSMDoc::Document& document) :
+mDocument(document)
 {
     mUniversalId.push_back (id);
     mObjectsFormats << QString::fromStdString ("tabledata/" + id.getTypeName());
 }
 
-CSMWorld::TableMimeData::TableMimeData (std::vector< CSMWorld::UniversalId >& id) :
-    mUniversalId (id)
+CSMWorld::TableMimeData::TableMimeData (std::vector< CSMWorld::UniversalId >& id, const CSMDoc::Document& document) :
+    mUniversalId (id), mDocument(document)
 {
     for (std::vector<UniversalId>::iterator it (mUniversalId.begin()); it != mUniversalId.end(); ++it)
     {
@@ -113,6 +114,11 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnB
     }
 
     throw ("TableMimeData object does not hold object of the seeked type");
+}
+
+bool CSMWorld::TableMimeData::fromDocument (const CSMDoc::Document& document) const
+{
+    return &document == &mDocument;
 }
 
 CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::ColumnBase::Display type) const

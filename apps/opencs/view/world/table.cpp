@@ -455,7 +455,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         if (selectedRows.size() == 1)
         {
-            mime = new CSMWorld::TableMimeData (getUniversalId (selectedRows.begin()->row()));
+            mime = new CSMWorld::TableMimeData (getUniversalId (selectedRows.begin()->row()), mDocument);
         }
         else
         {
@@ -466,7 +466,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
                 idToDrag.push_back (getUniversalId (it.row()));
             }
 
-            mime = new CSMWorld::TableMimeData (idToDrag);
+            mime = new CSMWorld::TableMimeData (idToDrag, mDocument);
         }
 
         drag->setMimeData (mime);
@@ -485,21 +485,24 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
     QModelIndex index = indexAt (event->pos());
 
-    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-    (mModel->headerData(index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
-    if (dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData())->holdsType(display))
+    if (dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->fromDocument (mDocument))
     {
-        const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>
-                (event->mimeData());
+        CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
+                                                (mModel->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-        CSMWorld::UniversalId record (mime->returnMatching (display));
+        if (dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->holdsType (display))
+        {
+            const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>
+                                                  (event->mimeData());
 
-        std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
-                (*mProxyModel, index, QVariant (QString::fromStdString (record.getId()))));
+            CSMWorld::UniversalId record (mime->returnMatching (display));
 
-        mUndoStack.push (command.release());
-    }
+            std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
+                    (*mProxyModel, index, QVariant (QString::fromStdString (record.getId()))));
+
+            mUndoStack.push (command.release());
+        }
+    } //TODO handle drops from different document
 }
 
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
