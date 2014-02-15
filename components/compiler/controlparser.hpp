@@ -26,7 +26,8 @@ namespace Compiler
                 IfElseEndState, IfElseBodyState,
                 IfEndifState,
                 WhileEndState, WhileBodyState,
-                WhileEndwhileState
+                WhileEndwhileState,
+                IfElseJunkState
             };
 
             typedef std::vector<Interpreter::Type_Code> Codes;
