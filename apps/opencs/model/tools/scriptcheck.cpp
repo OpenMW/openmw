@@ -51,6 +51,9 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
 CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMWorld::Data& data)
 : mData (data), mContext (data), mMessages (0)
 {
+    /// \todo add an option to configure warning mode
+    setWarningsMode (0);
+
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
 }
