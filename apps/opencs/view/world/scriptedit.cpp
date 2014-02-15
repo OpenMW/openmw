@@ -9,8 +9,8 @@ CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent) :
     QTextEdit (parent)
 {
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
-                  <<CSMWorld::UniversalId::Type_JournalInfo
                   <<CSMWorld::UniversalId::Type_Global
+                  <<CSMWorld::UniversalId::Type_Topic
                   <<CSMWorld::UniversalId::Type_Sound
                   <<CSMWorld::UniversalId::Type_Spell
                   <<CSMWorld::UniversalId::Type_Cell
