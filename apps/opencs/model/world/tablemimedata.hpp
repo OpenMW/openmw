@@ -53,8 +53,8 @@ namespace CSMWorld
         private:
             std::vector<UniversalId> mUniversalId;
             QStringList mObjectsFormats;
-
             const CSMDoc::Document& mDocument;
+
             CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type) const;
     };
 }
