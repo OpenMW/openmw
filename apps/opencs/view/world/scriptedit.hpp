@@ -2,6 +2,9 @@
 #define SCRIPTEDIT_H
 
 #include <qtextedit.h>
+#include <QVector>
+
+#include "../../model/world/universalid.hpp"
 
 class QWidget;
 
@@ -14,6 +17,8 @@ namespace CSVWorld
             ScriptEdit (QWidget* parent);
 
         private:
+            QVector<CSMWorld::UniversalId::Type> mAllowedTypes;
+
             void dragEnterEvent (QDragEnterEvent* event);
 
             void dropEvent (QDropEvent* event);
