@@ -252,7 +252,6 @@ link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MY
 if (APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
-                          ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
 
     # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
@@ -275,8 +274,6 @@ if (APPLE)
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-
-    #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
@@ -656,7 +653,7 @@ if (APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
     set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
-    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
+    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
     set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
@@ -671,18 +668,29 @@ if (APPLE)
         set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
+    install(CODE "
+        set(BU_CHMOD_BUNDLE_ITEMS ON)
+        include(BundleUtilities)
+    " COMPONENT Runtime)
+
     # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
     # and returns list of install paths for all installed plugins
     function (install_plugins_for_bundle bundle_path plugins_var)
-        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Plugins")
-        install(FILES ${ABSOLUTE_PLUGINS} DESTINATION ${RELATIVE_PLUGIN_INSTALL_BASE} COMPONENT Runtime)
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Frameworks")
 
         set(PLUGINS "")
         set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
 
         foreach (PLUGIN ${ABSOLUTE_PLUGINS})
             get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
-            set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
+            get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
+
+            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}/${PLUGIN_RELATIVE_WE}")
+            set(PLUGINS ${PLUGINS} "${PLUGIN_DYLIB_IN_BUNDLE}")
+
+            install(CODE "
+                copy_resolved_framework_into_bundle(\"${PLUGIN}/${PLUGIN_RELATIVE_WE}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
+            " COMPONENT Runtime)
         endforeach ()
 
         set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
@@ -702,6 +710,7 @@ if (APPLE)
     # Current limitations:
     #   1. Handles only frameworks, not simple libs
     INSTALL(CODE "
+        cmake_policy(SET CMP0009 OLD)
         set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
         set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
         set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
@@ -733,9 +742,6 @@ if (APPLE)
             endif()
         endfunction(gp_resolve_item_override)
 
-        cmake_policy(SET CMP0009 OLD)
-        set(BU_CHMOD_BUNDLE_ITEMS ON)
-        include(BundleUtilities)
         fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
         fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)
