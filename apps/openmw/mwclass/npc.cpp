@@ -1278,8 +1278,10 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore.
-            readState (state2.mInventory);
+        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+
+        customData.mInventoryStore.readState (state2.mInventory);
+        customData.mNpcStats.readState (state2.mNpcStats);
     }
 
     void Npc::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
@@ -1289,8 +1291,10 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore.
-            writeState (state2.mInventory);
+        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+
+        customData.mInventoryStore.writeState (state2.mInventory);
+        customData.mNpcStats.writeState (state2.mNpcStats);
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

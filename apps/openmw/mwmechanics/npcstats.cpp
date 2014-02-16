@@ -12,6 +12,7 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
+#include <components/esm/npcstats.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -422,4 +423,80 @@ void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
 {
     assert(time>=0 && time<=20);
     mTimeToStartDrowning=time;
+}
+
+void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
+{
+    for (std::map<std::string, int>::const_iterator iter (mFactionRank.begin());
+        iter!=mFactionRank.end(); ++iter)
+        state.mFactions[iter->first].mRank = iter->second;
+
+    state.mDisposition = mDisposition;
+
+    for (int i=0; i<27; ++i)
+    {
+        mSkill[i].writeState (state.mSkills[i].mRegular);
+        mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
+        state.mSkills[i].mIncrease = mSkillIncreases[i];
+    }
+
+    state.mBounty = mBounty;
+
+    for (std::set<std::string>::const_iterator iter (mExpelled.begin());
+        iter!=mExpelled.end(); ++iter)
+        state.mFactions[*iter].mExpelled = true;
+
+    for (std::map<std::string, int>::const_iterator iter (mFactionReputation.begin());
+        iter!=mFactionReputation.end(); ++iter)
+        state.mFactions[iter->first].mReputation = iter->second;
+
+    state.mReputation = mReputation;
+    state.mWerewolfKills = mWerewolfKills;
+    state.mProfit = mProfit;
+    state.mAttackStrength = mAttackStrength;
+    state.mLevelProgress = mLevelProgress;
+
+    std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
+
+    state.mTimeToStartDrowning = mTimeToStartDrowning;
+    state.mLastDrowningHit = mLastDrowningHit;
+    state.mLevelHealthBonus = mLevelHealthBonus;
+}
+
+void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
+{
+    for (std::map<std::string, ESM::NpcStats::Faction>::const_iterator iter (state.mFactions.begin());
+        iter!=state.mFactions.end(); ++iter)
+    {
+        if (iter->second.mExpelled)
+            mExpelled.insert (iter->first);
+
+        if (iter->second.mRank)
+            mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
+
+        if (iter->second.mReputation)
+            mFactionReputation.insert (std::make_pair (iter->first, iter->second.mReputation));
+    }
+
+    mDisposition = state.mDisposition;
+
+    for (int i=0; i<27; ++i)
+    {
+        mSkill[i].readState (state.mSkills[i].mRegular);
+        mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
+        mSkillIncreases[i] = state.mSkills[i].mIncrease;
+    }
+
+    mBounty = state.mBounty;
+    mReputation = state.mReputation;
+    mWerewolfKills = state.mWerewolfKills;
+    mProfit = state.mProfit;
+    mAttackStrength = state.mAttackStrength;
+    mLevelProgress = state.mLevelProgress;
+
+    std::copy (state.mUsedIds.begin(), state.mUsedIds.end(), std::inserter (mUsedIds, mUsedIds.begin()));
+
+    mTimeToStartDrowning = state.mTimeToStartDrowning;
+    mLastDrowningHit = state.mLastDrowningHit;
+    mLevelHealthBonus = state.mLevelHealthBonus;
 }
