@@ -193,7 +193,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         +MWBase::Environment::get().getJournal()->countSavedGameRecords()
         +MWBase::Environment::get().getWorld()->countSavedGameRecords()
         +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
-                + 1 // global map
+        +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
+        +1 // global map
         );
 
     writer.save (stream);
@@ -203,6 +204,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     writer.endRecord (ESM::REC_SAVE);
 
     MWBase::Environment::get().getJournal()->write (writer);
+    MWBase::Environment::get().getDialogueManager()->write (writer);
     MWBase::Environment::get().getWorld()->write (writer);
     MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer);
     MWBase::Environment::get().getWindowManager()->write(writer);
@@ -243,6 +245,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_QUES:
 
                     MWBase::Environment::get().getJournal()->readRecord (reader, n.val);
+                    break;
+
+                case ESM::REC_DIAS:
+
+                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, n.val);
                     break;
 
                 case ESM::REC_ALCH:
