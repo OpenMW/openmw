@@ -680,7 +680,8 @@ if (APPLE)
 
         foreach (PLUGIN ${ABSOLUTE_PLUGINS})
             get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
-            set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
+            get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
+            set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}/${PLUGIN_RELATIVE_WE}")
         endforeach ()
 
         set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
