@@ -52,7 +52,7 @@ namespace Terrain
         mColourBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
-        mNode->getTerrain()->getStorage()->fillVertexBuffers(lodLevel, mNode->getSize(), mNode->getCenter(),
+        mNode->getTerrain()->getStorage()->fillVertexBuffers(lodLevel, mNode->getSize(), mNode->getCenter(), mNode->getTerrain()->getAlign(),
                                                              mVertexBuffer, mNormalBuffer, mColourBuffer);
 
         mVertexData->vertexBufferBinding->setBinding(0, mVertexBuffer);

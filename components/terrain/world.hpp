@@ -6,10 +6,7 @@
 #include <OgreAxisAlignedBox.h>
 #include <OgreTexture.h>
 
-namespace Loading
-{
-    class Listener;
-}
+#include "defs.hpp"
 
 namespace Ogre
 {
@@ -33,7 +30,6 @@ namespace Terrain
     {
     public:
         /// @note takes ownership of \a storage
-        /// @param loadingListener Listener to update with progress
         /// @param sceneMgr scene manager to use
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param visbilityFlags visibility flags for the created meshes
@@ -41,11 +37,12 @@ namespace Terrain
         ///         This is a temporary option until it can be streamlined.
         /// @param shaders Whether to use splatting shader, or multi-pass fixed function splatting. Shader is usually
         ///         faster so this is just here for compatibility.
-        World(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
-                Storage* storage, int visiblityFlags, bool distantLand, bool shaders);
+        /// @param align The align of the terrain, see Alignment enum
+        /// @param minBatchSize Minimum size of a terrain batch along one side (in cell units). Used for building the quad tree.
+        /// @param maxBatchSize Maximum size of a terrain batch along one side (in cell units). Used when traversing the quad tree.
+        World(Ogre::SceneManager* sceneMgr,
+                Storage* storage, int visiblityFlags, bool distantLand, bool shaders, Alignment align, float minBatchSize, float maxBatchSize);
         ~World();
-
-        void setLoadingListener(Loading::Listener* loadingListener) { mLoadingListener = loadingListener; }
 
         bool getDistantLandEnabled() { return mDistantLand; }
         bool getShadersEnabled() { return mShaders; }
@@ -86,14 +83,15 @@ namespace Terrain
 
         void enableSplattingShader(bool enabled);
 
+        Alignment getAlign() { return mAlign; }
+
     private:
         bool mDistantLand;
         bool mShaders;
         bool mShadows;
         bool mSplitShadows;
         bool mVisible;
-
-        Loading::Listener* mLoadingListener;
+        Alignment mAlign;
 
         QuadTreeNode* mRootNode;
         Ogre::SceneNode* mRootSceneNode;
@@ -137,6 +135,11 @@ namespace Terrain
         // Delete all quads
         void clearCompositeMapSceneManager();
         void renderCompositeMap (Ogre::TexturePtr target);
+
+        // Convert the given position from Z-up align, i.e. Align_XY to the wanted align set in mAlign
+        void convertPosition (float& x, float& y, float& z);
+        void convertPosition (Ogre::Vector3& pos);
+        void convertBounds (Ogre::AxisAlignedBox& bounds);
 
     private:
         // Index buffers are shared across terrain batches where possible. There is one index buffer for each

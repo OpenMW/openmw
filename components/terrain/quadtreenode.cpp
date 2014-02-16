@@ -169,7 +169,11 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
         pos = mParent->getCenter();
     pos = mCenter - pos;
     float cellWorldSize = mTerrain->getStorage()->getCellWorldSize();
-    mSceneNode->setPosition(Ogre::Vector3(pos.x*cellWorldSize, pos.y*cellWorldSize, 0));
+
+    Ogre::Vector3 sceneNodePos (pos.x*cellWorldSize, pos.y*cellWorldSize, 0);
+    mTerrain->convertPosition(sceneNodePos.x, sceneNodePos.y, sceneNodePos.z);
+
+    mSceneNode->setPosition(sceneNodePos);
 
     mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
 }
@@ -212,11 +216,31 @@ void QuadTreeNode::initAabb()
             mChildren[i]->initAabb();
             mBounds.merge(mChildren[i]->getBoundingBox());
         }
-        mBounds = Ogre::AxisAlignedBox (Ogre::Vector3(-mSize/2*cellWorldSize, -mSize/2*cellWorldSize, mBounds.getMinimum().z),
-                                        Ogre::Vector3(mSize/2*cellWorldSize, mSize/2*cellWorldSize, mBounds.getMaximum().z));
+        float minH, maxH;
+        switch (mTerrain->getAlign())
+        {
+            case Terrain::Align_XY:
+                minH = mBounds.getMinimum().z;
+                maxH = mBounds.getMaximum().z;
+                break;
+            case Terrain::Align_XZ:
+                minH = mBounds.getMinimum().y;
+                maxH = mBounds.getMinimum().y;
+                break;
+            case Terrain::Align_YZ:
+                minH = mBounds.getMinimum().x;
+                maxH = mBounds.getMaximum().x;
+                break;
+        }
+        Ogre::Vector3 min(-mSize/2*cellWorldSize, -mSize/2*cellWorldSize, minH);
+        Ogre::Vector3 max(Ogre::Vector3(mSize/2*cellWorldSize, mSize/2*cellWorldSize, maxH));
+        mBounds = Ogre::AxisAlignedBox (min, max);
+        mTerrain->convertBounds(mBounds);
     }
-    mWorldBounds = Ogre::AxisAlignedBox(mBounds.getMinimum() + Ogre::Vector3(mCenter.x*cellWorldSize, mCenter.y*cellWorldSize, 0),
-                                        mBounds.getMaximum() + Ogre::Vector3(mCenter.x*cellWorldSize, mCenter.y*cellWorldSize, 0));
+    Ogre::Vector3 offset(mCenter.x*cellWorldSize, mCenter.y*cellWorldSize, 0);
+    mTerrain->convertPosition(offset);
+    mWorldBounds = Ogre::AxisAlignedBox(mBounds.getMinimum() + offset,
+                                        mBounds.getMaximum() + offset);
 }
 
 void QuadTreeNode::setBoundingBox(const Ogre::AxisAlignedBox &box)
@@ -229,7 +253,12 @@ const Ogre::AxisAlignedBox& QuadTreeNode::getBoundingBox()
     return mBounds;
 }
 
-void QuadTreeNode::update(const Ogre::Vector3 &cameraPos, Loading::Listener* loadingListener)
+const Ogre::AxisAlignedBox& QuadTreeNode::getWorldBoundingBox()
+{
+    return mWorldBounds;
+}
+
+void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
 {
     const Ogre::AxisAlignedBox& bounds = getBoundingBox();
     if (bounds.isNull())
@@ -262,9 +291,6 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos, Loading::Listener* loa
         wantedLod = 6;
 
     bool hadChunk = hasChunk();
-
-    if (loadingListener)
-        loadingListener->indicateProgress();
 
     if (!distantLand && dist > 8192*2)
     {
@@ -353,7 +379,7 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos, Loading::Listener* loa
         }
         assert(hasChildren() && "Leaf node's LOD needs to be 0");
         for (int i=0; i<4; ++i)
-            mChildren[i]->update(cameraPos, loadingListener);
+            mChildren[i]->update(cameraPos);
     }
 }
 

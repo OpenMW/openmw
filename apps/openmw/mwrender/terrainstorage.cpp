@@ -167,7 +167,7 @@ namespace MWRender
 
     }
 
-    void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center,
+    void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center, Terrain::Alignment align,
                             Ogre::HardwareVertexBufferSharedPtr vertexBuffer,
                             Ogre::HardwareVertexBufferSharedPtr normalBuffer,
                             Ogre::HardwareVertexBufferSharedPtr colourBuffer)

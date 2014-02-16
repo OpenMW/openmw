@@ -6,8 +6,6 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
 
-#include <components/loadinglistener/loadinglistener.hpp>
-
 #include "storage.hpp"
 #include "quadtreenode.hpp"
 
@@ -51,27 +49,25 @@ namespace
 namespace Terrain
 {
 
-    World::World(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
-                     Storage* storage, int visibilityFlags, bool distantLand, bool shaders)
+    World::World(Ogre::SceneManager* sceneMgr,
+                     Storage* storage, int visibilityFlags, bool distantLand, bool shaders, Alignment align, float minBatchSize, float maxBatchSize)
         : mStorage(storage)
-        , mMinBatchSize(1)
-        , mMaxBatchSize(64)
+        , mMinBatchSize(minBatchSize)
+        , mMaxBatchSize(maxBatchSize)
         , mSceneMgr(sceneMgr)
         , mVisibilityFlags(visibilityFlags)
         , mDistantLand(distantLand)
         , mShaders(shaders)
         , mVisible(true)
-        , mLoadingListener(loadingListener)
+        , mAlign(align)
         , mMaxX(0)
         , mMinX(0)
         , mMaxY(0)
         , mMinY(0)
     {
-        loadingListener->setLabel("Creating terrain");
-        loadingListener->indicateProgress();
-
         mCompositeMapSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
+        /// \todo make composite map size configurable
         Ogre::Camera* compositeMapCam = mCompositeMapSceneMgr->createCamera("a");
         mCompositeMapRenderTexture = Ogre::TextureManager::getSingleton().createManual(
                     "terrain/comp/rt", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -96,11 +92,11 @@ namespace Terrain
 
         mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(centerX, centerY), NULL);
         buildQuadTree(mRootNode);
-        loadingListener->indicateProgress();
+        //loadingListener->indicateProgress();
         mRootNode->initAabb();
-        loadingListener->indicateProgress();
+        //loadingListener->indicateProgress();
         mRootNode->initNeighbours();
-        loadingListener->indicateProgress();
+        //loadingListener->indicateProgress();
     }
 
     World::~World()
@@ -120,8 +116,12 @@ namespace Terrain
             Ogre::Vector2 center = node->getCenter();
             float cellWorldSize = getStorage()->getCellWorldSize();
             if (mStorage->getMinMaxHeights(node->getSize(), center, minZ, maxZ))
-                node->setBoundingBox(Ogre::AxisAlignedBox(Ogre::Vector3(-halfSize*cellWorldSize, -halfSize*cellWorldSize, minZ),
-                                                          Ogre::Vector3(halfSize*cellWorldSize, halfSize*cellWorldSize, maxZ)));
+            {
+                Ogre::AxisAlignedBox bounds(Ogre::Vector3(-halfSize*cellWorldSize, -halfSize*cellWorldSize, minZ),
+                                    Ogre::Vector3(halfSize*cellWorldSize, halfSize*cellWorldSize, maxZ));
+                convertBounds(bounds);
+                node->setBoundingBox(bounds);
+            }
             else
                 node->markAsDummy(); // no data available for this node, skip it
             return;
@@ -161,7 +161,7 @@ namespace Terrain
     {
         if (!mVisible)
             return;
-        mRootNode->update(cameraPos, mLoadingListener);
+        mRootNode->update(cameraPos);
         mRootNode->updateIndexBuffers();
     }
 
@@ -173,11 +173,7 @@ namespace Terrain
                 || center.y < mMinY)
             return Ogre::AxisAlignedBox::BOX_NULL;
         QuadTreeNode* node = findNode(center, mRootNode);
-        Ogre::AxisAlignedBox box = node->getBoundingBox();
-        float cellWorldSize = getStorage()->getCellWorldSize();
-        box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize,
-                       box.getMaximum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize);
-        return box;
+        return node->getWorldBoundingBox();
     }
 
     Ogre::HardwareVertexBufferSharedPtr World::getVertexBuffer(int numVertsOneSide)
@@ -414,5 +410,33 @@ namespace Terrain
         return mVisible;
     }
 
+    void World::convertPosition(float &x, float &y, float &z)
+    {
+        Terrain::convertPosition(mAlign, x, y, z);
+    }
+
+    void World::convertPosition(Ogre::Vector3 &pos)
+    {
+        convertPosition(pos.x, pos.y, pos.z);
+    }
+
+    void World::convertBounds(Ogre::AxisAlignedBox& bounds)
+    {
+        switch (mAlign)
+        {
+        case Align_XY:
+            return;
+        case Align_XZ:
+            convertPosition(bounds.getMinimum());
+            convertPosition(bounds.getMaximum());
+            // Because we changed sign of Z
+            std::swap(bounds.getMinimum().z, bounds.getMaximum().z);
+            return;
+        case Align_YZ:
+            convertPosition(bounds.getMinimum());
+            convertPosition(bounds.getMaximum());
+            return;
+        }
+    }
 
 }

@@ -1,9 +1,9 @@
 #ifndef COMPONENTS_TERRAIN_STORAGE_H
 #define COMPONENTS_TERRAIN_STORAGE_H
 
-#include <OgreAxisAlignedBox.h>
-
 #include <OgreHardwareVertexBuffer.h>
+
+#include "defs.hpp"
 
 namespace Terrain
 {
@@ -43,7 +43,7 @@ namespace Terrain
         /// @param vertexBuffer buffer to write vertices
         /// @param normalBuffer buffer to write vertex normals
         /// @param colourBuffer buffer to write vertex colours
-        virtual void fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center,
+        virtual void fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center, Terrain::Alignment align,
                                 Ogre::HardwareVertexBufferSharedPtr vertexBuffer,
                                 Ogre::HardwareVertexBufferSharedPtr normalBuffer,
                                 Ogre::HardwareVertexBufferSharedPtr colourBuffer) = 0;

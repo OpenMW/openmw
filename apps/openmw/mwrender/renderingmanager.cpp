@@ -1043,15 +1043,12 @@ void RenderingManager::enableTerrain(bool enable)
     {
         if (!mTerrain)
         {
-            Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-            Loading::ScopedLoad load(listener);
-            mTerrain = new Terrain::World(listener, mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+            mTerrain = new Terrain::World(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                             Settings::Manager::getBool("distant land", "Terrain"),
-                                            Settings::Manager::getBool("shader", "Terrain"));
+                                            Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));
             mTerrain->update(mRendering.getCamera()->getRealPosition());
-            mTerrain->setLoadingListener(NULL);
         }
         mTerrain->setVisible(true);
     }

@@ -235,7 +235,6 @@ namespace Terrain
 
 
                     sh::MaterialInstancePass* p = material->createPass ();
-
                     p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
                     p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
                     if (layerOffset != 0)

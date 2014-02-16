@@ -36,7 +36,7 @@ namespace MWRender
         /// @param vertexBuffer buffer to write vertices
         /// @param normalBuffer buffer to write vertex normals
         /// @param colourBuffer buffer to write vertex colours
-        virtual void fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center,
+        virtual void fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center, Terrain::Alignment align,
                                 Ogre::HardwareVertexBufferSharedPtr vertexBuffer,
                                 Ogre::HardwareVertexBufferSharedPtr normalBuffer,
                                 Ogre::HardwareVertexBufferSharedPtr colourBuffer);
