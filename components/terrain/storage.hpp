@@ -24,7 +24,7 @@ namespace Terrain
 
     public:
         /// Get bounds of the whole terrain in cell units
-        virtual Ogre::AxisAlignedBox getBounds() = 0;
+        virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) = 0;
 
         /// Get the minimum and maximum heights of a terrain chunk.
         /// @note Should only be called for chunks <= 1 cell, i.e. leafs of the quad tree.
