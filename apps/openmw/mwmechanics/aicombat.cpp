@@ -13,7 +13,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 
-#include "npcstats.hpp"
+#include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
 #include "character.hpp" // fixme: for getActiveWeapon
@@ -138,11 +138,11 @@ namespace MWMechanics
         {
             MWMechanics::DrawState_ state = actor.getClass().getCreatureStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                actor.getClass().getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
+                actor.getClass().getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
 
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot = 
-                MWMechanics::getActiveWeapon(cls.getNpcStats(actor), cls.getInventoryStore(actor), &weaptype);
+                MWMechanics::getActiveWeapon(cls.getCreatureStats(actor), cls.getInventoryStore(actor), &weaptype);
             if (weaptype == WeapType_HandToHand)
             {
                 const MWWorld::Store<ESM::GameSetting> &gmst = 
