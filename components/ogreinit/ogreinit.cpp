@@ -133,7 +133,7 @@ namespace OgreInit
             pluginDir = OGRE_PLUGIN_DIR;
             // if path is not specified try to find plugins inside the app bundle
             if (pluginDir.empty())
-                pluginDir = Ogre::macPluginPath();
+                pluginDir = Ogre::macFrameworksPath();
     #endif
     #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
             pluginDir = OGRE_PLUGIN_DIR_REL;
