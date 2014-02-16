@@ -13,6 +13,7 @@ namespace ESM
     {
         T mBase;
         T mMod;
+        T mCurrent;
         T mDamage;
         float mProgress;
 
@@ -23,13 +24,15 @@ namespace ESM
     };
 
     template<typename T>
-    StatState<T>::StatState() : mBase (0), mMod (0), mDamage (0), mProgress (0) {}
+    StatState<T>::StatState() : mBase (0), mMod (0), mCurrent (0), mDamage (0), mProgress (0) {}
 
     template<typename T>
     void StatState<T>::load (ESMReader &esm)
     {
         esm.getHNT (mBase, "STBA");
         esm.getHNT (mMod, "STMO");
+        mCurrent = 0;
+        esm.getHNOT (mCurrent, "STCU");
         mDamage = 0;
         esm.getHNOT (mDamage, "STDA");
         mProgress = 0;
@@ -41,6 +44,9 @@ namespace ESM
     {
         esm.writeHNT ("STBA", mBase);
         esm.writeHNT ("STMO", mMod);
+
+        if (mCurrent)
+            esm.writeHNT ("STCU", mCurrent);
 
         if (mDamage)
             esm.writeHNT ("STDA", mDamage);

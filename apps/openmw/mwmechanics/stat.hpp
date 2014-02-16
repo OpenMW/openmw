@@ -88,6 +88,18 @@ namespace MWMechanics
             {
                 mModified = mBase + modifier;
             }
+
+            void writeState (ESM::StatState<T>& state) const
+            {
+                state.mBase = mBase;
+                state.mMod = mModified;
+            }
+
+            void readState (const ESM::StatState<T>& state)
+            {
+                mBase = state.mBase;
+                mModified = state.mMod;
+            }
     };
 
     template<typename T>
@@ -191,6 +203,18 @@ namespace MWMechanics
                 T diff =  modifier - mStatic.getModifier();
                 mStatic.setModifier (modifier);
                 setCurrent (getCurrent()+diff);
+            }
+
+            void writeState (ESM::StatState<T>& state) const
+            {
+                mStatic.writeState (state);
+                state.mCurrent = mCurrent;
+            }
+
+            void readState (const ESM::StatState<T>& state)
+            {
+                mStatic.readState (state);
+                mCurrent = state.mCurrent;
             }
     };
 

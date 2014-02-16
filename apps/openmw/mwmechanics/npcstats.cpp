@@ -437,7 +437,6 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     {
         mSkill[i].writeState (state.mSkills[i].mRegular);
         mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
-        state.mSkills[i].mIncrease = mSkillIncreases[i];
     }
 
     state.mBounty = mBounty;
@@ -455,6 +454,9 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     state.mProfit = mProfit;
     state.mAttackStrength = mAttackStrength;
     state.mLevelProgress = mLevelProgress;
+
+    for (int i=0; i<8; ++i)
+        state.mSkillIncrease[i] = mSkillIncreases[i];
 
     std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
 
@@ -484,7 +486,6 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
     {
         mSkill[i].readState (state.mSkills[i].mRegular);
         mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
-        mSkillIncreases[i] = state.mSkills[i].mIncrease;
     }
 
     mBounty = state.mBounty;
@@ -493,6 +494,9 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
     mProfit = state.mProfit;
     mAttackStrength = state.mAttackStrength;
     mLevelProgress = state.mLevelProgress;
+
+    for (int i=0; i<8; ++i)
+        mSkillIncreases[i] = state.mSkillIncrease[i];
 
     std::copy (state.mUsedIds.begin(), state.mUsedIds.end(), std::inserter (mUsedIds, mUsedIds.begin()));
 
