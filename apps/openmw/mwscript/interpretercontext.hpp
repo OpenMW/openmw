@@ -37,6 +37,12 @@ namespace MWScript
 
             const MWWorld::Ptr getReference (const std::string& id, bool activeOnly, bool doThrow=true) const;
 
+            const Locals& getMemberLocals (std::string& id, bool global) const;
+            ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
+
+            Locals& getMemberLocals (std::string& id, bool global);
+            ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
+
         public:
 
             InterpreterContext (MWScript::Locals *locals, MWWorld::Ptr reference);
@@ -75,35 +81,35 @@ namespace MWScript
             virtual void setGlobalLong (const std::string& name, int value);
 
             virtual void setGlobalFloat (const std::string& name, float value);
-            
+
             virtual std::vector<std::string> getGlobals () const;
 
             virtual char getGlobalType (const std::string& name) const;
-            
+
             virtual std::string getActionBinding(const std::string& action) const;
-            
+
             virtual std::string getNPCName() const;
-            
+
             virtual std::string getNPCRace() const;
-            
+
             virtual std::string getNPCClass() const;
-            
+
             virtual std::string getNPCFaction() const;
 
             virtual std::string getNPCRank() const;
-            
+
             virtual std::string getPCName() const;
-            
+
             virtual std::string getPCRace() const;
-            
+
             virtual std::string getPCClass() const;
-            
+
             virtual std::string getPCRank() const;
-            
+
             virtual std::string getPCNextRank() const;
-            
+
             virtual int getPCBounty() const;
-            
+
             virtual std::string getCurrentCellName() const;
 
             virtual bool isScriptRunning (const std::string& name) const;
@@ -138,17 +144,17 @@ namespace MWScript
 
             virtual void disable (const std::string& id = "");
 
-            virtual int getMemberShort (const std::string& id, const std::string& name) const;
+            virtual int getMemberShort (const std::string& id, const std::string& name, bool global) const;
 
-            virtual int getMemberLong (const std::string& id, const std::string& name) const;
+            virtual int getMemberLong (const std::string& id, const std::string& name, bool global) const;
 
-            virtual float getMemberFloat (const std::string& id, const std::string& name) const;
+            virtual float getMemberFloat (const std::string& id, const std::string& name, bool global) const;
 
-            virtual void setMemberShort (const std::string& id, const std::string& name, int value);
+            virtual void setMemberShort (const std::string& id, const std::string& name, int value, bool global);
 
-            virtual void setMemberLong (const std::string& id, const std::string& name, int value);
+            virtual void setMemberLong (const std::string& id, const std::string& name, int value, bool global);
 
-            virtual void setMemberFloat (const std::string& id, const std::string& name, float value);
+            virtual void setMemberFloat (const std::string& id, const std::string& name, float value, bool global);
 
             MWWorld::Ptr getReference(bool required=true);
             ///< Reference, that the script is running from (can be empty)

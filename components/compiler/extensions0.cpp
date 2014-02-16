@@ -41,7 +41,7 @@ namespace Compiler
                 opcodeAiEscortCellExplicit);
             extensions.registerInstruction ("aiwander", "fff/llllllllll", opcodeAiWander,
                 opcodeAiWanderExplicit);
-            extensions.registerInstruction ("aifollow", "cffff/l", opcodeAiFollow,
+            extensions.registerInstruction ("aifollow", "cffff/llllllll", opcodeAiFollow,
                 opcodeAiFollowExplicit);
             extensions.registerInstruction ("aifollowcell", "ccffff/l", opcodeAiFollowCell,
                 opcodeAiFollowCellExplicit);
@@ -62,7 +62,7 @@ namespace Compiler
             extensions.registerInstruction ("toggleai", "", opcodeToggleAI, opcodeToggleAI);
             extensions.registerInstruction ("tai", "", opcodeToggleAI, opcodeToggleAI);
             extensions.registerInstruction("startcombat", "c", opcodeStartCombat, opcodeStartCombatExplicit);
-            extensions.registerInstruction("stopcombat", "", opcodeStopCombat, opcodeStopCombatExplicit);
+            extensions.registerInstruction("stopcombat", "x", opcodeStopCombat, opcodeStopCombatExplicit);
             extensions.registerFunction ("gethello", 'l', "", opcodeGetHello, opcodeGetHelloExplicit);
             extensions.registerFunction ("getfight", 'l', "", opcodeGetFight, opcodeGetFightExplicit);
             extensions.registerFunction ("getflee", 'l', "", opcodeGetFlee, opcodeGetFleeExplicit);
@@ -190,7 +190,7 @@ namespace Compiler
             extensions.registerInstruction ("enableclassmenu", "", opcodeEnableClassMenu);
             extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
             extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
-            extensions.registerInstruction ("enablestatreviewmenu", "", 
+            extensions.registerInstruction ("enablestatreviewmenu", "",
                 opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);
@@ -253,7 +253,7 @@ namespace Compiler
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "S", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
-            extensions.registerInstruction ("removesoulgem", "c", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
+            extensions.registerInstruction ("removesoulgem", "c/l", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
             extensions.registerInstruction ("drop", "cl", opcodeDrop, opcodeDropExplicit);
             extensions.registerInstruction ("dropsoulgem", "c", opcodeDropSoulGem, opcodeDropSoulGemExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
@@ -276,6 +276,8 @@ namespace Compiler
             extensions.registerInstruction("togglegodmode", "", opcodeToggleGodMode);
             extensions.registerInstruction ("disablelevitation", "", opcodeDisableLevitation);
             extensions.registerInstruction ("enablelevitation", "", opcodeEnableLevitation);
+            extensions.registerFunction ("getpcinjail", 'l', "", opcodeGetPcInJail);
+            extensions.registerFunction ("getpctraveling", 'l', "", opcodeGetPcTraveling);
         }
     }
 
@@ -396,7 +398,7 @@ namespace Compiler
             extensions.registerInstruction ("setpccrimelevel", "f", opcodeSetPCCrimeLevel);
             extensions.registerInstruction ("modpccrimelevel", "f", opcodeModPCCrimeLevel);
 
-            extensions.registerInstruction ("addspell", "c", opcodeAddSpell, opcodeAddSpellExplicit);
+            extensions.registerInstruction ("addspell", "cx", opcodeAddSpell, opcodeAddSpellExplicit);
             extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
                 opcodeRemoveSpellExplicit);
             extensions.registerInstruction ("removespelleffects", "c", opcodeRemoveSpellEffects,

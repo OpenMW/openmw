@@ -67,7 +67,13 @@ Allowed options:
   --script-run arg                      select a file containing a list of
                                         console commands that is executed on
                                         startup
-  --new-game [=arg(=1)] (=0)            activate char gen/new game mechanics
+   --script-warn [=arg(=1)] (=1)        handling of warnings when compiling
+                                        scripts
+                                        0 - ignore warning
+                                        1 - show warning but consider script as
+                                        correctly compiled anyway
+                                        2 - treat warnings as errors
+  --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
   --fs-strict [=arg(=1)] (=0)           strict file system handling (no case
                                         folding)
   --encoding arg (=win1252)             Character encoding used in OpenMW game

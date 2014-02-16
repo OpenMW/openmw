@@ -7,6 +7,8 @@
 #include <ostream>
 #include <iterator>
 
+#include <components/misc/stringops.hpp>
+
 namespace Compiler
 {
     const std::vector<std::string>& Locals::get (char type) const
@@ -97,7 +99,7 @@ namespace Compiler
 
     void Locals::declare (char type, const std::string& name)
     {
-        get (type).push_back (name);
+        get (type).push_back (Misc::StringUtils::lowerCase (name));
     }
 
     void Locals::clear()

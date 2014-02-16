@@ -8,13 +8,13 @@ namespace Compiler
     // \brief Skip parser for skipping a line
     //
     // This parser is mainly intended for skipping the rest of a faulty line.
-    
+
     class SkipParser : public Parser
     {
         public:
-           
-            SkipParser (ErrorHandler& errorHandler, Context& context);
-    
+
+            SkipParser (ErrorHandler& errorHandler, const Context& context);
+
             virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
             ///< Handle an int token.
             /// \return fetch another token?

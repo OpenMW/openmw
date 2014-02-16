@@ -74,6 +74,7 @@ namespace OMW
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
+            int mWarningsMode;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
             bool mScriptConsoleMode;
@@ -180,6 +181,8 @@ namespace OMW
 
             /// Override the game setting specified activation distance.
             void setActivationDistanceOverride (int distance);
+
+            void setWarningsMode (int mode);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

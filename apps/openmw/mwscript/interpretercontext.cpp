@@ -54,6 +54,47 @@ namespace MWScript
         }
     }
 
+    const Locals& InterpreterContext::getMemberLocals (std::string& id, bool global)
+        const
+    {
+        if (global)
+        {
+            return MWBase::Environment::get().getScriptManager()->getGlobalScripts().
+                getLocals (id);
+        }
+        else
+        {
+            const MWWorld::Ptr ptr = getReference (id, false);
+
+             id = MWWorld::Class::get (ptr).getScript (ptr);
+
+            ptr.getRefData().setLocals (
+                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
+
+            return ptr.getRefData().getLocals();
+        }
+    }
+
+    Locals& InterpreterContext::getMemberLocals (std::string& id, bool global)
+    {
+        if (global)
+        {
+            return MWBase::Environment::get().getScriptManager()->getGlobalScripts().
+                getLocals (id);
+        }
+        else
+        {
+            const MWWorld::Ptr ptr = getReference (id, false);
+
+            id = MWWorld::Class::get (ptr).getScript (ptr);
+
+            ptr.getRefData().setLocals (
+                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
+
+            return ptr.getRefData().getLocals();
+        }
+    }
+
     InterpreterContext::InterpreterContext (
         MWScript::Locals *locals, MWWorld::Ptr reference)
     : mLocals (locals), mReference (reference),
@@ -407,82 +448,80 @@ namespace MWScript
         MWBase::Environment::get().getWorld()->disable (ref);
     }
 
-    int InterpreterContext::getMemberShort (const std::string& id, const std::string& name) const
+    int InterpreterContext::getMemberShort (const std::string& id, const std::string& name,
+        bool global) const
     {
-        const MWWorld::Ptr ptr = getReference (id, false);
+        std::string scriptId (id);
 
-        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+        const Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (
+            scriptId, name, 's');
 
-        ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
-        return ptr.getRefData().getLocals().mShorts[index];
+        return locals.mShorts[index];
     }
 
-    int InterpreterContext::getMemberLong (const std::string& id, const std::string& name) const
+    int InterpreterContext::getMemberLong (const std::string& id, const std::string& name,
+        bool global) const
     {
-        const MWWorld::Ptr ptr = getReference (id, false);
+        std::string scriptId (id);
 
-        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+        const Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (
+            scriptId, name, 'l');
 
-        ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
-        return ptr.getRefData().getLocals().mLongs[index];
+        return locals.mLongs[index];
     }
 
-    float InterpreterContext::getMemberFloat (const std::string& id, const std::string& name) const
+    float InterpreterContext::getMemberFloat (const std::string& id, const std::string& name,
+        bool global) const
     {
-        const MWWorld::Ptr ptr = getReference (id, false);
+        std::string scriptId (id);
 
-        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+        const Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (
+            scriptId, name, 'f');
 
-        ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
-        return ptr.getRefData().getLocals().mFloats[index];
+        return locals.mFloats[index];
     }
 
-    void InterpreterContext::setMemberShort (const std::string& id, const std::string& name, int value)
+    void InterpreterContext::setMemberShort (const std::string& id, const std::string& name,
+        int value, bool global)
     {
-        const MWWorld::Ptr ptr = getReference (id, false);
+        std::string scriptId (id);
 
-        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+        Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
+        int index =
+            MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
 
-        ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
-        ptr.getRefData().getLocals().mShorts[index] = value;
+        locals.mShorts[index] = value;
     }
 
-    void InterpreterContext::setMemberLong (const std::string& id, const std::string& name, int value)
+    void InterpreterContext::setMemberLong (const std::string& id, const std::string& name, int value, bool global)
     {
-        const MWWorld::Ptr ptr = getReference (id, false);
+        std::string scriptId (id);
 
-        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+        Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
+        int index =
+            MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
 
-        ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
-        ptr.getRefData().getLocals().mLongs[index] = value;
+        locals.mLongs[index] = value;
     }
 
-    void InterpreterContext::setMemberFloat (const std::string& id, const std::string& name, float value)
+    void InterpreterContext::setMemberFloat (const std::string& id, const std::string& name, float value, bool global)
     {
-        const MWWorld::Ptr ptr = getReference (id, false);
+        std::string scriptId (id);
 
-        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+        Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
+        int index =
+            MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
 
-        ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
-        ptr.getRefData().getLocals().mFloats[index] = value;
+        locals.mFloats[index] = value;
     }
 
     MWWorld::Ptr InterpreterContext::getReference(bool required)

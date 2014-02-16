@@ -136,6 +136,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-run", bpo::value<std::string>()->default_value(""),
             "select a file containing a list of console commands that is executed on startup")
 
+        ("script-warn", bpo::value<int>()->implicit_value (1)
+            ->default_value (1),
+            "handling of warnings when compiling scripts\n"
+            "\t0 - ignore warning\n"
+            "\t1 - show warning but consider script as correctly compiled anyway\n"
+            "\t2 - treat warnings as errors")
+
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
 
@@ -241,6 +248,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
+    engine.setWarningsMode (variables["script-warn"].as<int>());
 
     return true;
 }

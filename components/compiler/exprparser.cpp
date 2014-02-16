@@ -7,6 +7,8 @@
 #include <stack>
 #include <iterator>
 
+#include <components/misc/stringops.hpp>
+
 #include "generator.hpp"
 #include "scanner.hpp"
 #include "errorhandler.hpp"
@@ -14,7 +16,6 @@
 #include "stringparser.hpp"
 #include "extensions.hpp"
 #include "context.hpp"
-#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
@@ -203,21 +204,22 @@ namespace Compiler
         std::string name2 = Misc::StringUtils::lowerCase (name);
         std::string id = Misc::StringUtils::lowerCase (mExplicit);
 
-        char type = getContext().getMemberType (name2, id);
+        std::pair<char, bool> type = getContext().getMemberType (name2, id);
 
-        if (type!=' ')
+        if (type.first!=' ')
         {
-            Generator::fetchMember (mCode, mLiterals, type, name2, id);
+            Generator::fetchMember (mCode, mLiterals, type.first, name2, id, !type.second);
+
             mNextOperand = false;
             mExplicit.clear();
-            mOperands.push_back (type=='f' ? 'f' : 'l');
+            mOperands.push_back (type.first=='f' ? 'f' : 'l');
             return true;
         }
 
         return false;
     }
 
-    ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+    ExprParser::ExprParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
         Literals& literals, bool argument)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
       mNextOperand (true), mFirst (true), mArgument (argument), mRefOp (false), mMemberOp (false)
@@ -308,6 +310,22 @@ namespace Compiler
                 return true;
             }
 
+            // die in a fire, Morrowind script compiler!
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                if (getContext().isJournalId (name2))
+                {
+                    // JournalID used as an argument. Use the index of that JournalID
+                    Generator::pushString (mCode, mLiterals, name2);
+                    int keyword = extensions->searchKeyword ("getjournalindex");
+                    extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit, 0);
+                    mNextOperand = false;
+                    mOperands.push_back ('l');
+
+                    return 2;
+                }
+            }
+
             if (mExplicit.empty() && getContext().isId (name2))
             {
                 mExplicit = name2;
@@ -326,6 +344,31 @@ namespace Compiler
 
     bool ExprParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (const Extensions *extensions = getContext().getExtensions())
+        {
+            std::string argumentType; // ignored
+            bool hasExplicit = false; // ignored
+            if (extensions->isInstruction (keyword, argumentType, hasExplicit))
+            {
+                // pretend this is not a keyword
+                return parseName (loc.mLiteral, loc, scanner);
+            }
+        }
+
+        if (keyword==Scanner::K_end || keyword==Scanner::K_begin ||
+            keyword==Scanner::K_short || keyword==Scanner::K_long ||
+            keyword==Scanner::K_float || keyword==Scanner::K_if ||
+            keyword==Scanner::K_endif || keyword==Scanner::K_else ||
+            keyword==Scanner::K_elseif || keyword==Scanner::K_while ||
+            keyword==Scanner::K_endwhile || keyword==Scanner::K_return ||
+            keyword==Scanner::K_messagebox || keyword==Scanner::K_set ||
+            keyword==Scanner::K_to || keyword==Scanner::K_startscript ||
+            keyword==Scanner::K_stopscript || keyword==Scanner::K_enable ||
+            keyword==Scanner::K_disable)
+        {
+            return parseName (loc.mLiteral, loc, scanner);
+        }
+
         mFirst = false;
 
         if (!mExplicit.empty())
@@ -368,8 +411,15 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
 
-                    if (extensions->isFunction (keyword, returnType, argumentType, true))
+                    bool hasExplicit = true;
+                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
                     {
+                        if (!hasExplicit)
+                        {
+                            getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+                            mExplicit.clear();
+                        }
+
                         start();
 
                         mTokenLoc = loc;
@@ -490,7 +540,9 @@ namespace Compiler
                     char returnType;
                     std::string argumentType;
 
-                    if (extensions->isFunction (keyword, returnType, argumentType, false))
+                    bool hasExplicit = false;
+
+                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
                     {
                         mTokenLoc = loc;
                         int optionals = parseArguments (argumentType, scanner);
@@ -518,6 +570,14 @@ namespace Compiler
     {
         if (!mExplicit.empty())
         {
+            if (mRefOp && code==Scanner::S_open)
+            {
+                /// \todo add option to disable this workaround
+                mOperators.push_back ('(');
+                mTokenLoc = loc;
+                return true;
+            }
+
             if (!mRefOp && code==Scanner::S_ref)
             {
                 mRefOp = true;
@@ -687,11 +747,11 @@ namespace Compiler
             {
                 optional = true;
             }
-            else if (*iter=='S' || *iter=='c')
+            else if (*iter=='S' || *iter=='c' || *iter=='x')
             {
                 stringParser.reset();
 
-                if (optional)
+                if (optional || *iter=='x')
                     stringParser.setOptional (true);
 
                 if (*iter=='c') stringParser.smashCase();
@@ -700,18 +760,21 @@ namespace Compiler
                 if (optional && stringParser.isEmpty())
                     break;
 
-                if (invert)
+                if (*iter!='x')
                 {
-                    std::vector<Interpreter::Type_Code> tmp;
-                    stringParser.append (tmp);
+                    if (invert)
+                    {
+                        std::vector<Interpreter::Type_Code> tmp;
+                        stringParser.append (tmp);
 
-                    stack.push (tmp);
+                        stack.push (tmp);
+                    }
+                    else
+                        stringParser.append (code);
+
+                    if (optional)
+                        ++optionalCount;
                 }
-                else
-                    stringParser.append (code);
-
-                if (optional)
-                    ++optionalCount;
             }
             else
             {
