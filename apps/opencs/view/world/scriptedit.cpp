@@ -5,8 +5,9 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
-CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent) :
-    QTextEdit (parent)
+CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& document) :
+    QTextEdit (parent),
+    mDocument (document)
 {
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
                   <<CSMWorld::UniversalId::Type_Global
@@ -55,13 +56,16 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
 
     setTextCursor (cursorForPosition (event->pos()));
 
-    std::vector<CSMWorld::UniversalId> records (mime->getData());
-
-    for (std::vector<CSMWorld::UniversalId>::iterator it = records.begin(); it != records.end(); ++it)
+    if (mime->fromDocument (mDocument))
     {
-        if (mAllowedTypes.contains (it->getType()))
+        std::vector<CSMWorld::UniversalId> records (mime->getData());
+
+        for (std::vector<CSMWorld::UniversalId>::iterator it = records.begin(); it != records.end(); ++it)
         {
-            QString::fromStdString ('"' + it->getId() + '"');
+            if (mAllowedTypes.contains (it->getType()))
+            {
+                QString::fromStdString ('"' + it->getId() + '"');
+            }
         }
     }
 }

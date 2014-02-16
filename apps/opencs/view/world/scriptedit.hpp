@@ -8,16 +8,22 @@
 
 class QWidget;
 
+namespace CSMDoc
+{
+    class Document;
+}
+
 namespace CSVWorld
 {
     class ScriptEdit : public QTextEdit
     {
             Q_OBJECT
         public:
-            ScriptEdit (QWidget* parent);
+            ScriptEdit (QWidget* parent, const CSMDoc::Document& document);
 
         private:
             QVector<CSMWorld::UniversalId::Type> mAllowedTypes;
+            const CSMDoc::Document& mDocument;
 
             void dragEnterEvent (QDragEnterEvent* event);
 
