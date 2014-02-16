@@ -83,6 +83,6 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id)
 {
     QString string(QString::fromStdString(id)); //<regex> is only for c++11, so let's use qregexp for now.
     //I'm not quite sure when do we need to put quotes. To be safe we will use quotes for anything other than…
-    QRegExp regexp("^[a-z]{1}[a-z|0-9]{0,}$", Qt::CaseInsensitive);
+    QRegExp regexp("^[a-z]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive);
     return !(string.contains(regexp));
 }
