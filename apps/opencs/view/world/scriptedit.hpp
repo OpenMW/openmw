@@ -30,6 +30,8 @@ namespace CSVWorld
             void dropEvent (QDropEvent* event);
 
             void dragMoveEvent (QDragMoveEvent* event);
+
+            bool stringNeedsQuote(const std::string& id);
     };
 }
 #endif // SCRIPTEDIT_H

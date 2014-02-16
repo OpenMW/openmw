@@ -1,6 +1,10 @@
 #include "scriptedit.hpp"
 
+#include <algorithm>
+
 #include <QDragEnterEvent>
+#include <QRegExp>
+#include <QString>
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
@@ -64,8 +68,21 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
         {
             if (mAllowedTypes.contains (it->getType()))
             {
-                QString::fromStdString ('"' + it->getId() + '"');
+                if (stringNeedsQuote(it->getId()))
+                {
+                    insertPlainText(QString::fromStdString ('"' + it->getId() + '"'));
+                } else {
+                    insertPlainText(QString::fromStdString (it->getId()));
+                }
             }
         }
     }
+}
+
+bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id)
+{
+    QString string(QString::fromStdString(id)); //<regex> is only for c++11, so let's use qregexp for now.
+    //I'm not quite sure when do we need to put quotes. To be safe we will use quotes for anything other than…
+    QRegExp regexp("^[a-z]{1}[a-z|0-9]{0,}$", Qt::CaseInsensitive);
+    return !(string.contains(regexp));
 }
