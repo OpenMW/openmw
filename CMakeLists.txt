@@ -252,7 +252,6 @@ link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MY
 if (APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
-                          ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
 
     # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
