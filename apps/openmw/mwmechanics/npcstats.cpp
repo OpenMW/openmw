@@ -467,18 +467,21 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
 
 void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
 {
+    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
     for (std::map<std::string, ESM::NpcStats::Faction>::const_iterator iter (state.mFactions.begin());
         iter!=state.mFactions.end(); ++iter)
-    {
-        if (iter->second.mExpelled)
-            mExpelled.insert (iter->first);
+        if (store.get<ESM::Faction>().search (iter->first))
+        {
+            if (iter->second.mExpelled)
+                mExpelled.insert (iter->first);
 
-        if (iter->second.mRank)
-            mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
+            if (iter->second.mRank)
+                mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
 
-        if (iter->second.mReputation)
-            mFactionReputation.insert (std::make_pair (iter->first, iter->second.mReputation));
-    }
+            if (iter->second.mReputation)
+                mFactionReputation.insert (std::make_pair (iter->first, iter->second.mReputation));
+        }
 
     mDisposition = state.mDisposition;
 
@@ -498,7 +501,10 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
     for (int i=0; i<8; ++i)
         mSkillIncreases[i] = state.mSkillIncrease[i];
 
-    std::copy (state.mUsedIds.begin(), state.mUsedIds.end(), std::inserter (mUsedIds, mUsedIds.begin()));
+    for (std::vector<std::string>::const_iterator iter (state.mUsedIds.begin());
+        iter!=state.mUsedIds.end(); ++iter)
+        if (store.find (*iter))
+            mUsedIds.insert (*iter);
 
     mTimeToStartDrowning = state.mTimeToStartDrowning;
     mLastDrowningHit = state.mLastDrowningHit;
