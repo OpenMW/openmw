@@ -86,7 +86,6 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
         movement.mPosition[1] = 0;
         MWWorld::Ptr target = world->getPtr(mObjectId,false);
         MWWorld::Class::get(target).activate(target,actor).get()->execute(actor);
-        std::cout << "activated";
         return true;
     }
 
@@ -95,7 +94,6 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
         movement.mPosition[1] = 0;
         MWWorld::Ptr target = world->getPtr(mObjectId,false);
         MWWorld::Class::get(target).activate(target,actor).get()->execute(actor);
-        std::cout << "activated";
         return true;
     }
 
