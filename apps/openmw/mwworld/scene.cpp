@@ -162,8 +162,6 @@ namespace MWWorld
             mRendering.cellAdded (cell);
 
             mRendering.configureAmbient(*cell);
-            mRendering.requestMap(cell);
-            mRendering.configureAmbient(*cell);
         }
 
         // register local scripts
@@ -198,6 +196,9 @@ namespace MWWorld
         mechMgr->watchActor(player);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
+
+        for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
+            mRendering.requestMap(*active);
     }
 
     void Scene::changeToVoid()
