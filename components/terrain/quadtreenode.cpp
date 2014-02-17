@@ -225,7 +225,7 @@ void QuadTreeNode::initAabb()
                 break;
             case Terrain::Align_XZ:
                 minH = mBounds.getMinimum().y;
-                maxH = mBounds.getMinimum().y;
+                maxH = mBounds.getMaximum().y;
                 break;
             case Terrain::Align_YZ:
                 minH = mBounds.getMinimum().x;
