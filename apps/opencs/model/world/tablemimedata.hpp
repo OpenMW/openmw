@@ -10,6 +10,10 @@
 #include "universalid.hpp"
 #include "columnbase.hpp"
 
+namespace CSMDoc
+{
+    class Document;
+}
 
 namespace CSMWorld
 {
@@ -24,20 +28,32 @@ namespace CSMWorld
     class TableMimeData : public QMimeData
     {
         public:
-            TableMimeData(UniversalId id);
-            TableMimeData(std::vector<UniversalId>& id);
+            TableMimeData(UniversalId id, const CSMDoc::Document& document);
+
+            TableMimeData(std::vector<UniversalId>& id, const CSMDoc::Document& document);
+
             ~TableMimeData();
+
             virtual QStringList formats() const;
+
             std::string getIcon() const;
+
             std::vector<UniversalId> getData() const;
+
             bool holdsType(UniversalId::Type type) const;
+
             bool holdsType(CSMWorld::ColumnBase::Display type) const;
+
+            bool fromDocument(const CSMDoc::Document& document) const;
+
             UniversalId returnMatching(UniversalId::Type type) const;
+
             UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
 
         private:
             std::vector<UniversalId> mUniversalId;
             QStringList mObjectsFormats;
+            const CSMDoc::Document& mDocument;
 
             CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type) const;
     };

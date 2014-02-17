@@ -9,6 +9,10 @@
 
 #include "../../model/filter/node.hpp"
 
+namespace CSMDoc {
+    class Document;
+}
+
 class QUndoStack;
 class QAction;
 
@@ -43,6 +47,10 @@ namespace CSVWorld
             bool mEditLock;
             int mRecordStatusDisplay;
 
+            /// \brief This variable is used exclusivly for checking if dropEvents came from the same document. Most likely you
+            /// should NOT use it for anything else.
+            const CSMDoc::Document& mDocument;
+
         private:
 
             void contextMenuEvent (QContextMenuEvent *event);
@@ -62,7 +70,9 @@ namespace CSVWorld
 
         public:
 
-            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete, bool sorting);
+            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete,
+                   bool sorting, const CSMDoc::Document& document);
+
             ///< \param createAndDelete Allow creation and deletion of records.
             /// \param sorting Allow changing order of rows in the view via column headers.
 
