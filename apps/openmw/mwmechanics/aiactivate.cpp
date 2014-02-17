@@ -8,6 +8,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 
+#include "steering.hpp"
+
 namespace
 {
     float sgn(float a)
@@ -98,8 +100,8 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     }
 
     float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-    // TODO: use movement settings instead of rotating directly
-    world->rotateObject(actor, 0, 0, zAngle, false);
+    zTurn(actor, Ogre::Degree(zAngle));
+    MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
     movement.mPosition[1] = 1;
 
     return false;
