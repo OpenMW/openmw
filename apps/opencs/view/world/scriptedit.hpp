@@ -7,6 +7,7 @@
 #include "../../model/world/universalid.hpp"
 
 class QWidget;
+class QRegExp;
 
 namespace CSMDoc
 {
@@ -24,6 +25,7 @@ namespace CSVWorld
         private:
             QVector<CSMWorld::UniversalId::Type> mAllowedTypes;
             const CSMDoc::Document& mDocument;
+            const QRegExp mWhiteListQoutes;
 
             void dragEnterEvent (QDragEnterEvent* event);
 
@@ -31,7 +33,7 @@ namespace CSVWorld
 
             void dragMoveEvent (QDragMoveEvent* event);
 
-            bool stringNeedsQuote(const std::string& id);
+            bool stringNeedsQuote(const std::string& id) const;
     };
 }
 #endif // SCRIPTEDIT_H

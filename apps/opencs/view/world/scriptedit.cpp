@@ -11,7 +11,8 @@
 
 CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& document) :
     QTextEdit (parent),
-    mDocument (document)
+    mDocument (document),
+    mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
                   <<CSMWorld::UniversalId::Type_Global
@@ -79,10 +80,9 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
     }
 }
 
-bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id)
+bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
 {
-    QString string(QString::fromStdString(id)); //<regex> is only for c++11, so let's use qregexp for now.
+    const QString string(QString::fromStdString(id)); //<regex> is only for c++11, so let's use qregexp for now.
     //I'm not quite sure when do we need to put quotes. To be safe we will use quotes for anything other than…
-    QRegExp regexp("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive);
-    return !(string.contains(regexp));
+    return !(string.contains(mWhiteListQoutes));
 }
