@@ -41,7 +41,11 @@ namespace Wizard
 
         void setIniCodec(QTextCodec *codec);
 
+        void setupSettings();
+
     private:
+
+        void writeSettings();
 
         bool getInstallComponent(Component component);
 
@@ -57,8 +61,6 @@ namespace Wizard
 
         bool moveFile(const QString &source, const QString &destination);
         bool moveDirectory(const QString &source, const QString &destination);
-
-        void setupSettings();
 
         bool extractCab(const QString &cabFile, const QString &outputDir);
         bool extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter);

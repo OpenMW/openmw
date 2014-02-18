@@ -110,6 +110,7 @@ void Wizard::InstallationPage::startInstallation()
 
         // Set the location of the Morrowind.ini to update
         mUnshield->setIniPath(mWizard->mInstallations[path]->iniPath);
+        mUnshield->setupSettings();
     }
 
     // Set the installation target path

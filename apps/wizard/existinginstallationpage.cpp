@@ -38,8 +38,7 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
     QString path(QDir::toNativeSeparators(info.absolutePath()));
     QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);
 
-    if (items.isEmpty())
-    {
+    if (items.isEmpty()) {
         // Path is not yet in the list, add it
         mWizard->addInstallation(path);
 

@@ -21,11 +21,6 @@ void Wizard::InstallationTargetPage::initializePage()
     QString path(QFile::decodeName(mCfgMgr.getUserDataPath().string().c_str()));
     path.append(QDir::separator() + QLatin1String("data"));
 
-    if (!QFile::exists(path)) {
-        QDir dir;
-        dir.mkpath(path);
-    }
-
     QDir dir(path);
     targetLineEdit->setText(QDir::toNativeSeparators(dir.absolutePath()));
 }
@@ -35,6 +30,13 @@ bool Wizard::InstallationTargetPage::validatePage()
     QString path(field("installation.path").toString());
 
     qDebug() << "Validating path: " << path;
+
+    // TODO: Check writeability
+    if (!QFile::exists(path)) {
+        QDir dir;
+        dir.mkpath(path);
+        return true;
+    }
 
     if (mWizard->findFiles(QLatin1String("Morrowind"), path)) {
         QMessageBox msgBox;

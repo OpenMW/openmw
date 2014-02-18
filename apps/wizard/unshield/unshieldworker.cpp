@@ -43,7 +43,6 @@ Wizard::UnshieldWorker::UnshieldWorker(QObject *parent) :
 
 Wizard::UnshieldWorker::~UnshieldWorker()
 {
-
 }
 
 void Wizard::UnshieldWorker::setInstallComponent(Wizard::Component component, bool install)
@@ -196,6 +195,29 @@ void Wizard::UnshieldWorker::setupSettings()
     stream.setCodec(mIniCodec);
 
     mIniSettings.readFile(stream);
+}
+
+void Wizard::UnshieldWorker::writeSettings()
+{
+    if (getIniPath().isEmpty())
+        return;
+
+    QFile file(getIniPath());
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        qDebug() << "Error opening .ini file!";
+        emit error(tr("Failed to open Morrowind configuration file!"),
+                   tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
+        return;
+    }
+
+    QTextStream stream(&file);
+    stream.setCodec(mIniCodec);
+
+    if (!mIniSettings.writeFile(getIniPath(), stream)) {
+         emit error(tr("Failed to write Morrowind configuration file!"),
+                    tr("Writing to %1 failed: %2.").arg(getIniPath(), file.errorString()));
+    }
 }
 
 bool Wizard::UnshieldWorker::removeDirectory(const QString &dirName)
@@ -383,6 +405,32 @@ void Wizard::UnshieldWorker::extract()
         setupAddon(Wizard::Component_Bloodmoon);
     }
 
+    // Update Morrowind configuration
+    if (getInstallComponent(Wizard::Component_Tribunal))
+    {
+        mIniSettings.setValue(QLatin1String("Archives/Archive0"), QVariant(QString("Tribunal.bsa")));
+        mIniSettings.setValue(QLatin1String("Game Files/Game File1"), QVariant(QString("Tribunal.esm")));
+    }
+
+    if (getInstallComponent(Wizard::Component_Bloodmoon))
+    {
+        mIniSettings.setValue(QLatin1String("Archives/Archive0"), QVariant(QString("Bloodmoon.bsa")));
+        mIniSettings.setValue(QLatin1String("Game Files/Game File1"), QVariant(QString("Bloodmoon.esm")));
+    }
+
+    if (getInstallComponent(Wizard::Component_Tribunal) &&
+            getInstallComponent(Wizard::Component_Bloodmoon))
+    {
+        mIniSettings.setValue(QLatin1String("Archives/Archive0"), QVariant(QString("Tribunal.bsa")));
+        mIniSettings.setValue(QLatin1String("Archives/Archive1"), QVariant(QString("Bloodmoon.bsa")));
+        mIniSettings.setValue(QLatin1String("Game Files/Game File1"), QVariant(QString("Tribunal.esm")));
+        mIniSettings.setValue(QLatin1String("Game Files/Game File2"), QVariant(QString("Bloodmoon.esm")));
+    }
+
+
+    // Write the settings to the Morrowind config file
+    writeSettings();
+
     // Remove the temporary directory
     removeDirectory(getPath() + QDir::separator() + QLatin1String("extract-temp"));
 
@@ -554,6 +602,10 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
             emit error(tr("Could not find Morrowind configuration file!"), tr("Failed to find %0.").arg(iniPath));
             return false;
         }
+
+        // Setup Morrowind configuration
+        setIniPath(getPath() + QDir::separator() + QLatin1String("Morrowind.ini"));
+        setupSettings();
     }
 
     if (component == Wizard::Component_Tribunal)
@@ -564,7 +616,6 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
             emit textChanged(tr("Extracting: Sound directory"));
             copyDirectory(sounds.absoluteFilePath(), getPath() + QDir::separator() + QLatin1String("Sound"));
         }
-
     }
 
     if (component == Wizard::Component_Bloodmoon)
@@ -577,6 +628,15 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
             copyFile(patch.absoluteFilePath(), original.absoluteFilePath());
         }
 
+        // Load Morrowind configuration settings from the setup script
+        QFileInfo inx(disk.absoluteFilePath(QLatin1String("setup.inx")));
+
+        if (inx.exists()) {
+            emit textChanged(tr("Updating Morrowind configuration file"));
+            mIniSettings.parseInx(inx.absoluteFilePath());
+        } else {
+            qDebug() << "setup.inx not found!";
+        }
     }
 
     emit textChanged(tr("%0 installation finished!").arg(name));
@@ -649,7 +709,7 @@ bool Wizard::UnshieldWorker::findFile(const QString &cabFile, const QString &fil
         {
             QString current(QString::fromLatin1(unshield_file_name(unshield, j)));
 
-            qDebug() << "File is: " << unshield_file_name(unshield, j);
+            qDebug() << "File is: " << current;
             if (current == fileName)
                 return true; // File is found!
         }

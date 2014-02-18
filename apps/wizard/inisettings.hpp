@@ -22,6 +22,11 @@ namespace Wizard
             return mSettings.value(key, defaultValue);
         }
 
+        inline QList<QVariant> values() const
+        {
+            return mSettings.values();
+        }
+
         inline void setValue(const QString &key, const QVariant &value)
         {
             mSettings.insert(key, value);
@@ -32,10 +37,16 @@ namespace Wizard
             mSettings.remove(key);
         }
 
+        QStringList findKeys(const QString &text);
+
         bool readFile(QTextStream &stream);
-        bool writeFile(QTextStream &stream);
+        bool writeFile(const QString &path, QTextStream &stream);
+
+        bool parseInx(const QString &path);
 
     private:
+
+        int getLastNewline(const QString &buffer, int from);
 
         SettingsMap mSettings;
     };

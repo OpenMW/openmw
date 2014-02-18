@@ -127,6 +127,7 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_Conclusion, new ConclusionPage(this));
     setStartId(Page_Intro);
 }
+
 void Wizard::MainWizard::accept()
 {
     writeSettings();
