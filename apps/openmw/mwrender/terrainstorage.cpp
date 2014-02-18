@@ -164,9 +164,9 @@ namespace MWRender
     }
 
     void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center, Terrain::Alignment align,
-                            Ogre::HardwareVertexBufferSharedPtr vertexBuffer,
-                            Ogre::HardwareVertexBufferSharedPtr normalBuffer,
-                            Ogre::HardwareVertexBufferSharedPtr colourBuffer)
+                                            std::vector<float>& positions,
+                                            std::vector<float>& normals,
+                                            std::vector<Ogre::uint8>& colours)
     {
         // LOD level n means every 2^n-th vertex is kept
         size_t increment = 1 << lodLevel;
@@ -180,11 +180,8 @@ namespace MWRender
 
         size_t numVerts = size*(ESM::Land::LAND_SIZE-1)/increment + 1;
 
-        std::vector<uint8_t> colors;
-        colors.resize(numVerts*numVerts*4);
-        std::vector<float> positions;
+        colours.resize(numVerts*numVerts*4);
         positions.resize(numVerts*numVerts*3);
-        std::vector<float> normals;
         normals.resize(numVerts*numVerts*3);
 
         Ogre::Vector3 normal;
@@ -270,7 +267,7 @@ namespace MWRender
                         color.a = 1;
                         Ogre::uint32 rsColor;
                         Ogre::Root::getSingleton().getRenderSystem()->convertColourValue(color, &rsColor);
-                        memcpy(&colors[vertX*numVerts*4 + vertY*4], &rsColor, sizeof(Ogre::uint32));
+                        memcpy(&colours[vertX*numVerts*4 + vertY*4], &rsColor, sizeof(Ogre::uint32));
 
                         ++vertX;
                     }
@@ -283,10 +280,6 @@ namespace MWRender
             assert(vertX_ == numVerts); // Ensure we covered whole area
         }
         assert(vertY_ == numVerts);  // Ensure we covered whole area
-
-        vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), &positions[0], true);
-        normalBuffer->writeData(0, normalBuffer->getSizeInBytes(), &normals[0], true);
-        colourBuffer->writeData(0, colourBuffer->getSizeInBytes(), &colors[0], true);
     }
 
     TerrainStorage::UniqueTextureId TerrainStorage::getVtexIndexAt(int cellX, int cellY,

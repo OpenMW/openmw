@@ -15,6 +15,7 @@ namespace Terrain
     class World;
     class Chunk;
     class MaterialGenerator;
+    struct LoadResponseData;
 
     enum Direction
     {
@@ -31,6 +32,13 @@ namespace Terrain
         SW = 2,
         SE = 3,
         Root
+    };
+
+    enum LoadState
+    {
+        LS_Unloaded,
+        LS_Loading,
+        LS_Loaded
     };
 
     /**
@@ -124,9 +132,17 @@ namespace Terrain
         /// @param quads collect quads here so they can be deleted later
         void prepareForCompositeMap(Ogre::TRect<float> area);
 
+        /// Create a chunk for this node from the given data.
+        void load (const LoadResponseData& data);
+        void unload();
+
+        LoadState getLoadState() { return mLoadState; }
+
     private:
         // Stored here for convenience in case we need layer list again
         MaterialGenerator* mMaterialGenerator;
+
+        LoadState mLoadState;
 
         /// Is this node (or any of its child nodes) currently configured to render itself?
         /// (only relevant when distant land is disabled, otherwise whole terrain is always rendered)

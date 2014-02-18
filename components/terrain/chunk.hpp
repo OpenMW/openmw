@@ -8,6 +8,7 @@ namespace Terrain
 {
 
     class QuadTreeNode;
+    struct LoadResponseData;
 
     /**
      * @brief Renders a chunk of terrain, either using alpha splatting or a composite map.
@@ -15,8 +16,8 @@ namespace Terrain
     class Chunk : public Ogre::Renderable, public Ogre::MovableObject
     {
     public:
-        /// @param lodLevel LOD level for the vertex buffer.
-        Chunk (QuadTreeNode* node, short lodLevel);
+        Chunk (QuadTreeNode* node, const LoadResponseData& data);
+
         virtual ~Chunk();
 
         void setMaterial (const Ogre::MaterialPtr& material);

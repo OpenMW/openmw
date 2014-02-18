@@ -388,6 +388,8 @@ namespace MWWorld
 
         typedef std::vector<ESM::LandTexture>::const_iterator iterator;
 
+        // Must be threadsafe! Called from terrain background loading threads.
+        // Not a big deal here, since ESM::LandTexture can never be modified or inserted/erased
         const ESM::LandTexture *search(size_t index, size_t plugin) const {
             assert(plugin < mStatic.size());
             const LandTextureList &ltexl = mStatic[plugin];
@@ -487,6 +489,8 @@ namespace MWWorld
             return iterator(mStatic.end());
         }
 
+        // Must be threadsafe! Called from terrain background loading threads.
+        // Not a big deal here, since ESM::Land can never be modified or inserted/erased
         ESM::Land *search(int x, int y) const {
             ESM::Land land;
             land.mX = x, land.mY = y;

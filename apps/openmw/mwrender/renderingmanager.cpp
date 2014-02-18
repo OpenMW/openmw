@@ -651,6 +651,11 @@ void RenderingManager::setGlare(bool glare)
 
 void RenderingManager::requestMap(MWWorld::CellStore* cell)
 {
+    // FIXME: move to other method
+    // TODO: probably not needed when crossing a cell border. Could delay the map render until we are loaded.
+    if (mTerrain)
+        mTerrain->syncLoad();
+
     if (cell->getCell()->isExterior())
     {
         assert(mTerrain);

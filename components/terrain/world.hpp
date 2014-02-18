@@ -5,6 +5,7 @@
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreAxisAlignedBox.h>
 #include <OgreTexture.h>
+#include <OgreWorkQueue.h>
 
 #include "defs.hpp"
 
@@ -26,7 +27,7 @@ namespace Terrain
      *        Cracks at LOD transitions are avoided using stitching.
      * @note  Multiple cameras are not supported yet
      */
-    class World
+    class World : public Ogre::WorkQueue::RequestHandler, public Ogre::WorkQueue::ResponseHandler
     {
     public:
         /// @note takes ownership of \a storage
@@ -85,7 +86,16 @@ namespace Terrain
 
         Alignment getAlign() { return mAlign; }
 
+        /// Wait until all background loading is complete.
+        void syncLoad();
+
     private:
+        // Called from a background worker thread
+        Ogre::WorkQueue::Response* handleRequest(const Ogre::WorkQueue::Request* req, const Ogre::WorkQueue* srcQ);
+        // Called from the main thread
+        void handleResponse(const Ogre::WorkQueue::Response* res, const Ogre::WorkQueue* srcQ);
+        Ogre::uint16 mWorkQueueChannel;
+
         bool mDistantLand;
         bool mShaders;
         bool mShadows;
@@ -98,6 +108,9 @@ namespace Terrain
         Storage* mStorage;
 
         int mVisibilityFlags;
+
+        /// The number of chunks currently loading in a background thread. If 0, we have finished loading!
+        int mChunksLoading;
 
         Ogre::SceneManager* mSceneMgr;
         Ogre::SceneManager* mCompositeMapSceneMgr;
@@ -141,6 +154,9 @@ namespace Terrain
         void convertPosition (Ogre::Vector3& pos);
         void convertBounds (Ogre::AxisAlignedBox& bounds);
 
+        // Adds a WorkQueue request to load a chunk for this node in the background.
+        void queueLoad (QuadTreeNode* node);
+
     private:
         // Index buffers are shared across terrain batches where possible. There is one index buffer for each
         // combination of LOD deltas and index buffer LOD we may need.
@@ -150,6 +166,30 @@ namespace Terrain
 
         Ogre::RenderTarget* mCompositeMapRenderTarget;
         Ogre::TexturePtr mCompositeMapRenderTexture;
+    };
+
+    struct LoadRequestData
+    {
+        QuadTreeNode* mNode;
+        bool mPack;
+
+        friend std::ostream& operator<<(std::ostream& o, const LoadRequestData& r)
+        { return o; }
+    };
+
+    struct LoadResponseData
+    {
+        std::vector<float> mPositions;
+        std::vector<float> mNormals;
+        std::vector<Ogre::uint8> mColours;
+        // Since we can't create a texture from a different thread, this only holds the raw texel data
+        std::vector< std::vector<Ogre::uint8> > mBlendmaps;
+        std::vector<Terrain::LayerInfo> mLayerList;
+
+        unsigned long time;
+
+        friend std::ostream& operator<<(std::ostream& o, const LoadResponseData& r)
+        { return o; }
     };
 
 }

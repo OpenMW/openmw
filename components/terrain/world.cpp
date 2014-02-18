@@ -64,6 +64,8 @@ namespace Terrain
         , mMinX(0)
         , mMaxY(0)
         , mMinY(0)
+        , mChunksLoading(0)
+        , mWorkQueueChannel(0)
     {
 #if TERRAIN_USE_SHADER == 0
         if (mShaders)
@@ -103,10 +105,19 @@ namespace Terrain
         //loadingListener->indicateProgress();
         mRootNode->initNeighbours();
         //loadingListener->indicateProgress();
+
+        Ogre::WorkQueue* wq = Ogre::Root::getSingleton().getWorkQueue();
+        mWorkQueueChannel = wq->getChannel("LargeTerrain");
+        wq->addRequestHandler(mWorkQueueChannel, this);
+        wq->addResponseHandler(mWorkQueueChannel, this);
     }
 
     World::~World()
     {
+        Ogre::WorkQueue* wq = Ogre::Root::getSingleton().getWorkQueue();
+        wq->removeRequestHandler(mWorkQueueChannel, this);
+        wq->removeResponseHandler(mWorkQueueChannel, this);
+
         delete mRootNode;
         delete mStorage;
     }
@@ -445,4 +456,62 @@ namespace Terrain
         }
     }
 
+    void World::syncLoad()
+    {
+        while (mChunksLoading)
+        {
+            OGRE_THREAD_SLEEP(0);
+            Ogre::Root::getSingleton().getWorkQueue()->processResponses();
+        }
+    }
+
+    Ogre::WorkQueue::Response* World::handleRequest(const Ogre::WorkQueue::Request *req, const Ogre::WorkQueue *srcQ)
+    {
+        const LoadRequestData data = Ogre::any_cast<LoadRequestData>(req->getData());
+
+        QuadTreeNode* node = data.mNode;
+
+        LoadResponseData* responseData = new LoadResponseData();
+
+        Ogre::Timer timer;
+        getStorage()->fillVertexBuffers(node->getNativeLodLevel(), node->getSize(), node->getCenter(), getAlign(),
+                                        responseData->mPositions, responseData->mNormals, responseData->mColours);
+
+        std::cout << "THREAD" << std::endl;
+
+        responseData->time = timer.getMicroseconds();
+
+        return OGRE_NEW Ogre::WorkQueue::Response(req, true, Ogre::Any(responseData));
+    }
+
+    void World::handleResponse(const Ogre::WorkQueue::Response *res, const Ogre::WorkQueue *srcQ)
+    {
+        static unsigned long time = 0;
+        if (res->succeeded())
+        {
+            LoadResponseData* data = Ogre::any_cast<LoadResponseData*>(res->getData());
+
+            const LoadRequestData requestData = Ogre::any_cast<LoadRequestData>(res->getRequest()->getData());
+
+            requestData.mNode->load(*data);
+
+            time += data->time;
+
+            delete data;
+
+            std::cout << "RESPONSE, reqs took ms" << time/1000.f << std::endl;
+        }
+        --mChunksLoading;
+    }
+
+    void World::queueLoad(QuadTreeNode *node)
+    {
+        LoadRequestData data;
+        data.mNode = node;
+        data.mPack = getShadersEnabled();
+
+        const Ogre::uint16 loadRequestId = 1;
+        Ogre::Root::getSingleton().getWorkQueue()->addRequest(mWorkQueueChannel, loadRequestId, Ogre::Any(data));
+        ++mChunksLoading;
+    }
 }

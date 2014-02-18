@@ -10,15 +10,17 @@
 namespace Terrain
 {
 
-    Chunk::Chunk(QuadTreeNode* node, short lodLevel)
+    Chunk::Chunk(QuadTreeNode* node, const LoadResponseData& data)
         : mNode(node)
-        , mVertexLod(lodLevel)
+        , mVertexLod(node->getNativeLodLevel())
         , mAdditionalLod(0)
     {
         mVertexData = OGRE_NEW Ogre::VertexData;
         mVertexData->vertexStart = 0;
 
         unsigned int verts = mNode->getTerrain()->getStorage()->getCellVertices();
+
+        size_t lodLevel = mNode->getNativeLodLevel();
 
         // Set the total number of vertices
         size_t numVertsOneSide = mNode->getSize() * (verts-1);
@@ -52,8 +54,9 @@ namespace Terrain
         mColourBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
-        mNode->getTerrain()->getStorage()->fillVertexBuffers(lodLevel, mNode->getSize(), mNode->getCenter(), mNode->getTerrain()->getAlign(),
-                                                             mVertexBuffer, mNormalBuffer, mColourBuffer);
+        mVertexBuffer->writeData(0, mVertexBuffer->getSizeInBytes(), &data.mPositions[0], true);
+        mNormalBuffer->writeData(0, mNormalBuffer->getSizeInBytes(), &data.mNormals[0], true);
+        mColourBuffer->writeData(0, mColourBuffer->getSizeInBytes(), &data.mColours[0], true);
 
         mVertexData->vertexBufferBinding->setBinding(0, mVertexBuffer);
         mVertexData->vertexBufferBinding->setBinding(1, mNormalBuffer);
