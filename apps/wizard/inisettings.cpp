@@ -131,30 +131,20 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
 
          int index = buffer.lastIndexOf(section);
          if (index != -1) {
-             // Append the new keys to the bottom of the section
+             // Look for the next section
              index = buffer.indexOf(QLatin1Char('['), index + 1);
 
-             if (index == -1 )
-             {
-                 // Beginning of next section not found, we are at the last section
-                 if (buffer.lastIndexOf(QLatin1String("\n")) > (buffer.lastIndexOf(section) + section.length())) {
-                     // There is a newline after the section
-                     index = buffer.lastIndexOf(QLatin1String("\n")) - 1;
-                     buffer.insert(index - 2, QString("\n%1=%2").arg(key, i.value().toString()));
-                     mSettings.remove(i.key());
-                     continue;
-                 } else {
-                     // No newline found, or the last newline is before the last section
-                     // Append the key to the bottom of the file
-                     buffer.append(QString("\n%1=%2").arg(key, i.value().toString()));
-                     mSettings.remove(i.key());
-                     continue;
-                 }
+             if (index == -1 ) {
+                 // We are at the last section, append it to the bottom of the file
+                 buffer.append(QString("\n%1=%2").arg(key, i.value().toString()));
+                 mSettings.remove(i.key());
+                 continue;
+             } else {
+                 // Not at last section, add the key at the index
+                 buffer.insert(index - 1, QString("\n%1=%2").arg(key, i.value().toString()));
+                 mSettings.remove(i.key());
              }
 
-             // Add the key at the index
-             buffer.insert(index - 1, QString("\n%1=%2").arg(key, i.value().toString()));
-             mSettings.remove(i.key());
          } else {
              // Add the section to the end of the file, because it's not found
              buffer.append(QString("\n%1\n").arg(section));

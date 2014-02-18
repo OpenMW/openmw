@@ -27,7 +27,7 @@ void Wizard::InstallationTargetPage::initializePage()
 
 bool Wizard::InstallationTargetPage::validatePage()
 {
-    QString path(field("installation.path").toString());
+    QString path(field(QLatin1String("installation.path")).toString());
 
     qDebug() << "Validating path: " << path;
 

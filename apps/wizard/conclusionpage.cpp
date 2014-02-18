@@ -13,9 +13,15 @@ Wizard::ConclusionPage::ConclusionPage(MainWizard *wizard) :
 
 void Wizard::ConclusionPage::initializePage()
 {
+    // Write the path to openmw.cfg
+    if (field(QLatin1String("installation.new")).toBool() == true) {
+        QString path(field(QLatin1String("installation.path")).toString());
+        mWizard->addInstallation(path);
+    }
+
     if (!mWizard->mError)
     {
-        if (field("installation.new").toBool() == true)
+        if (field(QLatin1String("installation.new")).toBool() == true)
         {
             textLabel->setText(tr("<html><head/><body><p>The OpenMW Wizard successfully installed Morrowind on your computer.</p> \
                                   <p>Click Finish to close the Wizard.</p></body></html>"));

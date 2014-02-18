@@ -20,8 +20,8 @@ Wizard::InstallationPage::InstallationPage(MainWizard *wizard) :
 
 void Wizard::InstallationPage::initializePage()
 {
-    QString path(field("installation.path").toString());
-    QStringList components(field("installation.components").toStringList());
+    QString path(field(QLatin1String("installation.path")).toString());
+    QStringList components(field(QLatin1String("installation.components")).toStringList());
 
     logTextEdit->appendPlainText(QString("Installing to %1").arg(path));
     logTextEdit->appendPlainText(QString("Installing %1.").arg(components.join(", ")));
@@ -32,7 +32,7 @@ void Wizard::InstallationPage::initializePage()
     // That way installing all three components would yield 300%
     // When one component is done the bar will be filled by 33%
 
-    if (field("installation.new").toBool() == true) {
+    if (field(QLatin1String("installation.new")).toBool() == true) {
         installProgressBar->setMaximum((components.count() * 100));
     } else {
         if (components.contains(QLatin1String("Tribunal"))
@@ -49,8 +49,8 @@ void Wizard::InstallationPage::initializePage()
 
 void Wizard::InstallationPage::startInstallation()
 {
-    QStringList components(field("installation.components").toStringList());
-    QString path(field("installation.path").toString());
+    QStringList components(field(QLatin1String("installation.components")).toStringList());
+    QString path(field(QLatin1String("installation.path")).toString());
 
     QThread *thread = new QThread();
     mUnshield = new UnshieldWorker();
@@ -86,7 +86,7 @@ void Wizard::InstallationPage::startInstallation()
     connect(mUnshield, SIGNAL(requestFileDialog(Wizard::Component)),
             this, SLOT(showFileDialog(Wizard::Component)), Qt::QueuedConnection);
 
-    if (field("installation.new").toBool() == true)
+    if (field(QLatin1String("installation.new")).toBool() == true)
     {
         // Always install Morrowind
         mUnshield->setInstallComponent(Wizard::Component_Morrowind, true);
@@ -117,7 +117,7 @@ void Wizard::InstallationPage::startInstallation()
     mUnshield->setPath(path);
 
     // Set the right codec to use for Morrowind.ini
-    QString language(field("installation.language").toString());
+    QString language(field(QLatin1String("installation.language")).toString());
 
     if (language == QLatin1String("Polish")) {
         mUnshield->setIniCodec(QTextCodec::codecForName("windows-1250"));

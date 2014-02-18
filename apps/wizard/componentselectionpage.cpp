@@ -16,7 +16,7 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(MainWizard *wizard) :
     setCommitPage(true);
     setButtonText(QWizard::CommitButton, tr("&Install"));
 
-    registerField("installation.components", componentsList);
+    registerField(QLatin1String("installation.components"), componentsList);
 
     connect(componentsList, SIGNAL(itemChanged(QListWidgetItem *)),
             this, SLOT(updateButton(QListWidgetItem *)));
@@ -25,7 +25,7 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(MainWizard *wizard) :
 
 void Wizard::ComponentSelectionPage::updateButton(QListWidgetItem *item)
 {
-    if (field("installation.new").toBool() == true)
+    if (field(QLatin1String("installation.new")).toBool() == true)
         return; // Morrowind is always checked here
 
     bool unchecked = true;
@@ -53,13 +53,13 @@ void Wizard::ComponentSelectionPage::initializePage()
 {
     componentsList->clear();
 
-    QString path(field("installation.path").toString());
+    QString path(field(QLatin1String("installation.path")).toString());
 
     QListWidgetItem *morrowindItem = new QListWidgetItem(QLatin1String("Morrowind"));
     QListWidgetItem *tribunalItem = new QListWidgetItem(QLatin1String("Tribunal"));
     QListWidgetItem *bloodmoonItem = new QListWidgetItem(QLatin1String("Bloodmoon"));
 
-    if (field("installation.new").toBool() == true)
+    if (field(QLatin1String("installation.new")).toBool() == true)
     {
         morrowindItem->setFlags(morrowindItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
         morrowindItem->setData(Qt::CheckStateRole, Qt::Checked);
@@ -111,12 +111,12 @@ void Wizard::ComponentSelectionPage::initializePage()
 
 bool Wizard::ComponentSelectionPage::validatePage()
 {
-    QStringList components(field("installation.components").toStringList());
-    QString path(field("installation.path").toString());
+    QStringList components(field(QLatin1String("installation.components")).toStringList());
+    QString path(field(QLatin1String("installation.path")).toString());
 
     qDebug() << components << path << mWizard->mInstallations[path];
 
-    if (field("installation.new").toBool() == false) {
+    if (field(QLatin1String("installation.new")).toBool() == false) {
         if (components.contains(QLatin1String("Tribunal")) && !components.contains(QLatin1String("Bloodmoon")))
         {
             if (mWizard->mInstallations[path]->hasBloodmoon)

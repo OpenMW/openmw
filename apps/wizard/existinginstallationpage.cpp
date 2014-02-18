@@ -82,7 +82,7 @@ bool Wizard::ExistingInstallationPage::validatePage()
     // It can be missing entirely
     // Or failed to be detected due to the target being a symlink
 
-    QString path(field("installation.path").toString());
+    QString path(field(QLatin1String("installation.path")).toString());
     QFile file(mWizard->mInstallations[path]->iniPath);
 
     if (!file.exists()) {
@@ -131,7 +131,7 @@ bool Wizard::ExistingInstallationPage::isComplete() const
 
 int Wizard::ExistingInstallationPage::nextId() const
 {
-    QString path(field("installation.path").toString());
+    QString path(field(QLatin1String("installation.path")).toString());
 
     if (path.isEmpty())
         return MainWizard::Page_LanguageSelection;

@@ -8,12 +8,12 @@ Wizard::MethodSelectionPage::MethodSelectionPage(MainWizard *wizard) :
 {
     setupUi(this);
 
-    registerField("installation.new", newLocationRadioButton);
+    registerField(QLatin1String("installation.new"), newLocationRadioButton);
 }
 
 int Wizard::MethodSelectionPage::nextId() const
 {
-    if (field("installation.new").toBool() == true) {
+    if (field(QLatin1String("installation.new")).toBool() == true) {
         return MainWizard::Page_InstallationTarget;
     } else {
         return MainWizard::Page_ExistingInstallation;
