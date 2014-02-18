@@ -46,10 +46,6 @@ namespace MWRender
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
         ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
-        // Load the data we are definitely going to need
-        int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
-        if (land && !land->isDataLoaded(mask))
-            land->loadData(mask);
         return land;
     }
 
@@ -316,9 +312,6 @@ namespace MWRender
         ESM::Land* land = getLand(cellX, cellY);
         if (land)
         {
-            if (!land->isDataLoaded(ESM::Land::DATA_VTEX))
-                land->loadData(ESM::Land::DATA_VTEX);
-
             int tex = land->mLandData->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
             if (tex == 0)
                 return std::make_pair(0,0); // vtex 0 is always the base texture, regardless of plugin
