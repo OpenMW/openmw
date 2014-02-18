@@ -171,7 +171,7 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
     float cellWorldSize = mTerrain->getStorage()->getCellWorldSize();
 
     Ogre::Vector3 sceneNodePos (pos.x*cellWorldSize, pos.y*cellWorldSize, 0);
-    mTerrain->convertPosition(sceneNodePos.x, sceneNodePos.y, sceneNodePos.z);
+    mTerrain->convertPosition(sceneNodePos);
 
     mSceneNode->setPosition(sceneNodePos);
 
@@ -274,21 +274,23 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
         mParent->getSceneNode()->addChild(mSceneNode);
     }
 
-    /// \todo implement error metrics or some other means of not using arbitrary values
-    ///  (general quality needs to be user configurable as well)
+    // Simple LOD selection
+    /// \todo use error metrics?
     size_t wantedLod = 0;
-    if (dist > 8192*1)
-        wantedLod = 1;
-    if (dist > 8192*2)
-        wantedLod = 2;
-    if (dist > 8192*5)
-        wantedLod = 3;
-    if (dist > 8192*12)
-        wantedLod = 4;
-    if (dist > 8192*32)
-        wantedLod = 5;
-    if (dist > 8192*64)
+    float cellWorldSize = mTerrain->getStorage()->getCellWorldSize();
+
+    if (dist > cellWorldSize*64)
         wantedLod = 6;
+    else if (dist > cellWorldSize*32)
+        wantedLod = 5;
+    else if (dist > cellWorldSize*12)
+        wantedLod = 4;
+    else if (dist > cellWorldSize*5)
+        wantedLod = 3;
+    else if (dist > cellWorldSize*2)
+        wantedLod = 2;
+    else if (dist > cellWorldSize)
+        wantedLod = 1;
 
     bool hadChunk = hasChunk();
 
