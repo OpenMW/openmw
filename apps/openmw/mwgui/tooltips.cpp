@@ -1,5 +1,7 @@
 #include "tooltips.hpp"
 
+#include <iomanip>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/world.hpp"

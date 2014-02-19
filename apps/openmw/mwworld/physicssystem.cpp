@@ -8,6 +8,7 @@
 #include <OgreViewport.h>
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
+#include <OgreSceneNode.h>
 
 #include <openengine/bullet/trace.h>
 #include <openengine/bullet/physic.hpp>

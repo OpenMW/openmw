@@ -2,6 +2,9 @@
 
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
+#include <OgreSceneNode.h>
+#include <OgreMaterialManager.h>
+#include <OgreTextureManager.h>
 
 #include "world.hpp"
 #include "chunk.hpp"

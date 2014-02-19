@@ -2,6 +2,7 @@
 
 #include <OgreSceneNode.h>
 #include <OgreHardwareBufferManager.h>
+#include <OgreRenderQueue.h>
 
 #include "quadtreenode.hpp"
 #include "world.hpp"

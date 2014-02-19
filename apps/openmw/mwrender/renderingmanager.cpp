@@ -5,12 +5,14 @@
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 #include <OgreViewport.h>
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreControllerManager.h>
 #include <OgreMeshManager.h>
+#include <OgreRenderTexture.h>
 
 #include <SDL_video.h>
 

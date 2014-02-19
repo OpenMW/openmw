@@ -1,6 +1,12 @@
 #include "loadingscreen.hpp"
 
 #include <OgreRenderWindow.h>
+#include <OgreMaterialManager.h>
+#include <OgreTechnique.h>
+#include <OgreRectangle2D.h>
+#include <OgreSceneNode.h>
+#include <OgreTextureManager.h>
+#include <OgreViewport.h>
 
 #include <openengine/ogre/fader.hpp>
 

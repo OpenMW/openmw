@@ -4,7 +4,11 @@
 #include <OgreCamera.h>
 #include <OgreHardwareBufferManager.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreTextureManager.h>
+#include <OgreRenderTexture.h>
+#include <OgreSceneNode.h>
 #include <OgreRoot.h>
+#include <OgreTimer.h> // TEMP
 
 #include "storage.hpp"
 #include "quadtreenode.hpp"

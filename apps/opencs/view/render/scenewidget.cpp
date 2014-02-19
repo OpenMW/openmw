@@ -8,6 +8,8 @@
 #include <OgreRenderWindow.h>
 #include <OgreEntity.h>
 #include <OgreCamera.h>
+#include <OgreSceneNode.h>
+#include <OgreViewport.h>
 
 #include "navigation.hpp"
 

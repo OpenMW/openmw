@@ -4,6 +4,11 @@
 #include <OgreEntity.h>
 #include <OgreParticleSystem.h>
 #include <OgreSubEntity.h>
+#include <OgreSkeleton.h>
+#include <OgreSkeletonInstance.h>
+#include <OgreSceneNode.h>
+#include <OgreBone.h>
+#include <OgreTechnique.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 

@@ -1,11 +1,16 @@
 #include "water.hpp"
 
-#include <OgreRenderTarget.h>
+#include <OgreRenderTexture.h>
 #include <OgreEntity.h>
 #include <OgreMeshManager.h>
+#include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
 #include <OgreCamera.h>
+#include <OgreTextureManager.h>
+#include <OgreViewport.h>
+#include <OgreSceneNode.h>
+#include <OgreTechnique.h>
 
 #include "sky.hpp"
 #include "renderingmanager.hpp"

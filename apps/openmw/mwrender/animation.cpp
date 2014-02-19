@@ -10,6 +10,8 @@
 #include <OgreSceneManager.h>
 #include <OgreControllerManager.h>
 #include <OgreStaticGeometry.h>
+#include <OgreSceneNode.h>
+#include <OgreTechnique.h>
 
 #include <components/esm/loadligh.hpp>
 #include <components/esm/loadweap.hpp>

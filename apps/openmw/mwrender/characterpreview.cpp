@@ -1,10 +1,13 @@
 #include "characterpreview.hpp"
 
-
 #include <OgreSceneManager.h>
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreCamera.h>
+#include <OgreSceneNode.h>
+#include <OgreTextureManager.h>
+#include <OgreViewport.h>
+#include <OgreRenderTexture.h>
 
 #include <libs/openengine/ogre/selectionbuffer.hpp>
 

@@ -5,6 +5,9 @@
 #include <OgreSubEntity.h>
 #include <OgreEntity.h>
 #include <OgreTechnique.h>
+#include <OgreTextureManager.h>
+#include <OgreViewport.h>
+
 #include <stdexcept>
 
 #include <extern/shiny/Main/Factory.hpp>

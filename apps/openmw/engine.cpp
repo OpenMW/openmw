@@ -1,6 +1,7 @@
 #include "engine.hpp"
 
 #include <stdexcept>
+#include <iomanip>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
