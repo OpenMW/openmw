@@ -3,6 +3,8 @@
 
 #include "objectstate.hpp"
 #include "inventorystate.hpp"
+#include "npcstats.hpp"
+#include "creaturestats.hpp"
 
 namespace ESM
 {
@@ -11,6 +13,8 @@ namespace ESM
     struct NpcState : public ObjectState
     {
         InventoryState mInventory;
+        NpcStats mNpcStats;
+        CreatureStats mCreatureStats;
 
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm, bool inInventory = false) const;

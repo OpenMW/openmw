@@ -1,8 +1,27 @@
 #include "aiactivate.hpp"
 #include <iostream>
 
+#include "movement.hpp"
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/action.hpp"
+
+#include "steering.hpp"
+
+namespace
+{
+    float sgn(float a)
+    {
+        if(a > 0)
+            return 1.0;
+        return -1.0;
+    }
+}
+
 MWMechanics::AiActivate::AiActivate(const std::string &objectId)
-: mObjectId(objectId)
+    : mObjectId(objectId)
 {
 }
 MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const
@@ -11,8 +30,81 @@ MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const
 }
 bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
 {
-    std::cout << "AiActivate completed.\n";
-    return true;
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    ESM::Position pos = actor.getRefData().getPosition();
+    Movement &movement = actor.getClass().getMovementSettings(actor);
+    const ESM::Cell *cell = actor.getCell()->mCell;
+
+    MWWorld::Ptr player = world->getPlayerPtr();
+    if(cell->mData.mX != player.getCell()->mCell->mData.mX)
+    {
+        int sideX = sgn(cell->mData.mX - player.getCell()->mCell->mData.mX);
+        //check if actor is near the border of an inactive cell. If so, stop walking.
+        if(sideX * (pos.pos[0] - cell->mData.mX*ESM::Land::REAL_SIZE) >
+            sideX * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
+        {
+            movement.mPosition[1] = 0;
+            return false;
+        }
+    }
+    if(cell->mData.mY != player.getCell()->mCell->mData.mY)
+    {
+        int sideY = sgn(cell->mData.mY - player.getCell()->mCell->mData.mY);
+        //check if actor is near the border of an inactive cell. If so, stop walking.
+        if(sideY * (pos.pos[1] - cell->mData.mY*ESM::Land::REAL_SIZE) >
+            sideY * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
+        {
+            movement.mPosition[1] = 0;
+            return false;
+        }
+    }
+
+    MWWorld::Ptr target = world->getPtr(mObjectId,false);
+    ESM::Position targetPos = target.getRefData().getPosition();
+
+    bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
+    if(!mPathFinder.isPathConstructed() || cellChange)
+    {
+        mCellX = cell->mData.mX;
+        mCellY = cell->mData.mY;
+
+        ESM::Pathgrid::Point dest;
+        dest.mX = targetPos.pos[0];
+        dest.mY = targetPos.pos[1];
+        dest.mZ = targetPos.pos[2];
+
+        ESM::Pathgrid::Point start;
+        start.mX = pos.pos[0];
+        start.mY = pos.pos[1];
+        start.mZ = pos.pos[2];
+
+        mPathFinder.buildPath(start, dest, actor.getCell(), true);
+    }
+
+    if((pos.pos[0]-targetPos.pos[0])*(pos.pos[0]-targetPos.pos[0])+
+        (pos.pos[1]-targetPos.pos[1])*(pos.pos[1]-targetPos.pos[1])+
+        (pos.pos[2]-targetPos.pos[2])*(pos.pos[2]-targetPos.pos[2]) < 200*200)
+    {
+        movement.mPosition[1] = 0;
+        MWWorld::Ptr target = world->getPtr(mObjectId,false);
+        MWWorld::Class::get(target).activate(target,actor).get()->execute(actor);
+        return true;
+    }
+
+    if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+    {
+        movement.mPosition[1] = 0;
+        MWWorld::Ptr target = world->getPtr(mObjectId,false);
+        MWWorld::Class::get(target).activate(target,actor).get()->execute(actor);
+        return true;
+    }
+
+    float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+    zTurn(actor, Ogre::Degree(zAngle));
+    MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+    movement.mPosition[1] = 1;
+
+    return false;
 }
 
 int MWMechanics::AiActivate::getTypeId() const

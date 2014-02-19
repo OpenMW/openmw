@@ -8,6 +8,7 @@
 
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadinfo.hpp>
+#include <components/esm/dialoguestate.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
@@ -588,6 +589,41 @@ namespace MWDialogue
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
                 sndMgr->say(actor, info->mSound);
+        }
+    }
+
+    int DialogueManager::countSavedGameRecords() const
+    {
+        return 1; // known topics
+    }
+
+    void DialogueManager::write (ESM::ESMWriter& writer) const
+    {
+        ESM::DialogueState state;
+
+        for (std::map<std::string, bool>::const_iterator iter (mKnownTopics.begin());
+            iter!=mKnownTopics.end(); ++iter)
+            if (iter->second)
+                state.mKnownTopics.push_back (iter->first);
+
+        writer.startRecord (ESM::REC_DIAS);
+        state.save (writer);
+        writer.endRecord (ESM::REC_DIAS);
+    }
+
+    void DialogueManager::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        if (type==ESM::REC_DIAS)
+        {
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+            ESM::DialogueState state;
+            state.load (reader);
+
+            for (std::vector<std::string>::const_iterator iter (state.mKnownTopics.begin());
+                iter!=state.mKnownTopics.end(); ++iter)
+                if (store.get<ESM::Dialogue>().search (*iter))
+                    mKnownTopics.insert (std::make_pair (*iter, true));
         }
     }
 

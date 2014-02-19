@@ -208,7 +208,11 @@ namespace Interpreter
 
     class OpStoreMemberShort : public Opcode0
     {
+            bool mGlobal;
+
         public:
+
+            OpStoreMemberShort (bool global) : mGlobal (global) {}
 
             virtual void execute (Runtime& runtime)
             {
@@ -218,7 +222,7 @@ namespace Interpreter
                 index = runtime[2].mInteger;
                 std::string variable = runtime.getStringLiteral (index);
 
-                runtime.getContext().setMemberShort (id, variable, data);
+                runtime.getContext().setMemberShort (id, variable, data, mGlobal);
 
                 runtime.pop();
                 runtime.pop();
@@ -228,7 +232,11 @@ namespace Interpreter
 
     class OpStoreMemberLong : public Opcode0
     {
+            bool mGlobal;
+
         public:
+
+            OpStoreMemberLong (bool global) : mGlobal (global) {}
 
             virtual void execute (Runtime& runtime)
             {
@@ -238,7 +246,7 @@ namespace Interpreter
                 index = runtime[2].mInteger;
                 std::string variable = runtime.getStringLiteral (index);
 
-                runtime.getContext().setMemberLong (id, variable, data);
+                runtime.getContext().setMemberLong (id, variable, data, mGlobal);
 
                 runtime.pop();
                 runtime.pop();
@@ -248,7 +256,11 @@ namespace Interpreter
 
     class OpStoreMemberFloat : public Opcode0
     {
+            bool mGlobal;
+
         public:
+
+            OpStoreMemberFloat (bool global) : mGlobal (global) {}
 
             virtual void execute (Runtime& runtime)
             {
@@ -258,7 +270,7 @@ namespace Interpreter
                 index = runtime[2].mInteger;
                 std::string variable = runtime.getStringLiteral (index);
 
-                runtime.getContext().setMemberFloat (id, variable, data);
+                runtime.getContext().setMemberFloat (id, variable, data, mGlobal);
 
                 runtime.pop();
                 runtime.pop();
@@ -268,7 +280,11 @@ namespace Interpreter
 
     class OpFetchMemberShort : public Opcode0
     {
+            bool mGlobal;
+
         public:
+
+            OpFetchMemberShort (bool global) : mGlobal (global) {}
 
             virtual void execute (Runtime& runtime)
             {
@@ -278,14 +294,18 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                int value = runtime.getContext().getMemberShort (id, variable);
+                int value = runtime.getContext().getMemberShort (id, variable, mGlobal);
                 runtime[0].mInteger = value;
             }
     };
 
     class OpFetchMemberLong : public Opcode0
     {
+            bool mGlobal;
+
         public:
+
+            OpFetchMemberLong (bool global) : mGlobal (global) {}
 
             virtual void execute (Runtime& runtime)
             {
@@ -295,14 +315,18 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                int value = runtime.getContext().getMemberLong (id, variable);
+                int value = runtime.getContext().getMemberLong (id, variable, mGlobal);
                 runtime[0].mInteger = value;
             }
     };
 
     class OpFetchMemberFloat : public Opcode0
     {
+            bool mGlobal;
+
         public:
+
+            OpFetchMemberFloat (bool global) : mGlobal (global) {}
 
             virtual void execute (Runtime& runtime)
             {
@@ -312,7 +336,7 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                float value = runtime.getContext().getMemberFloat (id, variable);
+                float value = runtime.getContext().getMemberFloat (id, variable, mGlobal);
                 runtime[0].mFloat = value;
             }
     };

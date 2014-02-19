@@ -7,7 +7,7 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
-#include <qt4/QtCore/qnamespace.h>
+#include <QtCore/qnamespace.h>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"

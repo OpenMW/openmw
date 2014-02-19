@@ -203,8 +203,8 @@ namespace Compiler
         const int opcodeGetEffectExplicit = 0x20001d0;
         const int opcodeAddSoulGem = 0x20001f3;
         const int opcodeAddSoulGemExplicit = 0x20001f4;
-        const int opcodeRemoveSoulGem = 0x20001f5;
-        const int opcodeRemoveSoulGemExplicit = 0x20001f6;
+        const int opcodeRemoveSoulGem = 0x20027;
+        const int opcodeRemoveSoulGemExplicit = 0x20028;
         const int opcodeDrop = 0x20001f8;
         const int opcodeDropExplicit = 0x20001f9;
         const int opcodeDropSoulGem = 0x20001fa;
@@ -245,6 +245,8 @@ namespace Compiler
         const int opcodeCastExplicit = 0x2000228;
         const int opcodeExplodeSpell = 0x2000229;
         const int opcodeExplodeSpellExplicit = 0x200022a;
+        const int opcodeGetPcInJail = 0x200023e;
+        const int opcodeGetPcTraveling = 0x200023f;
     }
 
     namespace Sky

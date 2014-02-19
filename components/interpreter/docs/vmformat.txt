@@ -127,5 +127,11 @@ op 61: store stack[0] in member float stack[2] of object with ID stack[1]
 op 62: replace stack[0] with member short stack[1] of object with ID stack[0]
 op 63: replace stack[0] with member short stack[1] of object with ID stack[0]
 op 64: replace stack[0] with member short stack[1] of object with ID stack[0]
-opcodes 65-33554431 unused
+op 65: store stack[0] in member short stack[2] of global script with ID stack[1]
+op 66: store stack[0] in member long stack[2] of global script with ID stack[1]
+op 67: store stack[0] in member float stack[2] of global script with ID stack[1]
+op 68: replace stack[0] with member short stack[1] of global script with ID stack[0]
+op 69: replace stack[0] with member short stack[1] of global script with ID stack[0]
+op 70: replace stack[0] with member short stack[1] of global script with ID stack[0]
+opcodes 71-33554431 unused
 opcodes 33554432-67108863 reserved for extensions

@@ -7,7 +7,7 @@
 
 namespace Compiler
 {
-    ScriptParser::ScriptParser (ErrorHandler& errorHandler, Context& context,
+    ScriptParser::ScriptParser (ErrorHandler& errorHandler, const Context& context,
         Locals& locals, bool end)
     : Parser (errorHandler, context), mOutput (locals),
       mLineParser (errorHandler, context, locals, mOutput.getLiterals(), mOutput.getCode()),
@@ -32,7 +32,7 @@ namespace Compiler
 
     bool ScriptParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
-        if (keyword==Scanner::K_while || keyword==Scanner::K_if)
+        if (keyword==Scanner::K_while || keyword==Scanner::K_if || keyword==Scanner::K_elseif)
         {
             mControlParser.reset();
             if (mControlParser.parseKeyword (keyword, loc, scanner))
@@ -70,6 +70,12 @@ namespace Compiler
     {
         if (code==Scanner::S_newline) // empty line
             return true;
+
+        if (code==Scanner::S_open) /// \todo Option to switch this off
+        {
+            scanner.putbackSpecial (code, loc);
+            return parseKeyword (Scanner::K_if, loc, scanner);
+        }
 
         mLineParser.reset();
         if (mLineParser.parseSpecial (code, loc, scanner))

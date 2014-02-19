@@ -4,10 +4,6 @@ if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
-
-    set(CMAKE_EXE_LINKER_FLAGS "-F /Library/Frameworks")
-    set(CMAKE_SHARED_LINKER_FLAGS "-F /Library/Frameworks")
-    set(CMAKE_MODULE_LINKER_FLAGS "-F /Library/Frameworks")
 endif (APPLE)
 
 # Macros
@@ -20,7 +16,7 @@ include(OpenMWMacros)
 
 include(GetGitRevisionDescription)
 
-get_git_tag_revision(TAGHASH --tags --max-count=1)
+get_git_tag_revision(TAGHASH --tags --max-count=1 "HEAD...")
 get_git_head_revision(REFSPEC COMMITHASH)
 git_describe(VERSION --tags ${TAGHASH})
 
@@ -206,10 +202,6 @@ if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
 endif()
 
-if (APPLE)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif (APPLE)
-
 # Dependencies
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
@@ -260,9 +252,14 @@ link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MY
 if (APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
-                          ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
-                          ${OGRE_Plugin_CgProgramManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
+
+    # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
+    # not reliable and equals TRUE even if there's no Ogre Cg plugin
+    if (Cg_FOUND)
+        set(USED_OGRE_PLUGINS ${USED_OGRE_PLUGINS}
+                              ${OGRE_Plugin_CgProgramManager_LIBRARY_REL})
+    endif ()
 
     if (${OGRE_PLUGIN_DIR_REL}})
         set(OGRE_PLUGINS_REL_FOUND TRUE)
@@ -277,8 +274,6 @@ if (APPLE)
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-
-    #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
@@ -301,7 +296,8 @@ endif()
 add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
 add_definitions(-DOGRE_PLUGIN_DIR_DBG="${OGRE_PLUGIN_DIR_DBG}")
 if (APPLE AND OPENMW_OSX_DEPLOYMENT)
-    add_definitions(-DOGRE_PLUGIN_DIR="${APP_BUNDLE_NAME}/Contents/Plugins")
+    # make it empty so plugin loading code can check this and try to find plugins inside app bundle
+    add_definitions(-DOGRE_PLUGIN_DIR="")
 else()
     add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
 endif()
@@ -657,14 +653,14 @@ if (APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
     set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
-    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
+    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
     set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
 
-    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/OpenCS.app")
+    set(OPENCS_BUNDLE_NAME "OpenCS.app")
+    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}")
 
-    set(PLUGINS "")
     set(ABSOLUTE_PLUGINS "")
 
     foreach (PLUGIN ${USED_OGRE_PLUGINS})
@@ -672,12 +668,36 @@ if (APPLE)
         set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
-    set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins")
-    install(FILES ${ABSOLUTE_PLUGINS} DESTINATION "${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins" COMPONENT Runtime)
-    foreach (PLUGIN ${ABSOLUTE_PLUGINS})
-        get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
-        set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
-    endforeach ()
+    install(CODE "
+        set(BU_CHMOD_BUNDLE_ITEMS ON)
+        include(BundleUtilities)
+    " COMPONENT Runtime)
+
+    # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
+    # and returns list of install paths for all installed plugins
+    function (install_plugins_for_bundle bundle_path plugins_var)
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Frameworks")
+
+        set(PLUGINS "")
+        set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
+
+        foreach (PLUGIN ${ABSOLUTE_PLUGINS})
+            get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
+            get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
+
+            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}/${PLUGIN_RELATIVE_WE}")
+            set(PLUGINS ${PLUGINS} "${PLUGIN_DYLIB_IN_BUNDLE}")
+
+            install(CODE "
+                copy_resolved_framework_into_bundle(\"${PLUGIN}/${PLUGIN_RELATIVE_WE}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
+            " COMPONENT Runtime)
+        endforeach ()
+
+        set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
+    endfunction (install_plugins_for_bundle)
+
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
     set(DIRS "")
@@ -690,6 +710,7 @@ if (APPLE)
     # Current limitations:
     #   1. Handles only frameworks, not simple libs
     INSTALL(CODE "
+        cmake_policy(SET CMP0009 OLD)
         set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
         set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
         set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
@@ -721,11 +742,8 @@ if (APPLE)
             endif()
         endfunction(gp_resolve_item_override)
 
-        cmake_policy(SET CMP0009 OLD)
-        set(BU_CHMOD_BUNDLE_ITEMS ON)
-        include(BundleUtilities)
         fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
-        fixup_bundle(\"${OPENCS_APP}\" \"\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)

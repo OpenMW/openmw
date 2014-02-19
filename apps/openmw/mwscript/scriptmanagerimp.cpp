@@ -7,22 +7,28 @@
 #include <exception>
 
 #include <components/esm/loadscpt.hpp>
-#include "../mwworld/esmstore.hpp"
+
+#include <components/misc/stringops.hpp>
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
 #include <components/compiler/exception.hpp>
+#include <components/compiler/quickfileparser.hpp>
+
+#include "../mwworld/esmstore.hpp"
 
 #include "extensions.hpp"
 
 namespace MWScript
 {
     ScriptManager::ScriptManager (const MWWorld::ESMStore& store, bool verbose,
-        Compiler::Context& compilerContext)
+        Compiler::Context& compilerContext, int warningsMode)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
       mOpcodesInstalled (false), mGlobalScripts (store)
-    {}
+    {
+        mErrorHandler.setWarningsMode (warningsMode);
+    }
 
     bool ScriptManager::compile (const std::string& name)
     {
@@ -138,37 +144,33 @@ namespace MWScript
 
     Compiler::Locals& ScriptManager::getLocals (const std::string& name)
     {
+        std::string name2 = Misc::StringUtils::lowerCase (name);
+
         {
-            ScriptCollection::iterator iter = mScripts.find (name);
+            ScriptCollection::iterator iter = mScripts.find (name2);
 
             if (iter!=mScripts.end())
                 return iter->second.second;
         }
 
         {
-            std::map<std::string, Compiler::Locals>::iterator iter = mOtherLocals.find (name);
+            std::map<std::string, Compiler::Locals>::iterator iter = mOtherLocals.find (name2);
 
             if (iter!=mOtherLocals.end())
                 return iter->second;
         }
 
-        Compiler::Locals locals;
-
-        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name2))
         {
-            int index = 0;
+            Compiler::Locals locals;
 
-            for (int i=0; i<script->mData.mNumShorts; ++i)
-                locals.declare ('s', script->mVarNames[index++]);
-
-            for (int i=0; i<script->mData.mNumLongs; ++i)
-                locals.declare ('l', script->mVarNames[index++]);
-
-            for (int i=0; i<script->mData.mNumFloats; ++i)
-                locals.declare ('f', script->mVarNames[index++]);
+            std::istringstream stream (script->mScriptText);
+            Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
+            Compiler::Scanner scanner (mErrorHandler, stream, mCompilerContext.getExtensions());
+            scanner.scan (parser);
 
             std::map<std::string, Compiler::Locals>::iterator iter =
-                mOtherLocals.insert (std::make_pair (name, locals)).first;
+                mOtherLocals.insert (std::make_pair (name2, locals)).first;
 
             return iter->second;
         }
@@ -214,8 +216,10 @@ namespace MWScript
                 throw std::runtime_error ("invalid variable type");
         }
 
+        std::string variable2 = Misc::StringUtils::lowerCase (variable);
+
         for (int i=0; i<size; ++i)
-            if (script->mVarNames.at (i+offset)==variable)
+            if (Misc::StringUtils::lowerCase (script->mVarNames.at (i+offset))==variable2)
                 return i;
 
         throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);

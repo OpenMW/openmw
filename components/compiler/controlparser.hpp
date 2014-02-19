@@ -26,7 +26,8 @@ namespace Compiler
                 IfElseEndState, IfElseBodyState,
                 IfEndifState,
                 WhileEndState, WhileBodyState,
-                WhileEndwhileState
+                WhileEndwhileState,
+                IfElseJunkState
             };
 
             typedef std::vector<Interpreter::Type_Code> Codes;
@@ -47,7 +48,7 @@ namespace Compiler
 
         public:
 
-            ControlParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+            ControlParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
                 Literals& literals);
 
             void appendCode (std::vector<Interpreter::Type_Code>& code) const;

@@ -12,6 +12,11 @@
 #include "aisequence.hpp"
 #include "drawstate.hpp"
 
+namespace ESM
+{
+    struct CreatureStats;
+}
+
 namespace MWMechanics
 {
     /// \brief Common creature stats
@@ -212,6 +217,10 @@ namespace MWMechanics
         std::set<int> mBoundItems;
         // Same as above
         std::map<int, std::string> mSummonedCreatures;
+
+        void writeState (ESM::CreatureStats& state) const;
+
+        void readState (const ESM::CreatureStats& state);
     };
 }
 
