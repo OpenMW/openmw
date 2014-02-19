@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 29)
+set(OPENMW_VERSION_MINOR 28)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -32,13 +32,22 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
             string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
             if(MATCH)
-                string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" OPENMW_VERSION_MAJOR "${VERSION}")
-                string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_MINOR "${VERSION}")
-                string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_RELEASE "${VERSION}")
+                string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" GIT_VERSION_MAJOR "${VERSION}")
+                string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_MINOR "${VERSION}")
+                string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_RELEASE "${VERSION}")
 
-                set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
-                set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
-                set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+                set(GIT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_RELEASE}")
+
+                if(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+                    message(FATAL_ERROR "Silly Zini forgot to update the version again...")
+                else(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+                    set(OPENMW_VERSION_MAJOR ${GIT_VERSION_MAJOR})
+                    set(OPENMW_VERSION_MINOR ${GIT_VERSION_MINOR})
+                    set(OPENMW_VERSION_RELEASE ${GIT_VERSION_RELEASE})
+
+                    set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+                    set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+                endif(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
 
                 message(STATUS "OpenMW version ${OPENMW_VERSION}")
             else(MATCH)
