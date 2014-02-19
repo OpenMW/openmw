@@ -121,20 +121,6 @@ function(git_describe _var)
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if(NOT res EQUAL 0)
-        execute_process(COMMAND
-                        "${GIT_EXECUTABLE}"
-                        describe
-                        "--always"
-                        WORKING_DIRECTORY
-                        "${CMAKE_SOURCE_DIR}"
-                        RESULT_VARIABLE
-                        res
-                        OUTPUT_VARIABLE
-                        out
-                        OUTPUT_STRIP_TRAILING_WHITESPACE)
-    endif()
-
-    if(NOT res EQUAL 0)
         set(out "${out}-${res}-NOTFOUND")
     endif()
 

@@ -76,17 +76,20 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     QString revision(OPENMW_VERSION_COMMITHASH);
     QString tag(OPENMW_VERSION_TAGHASH);
 
-    if (revision == tag) {
-        versionLabel->setText(tr("OpenMW %0 release").arg(OPENMW_VERSION));
-    } else {
-        versionLabel->setText(tr("OpenMW development (%0)").arg(revision.left(10)));
-    }
+    if (!revision.isEmpty() && !tag.isEmpty())
+    {
+        if (revision == tag) {
+            versionLabel->setText(tr("OpenMW %0 release").arg(OPENMW_VERSION));
+        } else {
+            versionLabel->setText(tr("OpenMW development (%0)").arg(revision.left(10)));
+        }
 
-    // Add the compile date and time
-    versionLabel->setToolTip(tr("Compiled on %0 %1").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
-                                                                                    QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
-                                                         QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
-                                                                                    QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
+        // Add the compile date and time
+        versionLabel->setToolTip(tr("Compiled on %0 %1").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
+                                                                                        QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
+                                                             QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
+                                                                                        QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
+    }
 
     createIcons();
 }
