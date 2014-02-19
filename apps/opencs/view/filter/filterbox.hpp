@@ -1,9 +1,12 @@
 #ifndef CSV_FILTER_FILTERBOX_H
 #define CSV_FILTER_FILTERBOX_H
 
+#include <vector>
+
 #include <QWidget>
 
 #include "../../model/filter/node.hpp"
+#include "../../model/world/universalid.hpp"
 
 namespace CSMWorld
 {
@@ -29,6 +32,7 @@ namespace CSVFilter
         signals:
 
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
+            void recordDropped (const std::vector<CSMWorld::UniversalId::Type>& types);
     };
 
 }

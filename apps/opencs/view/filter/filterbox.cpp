@@ -6,6 +6,8 @@
 
 #include "recordfilterbox.hpp"
 
+#include <apps/opencs/model/world/tablemimedata.hpp>
+
 CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
 : QWidget (parent)
 {
@@ -28,7 +30,18 @@ CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
 
 void CSVFilter::FilterBox::dropEvent (QDropEvent* event)
 {
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
 
+    std::vector<CSMWorld::UniversalId> records = mime->getData();
+
+    std::vector<CSMWorld::UniversalId::Type> types;
+
+    for (std::vector<CSMWorld::UniversalId>::iterator it = records.begin(); it != records.end(); ++it)
+    {
+        types.push_back(it->getType());
+    }
+
+    emit recordDropped(types);
 }
 
 void CSVFilter::FilterBox::dragEnterEvent (QDragEnterEvent* event)
