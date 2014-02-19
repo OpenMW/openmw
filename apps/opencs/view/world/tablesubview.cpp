@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 
 #include "../../model/doc/document.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 #include "../filter/filterbox.hpp"
 #include "table.hpp"
@@ -60,6 +61,12 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     connect (filterBox,
         SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)),
         mTable, SLOT (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
+
+    connect(filterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&)),
+        this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&)));
+
+    connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&)),
+            filterBox, SLOT(createFilter(std::vector<std::pair<std::string, std::vector<std::string> > >&)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
@@ -86,4 +93,18 @@ void CSVWorld::TableSubView::setStatusBar (bool show)
 void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
 {
     emit cloneRequest(toClone.getId(), toClone.getType());
+}
+
+void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::UniversalId>& types)
+{
+    std::vector<std::pair<std::string, std::vector<std::string> > > filterSource;
+
+    for (std::vector<CSMWorld::UniversalId>::iterator it = types.begin(); it != types.end(); ++it)
+    {
+        std::pair<std::string, std::vector<std::string> > pair(                         //splited long line
+        std::make_pair(it->getId(), mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(it->getType()))));
+
+        filterSource.push_back(pair);
+    }
+    emit createFilterRequest(filterSource);
 }

@@ -29,10 +29,13 @@ namespace CSVFilter
 
             FilterBox (CSMWorld::Data& data, QWidget *parent = 0);
 
+    public slots:
+        void createFilter(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource);
+
         signals:
 
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
-            void recordDropped (const std::vector<CSMWorld::UniversalId::Type>& types);
+            void recordDropped (std::vector<CSMWorld::UniversalId>& types);
     };
 
 }

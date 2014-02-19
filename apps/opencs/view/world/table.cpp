@@ -507,3 +507,21 @@ void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
 {
         event->accept();
 }
+
+std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const
+{
+    int count = mModel->columnCount();
+
+    std::vector<std::string> titles;
+    for (int i = 0; i < count; ++i)
+    {
+        CSMWorld::ColumnBase::Display columndisplay = static_cast<CSMWorld::ColumnBase::Display>
+                                                     (mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+
+        if (display == columndisplay)
+        {
+            titles.push_back(mModel->headerData (i, Qt::Horizontal).toString().toStdString());
+        }
+    }
+    return titles;
+}

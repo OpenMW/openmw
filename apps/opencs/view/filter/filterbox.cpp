@@ -30,18 +30,9 @@ CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
 
 void CSVFilter::FilterBox::dropEvent (QDropEvent* event)
 {
-    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    std::vector<CSMWorld::UniversalId> data = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->getData();
 
-    std::vector<CSMWorld::UniversalId> records = mime->getData();
-
-    std::vector<CSMWorld::UniversalId::Type> types;
-
-    for (std::vector<CSMWorld::UniversalId>::iterator it = records.begin(); it != records.end(); ++it)
-    {
-        types.push_back(it->getType());
-    }
-
-    emit recordDropped(types);
+    emit recordDropped(data);
 }
 
 void CSVFilter::FilterBox::dragEnterEvent (QDragEnterEvent* event)
@@ -52,4 +43,18 @@ void CSVFilter::FilterBox::dragEnterEvent (QDragEnterEvent* event)
 void CSVFilter::FilterBox::dragMoveEvent (QDragMoveEvent* event)
 {
     event->accept();
+}
+
+void CSVFilter::FilterBox::createFilter (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource)
+{
+    for (unsigned i = 0; i < filterSource.size(); ++i) //test
+    {
+        std::cout<<filterSource[i].first<<std::endl;
+        std::cout<<"Columns:\n";
+        for (unsigned j = 0; j < filterSource[i].second.size(); ++j)
+        {
+            std::cout<<filterSource[i].second[j]<<std::endl;
+        }
+        std::cout<<"\n";
+    }
 }

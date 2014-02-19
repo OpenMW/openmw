@@ -42,11 +42,13 @@ namespace CSVWorld
         signals:
             void cloneRequest(const std::string&,
                               const CSMWorld::UniversalId::Type);
+            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource);
 
         private slots:
 
             void editRequest (int row);
             void cloneRequest (const CSMWorld::UniversalId& toClone);
+            void createFilterRequest(std::vector< CSMWorld::UniversalId >& types);
     };
 }
 
