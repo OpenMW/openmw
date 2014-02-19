@@ -1,10 +1,10 @@
 #include <iostream>
 #include <cstdio>
 
+#include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
 
-#include <SDL_messagebox.h>
-#include <SDL_main.h>
+#include <SDL.h>
 #include "engine.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
@@ -12,6 +12,7 @@
 #include <boost/iostreams/stream_buffer.hpp>
 
 // For OutputDebugString
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
@@ -29,8 +30,6 @@ extern int is_debugger_attached(void);
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <OSX/macUtils.h>
 #endif
-
-#include "config.hpp"
 
 #include <boost/version.hpp>
 /**
@@ -116,16 +115,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("resources", bpo::value<std::string>()->default_value("resources"),
             "set resources directory")
 
-        ("start", bpo::value<std::string>()->default_value("Beshara"),
+        ("start", bpo::value<std::string>()->default_value(""),
             "set initial cell")
 
         ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
             ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
-        ("anim-verbose", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "output animation indices files")
-
-        ("nosound", bpo::value<bool>()->implicit_value(true)
+        ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
         ("script-verbose", bpo::value<bool>()->implicit_value(true)
@@ -140,8 +136,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-run", bpo::value<std::string>()->default_value(""),
             "select a file containing a list of console commands that is executed on startup")
 
-        ("new-game", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "activate char gen/new game mechanics")
+        ("script-warn", bpo::value<int>()->implicit_value (1)
+            ->default_value (1),
+            "handling of warnings when compiling scripts\n"
+            "\t0 - ignore warning\n"
+            "\t1 - show warning but consider script as correctly compiled anyway\n"
+            "\t2 - treat warnings as errors")
+
+        ("skip-menu", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "skip main menu on game startup")
 
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
@@ -169,8 +172,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    cfgMgr.readConfiguration(variables, desc);
-
     bool run = true;
 
     if (variables.count ("help"))
@@ -187,6 +188,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    cfgMgr.readConfiguration(variables, desc);
 
     engine.setGrabMouse(!variables.count("no-grab"));
 
@@ -235,17 +238,17 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setNewGame(variables["new-game"].as<bool>());
+    engine.setSkipMenu (variables["skip-menu"].as<bool>());
 
     // other settings
-    engine.setSoundUsage(!variables["nosound"].as<bool>());
+    engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
-    engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
+    engine.setWarningsMode (variables["script-warn"].as<int>());
 
     return true;
 }
@@ -283,7 +286,7 @@ int main(int argc, char**argv)
     catch (std::exception &e)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        if (isatty(fileno(stdin)))
+        if (isatty(fileno(stdin)) || !SDL_WasInit(SDL_INIT_VIDEO))
             std::cerr << "\nERROR: " << e.what() << std::endl;
         else
 #endif

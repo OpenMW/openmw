@@ -2221,7 +2221,7 @@ void CSMDoc::Document::createBase()
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, const boost::filesystem::path& resDir, bool new_)
     : mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
-      mProjectPath ((configuration.getUserPath() / "projects") /
+      mProjectPath ((configuration.getUserDataPath() / "projects") /
                     (savePath.filename().string() + ".project")),
       mSaving (*this, mProjectPath)
 {
@@ -2254,7 +2254,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
     }
     else
     {
-        boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
+        boost::filesystem::path locCustomFiltersPath (configuration.getUserDataPath());
         locCustomFiltersPath /= "defaultfilters";
 
         if (boost::filesystem::exists(locCustomFiltersPath))

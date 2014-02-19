@@ -131,7 +131,7 @@ CSMWorld::RecordBase& CSMWorld::RefIdData::getRecord (const LocalIndex& index)
     return iter->second->getRecord (index.first);
 }
 
-void CSMWorld::RefIdData::appendRecord (UniversalId::Type type, const std::string& id)
+void CSMWorld::RefIdData::appendRecord (UniversalId::Type type, const std::string& id, bool base)
 {
     std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
         mRecordContainers.find (type);
@@ -139,7 +139,7 @@ void CSMWorld::RefIdData::appendRecord (UniversalId::Type type, const std::strin
     if (iter==mRecordContainers.end())
         throw std::logic_error ("invalid local index type");
 
-    iter->second->appendRecord (id);
+    iter->second->appendRecord (id, base);
 
     mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id),
         LocalIndex (iter->second->getSize()-1, type)));
@@ -230,4 +230,118 @@ void CSMWorld::RefIdData::save (int index, ESM::ESMWriter& writer) const
         throw std::logic_error ("invalid local index type");
 
     iter->second->save (localIndex.first, writer);
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Book >& CSMWorld::RefIdData::getBooks() const
+{
+    return mBooks;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Activator >& CSMWorld::RefIdData::getActivators() const
+{
+    return mActivators;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Potion >& CSMWorld::RefIdData::getPotions() const
+{
+    return mPotions;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Apparatus >& CSMWorld::RefIdData::getApparati() const
+{
+    return mApparati;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Armor >& CSMWorld::RefIdData::getArmors() const
+{
+    return mArmors;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Clothing >& CSMWorld::RefIdData::getClothing() const
+{
+    return mClothing;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Container >& CSMWorld::RefIdData::getContainers() const
+{
+    return mContainers;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Creature >& CSMWorld::RefIdData::getCreatures() const
+{
+    return mCreatures;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Door >& CSMWorld::RefIdData::getDoors() const
+{
+    return mDoors;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Ingredient >& CSMWorld::RefIdData::getIngredients() const
+{
+    return mIngredients;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::CreatureLevList >& CSMWorld::RefIdData::getCreatureLevelledLists() const
+{
+    return mCreatureLevelledLists;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::ItemLevList >& CSMWorld::RefIdData::getItemLevelledList() const
+{
+    return mItemLevelledLists;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Light >& CSMWorld::RefIdData::getLights() const
+{
+    return mLights;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Lockpick >& CSMWorld::RefIdData::getLocpicks() const
+{
+    return mLockpicks;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Miscellaneous >& CSMWorld::RefIdData::getMiscellaneous() const
+{
+    return mMiscellaneous;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::NPC >& CSMWorld::RefIdData::getNPCs() const
+{
+    return mNpcs;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Weapon >& CSMWorld::RefIdData::getWeapons() const
+{
+    return mWeapons;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Probe >& CSMWorld::RefIdData::getProbes() const
+{
+    return mProbes;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Repair >& CSMWorld::RefIdData::getRepairs() const
+{
+    return mRepairs;
+}
+
+const CSMWorld::RefIdDataContainer< ESM::Static >& CSMWorld::RefIdData::getStatics() const
+{
+    return mStatics;
+}
+
+void CSMWorld::RefIdData::insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id)
+{
+  std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
+        mRecordContainers.find (type);
+
+    if (iter==mRecordContainers.end())
+        throw std::logic_error ("invalid local index type");
+
+    iter->second->insertRecord(record);
+
+    mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id),
+        LocalIndex (iter->second->getSize()-1, type)));
 }

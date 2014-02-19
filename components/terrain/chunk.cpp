@@ -18,11 +18,13 @@ namespace Terrain
         mVertexData = OGRE_NEW Ogre::VertexData;
         mVertexData->vertexStart = 0;
 
+        unsigned int verts = mNode->getTerrain()->getStorage()->getCellVertices();
+
         // Set the total number of vertices
-        size_t numVertsOneSide = mNode->getSize() * (ESM::Land::LAND_SIZE-1);
+        size_t numVertsOneSide = mNode->getSize() * (verts-1);
         numVertsOneSide /= 1 << lodLevel;
         numVertsOneSide += 1;
-        assert((int)numVertsOneSide == ESM::Land::LAND_SIZE);
+        assert(numVertsOneSide == verts);
         mVertexData->vertexCount = numVertsOneSide * numVertsOneSide;
 
         // Set up the vertex declaration, which specifies the info for each vertex (normals, colors, UVs, etc)

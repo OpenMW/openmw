@@ -1,9 +1,5 @@
-#include <boost/algorithm/string.hpp>
-
-#include <OgreMath.h>
 #include <OgreSceneNode.h>
 
-#include "../mwworld/esmstore.hpp"
 #include <components/esm/loadcell.hpp>
 
 #include <components/compiler/extensions.hpp>
@@ -16,8 +12,9 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -208,6 +205,14 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
+
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float pos = runtime[0].mFloat;
@@ -272,6 +277,14 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
+
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
                     Interpreter::Type_Float y = runtime[0].mFloat;
@@ -328,6 +341,14 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
 
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
@@ -458,7 +479,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr actor = pc
-                        ? MWBase::Environment::get().getWorld()->getPlayer().getPlayer()
+                        ? MWBase::Environment::get().getWorld()->getPlayerPtr()
                         : R()(runtime);
 
                     std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -593,6 +614,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
+
                     ptr.getRefData().getLocalRotation().rot[0] = 0;
                     ptr.getRefData().getLocalRotation().rot[1] = 0;
                     ptr.getRefData().getLocalRotation().rot[2] = 0;
@@ -611,6 +636,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     const MWWorld::Ptr& ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -646,6 +674,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();

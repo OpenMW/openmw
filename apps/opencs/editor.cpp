@@ -86,10 +86,6 @@ void CS::Editor::setupDataFiles()
         return;
     }
 
-    // Set the charset for reading the esm/esp files
-    // QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
-    //mFileDialog.setEncoding(encoding);
-
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     mDocumentManager.setResourceDir (variables["resources"].as<std::string>());
@@ -214,6 +210,8 @@ int CS::Editor::run()
     if (mLocal.empty())
         return 1;
 
+// temporarily disable OGRE-integration (need to fix path problem first)
+#if 0
     // TODO: setting
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName("OpenGL Rendering Subsystem"));
 
@@ -225,8 +223,12 @@ int CS::Editor::run()
     params.insert(std::make_pair("FSAA", "0"));
     params.insert(std::make_pair("vsync", "false"));
     params.insert(std::make_pair("hidden", "true"));
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    params.insert(std::make_pair("macAPI", "cocoa"));
+#endif
     Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
     hiddenWindow->setActive(false);
+#endif
 
     mStartup.show();
 

@@ -38,6 +38,7 @@ public:
   int getFormat() const;
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
+  std::string getName() const;
 
   /*************************************************************************
    *

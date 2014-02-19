@@ -56,9 +56,9 @@ namespace MWWorld
             void playerCellChange (CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
 
-            void insertCell (Ptr::CellStore &cell, bool rescale, Loading::Listener* loadingListener);
+            void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
-            int countRefs (const Ptr::CellStore& cell);
+            int countRefs (const CellStore& cell);
 
         public:
 
@@ -71,8 +71,6 @@ namespace MWWorld
             void loadCell (CellStore *cell, Loading::Listener* loadingListener);
 
             void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
-            ///< Move from exterior to interior or from interior cell to a different
-            /// interior cell.
 
             CellStore* getCurrentCell ();
 

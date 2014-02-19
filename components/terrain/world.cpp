@@ -6,7 +6,6 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
 
-#include <components/esm/loadland.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include "storage.hpp"
@@ -114,9 +113,10 @@ namespace Terrain
             // We arrived at a leaf
             float minZ,maxZ;
             Ogre::Vector2 center = node->getCenter();
+            float cellWorldSize = getStorage()->getCellWorldSize();
             if (mStorage->getMinMaxHeights(node->getSize(), center, minZ, maxZ))
-                node->setBoundingBox(Ogre::AxisAlignedBox(Ogre::Vector3(-halfSize*8192, -halfSize*8192, minZ),
-                                                          Ogre::Vector3(halfSize*8192, halfSize*8192, maxZ)));
+                node->setBoundingBox(Ogre::AxisAlignedBox(Ogre::Vector3(-halfSize*cellWorldSize, -halfSize*cellWorldSize, minZ),
+                                                          Ogre::Vector3(halfSize*cellWorldSize, halfSize*cellWorldSize, maxZ)));
             else
                 node->markAsDummy(); // no data available for this node, skip it
             return;
@@ -169,8 +169,9 @@ namespace Terrain
             return Ogre::AxisAlignedBox::BOX_NULL;
         QuadTreeNode* node = findNode(center, mRootNode);
         Ogre::AxisAlignedBox box = node->getBoundingBox();
-        box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * 8192,
-                       box.getMaximum() + Ogre::Vector3(center.x, center.y, 0) * 8192);
+        float cellWorldSize = getStorage()->getCellWorldSize();
+        box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize,
+                       box.getMaximum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize);
         return box;
     }
 
@@ -208,6 +209,8 @@ namespace Terrain
 
     Ogre::HardwareIndexBufferSharedPtr World::getIndexBuffer(int flags, size_t& numIndices)
     {
+        unsigned int verts = mStorage->getCellVertices();
+
         if (mIndexBufferMap.find(flags) != mIndexBufferMap.end())
         {
             numIndices = mIndexBufferMap[flags]->getNumIndexes();
@@ -224,11 +227,11 @@ namespace Terrain
         bool anyDeltas = (lodDeltas[North] || lodDeltas[South] || lodDeltas[West] || lodDeltas[East]);
 
         size_t increment = 1 << lodLevel;
-        assert((int)increment < ESM::Land::LAND_SIZE);
+        assert(increment < verts);
         std::vector<short> indices;
-        indices.reserve((ESM::Land::LAND_SIZE-1)*(ESM::Land::LAND_SIZE-1)*2*3 / increment);
+        indices.reserve((verts-1)*(verts-1)*2*3 / increment);
 
-        size_t rowStart = 0, colStart = 0, rowEnd = ESM::Land::LAND_SIZE-1, colEnd = ESM::Land::LAND_SIZE-1;
+        size_t rowStart = 0, colStart = 0, rowEnd = verts-1, colEnd = verts-1;
         // If any edge needs stitching we'll skip all edges at this point,
         // mainly because stitching one edge would have an effect on corners and on the adjacent edges
         if (anyDeltas)
@@ -242,13 +245,13 @@ namespace Terrain
         {
             for (size_t col = colStart; col < colEnd; col += increment)
             {
-                indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                indices.push_back(ESM::Land::LAND_SIZE*(col+increment)+row+increment);
-                indices.push_back(ESM::Land::LAND_SIZE*col+row+increment);
+                indices.push_back(verts*col+row);
+                indices.push_back(verts*(col+increment)+row+increment);
+                indices.push_back(verts*col+row+increment);
 
-                indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                indices.push_back(ESM::Land::LAND_SIZE*(col+increment)+row);
-                indices.push_back(ESM::Land::LAND_SIZE*(col+increment)+row+increment);
+                indices.push_back(verts*col+row);
+                indices.push_back(verts*(col+increment)+row);
+                indices.push_back(verts*(col+increment)+row+increment);
             }
         }
 
@@ -261,96 +264,96 @@ namespace Terrain
             // South
             size_t row = 0;
             size_t outerStep = 1 << (lodDeltas[South] + lodLevel);
-            for (size_t col = 0; col < ESM::Land::LAND_SIZE-1; col += outerStep)
+            for (size_t col = 0; col < verts-1; col += outerStep)
             {
-                indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
+                indices.push_back(verts*col+row);
+                indices.push_back(verts*(col+outerStep)+row);
                 // Make sure not to touch the right edge
-                if (col+outerStep == ESM::Land::LAND_SIZE-1)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep-innerStep)+row+innerStep);
+                if (col+outerStep == verts-1)
+                    indices.push_back(verts*(col+outerStep-innerStep)+row+innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row+innerStep);
+                    indices.push_back(verts*(col+outerStep)+row+innerStep);
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the left or right edges
-                    if (col+i == 0 || col+i == ESM::Land::LAND_SIZE-1-innerStep)
+                    if (col+i == 0 || col+i == verts-1-innerStep)
                         continue;
-                    indices.push_back(ESM::Land::LAND_SIZE*(col)+row);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+i+innerStep)+row+innerStep);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+i)+row+innerStep);
+                    indices.push_back(verts*(col)+row);
+                    indices.push_back(verts*(col+i+innerStep)+row+innerStep);
+                    indices.push_back(verts*(col+i)+row+innerStep);
                 }
             }
 
             // North
-            row = ESM::Land::LAND_SIZE-1;
+            row = verts-1;
             outerStep = 1 << (lodDeltas[North] + lodLevel);
-            for (size_t col = 0; col < ESM::Land::LAND_SIZE-1; col += outerStep)
+            for (size_t col = 0; col < verts-1; col += outerStep)
             {
-                indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
-                indices.push_back(ESM::Land::LAND_SIZE*col+row);
+                indices.push_back(verts*(col+outerStep)+row);
+                indices.push_back(verts*col+row);
                 // Make sure not to touch the left edge
                 if (col == 0)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row-innerStep);
+                    indices.push_back(verts*(col+innerStep)+row-innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*col+row-innerStep);
+                    indices.push_back(verts*col+row-innerStep);
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the left or right edges
-                    if (col+i == 0 || col+i == ESM::Land::LAND_SIZE-1-innerStep)
+                    if (col+i == 0 || col+i == verts-1-innerStep)
                         continue;
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+i)+row-innerStep);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+i+innerStep)+row-innerStep);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
+                    indices.push_back(verts*(col+i)+row-innerStep);
+                    indices.push_back(verts*(col+i+innerStep)+row-innerStep);
+                    indices.push_back(verts*(col+outerStep)+row);
                 }
             }
 
             // West
             size_t col = 0;
             outerStep = 1 << (lodDeltas[West] + lodLevel);
-            for (size_t row = 0; row < ESM::Land::LAND_SIZE-1; row += outerStep)
+            for (size_t row = 0; row < verts-1; row += outerStep)
             {
-                indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
-                indices.push_back(ESM::Land::LAND_SIZE*col+row);
+                indices.push_back(verts*col+row+outerStep);
+                indices.push_back(verts*col+row);
                 // Make sure not to touch the top edge
-                if (row+outerStep == ESM::Land::LAND_SIZE-1)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+outerStep-innerStep);
+                if (row+outerStep == verts-1)
+                    indices.push_back(verts*(col+innerStep)+row+outerStep-innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+outerStep);
+                    indices.push_back(verts*(col+innerStep)+row+outerStep);
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the top or bottom edges
-                    if (row+i == 0 || row+i == ESM::Land::LAND_SIZE-1-innerStep)
+                    if (row+i == 0 || row+i == verts-1-innerStep)
                         continue;
-                    indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+i);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+i+innerStep);
+                    indices.push_back(verts*col+row);
+                    indices.push_back(verts*(col+innerStep)+row+i);
+                    indices.push_back(verts*(col+innerStep)+row+i+innerStep);
                 }
             }
 
             // East
-            col = ESM::Land::LAND_SIZE-1;
+            col = verts-1;
             outerStep = 1 << (lodDeltas[East] + lodLevel);
-            for (size_t row = 0; row < ESM::Land::LAND_SIZE-1; row += outerStep)
+            for (size_t row = 0; row < verts-1; row += outerStep)
             {
-                indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
+                indices.push_back(verts*col+row);
+                indices.push_back(verts*col+row+outerStep);
                 // Make sure not to touch the bottom edge
                 if (row == 0)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+innerStep);
+                    indices.push_back(verts*(col-innerStep)+row+innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row);
+                    indices.push_back(verts*(col-innerStep)+row);
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the top or bottom edges
-                    if (row+i == 0 || row+i == ESM::Land::LAND_SIZE-1-innerStep)
+                    if (row+i == 0 || row+i == verts-1-innerStep)
                         continue;
-                    indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+i+innerStep);
-                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+i);
+                    indices.push_back(verts*col+row+outerStep);
+                    indices.push_back(verts*(col-innerStep)+row+i+innerStep);
+                    indices.push_back(verts*(col-innerStep)+row+i);
                 }
             }
         }

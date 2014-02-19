@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_ANIMATION_H
-#define _GAME_RENDER_ANIMATION_H
+#ifndef GAME_RENDER_ANIMATION_H
+#define GAME_RENDER_ANIMATION_H
 
 #include <OgreController.h>
 #include <OgreVector3.h>
@@ -32,14 +32,14 @@ protected:
     /* This is the number of *discrete* groups. */
     static const size_t sNumGroups = 4;
 
-    class AnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class AnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     private:
         Animation *mAnimation;
         std::string mAnimationName;
 
     public:
-        AnimationValue(Animation *anim)
+        AnimationTime(Animation *anim)
           : mAnimation(anim)
         { }
 
@@ -52,12 +52,12 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-    class EffectAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class EffectAnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     private:
         float mTime;
     public:
-        EffectAnimationValue() : mTime(0) {  }
+        EffectAnimationTime() : mTime(0) {  }
         void addTime(float time) { mTime += time; }
         void resetTime(float value) { mTime = value; }
 
@@ -67,7 +67,7 @@ protected:
 
 
 
-    class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    class NullAnimationTime : public Ogre::ControllerValue<Ogre::Real>
     {
     public:
         virtual Ogre::Real getValue() const
@@ -112,7 +112,7 @@ protected:
     struct EffectParams
     {
         std::string mModelName; // Just here so we don't add the same effect twice
-        NifOgre::ObjectList mObjects;
+        NifOgre::ObjectScenePtr mObjects;
         int mEffectId;
         bool mLoop;
         std::string mBoneName;
@@ -121,11 +121,10 @@ protected:
     std::vector<EffectParams> mEffects;
 
     MWWorld::Ptr mPtr;
-    Camera *mCamera;
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
-    NifOgre::ObjectList mObjectRoot;
+    NifOgre::ObjectScenePtr mObjectRoot;
     AnimSourceList mAnimSources;
     Ogre::Node *mAccumRoot;
     Ogre::Node *mNonAccumRoot;
@@ -134,8 +133,8 @@ protected:
 
     AnimStateMap mStates;
 
-    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
-    Ogre::SharedPtr<NullAnimationValue> mNullAnimationValuePtr;
+    Ogre::SharedPtr<AnimationTime> mAnimationTimePtr[sNumGroups];
+    Ogre::SharedPtr<NullAnimationTime> mNullAnimationTimePtr;
 
     ObjectAttachMap mAttachedObjects;
 
@@ -187,13 +186,7 @@ protected:
     void addAnimSource(const std::string &model);
 
     /** Adds an additional light to the given object list using the specified ESM record. */
-    void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light);
-
-    static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
-
-    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
-                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
-                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
+    void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light);
 
     void clearAnimSources();
 
@@ -201,6 +194,12 @@ protected:
     Ogre::Vector3 getEnchantmentColor(MWWorld::Ptr item);
 
 public:
+    // FIXME: Move outside of this class
+    static void setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
+                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
+                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
+
+
     Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
     virtual ~Animation();
 
@@ -217,6 +216,11 @@ public:
     void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
+
+    /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
+    virtual void preRender (Ogre::Camera* camera);
+
+    virtual void setAlpha(float alpha) {}
 private:
     void updateEffects(float duration);
 
@@ -255,6 +259,9 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
+    //Checks if playing any animation which shouldn't be stopped when switching camera view modes
+    bool allowSwitchViewMode() const;
+
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
      * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
@@ -263,25 +270,36 @@ public:
      */
     bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
 
+    /// Get the absolute position in the animation track of the first text key with the given group.
+    float getStartTime(const std::string &groupname) const;
+
+    /// Get the current absolute position in the animation track for the animation that is currently playing from the given group.
+    float getCurrentTime(const std::string& groupname) const;
+
     /** Disables the specified animation group;
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
+    void changeGroups(const std::string &groupname, int group);
+
+    virtual void setWeaponGroup(const std::string& group) {}
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
 
+    /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
+    /// to indicate the facing orientation of the character.
+    virtual void setPitchFactor(float factor) {}
+
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showShield(bool show) {}
-
+    virtual void showCarriedLeft(bool show) {}
+    virtual void attachArrow() {}
+    virtual void releaseArrow() {}
     void enableLights(bool enable);
 
     Ogre::AxisAlignedBox getWorldBounds();
-
-    void setCamera(Camera *cam)
-    { mCamera = cam; }
 
     Ogre::Node *getNode(const std::string &name);
 

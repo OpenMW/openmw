@@ -12,10 +12,10 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
+#include <components/esm/npcstats.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -23,42 +23,17 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mMovementFlags (0)
-, mDrawState (DrawState_Nothing)
-, mBounty (0)
+    : mBounty (0)
 , mLevelProgress(0)
 , mDisposition(0)
-, mVampire (0)
 , mReputation(0)
 , mWerewolfKills (0)
 , mProfit(0)
-, mAttackStrength(0.0f)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
+, mLevelHealthBonus(0)
 {
-    mSkillIncreases.resize (ESM::Attribute::Length);
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-        mSkillIncreases[i] = 0;
-}
-
-MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
-{
-    return mDrawState;
-}
-
-void MWMechanics::NpcStats::setDrawState (DrawState_ state)
-{
-    mDrawState = state;
-}
-
-float MWMechanics::NpcStats::getAttackStrength() const
-{
-    return mAttackStrength;
-}
-
-void MWMechanics::NpcStats::setAttackStrength(float value)
-{
-    mAttackStrength = value;
+    mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
 
 int MWMechanics::NpcStats::getBaseDisposition() const
@@ -71,30 +46,17 @@ void MWMechanics::NpcStats::setBaseDisposition(int disposition)
     mDisposition = disposition;
 }
 
-bool MWMechanics::NpcStats::getMovementFlag (Flag flag) const
+const MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index) const
 {
-    return mMovementFlags & flag;
-}
-
-void MWMechanics::NpcStats::setMovementFlag (Flag flag, bool state)
-{
-    if (state)
-        mMovementFlags |= flag;
-    else
-        mMovementFlags &= ~flag;
-}
-
-const MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index) const
-{
-    if (index<0 || index>=27)
+    if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
     return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
 }
 
-MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
+MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index)
 {
-    if (index<0 || index>=27)
+    if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
     return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
@@ -110,14 +72,26 @@ std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
     return mFactionRank;
 }
 
-const std::set<std::string>& MWMechanics::NpcStats::getExpelled() const
+bool MWMechanics::NpcStats::getExpelled(const std::string& factionID) const
 {
-    return mExpelled;
+    return mExpelled.find(Misc::StringUtils::lowerCase(factionID)) != mExpelled.end();
 }
 
-std::set<std::string>& MWMechanics::NpcStats::getExpelled()
+void MWMechanics::NpcStats::expell(const std::string& factionID)
 {
-    return mExpelled;
+    std::string lower = Misc::StringUtils::lowerCase(factionID);
+    if (mExpelled.find(lower) == mExpelled.end())
+    {
+        std::string message = "#{sExpelledMessage}";
+        message += MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID)->mName;
+        MWBase::Environment::get().getWindowManager()->messageBox(message);
+        mExpelled.insert(lower);
+    }
+}
+
+void MWMechanics::NpcStats::clearExpelled(const std::string& factionID)
+{
+    mExpelled.erase(Misc::StringUtils::lowerCase(factionID));
 }
 
 bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
@@ -197,69 +171,73 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     if(mIsWerewolf)
         return;
 
-    float base = getSkill (skillIndex).getBase();
+    MWMechanics::SkillValue& value = getSkill (skillIndex);
 
-    int level = static_cast<int> (base);
+    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType));
 
-    base += getSkillGain (skillIndex, class_, usageType);
-
-    if (static_cast<int> (base)!=level)
+    if (value.getProgress()>=1)
     {
         // skill leveled up
         increaseSkill(skillIndex, class_, false);
     }
-    else
-        getSkill (skillIndex).setBase (base);
 }
 
 void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &class_, bool preserveProgress)
 {
-    float base = getSkill (skillIndex).getBase();
+    int base = getSkill (skillIndex).getBase();
 
-    int level = static_cast<int> (base);
-
-    if (level >= 100)
+    if (base >= 100)
         return;
 
-    if (preserveProgress)
-        base += 1;
-    else
-        base = level+1;
+    base += 1;
 
-    // if this is a major or minor skill of the class, increase level progress
-    bool levelProgress = false;
-    for (int i=0; i<2; ++i)
-        for (int j=0; j<5; ++j)
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    // is this a minor or major skill?
+    int increase = gmst.find("iLevelupMiscMultAttriubte")->getInt(); // Note: GMST has a typo
+    for (int k=0; k<5; ++k)
+    {
+        if (class_.mData.mSkills[k][0] == skillIndex)
         {
-            int skill = class_.mData.mSkills[j][i];
-            if (skill == skillIndex)
-                levelProgress = true;
+            mLevelProgress += gmst.find("iLevelUpMinorMult")->getInt();
+            increase = gmst.find("iLevelUpMajorMultAttribute")->getInt();
         }
+    }
+    for (int k=0; k<5; ++k)
+    {
+        if (class_.mData.mSkills[k][1] == skillIndex)
+        {
+            mLevelProgress += gmst.find("iLevelUpMajorMult")->getInt();
+            increase = gmst.find("iLevelUpMinorMultAttribute")->getInt();
+        }
+    }
 
-    mLevelProgress += levelProgress;
-
-    // check the attribute this skill belongs to
     const ESM::Skill* skill =
         MWBase::Environment::get().getWorld ()->getStore ().get<ESM::Skill>().find(skillIndex);
-    ++mSkillIncreases[skill->mData.mAttribute];
+    mSkillIncreases[skill->mData.mAttribute] += increase;
 
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
 
+    std::vector <std::string> noButtons;
+
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), noButtons, MWGui::ShowInDialogueMode_Never);
 
-    if (mLevelProgress >= 10)
+    if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", noButtons, MWGui::ShowInDialogueMode_Never);
     }
 
     getSkill (skillIndex).setBase (base);
+    if (!preserveProgress)
+        getSkill(skillIndex).setProgress(0);
 }
 
 int MWMechanics::NpcStats::getLevelProgress () const
@@ -272,22 +250,43 @@ void MWMechanics::NpcStats::levelUp()
     mLevelProgress -= 10;
     for (int i=0; i<ESM::Attribute::Length; ++i)
         mSkillIncreases[i] = 0;
+
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+
+    // "When you gain a level, in addition to increasing three primary attributes, your Health
+    // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
+    // the Health increase is calculated from the increased Endurance"
+    mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
+    updateHealth();
+
+    setLevel(getLevel()+1);
+}
+
+void MWMechanics::NpcStats::updateHealth()
+{
+    const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+    const int strength = getAttribute(ESM::Attribute::Strength).getBase();
+
+    setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
 }
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
 {
-    // Source: http://www.uesp.net/wiki/Morrowind:Level#How_to_Level_Up
     int num = mSkillIncreases[attribute];
-    if (num <= 1)
+
+    if (num == 0)
         return 1;
-    else if (num <= 4)
-        return 2;
-    else if (num <= 7)
-        return 3;
-    else if (num <= 9)
-        return 4;
-    else
-        return 5;
+
+    num = std::min(10, num);
+
+    // iLevelUp01Mult - iLevelUp10Mult
+    std::stringstream gmst;
+    gmst << "iLevelUp" << std::setfill('0') << std::setw(2) << num << "Mult";
+
+    return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(gmst.str())->getInt();
 }
 
 void MWMechanics::NpcStats::flagAsUsed (const std::string& id)
@@ -302,12 +301,16 @@ bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
 
 int MWMechanics::NpcStats::getBounty() const
 {
-    return mBounty;
+    if (mIsWerewolf)
+        return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt();
+    else
+        return mBounty;
 }
 
 void MWMechanics::NpcStats::setBounty (int bounty)
 {
-    mBounty = bounty;
+    if (!mIsWerewolf)
+        mBounty = bounty;
 }
 
 int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
@@ -323,16 +326,6 @@ int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) con
 void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, int value)
 {
     mFactionReputation[faction] = value;
-}
-
-bool MWMechanics::NpcStats::isVampire() const
-{
-    return mVampire;
-}
-
-void MWMechanics::NpcStats::setVampire (bool set)
-{
-    mVampire = set;
 }
 
 int MWMechanics::NpcStats::getReputation() const
@@ -387,7 +380,7 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
             // Oh, Bethesda. It's "Intelligence".
             std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
                                             ESM::Attribute::sAttributeNames[i]);
-            mWerewolfAttributes[i].setModified(int(gmst.find(name)->getFloat()), 0);
+            mWerewolfAttributes[i].setBase(int(gmst.find(name)->getFloat()));
         }
 
         for(size_t i = 0;i < ESM::Skill::Length;i++)
@@ -401,7 +394,7 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
             // "Mercantile"! >_<
             std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
                                             ESM::Skill::sSkillNames[i]);
-            mWerewolfSkill[i].setModified(int(gmst.find(name)->getFloat()), 0);
+            mWerewolfSkill[i].setBase(int(gmst.find(name)->getFloat()));
         }
     }
     mIsWerewolf = set;
@@ -430,4 +423,90 @@ void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
 {
     assert(time>=0 && time<=20);
     mTimeToStartDrowning=time;
+}
+
+void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
+{
+    for (std::map<std::string, int>::const_iterator iter (mFactionRank.begin());
+        iter!=mFactionRank.end(); ++iter)
+        state.mFactions[iter->first].mRank = iter->second;
+
+    state.mDisposition = mDisposition;
+
+    for (int i=0; i<27; ++i)
+    {
+        mSkill[i].writeState (state.mSkills[i].mRegular);
+        mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
+    }
+
+    state.mBounty = mBounty;
+
+    for (std::set<std::string>::const_iterator iter (mExpelled.begin());
+        iter!=mExpelled.end(); ++iter)
+        state.mFactions[*iter].mExpelled = true;
+
+    for (std::map<std::string, int>::const_iterator iter (mFactionReputation.begin());
+        iter!=mFactionReputation.end(); ++iter)
+        state.mFactions[iter->first].mReputation = iter->second;
+
+    state.mReputation = mReputation;
+    state.mWerewolfKills = mWerewolfKills;
+    state.mProfit = mProfit;
+    state.mAttackStrength = mAttackStrength;
+    state.mLevelProgress = mLevelProgress;
+
+    for (int i=0; i<8; ++i)
+        state.mSkillIncrease[i] = mSkillIncreases[i];
+
+    std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
+
+    state.mTimeToStartDrowning = mTimeToStartDrowning;
+    state.mLastDrowningHit = mLastDrowningHit;
+    state.mLevelHealthBonus = mLevelHealthBonus;
+}
+
+void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
+{
+    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+    for (std::map<std::string, ESM::NpcStats::Faction>::const_iterator iter (state.mFactions.begin());
+        iter!=state.mFactions.end(); ++iter)
+        if (store.get<ESM::Faction>().search (iter->first))
+        {
+            if (iter->second.mExpelled)
+                mExpelled.insert (iter->first);
+
+            if (iter->second.mRank)
+                mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
+
+            if (iter->second.mReputation)
+                mFactionReputation.insert (std::make_pair (iter->first, iter->second.mReputation));
+        }
+
+    mDisposition = state.mDisposition;
+
+    for (int i=0; i<27; ++i)
+    {
+        mSkill[i].readState (state.mSkills[i].mRegular);
+        mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
+    }
+
+    mBounty = state.mBounty;
+    mReputation = state.mReputation;
+    mWerewolfKills = state.mWerewolfKills;
+    mProfit = state.mProfit;
+    mAttackStrength = state.mAttackStrength;
+    mLevelProgress = state.mLevelProgress;
+
+    for (int i=0; i<8; ++i)
+        mSkillIncreases[i] = state.mSkillIncrease[i];
+
+    for (std::vector<std::string>::const_iterator iter (state.mUsedIds.begin());
+        iter!=state.mUsedIds.end(); ++iter)
+        if (store.find (*iter))
+            mUsedIds.insert (*iter);
+
+    mTimeToStartDrowning = state.mTimeToStartDrowning;
+    mLastDrowningHit = state.mLastDrowningHit;
+    mLevelHealthBonus = state.mLevelHealthBonus;
 }

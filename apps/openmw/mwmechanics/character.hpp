@@ -22,13 +22,15 @@ namespace MWMechanics
 {
 
 class Movement;
-class NpcStats;
+class CreatureStats;
 
 enum Priority {
     Priority_Default,
     Priority_Jump,
     Priority_Movement,
+    Priority_Hit,
     Priority_Weapon,
+    Priority_Knockdown,
     Priority_Torch,
 
     Priority_Death,
@@ -87,7 +89,12 @@ enum CharacterState {
     CharState_Death3,
     CharState_Death4,
     CharState_Death5,
-    CharState_SwimDeath
+    CharState_SwimDeath,
+
+    CharState_Hit,
+    CharState_KnockDown,
+    CharState_KnockOut,
+    CharState_Block
 };
 
 enum WeaponType {
@@ -99,7 +106,7 @@ enum WeaponType {
     WeapType_TwoWide,
     WeapType_BowAndArrow,
     WeapType_Crossbow,
-    WeapType_ThowWeapon,
+    WeapType_Thrown,
     WeapType_PickProbe,
 
     WeapType_Spell
@@ -138,9 +145,13 @@ class CharacterController
     CharacterState mMovementState;
     std::string mCurrentMovement;
     float mMovementSpeed;
+    float mMovementAnimVelocity;
 
     CharacterState mDeathState;
     std::string mCurrentDeath;
+
+    CharacterState mHitState;
+    std::string mCurrentHit;
 
     UpperBodyCharacterState mUpperBodyState;
 
@@ -156,22 +167,23 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    // used for acrobatics progress and fall damages
-    float mFallHeight;
-
     std::string mAttackType; // slash, chop or thrust
+    void determineAttackType();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
-    static void getWeaponGroup(WeaponType weaptype, std::string &group);
-
-    static MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
-                                                           MWWorld::InventoryStore &inv,
-                                                           WeaponType *weaptype);
-
     void clearAnimQueue();
 
-    bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
+    bool updateWeaponState();
+    bool updateCreatureState();
+
+    void updateVisibility();
+
+    void playRandomDeath(float startpoint = 0.0f);
+
+    /// choose a random animation group with \a prefix and numeric suffix
+    /// @param num if non-NULL, the chosen animation number will be written here
+    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
@@ -188,7 +200,7 @@ public:
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
-    void kill();
+    bool kill();
     void resurrect();
     bool isDead() const
     { return mDeathState != CharState_None; }
@@ -196,6 +208,8 @@ public:
     void forceStateUpdate();
 };
 
+    void getWeaponGroup(WeaponType weaptype, std::string &group);
+    MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
 }
 
 #endif /* GAME_MWMECHANICS_CHARACTER_HPP */

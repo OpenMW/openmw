@@ -6,6 +6,7 @@
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 #include <OgreEntity.h>
+#include <OgreCamera.h>
 
 namespace CSVRender
 {
@@ -66,6 +67,10 @@ namespace CSVRender
         params.insert(std::make_pair("title", windowTitle.str()));
         params.insert(std::make_pair("FSAA", "0")); // TODO setting
         params.insert(std::make_pair("vsync", "false")); // TODO setting
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        params.insert(std::make_pair("macAPI", "cocoa"));
+        params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
+#endif
 
         mWindow = Ogre::Root::getSingleton().createRenderWindow(windowTitle.str(), this->width(), this->height(), false, &params);
         mWindow->addViewport(mCamera)->setBackgroundColour(Ogre::ColourValue(0.3,0.3,0.3,1));

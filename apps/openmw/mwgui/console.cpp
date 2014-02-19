@@ -119,8 +119,6 @@ namespace MWGui
 
         // Set up the log window
         mHistory->setOverflowToTheLeft(true);
-        mHistory->setEditStatic(true);
-        mHistory->setVisibleVScroll(true);
 
         // compiler
         Compiler::registerExtensions (mExtensions, mConsoleOnlyScripts);
@@ -215,7 +213,7 @@ namespace MWGui
         {
             std::vector<std::string> matches;
             listNames();
-            mCommandLine->setCaption(complete( mCommandLine->getCaption(), matches ));
+            mCommandLine->setCaption(complete( mCommandLine->getOnlyText(), matches ));
 #if 0
             int i = 0;
             for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); ++it,++i )
@@ -234,7 +232,7 @@ namespace MWGui
         {
             // If the user was editing a string, store it for later
             if(mCurrent == mCommandHistory.end())
-                mEditString = mCommandLine->getCaption();
+                mEditString = mCommandLine->getOnlyText();
 
             if(mCurrent != mCommandHistory.begin())
             {
@@ -259,7 +257,7 @@ namespace MWGui
 
     void Console::acceptCommand(MyGUI::EditBox* _sender)
     {
-        const std::string &cm = mCommandLine->getCaption();
+        const std::string &cm = mCommandLine->getOnlyText();
         if(cm.empty()) return;
 
         // Add the command to the history, and set the current pointer to
@@ -406,13 +404,14 @@ namespace MWGui
                 setTitle("#{sConsoleTitle} (" + object.getCellRef().mRefID + ")");
                 mPtr = object;
             }
+            // User clicked on an object. Restore focus to the console command line.
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
         }
         else
         {
             setTitle("#{sConsoleTitle}");
             mPtr = MWWorld::Ptr();
         }
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
     }
 
     void Console::onReferenceUnavailable()

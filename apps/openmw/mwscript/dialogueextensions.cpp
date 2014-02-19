@@ -13,7 +13,6 @@
 #include "../mwbase/journal.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "interpretercontext.hpp"
@@ -183,7 +182,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
                     runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).isSameFaction (MWWorld::Class::get(player).getNpcStats (player)));
                 }

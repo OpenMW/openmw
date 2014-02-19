@@ -28,8 +28,6 @@ namespace MWGui
 
             void startTrade(const MWWorld::Ptr& actor);
 
-            void addOrRemoveGold(int gold, const MWWorld::Ptr& actor);
-
             void onFrame(float frameDuration);
 
             void borrowItem (int index, size_t count);
@@ -94,6 +92,8 @@ namespace MWGui
 
             void onIncreaseButtonTriggered();
             void onDecreaseButtonTriggered();
+
+            void addOrRemoveGold(int gold, const MWWorld::Ptr& actor);
 
             void updateLabels();
 

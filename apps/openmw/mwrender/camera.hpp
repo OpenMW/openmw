@@ -47,6 +47,9 @@ namespace MWRender
 
         bool mDistanceAdjusted;
 
+        bool mVanityToggleQueued;
+        bool mViewModeToggleQueued;
+
         /// Updates sound manager listener data
         void updateListener();
 
@@ -77,13 +80,14 @@ namespace MWRender
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
 
+        /// @note this may be ignored if an important animation is currently playing
         void togglePreviewMode(bool enable);
 
         /// \brief Lowers the camera for sneak.
         /// As animation is tied to the camera, this needs
         /// to be set each frame after the animation is
         /// applied.
-        void setSneakOffset();
+        void setSneakOffset(float offset);
 
         bool isFirstPerson() const
         { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
@@ -100,6 +104,8 @@ namespace MWRender
 
         /// Restore default camera distance for current mode.
         void setCameraDistance();
+
+        float getCameraDistance() const;
 
         void setAnimation(NpcAnimation *anim);
 

@@ -42,10 +42,13 @@ int main(int argc, char *argv[])
 
     // TODO: Ogre startup shouldn't be here, but it currently has to:
     // SceneWidget destructor will delete the created render window, which would be called _after_ Root has shut down :(
-    OgreInit::OgreInit ogreInit;
-    ogreInit.init("./opencsOgre.log"); // TODO log path?
 
     Application mApplication (argc, argv);
+// temporarily disable OGRE-integration (need to fix path problem first)
+#if 0
+    OgreInit::OgreInit ogreInit;
+    ogreInit.init("./opencsOgre.log"); // TODO log path?
+#endif
 
 #ifdef Q_OS_MAC
     QDir dir(QCoreApplication::applicationDirPath());

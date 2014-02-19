@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_MWSCENE_H
-#define _GAME_RENDER_MWSCENE_H
+#ifndef GAME_RENDER_MWSCENE_H
+#define GAME_RENDER_MWSCENE_H
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>

@@ -75,14 +75,15 @@ void Actors::insertNPC(const MWWorld::Ptr& ptr)
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
-
-    // Create CustomData, will do autoEquip and trigger animation parts update
-    ptr.getClass().getInventoryStore(ptr);
 }
-void Actors::insertCreature (const MWWorld::Ptr& ptr)
+void Actors::insertCreature (const MWWorld::Ptr& ptr, bool weaponsShields)
 {
     insertBegin(ptr);
-    CreatureAnimation* anim = new CreatureAnimation(ptr);
+    Animation* anim = NULL;
+    if (weaponsShields)
+        anim = new CreatureWeaponAnimation(ptr);
+    else
+        anim = new CreatureAnimation(ptr);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
@@ -126,7 +127,7 @@ bool Actors::deleteObject (const MWWorld::Ptr& ptr)
     return true;
 }
 
-void Actors::removeCell(MWWorld::Ptr::CellStore* store)
+void Actors::removeCell(MWWorld::CellStore* store)
 {
     for(PtrAnimationMap::iterator iter = mAllActors.begin();iter != mAllActors.end();)
     {
@@ -150,9 +151,12 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store)
     }
 }
 
-void Actors::update (float duration)
+void Actors::update (Ogre::Camera* camera)
 {
-    // Nothing to do
+    for(PtrAnimationMap::iterator iter = mAllActors.begin();iter != mAllActors.end(); ++iter)
+    {
+        iter->second->preRender(camera);
+    }
 }
 
 Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)

@@ -1,6 +1,5 @@
 #include "race.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
@@ -71,8 +70,7 @@ namespace MWGui
         setText("RaceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu5", "Race"));
         getWidget(mRaceList, "RaceList");
         mRaceList->setScrollVisible(true);
-        mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
-        mRaceList->eventListMouseItemActivate += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
+        mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onAccept);
         mRaceList->eventListChangePosition += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
         setText("SkillsT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
@@ -140,7 +138,7 @@ namespace MWGui
         size_t count = mRaceList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (boost::iequals(*mRaceList->getItemDataAt<std::string>(i), raceId))
+            if (Misc::StringUtils::ciEqual(*mRaceList->getItemDataAt<std::string>(i), raceId))
             {
                 mRaceList->setIndexSelected(i);
                 MyGUI::Button* okButton;
@@ -230,7 +228,7 @@ namespace MWGui
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
-        if (boost::iequals(mCurrentRaceId, *raceId))
+        if (Misc::StringUtils::ciEqual(mCurrentRaceId, *raceId))
             return;
 
         mCurrentRaceId = *raceId;
@@ -240,6 +238,14 @@ namespace MWGui
         updatePreview();
         updateSkills();
         updateSpellPowers();
+    }
+
+    void RaceDialog::onAccept(MyGUI::ListBox *_sender, size_t _index)
+    {
+        onSelectRace(_sender, _index);
+        if(mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
+            return;
+        eventDone(this);
     }
 
     void RaceDialog::getBodyParts (int part, std::vector<std::string>& out)
@@ -320,7 +326,7 @@ namespace MWGui
                 continue;
 
             mRaceList->addItem(it->mName, it->mId);
-            if (boost::iequals(it->mId, mCurrentRaceId))
+            if (Misc::StringUtils::ciEqual(it->mId, mCurrentRaceId))
                 mRaceList->setIndexSelected(index);
             ++index;
         }

@@ -7,6 +7,11 @@
 #include "livecellref.hpp"
 #include "esmstore.hpp"
 
+namespace ESM
+{
+    struct CellState;
+}
+
 namespace MWWorld
 {
 
@@ -25,7 +30,7 @@ namespace MWWorld
     // and the build will fail with an ugly three-way cyclic header dependence
     // so we need to pass the instantiation of the method to the lnker, when
     // all methods are known.
-    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore);
+    void load(ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore);
 
     LiveRef *find (const std::string& name)
     {
@@ -133,6 +138,14 @@ namespace MWWorld
 
     Ptr searchInContainer (const std::string& id);
 
+        void loadState (const ESM::CellState& state);
+
+        void saveState (ESM::CellState& state) const;
+
+        void writeReferences (ESM::ESMWriter& writer) const;
+
+        void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap);
+
   private:
 
     template<class Functor, class List>
@@ -143,7 +156,7 @@ namespace MWWorld
         {
             if (!iter->mData.getCount())
                 continue;
-            if (!functor (iter->mRef, iter->mData))
+            if (!functor (MWWorld::Ptr(&*iter, this)))
                 return false;
         }
         return true;
@@ -154,6 +167,10 @@ namespace MWWorld
 
     void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
+        void loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store);
+        ///< Make case-adjustments to \a ref and insert it into the respective container.
+        ///
+        /// Invalid \a ref objects are silently dropped.
   };
 }
 

@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_ACTORS_H
-#define _GAME_RENDER_ACTORS_H
+#ifndef GAME_RENDER_ACTORS_H
+#define GAME_RENDER_ACTORS_H
 
 #include <openengine/ogre/renderer.hpp>
 
@@ -40,14 +40,14 @@ namespace MWRender
         void setRootNode(Ogre::SceneNode* root);
 
         void insertNPC(const MWWorld::Ptr& ptr);
-        void insertCreature (const MWWorld::Ptr& ptr);
+        void insertCreature (const MWWorld::Ptr& ptr, bool weaponsShields);
         void insertActivator (const MWWorld::Ptr& ptr);
          bool deleteObject (const MWWorld::Ptr& ptr);
         ///< \return found?
 
         void removeCell(MWWorld::CellStore* store);
 
-        void update (float duration);
+        void update (Ogre::Camera* camera);
 
         /// Updates containing cell for object rendering data
         void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);

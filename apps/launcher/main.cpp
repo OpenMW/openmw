@@ -16,6 +16,7 @@
 int main(int argc, char *argv[])
 {
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+    SDL_SetMainReady();
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         qDebug() << "SDL_Init failed: " << QString::fromStdString(SDL_GetError());

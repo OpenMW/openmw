@@ -25,7 +25,7 @@ namespace Compiler
         const int opcodeAiFollowExplicit = 0x20023;
         const int opcodeAiFollowCell = 0x20024;
         const int opcodeAiFollowCellExplicit = 0x20025;
-        const int opcodeSetHello = 0x200015e;
+        const int opcodeSetHello = 0x200015c;
         const int opcodeSetHelloExplicit = 0x200015d;
         const int opcodeSetFight = 0x200015e;
         const int opcodeSetFightExplicit = 0x200015f;
@@ -53,6 +53,12 @@ namespace Compiler
         const int opcodeGetLineOfSightExplicit = 0x2000223;
         const int opcodeToggleAI = 0x2000224;
         const int opcodeToggleAIExplicit = 0x2000225;
+        const int opcodeGetTarget = 0x2000238;
+        const int opcodeGetTargetExplicit = 0x2000239;
+        const int opcodeStartCombat = 0x200023a;
+        const int opcodeStartCombatExplicit = 0x200023b;
+        const int opcodeStopCombat = 0x200023c;
+        const int opcodeStopCombatExplicit = 0x200023d;
     }
 
     namespace Animation
@@ -69,7 +75,7 @@ namespace Compiler
     {
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
-        const int opcodeCOE = 0x200008e;
+        const int opcodeCOE = 0x2000226;
         const int opcodeGetInterior = 0x2000131;
         const int opcodeGetPCCell = 0x2000136;
         const int opcodeGetWaterLevel = 0x2000141;
@@ -161,6 +167,7 @@ namespace Compiler
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
         const int opcodeShowRestMenu = 0x2000018;
+        const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;
         const int opcodeToggleFogOfWar = 0x2000145;
         const int opcodeToggleFullHelp = 0x2000151;
@@ -188,6 +195,7 @@ namespace Compiler
         const int opcodeDontSaveObject = 0x2000153;
         const int opcodeToggleVanityMode = 0x2000174;
         const int opcodeGetPcSleep = 0x200019f;
+        const int opcodeGetPcJumping = 0x2000233;
         const int opcodeWakeUpPc = 0x20001a2;
         const int opcodeGetLocked = 0x20001c7;
         const int opcodeGetLockedExplicit = 0x20001c8;
@@ -195,8 +203,8 @@ namespace Compiler
         const int opcodeGetEffectExplicit = 0x20001d0;
         const int opcodeAddSoulGem = 0x20001f3;
         const int opcodeAddSoulGemExplicit = 0x20001f4;
-        const int opcodeRemoveSoulGem = 0x20001f5;
-        const int opcodeRemoveSoulGemExplicit = 0x20001f6;
+        const int opcodeRemoveSoulGem = 0x20027;
+        const int opcodeRemoveSoulGemExplicit = 0x20028;
         const int opcodeDrop = 0x20001f8;
         const int opcodeDropExplicit = 0x20001f9;
         const int opcodeDropSoulGem = 0x20001fa;
@@ -205,6 +213,8 @@ namespace Compiler
         const int opcodeGetAttackedExplicit = 0x20001d4;
         const int opcodeGetWeaponDrawn = 0x20001d7;
         const int opcodeGetWeaponDrawnExplicit = 0x20001d8;
+        const int opcodeGetSpellReadied = 0x2000231;
+        const int opcodeGetSpellReadiedExplicit = 0x2000232;
         const int opcodeGetSpellEffects = 0x20001db;
         const int opcodeGetSpellEffectsExplicit = 0x20001dc;
         const int opcodeGetCurrentTime = 0x20001dd;
@@ -219,6 +229,9 @@ namespace Compiler
         const int opcodeGetStandingActorExplicit = 0x200020f;
         const int opcodeGetWindSpeed = 0x2000212;
         const int opcodePlayBink = 0x20001f7;
+        const int opcodeGoToJail = 0x2000235;
+        const int opcodePayFine = 0x2000236;
+        const int opcodePayFineThief = 0x2000237;
         const int opcodeHitOnMe = 0x2000213;
         const int opcodeHitOnMeExplicit = 0x2000214;
         const int opcodeDisableTeleporting = 0x2000215;
@@ -228,6 +241,12 @@ namespace Compiler
         const int opcodeToggleGodMode = 0x200021f;
         const int opcodeDisableLevitation = 0x2000220;
         const int opcodeEnableLevitation = 0x2000221;
+        const int opcodeCast = 0x2000227;
+        const int opcodeCastExplicit = 0x2000228;
+        const int opcodeExplodeSpell = 0x2000229;
+        const int opcodeExplodeSpellExplicit = 0x200022a;
+        const int opcodeGetPcInJail = 0x200023e;
+        const int opcodeGetPcTraveling = 0x200023f;
     }
 
     namespace Sky
@@ -365,6 +384,13 @@ namespace Compiler
         const int opcodeIsWerewolfExplicit = 0x20001fe;
 
         const int opcodeGetWerewolfKills = 0x20001e2;
+
+        const int opcodeRemoveSpellEffects = 0x200022b;
+        const int opcodeRemoveSpellEffectsExplicit = 0x200022c;
+        const int opcodeRemoveEffects = 0x200022d;
+        const int opcodeRemoveEffectsExplicit = 0x200022e;
+        const int opcodeResurrect = 0x200022f;
+        const int opcodeResurrectExplicit = 0x2000230;
     }
 
     namespace Transformation
@@ -392,7 +418,7 @@ namespace Compiler
 
         const int opcodePlaceItemCell = 0x200019a;
         const int opcodePlaceItem = 0x200019b;
-        const int opcodePlaceAtPc = 0x200019c;  
+        const int opcodePlaceAtPc = 0x200019c;
         const int opcodePlaceAtMe = 0x200019d;
         const int opcodePlaceAtMeExplicit = 0x200019e;
         const int opcodeModScale = 0x20001e3;

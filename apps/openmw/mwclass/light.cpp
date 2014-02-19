@@ -2,6 +2,7 @@
 #include "light.hpp"
 
 #include <components/esm/loadligh.hpp>
+#include <components/esm/lightstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -183,10 +184,11 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -267,5 +269,25 @@ namespace MWClass
             return std::make_pair(3,"");
         }
         return std::make_pair(1,"");
+    }
+
+    void Light::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+        const
+    {
+        const ESM::LightState& state2 = dynamic_cast<const ESM::LightState&> (state);
+
+        ensureCustomData (ptr);
+
+        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime = state2.mTime;
+    }
+
+    void Light::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+        const
+    {
+        ESM::LightState& state2 = dynamic_cast<ESM::LightState&> (state);
+
+        ensureCustomData (ptr);
+
+        state2.mTime = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 }

@@ -8,6 +8,11 @@ namespace ESM
 
 using namespace Misc;
 
+    std::string ESMReader::getName() const
+    {
+        return mCtx.filename;
+    }
+
 ESM_Context ESMReader::getContext()
 {
     // Update the file position before returning
@@ -302,8 +307,14 @@ std::string ESMReader::getString(int size)
     char *ptr = &mBuffer[0];
     getExact(ptr, size);
 
+    if (size>0 && ptr[size-1]==0)
+        --size;
+
     // Convert to UTF8 and return
-    return mEncoder->getUtf8(ptr, size);
+    if (mEncoder)
+        return mEncoder->getUtf8(ptr, size);
+
+    return std::string (ptr, size);
 }
 
 void ESMReader::fail(const std::string &msg)

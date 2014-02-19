@@ -25,7 +25,7 @@ WindowsPath::WindowsPath(const std::string& application_name)
 {
 }
 
-boost::filesystem::path WindowsPath::getUserPath() const
+boost::filesystem::path WindowsPath::getUserConfigPath() const
 {
     boost::filesystem::path userPath(".");
 
@@ -41,7 +41,13 @@ boost::filesystem::path WindowsPath::getUserPath() const
     return userPath / mName;
 }
 
-boost::filesystem::path WindowsPath::getGlobalPath() const
+boost::filesystem::path WindowsPath::getUserDataPath() const
+{
+    // Have some chaos, windows people!
+    return getUserConfigPath();
+}
+
+boost::filesystem::path WindowsPath::getGlobalConfigPath() const
 {
     boost::filesystem::path globalPath(".");
 
@@ -63,12 +69,12 @@ boost::filesystem::path WindowsPath::getLocalPath() const
 
 boost::filesystem::path WindowsPath::getGlobalDataPath() const
 {
-    return getGlobalPath();
+    return getGlobalConfigPath();
 }
 
 boost::filesystem::path WindowsPath::getCachePath() const
 {
-    return getUserPath() / "cache";
+    return getUserConfigPath() / "cache";
 }
 
 boost::filesystem::path WindowsPath::getInstallPath() const

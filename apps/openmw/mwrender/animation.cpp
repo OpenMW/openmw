@@ -30,7 +30,7 @@
 namespace MWRender
 {
 
-Ogre::Real Animation::AnimationValue::getValue() const
+Ogre::Real Animation::AnimationTime::getValue() const
 {
     AnimStateMap::const_iterator iter = mAnimation->mStates.find(mAnimationName);
     if(iter != mAnimation->mStates.end())
@@ -38,65 +38,38 @@ Ogre::Real Animation::AnimationValue::getValue() const
     return 0.0f;
 }
 
-void Animation::AnimationValue::setValue(Ogre::Real)
+void Animation::AnimationTime::setValue(Ogre::Real)
 {
 }
 
-Ogre::Real Animation::EffectAnimationValue::getValue() const
+Ogre::Real Animation::EffectAnimationTime::getValue() const
 {
     return mTime;
 }
 
-void Animation::EffectAnimationValue::setValue(Ogre::Real)
+void Animation::EffectAnimationTime::setValue(Ogre::Real)
 {
-}
-
-
-void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
-{
-    for(size_t i = 0;i < objects.mLights.size();i++)
-    {
-        Ogre::Light *light = objects.mLights[i];
-        // If parent is a scene node, it was created specifically for this light. Destroy it now.
-        if(light->isAttached() && !light->isParentTagPoint())
-            sceneMgr->destroySceneNode(light->getParentSceneNode());
-        sceneMgr->destroyLight(light);
-    }
-    for(size_t i = 0;i < objects.mParticles.size();i++)
-        sceneMgr->destroyParticleSystem(objects.mParticles[i]);
-    for(size_t i = 0;i < objects.mEntities.size();i++)
-        sceneMgr->destroyEntity(objects.mEntities[i]);
-    objects.mControllers.clear();
-    objects.mLights.clear();
-    objects.mParticles.clear();
-    objects.mEntities.clear();
-    objects.mSkelBase = NULL;
 }
 
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
-    , mCamera(NULL)
     , mInsert(node)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
-    , mNullAnimationValuePtr(OGRE_NEW NullAnimationValue)
+    , mNullAnimationTimePtr(OGRE_NEW NullAnimationTime)
 {
     for(size_t i = 0;i < sNumGroups;i++)
-        mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
+        mAnimationTimePtr[i].bind(OGRE_NEW AnimationTime(this));
 }
 
 Animation::~Animation()
 {
-    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        destroyObjectList(mInsert->getCreator(), it->mObjects);
+    mEffects.clear();
 
     mAnimSources.clear();
-
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    destroyObjectList(sceneMgr, mObjectRoot);
 }
 
 
@@ -105,7 +78,7 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     OgreAssert(mAnimSources.empty(), "Setting object root while animation sources are set!");
 
     mSkelBase = NULL;
-    destroyObjectList(mInsert->getCreator(), mObjectRoot);
+    mObjectRoot.setNull();
 
     if(model.empty())
         return;
@@ -126,11 +99,11 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
-    if(mObjectRoot.mSkelBase)
+    if(mObjectRoot->mSkelBase)
     {
-        mSkelBase = mObjectRoot.mSkelBase;
+        mSkelBase = mObjectRoot->mSkelBase;
 
-        Ogre::AnimationStateSet *aset = mObjectRoot.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateSet *aset = mObjectRoot->mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -141,7 +114,7 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 
         // Set the bones as manually controlled since we're applying the
         // transformations manually
-        Ogre::SkeletonInstance *skelinst = mObjectRoot.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = mObjectRoot->mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
@@ -162,39 +135,31 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     else
         mAttachedObjects.clear();
 
-    for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
+    for(size_t i = 0;i < mObjectRoot->mControllers.size();i++)
     {
-        if(mObjectRoot.mControllers[i].getSource().isNull())
-            mObjectRoot.mControllers[i].setSource(mAnimationValuePtr[0]);
+        if(mObjectRoot->mControllers[i].getSource().isNull())
+            mObjectRoot->mControllers[i].setSource(mAnimationTimePtr[0]);
     }
 }
 
 struct AddGlow
 {
     Ogre::Vector3* mColor;
-    AddGlow(Ogre::Vector3* col) : mColor(col) {}
+    NifOgre::MaterialControllerManager* mMaterialControllerMgr;
+    AddGlow(Ogre::Vector3* col, NifOgre::MaterialControllerManager* materialControllerMgr)
+        : mColor(col)
+        , mMaterialControllerMgr(materialControllerMgr)
+    {}
 
-    // TODO: integrate this with material controllers?
     void operator()(Ogre::Entity* entity) const
     {
-        unsigned int numsubs = entity->getNumSubEntities();
-        for(unsigned int i = 0;i < numsubs;++i)
-        {
-            unsigned int numsubs = entity->getNumSubEntities();
-            for(unsigned int i = 0;i < numsubs;++i)
-            {
-                Ogre::SubEntity* subEnt = entity->getSubEntity(i);
-                std::string newName = subEnt->getMaterialName() + "@fx";
-                if (sh::Factory::getInstance().searchInstance(newName) == NULL)
-                {
-                    sh::MaterialInstance* instance =
-                        sh::Factory::getInstance().createMaterialInstance(newName, subEnt->getMaterialName());
-                    instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
-                    instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
-                }
-                subEnt->setMaterialName(newName);
-            }
-        }
+        if (!entity->getNumSubEntities())
+            return;
+        Ogre::MaterialPtr writableMaterial = mMaterialControllerMgr->getWritableMaterial(entity);
+        sh::MaterialInstance* instance = sh::Factory::getInstance().getMaterialInstance(writableMaterial->getName());
+
+        instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
     }
 };
 
@@ -219,6 +184,7 @@ public:
         for(unsigned int i = 0;i < numsubs;++i)
         {
             Ogre::SubEntity* subEnt = entity->getSubEntity(i);
+            sh::Factory::getInstance()._ensureMaterial(subEnt->getMaterial()->getName(), "Default");
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? mTransQueue : mSolidQueue);
         }
     }
@@ -233,16 +199,16 @@ public:
     }
 };
 
-void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist, bool enchantedGlow, Ogre::Vector3* glowColor)
+void Animation::setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist, bool enchantedGlow, Ogre::Vector3* glowColor)
 {
-    std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
+    std::for_each(objlist->mEntities.begin(), objlist->mEntities.end(),
                   VisQueueSet(visflags, solidqueue, transqueue, dist));
-    std::for_each(objlist.mParticles.begin(), objlist.mParticles.end(),
+    std::for_each(objlist->mParticles.begin(), objlist->mParticles.end(),
                   VisQueueSet(visflags, solidqueue, transqueue, dist));
 
     if (enchantedGlow)
-        std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
-                  AddGlow(glowColor));
+        std::for_each(objlist->mEntities.begin(), objlist->mEntities.end(),
+                  AddGlow(glowColor, &objlist->mMaterialControllerMgr));
 }
 
 
@@ -319,7 +285,7 @@ void Animation::addAnimSource(const std::string &model)
             }
         }
 
-        ctrls[i].setSource(mAnimationValuePtr[grp]);
+        ctrls[i].setSource(mAnimationTimePtr[grp]);
         grpctrls[grp].push_back(ctrls[i]);
     }
 }
@@ -329,7 +295,7 @@ void Animation::clearAnimSources()
     mStates.clear();
 
     for(size_t i = 0;i < sNumGroups;i++)
-        mAnimationValuePtr[i]->setAnimName(std::string());
+        mAnimationTimePtr[i]->setAnimName(std::string());
 
     mNonAccumCtrl = NULL;
 
@@ -340,7 +306,7 @@ void Animation::clearAnimSources()
 }
 
 
-void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light)
+void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light)
 {
     const MWWorld::Fallback *fallback = MWBase::Environment::get().getWorld()->getFallback();
 
@@ -353,8 +319,8 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
     if((light->mData.mFlags&ESM::Light::Negative))
         color *= -1;
 
-    objlist.mLights.push_back(sceneMgr->createLight());
-    Ogre::Light *olight = objlist.mLights.back();
+    objlist->mLights.push_back(sceneMgr->createLight());
+    Ogre::Light *olight = objlist->mLights.back();
     olight->setDiffuseColour(color);
 
     Ogre::ControllerValueRealPtr src(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
@@ -366,7 +332,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
         (light->mData.mFlags&ESM::Light::PulseSlow) ? OEngine::Render::LT_PulseSlow :
         OEngine::Render::LT_Normal
     ));
-    objlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
+    objlist->mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
 
     bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
     bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
@@ -392,14 +358,14 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
     }
 
     // If there's an AttachLight bone, attach the light to that, otherwise put it in the center,
-    if(objlist.mSkelBase && objlist.mSkelBase->getSkeleton()->hasBone("AttachLight"))
-        objlist.mSkelBase->attachObjectToBone("AttachLight", olight);
+    if(objlist->mSkelBase && objlist->mSkelBase->getSkeleton()->hasBone("AttachLight"))
+        objlist->mSkelBase->attachObjectToBone("AttachLight", olight);
     else
     {
         Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-        for(size_t i = 0;i < objlist.mEntities.size();i++)
+        for(size_t i = 0;i < objlist->mEntities.size();i++)
         {
-            Ogre::Entity *ent = objlist.mEntities[i];
+            Ogre::Entity *ent = objlist->mEntities[i];
             bounds.merge(ent->getBoundingBox());
         }
 
@@ -420,7 +386,6 @@ Ogre::Node *Animation::getNode(const std::string &name)
     }
     return NULL;
 }
-
 
 NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname)
 {
@@ -566,12 +531,6 @@ static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bo
             bone->setScale(Ogre::Vector3::UNIT_SCALE);
         }
     }
-    else
-    {
-        // No matching bone in the source. Make sure it stays properly offset
-        // from its parent.
-        bone->resetToInitialState();
-    }
 
     Ogre::Node::ChildNodeIterator boneiter = bone->getChildIterator();
     while(boneiter.hasMoreElements())
@@ -618,7 +577,11 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
 
     const std::string stoptag = groupname+": "+stop;
     NifOgre::TextKeyMap::const_iterator stopkey(groupstart);
-    while(stopkey != keys.end() && stopkey->second != stoptag)
+    while(stopkey != keys.end()
+          // We have to ignore extra garbage at the end.
+          // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
+          // Why, just why? :(
+          && (stopkey->second.size() < stoptag.size() || stopkey->second.substr(0,stoptag.size()) != stoptag))
         stopkey++;
     if(stopkey == keys.end())
         return false;
@@ -650,6 +613,13 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
     return true;
 }
 
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
 
 void Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
 {
@@ -664,14 +634,29 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     }
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
-        std::string sound = MWWorld::Class::get(mPtr).getSoundIdFromSndGen(mPtr, evt.substr(10));
+        std::string soundgen = evt.substr(10);
+
+        // The event can optionally contain volume and pitch modifiers
+        float volume=1.f, pitch=1.f;
+        if (soundgen.find(" ") != std::string::npos)
+        {
+            std::vector<std::string> tokens;
+            split(soundgen, ' ', tokens);
+            soundgen = tokens[0];
+            if (tokens.size() >= 2)
+                volume = Ogre::StringConverter::parseReal(tokens[1]);
+            if (tokens.size() >= 3)
+                pitch = Ogre::StringConverter::parseReal(tokens[2]);
+        }
+
+        std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
             if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0)
                 type = MWBase::SoundManager::Play_TypeFoot;
-            sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f, type);
+            sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
         }
         return;
     }
@@ -694,19 +679,50 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     else if(evt.compare(off, len, "unequip detach") == 0)
         showWeapons(false);
     else if(evt.compare(off, len, "chop hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
     else if(evt.compare(off, len, "slash hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
     else if(evt.compare(off, len, "thrust hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
-        MWWorld::Class::get(mPtr).hit(mPtr);
+    {
+        if (groupname == "attack1")
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+        else if (groupname == "attack2")
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+        else if (groupname == "attack3")
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+        else
+            mPtr.getClass().hit(mPtr);
+    }
+    else if (evt.compare(off, len, "shoot attach") == 0)
+        attachArrow();
+    else if (evt.compare(off, len, "shoot release") == 0)
+        releaseArrow();
+    else if (evt.compare(off, len, "shoot follow attach") == 0)
+        attachArrow();
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
+
+    else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
+        mPtr.getClass().block(mPtr);
 }
 
-
+void Animation::changeGroups(const std::string &groupname, int groups)
+{
+    AnimStateMap::iterator stateiter = mStates.begin();
+    stateiter = mStates.find(groupname);
+    if(stateiter != mStates.end())
+    {
+        if(stateiter->second.mGroups != groups)
+        {
+            stateiter->second.mGroups = groups;
+            resetActiveGroups();
+        }
+        return;
+    }
+}
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase || mAnimSources.empty())
@@ -810,7 +826,7 @@ void Animation::resetActiveGroups()
                 active = state;
         }
 
-        mAnimationValuePtr[grp]->setAnimName((active == mStates.end()) ?
+        mAnimationTimePtr[grp]->setAnimName((active == mStates.end()) ?
                                              std::string() : active->first);
     }
     mNonAccumCtrl = NULL;
@@ -818,7 +834,7 @@ void Animation::resetActiveGroups()
     if(!mNonAccumRoot || mAccumulate == Ogre::Vector3(0.0f))
         return;
 
-    AnimStateMap::const_iterator state = mStates.find(mAnimationValuePtr[0]->getAnimName());
+    AnimStateMap::const_iterator state = mStates.find(mAnimationTimePtr[0]->getAnimName());
     if(state == mStates.end())
         return;
 
@@ -859,6 +875,27 @@ bool Animation::getInfo(const std::string &groupname, float *complete, float *sp
     return true;
 }
 
+float Animation::getStartTime(const std::string &groupname) const
+{
+    AnimSourceList::const_iterator iter(mAnimSources.begin());
+    for(;iter != mAnimSources.end();iter++)
+    {
+        const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
+        NifOgre::TextKeyMap::const_iterator found = findGroupStart(keys, groupname);
+        if(found != keys.end())
+            return found->first;
+    }
+    return -1.f;
+}
+
+float Animation::getCurrentTime(const std::string &groupname) const
+{
+    AnimStateMap::const_iterator iter = mStates.find(groupname);
+    if(iter == mStates.end())
+        return -1.f;
+
+    return iter->second.mTime;
+}
 
 void Animation::disable(const std::string &groupname)
 {
@@ -872,7 +909,6 @@ void Animation::disable(const std::string &groupname)
 Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
-
     AnimStateMap::iterator stateiter = mStates.begin();
     while(stateiter != mStates.end())
     {
@@ -891,13 +927,13 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             targetTime = state.mTime + timepassed;
             if(textkey == textkeys.end() || textkey->first > targetTime)
             {
-                if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
+                if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
                     updatePosition(state.mTime, targetTime, movement);
                 state.mTime = std::min(targetTime, state.mStopTime);
             }
             else
             {
-                if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
+                if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
                     updatePosition(state.mTime, textkey->first, movement);
                 state.mTime = textkey->first;
             }
@@ -942,13 +978,13 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             ++stateiter;
     }
 
-    for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
-        mObjectRoot.mControllers[i].update();
+    for(size_t i = 0;i < mObjectRoot->mControllers.size();i++)
+        mObjectRoot->mControllers[i].update();
 
     // Apply group controllers
     for(size_t grp = 0;grp < sNumGroups;grp++)
     {
-        const std::string &name = mAnimationValuePtr[grp]->getAnimName();
+        const std::string &name = mAnimationTimePtr[grp]->getAnimName();
         if(!name.empty() && (stateiter=mStates.find(name)) != mStates.end())
         {
             const Ogre::SharedPtr<AnimSource> &src = stateiter->second.mSource;
@@ -986,7 +1022,7 @@ public:
 
 void Animation::enableLights(bool enable)
 {
-    std::for_each(mObjectRoot.mLights.begin(), mObjectRoot.mLights.end(), ToggleLight(enable));
+    std::for_each(mObjectRoot->mLights.begin(), mObjectRoot->mLights.end(), ToggleLight(enable));
 }
 
 
@@ -1005,7 +1041,7 @@ public:
 Ogre::AxisAlignedBox Animation::getWorldBounds()
 {
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    std::for_each(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(), MergeBounds(&bounds));
+    std::for_each(mObjectRoot->mEntities.begin(), mObjectRoot->mEntities.end(), MergeBounds(&bounds));
     return bounds;
 }
 
@@ -1030,6 +1066,17 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
+bool Animation::allowSwitchViewMode() const
+{
+    for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
+    {
+        if(stateiter->second.mPriority > MWMechanics::Priority_Movement 
+                && stateiter->second.mPriority < MWMechanics::Priority_Torch)
+            return false;
+    }
+    return true;
+}
+
 void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)
 {
     // Early out if we already have this effect
@@ -1051,32 +1098,32 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     else
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+
+    // TODO: turn off shadow casting
+    setRenderProperties(params.mObjects, RV_Misc,
+                        RQG_Main, RQG_Alpha, 0.f, false, NULL);
+
     params.mLoop = loop;
     params.mEffectId = effectId;
     params.mBoneName = bonename;
 
-    for(size_t i = 0;i < params.mObjects.mControllers.size();i++)
+    for(size_t i = 0;i < params.mObjects->mControllers.size();i++)
     {
-        if(params.mObjects.mControllers[i].getSource().isNull())
-            params.mObjects.mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationValue> (new EffectAnimationValue()));
+        if(params.mObjects->mControllers[i].getSource().isNull())
+            params.mObjects->mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationTime> (new EffectAnimationTime()));
     }
 
     if (!texture.empty())
     {
-        for(size_t i = 0;i < params.mObjects.mParticles.size(); ++i)
+        for(size_t i = 0;i < params.mObjects->mParticles.size(); ++i)
         {
-            Ogre::ParticleSystem* partSys = params.mObjects.mParticles[i];
-            sh::Factory::getInstance()._ensureMaterial(partSys->getMaterialName(), "Default");
-            Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
-            static int count = 0;
-            Ogre::String materialName = "openmw/" + Ogre::StringConverter::toString(count++);
-            // TODO: destroy when effect is removed
-            Ogre::MaterialPtr newMat = mat->clone(materialName);
-            partSys->setMaterialName(materialName);
+            Ogre::ParticleSystem* partSys = params.mObjects->mParticles[i];
 
-            for (int t=0; t<newMat->getNumTechniques(); ++t)
+            Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(partSys);
+
+            for (int t=0; t<mat->getNumTechniques(); ++t)
             {
-                Ogre::Technique* tech = newMat->getTechnique(t);
+                Ogre::Technique* tech = mat->getTechnique(t);
                 for (int p=0; p<tech->getNumPasses(); ++p)
                 {
                     Ogre::Pass* pass = tech->getPass(p);
@@ -1099,7 +1146,6 @@ void Animation::removeEffect(int effectId)
     {
         if (it->mEffectId == effectId)
         {
-            destroyObjectList(mInsert->getCreator(), it->mObjects);
             mEffects.erase(it);
             return;
         }
@@ -1119,38 +1165,47 @@ void Animation::updateEffects(float duration)
 {
     for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); )
     {
-        NifOgre::ObjectList& objects = it->mObjects;
-        for(size_t i = 0; i < objects.mControllers.size() ;i++)
+        NifOgre::ObjectScenePtr objects = it->mObjects;
+        for(size_t i = 0; i < objects->mControllers.size() ;i++)
         {
-            EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects.mControllers[i].getSource().get());
+            EffectAnimationTime* value = dynamic_cast<EffectAnimationTime*>(objects->mControllers[i].getSource().get());
             if (value)
                 value->addTime(duration);
 
-            objects.mControllers[i].update();
+            objects->mControllers[i].update();
         }
 
-        if (objects.mControllers[0].getSource()->getValue() >= objects.mMaxControllerLength)
+        if (objects->mControllers[0].getSource()->getValue() >= objects->mMaxControllerLength)
         {
             if (it->mLoop)
             {
                 // Start from the beginning again; carry over the remainder
-                float remainder = objects.mControllers[0].getSource()->getValue() - objects.mMaxControllerLength;
-                for(size_t i = 0; i < objects.mControllers.size() ;i++)
+                float remainder = objects->mControllers[0].getSource()->getValue() - objects->mMaxControllerLength;
+                for(size_t i = 0; i < objects->mControllers.size() ;i++)
                 {
-                    EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects.mControllers[i].getSource().get());
+                    EffectAnimationTime* value = dynamic_cast<EffectAnimationTime*>(objects->mControllers[i].getSource().get());
                     if (value)
                         value->resetTime(remainder);
                 }
             }
             else
             {
-                destroyObjectList(mInsert->getCreator(), it->mObjects);
                 it = mEffects.erase(it);
                 continue;
             }
         }
          ++it;
     }
+}
+
+void Animation::preRender(Ogre::Camera *camera)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        NifOgre::ObjectScenePtr objects = it->mObjects;
+        objects->rotateBillboardNodes(camera);
+    }
+    mObjectRoot->rotateBillboardNodes(camera);
 }
 
 // TODO: Should not be here
@@ -1205,6 +1260,7 @@ public:
         unsigned int numsubs = ent->getNumSubEntities();
         for(unsigned int i = 0;i < numsubs;++i)
         {
+            sh::Factory::getInstance()._ensureMaterial(ent->getSubEntity(i)->getMaterial()->getName(), "Default");
             if(ent->getSubEntity(i)->getMaterial()->isTransparent())
                 return true;
         }
@@ -1214,19 +1270,22 @@ public:
 
 bool ObjectAnimation::canBatch() const
 {
-    if(!mObjectRoot.mParticles.empty() || !mObjectRoot.mLights.empty() || !mObjectRoot.mControllers.empty())
+    if(!mObjectRoot->mParticles.empty() || !mObjectRoot->mLights.empty() || !mObjectRoot->mControllers.empty())
         return false;
-    return std::find_if(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(),
-                        FindEntityTransparency()) == mObjectRoot.mEntities.end();
+    if (!mObjectRoot->mBillboardNodes.empty())
+        return false;
+    return std::find_if(mObjectRoot->mEntities.begin(), mObjectRoot->mEntities.end(),
+                        FindEntityTransparency()) == mObjectRoot->mEntities.end();
 }
 
 void ObjectAnimation::fillBatch(Ogre::StaticGeometry *sg)
 {
-    std::vector<Ogre::Entity*>::reverse_iterator iter = mObjectRoot.mEntities.rbegin();
-    for(;iter != mObjectRoot.mEntities.rend();++iter)
+    std::vector<Ogre::Entity*>::reverse_iterator iter = mObjectRoot->mEntities.rbegin();
+    for(;iter != mObjectRoot->mEntities.rend();++iter)
     {
         Ogre::Node *node = (*iter)->getParentNode();
-        sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
+        if ((*iter)->isVisible())
+            sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
     }
 }
 

@@ -157,7 +157,7 @@ namespace MWClass
         if (ptr.getCellRef().mCharge == -1)
             return ref->mBase->mData.mValue;
         else
-            return ref->mBase->mData.mValue * (ptr.getCellRef().mCharge / getItemMaxHealth(ptr));
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Weapon::registerSelf()
@@ -346,7 +346,7 @@ namespace MWClass
         }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         info.enchant = ref->mBase->mEnchant;
 
@@ -355,6 +355,7 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -388,28 +389,26 @@ namespace MWClass
 
     std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
+        if (ptr.getCellRef().mCharge == 0)
+            return std::make_pair(0, "#{sInventoryMessage1}");
+
         std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
-        // equip the item in the first free slot
-        for (std::vector<int>::const_iterator slot=slots_.first.begin();
-            slot!=slots_.first.end(); ++slot)
+        if (slots_.first.empty())
+            return std::make_pair (0, "");
+
+        if(ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+        ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose ||
+        ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide ||
+        ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
+        ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand ||
+        ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow ||
+        ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
         {
-            if(*slot == MWWorld::InventoryStore::Slot_CarriedRight)
-            {
-                if(ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
-                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
-                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
-                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
-                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
-                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
-                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
-                {
-                    return std::make_pair (2, "");
-                }
-            }
-            return std::make_pair(1, "");
+            return std::make_pair (2, "");
         }
-        return std::make_pair (0, "");
+
+        return std::make_pair(1, "");
     }
 
     boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
@@ -430,12 +429,12 @@ namespace MWClass
         return MWWorld::Ptr(&cell.mWeapons.insert(*ref), &cell);
     }
 
-    float Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
                 ptr.get<ESM::Weapon>();
 
-        return ref->mBase->mData.mEnchant/10.f;
+        return ref->mBase->mData.mEnchant;
     }
 
     bool Weapon::canSell (const MWWorld::Ptr& item, int npcServices) const

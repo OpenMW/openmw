@@ -25,14 +25,9 @@ namespace MWMechanics
 {
     class Actors
     {
-        typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
-        PtrControllerMap mActors;
+            std::map<std::string, int> mDeathCount;
 
-        std::map<std::string, int> mDeathCount;
-
-        void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
-
-
+            void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
@@ -41,7 +36,7 @@ namespace MWMechanics
             void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration);
             void calculateNpcStatModifiers (const MWWorld::Ptr& ptr);
 
-            void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
+            void calculateRestoration (const MWWorld::Ptr& ptr, float duration, bool sleep);
 
             void updateDrowning (const MWWorld::Ptr& ptr, float duration);
 
@@ -50,6 +45,12 @@ namespace MWMechanics
         public:
 
             Actors();
+            ~Actors();
+
+            typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
+
+            PtrControllerMap::const_iterator begin() { return mActors.begin(); }
+            PtrControllerMap::const_iterator end() { return mActors.end(); }
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)
@@ -78,9 +79,12 @@ namespace MWMechanics
             ///< This function is normally called automatically during the update process, but it can
             /// also be called explicitly at any time to force an update.
 
-            void restoreDynamicStats();
+            void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.
-            
+
+            int getHoursToRest(const MWWorld::Ptr& ptr) const;
+            ///< Calculate how many hours the given actor needs to rest in order to be fully healed
+
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
@@ -89,6 +93,15 @@ namespace MWMechanics
         void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         void skipAnimation(const MWWorld::Ptr& ptr);
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
+
+            void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
+
+            std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
+            ///<return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
+
+    private:
+        PtrControllerMap mActors;
+
     };
 }
 

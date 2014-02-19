@@ -10,7 +10,7 @@
 
 namespace Compiler
 {
-    StringParser::StringParser (ErrorHandler& errorHandler, Context& context, Literals& literals)
+    StringParser::StringParser (ErrorHandler& errorHandler, const Context& context, Literals& literals)
     : Parser (errorHandler, context), mLiterals (literals), mState (StartState), mSmashCase (false)
     {
 

@@ -10,6 +10,12 @@
 #include "spells.hpp"
 #include "activespells.hpp"
 #include "aisequence.hpp"
+#include "drawstate.hpp"
+
+namespace ESM
+{
+    struct CreatureStats;
+}
 
 namespace MWMechanics
 {
@@ -18,15 +24,14 @@ namespace MWMechanics
     ///
     class CreatureStats
     {
-        Stat<int> mAttributes[8];
+        DrawState_ mDrawState;
+        AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
-        int mLevel;
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
-        int mAiSettings[4];
+        Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
-        float mLevelHealthBonus;
         bool mDead;
         bool mDied;
         int mFriendlyHits;
@@ -34,25 +39,48 @@ namespace MWMechanics
         bool mAlarmed;
         bool mAttacked;
         bool mHostile;
-        bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
+        bool mAttackingOrSpell;
+        bool mKnockdown;
+        bool mHitRecovery;
+        bool mBlock;
+        unsigned int mMovementFlags;
+        float mAttackStrength; // Note only some creatures attack with weapons
 
-        int mAttackType;
+        float mFallHeight;
 
         std::string mLastHitObject; // The last object to hit this actor
 
-        std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
+        // Do we need to recalculate stats derived from attributes or other factors?
+        bool mRecalcDynamicStats;
 
+        std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
     protected:
         bool mIsWerewolf;
-        Stat<int> mWerewolfAttributes[8];
+        AttributeValue mWerewolfAttributes[8];
+        int mLevel;
 
     public:
         CreatureStats();
 
+        DrawState_ getDrawState() const;
+        void setDrawState(DrawState_ state);
+
+        /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
+        float getAttackStrength() const;
+        void setAttackStrength(float value);
+
+        bool needToRecalcDynamicStats();
+
+        void addToFallHeight(float height);
+
+        /// Reset the fall height
+        /// @return total fall height
+        float land();
+
         bool canUsePower (const std::string& power) const;
         void usePower (const std::string& power);
 
-        const Stat<int> & getAttribute(int index) const;
+        const AttributeValue & getAttribute(int index) const;
 
         const DynamicStat<float> & getHealth() const;
 
@@ -72,18 +100,15 @@ namespace MWMechanics
 
         int getLevel() const;
 
-        int getAiSetting (int index) const;
-        ///< 0: hello, 1 fight, 2 flee, 3 alarm
-
-        Stat<int> & getAttribute(int index);
-
         Spells & getSpells();
 
         ActiveSpells & getActiveSpells();
 
         MagicEffects & getMagicEffects();
 
-        void setAttribute(int index, const Stat<int> &value);
+        void setAttribute(int index, const AttributeValue &value);
+        // Shortcut to set only the base
+        void setAttribute(int index, int base);
 
         void setHealth(const DynamicStat<float> &value);
 
@@ -101,19 +126,18 @@ namespace MWMechanics
 
         void setAttackingOrSpell(bool attackingOrSpell);
 
-        enum AttackType
-        {
-            AT_Slash,
-            AT_Thrust,
-            AT_Chop
-        };
-        void setAttackType(int attackType) { mAttackType = attackType; }
-        int getAttackType() { return mAttackType; }
-
         void setLevel(int level);
 
-        void setAiSetting (int index, int value);
-        ///< 0: hello, 1 fight, 2 flee, 3 alarm
+        enum AiSetting
+        {
+            AI_Hello = 0,
+            AI_Fight = 1,
+            AI_Flee = 2,
+            AI_Alarm = 3
+        };
+        void setAiSetting (AiSetting index, Stat<int> value);
+        void setAiSetting (AiSetting index, int base);
+        Stat<int> getAiSetting (AiSetting index) const;
 
         const AiSequence& getAiSequence() const;
 
@@ -121,14 +145,6 @@ namespace MWMechanics
 
         float getFatigueTerm() const;
         ///< Return effective fatigue
-
-        float getLevelHealthBonus() const;
-
-        void levelUp();
-
-        void updateHealth();
-        ///< Calculate health based on endurance and strength.
-        ///  Called at character creation and at level up.
 
         bool isDead() const;
 
@@ -169,6 +185,31 @@ namespace MWMechanics
 
         float getEvasion() const;
 
+        void setKnockedDown(bool value);
+        bool getKnockedDown() const;
+        void setHitRecovery(bool value);
+        bool getHitRecovery() const;
+        void setBlock(bool value);
+        bool getBlock() const;
+
+        enum Flag
+        {
+            Flag_ForceRun = 1,
+            Flag_ForceSneak = 2,
+            Flag_Run = 4,
+            Flag_Sneak = 8
+        };
+        enum Stance
+        {
+            Stance_Run,
+            Stance_Sneak
+        };
+
+        bool getMovementFlag (Flag flag) const;
+        void setMovementFlag (Flag flag, bool state);
+        /// Like getMovementFlag, but also takes into account if the flag is Forced
+        bool getStance (Stance flag) const;
+
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
 
@@ -176,6 +217,10 @@ namespace MWMechanics
         std::set<int> mBoundItems;
         // Same as above
         std::map<int, std::string> mSummonedCreatures;
+
+        void writeState (ESM::CreatureStats& state) const;
+
+        void readState (const ESM::CreatureStats& state);
     };
 }
 

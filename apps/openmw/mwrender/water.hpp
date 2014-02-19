@@ -133,8 +133,6 @@ namespace MWRender {
         RenderingManager* mRendering;
         SkyManager* mSky;
 
-        std::string mCompositorName;
-
         Ogre::MaterialPtr mMaterial;
 
         bool mUnderwaterEffect;

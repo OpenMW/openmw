@@ -1,6 +1,7 @@
 #include "windowbase.hpp"
 
 #include "../mwbase/windowmanager.hpp"
+#include "container.hpp"
 
 using namespace MWGui;
 
@@ -49,4 +50,37 @@ void WindowModal::open()
 void WindowModal::close()
 {
     MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
+}
+
+NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)
+    : mDrag(drag), mWidget(widget), mTransparent(false)
+{
+}
+
+void NoDrop::onFrame(float dt)
+{
+    MyGUI::IntPoint mousePos = MyGUI::InputManager::getInstance().getMousePosition();
+
+    if (mDrag->mIsOnDragAndDrop)
+    {
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getMouseFocusWidget();
+        while (focus && focus != mWidget)
+            focus = focus->getParent();
+
+        if (focus == mWidget)
+            mTransparent = true;
+    }
+    if (!mWidget->getAbsoluteCoord().inside(mousePos))
+        mTransparent = false;
+
+    if (mTransparent)
+    {
+        mWidget->setNeedMouseFocus(false); // Allow click-through
+        mWidget->setAlpha(std::max(0.13f, mWidget->getAlpha() - dt*5));
+    }
+    else
+    {
+        mWidget->setNeedMouseFocus(true);
+        mWidget->setAlpha(std::min(1.0f, mWidget->getAlpha() + dt*5));
+    }
 }

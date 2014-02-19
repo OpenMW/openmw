@@ -64,7 +64,7 @@ namespace Interpreter{
                     retval << context.getActionBinding("#{sRestKey}");
                 }
                 else if((found = Check(temp, "actionmenumode", &i, &start))){
-                    retval << context.getActionBinding("#{sJournal}");
+                    retval << context.getActionBinding("#{sInventory}");
                 }
                 else if((found = Check(temp, "actionactivate", &i, &start))){
                     retval << context.getActionBinding("#{sActivate}");
@@ -88,10 +88,10 @@ namespace Interpreter{
                     retval << context.getActionBinding("#{sBack}");
                 }
                 else if((found = Check(temp, "actionuse", &i, &start))){
-                    retval << "PLACEHOLDER_ACTION_USE";
+                    retval << context.getActionBinding("#{sUse}");
                 }
                 else if((found = Check(temp, "actionrun", &i, &start))){
-                    retval << "PLACEHOLDER_ACTION_RUN";
+                    retval << context.getActionBinding("#{sRun}");
                 }
                 else if((found = Check(temp, "pcclass", &i, &start))){
                     retval << context.getPCClass();

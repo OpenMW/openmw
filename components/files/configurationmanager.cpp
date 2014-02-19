@@ -26,9 +26,10 @@ ConfigurationManager::ConfigurationManager()
 {
     setupTokensMapping();
 
-    boost::filesystem::create_directories(mFixedPath.getUserPath());
+    boost::filesystem::create_directories(mFixedPath.getUserConfigPath());
+    boost::filesystem::create_directories(mFixedPath.getUserDataPath());
 
-    mLogPath = mFixedPath.getUserPath();
+    mLogPath = mFixedPath.getUserConfigPath();
 }
 
 ConfigurationManager::~ConfigurationManager()
@@ -39,19 +40,19 @@ void ConfigurationManager::setupTokensMapping()
 {
     mTokensMapping.insert(std::make_pair(mwToken, &FixedPath<>::getInstallPath));
     mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalPath));
-    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserPath));
+    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserConfigPath));
     mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalDataPath));
 }
 
 void ConfigurationManager::readConfiguration(boost::program_options::variables_map& variables,
     boost::program_options::options_description& description)
 {
-    loadConfig(mFixedPath.getUserPath(), variables, description);
+    loadConfig(mFixedPath.getUserConfigPath(), variables, description);
     boost::program_options::notify(variables);
 
     loadConfig(mFixedPath.getLocalPath(), variables, description);
     boost::program_options::notify(variables);
-    loadConfig(mFixedPath.getGlobalPath(), variables, description);
+    loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
     boost::program_options::notify(variables);
 
 }
@@ -141,12 +142,17 @@ void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
 
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const
 {
-    return mFixedPath.getGlobalPath();
+    return mFixedPath.getGlobalConfigPath();
 }
 
-const boost::filesystem::path& ConfigurationManager::getUserPath() const
+const boost::filesystem::path& ConfigurationManager::getUserConfigPath() const
 {
-    return mFixedPath.getUserPath();
+    return mFixedPath.getUserConfigPath();
+}
+
+const boost::filesystem::path& ConfigurationManager::getUserDataPath() const
+{
+    return mFixedPath.getUserDataPath();
 }
 
 const boost::filesystem::path& ConfigurationManager::getLocalPath() const

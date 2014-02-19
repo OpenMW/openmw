@@ -1,5 +1,5 @@
-#ifndef _MWINPUT_MWINPUTMANAGERIMP_H
-#define _MWINPUT_MWINPUTMANAGERIMP_H
+#ifndef MWINPUT_MWINPUTMANAGERIMP_H
+#define MWINPUT_MWINPUTMANAGERIMP_H
 
 #include "../mwgui/mode.hpp"
 
@@ -138,6 +138,8 @@ namespace MWInput
 
         bool mDragDrop;
 
+        bool mGrabCursor;
+
         bool mInvertY;
 
         float mCameraSensitivity;
@@ -171,7 +173,6 @@ namespace MWInput
         void toggleSpell();
         void toggleWeapon();
         void toggleInventory();
-        void toggleContainer();
         void toggleConsole();
         void screenshot();
         void toggleJournal();

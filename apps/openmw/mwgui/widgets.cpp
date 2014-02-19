@@ -178,7 +178,7 @@ namespace MWGui
             }
             if (mAttributeValueWidget)
             {
-                AttributeValue::Type modified = mValue.getModified(), base = mValue.getBase();
+                int modified = mValue.getModified(), base = mValue.getBase();
                 static_cast<MyGUI::TextBox*>(mAttributeValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
                 if (modified > base)
                     mAttributeValueWidget->_setWidgetState("increased");
@@ -528,14 +528,9 @@ namespace MWGui
 
             if (mBarTextWidget)
             {
-                if (mValue >= 0 && mMax > 0)
-                {
-                    std::stringstream out;
-                    out << mValue << "/" << mMax;
-                    static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption(out.str().c_str());
-                }
-                else
-                    static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption("");
+                std::stringstream out;
+                out << mValue << "/" << mMax;
+                static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption(out.str().c_str());
             }
         }
         void MWDynamicStat::setTitle(const std::string& text)
