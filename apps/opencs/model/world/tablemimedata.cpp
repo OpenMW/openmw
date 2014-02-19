@@ -121,7 +121,7 @@ bool CSMWorld::TableMimeData::fromDocument (const CSMDoc::Document& document) co
     return &document == &mDocument;
 }
 
-CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::ColumnBase::Display type) const
+CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::ColumnBase::Display type)
 {
     switch (type)
     {
