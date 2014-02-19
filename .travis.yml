@@ -7,7 +7,6 @@ branches:
     - /openmw-.*$/
 before_install:
  - pwd
- - git fetch --tags
  - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
  - echo "yes" | sudo apt-add-repository ppa:openmw/openmw
  - sudo apt-get update -qq
