@@ -13,27 +13,39 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 include(OpenMWMacros)
 
 # Version
+set(OPENMW_VERSION_MAJOR 0)
+set(OPENMW_VERSION_MINOR 29)
+set(OPENMW_VERSION_RELEASE 0)
 
-include(GetGitRevisionDescription)
+set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
-get_git_tag_revision(TAGHASH --tags --max-count=1 "HEAD...")
-get_git_head_revision(REFSPEC COMMITHASH)
-git_describe(VERSION --tags ${TAGHASH})
+if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
+    find_package(Git)
 
-string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
-if (MATCH)
-    string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" OPENMW_VERSION_MAJOR "${VERSION}")
-    string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_MINOR "${VERSION}")
-    string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_RELEASE "${VERSION}")
+    if(GIT_FOUND)
+        include(GetGitRevisionDescription)
+        get_git_tag_revision(TAGHASH --tags --max-count=1)
+        get_git_head_revision(REFSPEC COMMITHASH)
+        git_describe(VERSION --tags ${TAGHASH})
 
-    set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
-    set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
-    set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+        string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
+        if(MATCH)
+            string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" OPENMW_VERSION_MAJOR "${VERSION}")
+            string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_MINOR "${VERSION}")
+            string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" OPENMW_VERSION_RELEASE "${VERSION}")
 
-    message(STATUS "Configuring OpenMW ${OPENMW_VERSION}...")
-else (MATCH)
-    message(FATAL_ERROR "Failed to get valid version information from Git")
-endif (MATCH)
+            set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+            set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+            set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+
+            message(STATUS "Configuring OpenMW ${OPENMW_VERSION}...")
+        else(MATCH)
+            message(WARNING "Failed to get valid version information from Git")
+        endif(MATCH)
+    else(GIT_FOUND)
+        message(WARNING "Git executable not found")
+    endif(GIT_FOUND)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
 # doxygen main page
 

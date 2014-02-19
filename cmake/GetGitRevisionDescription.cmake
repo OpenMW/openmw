@@ -85,10 +85,6 @@ function(get_git_head_revision _refspecvar _hashvar)
 endfunction()
 
 function(git_describe _var)
-    if(NOT GIT_FOUND)
-        find_package(Git QUIET)
-    endif()
-
     #get_git_head_revision(refspec hash)
 
     if(NOT GIT_FOUND)
@@ -125,6 +121,20 @@ function(git_describe _var)
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if(NOT res EQUAL 0)
+        execute_process(COMMAND
+                        "${GIT_EXECUTABLE}"
+                        describe
+                        "--always"
+                        WORKING_DIRECTORY
+                        "${CMAKE_SOURCE_DIR}"
+                        RESULT_VARIABLE
+                        res
+                        OUTPUT_VARIABLE
+                        out
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
+    if(NOT res EQUAL 0)
         set(out "${out}-${res}-NOTFOUND")
     endif()
 
@@ -133,7 +143,8 @@ endfunction()
 
 function(get_git_tag_revision _var)
     if(NOT GIT_FOUND)
-        find_package(Git QUIET)
+        set(${_var} "GIT-NOTFOUND" PARENT_SCOPE)
+        return()
     endif()
 
     execute_process(COMMAND
