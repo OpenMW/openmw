@@ -105,7 +105,7 @@ namespace ESM
         rec.name = name;
         rec.position = mStream->tellp();
         rec.size = 0;
-        writeT<int>(0); // Size goes here
+        writeT<uint32_t>(0); // Size goes here
         mRecords.push_back(rec);
 
         assert(mRecords.back().size == 0);
