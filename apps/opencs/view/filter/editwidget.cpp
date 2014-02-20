@@ -60,20 +60,66 @@ void CSVFilter::EditWidget::filterRowsInserted (const QModelIndex& parent, int s
 
 void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource)
 {
-    clear();
+    const unsigned count = filterSource.size();
+    bool multipleElements = false;
 
-    std::string filter(generateFilter(*filterSource.begin()));
-    insert(QString::fromUtf8(filter.c_str()));
-
-    for (unsigned i = 0; i < filterSource.size(); ++i) //test
+    switch (count)
     {
-        std::cout<<filterSource[i].first<<std::endl;
-        std::cout<<"Columns:\n";
-        for (unsigned j = 0; j < filterSource[i].second.size(); ++j)
+        case 0: //empty
+            return; //nothing to do here
+
+        case 1: //only single
+            multipleElements = false;
+            break;
+
+        default:
+            multipleElements = true;
+            break;
+    }
+
+    QString oldContent(text());
+    bool replaceMode = oldContent.isEmpty() or !oldContent.contains(QRegExp("^!.*$", Qt::CaseInsensitive));
+    bool orMode = true; //not orMode = andMode,
+
+    std::string orAnd;
+    if (orMode)
+    {
+        orAnd = "or";
+    } else {
+        orAnd = "and";
+    }
+
+    if (multipleElements) //TODO Currently only 'or' is handled, we should be able to handle 'and' as well and be able to drag records into the EditWidget already filled with the filter
+    {
+        std::stringstream ss;
+        if (replaceMode)
         {
-            std::cout<<filterSource[i].second[j]<<std::endl;
+            ss<<'!'<<orAnd<<'(';
+
+            for (unsigned i = 0; i < count; ++i)
+            {
+                ss<<generateFilter (filterSource[i]);
+
+                if (i+1 != count)
+                {
+                    ss<<", ";
+                }
+            }
+
+            ss<<')';
+            clear();
+            insert (QString::fromUtf8 (ss.str().c_str()));
+        } else {
+            //not handled (yet) TODO
         }
-        std::cout<<"\n";
+    } else {
+        if (replaceMode)
+        {
+            clear();
+            insert ('!' + QString::fromUtf8 (generateFilter(filterSource[0]).c_str()));
+        } else {
+            //not handled (yet) TODO
+        }
     }
 }
 
@@ -99,7 +145,7 @@ std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::
     std::stringstream ss;
     if (multipleColumns)
     {
-        ss<<"!or(";
+        ss<<"or(";
         for (unsigned i = 0; i < columns; ++i)
         {
             ss<<"string("<<'"'<<seekedString.second[i]<<'"'<<','<<'"'<<seekedString.first<<'"'<<')';
@@ -108,7 +154,7 @@ std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::
         }
         ss<<')';
     } else {
-        ss<<"!string"<<'('<<'"'<<seekedString.second[0]<<"\","<<'"'<<seekedString.first<<"\")";
+        ss<<"string"<<'('<<'"'<<seekedString.second[0]<<"\","<<'"'<<seekedString.first<<"\")";
     }
 
     return ss.str();
