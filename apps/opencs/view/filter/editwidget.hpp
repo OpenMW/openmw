@@ -5,6 +5,7 @@
 
 #include <QLineEdit>
 #include <QPalette>
+#include <qt4/QtCore/qnamespace.h>
 
 #include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"
@@ -46,7 +47,8 @@ namespace CSVFilter
 
             void filterRowsInserted (const QModelIndex& parent, int start, int end);
 
-            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource);
+            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
+                                     Qt::DropAction action);
     };
 }
 

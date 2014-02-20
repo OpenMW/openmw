@@ -4,6 +4,7 @@
 #include <QHeaderView>
 
 #include <QAction>
+#include <QApplication>
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
@@ -471,7 +472,20 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
-        drag->exec();
+
+        Qt::DropActions action = Qt::IgnoreAction;
+        switch (QApplication::keyboardModifiers())
+        {
+            case Qt::ControlModifier:
+                action = Qt::CopyAction;
+                break;
+
+            case Qt::ShiftModifier:
+                action = Qt::MoveAction;
+                break;
+        }
+
+        drag->exec(action);
     }
 
 }

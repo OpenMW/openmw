@@ -3,6 +3,8 @@
 
 #include "../doc/subview.hpp"
 
+#include <qt4/QtCore/qnamespace.h>
+
 class QModelIndex;
 
 namespace CSMWorld
@@ -42,13 +44,15 @@ namespace CSVWorld
         signals:
             void cloneRequest(const std::string&,
                               const CSMWorld::UniversalId::Type);
-            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource);
+            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
+                                     Qt::DropAction action);
 
         private slots:
 
             void editRequest (int row);
             void cloneRequest (const CSMWorld::UniversalId& toClone);
-            void createFilterRequest(std::vector< CSMWorld::UniversalId >& types);
+            void createFilterRequest(std::vector< CSMWorld::UniversalId >& types,
+                                     Qt::DropAction action);
     };
 }
 

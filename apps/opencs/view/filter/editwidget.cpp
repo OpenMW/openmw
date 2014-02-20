@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 #include <QString>
+#include <QApplication>
 
 #include "../../model/world/data.hpp"
 
@@ -58,7 +59,8 @@ void CSVFilter::EditWidget::filterRowsInserted (const QModelIndex& parent, int s
     textChanged (text());
 }
 
-void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource)
+void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource,
+                                                 Qt::DropAction action)
 {
     const unsigned count = filterSource.size();
     bool multipleElements = false;
@@ -77,9 +79,34 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
             break;
     }
 
+    Qt::KeyboardModifiers key = QApplication::keyboardModifiers();
     QString oldContent(text());
-    bool replaceMode = oldContent.isEmpty() or !oldContent.contains(QRegExp("^!.*$", Qt::CaseInsensitive));
-    bool orMode = true; //not orMode = andMode,
+
+    bool replaceMode = false;
+    bool orMode = true;
+
+    switch (key)
+    {
+        case Qt::ShiftModifier:
+            orMode = true;
+            replaceMode = false;
+            break;
+
+        case Qt::ControlModifier:
+            orMode = false;
+            replaceMode = false;
+            break;
+
+        default:
+            replaceMode = true;
+            break;
+    }
+
+    if (oldContent.isEmpty() ||
+        !oldContent.contains(QRegExp("^!.*$", Qt::CaseInsensitive)))
+    {
+        replaceMode = true;
+    }
 
     std::string orAnd;
     if (orMode)
@@ -89,12 +116,12 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
         orAnd = "and";
     }
 
-    if (multipleElements) //TODO Currently only 'or' is handled, we should be able to handle 'and' as well and be able to drag records into the EditWidget already filled with the filter
+    if (multipleElements) //TODO appending to the existing filter
     {
         std::stringstream ss;
         if (replaceMode)
         {
-            ss<<'!'<<orAnd<<'(';
+            ss<<"!or(";
 
             for (unsigned i = 0; i < count; ++i)
             {
@@ -107,16 +134,25 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
             }
 
             ss<<')';
-            clear();
-            insert (QString::fromUtf8 (ss.str().c_str()));
+
+            if (ss.str().length() >2)
+            {
+                clear();
+                insert (QString::fromUtf8 (ss.str().c_str()));
+            }
         } else {
             //not handled (yet) TODO
         }
     } else {
         if (replaceMode)
         {
-            clear();
-            insert ('!' + QString::fromUtf8 (generateFilter(filterSource[0]).c_str()));
+            std::string filter(generateFilter(filterSource[0]));
+
+            if (!filter.empty())
+            {
+                clear();
+                insert ('!' + QString::fromUtf8 (generateFilter(filterSource[0]).c_str()));
+            }
         } else {
             //not handled (yet) TODO
         }

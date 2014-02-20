@@ -62,11 +62,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)),
         mTable, SLOT (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
 
-    connect(filterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&)),
-        this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&)));
+    connect(filterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)),
+        this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)));
 
-    connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&)),
-            filterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&)));
+    connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)),
+            filterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
@@ -95,7 +95,7 @@ void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
     emit cloneRequest(toClone.getId(), toClone.getType());
 }
 
-void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::UniversalId>& types)
+void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::UniversalId>& types, Qt::DropAction action)
 {
     std::vector<std::pair<std::string, std::vector<std::string> > > filterSource;
 
@@ -106,5 +106,5 @@ void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::Univers
 
         filterSource.push_back(pair);
     }
-    emit createFilterRequest(filterSource);
+    emit createFilterRequest(filterSource, action);
 }

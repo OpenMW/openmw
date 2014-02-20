@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <QWidget>
+#include <qt4/QtCore/qnamespace.h>
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/universalid.hpp"
@@ -32,8 +33,9 @@ namespace CSVFilter
         signals:
 
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
-            void recordDropped (std::vector<CSMWorld::UniversalId>& types);
-            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource);
+            void recordDropped (std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action);
+            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource, 
+                                     Qt::DropAction action);
     };
 
 }
