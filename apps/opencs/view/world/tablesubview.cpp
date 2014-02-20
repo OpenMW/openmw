@@ -66,7 +66,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&)));
 
     connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&)),
-            filterBox, SLOT(createFilter(std::vector<std::pair<std::string, std::vector<std::string> > >&)));
+            filterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)

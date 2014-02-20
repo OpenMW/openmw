@@ -25,6 +25,9 @@ CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
         SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>)),
         this, SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
 
+    connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&)),
+            recordFilterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&)));
+
     setAcceptDrops(true);
 }
 
@@ -43,18 +46,4 @@ void CSVFilter::FilterBox::dragEnterEvent (QDragEnterEvent* event)
 void CSVFilter::FilterBox::dragMoveEvent (QDragMoveEvent* event)
 {
     event->accept();
-}
-
-void CSVFilter::FilterBox::createFilter (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource)
-{
-    for (unsigned i = 0; i < filterSource.size(); ++i) //test
-    {
-        std::cout<<filterSource[i].first<<std::endl;
-        std::cout<<"Columns:\n";
-        for (unsigned j = 0; j < filterSource[i].second.size(); ++j)
-        {
-            std::cout<<filterSource[i].second[j]<<std::endl;
-        }
-        std::cout<<"\n";
-    }
 }

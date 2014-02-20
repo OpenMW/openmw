@@ -42,6 +42,8 @@ namespace CSVFilter
             void filterRowsRemoved (const QModelIndex& parent, int start, int end);
 
             void filterRowsInserted (const QModelIndex& parent, int start, int end);
+
+            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource);
     };
 }
 

@@ -27,6 +27,7 @@ namespace CSVFilter
         signals:
 
             void filterChanged (boost::shared_ptr<CSMFilter::Node> filter);
+            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource);
     };
 
 }

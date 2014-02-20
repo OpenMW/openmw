@@ -56,3 +56,17 @@ void CSVFilter::EditWidget::filterRowsInserted (const QModelIndex& parent, int s
 {
     textChanged (text());
 }
+
+void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource)
+{
+    for (unsigned i = 0; i < filterSource.size(); ++i) //test
+    {
+        std::cout<<filterSource[i].first<<std::endl;
+        std::cout<<"Columns:\n";
+        for (unsigned j = 0; j < filterSource[i].second.size(); ++j)
+        {
+            std::cout<<filterSource[i].second[j]<<std::endl;
+        }
+        std::cout<<"\n";
+    }
+}
