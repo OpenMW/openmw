@@ -60,7 +60,7 @@ void CSVFilter::EditWidget::filterRowsInserted (const QModelIndex& parent, int s
 }
 
 void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource,
-                                                 Qt::DropAction action)
+        Qt::DropAction action)
 {
     const unsigned count = filterSource.size();
     bool multipleElements = false;
@@ -80,7 +80,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     }
 
     Qt::KeyboardModifiers key = QApplication::keyboardModifiers();
-    QString oldContent(text());
+    QString oldContent (text());
 
     bool replaceMode = false;
     bool orMode = true;
@@ -103,59 +103,73 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     }
 
     if (oldContent.isEmpty() ||
-        !oldContent.contains(QRegExp("^!.*$", Qt::CaseInsensitive)))
+            !oldContent.contains (QRegExp ("^!.*$", Qt::CaseInsensitive)))
     {
         replaceMode = true;
     }
 
+    if (!replaceMode)
+    {
+        int index = oldContent.indexOf ('(');
+
+        if (index != 0)
+        {
+            oldContent.remove ('!');
+        }
+    }
+
     std::string orAnd;
+
     if (orMode)
     {
-        orAnd = "or";
+        orAnd = "!or(";
     } else {
-        orAnd = "and";
+        orAnd = "!and(";
     }
+
+    clear();
+    std::stringstream ss;
 
     if (multipleElements) //TODO appending to the existing filter
     {
-        std::stringstream ss;
         if (replaceMode)
         {
             ss<<"!or(";
-
-            for (unsigned i = 0; i < count; ++i)
-            {
-                ss<<generateFilter (filterSource[i]);
-
-                if (i+1 != count)
-                {
-                    ss<<", ";
-                }
-            }
-
-            ss<<')';
-
-            if (ss.str().length() >2)
-            {
-                clear();
-                insert (QString::fromUtf8 (ss.str().c_str()));
-            }
         } else {
-            //not handled (yet) TODO
+            ss << orAnd << oldContent.toStdString() << ',';
+        }
+
+        for (unsigned i = 0; i < count; ++i)
+        {
+            ss<<generateFilter (filterSource[i]);
+
+            if (i+1 != count)
+            {
+                ss<<", ";
+            }
+        }
+
+        ss<<')';
+
+        if (ss.str().length() >5)
+        {
+            insert (QString::fromUtf8 (ss.str().c_str()));
         }
     } else {
-        if (replaceMode)
+        if (!replaceMode)
         {
-            std::string filter(generateFilter(filterSource[0]));
-
-            if (!filter.empty())
-            {
-                clear();
-                insert ('!' + QString::fromUtf8 (generateFilter(filterSource[0]).c_str()));
-            }
+            ss << orAnd << oldContent.toStdString()<<',';
         } else {
-            //not handled (yet) TODO
+            ss<<'!';
         }
+
+        ss << generateFilter (filterSource[0]);
+        if (!replaceMode)
+        {
+            ss<<')';
+        }
+
+        insert (QString::fromStdString (ss.str().c_str()));
     }
 }
 
