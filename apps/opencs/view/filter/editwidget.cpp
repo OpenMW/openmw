@@ -2,6 +2,7 @@
 #include "editwidget.hpp"
 
 #include <QAbstractItemModel>
+#include <QString>
 
 #include "../../model/world/data.hpp"
 
@@ -59,6 +60,11 @@ void CSVFilter::EditWidget::filterRowsInserted (const QModelIndex& parent, int s
 
 void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource)
 {
+    clear();
+
+    std::string filter(generateFilter(*filterSource.begin()));
+    insert(QString::fromStdString(filter));
+
     for (unsigned i = 0; i < filterSource.size(); ++i) //test
     {
         std::cout<<filterSource[i].first<<std::endl;
@@ -69,4 +75,42 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
         }
         std::cout<<"\n";
     }
+}
+
+std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::vector< std::string > >& seekedString)
+{
+    const unsigned columns = seekedString.second.size();
+
+    bool multipleColumns = false;
+    switch (columns)
+    {
+    case 0: //empty
+        return ""; //no column to filter
+        break;
+
+    case 1: //one column to look for
+        multipleColumns = false;
+        break;
+
+    default:
+        multipleColumns = true;
+        break;
+    }
+
+    std::stringstream ss;
+    if (multipleColumns)
+    {
+        ss<<"!or(";
+        for (unsigned i = 0; i < columns; ++i)
+        {
+            ss<<"string("<<'"'<<seekedString.second[i]<<'"'<<','<<'"'<<seekedString.first<<'"'<<')';
+            if (i+1 != columns)
+                ss<<',';
+        }
+        ss<<')';
+    } else {
+        ss<<"!string"<<'('<<'"'<<seekedString.second[0]<<"\","<<'"'<<seekedString.first<<"\")";
+    }
+
+    return ss.str();
 }
