@@ -510,7 +510,7 @@ void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
 
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const
 {
-    int count = mModel->columnCount();
+    const int count = mModel->columnCount();
 
     std::vector<std::string> titles;
     for (int i = 0; i < count; ++i)

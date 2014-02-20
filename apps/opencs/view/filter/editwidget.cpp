@@ -77,7 +77,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     }
 }
 
-std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::vector< std::string > >& seekedString)
+std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::vector< std::string > >& seekedString) const
 {
     const unsigned columns = seekedString.second.size();
 

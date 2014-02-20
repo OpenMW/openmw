@@ -34,7 +34,7 @@ namespace CSVFilter
             void filterChanged (boost::shared_ptr<CSMFilter::Node> filter);
 
     private:
-            std::string generateFilter(std::pair<std::string, std::vector<std::string> >& seekedString);
+            std::string generateFilter(std::pair<std::string, std::vector<std::string> >& seekedString) const;
 
         private slots:
 
