@@ -130,7 +130,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     clear();
     std::stringstream ss;
 
-    if (multipleElements) //TODO appending to the existing filter
+    if (multipleElements)
     {
         if (replaceMode)
         {
@@ -169,7 +169,10 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
             ss<<')';
         }
 
-        insert (QString::fromStdString (ss.str().c_str()));
+        if (ss.str().length() >4)
+        {
+            insert (QString::fromStdString (ss.str().c_str()));
+        }
     }
 }
 

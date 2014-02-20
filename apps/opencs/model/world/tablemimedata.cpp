@@ -441,7 +441,6 @@ CSMWorld::ColumnBase::Display CSMWorld::TableMimeData::convertEnums (CSMWorld::U
 
 
         default:
-            return CSMWorld::ColumnBase::Display_String;
-
+            return CSMWorld::ColumnBase::Display_None;
     }
 }
