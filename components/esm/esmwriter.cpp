@@ -80,8 +80,8 @@ namespace ESM
         rec.name = name;
         rec.position = mStream->tellp();
         rec.size = 0;
-        writeT<int>(0); // Size goes here
-        writeT<int>(0); // Unused header?
+        writeT<uint32_t>(0); // Size goes here
+        writeT<uint32_t>(0); // Unused header?
         writeT(flags);
         mRecords.push_back(rec);
 
