@@ -63,7 +63,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     clear();
 
     std::string filter(generateFilter(*filterSource.begin()));
-    insert(QString::fromStdString(filter));
+    insert(QString::fromUtf8(filter.c_str()));
 
     for (unsigned i = 0; i < filterSource.size(); ++i) //test
     {
@@ -86,7 +86,6 @@ std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::
     {
     case 0: //empty
         return ""; //no column to filter
-        break;
 
     case 1: //one column to look for
         multipleColumns = false;

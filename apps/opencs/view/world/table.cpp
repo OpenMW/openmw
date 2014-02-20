@@ -496,7 +496,7 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
             CSMWorld::UniversalId record (mime->returnMatching (display));
 
             std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
-                    (*mProxyModel, index, QVariant (QString::fromStdString (record.getId()))));
+                    (*mProxyModel, index, QVariant (QString::fromUtf8 (record.getId().c_str()))));
 
             mUndoStack.push (command.release());
         }
