@@ -289,7 +289,7 @@ namespace MWDialogue
 
             // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
             // in which case it should not be added to the journal.
-            for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+            for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
                 iter!=dialogue.mInfo.end(); ++iter)
             {
                 if (iter->mId == info->mId)
@@ -467,7 +467,7 @@ namespace MWDialogue
 
                     // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
                     // in which case it should not be added to the journal.
-                    for (std::vector<ESM::DialInfo>::const_iterator iter = mDialogueMap[mLastTopic].mInfo.begin();
+                    for (ESM::Dialogue::InfoContainer::const_iterator iter = mDialogueMap[mLastTopic].mInfo.begin();
                         iter!=mDialogueMap[mLastTopic].mInfo.end(); ++iter)
                     {
                         if (iter->mId == info->mId)

@@ -72,9 +72,10 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             if (n.val == ESM::REC_INFO) {
                 std::string id = esm.getHNOString("INAM");
                 if (dialogue) {
-                    dialogue->mInfo.push_back(ESM::DialInfo());
-                    dialogue->mInfo.back().mId = id;
-                    dialogue->mInfo.back().load(esm);
+                    ESM::DialInfo info;
+                    info.mId = id;
+                    info.load(esm);
+                    dialogue->addInfo(info, esm.getIndex() != 0);
                 } else {
                     std::cerr << "error: info record without dialog" << std::endl;
                     esm.skipRecord();

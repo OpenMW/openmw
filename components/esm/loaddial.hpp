@@ -2,7 +2,7 @@
 #define OPENMW_ESM_DIAL_H
 
 #include <string>
-#include <vector>
+#include <list>
 
 #include "loadinfo.hpp"
 
@@ -33,10 +33,16 @@ struct Dialogue
 
     std::string mId;
     signed char mType;
-    std::vector<DialInfo> mInfo;
+
+    typedef std::list<DialInfo> InfoContainer;
+
+    InfoContainer mInfo;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
+
+    /// @param merge Merge with existing list, or just push each record to the end of the list?
+    void addInfo (const ESM::DialInfo& info, bool merge);
 
     void blank();
     ///< Set record to default state (does not touch the ID and does not change the type).
