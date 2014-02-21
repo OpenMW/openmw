@@ -109,6 +109,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
             {
                 uniqueID = uniqueID+1;
                 sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
+                sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
                 mStaticGeometrySmall[ptr.getCell()] = sg;
 
                 sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
@@ -122,6 +123,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
             {
                 uniqueID = uniqueID+1;
                 sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
+                sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
                 mStaticGeometry[ptr.getCell()] = sg;
             }
             else
