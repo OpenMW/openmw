@@ -499,6 +499,11 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
     QModelIndex index = indexAt (event->pos());
 
+    if (!index.isValid())
+    {
+        return;
+    }
+
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (mime->fromDocument (mDocument))
     {
