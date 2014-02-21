@@ -2,6 +2,7 @@
 #include "tablesubview.hpp"
 
 #include <QVBoxLayout>
+#include <QEvent>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
@@ -44,7 +45,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     mTable->tableSizeUpdate();
     mTable->selectionSizeUpdate();
-    mTable->installEventFilter(this);
+    mTable->viewport()->installEventFilter(this);
     mBottom->installEventFilter(this);
     filterBox->installEventFilter(this);
 
@@ -67,6 +68,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     connect(filterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)),
         this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)));
+
+    connect(this, SIGNAL(useFilterRequest(const std::string&)), filterBox, SIGNAL(useFilterRequest(const std::string&)));
 
     connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)),
             filterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)));
@@ -114,9 +117,16 @@ void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::Univers
 
 bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
 {
+    if (event->type() == QEvent::Drop)
+    {
+        QDropEvent* drop = dynamic_cast<QDropEvent*>(event);
+        const CSMWorld::TableMimeData* data = dynamic_cast<const CSMWorld::TableMimeData*>(drop->mimeData());
+        bool handled = data->holdsType(CSMWorld::UniversalId::Type_Filter);
+        if (handled)
+        {
+            emit useFilterRequest(data->returnMatching(CSMWorld::UniversalId::Type_Filter).getId());
+        }
+        return handled;
+    }
     return false;
-}
-
-void CSVWorld::TableSubView::dropEvent (QDropEvent* event)
-{
 }

@@ -64,10 +64,9 @@ namespace CSVWorld
 
             void dragEnterEvent(QDragEnterEvent *event);
 
-            void dropEvent(QDropEvent *event);
-
             void dragMoveEvent(QDragMoveEvent *event);
 
+            void dropEvent(QDropEvent *event);
 
         public:
 

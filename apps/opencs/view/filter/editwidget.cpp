@@ -154,7 +154,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     if (ss.str().length() >4)
     {
         clear();
-        insert (QString::fromStdString (ss.str().c_str()));
+        insert (QString::fromUtf8(ss.str().c_str()));
     }
 }
 
@@ -194,3 +194,10 @@ std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::
 
     return ss.str();
 }
+
+void CSVFilter::EditWidget::useFilterRequest (const std::string& idOfFilter)
+{
+    clear();
+    insert(QString::fromUtf8(idOfFilter.c_str()));
+}
+

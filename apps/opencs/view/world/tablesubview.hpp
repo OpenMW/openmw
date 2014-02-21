@@ -41,14 +41,15 @@ namespace CSVWorld
 
             virtual void setStatusBar (bool show);
 
+        protected:
             bool eventFilter(QObject* object, QEvent *event);
-            void dropEvent(QDropEvent *event);
 
         signals:
             void cloneRequest(const std::string&,
                               const CSMWorld::UniversalId::Type);
             void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
                                      Qt::DropAction action);
+            void useFilterRequest(const std::string& idOfFilter);
 
         private slots:
 

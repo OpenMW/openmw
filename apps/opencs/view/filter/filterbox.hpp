@@ -36,6 +36,7 @@ namespace CSVFilter
             void recordDropped (std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action);
             void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource, 
                                      Qt::DropAction action);
+            void useFilterRequest(const std::string& idOfFilter);
     };
 
 }
