@@ -44,6 +44,9 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     mTable->tableSizeUpdate();
     mTable->selectionSizeUpdate();
+    mTable->installEventFilter(this);
+    mBottom->installEventFilter(this);
+    filterBox->installEventFilter(this);
 
     if (mBottom->canCreateAndDelete())
     {
@@ -107,4 +110,13 @@ void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::Univers
         filterSource.push_back(pair);
     }
     emit createFilterRequest(filterSource, action);
+}
+
+bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
+{
+    return false;
+}
+
+void CSVWorld::TableSubView::dropEvent (QDropEvent* event)
+{
 }

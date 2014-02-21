@@ -41,6 +41,9 @@ namespace CSVWorld
 
             virtual void setStatusBar (bool show);
 
+            bool eventFilter(QObject* object, QEvent *event);
+            void dropEvent(QDropEvent *event);
+
         signals:
             void cloneRequest(const std::string&,
                               const CSMWorld::UniversalId::Type);
