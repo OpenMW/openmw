@@ -65,7 +65,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     const unsigned count = filterSource.size();
     bool multipleElements = false;
 
-    switch (count)
+    switch (count) //setting multipleElements;
     {
         case 0: //empty
             return; //nothing to do here
@@ -83,17 +83,17 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     QString oldContent (text());
 
     bool replaceMode = false;
-    bool orMode = true;
+    std::string orAnd;
 
-    switch (key)
+    switch (key) //setting replaceMode and string used to glue expressions
     {
         case Qt::ShiftModifier:
-            orMode = true;
+            orAnd = "!or(";
             replaceMode = false;
             break;
 
         case Qt::ControlModifier:
-            orMode = false;
+            orAnd = "!and(";
             replaceMode = false;
             break;
 
@@ -102,32 +102,16 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
             break;
     }
 
-    if (oldContent.isEmpty() ||
-            !oldContent.contains (QRegExp ("^!.*$", Qt::CaseInsensitive)))
+    if (oldContent.isEmpty() || !oldContent.contains (QRegExp ("^!.*$", Qt::CaseInsensitive))) //if line edit is empty or it does not contain one shot filter go into replace mode
     {
         replaceMode = true;
     }
 
     if (!replaceMode)
     {
-        int index = oldContent.indexOf ('(');
-
-        if (index != 0)
-        {
-            oldContent.remove ('!');
-        }
+        oldContent.remove ('!');
     }
 
-    std::string orAnd;
-
-    if (orMode)
-    {
-        orAnd = "!or(";
-    } else {
-        orAnd = "!and(";
-    }
-
-    clear();
     std::stringstream ss;
 
     if (multipleElements)
@@ -150,29 +134,27 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
         }
 
         ss<<')';
-
-        if (ss.str().length() >5)
-        {
-            insert (QString::fromUtf8 (ss.str().c_str()));
-        }
     } else {
         if (!replaceMode)
         {
-            ss << orAnd << oldContent.toStdString()<<',';
+            ss << orAnd << oldContent.toStdString() <<',';
         } else {
             ss<<'!';
         }
 
         ss << generateFilter (filterSource[0]);
+
         if (!replaceMode)
         {
             ss<<')';
         }
 
-        if (ss.str().length() >4)
-        {
-            insert (QString::fromStdString (ss.str().c_str()));
-        }
+    }
+
+    if (ss.str().length() >4)
+    {
+        clear();
+        insert (QString::fromStdString (ss.str().c_str()));
     }
 }
 
