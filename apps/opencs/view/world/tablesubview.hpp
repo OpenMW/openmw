@@ -3,7 +3,7 @@
 
 #include "../doc/subview.hpp"
 
-#include <qt4/QtCore/qnamespace.h>
+#include <QtCore/qnamespace.h>
 
 class QModelIndex;
 

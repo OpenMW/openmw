@@ -4,7 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <QWidget>
-#include <qt4/QtCore/qnamespace.h>
+#include <QtCore/qnamespace.h>
 
 #include <QHBoxLayout>
 
