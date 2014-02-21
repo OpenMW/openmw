@@ -664,7 +664,7 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
 
     mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
 
-    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->mCell->mRegion;
+    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->mRegion;
     if (Misc::StringUtils::ciEqual(region, playerRegion))
         setWeather(weather);
 }
@@ -695,7 +695,7 @@ void WeatherManager::switchToNextWeather(bool instantly)
     MWBase::World* world = MWBase::Environment::get().getWorld();
     if (world->isCellExterior() || world->isCellQuasiExterior())
     {
-        std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->mCell->mRegion);
+        std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->getCell()->mRegion);
 
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {

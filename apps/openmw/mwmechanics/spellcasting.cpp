@@ -503,7 +503,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
                 if (markedCell)
                 {
-                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->mCell->mName,
+                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName,
                                             markedPosition);
                     action.execute(target);
                 }

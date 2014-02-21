@@ -115,8 +115,8 @@ void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
     mCameraRotNode->setOrientation(Quaternion::IDENTITY);
     mCellCamera->setOrientation(Quaternion(Ogre::Math::Cos(Ogre::Degree(0)/2.f), 0, 0, -Ogre::Math::Sin(Ogre::Degree(0)/2.f)));
 
-    int x = cell->mCell->getGridX();
-    int y = cell->mCell->getGridY();
+    int x = cell->getCell()->getGridX();
+    int y = cell->getCell()->getGridY();
 
     std::string name = "Cell_"+coordStr(x, y);
 
@@ -182,7 +182,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
     const int segsX = std::ceil( length.x / sSize );
     const int segsY = std::ceil( length.y / sSize );
 
-    mInteriorName = cell->mCell->mName;
+    mInteriorName = cell->getCell()->mName;
 
     for (int x=0; x<segsX; ++x)
     {
@@ -192,7 +192,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
             Vector2 newcenter = start + 4096;
 
             render(newcenter.x - center.x, newcenter.y - center.y, zMin, zMax, sSize, sSize,
-                cell->mCell->mName + "_" + coordStr(x,y));
+                cell->getCell()->mName + "_" + coordStr(x,y));
         }
     }
 }

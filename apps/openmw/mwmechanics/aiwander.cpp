@@ -103,10 +103,10 @@ namespace MWMechanics
         if(!mStoredAvailableNodes)
         {
             mStoredAvailableNodes = true;
-            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
 
-            mCellX = actor.getCell()->mCell->mData.mX;
-            mCellY = actor.getCell()->mCell->mData.mY;
+            mCellX = actor.getCell()->getCell()->mData.mX;
+            mCellY = actor.getCell()->getCell()->mData.mY;
 
             if(!mPathgrid)
                 mDistance = 0;
@@ -117,7 +117,7 @@ namespace MWMechanics
             {
                 mXCell = 0;
                 mYCell = 0;
-                if(actor.getCell()->mCell->isExterior())
+                if(actor.getCell()->getCell()->isExterior())
                 {
                     mXCell = mCellX * ESM::Land::REAL_SIZE;
                     mYCell = mCellY * ESM::Land::REAL_SIZE;
@@ -157,7 +157,7 @@ namespace MWMechanics
             mDistance = 0;
 
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-        if(mDistance && (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY))
+        if(mDistance && (mCellX != actor.getCell()->getCell()->mData.mX || mCellY != actor.getCell()->getCell()->mData.mY))
             mDistance = 0;
 
         if(mChooseAction)

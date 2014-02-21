@@ -110,7 +110,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 
     // check cell
     if (!info.mCell.empty())
-        if (!Misc::StringUtils::ciEqual(player.getCell()->mCell->mName, info.mCell))
+        if (!Misc::StringUtils::ciEqual(player.getCell()->getCell()->mName, info.mCell))
             return false;
 
     return true;
@@ -445,7 +445,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotCell:
 
-            return !Misc::StringUtils::ciEqual(mActor.getCell()->mCell->mName, select.getName());
+            return !Misc::StringUtils::ciEqual(mActor.getCell()->getCell()->mName, select.getName());
 
         case SelectWrapper::Function_NotLocal:
         {

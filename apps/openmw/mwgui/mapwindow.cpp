@@ -356,7 +356,7 @@ namespace MWGui
         ESM::Position markedPosition;
         MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
         if (markedCell && markedCell->isExterior() == !mInterior
-                && (!mInterior || Misc::StringUtils::ciEqual(markedCell->mCell->mName, mPrefix)))
+                && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->mName, mPrefix)))
         {
             MarkerPosition markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(markedPosition.pos[0], markedPosition.pos[1], markerPos);

@@ -97,15 +97,15 @@ namespace MWWorld
             }
         }
 
-        if ((*iter)->mCell->isExterior())
+        if ((*iter)->getCell()->isExterior())
         {
             ESM::Land* land =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
-                    (*iter)->mCell->getGridX(),
-                    (*iter)->mCell->getGridY()
+                    (*iter)->getCell()->getGridX(),
+                    (*iter)->getCell()->getGridY()
                 );
             if (land)
-                mPhysics->removeHeightField( (*iter)->mCell->getGridX(), (*iter)->mCell->getGridY() );
+                mPhysics->removeHeightField ((*iter)->getCell()->getGridX(), (*iter)->getCell()->getGridY());
         }
 
         mRendering.removeCell(*iter);
@@ -128,18 +128,18 @@ namespace MWWorld
             float worldsize = ESM::Land::REAL_SIZE;
 
             // Load terrain physics first...
-            if (cell->mCell->isExterior())
+            if (cell->getCell()->isExterior())
             {
                 ESM::Land* land =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
-                        cell->mCell->getGridX(),
-                        cell->mCell->getGridY()
+                        cell->getCell()->getGridX(),
+                        cell->getCell()->getGridY()
                     );
                 if (land) {
                     mPhysics->addHeightField (
                         land->mLandData->mHeights,
-                        cell->mCell->getGridX(),
-                        cell->mCell->getGridY(),
+                        cell->getCell()->getGridX(),
+                        cell->getCell()->getGridY(),
                         0,
                         worldsize / (verts-1),
                         verts)
@@ -218,10 +218,10 @@ namespace MWWorld
         int numUnload = 0;
         while (active!=mActiveCells.end())
         {
-            if ((*active)->mCell->isExterior())
+            if ((*active)->getCell()->isExterior())
             {
-                if (std::abs (X-(*active)->mCell->getGridX())<=1 &&
-                    std::abs (Y-(*active)->mCell->getGridY())<=1)
+                if (std::abs (X-(*active)->getCell()->getGridX())<=1 &&
+                    std::abs (Y-(*active)->getCell()->getGridY())<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
@@ -235,10 +235,10 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-            if ((*active)->mCell->isExterior())
+            if ((*active)->getCell()->isExterior())
             {
-                if (std::abs (X-(*active)->mCell->getGridX())<=1 &&
-                    std::abs (Y-(*active)->mCell->getGridY())<=1)
+                if (std::abs (X-(*active)->getCell()->getGridX())<=1 &&
+                    std::abs (Y-(*active)->getCell()->getGridY())<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
@@ -257,10 +257,10 @@ namespace MWWorld
 
                 while (iter!=mActiveCells.end())
                 {
-                    assert ((*iter)->mCell->isExterior());
+                    assert ((*iter)->getCell()->isExterior());
 
-                    if (x==(*iter)->mCell->getGridX() &&
-                        y==(*iter)->mCell->getGridY())
+                    if (x==(*iter)->getCell()->getGridX() &&
+                        y==(*iter)->getCell()->getGridY())
                         break;
 
                     ++iter;
@@ -280,10 +280,10 @@ namespace MWWorld
 
                 while (iter!=mActiveCells.end())
                 {
-                    assert ((*iter)->mCell->isExterior());
+                    assert ((*iter)->getCell()->isExterior());
 
-                    if (x==(*iter)->mCell->getGridX() &&
-                        y==(*iter)->mCell->getGridY())
+                    if (x==(*iter)->getCell()->getGridX() &&
+                        y==(*iter)->getCell()->getGridY())
                         break;
 
                     ++iter;
@@ -302,10 +302,10 @@ namespace MWWorld
 
         while (iter!=mActiveCells.end())
         {
-            assert ((*iter)->mCell->isExterior());
+            assert ((*iter)->getCell()->isExterior());
 
-            if (X==(*iter)->mCell->getGridX() &&
-                Y==(*iter)->mCell->getGridY())
+            if (X==(*iter)->getCell()->getGridX() &&
+                Y==(*iter)->getCell()->getGridY())
                 break;
 
             ++iter;
@@ -407,7 +407,7 @@ namespace MWWorld
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cell.
-        std::cout << "cellName: " << cell->mCell->mName << std::endl;
+        std::cout << "cellName: " << cell->getCell()->mName << std::endl;
 
         //Loading Interior loading text
 

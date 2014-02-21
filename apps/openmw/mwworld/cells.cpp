@@ -83,8 +83,8 @@ bool MWWorld::Cells::hasState (const CellStore& cellStore) const
     if (cellStore.mState==CellStore::State_Loaded)
         return true;
 
-    if (cellStore.mCell->mData.mFlags & ESM::Cell::Interior)
-        return cellStore.mCell->mData.mFlags & ESM::Cell::HasWater;
+    if (cellStore.getCell()->mData.mFlags & ESM::Cell::Interior)
+        return cellStore.getCell()->mData.mFlags & ESM::Cell::HasWater;
     else
         return false;
 }

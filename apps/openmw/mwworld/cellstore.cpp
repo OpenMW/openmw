@@ -145,6 +145,11 @@ namespace MWWorld
         mWaterLevel = cell->mWater;
     }
 
+    const ESM::Cell *CellStore::getCell() const
+    {
+        return mCell;
+    }
+
     void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
     {
         if (mState!=State_Loaded)

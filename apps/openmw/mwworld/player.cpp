@@ -191,7 +191,7 @@ namespace MWWorld
         ESM::Player player;
 
         mPlayer.save (player.mObject);
-        player.mCellId = mCellStore->mCell->getCellId();
+        player.mCellId = mCellStore->getCell()->getCellId();
 
         player.mBirthsign = mSign;
 
@@ -203,7 +203,7 @@ namespace MWWorld
         {
             player.mHasMark = true;
             player.mMarkedPosition = mMarkedPosition;
-            player.mMarkedCell = mMarkedCell->mCell->getCellId();
+            player.mMarkedCell = mMarkedCell->getCell()->getCellId();
         }
         else
             player.mHasMark = false;

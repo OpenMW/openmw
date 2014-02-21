@@ -506,10 +506,10 @@ namespace MWWorld
         if (!cell)
             cell = mWorldScene->getCurrentCell();
 
-        if (!cell->mCell->isExterior() || !cell->mCell->mName.empty())
-            return cell->mCell->mName;
+        if (!cell->getCell()->isExterior() || !cell->getCell()->mName.empty())
+            return cell->getCell()->mName;
 
-        if (const ESM::Region* region = getStore().get<ESM::Region>().search (cell->mCell->mRegion))
+        if (const ESM::Region* region = getStore().get<ESM::Region>().search (cell->getCell()->mRegion))
             return region->mName;
 
         return getStore().get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
@@ -946,11 +946,11 @@ namespace MWWorld
             if (isPlayer)
             {
                 if (!newCell.isExterior())
-                    changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.mCell->mName), pos);
+                    changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.getCell()->mName), pos);
                 else
                 {
-                    int cellX = newCell.mCell->getGridX();
-                    int cellY = newCell.mCell->getGridY();
+                    int cellX = newCell.getCell()->getGridX();
+                    int cellY = newCell.getCell()->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
                 addContainerScripts (getPlayerPtr(), &newCell);
@@ -1465,7 +1465,7 @@ namespace MWWorld
         CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            return currentCell->mCell->isExterior();
+            return currentCell->getCell()->isExterior();
         }
         return false;
     }
@@ -1475,7 +1475,7 @@ namespace MWWorld
         CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->mCell->mData.mFlags & ESM::Cell::QuasiEx))
+            if (!(currentCell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 return false;
             else
                 return true;
@@ -1757,7 +1757,7 @@ namespace MWWorld
     bool
     World::isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const
     {
-        if (!(cell->mCell->mData.mFlags & ESM::Cell::HasWater)) {
+        if (!(cell->getCell()->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
         return pos.z < cell->mWaterLevel;
@@ -1816,7 +1816,7 @@ namespace MWWorld
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
         if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos))
             return 2;
-        if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep) ||
+        if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
            Class::get(player).getNpcStats(player).isWerewolf())
             return 1;
 

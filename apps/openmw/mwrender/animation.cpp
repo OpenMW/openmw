@@ -334,7 +334,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
     ));
     objlist->mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
 
-    bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
+    bool interior = !(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior());
     bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
                      !interior : fallback->getFallbackBool("LightAttenuation_UseQuadratic");
 
@@ -1070,7 +1070,7 @@ bool Animation::allowSwitchViewMode() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mPriority > MWMechanics::Priority_Movement 
+        if(stateiter->second.mPriority > MWMechanics::Priority_Movement
                 && stateiter->second.mPriority < MWMechanics::Priority_Torch)
             return false;
     }

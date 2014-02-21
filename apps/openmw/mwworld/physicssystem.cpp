@@ -574,7 +574,7 @@ namespace MWWorld
             for(;iter != mMovementQueue.end();iter++)
             {
                 float waterlevel = -std::numeric_limits<float>::max();
-                const ESM::Cell *cell = iter->first.getCell()->mCell;
+                const ESM::Cell *cell = iter->first.getCell()->getCell();
                 if(cell->hasWater())
                     waterlevel = cell->mWater;
 

@@ -49,19 +49,26 @@ namespace MWWorld
     }
   };
 
-  /// A storage struct for one single cell reference.
+  /// \brief Mutable state of a cell
   class CellStore
   {
-  public:
+    public:
 
-    enum State
-    {
-        State_Unloaded, State_Preloaded, State_Loaded
-    };
+        enum State
+        {
+            State_Unloaded, State_Preloaded, State_Loaded
+        };
 
-    CellStore (const ESM::Cell *cell_);
+    private:
 
-    const ESM::Cell *mCell;
+        const ESM::Cell *mCell;
+
+    public:
+
+        CellStore (const ESM::Cell *cell_);
+
+        const ESM::Cell *getCell() const;
+
     State mState;
     std::vector<std::string> mIds;
 
