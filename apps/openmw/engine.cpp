@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 
-#include <boost/filesystem.hpp>
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
@@ -340,10 +339,8 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
-	boost::filesystem::path saves(mCfgMgr.getUserDataPath() / "saves");
-	
     mEnvironment.setStateManager (
-        new MWState::StateManager (saves.make_preferred(), mContentFiles.at (0)));
+        new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
 
     Nif::NIFFile::CacheLock cachelock;
 
