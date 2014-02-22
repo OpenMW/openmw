@@ -176,7 +176,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     else
         slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
 
-    std::ofstream stream (slot->mPath.string().c_str());
+    std::ofstream stream (slot->mPath.string().c_str(), std::ios::binary);
 
     ESM::ESMWriter writer;
 

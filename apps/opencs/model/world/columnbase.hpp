@@ -26,6 +26,7 @@ namespace CSMWorld
 
         enum Display
         {
+            Display_None, //Do not use
             Display_String,
 
             //CONCRETE TYPES STARTS HERE

@@ -24,4 +24,9 @@ CSVFilter::RecordFilterBox::RecordFilterBox (CSMWorld::Data& data, QWidget *pare
     connect (
         editWidget, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>)),
         this, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>)));
+
+    connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)),
+            editWidget, SLOT(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)));
+
+    connect(this, SIGNAL(useFilterRequest(const std::string&)), editWidget, SLOT(useFilterRequest(const std::string&)));
 }

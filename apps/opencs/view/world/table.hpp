@@ -8,6 +8,7 @@
 #include <QtGui/qevent.h>
 
 #include "../../model/filter/node.hpp"
+#include "../../model/world/columnbase.hpp"
 
 namespace CSMDoc {
     class Document;
@@ -63,10 +64,9 @@ namespace CSVWorld
 
             void dragEnterEvent(QDragEnterEvent *event);
 
-            void dropEvent(QDropEvent *event);
-
             void dragMoveEvent(QDragMoveEvent *event);
 
+            void dropEvent(QDropEvent *event);
 
         public:
 
@@ -81,6 +81,8 @@ namespace CSVWorld
             CSMWorld::UniversalId getUniversalId (int row) const;
 
             void updateEditorSetting (const QString &settingName, const QString &settingValue);
+
+            std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 
         signals:
 

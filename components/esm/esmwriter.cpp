@@ -120,7 +120,7 @@ namespace ESM
         mStream->seekp(rec.position);
 
         mCounting = false;
-        write (reinterpret_cast<const char*> (&rec.size), sizeof(int));
+        write (reinterpret_cast<const char*> (&rec.size), sizeof(uint32_t));
         mCounting = true;
 
         mStream->seekp(0, std::ios::end);
