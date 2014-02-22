@@ -100,6 +100,7 @@ CHANGELOG
 0.29.0
 
 Bug #556: Video soundtrack not played when music volume is set to zero
+Bug #829: OpenMW uses up all available vram, when playing for extended time
 Bug #848: Wrong amount of footsteps playing in 1st person
 Bug #888: Ascended Sleepers have movement issues
 Bug #892: Explicit references are allowed on all script functions
