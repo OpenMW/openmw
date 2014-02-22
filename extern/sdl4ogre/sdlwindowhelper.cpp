@@ -31,11 +31,7 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 #ifdef WIN32
 	case SDL_SYSWM_WINDOWS:
 		// Windows code
-#ifdef __MINGW64__
-		winHandle = Ogre::StringConverter::toString((DWORD_PTR)wmInfo.info.win.window);
-#else
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.win.window);
-#endif /* __MINGW64__ */
 		break;
 #elif __MACOSX__
 	case SDL_SYSWM_COCOA:

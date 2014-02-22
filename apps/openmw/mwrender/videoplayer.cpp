@@ -385,7 +385,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     }
 
     void open(const std::string&)
-#ifdef _MSC_VER
+#ifdef _WIN32
     { fail(std::string("Invalid call to ")+__FUNCSIG__); }
 #else
     { fail(std::string("Invalid call to ")+__PRETTY_FUNCTION__); }

@@ -9,7 +9,7 @@
 #include <string.h>
 #if (defined(__APPLE__) && __MAC_OS_X_VERSION_MIN_REQUIRED < 1070) || defined(__MINGW32__)
 // need our own implementation of strnlen
-#if defined(__MINGW32__) && !defined(__MINGW64__)
+#ifdef __MINGW32__
 static size_t strnlen(const char *s, size_t n)
 {
     const char *p = (const char *)memchr(s, 0, n);

@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#ifdef _WIN32
 #include <boost/tr1/tr1/unordered_map>
 #elif defined HAVE_UNORDERED_MAP
 #include <unordered_map>
