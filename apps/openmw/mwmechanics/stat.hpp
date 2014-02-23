@@ -6,6 +6,8 @@
 
 #include <limits>
 
+#include <components/esm/statstate.hpp>
+
 namespace MWMechanics
 {
     template<typename T>
@@ -85,6 +87,18 @@ namespace MWMechanics
             void setModifier (const T& modifier)
             {
                 mModified = mBase + modifier;
+            }
+
+            void writeState (ESM::StatState<T>& state) const
+            {
+                state.mBase = mBase;
+                state.mMod = mModified;
+            }
+
+            void readState (const ESM::StatState<T>& state)
+            {
+                mBase = state.mBase;
+                mModified = state.mMod;
             }
     };
 
@@ -190,6 +204,18 @@ namespace MWMechanics
                 mStatic.setModifier (modifier);
                 setCurrent (getCurrent()+diff);
             }
+
+            void writeState (ESM::StatState<T>& state) const
+            {
+                mStatic.writeState (state);
+                state.mCurrent = mCurrent;
+            }
+
+            void readState (const ESM::StatState<T>& state)
+            {
+                mStatic.readState (state);
+                mCurrent = state.mCurrent;
+            }
     };
 
     template<typename T>
@@ -225,6 +251,10 @@ namespace MWMechanics
         void damage(int damage) { mDamage += damage; }
         void restore(int amount) { mDamage -= std::min(mDamage, amount); }
         int getDamage() const { return mDamage; }
+
+        void writeState (ESM::StatState<int>& state) const;
+
+        void readState (const ESM::StatState<int>& state);
     };
 
     class SkillValue : public AttributeValue
@@ -234,6 +264,10 @@ namespace MWMechanics
         SkillValue() : mProgress(0) {}
         float getProgress() const { return mProgress; }
         void setProgress(float progress) { mProgress = progress; }
+
+        void writeState (ESM::StatState<int>& state) const;
+
+        void readState (const ESM::StatState<int>& state);
     };
 
     inline bool operator== (const AttributeValue& left, const AttributeValue& right)

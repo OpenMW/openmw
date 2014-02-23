@@ -24,7 +24,7 @@ opencs_units (model/world
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata
     )
 
 opencs_hdrs_noqt (model/world
@@ -38,7 +38,7 @@ opencs_units (model/tools
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck spellcheck referenceablecheck
+    birthsigncheck spellcheck referenceablecheck scriptcheck
     )
 
 
@@ -60,7 +60,7 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator
+    scenetoolmode infocreator scriptedit
     )
 
 opencs_units (view/render

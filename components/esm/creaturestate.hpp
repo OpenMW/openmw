@@ -3,6 +3,7 @@
 
 #include "objectstate.hpp"
 #include "inventorystate.hpp"
+#include "creaturestats.hpp"
 
 namespace ESM
 {
@@ -11,6 +12,7 @@ namespace ESM
     struct CreatureState : public ObjectState
     {
         InventoryState mInventory;
+        CreatureStats mCreatureStats;
 
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm, bool inInventory = false) const;

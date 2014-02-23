@@ -131,7 +131,7 @@ CSMWorld::RecordBase& CSMWorld::RefIdData::getRecord (const LocalIndex& index)
     return iter->second->getRecord (index.first);
 }
 
-void CSMWorld::RefIdData::appendRecord (UniversalId::Type type, const std::string& id)
+void CSMWorld::RefIdData::appendRecord (UniversalId::Type type, const std::string& id, bool base)
 {
     std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
         mRecordContainers.find (type);
@@ -139,7 +139,7 @@ void CSMWorld::RefIdData::appendRecord (UniversalId::Type type, const std::strin
     if (iter==mRecordContainers.end())
         throw std::logic_error ("invalid local index type");
 
-    iter->second->appendRecord (id);
+    iter->second->appendRecord (id, base);
 
     mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id),
         LocalIndex (iter->second->getSize()-1, type)));

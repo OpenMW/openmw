@@ -766,8 +766,11 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore->
-            readState (state2.mInventory);
+        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+
+        customData.mContainerStore->readState (state2.mInventory);
+        customData.mCreatureStats.readState (state2.mCreatureStats);
+
     }
 
     void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
@@ -777,8 +780,10 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore->
-            writeState (state2.mInventory);
+        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+
+        customData.mContainerStore->writeState (state2.mInventory);
+        customData.mCreatureStats.writeState (state2.mCreatureStats);
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;

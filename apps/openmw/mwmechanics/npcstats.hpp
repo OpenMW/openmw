@@ -13,6 +13,7 @@
 namespace ESM
 {
     struct Class;
+    struct NpcStats;
 }
 
 namespace MWMechanics
@@ -128,6 +129,10 @@ namespace MWMechanics
             /// Sets time left for the creature to drown if it stays underwater.
             /// @param time value from [0,20]
             void setTimeToStartDrowning(float time);
+
+            void writeState (ESM::NpcStats& state) const;
+
+            void readState (const ESM::NpcStats& state);
     };
 }
 

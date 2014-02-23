@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <components/esm/creaturestats.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -457,4 +459,21 @@ namespace MWMechanics
         mAttackStrength = value;
     }
 
+    void CreatureStats::writeState (ESM::CreatureStats& state) const
+    {
+        for (int i=0; i<8; ++i)
+            mAttributes[i].writeState (state.mAttributes[i]);
+
+        for (int i=0; i<3; ++i)
+            mDynamic[i].writeState (state.mDynamic[i]);
+    }
+
+    void CreatureStats::readState (const ESM::CreatureStats& state)
+    {
+        for (int i=0; i<8; ++i)
+            mAttributes[i].readState (state.mAttributes[i]);
+
+        for (int i=0; i<3; ++i)
+            mDynamic[i].readState (state.mDynamic[i]);
+    }
 }

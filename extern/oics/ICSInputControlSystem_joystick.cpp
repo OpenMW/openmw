@@ -318,7 +318,7 @@ namespace ICS
 	}
 
 	// joyStick listeners
-	bool InputControlSystem::buttonPressed(const SDL_JoyButtonEvent &evt, int button)
+    void InputControlSystem::buttonPressed(const SDL_JoyButtonEvent &evt, int button)
 	{
 		if(mActive) 
 		{
@@ -354,11 +354,9 @@ namespace ICS
 					mDetectingBindingControl, evt.which, button, mDetectingBindingDirection);
 			}
 		}
-
-		return true;
 	}
 
-	bool InputControlSystem::buttonReleased(const SDL_JoyButtonEvent &evt, int button)
+    void InputControlSystem::buttonReleased(const SDL_JoyButtonEvent &evt, int button)
 	{
 		if(mActive)
 		{
@@ -371,10 +369,9 @@ namespace ICS
 				}
 			}
 		}
-		return true;
 	}
 
-	bool InputControlSystem::axisMoved(const SDL_JoyAxisEvent &evt, int axis)
+    void InputControlSystem::axisMoved(const SDL_JoyAxisEvent &evt, int axis)
 	{
 		if(mActive)
 		{
@@ -417,12 +414,10 @@ namespace ICS
 				}
 			}
 		}
-
-		return true;
 	}
 
 	//Here be dragons, apparently
-	bool InputControlSystem::povMoved(const SDL_JoyHatEvent &evt, int index)
+    void InputControlSystem::povMoved(const SDL_JoyHatEvent &evt, int index)
 	{
 		if(mActive)
 		{
@@ -542,13 +537,11 @@ namespace ICS
 				}
 			}
 		}
-
-		return true;
 	}
 
 	//TODO: does this have an SDL equivalent?
 	/*
-	bool InputControlSystem::sliderMoved(const OIS::JoyStickEvent &evt, int index)
+    void InputControlSystem::sliderMoved(const OIS::JoyStickEvent &evt, int index)
 	{
 		if(mActive)
 		{
@@ -590,8 +583,6 @@ namespace ICS
 				}
 			}
 		}
-
-		return true;
 	}
 	*/
 

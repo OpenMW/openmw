@@ -80,8 +80,8 @@ namespace ESM
         rec.name = name;
         rec.position = mStream->tellp();
         rec.size = 0;
-        writeT<int>(0); // Size goes here
-        writeT<int>(0); // Unused header?
+        writeT<uint32_t>(0); // Size goes here
+        writeT<uint32_t>(0); // Unused header?
         writeT(flags);
         mRecords.push_back(rec);
 
@@ -105,7 +105,7 @@ namespace ESM
         rec.name = name;
         rec.position = mStream->tellp();
         rec.size = 0;
-        writeT<int>(0); // Size goes here
+        writeT<uint32_t>(0); // Size goes here
         mRecords.push_back(rec);
 
         assert(mRecords.back().size == 0);
@@ -120,7 +120,7 @@ namespace ESM
         mStream->seekp(rec.position);
 
         mCounting = false;
-        write (reinterpret_cast<const char*> (&rec.size), sizeof(int));
+        write (reinterpret_cast<const char*> (&rec.size), sizeof(uint32_t));
         mCounting = true;
 
         mStream->seekp(0, std::ios::end);

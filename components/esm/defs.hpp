@@ -91,6 +91,7 @@ enum RecNameInts
     REC_PLAY = 0x59414c50,
     REC_CSTA = 0x41545343,
     REC_GMAP = 0x50414d47,
+    REC_DIAS = 0x53414944,
 
     // format 1
     REC_FILT = 0x544C4946

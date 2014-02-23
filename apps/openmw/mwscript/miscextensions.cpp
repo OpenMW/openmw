@@ -365,16 +365,20 @@ namespace MWScript
         };
 
         template<class R>
-        class OpRemoveSoulGem : public Interpreter::Opcode0
+        class OpRemoveSoulGem : public Interpreter::Opcode1
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    // throw away additional arguments
+                    for (unsigned int i=0; i<arg0; ++i)
+                        runtime.pop();
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
                     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
@@ -818,6 +822,28 @@ namespace MWScript
             }
         };
 
+        class OpGetPcInJail : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    /// \todo implement jail check
+                    runtime.push (0);
+                }
+        };
+
+        class OpGetPcTraveling : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime &runtime)
+                {
+                    /// \todo implement traveling check
+                    runtime.push (0);
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -850,8 +876,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetEffectExplicit, new OpGetEffect<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeAddSoulGem, new OpAddSoulGem<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeAddSoulGemExplicit, new OpAddSoulGem<ExplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeRemoveSoulGem, new OpRemoveSoulGem<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeRemoveSoulGemExplicit, new OpRemoveSoulGem<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Misc::opcodeRemoveSoulGem, new OpRemoveSoulGem<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Misc::opcodeRemoveSoulGemExplicit, new OpRemoveSoulGem<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeDrop, new OpDrop<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeDropExplicit, new OpDrop<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeDropSoulGem, new OpDropSoulGem<ImplicitRef>);
@@ -888,6 +914,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeCastExplicit, new OpCast<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpell, new OpExplodeSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcInJail, new OpGetPcInJail);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetPcTraveling, new OpGetPcTraveling);
         }
     }
 }

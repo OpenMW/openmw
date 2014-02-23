@@ -62,6 +62,10 @@ namespace Terrain
         , mShaders(shaders)
         , mVisible(true)
         , mLoadingListener(loadingListener)
+        , mMaxX(0)
+        , mMinX(0)
+        , mMaxY(0)
+        , mMinY(0)
     {
         loadingListener->setLabel("Creating terrain");
         loadingListener->indicateProgress();
@@ -76,20 +80,21 @@ namespace Terrain
         mCompositeMapRenderTarget->setAutoUpdated(false);
         mCompositeMapRenderTarget->addViewport(compositeMapCam);
 
-        mBounds = storage->getBounds();
+        storage->getBounds(mMinX, mMaxX, mMinY, mMaxY);
 
-        int origSizeX = mBounds.getSize().x;
-        int origSizeY = mBounds.getSize().y;
+        int origSizeX = mMaxX-mMinX;
+        int origSizeY = mMaxY-mMinY;
 
         // Dividing a quad tree only works well for powers of two, so round up to the nearest one
         int size = nextPowerOfTwo(std::max(origSizeX, origSizeY));
 
         // Adjust the center according to the new size
-        Ogre::Vector3 center = mBounds.getCenter() + Ogre::Vector3((size-origSizeX)/2.f, (size-origSizeY)/2.f, 0);
+        float centerX = (mMinX+mMaxX)/2.f + (size-origSizeX)/2.f;
+        float centerY = (mMinY+mMaxY)/2.f + (size-origSizeY)/2.f;
 
         mRootSceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
-        mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(center.x, center.y), NULL);
+        mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(centerX, centerY), NULL);
         buildQuadTree(mRootNode);
         loadingListener->indicateProgress();
         mRootNode->initAabb();
@@ -113,18 +118,19 @@ namespace Terrain
             // We arrived at a leaf
             float minZ,maxZ;
             Ogre::Vector2 center = node->getCenter();
+            float cellWorldSize = getStorage()->getCellWorldSize();
             if (mStorage->getMinMaxHeights(node->getSize(), center, minZ, maxZ))
-                node->setBoundingBox(Ogre::AxisAlignedBox(Ogre::Vector3(-halfSize*8192, -halfSize*8192, minZ),
-                                                          Ogre::Vector3(halfSize*8192, halfSize*8192, maxZ)));
+                node->setBoundingBox(Ogre::AxisAlignedBox(Ogre::Vector3(-halfSize*cellWorldSize, -halfSize*cellWorldSize, minZ),
+                                                          Ogre::Vector3(halfSize*cellWorldSize, halfSize*cellWorldSize, maxZ)));
             else
                 node->markAsDummy(); // no data available for this node, skip it
             return;
         }
 
-        if (node->getCenter().x - halfSize > mBounds.getMaximum().x
-                || node->getCenter().x + halfSize < mBounds.getMinimum().x
-                || node->getCenter().y - halfSize > mBounds.getMaximum().y
-                || node->getCenter().y + halfSize < mBounds.getMinimum().y )
+        if (node->getCenter().x - halfSize > mMaxX
+                || node->getCenter().x + halfSize < mMinX
+                || node->getCenter().y - halfSize > mMaxY
+                || node->getCenter().y + halfSize < mMinY )
             // Out of bounds of the actual terrain - this will happen because
             // we rounded the size up to the next power of two
         {
@@ -161,15 +167,16 @@ namespace Terrain
 
     Ogre::AxisAlignedBox World::getWorldBoundingBox (const Ogre::Vector2& center)
     {
-        if (center.x > mBounds.getMaximum().x
-                 || center.x < mBounds.getMinimum().x
-                || center.y > mBounds.getMaximum().y
-                || center.y < mBounds.getMinimum().y)
+        if (center.x > mMaxX
+                 || center.x < mMinX
+                || center.y > mMaxY
+                || center.y < mMinY)
             return Ogre::AxisAlignedBox::BOX_NULL;
         QuadTreeNode* node = findNode(center, mRootNode);
         Ogre::AxisAlignedBox box = node->getBoundingBox();
-        box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * 8192,
-                       box.getMaximum() + Ogre::Vector3(center.x, center.y, 0) * 8192);
+        float cellWorldSize = getStorage()->getCellWorldSize();
+        box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize,
+                       box.getMaximum() + Ogre::Vector3(center.x, center.y, 0) * cellWorldSize);
         return box;
     }
 
