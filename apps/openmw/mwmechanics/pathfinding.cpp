@@ -391,6 +391,8 @@ namespace MWMechanics
 
     void PathFinder::syncStart(const std::list<ESM::Pathgrid::Point> &path)
     {
+        if (path.size() < 2)
+            return; //nothing to pop
         std::list<ESM::Pathgrid::Point>::const_iterator oldStart = path.begin();
         std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
         
