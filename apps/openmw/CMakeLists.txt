@@ -57,7 +57,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader actiontrap
+    contentloader esmloader omwloader actiontrap cellreflist
     )
 
 add_openmw_dir (mwclass

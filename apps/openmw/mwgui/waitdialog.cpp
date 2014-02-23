@@ -10,6 +10,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"

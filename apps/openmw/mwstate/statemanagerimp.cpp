@@ -23,6 +23,7 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

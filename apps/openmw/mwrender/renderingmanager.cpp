@@ -24,6 +24,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"

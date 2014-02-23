@@ -14,6 +14,7 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/animation.hpp"
 

@@ -11,6 +11,7 @@
 #include "class.hpp"
 #include "esmstore.hpp"
 #include "containerstore.hpp"
+#include "cellstore.hpp"
 
 MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {

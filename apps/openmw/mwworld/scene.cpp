@@ -17,8 +17,8 @@
 #include "localscripts.hpp"
 #include "esmstore.hpp"
 #include "class.hpp"
-
 #include "cellfunctors.hpp"
+#include "cellstore.hpp"
 
 namespace
 {

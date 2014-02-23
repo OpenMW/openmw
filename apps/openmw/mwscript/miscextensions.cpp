@@ -13,12 +13,16 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/esm/loadmgef.hpp>
+#include <components/esm/loadcrea.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"

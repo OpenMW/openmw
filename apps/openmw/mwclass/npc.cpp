@@ -30,6 +30,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"

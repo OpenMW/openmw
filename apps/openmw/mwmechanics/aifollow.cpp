@@ -1,12 +1,14 @@
 #include "aifollow.hpp"
-#include <iostream>
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
-#include "movement.hpp"
 
 #include <OgreMath.h>
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
+#include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
+
+#include "movement.hpp"
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)

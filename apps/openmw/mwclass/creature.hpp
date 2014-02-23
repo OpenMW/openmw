@@ -3,6 +3,11 @@
 
 #include "../mwworld/class.hpp"
 
+namespace ESM
+{
+    struct GameSetting;
+}
+
 namespace MWClass
 {
     class Creature : public MWWorld::Class

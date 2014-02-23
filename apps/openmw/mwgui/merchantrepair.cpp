@@ -1,5 +1,7 @@
 #include "merchantrepair.hpp"
 
+#include <components/esm/loadgmst.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/world.hpp"
@@ -10,6 +12,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace MWGui
 {

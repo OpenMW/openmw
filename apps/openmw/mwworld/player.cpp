@@ -7,19 +7,20 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/player.hpp>
 #include <components/esm/defs.hpp>
+#include <components/esm/loadbsgn.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/inventorystore.hpp"
-
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "class.hpp"
+#include "ptr.hpp"
+#include "inventorystore.hpp"
+#include "cellstore.hpp"
 
 namespace MWWorld
 {

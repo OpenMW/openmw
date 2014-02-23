@@ -7,7 +7,9 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
 #include "../mwworld/player.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/globalmap.hpp"
 

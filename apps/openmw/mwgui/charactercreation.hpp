@@ -1,6 +1,9 @@
 #ifndef CHARACTER_CREATION_HPP
 #define CHARACTER_CREATION_HPP
 
+#include <components/esm/loadskil.hpp>
+#include <components/esm/loadclas.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 

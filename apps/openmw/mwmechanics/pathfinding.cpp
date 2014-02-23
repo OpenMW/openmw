@@ -1,13 +1,15 @@
 #include "pathfinding.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
+#include <map>
 
 #include "OgreMath.h"
 #include "OgreVector3.h"
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
-#include <map>
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 namespace
 {

@@ -39,6 +39,12 @@ namespace ESM
     struct Spell;
     struct NPC;
     struct CellId;
+    struct Armor;
+    struct Weapon;
+    struct Clothing;
+    struct Enchantment;
+    struct Book;
+    struct EffectList;
 }
 
 namespace MWRender

@@ -9,6 +9,7 @@
 #include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"

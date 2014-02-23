@@ -11,11 +11,15 @@
 #include <OgreParticleEmitter.h>
 #include <OgreStaticGeometry.h>
 
+#include <components/esm/loadligh.hpp>
+#include <components/esm/loadstat.hpp>
+
 #include <components/nifogre/ogrenifloader.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "renderconst.hpp"
 #include "animation.hpp"

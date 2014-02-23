@@ -18,6 +18,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"

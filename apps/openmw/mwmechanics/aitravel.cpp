@@ -2,7 +2,9 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "steering.hpp"
 #include "movement.hpp"

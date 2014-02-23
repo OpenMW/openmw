@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/esm/loadbook.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -169,7 +171,7 @@ namespace MWGui
             }
             ++i;
         }
-        
+
         //If it is the last page, hide the button "Next Page"
         if (   (mCurrentPage+1)*2 == mPages.size()
             || (mCurrentPage+1)*2 == mPages.size() + 1)
@@ -194,7 +196,7 @@ namespace MWGui
         if (button->getAlign().isRight())
             button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
     }
-    
+
     void BookWindow::nextPage()
     {
         if ((mCurrentPage+1)*2 < mPages.size())

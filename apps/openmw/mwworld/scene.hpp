@@ -21,6 +21,11 @@ namespace Files
     class Collections;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace Render
 {
     class OgreRenderer;

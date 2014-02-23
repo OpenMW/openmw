@@ -1,14 +1,15 @@
 #include "aiescort.hpp"
 
-#include "movement.hpp"
-
-#include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/timestamp.hpp"
+
 #include "steering.hpp"
+#include "movement.hpp"
 
 namespace
 {

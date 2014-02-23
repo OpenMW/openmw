@@ -12,6 +12,7 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
     struct CellId;
+    struct Cell;
 }
 
 namespace MWWorld

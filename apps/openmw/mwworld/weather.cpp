@@ -9,6 +9,7 @@
 #include "player.hpp"
 #include "esmstore.hpp"
 #include "fallback.hpp"
+#include "cellstore.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;

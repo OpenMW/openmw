@@ -15,13 +15,15 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
+#include <components/esm/loadgmst.hpp>
+
 #include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
-#include <components/esm/loadgmst.hpp>
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "ptr.hpp"
 #include "class.hpp"
