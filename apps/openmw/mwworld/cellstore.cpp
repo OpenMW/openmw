@@ -342,26 +342,14 @@ namespace MWWorld
 
     Ptr CellStore::searchInContainer (const std::string& id)
     {
-        {
-            Ptr ptr = searchInContainerList (mContainers, id);
+        if (Ptr ptr = searchInContainerList (mContainers, id))
+            return ptr;
 
-            if (!ptr.isEmpty())
-                return ptr;
-        }
+        if (Ptr ptr = searchInContainerList (mCreatures, id))
+            return ptr;
 
-        {
-            Ptr ptr = searchInContainerList (mCreatures, id);
-
-            if (!ptr.isEmpty())
-                return ptr;
-        }
-
-        {
-            Ptr ptr = searchInContainerList (mNpcs, id);
-
-            if (!ptr.isEmpty())
-                return ptr;
-        }
+        if (Ptr ptr = searchInContainerList (mNpcs, id))
+            return ptr;
 
         return Ptr();
     }

@@ -74,6 +74,9 @@ namespace MWWorld
 
             ContainerStore *getContainerStore() const;
             ///< May return a 0-pointer, if reference is not in a container.
+
+            operator const void *();
+            ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
     };
 
     inline bool operator== (const Ptr& left, const Ptr& right)
