@@ -167,7 +167,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
 
     if (cell.getState()==CellStore::State_Preloaded)
     {
-        if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), name))
+        if (cell.hasId (name))
         {
             cell.load (mStore, mReader);
         }
@@ -175,65 +175,10 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
             return Ptr();
     }
 
-    if (MWWorld::LiveCellRef<ESM::Activator> *ref = cell.mActivators.find (name))
-        return Ptr (ref, &cell);
+    Ptr ptr = cell.search (name);
 
-    if (MWWorld::LiveCellRef<ESM::Potion> *ref = cell.mPotions.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = cell.mAppas.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Armor> *ref = cell.mArmors.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Book> *ref = cell.mBooks.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Clothing> *ref = cell.mClothes.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Container> *ref = cell.mContainers.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Creature> *ref = cell.mCreatures.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Door> *ref = cell.mDoors.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Ingredient> *ref = cell.mIngreds.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = cell.mCreatureLists.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::ItemLevList> *ref = cell.mItemLists.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Light> *ref = cell.mLights.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Lockpick> *ref = cell.mLockpicks.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = cell.mMiscItems.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::NPC> *ref = cell.mNpcs.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Probe> *ref = cell.mProbes.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Repair> *ref = cell.mRepairs.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Static> *ref = cell.mStatics.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Weapon> *ref = cell.mWeapons.find (name))
-        return Ptr (ref, &cell);
+    if (!ptr.isEmpty())
+        return ptr;
 
     if (searchInContainers)
         return cell.searchInContainer (name);

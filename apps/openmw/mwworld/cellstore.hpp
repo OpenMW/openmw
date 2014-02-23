@@ -14,6 +14,7 @@ namespace ESM
 
 namespace MWWorld
 {
+    class Ptr;
 
   /// A list of cell references
   template <typename X>
@@ -63,6 +64,7 @@ namespace MWWorld
 
         const ESM::Cell *mCell;
         State mState;
+        std::vector<std::string> mIds;
 
     public:
 
@@ -72,7 +74,13 @@ namespace MWWorld
 
         State getState() const;
 
-    std::vector<std::string> mIds;
+        bool hasId (const std::string& id) const;
+        ///< May return true for deleted IDs when in preload state. Will return false, if cell is
+        /// unloaded.
+
+        Ptr search (const std::string& id);
+        ///< Will return an empty Ptr if cell is not loaded. Does not check references in
+        /// containers.
 
     float mWaterLevel;
 

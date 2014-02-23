@@ -1,6 +1,7 @@
 #include "cellstore.hpp"
 
 #include <iostream>
+#include <algorithm>
 
 #include <components/esm/cellstate.hpp>
 #include <components/esm/cellid.hpp>
@@ -153,6 +154,83 @@ namespace MWWorld
     CellStore::State CellStore::getState() const
     {
         return mState;
+    }
+
+    bool CellStore::hasId (const std::string& id) const
+    {
+        if (mState==State_Unloaded)
+            return false;
+
+        if (mState==State_Preloaded)
+            return std::binary_search (mIds.begin(), mIds.end(), id);
+
+        /// \todo address const-issues
+        return const_cast<CellStore *> (this)->search (id).isEmpty();
+    }
+
+    Ptr CellStore::search (const std::string& id)
+    {
+        if (LiveCellRef<ESM::Activator> *ref = mActivators.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Potion> *ref = mPotions.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Apparatus> *ref = mAppas.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Armor> *ref = mArmors.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Book> *ref = mBooks.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Clothing> *ref = mClothes.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Container> *ref = mContainers.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Creature> *ref = mCreatures.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Door> *ref = mDoors.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Ingredient> *ref = mIngreds.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::CreatureLevList> *ref = mCreatureLists.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::ItemLevList> *ref = mItemLists.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Light> *ref = mLights.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Lockpick> *ref = mLockpicks.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Miscellaneous> *ref = mMiscItems.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::NPC> *ref = mNpcs.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Probe> *ref = mProbes.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Repair> *ref = mRepairs.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Static> *ref = mStatics.find (id))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Weapon> *ref = mWeapons.find (id))
+            return Ptr (ref, this);
+
+        return Ptr();
     }
 
     void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
