@@ -80,7 +80,7 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, const CellStore& cell) c
 
 bool MWWorld::Cells::hasState (const CellStore& cellStore) const
 {
-    if (cellStore.mState==CellStore::State_Loaded)
+    if (cellStore.getState()==CellStore::State_Loaded)
         return true;
 
     if (cellStore.getCell()->mData.mFlags & ESM::Cell::Interior)
@@ -122,7 +122,7 @@ MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
             std::make_pair (x, y), CellStore (cell))).first;
     }
 
-    if (result->second.mState!=CellStore::State_Loaded)
+    if (result->second.getState()!=CellStore::State_Loaded)
     {
         // Multiple plugin support for landscape data is much easier than for references. The last plugin wins.
         result->second.load (mStore, mReader);
@@ -143,7 +143,7 @@ MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
         result = mInteriors.insert (std::make_pair (lowerName, CellStore (cell))).first;
     }
 
-    if (result->second.mState!=CellStore::State_Loaded)
+    if (result->second.getState()!=CellStore::State_Loaded)
     {
         result->second.load (mStore, mReader);
     }
@@ -162,10 +162,10 @@ MWWorld::CellStore *MWWorld::Cells::getCell (const ESM::CellId& id)
 MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
     bool searchInContainers)
 {
-    if (cell.mState==CellStore::State_Unloaded)
+    if (cell.getState()==CellStore::State_Unloaded)
         cell.preload (mStore, mReader);
 
-    if (cell.mState==CellStore::State_Preloaded)
+    if (cell.getState()==CellStore::State_Preloaded)
     {
         if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), name))
         {
@@ -375,7 +375,7 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
         state.load (reader);
         cellStore->loadState (state);
 
-        if (cellStore->mState!=CellStore::State_Loaded)
+        if (cellStore->getState()!=CellStore::State_Loaded)
             cellStore->load (mStore, mReader);
 
         cellStore->readReferences (reader, contentFileMap);

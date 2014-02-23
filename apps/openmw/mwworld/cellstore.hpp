@@ -62,6 +62,7 @@ namespace MWWorld
     private:
 
         const ESM::Cell *mCell;
+        State mState;
 
     public:
 
@@ -69,7 +70,8 @@ namespace MWWorld
 
         const ESM::Cell *getCell() const;
 
-    State mState;
+        State getState() const;
+
     std::vector<std::string> mIds;
 
     float mWaterLevel;

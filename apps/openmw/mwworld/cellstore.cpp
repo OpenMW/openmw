@@ -150,6 +150,11 @@ namespace MWWorld
         return mCell;
     }
 
+    CellStore::State CellStore::getState() const
+    {
+        return mState;
+    }
+
     void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
     {
         if (mState!=State_Loaded)
