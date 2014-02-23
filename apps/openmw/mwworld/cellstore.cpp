@@ -430,6 +430,11 @@ namespace MWWorld
         }
     }
 
+    bool CellStore::isExterior() const
+    {
+        return mCell->isExterior();
+    }
+
     Ptr CellStore::searchInContainer (const std::string& id)
     {
         if (Ptr ptr = searchInContainerList (mContainers, id))
@@ -636,5 +641,15 @@ namespace MWWorld
                     throw std::runtime_error ("unknown type in cell reference section");
             }
         }
+    }
+
+    bool operator== (const CellStore& left, const CellStore& right)
+    {
+        return left.getCell()->getCellId()==right.getCell()->getCellId();
+    }
+
+    bool operator!= (const CellStore& left, const CellStore& right)
+    {
+        return !(left==right);
     }
 }

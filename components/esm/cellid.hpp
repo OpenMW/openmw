@@ -23,6 +23,9 @@ namespace ESM
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
     };
+
+    bool operator== (const CellId& left, const CellId& right);
+    bool operator!= (const CellId& left, const CellId& right);
 }
 
 #endif
