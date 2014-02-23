@@ -233,6 +233,16 @@ namespace MWWorld
         return Ptr();
     }
 
+    float CellStore::getWaterLevel() const
+    {
+        return mWaterLevel;
+    }
+
+    void CellStore::setWaterLevel (float level)
+    {
+        mWaterLevel = level;
+    }
+
     void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
     {
         if (mState!=State_Loaded)

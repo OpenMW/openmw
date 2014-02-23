@@ -1760,7 +1760,7 @@ namespace MWWorld
         if (!(cell->getCell()->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
-        return pos.z < cell->mWaterLevel;
+        return pos.z < cell->getWaterLevel();
     }
 
     bool World::isOnGround(const MWWorld::Ptr &ptr) const

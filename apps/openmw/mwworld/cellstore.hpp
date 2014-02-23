@@ -65,6 +65,7 @@ namespace MWWorld
         const ESM::Cell *mCell;
         State mState;
         std::vector<std::string> mIds;
+        float mWaterLevel;
 
     public:
 
@@ -82,7 +83,9 @@ namespace MWWorld
         ///< Will return an empty Ptr if cell is not loaded. Does not check references in
         /// containers.
 
-    float mWaterLevel;
+        float getWaterLevel() const;
+
+        void setWaterLevel (float level);
 
     // Lists for each individual object type
     CellRefList<ESM::Activator>         mActivators;
