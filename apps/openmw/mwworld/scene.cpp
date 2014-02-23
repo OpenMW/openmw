@@ -22,6 +22,63 @@
 
 namespace
 {
+    struct InsertFunctor
+    {
+        MWWorld::CellStore& mCell;
+        bool mRescale;
+        Loading::Listener& mLoadingListener;
+        MWWorld::PhysicsSystem& mPhysics;
+        MWRender::RenderingManager& mRendering;
+
+        InsertFunctor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
+            MWWorld::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
+
+        bool operator() (const MWWorld::Ptr& ptr);
+    };
+
+    InsertFunctor::InsertFunctor (MWWorld::CellStore& cell, bool rescale,
+        Loading::Listener& loadingListener, MWWorld::PhysicsSystem& physics,
+        MWRender::RenderingManager& rendering)
+    : mCell (cell), mRescale (rescale), mLoadingListener (loadingListener),
+      mPhysics (physics), mRendering (rendering)
+    {}
+
+    bool InsertFunctor::InsertFunctor::operator() (const MWWorld::Ptr& ptr)
+    {
+        if (mRescale)
+        {
+            if (ptr.getCellRef().mScale<0.5)
+                ptr.getCellRef().mScale = 0.5;
+            else if (ptr.getCellRef().mScale>2)
+                ptr.getCellRef().mScale = 2;
+        }
+
+        if (ptr.getRefData().getCount() && ptr.getRefData().isEnabled())
+        {
+            try
+            {
+                mRendering.addObject (ptr);
+                ptr.getClass().insertObject (ptr, mPhysics);
+
+                float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
+                float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
+                float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+                MWBase::Environment::get().getWorld()->localRotateObject (ptr, ax, ay, az);
+
+                MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().mScale);
+                ptr.getClass().adjustPosition (ptr);
+            }
+            catch (const std::exception& e)
+            {
+                std::string error ("error during rendering: ");
+                std::cerr << error + e.what() << std::endl;
+            }
+        }
+
+        mLoadingListener.increaseProgress (1);
+
+        return true;
+    }
 
     template<typename T>
     void insertCellRefList(MWRender::RenderingManager& rendering,
@@ -267,7 +324,7 @@ namespace MWWorld
                 }
 
                 if (iter==mActiveCells.end())
-                    refsToLoad += countRefs(*MWBase::Environment::get().getWorld()->getExterior(x, y));
+                    refsToLoad += MWBase::Environment::get().getWorld()->getExterior(x, y)->count();
             }
 
         loadingListener->setProgressRange(refsToLoad);
@@ -403,7 +460,7 @@ namespace MWWorld
             ++current;
         }
 
-        int refsToLoad = countRefs(*cell);
+        int refsToLoad = cell->count();
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cell.
@@ -451,55 +508,10 @@ namespace MWWorld
         mCellChanged = false;
     }
 
-    int Scene::countRefs (const CellStore& cell)
-    {
-        return cell.mActivators.mList.size()
-                + cell.mPotions.mList.size()
-                + cell.mAppas.mList.size()
-                + cell.mArmors.mList.size()
-                + cell.mBooks.mList.size()
-                + cell.mClothes.mList.size()
-                + cell.mContainers.mList.size()
-                + cell.mDoors.mList.size()
-                + cell.mIngreds.mList.size()
-                + cell.mCreatureLists.mList.size()
-                + cell.mItemLists.mList.size()
-                + cell.mLights.mList.size()
-                + cell.mLockpicks.mList.size()
-                + cell.mMiscItems.mList.size()
-                + cell.mProbes.mList.size()
-                + cell.mRepairs.mList.size()
-                + cell.mStatics.mList.size()
-                + cell.mWeapons.mList.size()
-                + cell.mCreatures.mList.size()
-                + cell.mNpcs.mList.size();
-    }
-
     void Scene::insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
-        // Loop through all references in the cell
-        insertCellRefList(mRendering, cell.mActivators, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mPotions, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mAppas, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mArmors, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mBooks, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mClothes, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mItemLists, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mLights, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mMiscItems, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mProbes, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mRepairs, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mStatics, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mWeapons, cell, *mPhysics, rescale, loadingListener);
-        // Load NPCs and creatures _after_ everything else (important for adjustPosition to work correctly)
-        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale, loadingListener);
-        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale, loadingListener);
-        // Since this adds additional creatures, load afterwards, or they would be loaded twice
-        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale, loadingListener);
+        InsertFunctor functor (cell, rescale, *loadingListener, *mPhysics, mRendering);
+        cell.forEach (functor);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

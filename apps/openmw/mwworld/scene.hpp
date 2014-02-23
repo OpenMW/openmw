@@ -63,8 +63,6 @@ namespace MWWorld
 
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
-            int countRefs (const CellStore& cell);
-
         public:
 
             Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics);

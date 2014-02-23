@@ -227,7 +227,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
-        return MWWorld::Ptr(&cell.mLights.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Light>().insert(*ref), &cell);
     }
 
     void Light::ensureCustomData (const MWWorld::Ptr& ptr) const

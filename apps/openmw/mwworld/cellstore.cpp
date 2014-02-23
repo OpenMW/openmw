@@ -233,6 +233,71 @@ namespace MWWorld
         return Ptr();
     }
 
+    Ptr CellStore::searchViaHandle (const std::string& handle)
+    {
+        if (LiveCellRef<ESM::Activator> *ref = mActivators.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Potion> *ref = mPotions.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Apparatus> *ref = mAppas.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Armor> *ref = mArmors.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Book> *ref = mBooks.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Clothing> *ref = mClothes.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Container> *ref = mContainers.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Creature> *ref = mCreatures.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Door> *ref = mDoors.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Ingredient> *ref = mIngreds.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::CreatureLevList> *ref = mCreatureLists.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::ItemLevList> *ref = mItemLists.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Light> *ref = mLights.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Lockpick> *ref = mLockpicks.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Miscellaneous> *ref = mMiscItems.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::NPC> *ref = mNpcs.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Probe> *ref = mProbes.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Repair> *ref = mRepairs.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Static> *ref = mStatics.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        if (LiveCellRef<ESM::Weapon> *ref = mWeapons.searchViaHandle (handle))
+            return Ptr (ref, this);
+
+        return Ptr();
+    }
+
     float CellStore::getWaterLevel() const
     {
         return mWaterLevel;
@@ -241,6 +306,31 @@ namespace MWWorld
     void CellStore::setWaterLevel (float level)
     {
         mWaterLevel = level;
+    }
+
+    int CellStore::count() const
+    {
+        return
+            mActivators.mList.size()
+            + mPotions.mList.size()
+            + mAppas.mList.size()
+            + mArmors.mList.size()
+            + mBooks.mList.size()
+            + mClothes.mList.size()
+            + mContainers.mList.size()
+            + mDoors.mList.size()
+            + mIngreds.mList.size()
+            + mCreatureLists.mList.size()
+            + mItemLists.mList.size()
+            + mLights.mList.size()
+            + mLockpicks.mList.size()
+            + mMiscItems.mList.size()
+            + mProbes.mList.size()
+            + mRepairs.mList.size()
+            + mStatics.mList.size()
+            + mWeapons.mList.size()
+            + mCreatures.mList.size()
+            + mNpcs.mList.size();
     }
 
     void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)

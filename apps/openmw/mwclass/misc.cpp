@@ -218,13 +218,13 @@ namespace MWClass
             MWWorld::ManualRef newRef(store, base);
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 newRef.getPtr().get<ESM::Miscellaneous>();
-            newPtr = MWWorld::Ptr(&cell.mMiscItems.insert(*ref), &cell);
+            newPtr = MWWorld::Ptr(&cell.get<ESM::Miscellaneous>().insert(*ref), &cell);
             newPtr.getCellRef().mGoldValue = goldAmount;
             newPtr.getRefData().setCount(1);
         } else {
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 ptr.get<ESM::Miscellaneous>();
-            newPtr = MWWorld::Ptr(&cell.mMiscItems.insert(*ref), &cell);
+            newPtr = MWWorld::Ptr(&cell.get<ESM::Miscellaneous>().insert(*ref), &cell);
         }
         return newPtr;
     }

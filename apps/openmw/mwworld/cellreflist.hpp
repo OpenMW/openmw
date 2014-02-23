@@ -38,6 +38,16 @@ namespace MWWorld
             mList.push_back(item);
             return mList.back();
         }
+
+        LiveCellRef<X> *searchViaHandle (const std::string& handle)
+        {
+            for (typename List::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
+                if (iter->mData.getCount()>0 && iter->mData.getBaseNode() &&
+                    iter->mData.getHandle()==handle)
+                    return &*iter;
+
+            return 0;
+        }
     };
 }
 
