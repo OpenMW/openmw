@@ -141,7 +141,7 @@ namespace MWWorld
     }
 
     CellStore::CellStore (const ESM::Cell *cell)
-      : mCell (cell), mState (State_Unloaded)
+      : mCell (cell), mState (State_Unloaded), mHasState (false)
     {
         mWaterLevel = cell->mWater;
     }
@@ -154,6 +154,11 @@ namespace MWWorld
     CellStore::State CellStore::getState() const
     {
         return mState;
+    }
+
+    bool CellStore::hasState() const
+    {
+        return mHasState;
     }
 
     bool CellStore::hasId (const std::string& id) const
@@ -170,6 +175,10 @@ namespace MWWorld
 
     Ptr CellStore::search (const std::string& id)
     {
+        bool oldState = mHasState;
+
+        mHasState = true;
+
         if (LiveCellRef<ESM::Activator> *ref = mActivators.find (id))
             return Ptr (ref, this);
 
@@ -230,11 +239,17 @@ namespace MWWorld
         if (LiveCellRef<ESM::Weapon> *ref = mWeapons.find (id))
             return Ptr (ref, this);
 
+        mHasState = oldState;
+
         return Ptr();
     }
 
     Ptr CellStore::searchViaHandle (const std::string& handle)
     {
+        bool oldState = mHasState;
+
+        mHasState = true;
+
         if (LiveCellRef<ESM::Activator> *ref = mActivators.searchViaHandle (handle))
             return Ptr (ref, this);
 
@@ -295,6 +310,8 @@ namespace MWWorld
         if (LiveCellRef<ESM::Weapon> *ref = mWeapons.searchViaHandle (handle))
             return Ptr (ref, this);
 
+        mHasState = oldState;
+
         return Ptr();
     }
 
@@ -306,6 +323,7 @@ namespace MWWorld
     void CellStore::setWaterLevel (float level)
     {
         mWaterLevel = level;
+        mHasState = true;
     }
 
     int CellStore::count() const
@@ -437,6 +455,10 @@ namespace MWWorld
 
     Ptr CellStore::searchInContainer (const std::string& id)
     {
+        bool oldState = mHasState;
+
+        mHasState = true;
+
         if (Ptr ptr = searchInContainerList (mContainers, id))
             return ptr;
 
@@ -445,6 +467,8 @@ namespace MWWorld
 
         if (Ptr ptr = searchInContainerList (mNpcs, id))
             return ptr;
+
+        mHasState = oldState;
 
         return Ptr();
     }
@@ -486,6 +510,8 @@ namespace MWWorld
 
     void CellStore::loadState (const ESM::CellState& state)
     {
+        mHasState = true;
+
         if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
             mWaterLevel = state.mWaterLevel;
 
@@ -529,6 +555,8 @@ namespace MWWorld
     void CellStore::readReferences (ESM::ESMReader& reader,
         const std::map<int, int>& contentFileMap)
     {
+        mHasState = true;
+
         while (reader.isNextSub ("OBJE"))
         {
             unsigned int id = 0;

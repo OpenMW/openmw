@@ -31,6 +31,7 @@ namespace MWWorld
 
             const ESM::Cell *mCell;
             State mState;
+            bool mHasState;
             std::vector<std::string> mIds;
             float mWaterLevel;
 
@@ -62,6 +63,9 @@ namespace MWWorld
             const ESM::Cell *getCell() const;
 
             State getState() const;
+
+            bool hasState() const;
+            ///< Does this cell have state that needs to be stored in a saved game file?
 
             bool hasId (const std::string& id) const;
             ///< May return true for deleted IDs when in preload state. Will return false, if cell is
@@ -95,6 +99,8 @@ namespace MWWorld
             template<class Functor>
             bool forEach (Functor& functor)
             {
+                mHasState = true;
+
                 return
                     forEachImp (functor, mActivators) &&
                     forEachImp (functor, mPotions) &&
@@ -165,120 +171,140 @@ namespace MWWorld
     template<>
     inline CellRefList<ESM::Activator>& CellStore::get<ESM::Activator>()
     {
+        mHasState = true;
         return mActivators;
     }
 
     template<>
     inline CellRefList<ESM::Potion>& CellStore::get<ESM::Potion>()
     {
+        mHasState = true;
         return mPotions;
     }
 
     template<>
     inline CellRefList<ESM::Apparatus>& CellStore::get<ESM::Apparatus>()
     {
+        mHasState = true;
         return mAppas;
     }
 
     template<>
     inline CellRefList<ESM::Armor>& CellStore::get<ESM::Armor>()
     {
+        mHasState = true;
         return mArmors;
     }
 
     template<>
     inline CellRefList<ESM::Book>& CellStore::get<ESM::Book>()
     {
+        mHasState = true;
         return mBooks;
     }
 
     template<>
     inline CellRefList<ESM::Clothing>& CellStore::get<ESM::Clothing>()
     {
+        mHasState = true;
         return mClothes;
     }
 
     template<>
     inline CellRefList<ESM::Container>& CellStore::get<ESM::Container>()
     {
+        mHasState = true;
         return mContainers;
     }
 
     template<>
     inline CellRefList<ESM::Creature>& CellStore::get<ESM::Creature>()
     {
+        mHasState = true;
         return mCreatures;
     }
 
     template<>
     inline CellRefList<ESM::Door>& CellStore::get<ESM::Door>()
     {
+        mHasState = true;
         return mDoors;
     }
 
     template<>
     inline CellRefList<ESM::Ingredient>& CellStore::get<ESM::Ingredient>()
     {
+        mHasState = true;
         return mIngreds;
     }
 
     template<>
     inline CellRefList<ESM::CreatureLevList>& CellStore::get<ESM::CreatureLevList>()
     {
+        mHasState = true;
         return mCreatureLists;
     }
 
     template<>
     inline CellRefList<ESM::ItemLevList>& CellStore::get<ESM::ItemLevList>()
     {
+        mHasState = true;
         return mItemLists;
     }
 
     template<>
     inline CellRefList<ESM::Light>& CellStore::get<ESM::Light>()
     {
+        mHasState = true;
         return mLights;
     }
 
     template<>
     inline CellRefList<ESM::Lockpick>& CellStore::get<ESM::Lockpick>()
     {
+        mHasState = true;
         return mLockpicks;
     }
 
     template<>
     inline CellRefList<ESM::Miscellaneous>& CellStore::get<ESM::Miscellaneous>()
     {
+        mHasState = true;
         return mMiscItems;
     }
 
     template<>
     inline CellRefList<ESM::NPC>& CellStore::get<ESM::NPC>()
     {
+        mHasState = true;
         return mNpcs;
     }
 
     template<>
     inline CellRefList<ESM::Probe>& CellStore::get<ESM::Probe>()
     {
+        mHasState = true;
         return mProbes;
     }
 
     template<>
     inline CellRefList<ESM::Repair>& CellStore::get<ESM::Repair>()
     {
+        mHasState = true;
         return mRepairs;
     }
 
     template<>
     inline CellRefList<ESM::Static>& CellStore::get<ESM::Static>()
     {
+        mHasState = true;
         return mStatics;
     }
 
     template<>
     inline CellRefList<ESM::Weapon>& CellStore::get<ESM::Weapon>()
     {
+        mHasState = true;
         return mWeapons;
     }
 

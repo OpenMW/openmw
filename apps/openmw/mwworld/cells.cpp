@@ -66,8 +66,11 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, CellStore&
     return ptr;
 }
 
-void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, const CellStore& cell) const
+void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
 {
+    if (cell.getState()!=CellStore::State_Loaded)
+        cell.load (mStore, mReader);
+
     ESM::CellState cellState;
 
     cell.saveState (cellState);
@@ -77,17 +80,6 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, const CellStore& cell) c
     cellState.save (writer);
     cell.writeReferences (writer);
     writer.endRecord (ESM::REC_CSTA);
-}
-
-bool MWWorld::Cells::hasState (const CellStore& cellStore) const
-{
-    if (cellStore.getState()==CellStore::State_Loaded)
-        return true;
-
-    if (cellStore.getCell()->mData.mFlags & ESM::Cell::Interior)
-        return cellStore.getCell()->mData.mFlags & ESM::Cell::HasWater;
-    else
-        return false;
 }
 
 MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
@@ -274,12 +266,12 @@ int MWWorld::Cells::countSavedGameRecords() const
 
     for (std::map<std::string, CellStore>::const_iterator iter (mInteriors.begin());
         iter!=mInteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             ++count;
 
     for (std::map<std::pair<int, int>, CellStore>::const_iterator iter (mExteriors.begin());
         iter!=mExteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             ++count;
 
     return count;
@@ -287,14 +279,14 @@ int MWWorld::Cells::countSavedGameRecords() const
 
 void MWWorld::Cells::write (ESM::ESMWriter& writer) const
 {
-    for (std::map<std::pair<int, int>, CellStore>::const_iterator iter (mExteriors.begin());
+    for (std::map<std::pair<int, int>, CellStore>::iterator iter (mExteriors.begin());
         iter!=mExteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             writeCell (writer, iter->second);
 
-    for (std::map<std::string, CellStore>::const_iterator iter (mInteriors.begin());
+    for (std::map<std::string, CellStore>::iterator iter (mInteriors.begin());
         iter!=mInteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             writeCell (writer, iter->second);
 }
 
