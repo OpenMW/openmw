@@ -13,8 +13,7 @@ namespace CSVSettings
         QWidget *mListWidget;
 
     public:
-        explicit ListView (QAbstractItemModel *listModel,
-                            const CSMSettings::Setting *setting,
+        explicit ListView (const CSMSettings::Setting &setting,
                             QWidget *parent = 0);
 
     protected:
@@ -31,8 +30,7 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        ListView *createView (QStandardItemModel &model,
-                               const CSMSettings::Setting *setting);
+        ListView *createView (const CSMSettings::Setting &setting);
     };
 }
 #endif // CSVSETTINGS_LISTVIEW_HPP

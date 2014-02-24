@@ -3,8 +3,14 @@
 
 #include <QMainWindow>
 #include <QList>
+#include <QSortFilterProxyModel>
 
-namespace CSMSettings { class SettingModel; }
+#include "support.hpp"
+
+class QStandardItemModel;
+
+namespace CSMSettings { class SettingManager; }
+
 namespace CSVSettings {
 
     class Page;
@@ -24,10 +30,13 @@ namespace CSVSettings {
 
         virtual void closeEvent (QCloseEvent *event);
 
-        void createPages (CSMSettings::SettingModel &model);
+        void createPages (CSMSettings::SettingManager &manager);
 
         const PageList &pages() const     { return mPages; }
 
+        QSortFilterProxyModel *buildFilter (QAbstractItemModel &model,
+                                            CSMSettings::SettingProperty column,
+                                            const QString &expression);
     public slots:
     };
 }

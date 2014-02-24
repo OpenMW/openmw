@@ -14,7 +14,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <boost/version.hpp>
 
-#include "definitionmodel.hpp"
+#include "setting.hpp"
 #include "../../view/settings/support.hpp"
 
 #include <QDebug>
@@ -50,13 +50,18 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
     {
-        Setting *width = declareSingleText ("Width", section, "1024");
-        Setting *height = declareSingleText ("Height", section, "768");
+        Setting *width = new Setting
+                                    (Type_SingleText, "Width", section, "1024");
+        Setting *height = new Setting
+                                    (Type_SingleText, "Height", section, "768");
 
-        width->setWidgetWidth (5);
+        width->setProperty(Property_WidgetWidth, 5);
 
-        height->setWidgetWidth (5);
-        height->setViewColumn (1);
+        height->setProperty (Property_WidgetWidth, 5);
+        height->setProperty (Property_ViewColumn, 1);
+
+        addDeclaration (width);
+        addDeclaration (height);
 /*
         QStringList predefValues;
 
@@ -86,10 +91,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     {
         QString defaultValue = "Icon and Text";
 
-        Setting *rsd = declareSingleBool ("Record Status Display",
+        Setting *rsd = new Setting (Type_SingleBool, "Record Status Display",
                                                         section, defaultValue);
 
-        Setting *ritd = declareSingleBool ("Referenceable ID Type Display",
+        Setting *ritd = new Setting (Type_SingleBool,
+                                     "Referenceable ID Type Display",
                                                         section, defaultValue);
 
 
@@ -97,8 +103,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         dfValues << defaultValue << "Icon Only" << "Text Only";
 
-        rsd->setPropertyList (CSMSettings::PropertyList_DefinedValues, dfValues);
-        ritd->setPropertyList (CSMSettings::PropertyList_DefinedValues, dfValues);
+        rsd->setPropertyList (PropertyList_DeclaredValues, dfValues);
+        ritd->setPropertyList (PropertyList_DeclaredValues, dfValues);
+
+        addDeclaration (rsd);
+        addDeclaration (ritd);
     }
 }
 
@@ -124,13 +133,13 @@ bool CSMSettings::UserSettings::loadSettingsFromFile
         PageMap pageMap;
 
         if (stream)
-            pageMap = SettingModel::readFilestream(stream);
+            pageMap = readFilestream(stream);
         else
             success = success && false;
 
         mergeSettings (totalMap, pageMap, Merge_Overwrite);
     }
-    validate (totalMap);
+   // validate (totalMap);
     buildModel (totalMap);
 
     return success;

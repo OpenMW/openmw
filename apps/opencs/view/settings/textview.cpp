@@ -12,17 +12,16 @@
 #include "../../model/settings/textadapter.hpp"
 #include "settingbox.hpp"
 
-CSVSettings::TextView::TextView(QAbstractItemModel *textAdapter,
-                                const CSMSettings::Setting *setting,
+CSVSettings::TextView::TextView(const CSMSettings::Setting &setting,
                                 QWidget *parent)
-    : View (textAdapter, setting, parent)
+    : View (setting, parent)
 
 {
     buildView (setting);
     buildModel (setting);
 }
 
-void CSVSettings::TextView::buildView(const CSMSettings::Setting *setting)
+void CSVSettings::TextView::buildView(const CSMSettings::Setting &setting)
 {/*
     setObjectName (setting->settingName + "_view");
 
@@ -47,7 +46,7 @@ void CSVSettings::TextView::buildView(const CSMSettings::Setting *setting)
     */
 }
 
-void CSVSettings::TextView::buildModel (const CSMSettings::Setting *setting)
+void CSVSettings::TextView::buildModel (const CSMSettings::Setting &setting)
 {/*
     QByteArray propName;
 
@@ -69,13 +68,13 @@ void CSVSettings::TextView::buildModel (const CSMSettings::Setting *setting)
 }
 
 CSVSettings::TextView *CSVSettings::TextViewFactory::createView
-    (QStandardItemModel &model, const CSMSettings::Setting *setting)
+    (const CSMSettings::Setting &setting)
 {
     QWidget *widgParent = static_cast<QWidget *>(parent());
-
+/*
     CSMSettings::TextAdapter *adapter =
             new CSMSettings::TextAdapter (model, setting, widgParent);
-
-    return new TextView (adapter, setting, widgParent);
+*/
+    return new TextView (setting);
 }
 

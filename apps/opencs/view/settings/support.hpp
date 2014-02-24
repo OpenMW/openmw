@@ -4,6 +4,7 @@
 #include <Qt>
 #include <QPair>
 #include <QList>
+#include <QVariant>
 
 //Typedefs
 namespace CSMSettings
@@ -22,7 +23,7 @@ namespace CSMSettings
     typedef QPair <QString, DeclarationPair> DeclarationListItem;
     typedef QList <DeclarationListItem> DeclarationList;
 
-    static int sSettingPropertyCount = 12;
+    static int sSettingPropertyCount = 11;
     static int sSettingPropertyListCount = 3;
 }
 
@@ -47,14 +48,17 @@ namespace CSMSettings
         Property_WidgetWidth = 7,
         Property_ViewRow = 8,
         Property_ViewColumn = 9,
-        Property_Delimiter
+        Property_Delimiter = 10
     };
 
+    //PropertyList_DefinedValues needs to always be the last item in the list.
+    //New declaration lists should be inserted before it and the integer values
+    //reassigned accordingly
     enum SettingPropertyList
     {
-        PropertyList_DefinedValues = 100,
-        PropertyList_DeclaredValues = 101,
-        PropertyList_Proxy = 102
+        PropertyList_DeclaredValues = 0,
+        PropertyList_DefinedValues = 1,
+        PropertyList_Proxies = 2
     };
 
     enum SettingType
@@ -93,6 +97,41 @@ namespace CSVSettings
         Align_Left    = Qt::AlignLeft,
         Align_Center  = Qt::AlignHCenter,
         Align_Right   = Qt::AlignRight
+    };
+}
+
+//
+namespace CSMSettings
+{
+    struct PropertyDefaultValues
+    {
+        int id;
+        QString name;
+        QString value;
+    };
+
+    const PropertyDefaultValues sPropertyDefaults[] =
+    {
+        {Property_Name, "name", "undefined"},
+        {Property_Page, "page", "undefined"},
+        {Property_DefaultValue, "default", "undefined"},
+        {Property_ViewType, "view type",
+                QVariant (static_cast<int>
+                                (CSVSettings::ViewType_Undefined)).toString() },
+        {Property_IsMultiValue, "multi-value", QVariant (false).toString() },
+        {Property_IsHorizontal, "horizontal", QVariant (true).toString() },
+        {Property_IsMultiLine, "multi-line", QVariant (false).toString() },
+        {Property_WidgetWidth, "width", QVariant (0).toString() },
+        {Property_ViewRow, "view row", QVariant (-1).toString() },
+        {Property_ViewColumn, "view column", QVariant (-1).toString() },
+        {Property_Delimiter, "delimiter", "" }
+    };
+
+    const PropertyDefaultValues sPropertyListDefaults[] =
+    {
+        {PropertyList_DeclaredValues, "declarations", ""},
+        {PropertyList_DefinedValues, "definitions", ""},
+        {PropertyList_Proxies, "proxies", ""}
     };
 }
 

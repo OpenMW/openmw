@@ -13,6 +13,7 @@ class QStandardItemModel;
 namespace CSMSettings
 {
     class Setting;
+    class Adapter;
 }
 
 namespace CSVSettings
@@ -23,7 +24,7 @@ namespace CSVSettings
     {
         Q_OBJECT
 
-        QAbstractItemModel *mModel;
+        CSMSettings::Adapter *mModel;
 
         SettingBox *mViewFrame;
 
@@ -32,14 +33,15 @@ namespace CSVSettings
 
     public:
 
-        explicit View (QAbstractItemModel *model,
-                      const CSMSettings::Setting *setting, QWidget *parent = 0);
+        explicit View (const CSMSettings::Setting &setting,
+                       CSMSettings::Adapter *adapter,
+                       QWidget *parent = 0);
 
         SettingBox *viewFrame() const                    { return mViewFrame; }
 
     protected:
 
-        QAbstractItemModel *model()                         { return mModel; }
+ //       QStandardItemModel *model()                         { return mModel; }
         QStringList valueList() const;
         bool isMultiValue() const;
     };
@@ -47,8 +49,7 @@ namespace CSVSettings
     class IViewFactory
     {
     public:
-        virtual View *createView (QStandardItemModel &model,
-                                  const CSMSettings::Setting *setting) = 0;
+        virtual View *createView (const CSMSettings::Setting &setting) = 0;
     };
 }
 #endif // SCVSETTINGS_VIEW_HPP

@@ -5,16 +5,14 @@
 
 #include "support.hpp"
 #include "settingbox.hpp"
+#include <QAbstractItemModel>
 
 class QSortFilterProxyModel;
 class QGroupBox;
-class QAbstractItemModel;
 
 namespace CSMSettings
 {
     class Setting;
-    class DeclarationModel;
-    class DefinitionModel;
 }
 
 namespace CSVSettings
@@ -33,24 +31,18 @@ namespace CSVSettings
 
     public:
         explicit Page(const QString &pageName,
-                      CSMSettings::DeclarationModel &declarationModel,
-                      CSMSettings::DefinitionModel &definitionModel,
-                      bool isHoriztonal, QWidget *parent = 0);
+                      const QList <CSMSettings::Setting> &settingList,
+                                                        QWidget *parent = 0);
 
-        void addView (CSMSettings::DefinitionModel &definitionModel,
-                      const CSMSettings::Setting *setting);
+        void addView (const CSMSettings::Setting &setting);
 
         QGroupBox *pageFrame() { return mBox; }
 
     private:
 
-        void setupPage (bool isHorizontal);
-        void setupViews (CSMSettings::DeclarationModel &declarationModel,
-                         CSMSettings::DefinitionModel &definitionModel);
+        void setupPage ();
+        void setupViews (const QList <CSMSettings::Setting> &settingList);
 
-        QSortFilterProxyModel *buildFilter (QAbstractItemModel &model,
-                                            CSMSettings::SettingProperty column,
-                                            const QString &expression);
         void buildFactories();
     };
 }

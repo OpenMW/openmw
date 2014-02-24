@@ -1,9 +1,9 @@
 #include <QApplication>
+#include <QStandardItemModel>
 
+#include "../../model/settings/setting.hpp"
+#include "../../model/settings/settingmanager.hpp"
 #include "settingwindow.hpp"
-#include "../../model/settings/settingmodel.hpp"
-#include "../../model/settings/declarationmodel.hpp"
-#include "../../model/settings/definitionmodel.hpp"
 #include "page.hpp"
 
 #include <QDebug>
@@ -12,28 +12,42 @@ CSVSettings::SettingWindow::SettingWindow(QWidget *parent) :
 {
 }
 
-void CSVSettings::SettingWindow::createPages (CSMSettings::SettingModel &model)
+void CSVSettings::SettingWindow::createPages
+                                    (CSMSettings::SettingManager &manager)
 {
     QStringList builtPages;
 
-    //CSMSettings::DeclarationModel &decModel = model.declarationModel();
-    //CSMSettings::DefinitionModel &defModel = model.definitionModel();
-
-//    for (int i = 0; i < decModel.rowCount(); i++)
+    for (int i = 0; i < manager.model().rowCount(); i++)
     {
-       // QModelIndex idx = decModel.index (i, CSMSettings::Property_Page);
-       // QString pageName = decModel.data (idx).toString();
+        QString pageName = manager.model().item(i, CSMSettings::Property_Page)
+                                            ->data(Qt::DisplayRole).toString();
 
-   //     if (builtPages.contains (pageName))
-   //         continue;
+        if (builtPages.contains (pageName))
+            continue;
 
-  //      builtPages << pageName;
+        QList <CSMSettings::Setting> settingList = manager.getSettings(pageName);
 
-     //   mPages << new Page (pageName, decModel, defModel, false, this);
+        mPages.append (new Page (pageName, settingList, this));
+
+        builtPages.append (pageName);
+
     }
 }
 
 void CSVSettings::SettingWindow::closeEvent (QCloseEvent *event)
 {
     QApplication::focusWidget()->clearFocus();
+}
+
+QSortFilterProxyModel *CSVSettings::SettingWindow::buildFilter
+                                             (QAbstractItemModel &model,
+                                              CSMSettings::SettingProperty column,
+                                              const QString &expression)
+{
+    QSortFilterProxyModel *filter = new QSortFilterProxyModel (this);
+    filter->setSourceModel (&model);
+    filter->setFilterKeyColumn (column);
+    filter->setFilterRegExp (expression);
+
+    return filter;
 }

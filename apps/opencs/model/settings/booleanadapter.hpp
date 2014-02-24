@@ -21,7 +21,7 @@ namespace CSMSettings
     public:
 
         explicit BooleanAdapter (QStandardItemModel &model,
-                                 const CSMSettings::Setting *setting,
+                                 CSMSettings::Setting *setting,
                                  QObject *parent = 0);
 
         int rowCount(const QModelIndex &parent = QModelIndex()) const;

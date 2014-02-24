@@ -7,33 +7,36 @@
 
 #include <QDataWidgetMapper>
 #include <QStandardItemModel>
+#include <QStringListModel>
 
 #include "booleanview.hpp"
 #include "../../model/settings/booleanadapter.hpp"
 #include "../../model/settings/setting.hpp"
-#include "../../model/settings/definitionmodel.hpp"
 #include "settingbox.hpp"
 
 #include <QDebug>
 
-CSVSettings::BooleanView::BooleanView (QAbstractItemModel *booleanAdapter,
-                                       const CSMSettings::Setting *setting,
+CSVSettings::BooleanView::BooleanView (const CSMSettings::Setting &setting,
+                                       CSMSettings::Adapter *adapter,
                                        QWidget *parent)
-    : View (booleanAdapter, setting, parent)
+    : View (setting, adapter, parent)
 {
     createView (setting);
-    //createModel (setting->settingName);
+    createModel (setting);
 }
 
-void CSVSettings::BooleanView::createView(const CSMSettings::Setting *setting)
+void CSVSettings::BooleanView::createView(const CSMSettings::Setting &setting)
 {
    // setObjectName (setting->settingName + "_view");
-/*
-    foreach (const QString &value, setting->valueList)
+
+    QStringList declaration = setting.propertyList
+                                    (CSMSettings::PropertyList_DeclaredValues);
+
+    foreach (const QString &value, declaration)
     {
         QWidget *widget = 0;
 
-        if (isMultiValue())
+        if (setting.isMultiValue())
             widget = new QCheckBox (value, this);
         else
             widget = new QRadioButton (value, this);
@@ -43,19 +46,21 @@ void CSVSettings::BooleanView::createView(const CSMSettings::Setting *setting)
         viewFrame()->addWidget (widget);
 
         mWidgets.append (widget);
-    }*/
+    }
 }
 
-void CSVSettings::BooleanView::createModel (const QString &settingName)
+void CSVSettings::BooleanView::createModel (const CSMSettings::Setting &setting)
 {
     int i = 0;
+
+    mModel = new QStringListModel (setting.declarationList());
 
     foreach (QWidget *widget, mWidgets)
     {
         QDataWidgetMapper *mapper = new QDataWidgetMapper (widget);
         mapper->setObjectName
-                    (settingName + '.' + widget->objectName() + "_mapper");
-        mapper->setModel (model());
+                    (setting.name() + '.' + widget->objectName() + "_mapper");
+        mapper->setModel (mModel);
         mapper->addMapping (widget, CSMSettings::BooleanProperty_ValueState);
         mapper->setCurrentIndex(i);
         i++;
@@ -63,12 +68,12 @@ void CSVSettings::BooleanView::createModel (const QString &settingName)
 }
 
 CSVSettings::BooleanView *CSVSettings::BooleanViewFactory::createView
-    (QStandardItemModel &model, const CSMSettings::Setting *setting)
+    (const CSMSettings::Setting &setting)
 {
     QWidget *widgParent = static_cast<QWidget *>(parent());
 
     CSMSettings::BooleanAdapter *adapter =
             new CSMSettings::BooleanAdapter (model, setting, widgParent);
 
-    return new BooleanView (adapter, setting, widgParent);
+    return new BooleanView (setting, adapter, widgParent);
 }

@@ -12,7 +12,6 @@
 
 #include <QDebug>
 
-//CustomPage includes
 #include <QApplication>
 
 #include <QSplitter>
@@ -28,15 +27,6 @@ CSVSettings::Dialog::Dialog(QMainWindow *parent) :
     SettingWindow (parent), mStackedWidget (0), mDebugMode (false), mModel (0)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
-
-    QStandardItem item;
-
-    item.setData("Display data", Qt::DisplayRole);
-    item.setData("User Data", Qt::UserRole);
-    item.setData("User Data1", Qt::UserRole + 1);
-
-    qDebug() << "Item data: " << item.data(Qt::DisplayRole) << ','
-             << item.data(Qt::UserRole) << ',' << item.data(Qt::UserRole + 1);
 
     setupDialog();
 
@@ -89,7 +79,7 @@ void CSVSettings::Dialog::addDebugPage()
 {
   QTreeView *tree = new QTreeView();
 
-  tree->setModel( &CSMSettings::UserSettings::instance() );
+  tree->setModel( &CSMSettings::UserSettings::instance().model() );
 
   mStackedWidget->addWidget(tree);
      new QListWidgetItem ("Standard Item Model", mPageListWidget);

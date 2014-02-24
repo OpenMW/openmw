@@ -15,14 +15,13 @@ namespace CSVSettings
         QWidget *mTextWidget;
 
     public:
-        explicit TextView (QAbstractItemModel *textAdapter,
-                            const CSMSettings::Setting *setting,
+        explicit TextView (const CSMSettings::Setting &setting,
                             QWidget *parent = 0);
 
     protected:
 
-        void buildView (const CSMSettings::Setting *setting);
-        void buildModel (const CSMSettings::Setting *setting);
+        void buildView (const CSMSettings::Setting &setting);
+        void buildModel (const CSMSettings::Setting &setting);
     };
 
     class TextViewFactory : public QObject, public IViewFactory
@@ -34,8 +33,7 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        TextView *createView (QStandardItemModel &model,
-                               const CSMSettings::Setting *setting);
+        TextView *createView (const CSMSettings::Setting &setting);
     };
 }
 #endif // CSVSETTINGS_TEXTVIEW_HPP

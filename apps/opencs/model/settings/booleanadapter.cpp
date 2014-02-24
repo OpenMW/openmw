@@ -8,11 +8,11 @@
 #include <QDebug>
 
 CSMSettings::BooleanAdapter::BooleanAdapter (QStandardItemModel &model,
-                                            const CSMSettings::Setting *setting,
+                                            CSMSettings::Setting *setting,
                                             QObject *parent)
 
-    : Adapter (model, setting->page(), setting->name(),
-               setting->isMultiValue(), parent)
+    : Adapter (model, setting->page(), setting->name(), setting->isMultiValue(),
+               parent)
 {
 
     //create a list of QString pairs which represent the setting values and
@@ -178,9 +178,11 @@ bool CSMSettings::BooleanAdapter::setMultiValue (bool state,
         return false;
 
     if (state)
-        return insertValue(value);
+        return mModel.addDefinition (pageName(), settingName(), value);
+        //return insertValue(value);
     else
-        return removeValue(value);
+        return mModel.removeDefinition (pageName(), settingName(), value);
+        //return removeValue(value);
 }
 
 bool CSMSettings::BooleanAdapter::setSingleValue (const QString &value)
@@ -196,10 +198,13 @@ bool CSMSettings::BooleanAdapter::setSingleValue (const QString &value)
 
         if (*(settingPair.second) == QBool(true))
         {
-            removeValue(settingPair.first);
+            mModel.removeDefinition (pageName(), settingName(), value);
+            //removeValue(settingPair.first);
             *(settingPair.second) = QBool(false);
         }
     }
 
-    return insertValue(value);
+    //set the first element of the definition stringlist
+    return mModel.setDefinition (pageName, settingName, value);
+    //return insertValue(value);
 }

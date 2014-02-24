@@ -4,7 +4,6 @@
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 
-#include "settingitem.hpp"
 #include "setting.hpp"
 #include "../../view/settings/support.hpp"
 

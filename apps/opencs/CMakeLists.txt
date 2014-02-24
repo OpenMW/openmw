@@ -100,9 +100,6 @@ opencs_units (model/settings
     usersettings
     booleanadapter
     textadapter
-    definitionmodel
-    declarationmodel
-    settingmodel
     setting
     settingmanager
     adapter

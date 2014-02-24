@@ -11,22 +11,19 @@
 
 #include <QDebug>
 
-CSVSettings::View::View(QAbstractItemModel *model,
-                        const CSMSettings::Setting *setting,
+CSVSettings::View::View(const CSMSettings::Setting &setting,
+                        CSMSettings::Adapter *adapter,
                         QWidget *parent)
 
-    : mModel (model), QWidget(parent) //, mIsMultiValue (setting->isMultiValue)
-      //mValueList (setting->valueList)
-{/*
-    mViewFrame = new SettingBox(true, setting->settingName, parent);
+    : mModel (adapter), QWidget(parent)
+{
+    mViewFrame = new SettingBox(true, setting.name(), parent);
     mViewFrame->setFlat (true);
 
-    if (setting->isHorizontal)
         mViewFrame->setHLayout();
-    else
-        mViewFrame->setVLayout();
 
-    setObjectName (setting->settingName);*/
+
+        setObjectName (setting.name());
 }
 
 bool CSVSettings::View::isMultiValue() const

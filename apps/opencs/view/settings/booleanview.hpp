@@ -11,10 +11,10 @@ class QDataWidgetMapper;
 class QAbstractItemModel;
 class QSortFilterProxyModel;
 class QStandardItemModel;
+class QStringListModel;
 
 namespace CSMSettings {
-    class IViewAdapter;
-    class DefinitionModel;
+    class Adapter;
 }
 
 namespace CSVSettings
@@ -23,16 +23,18 @@ namespace CSVSettings
     {
         QList <QWidget *> mWidgets;
 
+        QStringListModel *mModel;
+
     public:
-        explicit BooleanView (QAbstractItemModel *booleanAdapter,
-                              const CSMSettings::Setting *setting,
+        explicit BooleanView (const CSMSettings::Setting &setting,
+                              CSMSettings::Adapter *adapter,
                               QWidget *parent = 0);
 
 
     protected:
 
-        void createView (const CSMSettings::Setting *setting);
-        void createModel (const QString &settingName);
+        void createView (const CSMSettings::Setting &setting);
+        void createModel (const CSMSettings::Setting &setting);
     };
 
     class BooleanViewFactory : public QObject, public IViewFactory
@@ -44,8 +46,8 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        BooleanView *createView (QStandardItemModel &model,
-                                 const CSMSettings::Setting *setting);
+        BooleanView *createView (QStandardItemModel *model,
+                                 const CSMSettings::Setting &setting);
     };
 }
 #endif // CSVSETTINGS_BOOLEANVIEW_HPP

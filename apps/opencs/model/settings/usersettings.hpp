@@ -9,7 +9,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include "settingmodel.hpp"
+#include "settingmanager.hpp"
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
@@ -22,7 +22,7 @@ class QFile;
 
 namespace CSMSettings {
 
-    class UserSettings: public SettingModel
+    class UserSettings: public SettingManager
     {
 
         Q_OBJECT

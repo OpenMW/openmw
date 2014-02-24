@@ -7,7 +7,7 @@
 #include <QStandardItemModel>
 
 CSMSettings::TextAdapter::TextAdapter(QStandardItemModel &model,
-                                      const CSMSettings::Setting *setting,
+                                      CSMSettings::Setting *setting,
                                       QObject *parent)
     : mDelimiter (setting->delimiter()),
       Adapter (model, setting->page(), setting->name(), setting->isMultiValue()
@@ -20,8 +20,6 @@ CSMSettings::TextAdapter::TextAdapter(QStandardItemModel &model,
 QVariant CSMSettings::TextAdapter::data (const QModelIndex &index,
                                          int role) const
 {
-    qDebug() << "TextAdapter::data()";
-
     if (!validIndex(index))
         return QVariant();
 
@@ -34,16 +32,14 @@ QVariant CSMSettings::TextAdapter::data (const QModelIndex &index,
 
         if (!isMultiValue())
         {
-            qDebug() << "returning single-value...";
             concatenation = filter()->data (
                                 filter()->index (
                                     filter()->rowCount()-1, 2
                                 )
                             ).toString();
-            qDebug() << "\t" << concatenation;
             return concatenation;
         }
-        qDebug() << "\t multi-valued, delimiter: " << mDelimiter;
+
         //iterate each row in the filter and concatenate the values into
         //a string, delimited by the user-defined delimiter.
         for (int i = 0; i < filter()->rowCount(); i++)
@@ -55,7 +51,7 @@ QVariant CSMSettings::TextAdapter::data (const QModelIndex &index,
 
             concatenation += filter()->data(idx).toString();
         }
-        qDebug() << "\treturning concat: " << concatenation;
+
         return concatenation;
 
     break;
@@ -71,12 +67,8 @@ bool CSMSettings::TextAdapter::setData (const QModelIndex &index,
                                         const QVariant &value,
                                         int role)
 {
-    qDebug() << "TextAdapter::setData()";
-
     QStringList valueList =
                 value.toString().split (mDelimiter, QString::SkipEmptyParts);\
-
-    qDebug() << "\tvalueList: " << valueList;
 
     if (valueList.size() == 0)
         return false;
@@ -110,7 +102,7 @@ bool CSMSettings::TextAdapter::setData (const QModelIndex &index,
     if (!isDifferent)
     {
         bool valueFound = false;
-        qDebug() << "\tpassed check #1";
+
         //check the value list against the model.
         foreach (const QString &value, valueList)
         {
@@ -129,13 +121,12 @@ bool CSMSettings::TextAdapter::setData (const QModelIndex &index,
         if (valueFound)
             return false;
     }
-    qDebug() << "\tpassed check #2";
+
     //clear and repopulate the model from the value list
     filter()->removeRows (0, filter()->rowCount());
-    qDebug() << "\tAdding values: " << valueList;
+
     foreach (const QString &value, valueList)
     {
-        qDebug() << "\tinserting value: " << value;
        // model().defineSetting (settingName(), pageName(), value);
     }
     return true;
