@@ -240,12 +240,12 @@ namespace MWMechanics
             //target is at far distance: build path to target OR follow target (if previously actor had reached it once)
             mFollowTarget = false;
 
-            buildNewPath(actor); //not guaranteed, check before use
+            buildNewPath(actor); //may fail to build a path, check before use
 
             //delete visited path node
             mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
-            //if buildNewPath() failed leave mTargetAngle unchanged
+            //if no new path leave mTargetAngle unchanged
             if(!mPathFinder.getPath().empty())
             {
                 //try shortcut
@@ -253,8 +253,8 @@ namespace MWMechanics
                     mTargetAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / vDir.length()) * sgn(Ogre::Math::ASin(vDir.x / vDir.length())) ).valueDegrees();
                 else
                     mTargetAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+                mRotate = true;
             }
-            mRotate = true;
             
             mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
