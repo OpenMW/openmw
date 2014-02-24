@@ -41,9 +41,36 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 
 void Wizard::MainWizard::setupInstallations()
 {
-    QString userPath(QFile::decodeName(mCfgMgr.getUserConfigPath().string().c_str()));
-    QString globalPath(QFile::decodeName(mCfgMgr.getGlobalPath().string().c_str()));
+    QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    QString globalPath(QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str()));
+    QString message(tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
+                    <p>Please make sure you have the right permissions \
+                    and try again.</p></body></html>"));
 
+    // Load the user config file first, separately
+    // So we can write it properly, uncontaminated
+    QString path(userPath + QLatin1String("openmw.cfg"));
+    QFile file(path);
+
+    qDebug() << "Loading config file:" << qPrintable(path);
+
+    if (file.exists()) {
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(message.arg(file.fileName()));
+            msgBox.exec();
+            return qApp->quit();
+        }
+        QTextStream stream(&file);
+        stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+        mGameSettings.readUserFile(stream);
+    }
+
+    // Now the rest
     QStringList paths;
     paths.append(userPath + QLatin1String("openmw.cfg"));
     paths.append(QLatin1String("openmw.cfg"));
@@ -59,10 +86,8 @@ void Wizard::MainWizard::setupInstallations()
                 msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
                 msgBox.setIcon(QMessageBox::Critical);
                 msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                           Please make sure you have the right permissions \
-                                           and try again.<br>").arg(file.fileName()));
-                                           msgBox.exec();
+                msgBox.setText(message.arg(file.fileName()));
+
                 return qApp->quit();
             }
             QTextStream stream(&file);
@@ -73,7 +98,7 @@ void Wizard::MainWizard::setupInstallations()
         file.close();
     }
 
-    // Check if the paths actually contains a Morrowind installation
+    // Check if the paths actually contain a Morrowind installation
     foreach (const QString path, mGameSettings.getDataDirs()) {
 
         if (findFiles(QLatin1String("Morrowind"), path))
@@ -136,7 +161,24 @@ void Wizard::MainWizard::accept()
 
 void Wizard::MainWizard::writeSettings()
 {
-    QString userPath(QFile::decodeName(mCfgMgr.getUserConfigPath().string().c_str()));
+    QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    QDir dir(userPath);
+
+    if (!dir.exists()) {
+        if (!dir.mkpath(userPath)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error creating OpenMW configuration directory"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<html><head/><body><p><b>Could not create %1</b></p> \
+                              <p>Please make sure you have the right permissions \
+                              and try again.</p></body></html>").arg(userPath));
+            msgBox.exec();
+            return qApp->quit();
+        }
+    }
+
+    // Game settings
     QFile file(userPath + QLatin1String("openmw.cfg"));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
@@ -145,9 +187,9 @@ void Wizard::MainWizard::writeSettings()
         msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file.fileName()));
+        msgBox.setText(tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
+                          <p>Please make sure you have the right permissions \
+                          and try again.</p></body></html>").arg(file.fileName()));
         msgBox.exec();
         return qApp->quit();
     }

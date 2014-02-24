@@ -656,7 +656,7 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outp
         path.append(prefix + QDir::separator());
 
     if (directory >= 0)
-        path.append(QString::fromLatin1(unshield_directory_name(unshield, directory)) + QDir::separator());
+        path.append(QString::fromUtf8(unshield_directory_name(unshield, directory)) + QDir::separator());
 
     // Ensure the path has the right separators
     path.replace(QLatin1Char('\\'), QDir::separator());
@@ -667,7 +667,7 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outp
     dir.mkpath(path);
 
     QString fileName(path);
-    fileName.append(QString::fromLatin1(unshield_file_name(unshield, index)));
+    fileName.append(QString::fromUtf8(unshield_file_name(unshield, index)));
 
     // Calculate the percentage done
     int progress = (((float) counter / (float) unshield_file_count(unshield)) * 100);
@@ -678,13 +678,14 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outp
     if (getComponentDone(Wizard::Component_Tribunal))
         progress = progress + 100;
 
-    emit textChanged(tr("Extracting: %1").arg(QString::fromLatin1(unshield_file_name(unshield, index))));
+    emit textChanged(tr("Extracting: %1").arg(QString::fromUtf8(unshield_file_name(unshield, index))));
     emit progressChanged(progress);
 
-    success = unshield_file_save(unshield, index, fileName.toLatin1().constData());
+    QByteArray array(fileName.toUtf8());
+    success = unshield_file_save(unshield, index, array.constData());
 
     if (!success) {
-        emit error(tr("Failed to extract %1.").arg(QString::fromLatin1(unshield_file_name(unshield, index))), tr("Complete path: %1.").arg(fileName));
+        emit error(tr("Failed to extract %1.").arg(QString::fromUtf8(unshield_file_name(unshield, index))), tr("Complete path: %1.").arg(fileName));
         dir.remove(fileName);
     }
 
@@ -693,8 +694,10 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &outp
 
 bool Wizard::UnshieldWorker::findFile(const QString &cabFile, const QString &fileName)
 {
+    QByteArray array(cabFile.toUtf8());
+
     Unshield *unshield;
-    unshield = unshield_open(cabFile.toLatin1().constData());
+    unshield = unshield_open(array.constData());
 
     if (!unshield) {
         emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
@@ -707,7 +710,7 @@ bool Wizard::UnshieldWorker::findFile(const QString &cabFile, const QString &fil
 
         for (size_t j=group->first_file; j<=group->last_file; ++j)
         {
-            QString current(QString::fromLatin1(unshield_file_name(unshield, j)));
+            QString current(QString::fromUtf8(unshield_file_name(unshield, j)));
 
             qDebug() << "File is: " << current;
             if (current == fileName)
@@ -723,8 +726,10 @@ bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &o
 {
     bool success;
 
+    QByteArray array(cabFile.toUtf8());
+
     Unshield *unshield;
-    unshield = unshield_open(cabFile.toLatin1().constData());
+    unshield = unshield_open(array.constData());
 
     if (!unshield) {
         emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
