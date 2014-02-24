@@ -30,7 +30,7 @@ namespace MWClass
 
         return ref->mBase->mId;
     }
-    
+
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -89,16 +89,16 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-   
+
     boost::shared_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr) const
     {
         boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
 
         action->setSound ("Swallow");
 
-        return action;    
+        return action;
     }
-    
+
     void Ingredient::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Ingredient);
@@ -189,7 +189,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return MWWorld::Ptr(&cell.mIngreds.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Ingredient>().insert(*ref), &cell);
     }
 
     bool Ingredient::canSell (const MWWorld::Ptr& item, int npcServices) const

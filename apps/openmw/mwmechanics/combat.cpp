@@ -10,6 +10,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 

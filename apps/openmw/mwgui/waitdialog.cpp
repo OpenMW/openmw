@@ -10,6 +10,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -129,7 +130,7 @@ namespace MWGui
         MWWorld::Ptr player = world->getPlayerPtr();
         if (mSleeping && player.getCell()->isExterior())
         {
-            std::string regionstr = player.getCell()->mCell->mRegion;
+            std::string regionstr = player.getCell()->getCell()->mRegion;
             if (!regionstr.empty())
             {
                 const ESM::Region *region = world->getStore().get<ESM::Region>().find (regionstr);

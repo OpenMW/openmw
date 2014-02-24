@@ -7,19 +7,20 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/player.hpp>
 #include <components/esm/defs.hpp>
+#include <components/esm/loadbsgn.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/inventorystore.hpp"
-
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "class.hpp"
+#include "ptr.hpp"
+#include "inventorystore.hpp"
+#include "cellstore.hpp"
 
 namespace MWWorld
 {
@@ -191,7 +192,7 @@ namespace MWWorld
         ESM::Player player;
 
         mPlayer.save (player.mObject);
-        player.mCellId = mCellStore->mCell->getCellId();
+        player.mCellId = mCellStore->getCell()->getCellId();
 
         player.mBirthsign = mSign;
 
@@ -203,7 +204,7 @@ namespace MWWorld
         {
             player.mHasMark = true;
             player.mMarkedPosition = mMarkedPosition;
-            player.mMarkedCell = mMarkedCell->mCell->getCellId();
+            player.mMarkedCell = mMarkedCell->getCell()->getCellId();
         }
         else
             player.mHasMark = false;

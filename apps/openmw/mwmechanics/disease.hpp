@@ -6,6 +6,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 

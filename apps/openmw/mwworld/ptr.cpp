@@ -55,3 +55,8 @@ MWWorld::ContainerStore *MWWorld::Ptr::getContainerStore() const
 {
     return mContainerStore;
 }
+
+MWWorld::Ptr::operator const void *()
+{
+    return mRef;
+}

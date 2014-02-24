@@ -23,6 +23,7 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -301,7 +302,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
 
-        ESM::CellId cellId = ptr.getCell()->mCell->getCellId();
+        ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
     }

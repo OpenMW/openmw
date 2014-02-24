@@ -11,6 +11,7 @@
 #include "class.hpp"
 #include "esmstore.hpp"
 #include "containerstore.hpp"
+#include "cellstore.hpp"
 
 MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
@@ -65,8 +66,11 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, CellStore&
     return ptr;
 }
 
-void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, const CellStore& cell) const
+void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
 {
+    if (cell.getState()!=CellStore::State_Loaded)
+        cell.load (mStore, mReader);
+
     ESM::CellState cellState;
 
     cell.saveState (cellState);
@@ -76,17 +80,6 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, const CellStore& cell) c
     cellState.save (writer);
     cell.writeReferences (writer);
     writer.endRecord (ESM::REC_CSTA);
-}
-
-bool MWWorld::Cells::hasState (const CellStore& cellStore) const
-{
-    if (cellStore.mState==CellStore::State_Loaded)
-        return true;
-
-    if (cellStore.mCell->mData.mFlags & ESM::Cell::Interior)
-        return cellStore.mCell->mData.mFlags & ESM::Cell::HasWater;
-    else
-        return false;
 }
 
 MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
@@ -122,7 +115,7 @@ MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
             std::make_pair (x, y), CellStore (cell))).first;
     }
 
-    if (result->second.mState!=CellStore::State_Loaded)
+    if (result->second.getState()!=CellStore::State_Loaded)
     {
         // Multiple plugin support for landscape data is much easier than for references. The last plugin wins.
         result->second.load (mStore, mReader);
@@ -143,7 +136,7 @@ MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
         result = mInteriors.insert (std::make_pair (lowerName, CellStore (cell))).first;
     }
 
-    if (result->second.mState!=CellStore::State_Loaded)
+    if (result->second.getState()!=CellStore::State_Loaded)
     {
         result->second.load (mStore, mReader);
     }
@@ -162,12 +155,12 @@ MWWorld::CellStore *MWWorld::Cells::getCell (const ESM::CellId& id)
 MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
     bool searchInContainers)
 {
-    if (cell.mState==CellStore::State_Unloaded)
+    if (cell.getState()==CellStore::State_Unloaded)
         cell.preload (mStore, mReader);
 
-    if (cell.mState==CellStore::State_Preloaded)
+    if (cell.getState()==CellStore::State_Preloaded)
     {
-        if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), name))
+        if (cell.hasId (name))
         {
             cell.load (mStore, mReader);
         }
@@ -175,65 +168,10 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
             return Ptr();
     }
 
-    if (MWWorld::LiveCellRef<ESM::Activator> *ref = cell.mActivators.find (name))
-        return Ptr (ref, &cell);
+    Ptr ptr = cell.search (name);
 
-    if (MWWorld::LiveCellRef<ESM::Potion> *ref = cell.mPotions.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = cell.mAppas.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Armor> *ref = cell.mArmors.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Book> *ref = cell.mBooks.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Clothing> *ref = cell.mClothes.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Container> *ref = cell.mContainers.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Creature> *ref = cell.mCreatures.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Door> *ref = cell.mDoors.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Ingredient> *ref = cell.mIngreds.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = cell.mCreatureLists.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::ItemLevList> *ref = cell.mItemLists.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Light> *ref = cell.mLights.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Lockpick> *ref = cell.mLockpicks.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = cell.mMiscItems.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::NPC> *ref = cell.mNpcs.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Probe> *ref = cell.mProbes.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Repair> *ref = cell.mRepairs.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Static> *ref = cell.mStatics.find (name))
-        return Ptr (ref, &cell);
-
-    if (MWWorld::LiveCellRef<ESM::Weapon> *ref = cell.mWeapons.find (name))
-        return Ptr (ref, &cell);
+    if (!ptr.isEmpty())
+        return ptr;
 
     if (searchInContainers)
         return cell.searchInContainer (name);
@@ -328,12 +266,12 @@ int MWWorld::Cells::countSavedGameRecords() const
 
     for (std::map<std::string, CellStore>::const_iterator iter (mInteriors.begin());
         iter!=mInteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             ++count;
 
     for (std::map<std::pair<int, int>, CellStore>::const_iterator iter (mExteriors.begin());
         iter!=mExteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             ++count;
 
     return count;
@@ -341,14 +279,14 @@ int MWWorld::Cells::countSavedGameRecords() const
 
 void MWWorld::Cells::write (ESM::ESMWriter& writer) const
 {
-    for (std::map<std::pair<int, int>, CellStore>::const_iterator iter (mExteriors.begin());
+    for (std::map<std::pair<int, int>, CellStore>::iterator iter (mExteriors.begin());
         iter!=mExteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             writeCell (writer, iter->second);
 
-    for (std::map<std::string, CellStore>::const_iterator iter (mInteriors.begin());
+    for (std::map<std::string, CellStore>::iterator iter (mInteriors.begin());
         iter!=mInteriors.end(); ++iter)
-        if (hasState (iter->second))
+        if (iter->second.hasState())
             writeCell (writer, iter->second);
 }
 
@@ -375,7 +313,7 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
         state.load (reader);
         cellStore->loadState (state);
 
-        if (cellStore->mState!=CellStore::State_Loaded)
+        if (cellStore->getState()!=CellStore::State_Loaded)
             cellStore->load (mStore, mReader);
 
         cellStore->readReferences (reader, contentFileMap);

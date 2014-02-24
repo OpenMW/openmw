@@ -15,13 +15,15 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
+#include <components/esm/loadgmst.hpp>
+
 #include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
-#include <components/esm/loadgmst.hpp>
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "ptr.hpp"
 #include "class.hpp"
@@ -574,7 +576,7 @@ namespace MWWorld
             for(;iter != mMovementQueue.end();iter++)
             {
                 float waterlevel = -std::numeric_limits<float>::max();
-                const ESM::Cell *cell = iter->first.getCell()->mCell;
+                const ESM::Cell *cell = iter->first.getCell()->getCell();
                 if(cell->hasWater())
                     waterlevel = cell->mWater;
 

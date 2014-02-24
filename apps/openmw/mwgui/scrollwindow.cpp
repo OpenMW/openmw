@@ -1,5 +1,7 @@
 #include "scrollwindow.hpp"
 
+#include <components/esm/loadbook.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"

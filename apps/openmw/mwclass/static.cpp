@@ -5,6 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -25,7 +26,7 @@ namespace MWClass
         if(!model.empty())
             physics.addObject(ptr);
     }
-    
+
     std::string Static::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Static> *ref =
@@ -57,6 +58,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
-        return MWWorld::Ptr(&cell.mStatics.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Static>().insert(*ref), &cell);
     }
 }

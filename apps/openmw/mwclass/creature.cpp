@@ -22,6 +22,7 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/actors.hpp"
@@ -679,7 +680,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
-        return MWWorld::Ptr(&cell.mCreatures.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Creature>().insert(*ref), &cell);
     }
 
     bool Creature::isFlying(const MWWorld::Ptr &ptr) const

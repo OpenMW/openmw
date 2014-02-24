@@ -21,6 +21,11 @@ namespace Files
     class Collections;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace Render
 {
     class OgreRenderer;
@@ -57,8 +62,6 @@ namespace MWWorld
                 bool adjustPlayerPos = true);
 
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
-
-            int countRefs (const CellStore& cell);
 
         public:
 

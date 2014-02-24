@@ -4,11 +4,13 @@
 #include <OgreSkeletonInstance.h>
 #include <OgreBone.h>
 
-#include "renderconst.hpp"
+#include <components/esm/loadcrea.hpp>
 
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+
+#include "renderconst.hpp"
 
 namespace MWRender
 {

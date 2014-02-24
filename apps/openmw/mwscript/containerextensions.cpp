@@ -14,6 +14,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/esm/loadskil.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -284,7 +286,7 @@ namespace MWScript
                 virtual void execute(Interpreter::Runtime &runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-      
+
                     const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 

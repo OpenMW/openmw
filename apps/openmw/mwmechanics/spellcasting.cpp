@@ -14,6 +14,7 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -503,7 +504,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
                 if (markedCell)
                 {
-                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->mCell->mName,
+                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName,
                                             markedPosition);
                     action.execute(target);
                 }

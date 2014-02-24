@@ -36,6 +36,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace
 {
@@ -562,7 +563,7 @@ bool CharacterController::updateWeaponState()
             getWeaponGroup(weaptype, weapgroup);
             mAnimation->showWeapons(false);
             mAnimation->setWeaponGroup(weapgroup);
-            
+
             mAnimation->play(weapgroup, Priority_Weapon,
                              MWRender::Animation::Group_UpperBody, true,
                              1.0f, "equip start", "equip stop", 0.0f, 0);
@@ -751,7 +752,7 @@ bool CharacterController::updateWeaponState()
                                  MWRender::Animation::Group_UpperBody, false,
                                  weapSpeed, mAttackType+" start", mAttackType+" min attack",
                                  0.0f, 0);
-                mUpperBodyState = UpperCharState_StartToMinAttack;   
+                mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }
 
@@ -855,7 +856,7 @@ bool CharacterController::updateWeaponState()
 
             mUpperBodyState = UpperCharState_WeapEquiped;
             //don't allow to continue playing hit animation on UpperBody after actor had attacked during it
-            if(mHitState == CharState_Hit) 
+            if(mHitState == CharState_Hit)
             {
                 mAnimation->changeGroups(mCurrentHit, MWRender::Animation::Group_LowerBody);
                 //commenting out following 2 lines will give a bit different combat dynamics(slower)
@@ -932,7 +933,7 @@ bool CharacterController::updateWeaponState()
                                  weapSpeed, start, stop, 0.0f, 0);
         }
     }
-    
+
      //if playing combat animation and lowerbody is not busy switch to whole body animation
     if((weaptype != WeapType_None || UpperCharState_UnEquipingWeap) && animPlaying)
     {
@@ -1431,7 +1432,7 @@ void CharacterController::updateVisibility()
 void CharacterController::determineAttackType()
 {
     float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
-    
+
     if(mPtr.getClass().hasInventoryStore(mPtr))
     {
         if (move[0] && !move[1]) //sideway

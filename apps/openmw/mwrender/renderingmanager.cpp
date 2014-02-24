@@ -24,6 +24,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
@@ -422,9 +423,9 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
 
 void RenderingManager::waterAdded (MWWorld::CellStore *store)
 {
-    if(store->mCell->mData.mFlags & ESM::Cell::HasWater)
+    if (store->getCell()->mData.mFlags & ESM::Cell::HasWater)
     {
-        mWater->changeCell(store->mCell);
+        mWater->changeCell (store->getCell());
         mWater->setActive(true);
     }
     else
@@ -501,9 +502,9 @@ bool RenderingManager::toggleRenderMode(int mode)
 void RenderingManager::configureFog(MWWorld::CellStore &mCell)
 {
     Ogre::ColourValue color;
-    color.setAsABGR (mCell.mCell->mAmbi.mFog);
+    color.setAsABGR (mCell.getCell()->mAmbi.mFog);
 
-    configureFog(mCell.mCell->mAmbi.mFogDensity, color);
+    configureFog (mCell.getCell()->mAmbi.mFogDensity, color);
 }
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
@@ -553,8 +554,8 @@ void RenderingManager::setAmbientMode()
 
 void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
 {
-    if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
-        mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
+    if (mCell.getCell()->mData.mFlags & ESM::Cell::Interior)
+        mAmbientColor.setAsABGR (mCell.getCell()->mAmbi.mAmbient);
     setAmbientMode();
 
     // Create a "sun" that shines light downwards. It doesn't look
@@ -564,10 +565,10 @@ void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
         mSun = mRendering.getScene()->createLight();
         mSun->setType(Ogre::Light::LT_DIRECTIONAL);
     }
-    if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
+    if (mCell.getCell()->mData.mFlags & ESM::Cell::Interior)
     {
         Ogre::ColourValue colour;
-        colour.setAsABGR (mCell.mCell->mAmbi.mSunlight);
+        colour.setAsABGR (mCell.getCell()->mAmbi.mSunlight);
         mSun->setDiffuseColour (colour);
         mSun->setDirection(0,-1,0);
     }
@@ -650,12 +651,12 @@ void RenderingManager::setGlare(bool glare)
 
 void RenderingManager::requestMap(MWWorld::CellStore* cell)
 {
-    if (cell->mCell->isExterior())
+    if (cell->getCell()->isExterior())
     {
         assert(mTerrain);
 
         Ogre::AxisAlignedBox dims = mObjects->getDimensions(cell);
-        Ogre::Vector2 center(cell->mCell->getGridX() + 0.5, cell->mCell->getGridY() + 0.5);
+        Ogre::Vector2 center (cell->getCell()->getGridX() + 0.5, cell->getCell()->getGridY() + 0.5);
         dims.merge(mTerrain->getWorldBoundingBox(center));
 
         if (dims.isFinite())

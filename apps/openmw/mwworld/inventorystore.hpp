@@ -5,6 +5,11 @@
 
 #include "../mwmechanics/magiceffects.hpp"
 
+namespace ESM
+{
+    struct MagicEffect;
+}
+
 namespace MWMechanics
 {
     class NpcStats;

@@ -12,6 +12,7 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
     struct CellId;
+    struct Cell;
 }
 
 namespace MWWorld
@@ -23,8 +24,8 @@ namespace MWWorld
     {
             const MWWorld::ESMStore& mStore;
             std::vector<ESM::ESMReader>& mReader;
-            std::map<std::string, CellStore> mInteriors;
-            std::map<std::pair<int, int>, CellStore> mExteriors;
+            mutable std::map<std::string, CellStore> mInteriors;
+            mutable std::map<std::pair<int, int>, CellStore> mExteriors;
             std::vector<std::pair<std::string, CellStore *> > mIdCache;
             std::size_t mIdCacheIndex;
 
@@ -35,10 +36,7 @@ namespace MWWorld
 
             Ptr getPtrAndCache (const std::string& name, CellStore& cellStore);
 
-            void writeCell (ESM::ESMWriter& writer, const CellStore& cell) const;
-
-            bool hasState (const CellStore& cellStore) const;
-            ///< Check if cell has state that needs to be included in a saved game file.
+            void writeCell (ESM::ESMWriter& writer, CellStore& cell) const;
 
         public:
 

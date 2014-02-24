@@ -9,6 +9,7 @@
 #include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"
@@ -480,7 +481,7 @@ namespace MWSound
         static float sTimePassed = 0.0;
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Ptr player = world->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->mCell;
+        const ESM::Cell *cell = player.getCell()->getCell();
 
         sTimePassed += duration;
         if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
@@ -548,7 +549,7 @@ namespace MWSound
 
         MWWorld::Ptr player =
             MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->mCell;
+        const ESM::Cell *cell = player.getCell()->getCell();
 
         Environment env = Env_Normal;
         if((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater)
