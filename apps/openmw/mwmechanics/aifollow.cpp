@@ -1,12 +1,14 @@
 #include "aifollow.hpp"
-#include <iostream>
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
-#include "movement.hpp"
 
 #include <OgreMath.h>
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
+#include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
+
+#include "movement.hpp"
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
@@ -33,16 +35,16 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
     if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
         (pos.pos[1]-mY)*(pos.pos[1]-mY) +
-        (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < 100*100) 
+        (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < 100*100)
     {
         if(actor.getCell()->isExterior())
         {
-            if(mCellId == "") 
+            if(mCellId == "")
                 return true;
         }
         else
         {
-            if(mCellId == actor.getCell()->mCell->mName)
+            if(mCellId == actor.getCell()->getCell()->mName)
                 return true;
         }
     }
@@ -67,7 +69,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
         {
             ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back();
 
-            if((dest.mX - lastPos.mX)*(dest.mX - lastPos.mX) 
+            if((dest.mX - lastPos.mX)*(dest.mX - lastPos.mX)
                 +(dest.mY - lastPos.mY)*(dest.mY - lastPos.mY)
                 +(dest.mZ - lastPos.mZ)*(dest.mZ - lastPos.mZ)
             > 100*100)

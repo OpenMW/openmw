@@ -4,6 +4,7 @@
 #include <QHeaderView>
 
 #include <QAction>
+#include <QApplication>
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
@@ -471,7 +472,20 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
-        drag->exec();
+
+        Qt::DropActions action = Qt::IgnoreAction;
+        switch (QApplication::keyboardModifiers())
+        {
+            case Qt::ControlModifier:
+                action = Qt::CopyAction;
+                break;
+
+            case Qt::ShiftModifier:
+                action = Qt::MoveAction;
+                break;
+        }
+
+        drag->exec(action);
     }
 
 }
@@ -485,6 +499,11 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
     QModelIndex index = indexAt (event->pos());
 
+    if (!index.isValid())
+    {
+        return;
+    }
+
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (mime->fromDocument (mDocument))
     {
@@ -496,7 +515,7 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
             CSMWorld::UniversalId record (mime->returnMatching (display));
 
             std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
-                    (*mProxyModel, index, QVariant (QString::fromStdString (record.getId()))));
+                    (*mProxyModel, index, QVariant (QString::fromUtf8 (record.getId().c_str()))));
 
             mUndoStack.push (command.release());
         }
@@ -506,4 +525,22 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
 {
         event->accept();
+}
+
+std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const
+{
+    const int count = mModel->columnCount();
+
+    std::vector<std::string> titles;
+    for (int i = 0; i < count; ++i)
+    {
+        CSMWorld::ColumnBase::Display columndisplay = static_cast<CSMWorld::ColumnBase::Display>
+                                                     (mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+
+        if (display == columndisplay)
+        {
+            titles.push_back(mModel->headerData (i, Qt::Horizontal).toString().toStdString());
+        }
+    }
+    return titles;
 }

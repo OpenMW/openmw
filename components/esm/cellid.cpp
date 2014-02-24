@@ -24,3 +24,14 @@ void ESM::CellId::save (ESMWriter &esm) const
     if (mPaged)
         esm.writeHNT ("CIDX", mIndex, 8);
 }
+
+bool ESM::operator== (const CellId& left, const CellId& right)
+{
+    return left.mWorldspace==right.mWorldspace && left.mPaged==right.mPaged &&
+        (!left.mPaged || (left.mIndex.mX==right.mIndex.mX && left.mIndex.mY==right.mIndex.mY));
+}
+
+bool ESM::operator!= (const CellId& left, const CellId& right)
+{
+    return !(left==right);
+}

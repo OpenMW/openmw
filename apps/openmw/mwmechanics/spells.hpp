@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+#include <components/misc/stringops.hpp>
+
 #include "../mwworld/ptr.hpp"
 
 #include "magiceffects.hpp"

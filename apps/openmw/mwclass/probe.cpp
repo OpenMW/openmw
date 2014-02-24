@@ -168,7 +168,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        return MWWorld::Ptr(&cell.mProbes.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Probe>().insert(*ref), &cell);
     }
 
     bool Probe::canSell (const MWWorld::Ptr& item, int npcServices) const

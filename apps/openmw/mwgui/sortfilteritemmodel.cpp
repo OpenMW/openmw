@@ -1,5 +1,18 @@
 #include "sortfilteritemmodel.hpp"
 
+#include <components/esm/loadalch.hpp>
+#include <components/esm/loadappa.hpp>
+#include <components/esm/loadarmo.hpp>
+#include <components/esm/loadbook.hpp>
+#include <components/esm/loadclot.hpp>
+#include <components/esm/loadingr.hpp>
+#include <components/esm/loadlock.hpp>
+#include <components/esm/loadligh.hpp>
+#include <components/esm/loadmisc.hpp>
+#include <components/esm/loadprob.hpp>
+#include <components/esm/loadrepa.hpp>
+#include <components/esm/loadweap.hpp>
+
 #include "../mwworld/class.hpp"
 
 namespace

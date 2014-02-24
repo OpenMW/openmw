@@ -30,6 +30,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -1252,7 +1253,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
-        return MWWorld::Ptr(&cell.mNpcs.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::NPC>().insert(*ref), &cell);
     }
 
     int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const

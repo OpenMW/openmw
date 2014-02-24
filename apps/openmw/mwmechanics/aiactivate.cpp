@@ -1,14 +1,14 @@
 #include "aiactivate.hpp"
-#include <iostream>
-
-#include "movement.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "steering.hpp"
+#include "movement.hpp"
 
 namespace
 {
@@ -33,12 +33,12 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     MWBase::World *world = MWBase::Environment::get().getWorld();
     ESM::Position pos = actor.getRefData().getPosition();
     Movement &movement = actor.getClass().getMovementSettings(actor);
-    const ESM::Cell *cell = actor.getCell()->mCell;
+    const ESM::Cell *cell = actor.getCell()->getCell();
 
     MWWorld::Ptr player = world->getPlayerPtr();
-    if(cell->mData.mX != player.getCell()->mCell->mData.mX)
+    if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
     {
-        int sideX = sgn(cell->mData.mX - player.getCell()->mCell->mData.mX);
+        int sideX = sgn(cell->mData.mX - player.getCell()->getCell()->mData.mX);
         //check if actor is near the border of an inactive cell. If so, stop walking.
         if(sideX * (pos.pos[0] - cell->mData.mX*ESM::Land::REAL_SIZE) >
             sideX * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
@@ -47,9 +47,9 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
             return false;
         }
     }
-    if(cell->mData.mY != player.getCell()->mCell->mData.mY)
+    if(cell->mData.mY != player.getCell()->getCell()->mData.mY)
     {
-        int sideY = sgn(cell->mData.mY - player.getCell()->mCell->mData.mY);
+        int sideY = sgn(cell->mData.mY - player.getCell()->getCell()->mData.mY);
         //check if actor is near the border of an inactive cell. If so, stop walking.
         if(sideY * (pos.pos[1] - cell->mData.mY*ESM::Land::REAL_SIZE) >
             sideY * (ESM::Land::REAL_SIZE/2.0f - 200.0f))

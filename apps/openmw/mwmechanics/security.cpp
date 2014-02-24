@@ -2,6 +2,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

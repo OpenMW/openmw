@@ -13,12 +13,12 @@
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "renderconst.hpp"
 
@@ -230,22 +230,22 @@ void Debugging::togglePathgrid()
 void Debugging::enableCellPathgrid(MWWorld::CellStore *store)
 {
     const ESM::Pathgrid *pathgrid =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*store->mCell);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*store->getCell());
     if (!pathgrid) return;
 
     Vector3 cellPathGridPos(0, 0, 0);
-    if (store->mCell->isExterior())
+    if (store->getCell()->isExterior())
     {
-        cellPathGridPos.x = store->mCell->mData.mX * ESM::Land::REAL_SIZE;
-        cellPathGridPos.y = store->mCell->mData.mY * ESM::Land::REAL_SIZE;
+        cellPathGridPos.x = store->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+        cellPathGridPos.y = store->getCell()->mData.mY * ESM::Land::REAL_SIZE;
     }
     SceneNode *cellPathGrid = mPathGridRoot->createChildSceneNode(cellPathGridPos);
     cellPathGrid->attachObject(createPathgridLines(pathgrid));
     cellPathGrid->attachObject(createPathgridPoints(pathgrid));
 
-    if (store->mCell->isExterior())
+    if (store->getCell()->isExterior())
     {
-        mExteriorPathgridNodes[std::make_pair(store->mCell->getGridX(), store->mCell->getGridY())] = cellPathGrid;
+        mExteriorPathgridNodes[std::make_pair(store->getCell()->getGridX(), store->getCell()->getGridY())] = cellPathGrid;
     }
     else
     {
@@ -256,10 +256,10 @@ void Debugging::enableCellPathgrid(MWWorld::CellStore *store)
 
 void Debugging::disableCellPathgrid(MWWorld::CellStore *store)
 {
-    if (store->mCell->isExterior())
+    if (store->getCell()->isExterior())
     {
         ExteriorPathgridNodes::iterator it =
-                mExteriorPathgridNodes.find(std::make_pair(store->mCell->getGridX(), store->mCell->getGridY()));
+                mExteriorPathgridNodes.find(std::make_pair(store->getCell()->getGridX(), store->getCell()->getGridY()));
         if (it != mExteriorPathgridNodes.end())
         {
             destroyCellPathgridNode(it->second);

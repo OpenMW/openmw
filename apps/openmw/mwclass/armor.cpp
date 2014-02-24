@@ -333,11 +333,11 @@ namespace MWClass
 
                 if(weapon->getTypeName() == typeid(ESM::Weapon).name() &&
                         (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
-                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
-                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose ||
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide ||
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
-                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
-                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand ||
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow ||
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow))
                 {
                     return std::make_pair(3,"");
@@ -363,7 +363,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
 
-        return MWWorld::Ptr(&cell.mArmors.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Armor>().insert(*ref), &cell);
     }
 
     int Armor::getEnchantmentPoints (const MWWorld::Ptr& ptr) const

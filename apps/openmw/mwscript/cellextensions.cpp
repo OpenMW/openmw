@@ -13,6 +13,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "interpretercontext.hpp"
 
@@ -88,7 +89,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool interior =
-                        !MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->mCell->isExterior();
+                        !MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->isExterior();
 
                     runtime.push (interior ? 1 : 0);
                 }
@@ -103,7 +104,7 @@ namespace MWScript
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->mCell;
+                    const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
 
                     std::string current = cell->mName;
 
@@ -131,8 +132,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
-                    if (cell->mCell->hasWater())
-                        runtime.push (cell->mWaterLevel);
+                    if (cell->getCell()->hasWater())
+                        runtime.push (cell->getWaterLevel());
                     else
                         runtime.push (-std::numeric_limits<float>().max());
                 }
@@ -148,11 +149,11 @@ namespace MWScript
 
                     MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
-                    if (cell->mCell->isExterior())
+                    if (cell->getCell()->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");
 
-                    cell->mWaterLevel = level;
-                    MWBase::Environment::get().getWorld()->setWaterHeight(cell->mWaterLevel);
+                    cell->setWaterLevel (level);
+                    MWBase::Environment::get().getWorld()->setWaterHeight (cell->getWaterLevel());
                 }
         };
 
@@ -166,11 +167,11 @@ namespace MWScript
 
                     MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
-                    if (cell->mCell->isExterior())
+                    if (cell->getCell()->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");
 
-                    cell->mWaterLevel +=level;
-                    MWBase::Environment::get().getWorld()->setWaterHeight(cell->mWaterLevel);
+                    cell->setWaterLevel (cell->getWaterLevel()+level);
+                    MWBase::Environment::get().getWorld()->setWaterHeight(cell->getWaterLevel());
                 }
         };
 

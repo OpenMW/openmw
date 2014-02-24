@@ -1,13 +1,15 @@
 #include "pathfinding.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
+#include <map>
 
 #include "OgreMath.h"
 #include "OgreVector3.h"
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
-#include <map>
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 namespace
 {
@@ -299,14 +301,14 @@ namespace MWMechanics
         if(!allowShortcuts)
         {
             const ESM::Pathgrid *pathGrid =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell->mCell);
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell->getCell());
             float xCell = 0;
             float yCell = 0;
 
             if (mCell->isExterior())
             {
-                xCell = mCell->mCell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = mCell->mCell->mData.mY * ESM::Land::REAL_SIZE;
+                xCell = mCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+                yCell = mCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
             }
             int startNode = getClosestPoint(pathGrid, startPoint.mX - xCell, startPoint.mY - yCell,startPoint.mZ);
             int endNode = getClosestPoint(pathGrid, endPoint.mX - xCell, endPoint.mY - yCell, endPoint.mZ);
@@ -393,7 +395,7 @@ namespace MWMechanics
     {
         std::list<ESM::Pathgrid::Point>::const_iterator oldStart = path.begin();
         std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
-        
+
         if(    (*iter).mX == oldStart->mX
             && (*iter).mY == oldStart->mY
             && (*iter).mZ == oldStart->mZ

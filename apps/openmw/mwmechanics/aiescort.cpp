@@ -1,14 +1,15 @@
 #include "aiescort.hpp"
 
-#include "movement.hpp"
-
-#include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/timestamp.hpp"
+
 #include "steering.hpp"
+#include "movement.hpp"
 
 namespace
 {
@@ -86,25 +87,25 @@ namespace MWMechanics
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ESM::Position pos = actor.getRefData().getPosition();
-        bool cellChange = actor.getCell()->mCell->mData.mX != mCellX || actor.getCell()->mCell->mData.mY != mCellY;
+        bool cellChange = actor.getCell()->getCell()->mData.mX != mCellX || actor.getCell()->getCell()->mData.mY != mCellY;
 
-        if(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX)
+        if(actor.getCell()->getCell()->mData.mX != player.getCell()->getCell()->mData.mX)
         {
-            int sideX = sgn(actor.getCell()->mCell->mData.mX - player.getCell()->mCell->mData.mX);
+            int sideX = sgn(actor.getCell()->getCell()->mData.mX - player.getCell()->getCell()->mData.mX);
             // Check if actor is near the border of an inactive cell. If so, pause walking.
-            if(sideX * (pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
+            if(sideX * (pos.pos[0] - actor.getCell()->getCell()->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
+                2.0 - 200))
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 return false;
             }
         }
-        if(actor.getCell()->mCell->mData.mY != player.getCell()->mCell->mData.mY)
+        if(actor.getCell()->getCell()->mData.mY != player.getCell()->getCell()->mData.mY)
         {
-            int sideY = sgn(actor.getCell()->mCell->mData.mY - player.getCell()->mCell->mData.mY);
+            int sideY = sgn(actor.getCell()->getCell()->mData.mY - player.getCell()->getCell()->mData.mY);
             // Check if actor is near the border of an inactive cell. If so, pause walking.
-            if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
+            if(sideY*(pos.pos[1] - actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
+                2.0 - 200))
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 return false;
@@ -114,8 +115,8 @@ namespace MWMechanics
 
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
-            mCellX = actor.getCell()->mCell->mData.mX;
-            mCellY = actor.getCell()->mCell->mData.mY;
+            mCellX = actor.getCell()->getCell()->mData.mX;
+            mCellY = actor.getCell()->getCell()->mData.mY;
 
             ESM::Pathgrid::Point dest;
             dest.mX = mX;

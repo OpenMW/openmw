@@ -15,13 +15,16 @@
 
 #include "../engine.hpp"
 
-#include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+
+#include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 
 using namespace ICS;
@@ -169,7 +172,7 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running 
+                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running
                     && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
                         toggleMainMenu ();
                 break;
@@ -283,7 +286,7 @@ namespace MWInput
 
         // Disable movement in Gui mode
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running) 
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
                 return;
 
 
