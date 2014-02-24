@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="ExposedWindow" skin="MW_Window_Pinnable" layer="Windows" position="0 0 600 300" name="_Main">
+        <Property key="MinSize" value="40 40"/>
+
+        <Widget type="Widget" skin="" position="0 0 224 223" align="Left Top" name="LeftPane">
+
+            <!-- Player encumbrance -->
+            <Widget type="MWDynamicStat" skin="MW_ChargeBar_Blue" position="8 8 212 24" name="EncumbranceBar" align="Left Top HStretch">
+            </Widget>
+
+            <!-- Avatar -->
+            <Widget type="Widget" skin="MW_Box" position="8 38 212 185" name="Avatar" align="Left Top Stretch">
+                <Widget type="ImageBox" skin="ImageBox" position="0 0 212 161" align="Stretch" name="AvatarImage">
+                    <UserString key="ToolTipType" value="AvatarItemSelection"/>
+                </Widget>
+                <Widget type="TextBox" skin="ProgressText" position="0 161 212 24" align="HStretch Bottom" name="ArmorRating">
+                    <Property key="NeedMouse" value="false"/>
+                </Widget>
+            </Widget>
+
+        </Widget>
+
+        <Widget type="Widget" skin="" position="228 0 350 223" align="Left Top" name="RightPane">
+
+            <!-- Items in inventory -->
+            <Widget type="ItemView" skin="MW_ItemView" position="0 38 350 185" name="ItemView" align="Left Top Stretch">
+            </Widget>
+
+            <!-- Categories -->
+            <Widget type="HBox" position="0 8 350 24" align="Left Top HStretch" name="Categories">
+                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="AllButton">
+                    <Property key="Caption" value="#{sAllTab}"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="WeaponButton">
+                    <Property key="Caption" value="#{sWeaponTab}"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="ApparelButton">
+                    <Property key="Caption" value="#{sApparelTab}"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="MagicButton">
+                    <Property key="Caption" value="#{sMagicTab}"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="MiscButton">
+                    <Property key="Caption" value="#{sMiscTab}"/>
+                </Widget>
+            </Widget>
+
+        </Widget>
+
+    </Widget>
+</MyGUI>

@@ -3,157 +3,107 @@
 
 #include <stdexcept>
 
-#include <components/esm_store/store.hpp>
+#include <components/misc/stringops.hpp>
+
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/esmreader.hpp>
+
+#include "esmstore.hpp"
 
 namespace MWWorld
 {
     Globals::Collection::const_iterator Globals::find (const std::string& name) const
     {
         Collection::const_iterator iter = mVariables.find (name);
-            
+
         if (iter==mVariables.end())
             throw std::runtime_error ("unknown global variable: " + name);
-            
-        return iter;    
+
+        return iter;
     }
 
     Globals::Collection::iterator Globals::find (const std::string& name)
     {
         Collection::iterator iter = mVariables.find (name);
-            
+
         if (iter==mVariables.end())
             throw std::runtime_error ("unknown global variable: " + name);
-            
-        return iter;    
+
+        return iter;
     }
 
-    Globals::Globals (const ESMS::ESMStore& store)
+    void Globals::fill (const MWWorld::ESMStore& store)
     {
-        for (ESMS::RecListT<ESM::Global>::MapType::const_iterator iter
-            (store.globals.list.begin()); iter != store.globals.list.end(); ++iter)
-        {
-            char type = ' ';
-            Data value;
-        
-            switch (iter->second.type)
-            {
-                case ESM::VT_Short:
-                    
-                    type = 's';
-                    value.mShort = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.value);
-                    break;
-                    
-                case ESM::VT_Int:
-                
-                    type = 'l';
-                    value.mLong = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.value);
-                    break;
-                    
-                case ESM::VT_Float:
-                
-                    type = 'f';
-                    value.mFloat = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.value);
-                    break;
-                    
-                default:
-                
-                    throw std::runtime_error ("unsupported global variable type");
-            }            
+        mVariables.clear();
 
-            mVariables.insert (std::make_pair (iter->first, std::make_pair (type, value)));
-        }
-        
-        if (mVariables.find ("dayspassed")==mVariables.end())
+        const MWWorld::Store<ESM::Global>& globals = store.get<ESM::Global>();
+
+        for (MWWorld::Store<ESM::Global>::iterator iter = globals.begin(); iter!=globals.end();
+            ++iter)
         {
-            // vanilla Morrowind does not define dayspassed.
-            Data value;
-            value.mLong = 0;
-            
-            mVariables.insert (std::make_pair ("dayspassed", std::make_pair ('l', value)));
+            mVariables.insert (std::make_pair (iter->mId, iter->mValue));
         }
     }
 
-    const Globals::Data& Globals::operator[] (const std::string& name) const
+    const ESM::Variant& Globals::operator[] (const std::string& name) const
     {
-        Collection::const_iterator iter = find (name);
-            
-        return iter->second.second;
+        return find (name)->second;
     }
 
-    Globals::Data& Globals::operator[] (const std::string& name)
+    ESM::Variant& Globals::operator[] (const std::string& name)
     {
-        Collection::iterator iter = find (name);
-            
-        return iter->second.second;
+        return find (name)->second;
     }
-    
-    void Globals::setInt (const std::string& name, int value)
-    {
-        Collection::iterator iter = find (name);
-        
-        switch (iter->second.first)
-        {
-            case 's': iter->second.second.mShort = value; break;
-            case 'l': iter->second.second.mLong = value; break;
-            case 'f': iter->second.second.mFloat = value; break;
-            
-            default: throw std::runtime_error ("unsupported global variable type");
-        }
-    }
-    
-    void Globals::setFloat (const std::string& name, float value)
-    {
-        Collection::iterator iter = find (name);
 
-        switch (iter->second.first)
-        {
-            case 's': iter->second.second.mShort = value; break;
-            case 'l': iter->second.second.mLong = value; break;
-            case 'f': iter->second.second.mFloat = value; break;
-
-            default: throw std::runtime_error ("unsupported global variable type");
-        }        
-    }
-    
-    int Globals::getInt (const std::string& name) const
-    {
-        Collection::const_iterator iter = find (name);
-
-        switch (iter->second.first)
-        {
-            case 's': return iter->second.second.mShort;
-            case 'l': return iter->second.second.mLong;
-            case 'f': return iter->second.second.mFloat;
-
-            default: throw std::runtime_error ("unsupported global variable type");
-        }                
-    }
-        
-    float Globals::getFloat (const std::string& name) const
-    {
-        Collection::const_iterator iter = find (name);
-    
-        switch (iter->second.first)
-        {
-            case 's': return iter->second.second.mShort;
-            case 'l': return iter->second.second.mLong;
-            case 'f': return iter->second.second.mFloat;
-
-            default: throw std::runtime_error ("unsupported global variable type");
-        }    
-    }
-    
     char Globals::getType (const std::string& name) const
     {
         Collection::const_iterator iter = mVariables.find (name);
-        
+
         if (iter==mVariables.end())
             return ' ';
-            
-        return iter->second.first;
+
+        switch (iter->second.getType())
+        {
+            case ESM::VT_Short: return 's';
+            case ESM::VT_Long: return 'l';
+            case ESM::VT_Float: return 'f';
+
+            default: return ' ';
+        }
+    }
+
+    int Globals::countSavedGameRecords() const
+    {
+        return mVariables.size();
+    }
+
+    void Globals::write (ESM::ESMWriter& writer) const
+    {
+        for (Collection::const_iterator iter (mVariables.begin()); iter!=mVariables.end(); ++iter)
+        {
+            writer.startRecord (ESM::REC_GLOB);
+            writer.writeHNString ("NAME", iter->first);
+            iter->second.write (writer, ESM::Variant::Format_Global);
+            writer.endRecord (ESM::REC_GLOB);
+        }
+    }
+
+    bool Globals::readRecord (ESM::ESMReader& reader,  int32_t type)
+    {
+        if (type==ESM::REC_GLOB)
+        {
+            std::string id = reader.getHNString ("NAME");
+
+            Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (id));
+
+            if (iter!=mVariables.end())
+                iter->second.read (reader, ESM::Variant::Format_Global);
+            else
+                reader.skipHRecord();
+
+            return true;
+        }
+
+        return false;
     }
 }
-

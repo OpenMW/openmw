@@ -1,9 +1,13 @@
-#ifndef _ESM_CLAS_H
-#define _ESM_CLAS_H
+#ifndef OPENMW_ESM_CLAS_H
+#define OPENMW_ESM_CLAS_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Character class definitions
@@ -13,52 +17,66 @@ namespace ESM {
 // class
 struct Class
 {
-  enum AutoCalc
+    static unsigned int sRecordId;
+
+    enum AutoCalc
     {
-      Weapon		= 0x00001,
-      Armor		= 0x00002,
-      Clothing	 	= 0x00004,
-      Books		= 0x00008,
-      Ingredient	= 0x00010,
-      Lockpick		= 0x00020,
-      Probe		= 0x00040,
-      Lights		= 0x00080,
-      Apparatus		= 0x00100,
-      Repair		= 0x00200,
-      Misc		= 0x00400,
-      Spells		= 0x00800,
-      MagicItems	= 0x01000,
-      Potions		= 0x02000,
-      Training		= 0x04000,
-      Spellmaking	= 0x08000,
-      Enchanting	= 0x10000,
-      RepairItem	= 0x20000
+        Weapon = 0x00001,
+        Armor = 0x00002,
+        Clothing = 0x00004,
+        Books = 0x00008,
+        Ingredient = 0x00010,
+        Lockpick = 0x00020,
+        Probe = 0x00040,
+        Lights = 0x00080,
+        Apparatus = 0x00100,
+        Repair = 0x00200,
+        Misc = 0x00400,
+        Spells = 0x00800,
+        MagicItems = 0x01000,
+        Potions = 0x02000,
+        Training = 0x04000,
+        Spellmaking = 0x08000,
+        Enchanting = 0x10000,
+        RepairItem = 0x20000
     };
 
-  struct CLDTstruct
-  {
-    int attribute[2];   // Attributes that get class bonus
-    int specialization; // 0 = Combat, 1 = Magic, 2 = Stealth
-    int skills[5][2];   // Minor and major skills.
-    int isPlayable;     // 0x0001 - Playable class
-
-    // I have no idea how to autocalculate these items...
-    int calc;
-  }; // 60 bytes
-
-  std::string name, description;
-  CLDTstruct data;
-
-  void load(ESMReader &esm)
+    enum Specialization
     {
-      name = esm.getHNString("FNAM");
-      esm.getHNT(data, "CLDT", 60);
+        Combat = 0,
+        Magic = 1,
+        Stealth = 2
+    };
 
-      if(data.isPlayable > 1)
-	esm.fail("Unknown bool value");
+    static const Specialization sSpecializationIds[3];
+    static const char *sGmstSpecializationIds[3];
 
-      description = esm.getHNOString("DESC");
-    }
+    struct CLDTstruct
+    {
+        int mAttribute[2]; // Attributes that get class bonus
+        int mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
+        int mSkills[5][2]; // Minor and major skills.
+        int mIsPlayable; // 0x0001 - Playable class
+
+        // I have no idea how to autocalculate these items...
+        int mCalc;
+
+        int& getSkill (int index, bool major);
+        ///< Throws an exception for invalid values of \a index.
+
+        int getSkill (int index, bool major) const;
+        ///< Throws an exception for invalid values of \a index.
+    }; // 60 bytes
+
+    std::string mId, mName, mDescription;
+    CLDTstruct mData;
+
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm) const;
+
+    void blank();
+     ///< Set record to default state (does not touch the ID/index).
+
 };
 }
 #endif

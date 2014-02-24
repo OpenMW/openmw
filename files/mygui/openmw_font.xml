@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Resource" version="1.1">
+    <Resource type="ResourceTrueTypeFont" name="MonoFont">
+        <Property key="Source" value="DejaVuLGCSansMono.ttf"/>
+        <Property key="Size" value="17"/>
+        <Property key="Resolution" value="50"/>
+        <Property key="Antialias" value="false"/>
+        <Property key="TabWidth" value="8"/>
+        <Property key="OffsetHeight" value="0"/>
+        <Codes>
+            <Code range="33 126"/>
+            <Code range="192 382"/>
+            <Code range="1025 1105"/>
+            <Code range="8470"/>
+            <Code hide="128"/>
+            <Code hide="1026 1039"/>
+            <Code hide="1104"/>
+        </Codes>
+    </Resource>
+</MyGUI>

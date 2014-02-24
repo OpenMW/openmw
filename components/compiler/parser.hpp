@@ -17,7 +17,7 @@ namespace Compiler
     class Parser
     {
             ErrorHandler& mErrorHandler;
-            Context& mContext;
+            const Context& mContext;
             bool mOptional;
             bool mEmpty;
 
@@ -38,14 +38,14 @@ namespace Compiler
             ErrorHandler& getErrorHandler();
             ///< Return error handler
 
-            Context& getContext();
+            const Context& getContext() const;
             ///< Return context
 
             static std::string toLower (const std::string& name);
 
         public:
 
-            Parser (ErrorHandler& errorHandler, Context& context);
+            Parser (ErrorHandler& errorHandler, const Context& context);
             ///< constructor
 
             virtual ~Parser();
@@ -81,6 +81,13 @@ namespace Compiler
             /// \return fetch another token?
             ///
             /// - Default-implementation: Report an error.
+
+            virtual bool parseComment (const std::string& comment, const TokenLoc& loc,
+                Scanner& scanner);
+            ///< Handle comment token.
+            /// \return fetch another token?
+            ///
+            /// - Default-implementation: ignored (and return true).
 
             virtual void parseEOF (Scanner& scanner);
             ///< Handle EOF token.

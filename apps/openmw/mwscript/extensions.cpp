@@ -13,23 +13,15 @@
 #include "containerextensions.hpp"
 #include "aiextensions.hpp"
 #include "controlextensions.hpp"
+#include "dialogueextensions.hpp"
+#include "animationextensions.hpp"
+#include "transformationextensions.hpp"
+#include "consoleextensions.hpp"
+#include "userextensions.hpp"
 
 namespace MWScript
 {
-    void registerExtensions (Compiler::Extensions& extensions)
-    {
-        Cell::registerExtensions (extensions);
-        Misc::registerExtensions (extensions);
-        Gui::registerExtensions (extensions);
-        Sound::registerExtensions (extensions);
-        Sky::registerExtensions (extensions);
-        Stats::registerExtensions (extensions);
-        Container::registerExtensions (extensions);
-        Ai::registerExtensions (extensions);
-        Control::registerExtensions (extensions);
-    }
-
-    void installOpcodes (Interpreter::Interpreter& interpreter)
+    void installOpcodes (Interpreter::Interpreter& interpreter, bool consoleOnly)
     {
         Interpreter::installOpcodes (interpreter);
         Cell::installOpcodes (interpreter);
@@ -41,5 +33,14 @@ namespace MWScript
         Container::installOpcodes (interpreter);
         Ai::installOpcodes (interpreter);
         Control::installOpcodes (interpreter);
+        Dialogue::installOpcodes (interpreter);
+        Animation::installOpcodes (interpreter);
+        Transformation::installOpcodes (interpreter);
+
+        if (consoleOnly)
+        {
+            Console::installOpcodes (interpreter);
+            User::installOpcodes (interpreter);
+        }
     }
 }

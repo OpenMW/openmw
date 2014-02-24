@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Widget" layer="Popup" position="0 0 300 300" name="_Main">
+
+        <!-- Dynamically constructed tooltip goes here -->
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="DynamicToolTipBox">
+        </Widget>
+
+        <!-- Text tooltip, one line -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="TextToolTipOneLine">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="AutoSizedTextBox" skin="SandText" position="8 8 284 284" align="Left Top" name="TextOneLine">
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <!-- Text tooltip, multiline -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="TextToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 8 284 284" align="Left Top" name="Text">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <!-- Text with centered caption tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 56" align="Stretch" name="TextWithCenteredCaptionToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="CenteredCaption">
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 330 18" align="Left Top" name="CenteredCaptionText">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <!-- Class tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 78" align="Stretch" name="ClassToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="ClassName">
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 320 18" align="Left Top" name="ClassDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 52 284 18" align="Left Bottom" name="ClassSpecialisation">
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+        </Widget>
+
+        <!-- Health tooltip -->
+        <Widget type="HBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="HealthToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="VBox">
+                <UserString key="VStretch" value="true"/>
+                <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="HealthImage"/>
+                <Widget type="Widget">
+                    <UserString key="VStretch" value="true"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="44 8 248 284" align="Left Top" name="HealthDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <!-- Attribute tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="AttributeToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="HBox">
+                <Property key="Spacing" value="4"/>
+                <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="AttributeImage"/>
+
+                <Widget type="AutoSizedEditBox" skin="NormalText" position="44 8 252 32" align="Left Top" name="AttributeName">
+                    <Property key="TextAlign" value="Left VCenter"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 44 284 248" align="Left Top" name="AttributeDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <!-- Skill tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 98" align="Stretch" name="SkillToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="HBox">
+                <UserString key="HStretch" value="true"/>
+                <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="SkillImage"/>
+
+                <Widget type="VBox">
+                    <Widget type="AutoSizedTextBox" skin="NormalText" position="44 8 252 16" align="Left Top" name="SkillName">
+                        <Property key="TextAlign" value="Left"/>
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="44 24 252 16" align="Left Top" name="SkillAttribute">
+                        <Property key="TextAlign" value="Left"/>
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 44 320 0" align="Left Top" name="SkillDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 48 284 18" align="Left Bottom">
+                <Property key="Caption" value="#{sSkillProgress}"/>
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="ProgressBar" skin="MW_Progress_Red" position="50 70 200 20" align="HCenter Bottom" name="SkillProgress">
+                <Widget type="TextBox" skin="ProgressText" position="0 0 200 20" align="Stretch" name="SkillProgressText">
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+            </Widget>
+        </Widget>
+
+        <!-- Skill tooltip (without progress bar) -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 52" align="Stretch" name="SkillNoProgressToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="HBox">
+                <UserString key="HStretch" value="true"/>
+
+                <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="SkillNoProgressImage"/>
+
+                <Widget type="VBox">
+                    <Widget type="AutoSizedEditBox" skin="NormalText" position="44 8 252 16" align="Left Top" name="SkillNoProgressName">
+                        <Property key="TextAlign" value="Left"/>
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="44 24 252 16" align="Left Top" name="SkillNoProgressAttribute">
+                        <Property key="TextAlign" value="Left"/>
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 44 320 0" align="Left Top" name="SkillNoProgressDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <!-- Level tooltip -->
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 58" align="Left Top" name="LevelToolTip">
+            <Widget type="TextBox" skin="NormalText" position="8 8 284 18" align="Left Top HStretch">
+                <Property key="Caption" value="#{sLevelProgress}"/>
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="ProgressBar" skin="MW_Progress_Red" position="50 30 200 20" align="HCenter Bottom" name="LevelProgress">
+                <Widget type="TextBox" skin="ProgressText" position="0 0 200 20" align="Stretch" name="LevelProgressText">
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+            </Widget>
+        </Widget>
+
+        <!-- Birthsign tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="BirthSignToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <!-- Birthsign image -->
+            <Widget type="Widget" skin="MW_Box" position="18 13 263 137" align="Top HCenter">
+                <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthSignImage" align="Left Top"/>
+            </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 154 284 138" align="Top" name="BirthSignText">
+                <Property key="TextAlign" value="Top HCenter"/>
+            </Widget>
+        </Widget>
+
+        <!-- Magic effect tooltip -->
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 52" align="Stretch" name="MagicEffectToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="HBox">
+                <UserString key="HStretch" value="true"/>
+
+                <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="MagicEffectImage"/>
+
+                <Widget type="VBox">
+                    <Widget type="AutoSizedTextBox" skin="NormalText" position="44 8 252 16" align="Left Top" name="MagicEffectName">
+                        <Property key="TextAlign" value="Left"/>
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+
+
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="44 24 252 16" align="Left Top" name="MagicEffectSchool">
+                        <Property key="TextAlign" value="Left"/>
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+                </Widget>
+
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="8 44 284 0" align="Left Top" name="MagicEffectDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+</MyGUI>
+

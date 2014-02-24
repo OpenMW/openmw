@@ -1,77 +1,49 @@
-#ifndef _ESM_CELL_H
-#define _ESM_CELL_H
+#ifndef OPENMW_ESM_CELL_H
+#define OPENMW_ESM_CELL_H
 
-#include "esm_reader.hpp"
+#include <string>
+#include <vector>
+#include <list>
+
+#include "esmcommon.hpp"
 #include "defs.hpp"
+#include "cellref.hpp"
 
-namespace ESM {
+namespace MWWorld
+{
+    class ESMStore;
+}
 
-/* Cell reference. This represents ONE object (of many) inside the
-   cell. The cell references are not loaded as part of the normal
-   loading process, but are rather loaded later on demand when we are
-   setting up a specific cell.
- */
-class CellRef
+namespace ESM
+{
+class ESMReader;
+class ESMWriter;
+    class CellId;
+
+/* Moved cell reference tracking object. This mainly stores the target cell
+        of the reference, so we can easily know where it has been moved when another
+        plugin tries to move it independently.
+    Unfortunately, we need to implement this here.
+    */
+class MovedCellRef
 {
 public:
-  int refnum;           // Reference number
-  std::string refID;    // ID of object being referenced
+    CellRef::RefNum mRefNum;
 
-  float scale;          // Scale applied to mesh
+    // Target cell (if exterior)
+    int mTarget[2];
 
-  // The NPC that owns this object (and will get angry if you steal
-  // it)
-  std::string owner;
-
-  // I have no idea, looks like a link to a global variable?
-  std::string glob;
-
-  // ID of creature trapped in this soul gem (?)
-  std::string soul;
-
-  // ?? CNAM has a faction name, might be for objects/beds etc
-  // belonging to a faction.
-  std::string faction;
-
-  // INDX might be PC faction rank required to use the item? Sometimes
-  // is -1, which I assume means "any rank".
-  int factIndex;
-
-  // Depends on context - possibly weapon health, number of uses left
-  // or weapon magic charge?
-  float charge;
-
-  // I have no idea, these are present some times, often along with
-  // owner (ANAM) and sometimes otherwise. They are often (but not
-  // always) 1. INTV is big for lights (possibly a float?), might have
-  // something to do with remaining light "charge".
-  int intv, nam9;
-
-  // For doors - true if this door teleports to somewhere else, false
-  // if it should open through animation.
-  bool teleport;
-
-  // Teleport location for the door, if this is a teleporting door.
-  Position doorDest;
-
-  // Destination cell for doors (optional)
-  std::string destCell;
-
-  // Lock level for doors and containers
-  int lockLevel;
-  std::string key, trap; // Key and trap ID names, if any
-
-  // No idea - occurs ONCE in Morrowind.esm, for an activator
-  char unam;
-
-  // Occurs in Tribunal.esm, eg. in the cell "Mournhold, Plaza
-  // Brindisi Dorom", where it has the value 100. Also only for
-  // activators.
-  int fltv;
-
-  // Position and rotation of this object within the cell
-  Position pos;
+    // TODO: Support moving references between exterior and interior cells!
+    //  This may happen in saves, when an NPC follows the player. Tribunal
+    //  introduces a henchman (which no one uses), so we may need this as well.
 };
+
+/// Overloaded compare operator used to search inside a list of cell refs.
+bool operator==(const MovedCellRef& ref, const CellRef::RefNum& refNum);
+bool operator==(const CellRef& ref, const CellRef::RefNum& refNum);
+
+typedef std::list<MovedCellRef> MovedCellRefTracker;
+typedef std::list<CellRef> CellRefTracker;
 
 /* Cells hold data about objects, creatures, statics (rocks, walls,
    buildings) and landscape (for exterior cells). Cells frequently
@@ -83,6 +55,8 @@ public:
  */
 struct Cell
 {
+    static unsigned int sRecordId;
+
   enum Flags
     {
       Interior  = 0x01, // Interior cell
@@ -94,65 +68,68 @@ struct Cell
 
   struct DATAstruct
   {
-    int flags;
-    int gridX, gridY;
+    int mFlags;
+    int mX, mY;
   };
 
   struct AMBIstruct
   {
-    Color ambient, sunlight, fog;
-    float fogDensity;
+    Color mAmbient, mSunlight, mFog;
+    float mFogDensity;
   };
+
+  Cell() : mWater(0), mHasWaterLevelRecord(false) {}
+
+  /// Merge \a modified into \a original
+  static void merge (Cell* original, Cell* modified);
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
-  std::string name,
+  std::string mName;
 
   // Optional region name for exterior and quasi-exterior cells.
-    region;
+  std::string mRegion;
 
-  ESM_Context context; // File position
-  DATAstruct data;
-  AMBIstruct ambi;
-  int water; // Water level
-  int mapColor;
+  std::vector<ESM_Context> mContextList; // File position; multiple positions for multiple plugin support
+  DATAstruct mData;
+  AMBIstruct mAmbi;
+  float mWater; // Water level
+  bool mHasWaterLevelRecord;
+  bool mWaterInt;
+  int mMapColor;
+  int mNAM0;
 
-  void load(ESMReader &esm)
+  // References "leased" from another cell (i.e. a different cell
+  //  introduced this ref, and it has been moved here by a plugin)
+  CellRefTracker mLeasedRefs;
+  MovedCellRefTracker mMovedRefs;
+
+  void preLoad(ESMReader &esm);
+  void postLoad(ESMReader &esm);
+
+  // This method is left in for compatibility with esmtool. Parsing moved references currently requires
+  //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
+  void load(ESMReader &esm, bool saveContext = true);
+  void save(ESMWriter &esm) const;
+
+  bool isExterior() const
   {
-    // Ignore this for now, it might mean we should delete the entire
-    // cell?
-    if(esm.isNextSub("DELE")) esm.skipHSub();
+      return !(mData.mFlags & Interior);
+  }
 
-    esm.getHNT(data, "DATA", 12);
+  int getGridX() const
+  {
+      return mData.mX;
+  }
 
-    // Water level
-    water = 0;
+  int getGridY() const
+  {
+      return mData.mY;
+  }
 
-    if(data.flags & Interior)
-      {
-        // Interior cells
-
-        if(esm.isNextSub("INTV") || esm.isNextSub("WHGT"))
-          esm.getHT(water);
-
-        // Quasi-exterior cells have a region (which determines the
-        // weather), pure interior cells have ambient lighting
-        // instead.
-        if(data.flags & QuasiEx)
-          region = esm.getHNOString("RGNN");
-        else
-          esm.getHNT(ambi, "AMBI", 16);
-      }
-    else
-      {
-        // Exterior cells
-        region = esm.getHNOString("RGNN");
-        esm.getHNOT(mapColor, "NAM5");
-      }
-
-    // Save position of the cell references and move on
-    context = esm.getContext();
-    esm.skipRecord();
+  bool hasWater() const
+  {
+      return (mData.mFlags&HasWater);
   }
 
   // Restore the given reader to the stored position. Will try to open
@@ -160,8 +137,10 @@ struct Cell
   // somewhere other than the file system, you need to pre-open the
   // ESMReader, and the filename must match the stored filename
   // exactly.
-  void restore(ESMReader &esm) const
-  { esm.restoreContext(context); }
+  void restore(ESMReader &esm, int iCtx) const;
+
+  std::string getDescription() const;
+  ///< Return a short string describing the cell (mostly used for debugging/logging purpose)
 
   /* Get the next reference in this cell, if any. Returns false when
      there are no more references in the cell.
@@ -169,66 +148,17 @@ struct Cell
      All fields of the CellRef struct are overwritten. You can safely
      reuse one memory location without blanking it between calls.
   */
-  static bool getNextRef(ESMReader &esm, CellRef &ref)
-  {
-    if(!esm.hasMoreSubs()) return false;
+  static bool getNextRef(ESMReader &esm, CellRef &ref, bool& deleted);
 
-    // Number of references in the cell? Maximum once in each cell,
-    // but not always at the beginning, and not always right. In other
-    // words, completely useless.
-    {
-      int i;
-      esm.getHNOT(i, "NAM0");
-    }
+  /* This fetches an MVRF record, which is used to track moved references.
+   * Since they are comparably rare, we use a separate method for this.
+   */
+  static bool getNextMVRF(ESMReader &esm, MovedCellRef &mref);
 
-    esm.getHNT(ref.refnum, "FRMR");
-    ref.refID = esm.getHNString("NAME");
+    void blank();
+    ///< Set record to default state (does not touch the ID/index).
 
-    // getHNOT will not change the existing value if the subrecord is
-    // missing
-    ref.scale = 1.0;
-    esm.getHNOT(ref.scale, "XSCL");
-
-    ref.owner = esm.getHNOString("ANAM");
-    ref.glob = esm.getHNOString("BNAM");
-    ref.soul = esm.getHNOString("XSOL");
-
-    ref.faction = esm.getHNOString("CNAM");
-    ref.factIndex = -1;
-    esm.getHNOT(ref.factIndex, "INDX");
-
-    ref.charge = -1.0;
-    esm.getHNOT(ref.charge, "XCHG");
-
-    ref.intv = 0;
-    ref.nam9 = 0;
-    esm.getHNOT(ref.intv, "INTV");
-    esm.getHNOT(ref.nam9, "NAM9");
-
-    // Present for doors that teleport you to another cell.
-    if(esm.isNextSub("DODT"))
-      {
-        ref.teleport = true;
-        esm.getHT(ref.doorDest);
-        ref.destCell = esm.getHNOString("DNAM");
-      }
-    else ref.teleport = false;
-
-    // Integer, despite the name suggesting otherwise
-    ref.lockLevel = 0;
-    esm.getHNOT(ref.lockLevel, "FLTV");
-    ref.key = esm.getHNOString("KNAM");
-    ref.trap = esm.getHNOString("TNAM");
-
-    ref.unam = 0;
-    ref.fltv = 0;
-    esm.getHNOT(ref.unam, "UNAM");
-    esm.getHNOT(ref.fltv, "FLTV");
-
-    esm.getHNT(ref.pos, "DATA", 24);
-
-    return true;
-  }
+    CellId getCellId() const;
 };
 }
 #endif

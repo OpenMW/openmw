@@ -11,6 +11,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace Bsa;
 
 BSAFile bsa;
 

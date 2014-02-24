@@ -1,22 +1,89 @@
 
 #include "statsextensions.hpp"
 
+#include <cmath>
+
+#include <components/esm/loadnpc.hpp>
+
+#include "../mwworld/esmstore.hpp"
+
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "interpretercontext.hpp"
+#include "ref.hpp"
+
+namespace
+{
+    std::string getDialogueActorFaction()
+    {
+        MWWorld::Ptr actor = MWBase::Environment::get().getDialogueManager()->getActor();
+
+        const MWMechanics::NpcStats &stats = MWWorld::Class::get (actor).getNpcStats (actor);
+
+        if (stats.getFactionRanks().empty())
+            throw std::runtime_error (
+                "failed to determine dialogue actors faction (because actor is factionless)");
+
+        return stats.getFactionRanks().begin()->first;
+    }
+}
 
 namespace MWScript
 {
     namespace Stats
     {
+        template<class R>
+        class OpGetLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value =
+                        MWWorld::Class::get (ptr)
+                            .getCreatureStats (ptr)
+                            .getLevel();
+
+                    runtime.push (value);
+                }
+        };
+
+        template<class R>
+        class OpSetLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr)
+                        .getCreatureStats (ptr)
+                        .setLevel(value);
+                }
+        };
+
+        template<class R>
         class OpGetAttribute : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -27,45 +94,19 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
+                        MWWorld::Class::get (ptr)
+                            .getCreatureStats (ptr)
+                            .getAttribute(mIndex)
+                            .getModified();
 
                     runtime.push (value);
                 }
         };
 
-        class OpGetAttributeExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpGetAttributeExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
-
-                    runtime.push (value);
-                }
-        };
-
+        template<class R>
         class OpSetAttribute : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -76,45 +117,18 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Ptr ptr = context.getReference();
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0);
+                    MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
+                    attribute.setBase (value - (attribute.getModified() - attribute.getBase()));
+                    ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
 
-        class OpSetAttributeExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpSetAttributeExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0);
-                }
-        };
-
+        template<class R>
         class OpModAttribute : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -125,52 +139,21 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWMechanics::AttributeValue attribute = MWWorld::Class::get(ptr)
+                        .getCreatureStats(ptr)
+                        .getAttribute(mIndex);
 
-                    value += MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0, 100);
+                    attribute.setBase (std::min(100, attribute.getBase() + value));
+                    ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
         };
 
-        class OpModAttributeExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpModAttributeExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    value +=
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0, 100);
-                }
-        };
-
+        template<class R>
         class OpGetDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -181,65 +164,25 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
+                    Interpreter::Type_Float value;
 
                     if (mIndex==0 && MWWorld::Class::get (ptr).hasItemHealth (ptr))
                     {
                         // health is a special case
-                        Interpreter::Type_Integer value =
-                            MWWorld::Class::get (ptr).getItemMaxHealth (ptr);
-                        runtime.push (value);
-
-                        return;
+                        value = MWWorld::Class::get (ptr).getItemMaxHealth (ptr);
+                    } else {
+                        value =
+                            MWWorld::Class::get(ptr)
+                                .getCreatureStats(ptr)
+                                .getDynamic(mIndex)
+                                .getCurrent();
                     }
-
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        getCurrent();
-
                     runtime.push (value);
                 }
         };
 
-        class OpGetDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpGetDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    if (mIndex==0 && MWWorld::Class::get (ptr).hasItemHealth (ptr))
-                    {
-                        // health is a special case
-                        Interpreter::Type_Integer value =
-                            MWWorld::Class::get (ptr).getItemMaxHealth (ptr);
-                        runtime.push (value);
-
-                        return;
-                    }
-
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        getCurrent();
-
-                    runtime.push (value);
-                }
-        };
-
+        template<class R>
         class OpSetDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -250,45 +193,22 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        setModified (value, 0);
+                    stat.setModified (value, 0);
+                    stat.setCurrent(value);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
-        class OpSetDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpSetDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        setModified (value, 0);
-                }
-        };
-
+        template<class R>
         class OpModDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -299,59 +219,27 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
+                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.mDynamic[mIndex].setModified (
-                        diff + stats.mDynamic[mIndex].getModified(), 0);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
 
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
+                    stat.setModified (diff + stat.getModified(), 0);
+
+                    stat.setCurrent (diff + current);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
-        class OpModDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpModDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWMechanics::CreatureStats& stats =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr);
-
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
-
-                    stats.mDynamic[mIndex].setModified (
-                        diff + stats.mDynamic[mIndex].getModified(), 0);
-
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
-                }
-        };
-
-
+        template<class R>
         class OpModCurrentDynamic : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -362,52 +250,25 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getReference();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
+                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
+
+                    stat.setCurrent (diff + current);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
-        class OpModCurrentDynamicExplicit : public Interpreter::Opcode0
-        {
-                int mIndex;
-
-            public:
-
-                OpModCurrentDynamicExplicit (int index) : mIndex (index) {}
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWMechanics::CreatureStats& stats =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr);
-
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
-
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
-                }
-        };
-
+        template<class R>
         class OpGetDynamicGetRatio : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -418,169 +279,966 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
                     Interpreter::Type_Float value = 0;
 
-                    Interpreter::Type_Float max = stats.mDynamic[mIndex].getModified();
+                    Interpreter::Type_Float max = stats.getDynamic(mIndex).getModified();
 
                     if (max>0)
-                        value = stats.mDynamic[mIndex].getCurrent() / max;
+                        value = stats.getDynamic(mIndex).getCurrent() / max;
 
                     runtime.push (value);
                 }
         };
 
-        class OpGetDynamicGetRatioExplicit : public Interpreter::Opcode0
+        template<class R>
+        class OpGetSkill : public Interpreter::Opcode0
         {
                 int mIndex;
 
             public:
 
-                OpGetDynamicGetRatioExplicit (int index) : mIndex (index) {}
+                OpGetSkill (int index) : mIndex (index) {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
-
-                    MWMechanics::CreatureStats& stats =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr);
-
-                    Interpreter::Type_Float value = 0;
-
-                    Interpreter::Type_Float max = stats.mDynamic[mIndex].getModified();
-
-                    if (max>0)
-                        value = stats.mDynamic[mIndex].getCurrent() / max;
+                    Interpreter::Type_Integer value = ptr.getClass().getSkill(ptr, mIndex);
 
                     runtime.push (value);
                 }
         };
 
-        const int numberOfAttributes = 8;
-
-        const int opcodeGetAttribute = 0x2000027;
-        const int opcodeGetAttributeExplicit = 0x200002f;
-        const int opcodeSetAttribute = 0x2000037;
-        const int opcodeSetAttributeExplicit = 0x200003f;
-        const int opcodeModAttribute = 0x2000047;
-        const int opcodeModAttributeExplicit = 0x200004f;
-
-        const int numberOfDynamics = 3;
-
-        const int opcodeGetDynamic = 0x2000057;
-        const int opcodeGetDynamicExplicit = 0x200005a;
-        const int opcodeSetDynamic = 0x200005d;
-        const int opcodeSetDynamicExplicit = 0x2000060;
-        const int opcodeModDynamic = 0x2000063;
-        const int opcodeModDynamicExplicit = 0x2000066;
-        const int opcodeModCurrentDynamic = 0x2000069;
-        const int opcodeModCurrentDynamicExplicit = 0x200006c;
-        const int opcodeGetDynamicGetRatio = 0x200006f;
-        const int opcodeGetDynamicGetRatioExplicit = 0x2000072;
-
-        void registerExtensions (Compiler::Extensions& extensions)
+        template<class R>
+        class OpSetSkill : public Interpreter::Opcode0
         {
-            static const char *attributes[numberOfAttributes] =
-            {
-                "strength", "intelligence", "willpower", "agility", "speed", "endurance",
-                "personality", "luck"
-            };
+                int mIndex;
 
-            static const char *dynamics[numberOfDynamics] =
-            {
-                "health", "magicka", "fatigue"
-            };
+            public:
 
-            std::string get ("get");
-            std::string set ("set");
-            std::string mod ("mod");
-            std::string modCurrent ("modcurrent");
-            std::string getRatio ("getratio");
+                OpSetSkill (int index) : mIndex (index) {}
 
-            for (int i=0; i<numberOfAttributes; ++i)
-            {
-                extensions.registerFunction (get + attributes[i], 'l', "",
-                    opcodeGetAttribute+i, opcodeGetAttributeExplicit+i);
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
 
-                extensions.registerInstruction (set + attributes[i], "l",
-                    opcodeSetAttribute+i, opcodeSetAttributeExplicit+i);
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
 
-                extensions.registerInstruction (mod + attributes[i], "l",
-                    opcodeModAttribute+i, opcodeModAttributeExplicit+i);
+                    MWMechanics::NpcStats& stats = MWWorld::Class::get (ptr).getNpcStats (ptr);
+
+                    MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+
+                    assert (ref);
+
+                    const ESM::Class& class_ =
+                        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (ref->mBase->mClass);
+
+                    float level = stats.getSkill(mIndex).getBase();
+                    float progress = stats.getSkill(mIndex).getProgress();
+
+                    int newLevel = value - (stats.getSkill(mIndex).getModified() - stats.getSkill(mIndex).getBase());
+
+                    if (newLevel<0)
+                        newLevel = 0;
+
+                    progress = (progress / stats.getSkillGain (mIndex, class_, -1, level))
+                        * stats.getSkillGain (mIndex, class_, -1, newLevel);
+
+                    if (progress>=1)
+                        progress = 0.999999999;
+
+                    stats.getSkill (mIndex).setBase (newLevel);
+                    stats.getSkill (mIndex).setProgress(progress);
+                }
+        };
+
+        template<class R>
+        class OpModSkill : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpModSkill (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats(ptr);
+
+                    stats.getSkill(mIndex).
+                        setBase (std::min(100, stats.getSkill(mIndex).getBase() + value));
+                }
+        };
+
+        class OpGetPCCrimeLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::Ptr player = world->getPlayerPtr();
+                    runtime.push (static_cast <Interpreter::Type_Float> (MWWorld::Class::get (player).getNpcStats (player).getBounty()));
+                }
+        };
+
+        class OpSetPCCrimeLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::Ptr player = world->getPlayerPtr();
+
+                    MWWorld::Class::get (player).getNpcStats (player).setBounty(runtime[0].mFloat);
+                    runtime.pop();
+                }
+        };
+
+        class OpModPCCrimeLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::Ptr player = world->getPlayerPtr();
+
+                    MWWorld::Class::get (player).getNpcStats (player).setBounty(runtime[0].mFloat + MWWorld::Class::get (player).getNpcStats (player).getBounty());
+                    runtime.pop();
+                }
+        };
+
+        template<class R>
+        class OpAddSpell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    // make sure a spell with this ID actually exists.
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().add (id);
+                }
+        };
+
+        template<class R>
+        class OpRemoveSpell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().remove (id);
+
+                    MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                        id == wm->getSelectedSpell())
+                    {
+                        wm->unsetSelectedSpell();
+                    }
+                }
+        };
+
+        template<class R>
+        class OpRemoveSpellEffects : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string spellid = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
+                }
+        };
+
+        template<class R>
+        class OpRemoveEffects : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer effectId = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getActiveSpells().purgeEffect(effectId);
+                }
+        };
+
+        template<class R>
+        class OpGetSpell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer value = 0;
+
+                    for (MWMechanics::Spells::TIterator iter (
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().begin());
+                        iter!=MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().end(); ++iter)
+                        if (iter->first==id)
+                        {
+                            value = 1;
+                            break;
+                        }
+
+                    runtime.push (value);
+                }
+        };
+
+        class OpPCJoinFaction : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+
+                    if(arg0==0)
+                    {
+                        factionID = getDialogueActorFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    Misc::StringUtils::toLower(factionID);
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) == MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = 0;
+                        }
+                    }
+                }
+        };
+
+        class OpPCRaiseRank : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+
+                    if(arg0==0)
+                    {
+                        factionID = getDialogueActorFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    Misc::StringUtils::toLower(factionID);
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) == MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = 0;
+                        }
+                        else
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] +1;
+                        }
+                    }
+                }
+        };
+
+        class OpPCLowerRank : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+
+                    if(arg0==0)
+                    {
+                        factionID = getDialogueActorFaction();
+                    }
+                    else
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    Misc::StringUtils::toLower(factionID);
+                    if(factionID != "")
+                    {
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) != MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
+                        {
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] -1;
+                        }
+                    }
+                }
+        };
+
+        template<class R>
+        class OpGetPCRank : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string factionID = "";
+                    if(arg0 >0)
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
+                        {
+                            factionID = "";
+                        }
+                        else
+                        {
+                            factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
+                        }
+                    }
+                    Misc::StringUtils::toLower(factionID);
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    if(factionID!="")
+                    {
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) != MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
+                        {
+                            runtime.push(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID]);
+                        }
+                        else
+                        {
+                            runtime.push(-1);
+                        }
+                    }
+                    else
+                    {
+                        runtime.push(-1);
+                    }
+                }
+        };
+
+        template<class R>
+        class OpModDisposition : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setBaseDisposition
+                        (MWWorld::Class::get (ptr).getNpcStats (ptr).getBaseDisposition() + value);
+                }
+        };
+
+        template<class R>
+        class OpSetDisposition : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setBaseDisposition (value);
+                }
+        };
+
+        template<class R>
+        class OpGetDisposition : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
+                }
+        };
+
+        class OpGetDeadCount : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime[0].mInteger = MWBase::Environment::get().getMechanicsManager()->countDeaths (id);
+                }
+        };
+
+        template<class R>
+        class OpGetPCFacRep : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionId;
+
+                    if (arg0==1)
+                    {
+                        factionId = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+
+                        if (!MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().empty())
+                            factionId = MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().begin()->first;
+                    }
+
+                    if (factionId.empty())
+                        throw std::runtime_error ("failed to determine faction");
+
+                    Misc::StringUtils::toLower (factionId);
+
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    runtime.push (
+                        MWWorld::Class::get (player).getNpcStats (player).getFactionReputation (factionId));
+                }
+        };
+
+        template<class R>
+        class OpSetPCFacRep : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    std::string factionId;
+
+                    if (arg0==1)
+                    {
+                        factionId = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+
+                        if (!MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().empty())
+                            factionId = MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().begin()->first;
+                    }
+
+                    if (factionId.empty())
+                        throw std::runtime_error ("failed to determine faction");
+
+                    Misc::StringUtils::toLower (factionId);
+
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId, value);
+                }
+        };
+
+        template<class R>
+        class OpModPCFacRep : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    std::string factionId;
+
+                    if (arg0==1)
+                    {
+                        factionId = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+
+                        if (!MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().empty())
+                            factionId = MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().begin()->first;
+                    }
+
+                    if (factionId.empty())
+                        throw std::runtime_error ("failed to determine faction");
+
+                    Misc::StringUtils::toLower (factionId);
+
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId,
+                        MWWorld::Class::get (player).getNpcStats (player).getFactionReputation (factionId)+
+                        value);
+                }
+        };
+
+        template<class R>
+        class OpGetCommonDisease : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (MWWorld::Class::get (ptr).getCreatureStats (ptr).hasCommonDisease());
+                }
+        };
+
+        template<class R>
+        class OpGetBlightDisease : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (MWWorld::Class::get (ptr).getCreatureStats (ptr).hasBlightDisease());
+                }
+        };
+
+        template<class R>
+        class OpGetRace : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string race = runtime.getStringLiteral(runtime[0].mInteger);
+                    Misc::StringUtils::toLower(race);
+                    runtime.pop();
+
+                    std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
+                    Misc::StringUtils::toLower(npcRace);
+
+                    runtime.push (npcRace == race);
             }
+        };
 
-            for (int i=0; i<numberOfDynamics; ++i)
-            {
-                extensions.registerFunction (get + dynamics[i], 'l', "",
-                    opcodeGetDynamic+i, opcodeGetDynamicExplicit+i);
+        class OpGetWerewolfKills : public Interpreter::Opcode0
+        {
+            public:
 
-                extensions.registerInstruction (set + dynamics[i], "l",
-                    opcodeSetDynamic+i, opcodeSetDynamicExplicit+i);
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-                extensions.registerInstruction (mod + dynamics[i], "l",
-                    opcodeModDynamic+i, opcodeModDynamicExplicit+i);
+                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).getWerewolfKills ());
+                }
+        };
 
-                extensions.registerInstruction (modCurrent + dynamics[i], "l",
-                    opcodeModCurrentDynamic+i, opcodeModCurrentDynamicExplicit+i);
+        template <class R>
+        class OpPcExpelled : public Interpreter::Opcode1
+        {
+            public:
 
-                extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
-                    opcodeGetDynamicGetRatio+i, opcodeGetDynamicGetRatioExplicit+i);
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
 
-            }
-        }
+                    std::string factionID = "";
+                    if(arg0 >0 )
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
+                        {
+                            factionID = "";
+                        }
+                        else
+                        {
+                            factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
+                        }
+                    }
+                    Misc::StringUtils::toLower(factionID);
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    if(factionID!="")
+                    {
+                        runtime.push(player.getClass().getNpcStats(player).getExpelled(factionID));
+                    }
+                    else
+                    {
+                        runtime.push(0);
+                    }
+                }
+        };
+
+        template <class R>
+        class OpPcExpell : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+                    if(arg0 >0 )
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+                        if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
+                        {
+                            factionID = "";
+                        }
+                        else
+                        {
+                            factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
+                        }
+                    }
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    if(factionID!="")
+                    {
+                        player.getClass().getNpcStats(player).expell(factionID);
+                    }
+                }
+        };
+
+        template <class R>
+        class OpPcClearExpelled : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionID = "";
+                    if(arg0 >0 )
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+                        if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
+                        {
+                            factionID = "";
+                        }
+                        else
+                        {
+                            factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
+                        }
+                    }
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    if(factionID!="")
+                        player.getClass().getNpcStats(player).clearExpelled(factionID);
+                }
+        };
+
+        template <class R>
+        class OpRaiseRank : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string factionID = "";
+                    if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
+                        return;
+                    else
+                    {
+                        factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
+                    }
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+                    // no-op when executed on the player
+                    if (ptr == player)
+                        return;
+
+                    std::map<std::string, int>& ranks = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks ();
+                    ranks[factionID] = ranks[factionID]+1;
+                }
+        };
+
+        template <class R>
+        class OpLowerRank : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string factionID = "";
+                    if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
+                        return;
+                    else
+                    {
+                        factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
+                    }
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+                    // no-op when executed on the player
+                    if (ptr == player)
+                        return;
+
+                    std::map<std::string, int>& ranks = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks ();
+                    ranks[factionID] = ranks[factionID]-1;
+                }
+        };
+
+        template <class R>
+        class OpOnDeath : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value =
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).hasDied();
+
+                    if (value)
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).clearHasDied();
+
+                    runtime.push (value);
+                }
+        };
+
+        template <class R>
+        class OpIsWerewolf : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push(MWWorld::Class::get(ptr).getNpcStats(ptr).isWerewolf());
+                }
+        };
+
+        template <class R, bool set>
+        class OpSetWerewolf : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->setWerewolf(ptr, set);
+                }
+        };
+
+        template <class R>
+        class OpSetWerewolfAcrobatics : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->applyWerewolfAcrobatics(ptr);
+                }
+        };
+
+        template <class R>
+        class OpResurrect : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    ptr.getClass().getCreatureStats(ptr).resurrect();
+                }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            for (int i=0; i<numberOfAttributes; ++i)
+            for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
             {
-                interpreter.installSegment5 (opcodeGetAttribute+i, new OpGetAttribute (i));
-                interpreter.installSegment5 (opcodeGetAttributeExplicit+i,
-                    new OpGetAttributeExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetAttribute+i, new OpGetAttribute<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetAttributeExplicit+i,
+                    new OpGetAttribute<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetAttribute+i, new OpSetAttribute (i));
-                interpreter.installSegment5 (opcodeSetAttributeExplicit+i,
-                    new OpSetAttributeExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetAttribute+i, new OpSetAttribute<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetAttributeExplicit+i,
+                    new OpSetAttribute<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModAttribute+i, new OpModAttribute (i));
-                interpreter.installSegment5 (opcodeModAttributeExplicit+i,
-                    new OpModAttributeExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModAttribute+i, new OpModAttribute<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModAttributeExplicit+i,
+                    new OpModAttribute<ExplicitRef> (i));
             }
 
-            for (int i=0; i<numberOfDynamics; ++i)
+            for (int i=0; i<Compiler::Stats::numberOfDynamics; ++i)
             {
-                interpreter.installSegment5 (opcodeGetDynamic+i, new OpGetDynamic (i));
-                interpreter.installSegment5 (opcodeGetDynamicExplicit+i,
-                    new OpGetDynamicExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamic+i, new OpGetDynamic<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicExplicit+i,
+                    new OpGetDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetDynamic+i, new OpSetDynamic (i));
-                interpreter.installSegment5 (opcodeSetDynamicExplicit+i,
-                    new OpSetDynamicExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetDynamic+i, new OpSetDynamic<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetDynamicExplicit+i,
+                    new OpSetDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModDynamic+i, new OpModDynamic (i));
-                interpreter.installSegment5 (opcodeModDynamicExplicit+i,
-                    new OpModDynamicExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModDynamic+i, new OpModDynamic<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModDynamicExplicit+i,
+                    new OpModDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModCurrentDynamic+i, new OpModCurrentDynamic (i));
-                interpreter.installSegment5 (opcodeModCurrentDynamicExplicit+i,
-                    new OpModCurrentDynamicExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModCurrentDynamic+i,
+                    new OpModCurrentDynamic<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModCurrentDynamicExplicit+i,
+                    new OpModCurrentDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeGetDynamicGetRatio+i,
-                    new OpGetDynamicGetRatio (i));
-                interpreter.installSegment5 (opcodeGetDynamicGetRatioExplicit+i,
-                    new OpGetDynamicGetRatioExplicit (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicGetRatio+i,
+                    new OpGetDynamicGetRatio<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicGetRatioExplicit+i,
+                    new OpGetDynamicGetRatio<ExplicitRef> (i));
             }
+
+            for (int i=0; i<Compiler::Stats::numberOfSkills; ++i)
+            {
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetSkill+i, new OpGetSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetSkillExplicit+i, new OpGetSkill<ExplicitRef> (i));
+
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetSkill+i, new OpSetSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetSkillExplicit+i, new OpSetSkill<ExplicitRef> (i));
+
+                interpreter.installSegment5 (Compiler::Stats::opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
+            }
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetPCCrimeLevel, new OpGetPCCrimeLevel);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetPCCrimeLevel, new OpSetPCCrimeLevel);
+            interpreter.installSegment5 (Compiler::Stats::opcodeModPCCrimeLevel, new OpModPCCrimeLevel);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeAddSpell, new OpAddSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeAddSpellExplicit, new OpAddSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellExplicit,
+                new OpRemoveSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffects, new OpRemoveSpellEffects<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellEffectsExplicit,
+                new OpRemoveSpellEffects<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeResurrect, new OpResurrect<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeResurrectExplicit,
+                new OpResurrect<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffects, new OpRemoveEffects<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveEffectsExplicit,
+                new OpRemoveEffects<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetSpell, new OpGetSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
+
+            interpreter.installSegment3(Compiler::Stats::opcodePCRaiseRank,new OpPCRaiseRank);
+            interpreter.installSegment3(Compiler::Stats::opcodePCLowerRank,new OpPCLowerRank);
+            interpreter.installSegment3(Compiler::Stats::opcodePCJoinFaction,new OpPCJoinFaction);
+            interpreter.installSegment3(Compiler::Stats::opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
+
+            interpreter.installSegment5(Compiler::Stats::opcodeModDisposition,new OpModDisposition<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeSetDisposition,new OpSetDisposition<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeSetDispositionExplicit,new OpSetDisposition<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeGetDisposition,new OpGetDisposition<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeGetDispositionExplicit,new OpGetDisposition<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetLevel, new OpGetLevel<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetLevelExplicit, new OpGetLevel<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetLevel, new OpSetLevel<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetDeadCount, new OpGetDeadCount);
+
+            interpreter.installSegment3 (Compiler::Stats::opcodeGetPCFacRep, new OpGetPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeGetPCFacRepExplicit, new OpGetPCFacRep<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeSetPCFacRep, new OpSetPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeSetPCFacRepExplicit, new OpSetPCFacRep<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeModPCFacRep, new OpModPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeModPCFacRepExplicit, new OpModPCFacRep<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetCommonDisease, new OpGetCommonDisease<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetCommonDiseaseExplicit, new OpGetCommonDisease<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetBlightDisease, new OpGetBlightDisease<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetBlightDiseaseExplicit, new OpGetBlightDisease<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetRace, new OpGetRace<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetRaceExplicit, new OpGetRace<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetWerewolfKills, new OpGetWerewolfKills);
+
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpelled, new OpPcExpelled<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpelledExplicit, new OpPcExpelled<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpell, new OpPcExpell<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpellExplicit, new OpPcExpell<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcClearExpelled, new OpPcClearExpelled<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcClearExpelledExplicit, new OpPcClearExpelled<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRaiseRank, new OpRaiseRank<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRaiseRankExplicit, new OpRaiseRank<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeLowerRank, new OpLowerRank<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeLowerRankExplicit, new OpLowerRank<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnDeath, new OpOnDeath<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeBecomeWerewolf, new OpSetWerewolf<ImplicitRef, true>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeBecomeWerewolfExplicit, new OpSetWerewolf<ExplicitRef, true>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolf, new OpSetWerewolf<ImplicitRef, false>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobatics, new OpSetWerewolfAcrobatics<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);           
         }
     }
 }

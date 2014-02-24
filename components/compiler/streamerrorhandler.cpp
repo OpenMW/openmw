@@ -35,4 +35,5 @@ namespace Compiler
             << "    " << message << std::endl;
     }
 
-    StreamErrorHandler::StreamErrorHandler (std::ostream& ErrorStream) : mStream (ErrorStream) {}}
+    StreamErrorHandler::StreamErrorHandler (std::ostream& ErrorStream) : mStream (ErrorStream) {}
+}

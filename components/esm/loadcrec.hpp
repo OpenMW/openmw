@@ -1,9 +1,15 @@
-#ifndef _ESM_CREC_H
-#define _ESM_CREC_H
+#ifndef OPENMW_ESM_CREC_H
+#define OPENMW_ESM_CREC_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+// TODO create implementation files and remove this one
+#include "esmreader.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /* These two are only used in save games. They are not decoded yet.
  */
@@ -11,18 +17,32 @@ namespace ESM {
 /// Changes a creature
 struct LoadCREC
 {
-  void load(ESMReader &esm)
+    static unsigned int sRecordId;
+
+    std::string mId;
+
+    void load(ESMReader &esm)
     {
       esm.skipRecord();
+    }
+
+    void save(ESMWriter &esm) const
+    {
     }
 };
 
 /// Changes an item list / container
 struct LoadCNTC
 {
-  void load(ESMReader &esm)
+    std::string mId;
+
+    void load(ESMReader &esm)
     {
       esm.skipRecord();
+    }
+
+    void save(ESMWriter &esm) const
+    {
     }
 };
 }

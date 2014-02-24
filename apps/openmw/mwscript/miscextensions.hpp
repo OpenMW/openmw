@@ -14,9 +14,7 @@ namespace Interpreter
 namespace MWScript
 {
     namespace Misc
-    {
-        void registerExtensions (Compiler::Extensions& extensions);
-        
+    {        
         void installOpcodes (Interpreter::Interpreter& interpreter);
     }
 }

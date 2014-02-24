@@ -1,9 +1,13 @@
-#ifndef _ESM_APPA_H
-#define _ESM_APPA_H
+#ifndef OPENMW_ESM_APPA_H
+#define OPENMW_ESM_APPA_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Alchemist apparatus
@@ -11,33 +15,32 @@ namespace ESM {
 
 struct Apparatus
 {
-  enum AppaType
+    static unsigned int sRecordId;
+
+    enum AppaType
     {
-      MortarPestle	= 0,
-      Albemic		= 1,
-      Calcinator	= 2,
-      Retort		= 3
+        MortarPestle = 0,
+        Albemic = 1,
+        Calcinator = 2,
+        Retort = 3
     };
 
-  struct AADTstruct
-  {
-    int type;
-    float quality;
-    float weight;
-    int value;
-  };
+    struct AADTstruct
+    {
+        int mType;
+        float mQuality;
+        float mWeight;
+        int mValue;
+    };
 
-  AADTstruct data;
-  std::string model, icon, script, name;
+    AADTstruct mData;
+    std::string mId, mModel, mIcon, mScript, mName;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNString("FNAM");
-    esm.getHNT(data, "AADT", 16);
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNString("ITEX");
-  }
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm) const;
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

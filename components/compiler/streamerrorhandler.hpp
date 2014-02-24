@@ -30,7 +30,7 @@ namespace Compiler
         // constructors
 
             StreamErrorHandler (std::ostream& ErrorStream);
-		    ///< constructor
+            ///< constructor
     };
 }
 

@@ -1,0 +1,32 @@
+/*!
+
+	\page configurations Configurations
+
+	A common task in shader development is to provide a different set of simpler shaders for all your materials. Some examples:
+	 - When rendering cubic or planar reflection maps in real-time, you will want to disable shadows.
+	 - For an in-game minimap render target, you don't want to have fog.
+
+	For this task, the library provides a \a Configuration concept.
+
+	A Configuration is a set of properties that can override global settings, as long as this Configuration is active.
+
+	Here's an example. Say you have a global setting with the name 'shadows' that controls if your materials receive shadows.
+
+	Now, lets create a configuration for our reflection render targets that disables shadows for all materials. Paste the following in a new file with the extension '.configuration':
+
+	\code
+	configuration reflection_targets
+	{
+		shadows false
+	}
+	\endcode
+
+	\note You may also create configurations using sh::Factory::createConfiguration.
+
+	The active Configuration is controlled by the active material scheme in Ogre. So, in order to use the configuration "reflection_targets" for your reflection renders, simply call
+	\code
+	viewport->setMaterialScheme ("reflection_targets");
+	\endcode
+	on the Ogre viewport of your reflection render!
+
+*/

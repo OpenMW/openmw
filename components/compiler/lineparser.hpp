@@ -20,11 +20,11 @@ namespace Compiler
             enum State
             {
                 BeginState,
-                ShortState, LongState, FloatState,
-                SetState, SetLocalVarState, SetGlobalVarState,
+                SetState, SetLocalVarState, SetGlobalVarState, SetPotentialMemberVarState,
+                SetMemberVarState, SetMemberVarState2,
                 MessageState, MessageCommaState, MessageButtonState, MessageButtonCommaState,
-                EndState,
-                PotentialExplicitState, ExplicitState
+                EndState, PotentialEndState /* may have a stray string argument */,
+                PotentialExplicitState, ExplicitState, MemberState
             };
 
             Locals& mLocals;
@@ -32,6 +32,8 @@ namespace Compiler
             std::vector<Interpreter::Type_Code>& mCode;
             State mState;
             std::string mName;
+            std::string mMemberName;
+            bool mReferenceMember;
             int mButtons;
             std::string mExplicit;
             char mType;
@@ -42,7 +44,7 @@ namespace Compiler
 
         public:
 
-            LineParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+            LineParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
                 Literals& literals, std::vector<Interpreter::Type_Code>& code,
                 bool allowExpression = false);
             ///< \param allowExpression Allow lines consisting of a naked expression

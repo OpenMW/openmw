@@ -1,0 +1,227 @@
+
+#include "scriptmanagerimp.hpp"
+
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <exception>
+
+#include <components/esm/loadscpt.hpp>
+
+#include <components/misc/stringops.hpp>
+
+#include <components/compiler/scanner.hpp>
+#include <components/compiler/context.hpp>
+#include <components/compiler/exception.hpp>
+#include <components/compiler/quickfileparser.hpp>
+
+#include "../mwworld/esmstore.hpp"
+
+#include "extensions.hpp"
+
+namespace MWScript
+{
+    ScriptManager::ScriptManager (const MWWorld::ESMStore& store, bool verbose,
+        Compiler::Context& compilerContext, int warningsMode)
+    : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
+      mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
+      mOpcodesInstalled (false), mGlobalScripts (store)
+    {
+        mErrorHandler.setWarningsMode (warningsMode);
+    }
+
+    bool ScriptManager::compile (const std::string& name)
+    {
+        mParser.reset();
+        mErrorHandler.reset();
+
+        bool Success = true;
+
+        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+        {
+            if (mVerbose)
+                std::cout << "compiling script: " << name << std::endl;
+
+            try
+            {
+                std::istringstream input (script->mScriptText);
+
+                Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
+
+                scanner.scan (mParser);
+
+                if (!mErrorHandler.isGood())
+                    Success = false;
+            }
+            catch (const Compiler::SourceException&)
+            {
+                // error has already been reported via error handler
+                Success = false;
+            }
+            catch (const std::exception& error)
+            {
+                std::cerr << "An exception has been thrown: " << error.what() << std::endl;
+                Success = false;
+            }
+
+            if (!Success && mVerbose)
+            {
+                std::cerr
+                    << "compiling failed: " << name << std::endl
+                    << script->mScriptText
+                    << std::endl << std::endl;
+            }
+
+            if (Success)
+            {
+                std::vector<Interpreter::Type_Code> code;
+                mParser.getCode (code);
+                mScripts.insert (std::make_pair (name, std::make_pair (code, mParser.getLocals())));
+
+                // TODO sanity check on generated locals
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
+    {
+        // compile script
+        ScriptCollection::iterator iter = mScripts.find (name);
+
+        if (iter==mScripts.end())
+        {
+            if (!compile (name))
+            {
+                // failed -> ignore script from now on.
+                std::vector<Interpreter::Type_Code> empty;
+                mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
+                return;
+            }
+
+            iter = mScripts.find (name);
+            assert (iter!=mScripts.end());
+        }
+
+        // execute script
+        if (!iter->second.first.empty())
+            try
+            {
+                if (!mOpcodesInstalled)
+                {
+                    installOpcodes (mInterpreter);
+                    mOpcodesInstalled = true;
+                }
+
+                mInterpreter.run (&iter->second.first[0], iter->second.first.size(), interpreterContext);
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "Execution of script " << name << " failed:" << std::endl;
+                std::cerr << e.what() << std::endl;
+
+                iter->second.first.clear(); // don't execute again.
+            }
+    }
+
+    std::pair<int, int> ScriptManager::compileAll()
+    {
+        int count = 0;
+        int success = 0;
+
+        const MWWorld::Store<ESM::Script>& scripts = mStore.get<ESM::Script>();
+        MWWorld::Store<ESM::Script>::iterator it = scripts.begin();
+
+        for (; it != scripts.end(); ++it, ++count)
+            if (compile (it->mId))
+                ++success;
+
+        return std::make_pair (count, success);
+    }
+
+    Compiler::Locals& ScriptManager::getLocals (const std::string& name)
+    {
+        std::string name2 = Misc::StringUtils::lowerCase (name);
+
+        {
+            ScriptCollection::iterator iter = mScripts.find (name2);
+
+            if (iter!=mScripts.end())
+                return iter->second.second;
+        }
+
+        {
+            std::map<std::string, Compiler::Locals>::iterator iter = mOtherLocals.find (name2);
+
+            if (iter!=mOtherLocals.end())
+                return iter->second;
+        }
+
+        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name2))
+        {
+            Compiler::Locals locals;
+
+            std::istringstream stream (script->mScriptText);
+            Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
+            Compiler::Scanner scanner (mErrorHandler, stream, mCompilerContext.getExtensions());
+            scanner.scan (parser);
+
+            std::map<std::string, Compiler::Locals>::iterator iter =
+                mOtherLocals.insert (std::make_pair (name2, locals)).first;
+
+            return iter->second;
+        }
+
+        throw std::logic_error ("script " + name + " does not exist");
+    }
+
+    GlobalScripts& ScriptManager::getGlobalScripts()
+    {
+        return mGlobalScripts;
+    }
+
+    int ScriptManager::getLocalIndex (const std::string& scriptId, const std::string& variable,
+        char type)
+    {
+        const ESM::Script *script = mStore.get<ESM::Script>().find (scriptId);
+
+        int offset = 0;
+        int size = 0;
+
+        switch (type)
+        {
+            case 's':
+
+                offset = 0;
+                size = script->mData.mNumShorts;
+                break;
+
+            case 'l':
+
+                offset = script->mData.mNumShorts;
+                size = script->mData.mNumLongs;
+                break;
+
+            case 'f':
+
+                offset = script->mData.mNumShorts+script->mData.mNumLongs;
+                size = script->mData.mNumFloats;
+                break;
+
+            default:
+
+                throw std::runtime_error ("invalid variable type");
+        }
+
+        std::string variable2 = Misc::StringUtils::lowerCase (variable);
+
+        for (int i=0; i<size; ++i)
+            if (Misc::StringUtils::lowerCase (script->mVarNames.at (i+offset))==variable2)
+                return i;
+
+        throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);
+    }
+}

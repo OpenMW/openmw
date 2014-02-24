@@ -81,6 +81,8 @@ namespace Compiler
         void message (CodeContainer& code, Literals& literals, const std::string& message,
             int buttons);
 
+        void report (CodeContainer& code, Literals& literals, const std::string& message);
+
         void fetchLocal (CodeContainer& code, char localType, int localIndex);
 
         void jump (CodeContainer& code, int offset);
@@ -99,6 +101,14 @@ namespace Compiler
         void fetchGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name);
 
+        void assignToMember (CodeContainer& code, Literals& literals, char memberType,
+            const std::string& name, const std::string& id, const CodeContainer& value, char valueType, bool global);
+        ///< \param global Member of a global script instead of a script of a reference.
+
+        void fetchMember (CodeContainer& code, Literals& literals, char memberType,
+            const std::string& name, const std::string& id, bool global);
+        ///< \param global Member of a global script instead of a script of a reference.
+
         void random (CodeContainer& code);
 
         void scriptRunning (CodeContainer& code);
@@ -107,15 +117,15 @@ namespace Compiler
 
         void stopScript (CodeContainer& code);
 
-        void getDistance (CodeContainer& code, Literals& literals, const std::string id);
+        void getDistance (CodeContainer& code, Literals& literals, const std::string& id);
 
         void getSecondsPassed (CodeContainer& code);
 
-        void getDisabled (CodeContainer& code, Literals& literals, const std::string id);
+        void getDisabled (CodeContainer& code, Literals& literals, const std::string& id);
 
-        void enable (CodeContainer& code, Literals& literals, const std::string id);
+        void enable (CodeContainer& code, Literals& literals, const std::string& id);
 
-        void disable (CodeContainer& code, Literals& literals, const std::string id);
+        void disable (CodeContainer& code, Literals& literals, const std::string& id);
     }
 }
 

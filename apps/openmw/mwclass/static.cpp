@@ -4,25 +4,40 @@
 #include <components/esm/loadstat.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/physicssystem.hpp"
+#include "../mwworld/cellstore.hpp"
 
-#include "../mwrender/cellimp.hpp"
+#include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
 {
-    void Static::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+    void Static::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Static, MWWorld::RefData> *ref =
-            ptr.get<ESM::Static>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-        if (!model.empty())
-        {
-            MWRender::Rendering rendering (cellRender, ref->ref);
-            cellRender.insertMesh ("meshes\\" + model);
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
+            renderingInterface.getObjects().insertModel(ptr, model);
         }
+    }
+
+    void Static::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    {
+        const std::string model = getModel(ptr);
+        if(!model.empty())
+            physics.addObject(ptr);
+    }
+
+    std::string Static::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Static> *ref =
+            ptr.get<ESM::Static>();
+        assert(ref->mBase != NULL);
+
+        const std::string &model = ref->mBase->mModel;
+        if (!model.empty()) {
+            return "meshes\\" + model;
+        }
+        return "";
     }
 
     std::string Static::getName (const MWWorld::Ptr& ptr) const
@@ -35,5 +50,14 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Static);
 
         registerClass (typeid (ESM::Static).name(), instance);
+    }
+
+    MWWorld::Ptr
+    Static::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Static> *ref =
+            ptr.get<ESM::Static>();
+
+        return MWWorld::Ptr(&cell.get<ESM::Static>().insert(*ref), &cell);
     }
 }

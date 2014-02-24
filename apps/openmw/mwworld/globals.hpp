@@ -1,61 +1,58 @@
 #ifndef GAME_MWWORLD_GLOBALS_H
 #define GAME_MWWORLD_GLOBALS_H
 
+#include <vector>
 #include <string>
 #include <map>
 
-#include <components/interpreter/types.hpp>
+#include <libs/platform/stdint.h>
 
-namespace ESMS
+#include <components/interpreter/types.hpp>
+#include <components/esm/variant.hpp>
+
+namespace ESM
 {
-    struct ESMStore;
+    class ESMWriter;
+    class ESMReader;
 }
 
 namespace MWWorld
 {
+    class ESMStore;
+
     class Globals
     {
-        public:
-        
-            union Data
-            {
-                Interpreter::Type_Float mFloat;
-                Interpreter::Type_Float mLong; // Why Morrowind, why? :(
-                Interpreter::Type_Float mShort;
-            };
-        
-            typedef std::map<std::string, std::pair<char, Data> > Collection;
-        
         private:
-        
+
+            typedef std::map<std::string, ESM::Variant> Collection;
+
             Collection mVariables; // type, value
-        
+
             Collection::const_iterator find (const std::string& name) const;
 
             Collection::iterator find (const std::string& name);
-        
-        public:
-        
-            Globals (const ESMS::ESMStore& store);
-        
-            const Data& operator[] (const std::string& name) const;
 
-            Data& operator[] (const std::string& name);
-            
-            void setInt (const std::string& name, int value);
-            ///< Set value independently from real type.
-            
-            void setFloat (const std::string& name, float value);
-            ///< Set value independently from real type.
-            
-            int getInt (const std::string& name) const;
-            ///< Get value independently from real type.
-                
-            float getFloat (const std::string& name) const;
-            ///< Get value independently from real type.
-            
+        public:
+
+            const ESM::Variant& operator[] (const std::string& name) const;
+
+            ESM::Variant& operator[] (const std::string& name);
+
             char getType (const std::string& name) const;
             ///< If there is no global variable with this name, ' ' is returned.
+
+            void fill (const MWWorld::ESMStore& store);
+            ///< Replace variables with variables from \a store with default values.
+
+            int countSavedGameRecords() const;
+
+            void write (ESM::ESMWriter& writer) const;
+
+            bool readRecord (ESM::ESMReader& reader, int32_t type);
+            ///< Records for variables that do not exist are dropped silently.
+            ///
+            /// \return Known type?
+
     };
 }
 

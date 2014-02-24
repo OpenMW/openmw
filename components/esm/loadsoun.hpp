@@ -1,22 +1,31 @@
-#ifndef _ESM_SOUN_H
-#define _ESM_SOUN_H
+#ifndef OPENMW_ESM_SOUN_H
+#define OPENMW_ESM_SOUN_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 struct SOUNstruct
 {
-  unsigned char volume, minRange, maxRange;
+    unsigned char mVolume, mMinRange, mMaxRange;
 };
 
 struct Sound
 {
-  SOUNstruct data;
-  std::string sound;
+    static unsigned int sRecordId;
 
-  // Body moved to load_impl.cpp
-  void load(ESMReader &esm);
+    SOUNstruct mData;
+    std::string mId, mSound;
+
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm) const;
+
+    void blank();
+    ///< Set record to default state (does not touch the ID/index).
 };
 }
 #endif

@@ -3,86 +3,91 @@
 
 #include <cassert>
 
-#include <boost/any.hpp>
+#include <string>
+#include <sstream>
 
-#include <components/esm_store/cell_store.hpp>
-
-#include "refdata.hpp"
+#include "cellreflist.hpp"
+#include "livecellref.hpp"
 
 namespace MWWorld
 {
+    class ContainerStore;
+    class CellStore;
+
     /// \brief Pointer to a LiveCellRef
 
     class Ptr
     {
         public:
 
-            typedef ESMS::CellStore<RefData> CellStore;
-
-            boost::any mPtr;
-            ESM::CellRef *mCellRef;
-            RefData *mRefData;
+            MWWorld::LiveCellRefBase *mRef;
             CellStore *mCell;
-            std::string mTypeName;
+            ContainerStore *mContainerStore;
 
         public:
-
-            Ptr() : mCellRef (0), mRefData (0), mCell (0) {}
+            Ptr(MWWorld::LiveCellRefBase *liveCellRef=0, CellStore *cell=0)
+              : mRef(liveCellRef), mCell(cell), mContainerStore(0)
+            {
+            }
 
             bool isEmpty() const
             {
-                return mPtr.empty();
+                return mRef == 0;
             }
 
-            const std::type_info& getType()
-            {
-                assert (!mPtr.empty());
-                return mPtr.type();
-            }
+            const std::string& getTypeName() const;
 
-            const std::string& getTypeName() const
+            const Class& getClass() const
             {
-                return mTypeName;
-            }
-
-            template<typename T>
-            Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
-            {
-                mPtr = liveCellRef;
-                mCellRef = &liveCellRef->ref;
-                mRefData = &liveCellRef->mData;
-                mCell = cell;
-                mTypeName = typeid (T).name();
+                if(mRef != 0)
+                    return *(mRef->mClass);
+                throw std::runtime_error("Cannot get class of an empty object");
             }
 
             template<typename T>
-            ESMS::LiveCellRef<T, RefData> *get() const
+            MWWorld::LiveCellRef<T> *get() const
             {
-                return boost::any_cast<ESMS::LiveCellRef<T, RefData>*> (mPtr);
+                MWWorld::LiveCellRef<T> *ref = dynamic_cast<MWWorld::LiveCellRef<T>*>(mRef);
+                if(ref) return ref;
+
+                std::stringstream str;
+                str<< "Bad LiveCellRef cast to "<<typeid(T).name()<<" from ";
+                if(mRef != 0) str<< getTypeName();
+                else str<< "an empty object";
+
+                throw std::runtime_error(str.str());
             }
 
-            ESM::CellRef& getCellRef() const
-            {
-                assert (mCellRef);
-                return *mCellRef;
-            }
+            MWWorld::LiveCellRefBase *getBase() const;
 
-            RefData& getRefData() const
-            {
-                assert (mRefData);
-                return *mRefData;
-            }
+            ESM::CellRef& getCellRef() const;
 
-            Ptr::CellStore *getCell() const
+            RefData& getRefData() const;
+
+            CellStore *getCell() const
             {
-                assert (mCell);
+                assert(mCell);
                 return mCell;
             }
+
+            bool isInCell() const
+            {
+                return (mContainerStore == 0) && (mCell != 0);
+            }
+
+            void setContainerStore (ContainerStore *store);
+            ///< Must not be called on references that are in a cell.
+
+            ContainerStore *getContainerStore() const;
+            ///< May return a 0-pointer, if reference is not in a container.
+
+            operator const void *();
+            ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
     };
 
     inline bool operator== (const Ptr& left, const Ptr& right)
     {
-        return left.mRefData==right.mRefData;
+        return left.mRef==right.mRef;
     }
 
     inline bool operator!= (const Ptr& left, const Ptr& right)
@@ -92,7 +97,7 @@ namespace MWWorld
 
     inline bool operator< (const Ptr& left, const Ptr& right)
     {
-        return left.mRefData<right.mRefData;
+        return left.mRef<right.mRef;
     }
 
     inline bool operator>= (const Ptr& left, const Ptr& right)

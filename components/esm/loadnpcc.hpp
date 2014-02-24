@@ -1,9 +1,15 @@
-#ifndef _ESM_NPCC_H
-#define _ESM_NPCC_H
+#ifndef OPENMW_ESM_NPCC_H
+#define OPENMW_ESM_NPCC_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+// TODO: create implementation files to remove this
+#include "esmreader.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * NPC change information (found in savegame files only). We can't
@@ -72,9 +78,16 @@ namespace ESM {
 
 struct LoadNPCC
 {
+    static unsigned int sRecordId;
+
+    std::string mId;
+
   void load(ESMReader &esm)
   {
     esm.skipRecord();
+  }
+  void save(ESMWriter &esm) const
+  {
   }
 };
 }

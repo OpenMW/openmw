@@ -15,9 +15,7 @@ namespace MWScript
 {
     /// \brief cell-related script functionality
     namespace Cell
-    {
-        void registerExtensions (Compiler::Extensions& extensions);
-        
+    {        
         void installOpcodes (Interpreter::Interpreter& interpreter);
     }
 }

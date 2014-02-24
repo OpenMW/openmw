@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="ExposedWindow" skin="MW_Window_Pinnable" layer="Windows" position="0 0 500 342" name="_Main">
+        <Property key="MinSize" value="40 40"/>
+
+        <Widget type="Widget" skin="" name="LeftPane" position="0 0 220 342">
+
+            <!-- Player health stats -->
+            <Widget type="Widget" skin="MW_Box" position="8 8 212 62" align="Left Top HStretch">
+                <!-- Health -->
+                <Widget type="Widget" skin="" position="4 4 204 18" name="Health" align="Left Top HStretch">
+                    <Property key="NeedMouse" value="true"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="HealthToolTip"/>
+                    <UserString key="ImageTexture_HealthImage" value="icons\k\health.dds"/>
+                    <Widget type="TextBox" skin="NormalText" position="0 0 70 18" name="Health_str" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                        <Property key="Caption" value="#{sHealth}"/>
+                    </Widget>
+                    <Widget type="ProgressBar" skin="MW_Progress_Red" position="74 0 130 18" name="HBar" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="HBarT" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <!-- Magicka -->
+                <Widget type="Widget" skin="" position="4 22 204 18" name="Magicka" align="Left Top HStretch">
+                    <Property key="NeedMouse" value="true"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="HealthToolTip"/>
+                    <UserString key="ImageTexture_HealthImage" value="icons\k\magicka.dds"/>
+
+                    <Widget type="TextBox" skin="NormalText" position="0 0 70 18" name="Magicka_str" align="Left Top HStretch">
+                        <Property key="Caption" value="#{sMagic}"/>
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+
+                    <Widget type="ProgressBar" skin="MW_Progress_Blue" position="74 0 130 18" name="MBar" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+
+                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="MBarT" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <!-- Fatigue -->
+                <Widget type="Widget" skin="" position="4 40 204 18" name="Fatigue" align="Left Top HStretch">
+                    <Property key="NeedMouse" value="true"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="HealthToolTip"/>
+                    <UserString key="ImageTexture_HealthImage" value="icons\k\fatigue.dds"/>
+
+                    <Widget type="TextBox" skin="NormalText" position="0 0 70 18" name="Fatigue_str" align="Left Top HStretch">
+                        <Property key="Caption" value="#{sFatigue}"/>
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+
+                    <Widget type="ProgressBar" skin="MW_Progress_Green" position="74 0 130 18" name="FBar" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="FBarT" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+
+            <!-- Player level, race and class -->
+            <Widget type="Widget" skin="MW_Box" position="8 78 212 62" align="Left Top HStretch">
+                <Widget type="TextBox" skin="NormalText" position="4 4 100 18" name="Level_str" align="Left Top HStretch">
+                    <Property key="Caption" value="#{sLevel}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="LevelToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="NormalText" position="4 22 100 18" name="Race_str" align="Left Top HStretch">
+                    <Property key="Caption" value="#{sRace}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="NormalText" position="4 40 100 18" name="Class_str" align="Left Top HStretch">
+                    <Property key="Caption" value="#{sClass}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="ClassToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandTextRight" position="104 4 104 18" name="LevelText" align="Right Top">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="LevelToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandTextRight" position="104 22 104 18" name="RaceText" align="Right Top">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="ClassText" align="Right Top">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="ClassToolTip"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box" position="8 148 212 152" align="Left Top Stretch">
+            <!-- TODO: this should be a scroll view -->
+            <Widget type="Widget" skin="" position="4 4 204 144" align="Left Top Stretch">
+                <Widget type="Button" skin="" position="0 0 204 18" name="Attrib1Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeStrength}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sStrDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_strength.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib1" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal1" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Button" skin="" position="0 18 204 18" name="Attrib2Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeIntelligence}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sIntDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_int.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib2" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal2" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Button" skin="" position="0 36 204 18" name="Attrib3Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeWillpower}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sWilDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_wilpower.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib3" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal3" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Button" skin="" position="0 54 204 18" name="Attrib4Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeAgility}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sAgiDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_agility.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib4" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal4" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Button" skin="" position="0 72 204 18" name="Attrib5Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeSpeed}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sSpdDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_speed.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib5" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal5" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Button" skin="" position="0 90 204 18" name="Attrib6Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeEndurance}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sEndDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_endurance.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib6" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal6" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Button" skin="" position="0 108 204 18" name="Attrib7Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributePersonality}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sPerDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_personality.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib7" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal7" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Button" skin="" position="0 126 204 18" name="Attrib8Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeLuck}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sLucDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_luck.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib8" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal8" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+            </Widget>
+            </Widget>
+
+        </Widget>
+
+        <Widget type="Widget" skin="" name="RightPane" position="220 0 280 342">
+
+            <!-- Player skills, factions, birthsign and reputation -->
+            <Widget type="Widget" skin="MW_Box" position="8 8 248 292" align="Left Stretch" name="Skills">
+                <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 240 284" align="Left Top Stretch" name="SkillView"/>
+            </Widget>
+
+        </Widget>
+
+    </Widget>
+</MyGUI>

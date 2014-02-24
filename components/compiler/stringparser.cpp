@@ -6,10 +6,11 @@
 
 #include "scanner.hpp"
 #include "generator.hpp"
+#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
-    StringParser::StringParser (ErrorHandler& errorHandler, Context& context, Literals& literals)
+    StringParser::StringParser (ErrorHandler& errorHandler, const Context& context, Literals& literals)
     : Parser (errorHandler, context), mLiterals (literals), mState (StartState), mSmashCase (false)
     {
 
@@ -22,7 +23,7 @@ namespace Compiler
         {
             start();
             if (mSmashCase)
-                Generator::pushString (mCode, mLiterals, toLower (name));
+                Generator::pushString (mCode, mLiterals, Misc::StringUtils::lowerCase (name));
             else
                 Generator::pushString (mCode, mLiterals, name);
 

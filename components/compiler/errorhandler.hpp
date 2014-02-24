@@ -16,6 +16,7 @@ namespace Compiler
     {
             int mWarnings;
             int mErrors;
+            int mWarningsMode;
 
         protected:
 
@@ -37,10 +38,10 @@ namespace Compiler
         public:
 
             ErrorHandler();
-		    ///< constructor
+            ///< constructor
 
             virtual ~ErrorHandler();
-		    ///< destructor
+            ///< destructor
 
             bool isGood() const;
             ///< Was compiling successful?
@@ -60,8 +61,11 @@ namespace Compiler
             void endOfFile();
             ///< Generate an error message for an unexpected EOF.
 
-           virtual void reset();
+            virtual void reset();
             ///< Remove all previous error/warning events
+
+            void setWarningsMode (int mode);
+            ///< // 0 ignore, 1 rate as warning, 2 rate as error
     };
 }
 

@@ -1,0 +1,22 @@
+material quad
+{
+    depth_write on
+    
+    pass
+    {
+        vertex_program transform_vertex
+        fragment_program quad_fragment
+        
+        depth_write $depth_write
+        
+        texture_unit SceneBuffer
+        {
+        }
+    }
+}
+
+material quad_noDepthWrite
+{
+    parent quad
+    depth_write off
+}

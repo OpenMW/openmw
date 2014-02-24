@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 588 444" name="_Main">
+       <Property key="MinSize" value="425 360"/>
+
+        <!-- Name -->
+
+        <Widget type="TextBox" skin="SandText" position="10 10 65 24">
+            <Property key="Caption" value="#{sName}"/>
+            <Property key="TextAlign" value="Left"/>
+        </Widget>
+
+        <Widget type="EditBox" skin="MW_TextEdit" position="70 10 492 24" align="Top Left HStretch" name="NameEdit"/>
+
+
+        <!-- Apparatus -->
+
+        <Widget type="TextBox" skin="SandText" position="10 40 260 24">
+            <Property key="Caption" value="#{sApparatus}"/>
+            <Property key="TextAlign" value="Left"/>
+        </Widget>
+
+        <Widget type="Widget" skin="" position="10 66 260 50">
+
+            <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus1"/>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box" position="60 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus2"/>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box" position="120 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus3"/>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box" position="180 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus4"/>
+            </Widget>
+
+        </Widget>
+
+
+        <!-- Used Ingredients -->
+
+        <Widget type="TextBox" skin="SandText" position="10 120 260 24">
+            <Property key="Caption" value="#{sIngredients}"/>
+            <Property key="TextAlign" value="Left"/>
+        </Widget>
+
+        <Widget type="Widget" skin="" position="10 146 260 50">
+
+            <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient1"/>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box" position="60 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient2"/>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box" position="120 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient3"/>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box" position="180 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient4"/>
+            </Widget>
+
+        </Widget>
+
+
+        <!-- Available Ingredients -->
+
+        <Widget type="ItemView" skin="MW_ItemView" position="10 206 552 158" name="ItemView" align="Left Top Stretch"/>
+
+
+        <!-- Created Effects -->
+
+        <Widget type="TextBox" skin="SandText" position="250 40 320 24">
+            <Property key="Caption" value="#{sCreatedEffects}"/>
+            <Property key="TextAlign" value="Left"/>
+        </Widget>
+
+        <Widget type="Widget" skin="MW_Box" position="250 66 312 130" align="Top Left HStretch">
+            <Widget type="Widget" skin="" position="4 4 316 122" name="CreatedEffects" align="HStretch"/>
+        </Widget>
+
+
+        <!-- Buttons -->
+
+        <Widget type="HBox" skin="" position="110 374 452 24" align="Bottom Right">
+
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CreateButton">
+                <Property key="Caption" value="#{sCreate}"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
+
+        </Widget>
+
+    </Widget>
+</MyGUI>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+    <!-- Button graphics -->
+    <Skin name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
+        <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
+            <State name="normal" offset="0 0 128 4">
+                <Property key="TileSize" value="128 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Skin>
+    <Skin name="BTN_Bottom" size="128 4" texture="textures\menu_button_frame_bottom.dds">
+        <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
+            <State name="normal" offset="0 0 128 4">
+                <Property key="TileSize" value="128 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Skin>
+    <Skin name="BTN_Left" size="4 16" texture="textures\menu_button_frame_left.dds">
+        <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
+            <State name="normal" offset="0 0 4 16">
+                <Property key="TileSize" value="4 16"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Skin>
+    <Skin name="BTN_Right" size="4 16" texture="textures\menu_button_frame_right.dds">
+        <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
+            <State name="normal" offset="0 0 4 16">
+                <Property key="TileSize" value="4 16"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Skin>
+    <Skin name="BTN_TopLeft" size="4 4" texture="textures\menu_button_frame_top_left_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="BTN_TopRight" size="4 4" texture="textures\menu_button_frame_top_right_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="BTN_BottomLeft" size="4 4" texture="textures\menu_button_frame_bottom_left_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="BTN_BottomRight" size="4 4" texture="textures\menu_button_frame_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Skin>
+
+    <!-- Button widget -->
+    <Skin name="MW_Button" size="136 24">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+
+        <Child type="Widget" skin="BTN_Left" offset="0 4 4 16" align="VStretch Left"/>
+        <Child type="Widget" skin="BTN_Right" offset="132 4 4 16" align="VStretch Right"/>
+        <Child type="Widget" skin="BTN_Top" offset="4 0 128 4" align="HStretch Top"/>
+        <Child type="Widget" skin="BTN_Bottom" offset="4 20 128 4" align="HStretch Bottom"/>
+        <Child type="Widget" skin="BTN_TopLeft" offset="0 0 4 4" align="Top Left"/>
+        <Child type="Widget" skin="BTN_TopRight" offset="132 0 4 4" align="Top Right"/>
+        <Child type="Widget" skin="BTN_BottomLeft" offset="0 20 4 4" align="Bottom Left"/>
+        <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
+
+        <BasisSkin type="SimpleText" offset="4 4 128 16" align="Stretch">
+            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
+            <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
+            <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
+            <State name="pushed" colour="1 1 1" shift="0"/>
+            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
+        </BasisSkin>
+   </Skin>
+</MyGUI>

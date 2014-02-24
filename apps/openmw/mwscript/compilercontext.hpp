@@ -3,44 +3,46 @@
 
 #include <components/compiler/context.hpp>
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 namespace MWScript
 {
     class CompilerContext : public Compiler::Context
     {
         public:
-        
+
             enum Type
             {
                 Type_Full, // global, local, targetted
                 Type_Dialgoue,
                 Type_Console
             };
-            
+
         private:
-        
+
             Type mType;
-            const MWWorld::Environment& mEnvironment;
-    
+
         public:
-        
-            CompilerContext (Type type, const MWWorld::Environment& environment);
-        
+
+            CompilerContext (Type type);
+
             /// Is the compiler allowed to declare local variables?
-            virtual bool canDeclareLocals() const;  
-            
-            /// 'l: long, 's': short, 'f': float, ' ': does not exist.              
+            virtual bool canDeclareLocals() const;
+
+            /// 'l: long, 's': short, 'f': float, ' ': does not exist.
             virtual char getGlobalType (const std::string& name) const;
 
+            virtual std::pair<char, bool> getMemberType (const std::string& name,
+                const std::string& id) const;
+            ///< Return type of member variable \a name in script \a id or in script of reference of
+            /// \a id
+            /// \return first: 'l: long, 's': short, 'f': float, ' ': does not exist.
+            /// second: true: script of reference
+
             virtual bool isId (const std::string& name) const;
-            ///< Does \a name match an ID, that can be referenced?            
+            ///< Does \a name match an ID, that can be referenced?
+
+            virtual bool isJournalId (const std::string& name) const;
+            ///< Does \a name match a journal ID?
     };
 }
 
 #endif
-
-

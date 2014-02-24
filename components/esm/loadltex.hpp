@@ -1,9 +1,13 @@
-#ifndef _ESM_LTEX_H
-#define _ESM_LTEX_H
+#ifndef OPENMW_ESM_LTEX_H
+#define OPENMW_ESM_LTEX_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Texture used for texturing landscape.
@@ -23,14 +27,13 @@ namespace ESM {
 
 struct LandTexture
 {
-  std::string id, texture;
-  int index;
+    static unsigned int sRecordId;
 
-  void load(ESMReader &esm)
-  {
-    esm.getHNT(index, "INTV");
-    texture = esm.getHNString("DATA");
-  }
+    std::string mId, mTexture;
+    int mIndex;
+
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm) const;
 };
 }
 #endif

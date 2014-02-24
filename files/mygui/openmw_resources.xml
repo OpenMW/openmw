@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource">
+
+    <!-- Cursors -->
+    <Resource type="ResourceImageSet" name="ArrowPointerImage">
+        <Group name="Pointer" texture="textures\tx_cursor.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="HResizePointerImage">
+        <Group name="Pointer" texture="textures\tx_cursormove.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="DropGroundPointerImage">
+        <Group name="Pointer" texture="textures\cursor_drop_ground.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+
+
+
+
+    <!-- Journal, book, scroll -->
+    <Resource type="ResourceImageSet" name="MenuBook_Close">
+        <Group name="States" texture="mwgui1" size="96 24">
+            <Index name="disabled">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="128 0"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="256 0"/>
+            </Index>
+        </Group>
+    </Resource>
+
+    <Resource type="ResourceImageSet" name="MenuBook_Take">
+        <Group name="States" texture="mwgui1" size="96 24">
+            <Index name="disabled">
+                <Frame point="384 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="384 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="0 32"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="128 32"/>
+            </Index>
+        </Group>
+    </Resource>
+
+    <Resource type="ResourceImageSet" name="MenuBook_Next">
+        <Group name="States" texture="mwgui1" size="57 24">
+            <Index name="disabled">
+                <Frame point="256 32"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="256 32"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="384 32"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 64"/>
+            </Index>
+        </Group>
+    </Resource>
+
+    <Resource type="ResourceImageSet" name="MenuBook_Prev">
+        <Group name="States" texture="mwgui1" size="96 24">
+            <Index name="disabled">
+                <Frame point="128 64"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="128 64"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="256 64"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="384 64"/>
+            </Index>
+        </Group>
+    </Resource>
+
+
+
+
+    <!-- Main menu -->
+    <Resource type="ResourceImageSet" name="Menu_NewGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="256 0"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="128 0"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_LoadGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="384 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="384 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="128 64"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 64"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_Options">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="256 64"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="256 64"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="0 128"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="384 64"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_Credits">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="128 128"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="128 128"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="384 128"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="256 128"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_ExitGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="0 192"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="0 192"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="256 192"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="128 192"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_SaveGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="384 192"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="384 192"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="128 256"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 256"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_Return">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="256 256"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="256 256"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="0 320"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="384 256"/>
+            </Index>
+        </Group>
+    </Resource>
+
+
+    <Resource type="ResourceImageSet" name="DoorMarker">
+        <Group name="States" texture="markers.png" size="8 8">
+            <Index name="disabled">
+                <Frame point="8 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="8 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+
+
+
+    <!-- Skins -->
+
+    <Resource type="ResourceLayout" name="ButtonImage" version="3.2.0">
+        <Widget type="Widget" skin="Default" position="20 20 16 16" name="Root">
+            <Property key="TextAlign" value="Center"/>
+            <Property key="FontName" value="Default"/>
+            <Property key="ModeImage" value="true"/>
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 16 16" align="Stretch" name="Image">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
+        <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
+            <UserString key="ButtonSkin" value="MW_Button"/>
+            <Widget type="Widget" skin="MW_Box" position="0 28 89 32" align="Left Top Stretch">
+                <Widget type="Widget" skin="" position="4 4 81 28" align="Left Top Stretch" name="TabItem"/>
+            </Widget>
+            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="TabControlInner" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 5 89 60" name="Root">
+            <UserString key="ButtonSkin" value="MW_Button"/>
+            <Widget type="Widget" skin="" position="0 28 89 32" align="Left Top Stretch" name="TabItem"/>
+
+            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatNameValue" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position="0 0 160 18" align="Left HStretch" name="StatName">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+            <Widget type="TextBox" skin="SandTextRight" position="160 0 40 18" align="Right Top" name="StatValue">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatName" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position="0 0 200 18" align="Left HStretch" name="StatName">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatNameButton" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Widget type="Button" skin="SandTextButton" position="0 0 200 18" align="Left HStretch" name="StatNameButton">
+                <Property key="NeedMouse" value="true"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_ComboBox" version="3.2.0">
+        <Widget type="Widget" skin="" position="65 10 100 26" name="Root">
+            <Property key="MaxListLength" value="200"/>
+            <Property key="SmoothShow" value="true"/>
+            <Property key="ModeDrop" value="true"/>
+
+            <Widget type="Widget" skin="MW_Box" position="0 0 100 26" align="Stretch">
+                <Widget type="TextBox" skin="SandText" position="2 2 75 20" align="Stretch" name="Client">
+                    <Property key="TextAlign" value="Left VCenter"/>
+                </Widget>
+                <Widget type="ListBox" skin="MW_PopupList" position="65 38 100 200" style="Popup" layer="Popup" name="List">
+                    <Property key="Visible" value="false"/>
+                </Widget>
+                <Widget type="Button" skin="MW_ArrowDown" position="79 7 14 11" align="Right VCenter" name="Button"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+</MyGUI>

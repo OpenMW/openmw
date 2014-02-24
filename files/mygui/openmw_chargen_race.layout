@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 433" name="_Main">
+
+        <!-- Appearance -->
+        <Widget type="TextBox" skin="HeaderText" position="8 16 241 18" name="AppearanceT" align="Left Top">
+            <Property key="Caption" value="Appearance"/>
+            <Property key="TextAlign" value="Left Top"/>
+        </Widget>
+        <Widget type="Widget" skin="MW_Box" position="8 39 241 220">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 237 216" align="Stretch" name="PreviewImage"/>
+        </Widget>
+
+        <!-- Sliders -->
+        <!-- Rotation of head -->
+        <Widget type="MWScrollBar" skin="MW_HScroll" position="8 270 241 14" name="HeadRotate"/>
+
+        <!-- Gender choice -->
+
+        <Widget type="Widget" skin="MW_Box" position="8 298 15 14">
+            <Widget type="Button" skin="MW_ArrowLeft" position="3 2 10 10" align="Left VStretch" name="PrevGenderButton"/>
+        </Widget>
+
+        <Widget type="TextBox" skin="HeaderText" position="25 294 205 18" name="GenderChoiceT"/>
+
+        <Widget type="Widget" skin="MW_Box" position="234 298 15 14">
+            <Widget type="Button" skin="MW_ArrowRight" position="1 2 10 10" align="Right VStretch" name="NextGenderButton"/>
+        </Widget>
+
+        <!-- Face choice -->
+
+        <Widget type="Widget" skin="MW_Box" position="8 320 15 14">
+            <Widget type="Button" skin="MW_ArrowLeft" position="3 2 10 10" align="Left VStretch" name="PrevFaceButton"/>
+        </Widget>
+
+        <Widget type="TextBox" skin="HeaderText" position="25 316 205 18" name="FaceChoiceT"/>
+
+        <Widget type="Widget" skin="MW_Box" position="234 320 15 14">
+            <Widget type="Button" skin="MW_ArrowRight" position="1 2 10 10" align="Right VStretch" name="NextFaceButton"/>
+        </Widget>
+
+        <!-- Hair choice -->
+
+        <Widget type="Widget" skin="MW_Box" position="8 342 15 14">
+            <Widget type="Button" skin="MW_ArrowLeft" position="3 2 10 10" align="Left VStretch" name="PrevHairButton"/>
+        </Widget>
+
+        <Widget type="TextBox" skin="HeaderText" position="25 338 205 18" name="HairChoiceT"/>
+
+        <Widget type="Widget" skin="MW_Box" position="234 342 15 14">
+            <Widget type="Button" skin="MW_ArrowRight" position="1 2 10 10" align="Right VStretch" name="NextHairButton"/>
+        </Widget>
+
+        <!-- Race -->
+
+        <Widget type="TextBox" skin="HeaderText" position="261 16 132 18" name="RaceT" align="Left Top">
+            <Property key="TextAlign" value="Left Top"/>
+        </Widget>
+        <Widget type="ListBox" skin="MW_List" position="264 39 132 161" name="RaceList">
+        </Widget>
+
+        <!-- Spell powers -->
+        <Widget type="TextBox" skin="HeaderText" position="261 210 132 18" name="SpellPowerT" align="Left Top">
+            <Property key="TextAlign" value="Left Top"/>
+        </Widget>
+        <!-- Spell power sub-widgets will be placed here, no skin to make it invisible -->
+        <Widget type="Widget" skin="" position="261 230 250 140" name="SpellPowerList"/>
+
+        <!-- Skill bonus -->
+        <Widget type="TextBox" skin="HeaderText" position="403 39 159 18" name="SkillsT" align="Left Top">
+            <Property key="TextAlign" value="Left Top"/>
+        </Widget>
+        <!-- Skill bonus sub-widgets will be placed here, no skin to make it invisible -->
+        <Widget type="Widget" skin="" position="403 59 159 360" name="SkillList"/>
+
+        <!-- Dialog buttons -->
+        <Widget type="HBox" position="0 393 572 24">
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" position="471 397 53 23" name="BackButton">
+                <Property key="Caption" value="#{sBack}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" position="532 397 42 23" name="OKButton">
+                <Property key="Caption" value="#{sOK]"/>
+            </Widget>
+        </Widget>
+    </Widget>
+</MyGUI>

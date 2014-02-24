@@ -22,7 +22,7 @@ namespace Compiler
     }
 
     bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType,
-        bool explicitReference) const
+        bool& explicitReference) const
     {
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
 
@@ -30,7 +30,7 @@ namespace Compiler
             return false;
 
         if (explicitReference && iter->second.mCodeExplicit==-1)
-            return false;
+            explicitReference = false;
 
         returnType = iter->second.mReturn;
         argumentType = iter->second.mArguments;
@@ -38,7 +38,7 @@ namespace Compiler
     }
 
     bool Extensions::isInstruction (int keyword, std::string& argumentType,
-        bool explicitReference) const
+        bool& explicitReference) const
     {
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
 
@@ -46,7 +46,7 @@ namespace Compiler
             return false;
 
         if (explicitReference && iter->second.mCodeExplicit==-1)
-            return false;
+            explicitReference = false;
 
         argumentType = iter->second.mArguments;
         return true;
@@ -206,5 +206,12 @@ namespace Compiler
 
                 throw std::logic_error ("unsupported code segment");
         }
+    }
+
+    void Extensions::listKeywords (std::vector<std::string>& keywords) const
+    {
+        for (std::map<std::string, int>::const_iterator iter (mKeywords.begin());
+            iter!=mKeywords.end(); ++iter)
+            keywords.push_back (iter->first);
     }
 }

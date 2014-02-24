@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 300 300" name="_Main">
-        <Widget type="StaticImage" skin="StaticImage" position="0 0 284 264" align="ALIGN_STRETCH" name="Map"/>
-        <Widget type="StaticImage" skin="StaticImage" position="126 116 32 32" align="Center" name="Compass"/>
-        <Widget type="Button" skin="MW_Button" position="213 233 61 22" align="ALIGN_BOTTOM ALIGN_RIGHT" name="WorldButton"/>
-    </Widget>
-</MyGUI>

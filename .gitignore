@@ -1,4 +1,55 @@
+## make
+CMakeFiles
+*/CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+makefile
 build
-*~
-Doxygen
 prebuilt
+
+## doxygen
+Doxygen
+
+## ides/editors
+*~
+*.kdev4
+*.swp
+*.swo
+*.kate-swp
+.cproject
+.project
+.settings
+.directory
+## qt-creator
+CMakeLists.txt.user*
+
+## resources
+data
+resources
+/*.cfg
+/*.desktop
+/*.install
+
+## binaries
+/esmtool
+/mwiniimport
+/omwlauncher
+/openmw
+/opencs
+
+## generated objects
+apps/openmw/config.hpp
+components/version/version.hpp
+Docs/mainpage.hpp
+moc_*.cxx
+*.cxx_parameters
+*qrc_launcher.cxx
+*qrc_resources.cxx
+*__*
+*ui_datafilespage.h
+*ui_graphicspage.h
+*ui_mainwindow.h
+*ui_playpage.h
+*.[ao]
+*.so

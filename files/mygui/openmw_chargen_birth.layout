@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 527 378" name="_Main">
+
+        <!-- Birthsign list -->
+        <Widget type="ListBox" skin="MW_List" position="8 8 232 137" name="BirthsignList"/>
+
+        <!-- Birthsign image -->
+        <Widget type="Widget" skin="MW_Box" position="248 8 263 137" align="Left Top">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthsignImage" align="Left Top"/>
+        </Widget>
+
+        <!-- Spell list -->
+        <Widget type="Widget" skin="" position="8 160 519 178" align="Left Top" name="SpellArea"/>
+
+        <!-- Dialog buttons -->
+        <Widget type="HBox" position="0 338 511 24">
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
+                <Property key="Caption" value="#{sBack}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
+                <Property key="Caption" value="OK"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+</MyGUI>
