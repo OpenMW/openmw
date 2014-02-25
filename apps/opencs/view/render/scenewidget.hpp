@@ -12,7 +12,6 @@ namespace Ogre
 
 namespace CSVRender
 {
-
     class SceneWidget : public QWidget
     {
         Q_OBJECT
@@ -34,6 +33,12 @@ namespace CSVRender
             void resizeEvent(QResizeEvent* e);
             bool event(QEvent* e);
 
+            void keyPressEvent (QKeyEvent *event);
+
+            void keyReleaseEvent (QKeyEvent *event);
+
+            void focusOutEvent (QFocusEvent *event);
+
             void updateOgreWindow();
 
             Ogre::Camera*	    mCamera;
@@ -41,6 +46,13 @@ namespace CSVRender
             Ogre::RenderWindow* mWindow;
 
             NavigationMode mNavigationMode;
+            bool mUpdate;
+            int mKeyForward;
+            int mKeyBackward;
+
+        private slots:
+
+            void update();
     };
 }
 

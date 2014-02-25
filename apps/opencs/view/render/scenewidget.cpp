@@ -2,6 +2,7 @@
 
 #include <QEvent>
 #include <QResizeEvent>
+#include <QTimer>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -10,15 +11,17 @@
 
 namespace CSVRender
 {
-
     SceneWidget::SceneWidget(QWidget *parent)
         : QWidget(parent)
         , mWindow(NULL)
         , mCamera(NULL)
-        , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free)
+        , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free), mUpdate (false)
+        , mKeyForward (false), mKeyBackward (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);
+
+        setFocusPolicy (Qt::StrongFocus);
 
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
@@ -44,6 +47,11 @@ namespace CSVRender
         mCamera->lookAt(0,0,0);
         mCamera->setNearClipDistance(0.1);
         mCamera->setFarClipDistance(3000);
+
+        QTimer *timer = new QTimer (this);
+
+        connect (timer, SIGNAL (timeout()), this, SLOT (update()));
+        timer->start (20); /// \todo make this configurable
     }
 
     void SceneWidget::updateOgreWindow()
@@ -93,7 +101,6 @@ namespace CSVRender
         e->accept();
     }
 
-
     QPaintEngine* SceneWidget::paintEngine() const
     {
         // We don't want another paint engine to get in the way.
@@ -130,4 +137,52 @@ namespace CSVRender
         return QWidget::event(e);
     }
 
+    void SceneWidget::keyPressEvent (QKeyEvent *event)
+    {
+        switch (event->key())
+        {
+            case Qt::Key_W: mKeyForward = true; break;
+            case Qt::Key_S: mKeyBackward = true; break;
+            default: QWidget::keyPressEvent (event);
+        }
+    }
+
+    void SceneWidget::keyReleaseEvent (QKeyEvent *event)
+    {
+        switch (event->key())
+        {
+            case Qt::Key_W: mKeyForward = false; break;
+            case Qt::Key_S: mKeyBackward = false; break;
+            default: QWidget::keyReleaseEvent (event);
+        }
+    }
+
+    void SceneWidget::focusOutEvent (QFocusEvent *event)
+    {
+        mKeyForward = false;
+        mKeyBackward = false;
+
+        QWidget::focusOutEvent (event);
+    }
+
+    void SceneWidget::update()
+    {
+        if (mKeyForward && !mKeyBackward)
+        {
+            mCamera->move (mCamera->getDirection());
+            mUpdate = true;
+        }
+
+        if (!mKeyForward && mKeyBackward)
+        {
+            mCamera->move (-mCamera->getDirection());
+            mUpdate = true;
+        }
+
+        if (mUpdate)
+        {
+            mUpdate = false;
+            mWindow->update();
+        }
+    }
 }
