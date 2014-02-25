@@ -41,6 +41,12 @@ namespace CSVRender
 
             void wheelEvent (QWheelEvent *event);
 
+            void leaveEvent (QEvent *event);
+
+            void mouseMoveEvent (QMouseEvent *event);
+
+            void mouseReleaseEvent (QMouseEvent *event);
+
             void updateOgreWindow();
 
             Ogre::Camera*	    mCamera;
@@ -54,6 +60,8 @@ namespace CSVRender
             int mKeyLeft;
             int mKeyRight;
             bool mFast;
+            bool mDragging;
+            QPoint mOldPos;
 
         private slots:
 

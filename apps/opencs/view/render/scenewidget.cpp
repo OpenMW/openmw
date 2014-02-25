@@ -17,7 +17,7 @@ namespace CSVRender
         , mCamera(NULL)
         , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free), mUpdate (false)
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
-        , mFast (false)
+        , mFast (false), mDragging (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);
@@ -173,6 +173,52 @@ namespace CSVRender
             mCamera->move ((factor * mCamera->getDirection() * delta)/2);
             mUpdate = true;
         }
+    }
+
+    void SceneWidget::leaveEvent (QEvent *event)
+    {
+        mDragging = false;
+    }
+
+    void SceneWidget::mouseMoveEvent (QMouseEvent *event)
+    {
+        int factor = mFast ? 4 : 1; /// \todo make this configurable
+
+        if (event->buttons() & Qt::LeftButton)
+        {
+            if (mDragging)
+            {
+                QPoint diff = mOldPos-event->pos();
+                mOldPos = event->pos();
+
+                if (diff.x())
+                {
+                    Ogre::Vector3 direction = mCamera->getDerivedRight();
+                    /// \todo make mouse sensitivity configurable (the factor 2)
+                    mCamera->move ((factor * direction * diff.x())/2);
+                    mUpdate = true;
+                }
+
+                if (diff.y())
+                {
+                    Ogre::Vector3 direction = mCamera->getDerivedUp();
+                    /// \todo make mouse sensitivity configurable (the factor 2)
+                    mCamera->move ((factor * -direction * diff.y())/2);
+                    mUpdate = true;
+                }
+            }
+            else
+            {
+                mDragging = true;
+                mOldPos = event->pos();
+            }
+        }
+    }
+
+    void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
+    {
+        if (event->buttons() & Qt::LeftButton)
+            mDragging = false;
     }
 
     void SceneWidget::focusOutEvent (QFocusEvent *event)
