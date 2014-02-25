@@ -587,6 +587,14 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
 
     if (component == Wizard::Component_Morrowind)
     {
+        // Some installations have a separate Splash directory
+        QFileInfo splash(temp.absoluteFilePath(QLatin1String("Splash")));
+
+        if (splash.exists()) {
+            emit textChanged(tr("Extracting: Splash directory"));
+            copyDirectory(splash.absoluteFilePath(), getPath() + QDir::separator() + QLatin1String("Splash"));
+        }
+
         // Copy Morrowind configuration file
         QString iniPath(temp.absoluteFilePath(QLatin1String("App Executables")));
         iniPath.append(QDir::separator() + QLatin1String("Morrowind.ini"));
