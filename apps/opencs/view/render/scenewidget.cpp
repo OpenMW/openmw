@@ -16,7 +16,8 @@ namespace CSVRender
         , mWindow(NULL)
         , mCamera(NULL)
         , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free), mUpdate (false)
-        , mKeyForward (false), mKeyBackward (false), mFast (false)
+        , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
+        , mFast (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);
@@ -143,6 +144,8 @@ namespace CSVRender
         {
             case Qt::Key_W: mKeyForward = true; break;
             case Qt::Key_S: mKeyBackward = true; break;
+            case Qt::Key_A: mKeyLeft = true; break;
+            case Qt::Key_D: mKeyRight = true; break;
             case Qt::Key_Shift: mFast = true; break;
             default: QWidget::keyPressEvent (event);
         }
@@ -154,6 +157,8 @@ namespace CSVRender
         {
             case Qt::Key_W: mKeyForward = false; break;
             case Qt::Key_S: mKeyBackward = false; break;
+            case Qt::Key_A: mKeyLeft = false; break;
+            case Qt::Key_D: mKeyRight = false; break;
             case Qt::Key_Shift: mFast = false; break;
             default: QWidget::keyReleaseEvent (event);
         }
@@ -163,6 +168,8 @@ namespace CSVRender
     {
         mKeyForward = false;
         mKeyBackward = false;
+        mKeyLeft = false;
+        mKeyRight = false;
         mFast = false;
 
         QWidget::focusOutEvent (event);
@@ -170,17 +177,31 @@ namespace CSVRender
 
     void SceneWidget::update()
     {
+        int factor = mFast ? 4 : 1;
+
         if (mKeyForward && !mKeyBackward)
         {
-            int factor = mFast ? 4 : 1;
             mCamera->move (factor * mCamera->getDirection());
             mUpdate = true;
         }
 
         if (!mKeyForward && mKeyBackward)
         {
-            int factor = mFast ? 4 : 1;
             mCamera->move (factor * -mCamera->getDirection());
+            mUpdate = true;
+        }
+
+        if (mKeyLeft && !mKeyRight)
+        {
+            Ogre::Vector3 direction = mCamera->getDerivedRight();
+            mCamera->move (factor * -direction);
+            mUpdate = true;
+        }
+
+        if (!mKeyLeft && mKeyRight)
+        {
+            Ogre::Vector3 direction = mCamera->getDerivedRight();
+            mCamera->move (factor * direction);
             mUpdate = true;
         }
 
