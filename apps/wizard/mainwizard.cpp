@@ -152,11 +152,11 @@ void Wizard::MainWizard::runSettingsImporter()
     QString language(field(QLatin1String("installation.language")).toString());
 
     if (language == QLatin1String("Polish")) {
-        arguments.append(QLatin1String("windows-1250"));
+        arguments.append(QLatin1String("win1250"));
     } else if (language == QLatin1String("Russian")) {
-        arguments.append(QLatin1String("windows-1251"));
+        arguments.append(QLatin1String("win1251"));
     }  else {
-        arguments.append(QLatin1String("windows-1252"));
+        arguments.append(QLatin1String("win1252"));
     }
 
     // Now the paths
