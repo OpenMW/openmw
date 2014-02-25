@@ -7,6 +7,9 @@ Wizard::ImportPage::ImportPage(MainWizard *wizard) :
     mWizard(wizard)
 {
     setupUi(this);
+
+    registerField(QLatin1String("installation.import-settings"), importCheckBox);
+    registerField(QLatin1String("installation.import-addons"), addonsCheckBox);
 }
 
 int Wizard::ImportPage::nextId() const

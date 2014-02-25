@@ -477,7 +477,6 @@ void Wizard::UnshieldWorker::setupAddon(Component component)
             mWait.wait(&mLock);
 
         } else if (disk.exists(QLatin1String("data1.hdr"))) {
-            qDebug() << "Exists! " << disk.absolutePath();
             setComponentPath(component, disk.absolutePath());
         }
 
@@ -532,13 +531,13 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
         return false;
     }
 
-    emit textChanged(tr("Installing %0").arg(name));
+    emit textChanged(tr("Installing %1").arg(name));
 
     QDir disk(getComponentPath(component));
 
     if (!disk.exists()) {
         qDebug() << "Component path not set: " << getComponentPath(Wizard::Component_Morrowind);
-        emit error(tr("Component path not set!"), tr("The source path for %0 was not set.").arg(name));
+        emit error(tr("Component path not set!"), tr("The source path for %1 was not set.").arg(name));
         return false;
     }
 
@@ -552,20 +551,20 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
 
     if (!temp.mkpath(tempPath)) {
         qDebug() << "Can't make path";
-        emit error(tr("Cannot create temporary directory!"), tr("Failed to create %0.").arg(tempPath));
+        emit error(tr("Cannot create temporary directory!"), tr("Failed to create %1.").arg(tempPath));
         return false;
     }
 
     temp.setPath(tempPath);
 
     if (!temp.mkdir(name)) {
-        emit error(tr("Cannot create temporary directory!"), tr("Failed to create %0.").arg(temp.absoluteFilePath(name)));
+        emit error(tr("Cannot create temporary directory!"), tr("Failed to create %1.").arg(temp.absoluteFilePath(name)));
         return false;
     }
 
     if (!temp.cd(name)) {
         qDebug() << "Can't cd to dir";
-        emit error(tr("Cannot move into temporary directory!"), tr("Failed to move into %0.").arg(temp.absoluteFilePath(name)));
+        emit error(tr("Cannot move into temporary directory!"), tr("Failed to move into %1.").arg(temp.absoluteFilePath(name)));
         return false;
     }
 
@@ -578,7 +577,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
     if (!moveDirectory(temp.absoluteFilePath(QLatin1String("Data Files")), getPath())) {
         qDebug() << "failed to move files!";
         emit error(tr("Moving extracted files failed!"),
-                   tr("Failed to move files from %0 to %1.").arg(temp.absoluteFilePath(QLatin1String("Data Files")),
+                   tr("Failed to move files from %1 to %2.").arg(temp.absoluteFilePath(QLatin1String("Data Files")),
                                                                 getPath()));
         return false;
     }
@@ -599,7 +598,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
             moveFile(info.absoluteFilePath(), getPath() + QDir::separator() + QLatin1String("Morrowind.ini"));
         } else {
             qDebug() << "Could not find ini file!";
-            emit error(tr("Could not find Morrowind configuration file!"), tr("Failed to find %0.").arg(iniPath));
+            emit error(tr("Could not find Morrowind configuration file!"), tr("Failed to find %1.").arg(iniPath));
             return false;
         }
 
@@ -639,7 +638,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
         }
     }
 
-    emit textChanged(tr("%0 installation finished!").arg(name));
+    emit textChanged(tr("%1 installation finished!").arg(name));
     return true;
 
 }
@@ -710,11 +709,13 @@ bool Wizard::UnshieldWorker::findFile(const QString &cabFile, const QString &fil
 
         for (size_t j=group->first_file; j<=group->last_file; ++j)
         {
-            QString current(QString::fromUtf8(unshield_file_name(unshield, j)));
 
-            qDebug() << "File is: " << current;
-            if (current == fileName)
-                return true; // File is found!
+            if (unshield_file_is_valid(unshield, j)) {
+                QString current(QString::fromUtf8(unshield_file_name(unshield, j)));
+
+                if (current.toLower() == fileName.toLower())
+                    return true; // File is found!
+            }
         }
     }
 

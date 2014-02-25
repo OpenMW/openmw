@@ -13,10 +13,20 @@ Wizard::ConclusionPage::ConclusionPage(MainWizard *wizard) :
 
 void Wizard::ConclusionPage::initializePage()
 {
-    // Write the path to openmw.cfg
-    if (field(QLatin1String("installation.new")).toBool() == true) {
-        QString path(field(QLatin1String("installation.path")).toString());
-        mWizard->addInstallation(path);
+//    // Write the path to openmw.cfg
+//    if (field(QLatin1String("installation.new")).toBool() == true) {
+//        QString path(field(QLatin1String("installation.path")).toString());
+//        mWizard->addInstallation(path);
+//    }
+
+    if (!mWizard->mError)
+    {
+        if ((field(QLatin1String("installation.new")).toBool() == true)
+                | (field(QLatin1String("installation.import-settings")).toBool() == true))
+        {
+            qDebug() << "IMPORT SETTINGS";
+            mWizard->runSettingsImporter();
+        }
     }
 
     if (!mWizard->mError)

@@ -105,6 +105,10 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
         launchersettings
         settingsbase
         )
+        
+    add_component_qt_dir (process
+        processinvoker
+    )
 
    include(${QT_USE_FILE})
     QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})

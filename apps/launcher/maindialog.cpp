@@ -1,6 +1,7 @@
 #include "maindialog.hpp"
 
 #include <components/version/version.hpp>
+#include <components/process/processinvoker.hpp>
 
 #include <QLabel>
 #include <QDate>
@@ -28,6 +29,8 @@
 #include "playpage.hpp"
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"
+
+using namespace Process;
 
 Launcher::MainDialog::MainDialog(QWidget *parent)
     : mGameSettings(mCfgMgr), QMainWindow (parent)
@@ -273,7 +276,7 @@ bool Launcher::MainDialog::showFirstRunDialog()
         arguments.append(QString("--cfg"));
         arguments.append(path);
 
-        if (!startProgram(QString("mwiniimport"), arguments, false))
+        if (!ProcessInvoker::startProcess(QLatin1String("mwiniimport"), arguments, false))
             return false;
 
         // Re-read the game settings
@@ -810,103 +813,6 @@ void Launcher::MainDialog::play()
     }
 
     // Launch the game detached
-    startProgram(QString("openmw"), true);
-    qApp->quit();
-}
-
-bool Launcher::MainDialog::startProgram(const QString &name, const QStringList &arguments, bool detached)
-{
-    QString path = name;
-#ifdef Q_OS_WIN
-    path.append(QString(".exe"));
-#elif defined(Q_OS_MAC)
-    QDir dir(QCoreApplication::applicationDirPath());
-    path = dir.absoluteFilePath(name);
-#else
-    path.prepend(QString("./"));
-#endif
-
-    QFile file(path);
-
-    QProcess process;
-    QFileInfo info(file);
-
-    if (!file.exists()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error starting executable"));
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not find %1</b><br><br> \
-                        The application is not found.<br> \
-                        Please make sure OpenMW is installed correctly and try again.<br>").arg(info.fileName()));
-        msgBox.exec();
-
-        return false;
-    }
-
-    if (!info.isExecutable()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error starting executable"));
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not start %1</b><br><br> \
-                        The application is not executable.<br> \
-                        Please make sure you have the right permissions and try again.<br>").arg(info.fileName()));
-        msgBox.exec();
-
-        return false;
-    }
-
-    // Start the executable
-    if (detached) {
-        if (!process.startDetached(path, arguments)) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error starting executable"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not start %1</b><br><br> \
-                              An error occurred while starting %1.<br><br> \
-                              Press \"Show Details...\" for more information.<br>").arg(info.fileName()));
-            msgBox.setDetailedText(process.errorString());
-            msgBox.exec();
-
-            return false;
-        }
-    } else {
-        process.start(path, arguments);
-        if (!process.waitForFinished()) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error starting executable"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not start %1</b><br><br> \
-                              An error occurred while starting %1.<br><br> \
-                              Press \"Show Details...\" for more information.<br>").arg(info.fileName()));
-            msgBox.setDetailedText(process.errorString());
-            msgBox.exec();
-
-            return false;
-        }
-
-        if (process.exitCode() != 0 || process.exitStatus() == QProcess::CrashExit) {
-            QString error(process.readAllStandardError());
-            error.append(tr("\nArguments:\n"));
-            error.append(arguments.join(" "));
-
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error running executable"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Executable %1 returned an error</b><br><br> \
-                              An error occurred while running %1.<br><br> \
-                              Press \"Show Details...\" for more information.<br>").arg(info.fileName()));
-            msgBox.setDetailedText(error);
-            msgBox.exec();
-
-            return false;
-        }
-    }
-
-    return true;
-
+    if (ProcessInvoker::startProcess(QLatin1String("openmw"), true))
+        qApp->quit();
 }

@@ -154,6 +154,11 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 
     if (fileName.isEmpty()) {
         qDebug() << "Cancel was clicked!";
+
+        logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
+                                    <b>Error: The installation was aborted by the user</b></p>"));
+        mWizard->mError = true;
+        emit completeChanged();
         return;
     }
 
@@ -184,8 +189,10 @@ void Wizard::InstallationPage::installationError(const QString &text, const QStr
 
     installProgressLabel->setText(tr("Installation failed!"));
 
-    logTextEdit->appendHtml(tr("<b><font color='red'>Error: %1</b>").arg(text));
-    logTextEdit->appendHtml(tr("<b><font color='red'>%1</b>").arg(details));
+    logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
+                               <b>Error: %1</b></p>").arg(text));
+    logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"> \
+                               <b>%1</b></p>").arg(details));
 
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("An error occurred"));
@@ -214,9 +221,13 @@ bool Wizard::InstallationPage::isComplete() const
 
 int Wizard::InstallationPage::nextId() const
 {
-    if (!mWizard->mError) {
-        return MainWizard::Page_Import;
-    } else {
+    if (field(QLatin1String("installation.new")).toBool() == true) {
         return MainWizard::Page_Conclusion;
+    } else {
+        if (!mWizard->mError) {
+            return MainWizard::Page_Import;
+        } else {
+            return MainWizard::Page_Conclusion;
+        }
     }
 }

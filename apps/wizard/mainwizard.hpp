@@ -39,6 +39,7 @@ namespace Wizard
 
         bool findFiles(const QString &name, const QString &path);
         void addInstallation(const QString &path);
+        void runSettingsImporter();
 
         QMap<QString, Installation*> mInstallations;
 
@@ -48,6 +49,7 @@ namespace Wizard
 
     private:
 
+        void setupGameSettings();
         void setupInstallations();
         void setupPages();
 

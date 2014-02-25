@@ -1,5 +1,7 @@
 #include "mainwizard.hpp"
 
+#include <components/process/processinvoker.hpp>
+
 #include <QDebug>
 
 #include <QCloseEvent>
@@ -16,6 +18,8 @@
 #include "installationpage.hpp"
 #include "importpage.hpp"
 #include "conclusionpage.hpp"
+
+using namespace Process;
 
 Wizard::MainWizard::MainWizard(QWidget *parent) :
     mGameSettings(mCfgMgr),
@@ -35,11 +39,12 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 
     setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
 
+    setupGameSettings();
     setupInstallations();
     setupPages();
 }
 
-void Wizard::MainWizard::setupInstallations()
+void Wizard::MainWizard::setupGameSettings()
 {
     QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
     QString globalPath(QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str()));
@@ -97,14 +102,74 @@ void Wizard::MainWizard::setupInstallations()
         }
         file.close();
     }
+}
 
+void Wizard::MainWizard::setupInstallations()
+{
     // Check if the paths actually contain a Morrowind installation
     foreach (const QString path, mGameSettings.getDataDirs()) {
 
         if (findFiles(QLatin1String("Morrowind"), path))
             addInstallation(path);
     }
+}
 
+void Wizard::MainWizard::runSettingsImporter()
+{
+    QString path(field(QLatin1String("installation.path")).toString());
+
+    // Create the file if it doesn't already exist, else the importer will fail
+    QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    QFile file(userPath + QLatin1String("openmw.cfg"));
+
+    if (!file.exists()) {
+        if (!file.open(QIODevice::ReadWrite)) {
+            // File cannot be created
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<html><head/><body><p><b>Could not open or create %1 for writing</b></p> \
+                              <p>Please make sure you have the right permissions \
+                              and try again.</p></body></html>").arg(file.fileName()));
+            msgBox.exec();
+            return qApp->quit();
+        }
+
+        file.close();
+    }
+
+    // Construct the arguments to run the importer
+    QStringList arguments;
+
+    // Import plugin selection?
+    if (field(QLatin1String("installation.import-addons")).toBool() == true)
+        arguments.append(QLatin1String("--game-files"));
+
+    arguments.append(QLatin1String("--encoding"));
+
+    // Set encoding
+    QString language(field(QLatin1String("installation.language")).toString());
+
+    if (language == QLatin1String("Polish")) {
+        arguments.append(QLatin1String("windows-1250"));
+    } else if (language == QLatin1String("Russian")) {
+        arguments.append(QLatin1String("windows-1251"));
+    }  else {
+        arguments.append(QLatin1String("windows-1252"));
+    }
+
+    // Now the paths
+    arguments.append(QLatin1String("--ini"));
+    arguments.append(path + QDir::separator() + QLatin1String("Morrowind.ini"));
+    arguments.append(QLatin1String("--cfg"));
+    arguments.append(userPath + QLatin1String("openmw.cfg"));
+
+    if (!ProcessInvoker::startProcess(QLatin1String("mwiniimport"), arguments, false))
+        return qApp->quit();;
+
+    // Re-read the game settings
+    setupGameSettings();
 }
 
 void Wizard::MainWizard::addInstallation(const QString &path)
@@ -134,7 +199,7 @@ void Wizard::MainWizard::addInstallation(const QString &path)
 
     // Add it to the openmw.cfg too
     if (!mGameSettings.getDataDirs().contains(path)) {
-        mGameSettings.setMultiValue(QString("data"), path);
+        mGameSettings.setMultiValue(QLatin1String("data"), path);
         mGameSettings.addDataDir(path);
     }
 }
@@ -161,6 +226,12 @@ void Wizard::MainWizard::accept()
 
 void Wizard::MainWizard::writeSettings()
 {
+    QString path(field(QLatin1String("installation.path")).toString());
+
+    // Make sure the installation path is the last data= entry
+    mGameSettings.removeDataDir(path);
+    mGameSettings.addDataDir(path);
+
     QString userPath(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
     QDir dir(userPath);
 
@@ -209,10 +280,6 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
         return false;
 
     // TODO: add MIME handling to make sure the files are real
-    if (dir.exists(name + QLatin1String(".esm")) && dir.exists(name + QLatin1String(".bsa"))) {
-        return true;
-    } else {
-        return false;
-    }
-
+    return (dir.entryList().contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
+            && dir.entryList().contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive));
 }
