@@ -49,6 +49,7 @@ namespace CSVRender
             bool mUpdate;
             int mKeyForward;
             int mKeyBackward;
+            bool mFast;
 
         private slots:
 
