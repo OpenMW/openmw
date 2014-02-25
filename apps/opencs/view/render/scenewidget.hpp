@@ -63,6 +63,7 @@ namespace CSVRender
             int mKeyRight;
             bool mFast;
             bool mDragging;
+            bool mMod1;
             QPoint mOldPos;
             int mMouseSensitivity;
             int mFastFactor;

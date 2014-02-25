@@ -17,7 +17,7 @@ namespace CSVRender
         , mCamera(NULL)
         , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free), mUpdate (false)
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
-        , mFast (false), mDragging (false)
+        , mFast (false), mDragging (false), mMod1 (false)
         , mMouseSensitivity (2), mFastFactor (4) /// \todo make these configurable
     {
         setAttribute(Qt::WA_PaintOnScreen);
@@ -148,6 +148,7 @@ namespace CSVRender
             case Qt::Key_A: mKeyLeft = true; break;
             case Qt::Key_D: mKeyRight = true; break;
             case Qt::Key_Shift: mFast = true; break;
+            case Qt::Key_Control: mMod1 = true; break;
             default: QWidget::keyPressEvent (event);
         }
     }
@@ -161,6 +162,7 @@ namespace CSVRender
             case Qt::Key_A: mKeyLeft = false; break;
             case Qt::Key_D: mKeyRight = false; break;
             case Qt::Key_Shift: mFast = false; break;
+            case Qt::Key_Control: mMod1 = false; break;
             default: QWidget::keyReleaseEvent (event);
         }
     }
@@ -188,18 +190,39 @@ namespace CSVRender
                 QPoint diff = mOldPos-event->pos();
                 mOldPos = event->pos();
 
-                if (diff.x())
+                if (mMod1)
                 {
-                    Ogre::Vector3 direction = mCamera->getDerivedRight();
-                    mCamera->move ((getFastFactor() * direction * diff.x())/mMouseSensitivity);
-                    mUpdate = true;
-                }
+                    // turn camera
+                    if (diff.x())
+                    {
+                        mCamera->yaw (
+                            Ogre::Degree ((getFastFactor() * diff.x())/mMouseSensitivity));
+                        mUpdate = true;
+                    }
 
-                if (diff.y())
+                    if (diff.y())
+                    {
+                        mCamera->pitch (
+                            Ogre::Degree ((getFastFactor() * diff.y())/mMouseSensitivity));
+                        mUpdate = true;
+                    }
+                }
+                else
                 {
-                    Ogre::Vector3 direction = mCamera->getDerivedUp();
-                    mCamera->move ((getFastFactor() * -direction * diff.y())/mMouseSensitivity);
-                    mUpdate = true;
+                    // pan camera
+                    if (diff.x())
+                    {
+                        Ogre::Vector3 direction = mCamera->getDerivedRight();
+                        mCamera->move ((getFastFactor() * direction * diff.x())/mMouseSensitivity);
+                        mUpdate = true;
+                    }
+
+                    if (diff.y())
+                    {
+                        Ogre::Vector3 direction = mCamera->getDerivedUp();
+                        mCamera->move ((getFastFactor() * -direction * diff.y())/mMouseSensitivity);
+                        mUpdate = true;
+                    }
                 }
             }
             else
@@ -223,6 +246,7 @@ namespace CSVRender
         mKeyLeft = false;
         mKeyRight = false;
         mFast = false;
+        mMod1 = false;
 
         QWidget::focusOutEvent (event);
     }
