@@ -15,7 +15,7 @@ namespace CSVRender
         : QWidget(parent)
         , mWindow(NULL)
         , mCamera(NULL)
-        , mSceneMgr(NULL)
+        , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free)
     {
         setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);

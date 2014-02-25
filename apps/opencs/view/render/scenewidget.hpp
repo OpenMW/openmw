@@ -17,24 +17,31 @@ namespace CSVRender
     {
         Q_OBJECT
 
-    public:
-        SceneWidget(QWidget *parent);
-        virtual ~SceneWidget(void);
+        public:
 
-        QPaintEngine*	paintEngine() const;
+            enum NavigationMode
+            {
+                NavigationMode_Free
+            };
 
-    private:
-        void paintEvent(QPaintEvent* e);
-        void resizeEvent(QResizeEvent* e);
-        bool event(QEvent* e);
+            SceneWidget(QWidget *parent);
+            virtual ~SceneWidget(void);
 
-        void updateOgreWindow();
+            QPaintEngine*	paintEngine() const;
 
-        Ogre::Camera*	    mCamera;
-        Ogre::SceneManager* mSceneMgr;
-        Ogre::RenderWindow* mWindow;
+        private:
+            void paintEvent(QPaintEvent* e);
+            void resizeEvent(QResizeEvent* e);
+            bool event(QEvent* e);
+
+            void updateOgreWindow();
+
+            Ogre::Camera*	    mCamera;
+            Ogre::SceneManager* mSceneMgr;
+            Ogre::RenderWindow* mWindow;
+
+            NavigationMode mNavigationMode;
     };
-
 }
 
 #endif
