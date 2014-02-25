@@ -164,6 +164,17 @@ namespace CSVRender
         }
     }
 
+    void SceneWidget::wheelEvent (QWheelEvent *event)
+    {
+        if (int delta = event->delta())
+        {
+            int factor = mFast ? 4 : 1; /// \todo make this configurable
+            /// \todo make mouse sensitivity configurable (the factor 2)
+            mCamera->move ((factor * mCamera->getDirection() * delta)/2);
+            mUpdate = true;
+        }
+    }
+
     void SceneWidget::focusOutEvent (QFocusEvent *event)
     {
         mKeyForward = false;
@@ -177,7 +188,7 @@ namespace CSVRender
 
     void SceneWidget::update()
     {
-        int factor = mFast ? 4 : 1;
+        int factor = mFast ? 4 : 1; /// \todo make this configurable
 
         if (mKeyForward && !mKeyBackward)
         {

@@ -39,6 +39,8 @@ namespace CSVRender
 
             void focusOutEvent (QFocusEvent *event);
 
+            void wheelEvent (QWheelEvent *event);
+
             void updateOgreWindow();
 
             Ogre::Camera*	    mCamera;
