@@ -190,7 +190,7 @@ namespace CSVRender
                 QPoint diff = mOldPos-event->pos();
                 mOldPos = event->pos();
 
-                if (mMod1)
+                if (!mMod1)
                 {
                     // turn camera
                     if (diff.x())
