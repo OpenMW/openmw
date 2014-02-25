@@ -10,6 +10,8 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
+#include <components/files/multidircollection.hpp>
+
 #include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
 
@@ -19,6 +21,11 @@
 #include "view/doc/newgame.hpp"
 
 #include "view/settings/usersettingsdialog.hpp"
+
+namespace OgreInit
+{
+    class OgreInit;
+}
 
 namespace CS
 {
@@ -37,7 +44,10 @@ namespace CS
 
             boost::filesystem::path mLocal;
 
-            void setupDataFiles();
+            void setupDataFiles (const Files::PathContainer& dataDirs);
+
+            Files::PathContainer readConfig();
+            ///< \return data paths
 
             // not implemented
             Editor (const Editor&);
@@ -45,7 +55,7 @@ namespace CS
 
         public:
 
-            Editor();
+            Editor (OgreInit::OgreInit& ogreInit);
 
             bool makeIPCServer();
             void connectToIPCServer();
