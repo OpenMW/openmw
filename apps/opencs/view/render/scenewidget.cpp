@@ -18,6 +18,7 @@ namespace CSVRender
         , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free), mUpdate (false)
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
         , mFast (false), mDragging (false)
+        , mMouseSensitivity (2), mFastFactor (4) /// \todo make these configurable
     {
         setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);
@@ -168,9 +169,7 @@ namespace CSVRender
     {
         if (int delta = event->delta())
         {
-            int factor = mFast ? 4 : 1; /// \todo make this configurable
-            /// \todo make mouse sensitivity configurable (the factor 2)
-            mCamera->move ((factor * mCamera->getDirection() * delta)/2);
+            mCamera->move ((getFastFactor() * mCamera->getDirection() * delta)/mMouseSensitivity);
             mUpdate = true;
         }
     }
@@ -182,8 +181,6 @@ namespace CSVRender
 
     void SceneWidget::mouseMoveEvent (QMouseEvent *event)
     {
-        int factor = mFast ? 4 : 1; /// \todo make this configurable
-
         if (event->buttons() & Qt::LeftButton)
         {
             if (mDragging)
@@ -194,16 +191,14 @@ namespace CSVRender
                 if (diff.x())
                 {
                     Ogre::Vector3 direction = mCamera->getDerivedRight();
-                    /// \todo make mouse sensitivity configurable (the factor 2)
-                    mCamera->move ((factor * direction * diff.x())/2);
+                    mCamera->move ((getFastFactor() * direction * diff.x())/mMouseSensitivity);
                     mUpdate = true;
                 }
 
                 if (diff.y())
                 {
                     Ogre::Vector3 direction = mCamera->getDerivedUp();
-                    /// \todo make mouse sensitivity configurable (the factor 2)
-                    mCamera->move ((factor * -direction * diff.y())/2);
+                    mCamera->move ((getFastFactor() * -direction * diff.y())/mMouseSensitivity);
                     mUpdate = true;
                 }
             }
@@ -234,31 +229,29 @@ namespace CSVRender
 
     void SceneWidget::update()
     {
-        int factor = mFast ? 4 : 1; /// \todo make this configurable
-
         if (mKeyForward && !mKeyBackward)
         {
-            mCamera->move (factor * mCamera->getDirection());
+            mCamera->move (getFastFactor() * mCamera->getDirection());
             mUpdate = true;
         }
 
         if (!mKeyForward && mKeyBackward)
         {
-            mCamera->move (factor * -mCamera->getDirection());
+            mCamera->move (getFastFactor() * -mCamera->getDirection());
             mUpdate = true;
         }
 
         if (mKeyLeft && !mKeyRight)
         {
             Ogre::Vector3 direction = mCamera->getDerivedRight();
-            mCamera->move (factor * -direction);
+            mCamera->move (getFastFactor() * -direction);
             mUpdate = true;
         }
 
         if (!mKeyLeft && mKeyRight)
         {
             Ogre::Vector3 direction = mCamera->getDerivedRight();
-            mCamera->move (factor * direction);
+            mCamera->move (getFastFactor() * direction);
             mUpdate = true;
         }
 
@@ -267,5 +260,10 @@ namespace CSVRender
             mUpdate = false;
             mWindow->update();
         }
+    }
+
+    int SceneWidget::getFastFactor() const
+    {
+        return mFast ? mFastFactor : 1;
     }
 }

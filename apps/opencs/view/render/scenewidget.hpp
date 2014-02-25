@@ -49,6 +49,8 @@ namespace CSVRender
 
             void updateOgreWindow();
 
+            int getFastFactor() const;
+
             Ogre::Camera*	    mCamera;
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
@@ -62,6 +64,8 @@ namespace CSVRender
             bool mFast;
             bool mDragging;
             QPoint mOldPos;
+            int mMouseSensitivity;
+            int mFastFactor;
 
         private slots:
 
