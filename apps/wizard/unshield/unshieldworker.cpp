@@ -630,6 +630,10 @@ bool Wizard::UnshieldWorker::installComponent(Component component)
         QFileInfo patch(temp.absoluteFilePath(QLatin1String("Tribunal Patch") + QDir::separator() + QLatin1String("Tribunal.esm")));
         QFileInfo original(getPath() + QDir::separator() + QLatin1String("Tribunal.esm"));
 
+        // Look for the patch in other places too, it's not always in "Tribunal Patch"
+        if (!patch.exists())
+            patch = QFileInfo(temp.absoluteFilePath(QLatin1String("Tribunal") + QDir::separator() + QLatin1String("Tribunal.esm")));
+
         if (original.exists() && patch.exists()) {
             emit textChanged(tr("Extracting: Tribunal patch"));
             copyFile(patch.absoluteFilePath(), original.absoluteFilePath());
