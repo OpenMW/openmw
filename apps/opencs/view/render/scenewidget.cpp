@@ -15,7 +15,7 @@ namespace CSVRender
         : QWidget(parent)
         , mWindow(NULL)
         , mCamera(NULL)
-        , mSceneMgr(NULL), mNavigationMode (NavigationMode_Free), mUpdate (false)
+        , mSceneMgr(NULL), mNavigationMode (NavigationMode_1stPerson), mUpdate (false)
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
         , mFast (false), mDragging (false), mMod1 (false)
         , mMouseSensitivity (2), mFastFactor (4) /// \todo make these configurable
@@ -92,6 +92,15 @@ namespace CSVRender
     SceneWidget::~SceneWidget()
     {
         Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
+    }
+
+    void SceneWidget::setNavigationMode (NavigationMode mode)
+    {
+        if (mode!=mNavigationMode)
+        {
+            mNavigationMode = mode;
+
+        }
     }
 
     void SceneWidget::paintEvent(QPaintEvent* e)

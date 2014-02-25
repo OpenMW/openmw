@@ -20,13 +20,17 @@ namespace CSVRender
 
             enum NavigationMode
             {
-                NavigationMode_Free
+                NavigationMode_1stPerson,
+                NavigationMode_Free,
+                NavigationMode_Orbit
             };
 
             SceneWidget(QWidget *parent);
-            virtual ~SceneWidget(void);
+            virtual ~SceneWidget();
 
             QPaintEngine*	paintEngine() const;
+
+            void setNavigationMode (NavigationMode mode);
 
         private:
             void paintEvent(QPaintEvent* e);
