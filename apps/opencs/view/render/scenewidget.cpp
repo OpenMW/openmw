@@ -235,7 +235,7 @@ namespace CSVRender
 
     void SceneWidget::mouseReleaseEvent (QMouseEvent *event)
     {
-        if (event->buttons() & Qt::LeftButton)
+        if (!(event->buttons() & Qt::LeftButton))
             mDragging = false;
     }
 
