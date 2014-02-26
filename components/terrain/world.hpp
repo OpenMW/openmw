@@ -1,13 +1,12 @@
 #ifndef COMPONENTS_TERRAIN_H
 #define COMPONENTS_TERRAIN_H
 
-#include <OgreHardwareIndexBuffer.h>
-#include <OgreHardwareVertexBuffer.h>
 #include <OgreAxisAlignedBox.h>
 #include <OgreTexture.h>
 #include <OgreWorkQueue.h>
 
 #include "defs.hpp"
+#include "buffercache.hpp"
 
 namespace Ogre
 {
@@ -125,25 +124,12 @@ namespace Terrain
 
         void buildQuadTree(QuadTreeNode* node);
 
+        BufferCache mCache;
+
     public:
         // ----INTERNAL----
-
-        enum IndexBufferFlags
-        {
-            IBF_North = 1 << 0,
-            IBF_East  = 1 << 1,
-            IBF_South = 1 << 2,
-            IBF_West  = 1 << 3
-        };
-
-        /// @param flags first 4*4 bits are LOD deltas on each edge, respectively (4 bits each)
-        ///              next 4 bits are LOD level of the index buffer (LOD 0 = don't omit any vertices)
-        /// @param numIndices number of indices that were used will be written here
-        Ogre::HardwareIndexBufferSharedPtr getIndexBuffer (int flags, size_t& numIndices);
-
-        Ogre::HardwareVertexBufferSharedPtr getVertexBuffer (int numVertsOneSide);
-
         Ogre::SceneManager* getCompositeMapSceneManager() { return mCompositeMapSceneMgr; }
+        BufferCache& getBufferCache() { return mCache; }
 
         // Delete all quads
         void clearCompositeMapSceneManager();
@@ -158,12 +144,6 @@ namespace Terrain
         void queueLoad (QuadTreeNode* node);
 
     private:
-        // Index buffers are shared across terrain batches where possible. There is one index buffer for each
-        // combination of LOD deltas and index buffer LOD we may need.
-        std::map<int, Ogre::HardwareIndexBufferSharedPtr> mIndexBufferMap;
-
-        std::map<int, Ogre::HardwareVertexBufferSharedPtr> mUvBufferMap;
-
         Ogre::RenderTarget* mCompositeMapRenderTarget;
         Ogre::TexturePtr mCompositeMapRenderTexture;
     };

@@ -9,7 +9,7 @@
 #include "world.hpp"
 #include "chunk.hpp"
 #include "storage.hpp"
-
+#include "buffercache.hpp"
 #include "material.hpp"
 
 using namespace Terrain;
@@ -372,7 +372,7 @@ void QuadTreeNode::load(const LoadResponseData &data)
     assert (!mChunk);
 
     std::cout << "loading " << std::endl;
-    mChunk = new Chunk(this, data);
+    mChunk = new Chunk(mTerrain->getBufferCache().getUVBuffer(), mBounds, data);
     mChunk->setVisibilityFlags(mTerrain->getVisiblityFlags());
     mChunk->setCastShadows(true);
     mSceneNode->attachObject(mChunk);
@@ -429,7 +429,38 @@ void QuadTreeNode::unload()
 void QuadTreeNode::updateIndexBuffers()
 {
     if (hasChunk())
-        mChunk->updateIndexBuffer();
+    {
+        // Fetch a suitable index buffer (which may be shared)
+        size_t ourLod = getActualLodLevel();
+
+        int flags = 0;
+
+        for (int i=0; i<4; ++i)
+        {
+            QuadTreeNode* neighbour = getNeighbour((Direction)i);
+
+            // If the neighbour isn't currently rendering itself,
+            // go up until we find one. NOTE: We don't need to go down,
+            // because in that case neighbour's detail would be higher than
+            // our detail and the neighbour would handle stitching by itself.
+            while (neighbour && !neighbour->hasChunk())
+                neighbour = neighbour->getParent();
+            size_t lod = 0;
+            if (neighbour)
+                lod = neighbour->getActualLodLevel();
+            if (lod <= ourLod) // We only need to worry about neighbours less detailed than we are -
+                lod = 0;         // neighbours with more detail will do the stitching themselves
+            // Use 4 bits for each LOD delta
+            if (lod > 0)
+            {
+                assert (lod - ourLod < (1 << 4));
+                flags |= int(lod - ourLod) << (4*i);
+            }
+        }
+        flags |= 0 /*((int)mAdditionalLod)*/ << (4*4);
+
+        mChunk->setIndexBuffer(mTerrain->getBufferCache().getIndexBuffer(flags));
+    }
     else if (hasChildren())
     {
         for (int i=0; i<4; ++i)
@@ -445,7 +476,7 @@ bool QuadTreeNode::hasChunk()
 size_t QuadTreeNode::getActualLodLevel()
 {
     assert(hasChunk() && "Can't get actual LOD level if this node has no render chunk");
-    return mLodLevel + mChunk->getAdditionalLod();
+    return mLodLevel /* + mChunk->getAdditionalLod() */;
 }
 
 void QuadTreeNode::ensureLayerInfo()

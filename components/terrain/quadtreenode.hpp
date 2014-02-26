@@ -5,6 +5,8 @@
 #include <OgreVector2.h>
 #include <OgreTexture.h>
 
+#include "defs.hpp"
+
 namespace Ogre
 {
     class Rectangle2D;
@@ -16,14 +18,6 @@ namespace Terrain
     class Chunk;
     class MaterialGenerator;
     struct LoadResponseData;
-
-    enum Direction
-    {
-        North = 0,
-        East = 1,
-        South = 2,
-        West = 3
-    };
 
     enum ChildDirection
     {
