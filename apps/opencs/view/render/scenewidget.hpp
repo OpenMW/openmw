@@ -12,25 +12,21 @@ namespace Ogre
 
 namespace CSVRender
 {
+    class Navigation;
+
     class SceneWidget : public QWidget
     {
         Q_OBJECT
 
         public:
 
-            enum NavigationMode
-            {
-                NavigationMode_1stPerson,
-                NavigationMode_Free,
-                NavigationMode_Orbit
-            };
-
             SceneWidget(QWidget *parent);
             virtual ~SceneWidget();
 
             QPaintEngine*	paintEngine() const;
 
-            void setNavigationMode (NavigationMode mode);
+            void setNavigation (Navigation *navigation);
+            ///< \attention The ownership of \a navigation is not transferred to *this.
 
         private:
             void paintEvent(QPaintEvent* e);
@@ -59,7 +55,7 @@ namespace CSVRender
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
 
-            NavigationMode mNavigationMode;
+            Navigation *mNavigation;
             bool mUpdate;
             int mKeyForward;
             int mKeyBackward;
@@ -69,7 +65,6 @@ namespace CSVRender
             bool mDragging;
             bool mMod1;
             QPoint mOldPos;
-            int mMouseSensitivity;
             int mFastFactor;
 
         private slots:

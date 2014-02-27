@@ -59,6 +59,8 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     widget->setLayout (layout);
 
     setWidget (widget);
+
+    mScene->setNavigation (&m1st);
 }
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
@@ -81,9 +83,13 @@ void CSVWorld::SceneSubView::setStatusBar (bool show)
 void CSVWorld::SceneSubView::selectNavigationMode (const std::string& mode)
 {
     if (mode=="1st")
-        mScene->setNavigationMode (CSVRender::SceneWidget::NavigationMode_1stPerson);
+        mScene->setNavigation (&m1st);
     else if (mode=="free")
-        mScene->setNavigationMode (CSVRender::SceneWidget::NavigationMode_Free);
+    {
+
+    }
     else if (mode=="orbit")
-        mScene->setNavigationMode (CSVRender::SceneWidget::NavigationMode_Orbit);
+    {
+
+    }
 }
