@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <QWidget>
-#include <QtCore/qnamespace.h>
+#include <qt4/QtCore/qnamespace.h>
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/universalid.hpp"
