@@ -64,8 +64,12 @@ opencs_units (view/world
     )
 
 opencs_units (view/render
-	scenewidget
-	)
+    scenewidget
+    )
+
+opencs_units_noqt (view/render
+    navigation
+    )
 
 opencs_units_noqt (view/world
     dialoguesubview subviews
