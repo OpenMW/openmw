@@ -980,13 +980,11 @@ void RenderingManager::screenshot(Image &image, int w, int h)
 
     Ogre::PixelFormat pf = rt->suggestPixelFormat();
 
-    std::vector<Ogre::uchar> data;
-    data.resize(w * h * Ogre::PixelUtil::getNumElemBytes(pf));
-
-    Ogre::PixelBox pb(w, h, 1, pf, &data[0]);
-    rt->copyContentsToMemory(pb);
-
-    image.loadDynamicImage(&data[0], w, h, pf);
+    image.loadDynamicImage(
+        OGRE_ALLOC_T(Ogre::uchar, w * h * Ogre::PixelUtil::getNumElemBytes(pf), Ogre::MEMCATEGORY_GENERAL),
+        w, h, 1, pf, true // autoDelete=true, frees memory we allocate
+    );
+    rt->copyContentsToMemory(image.getPixelBox()); // getPixelBox returns a box sharing the same memory as the image
 
     Ogre::TextureManager::getSingleton().remove(tempName);
     mRendering.getCamera()->setAspectRatio(oldAspect);
