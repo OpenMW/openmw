@@ -68,7 +68,7 @@ opencs_units (view/render
     )
 
 opencs_units_noqt (view/render
-    navigation navigation1st
+    navigation navigation1st navigationfree
     )
 
 opencs_units_noqt (view/world

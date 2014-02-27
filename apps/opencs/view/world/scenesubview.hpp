@@ -4,6 +4,7 @@
 #include "../doc/subview.hpp"
 
 #include "../render/navigation1st.hpp"
+#include "../render/navigationfree.hpp"
 
 class QModelIndex;
 
@@ -30,6 +31,7 @@ namespace CSVWorld
             TableBottomBox *mBottom;
             CSVRender::SceneWidget *mScene;
             CSVRender::Navigation1st m1st;
+            CSVRender::NavigationFree mFree;
 
         public:
 

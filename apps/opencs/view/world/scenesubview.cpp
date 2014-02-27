@@ -86,7 +86,7 @@ void CSVWorld::SceneSubView::selectNavigationMode (const std::string& mode)
         mScene->setNavigation (&m1st);
     else if (mode=="free")
     {
-
+        mScene->setNavigation (&mFree);
     }
     else if (mode=="orbit")
     {
