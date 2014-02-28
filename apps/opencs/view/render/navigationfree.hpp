@@ -26,6 +26,9 @@ namespace CSVRender
 
             virtual bool handleMovementKeys (int vertical, int horizontal);
             ///< \return Update required?
+
+            virtual bool handleRollKeys (int delta);
+            ///< \return Update required?
     };
 }
 

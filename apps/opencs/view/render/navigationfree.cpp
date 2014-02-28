@@ -58,3 +58,9 @@ bool CSVRender::NavigationFree::handleMovementKeys (int vertical, int horizontal
 
     return true;
 }
+
+bool CSVRender::NavigationFree::handleRollKeys (int delta)
+{
+    mCamera->roll (Ogre::Degree (getFactor (false) * delta));
+    return true;
+}

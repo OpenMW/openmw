@@ -57,10 +57,12 @@ namespace CSVRender
 
             Navigation *mNavigation;
             bool mUpdate;
-            int mKeyForward;
-            int mKeyBackward;
-            int mKeyLeft;
-            int mKeyRight;
+            bool mKeyForward;
+            bool mKeyBackward;
+            bool mKeyLeft;
+            bool mKeyRight;
+            bool mKeyRollLeft;
+            bool mKeyRollRight;
             bool mFast;
             bool mDragging;
             bool mMod1;

@@ -58,3 +58,9 @@ bool CSVRender::Navigation1st::handleMovementKeys (int vertical, int horizontal)
 
     return true;
 }
+
+bool CSVRender::Navigation1st::handleRollKeys (int delta)
+{
+    // we don't roll this way in 1st person mode
+    return false;
+}

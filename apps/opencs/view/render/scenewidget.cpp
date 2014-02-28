@@ -19,6 +19,7 @@ namespace CSVRender
         , mCamera(NULL)
         , mSceneMgr(NULL), mNavigation (0), mUpdate (false)
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
+        , mKeyRollLeft (false), mKeyRollRight (false)
         , mFast (false), mDragging (false), mMod1 (false)
         , mFastFactor (4) /// \todo make this configurable
     {
@@ -158,6 +159,8 @@ namespace CSVRender
             case Qt::Key_S: mKeyBackward = true; break;
             case Qt::Key_A: mKeyLeft = true; break;
             case Qt::Key_D: mKeyRight = true; break;
+            case Qt::Key_Q: mKeyRollLeft = true; break;
+            case Qt::Key_E: mKeyRollRight = true; break;
             case Qt::Key_Control: mMod1 = true; break;
 
             case Qt::Key_Shift:
@@ -181,6 +184,8 @@ namespace CSVRender
             case Qt::Key_S: mKeyBackward = false; break;
             case Qt::Key_A: mKeyLeft = false; break;
             case Qt::Key_D: mKeyRight = false; break;
+            case Qt::Key_Q: mKeyRollLeft = false; break;
+            case Qt::Key_E: mKeyRollRight = false; break;
             case Qt::Key_Control: mMod1 = false; break;
 
             case Qt::Key_Shift:
@@ -268,6 +273,18 @@ namespace CSVRender
             if (horizontal || vertical)
                 if (mNavigation->handleMovementKeys (vertical, horizontal))
                     mUpdate = true;
+
+            int roll = 0;
+
+            if (mKeyRollLeft && !mKeyRollRight)
+                roll = 1;
+            else if (!mKeyRollLeft && mKeyRollRight)
+                roll = -1;
+
+            if (roll)
+                if (mNavigation->handleRollKeys (roll))
+                    mUpdate = true;
+
         }
 
         if (mUpdate)
