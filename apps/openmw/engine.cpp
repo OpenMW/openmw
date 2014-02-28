@@ -456,7 +456,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
     {
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
-        pos.rot[0] = pos.rot[1] = pos.pos[2] = 0;
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         world->changeToExteriorCell (pos);
     }
 
