@@ -46,9 +46,6 @@ namespace Terrain
 
         Ogre::VertexData* mVertexData;
         Ogre::IndexData* mIndexData;
-        Ogre::HardwareVertexBufferSharedPtr mVertexBuffer;
-        Ogre::HardwareVertexBufferSharedPtr mNormalBuffer;
-        Ogre::HardwareVertexBufferSharedPtr mColourBuffer;
     };
 
 }

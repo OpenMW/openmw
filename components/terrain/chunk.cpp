@@ -28,12 +28,12 @@ namespace Terrain
 
         // Positions
         vertexDecl->addElement(nextBuffer++, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-        mVertexBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+        Ogre::HardwareVertexBufferSharedPtr vertexBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
         // Normals
         vertexDecl->addElement(nextBuffer++, 0, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-        mNormalBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+        Ogre::HardwareVertexBufferSharedPtr normalBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
 
@@ -43,17 +43,17 @@ namespace Terrain
 
         // Colours
         vertexDecl->addElement(nextBuffer++, 0, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
-        mColourBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
+        Ogre::HardwareVertexBufferSharedPtr colourBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
-        mVertexBuffer->writeData(0, mVertexBuffer->getSizeInBytes(), &data.mPositions[0], true);
-        mNormalBuffer->writeData(0, mNormalBuffer->getSizeInBytes(), &data.mNormals[0], true);
-        mColourBuffer->writeData(0, mColourBuffer->getSizeInBytes(), &data.mColours[0], true);
+        vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), &data.mPositions[0], true);
+        normalBuffer->writeData(0, normalBuffer->getSizeInBytes(), &data.mNormals[0], true);
+        colourBuffer->writeData(0, colourBuffer->getSizeInBytes(), &data.mColours[0], true);
 
-        mVertexData->vertexBufferBinding->setBinding(0, mVertexBuffer);
-        mVertexData->vertexBufferBinding->setBinding(1, mNormalBuffer);
+        mVertexData->vertexBufferBinding->setBinding(0, vertexBuffer);
+        mVertexData->vertexBufferBinding->setBinding(1, normalBuffer);
         mVertexData->vertexBufferBinding->setBinding(2, uvBuffer);
-        mVertexData->vertexBufferBinding->setBinding(3, mColourBuffer);
+        mVertexData->vertexBufferBinding->setBinding(3, colourBuffer);
 
         mIndexData = OGRE_NEW Ogre::IndexData();
         mIndexData->indexStart = 0;
