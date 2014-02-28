@@ -102,7 +102,8 @@ namespace CSVRender
         if ((mNavigation = navigation))
         {
             mNavigation->setFastModeFactor (mFast ? mFastFactor : 1);
-            mNavigation->activate (mCamera);
+            if (mNavigation->activate (mCamera))
+                mUpdate = true;
         }
     }
 

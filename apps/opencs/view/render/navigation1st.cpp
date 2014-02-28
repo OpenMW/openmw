@@ -11,7 +11,17 @@ bool CSVRender::Navigation1st::activate (Ogre::Camera *camera)
 {
     mCamera = camera;
     mCamera->setFixedYawAxis (true);
-    return false;
+
+    Ogre::Radian pitch = mCamera->getOrientation().getPitch();
+
+    Ogre::Radian limit (Ogre::Math::PI/2-0.5);
+
+    if (pitch>limit)
+        mCamera->pitch (-(pitch-limit));
+    else if (pitch<-limit)
+        mCamera->pitch (pitch-limit);
+
+    return true;
 }
 
 bool CSVRender::Navigation1st::wheelMoved (int delta)
@@ -29,7 +39,16 @@ bool CSVRender::Navigation1st::mouseMoved (const QPoint& delta, int mode)
             mCamera->yaw (Ogre::Degree (getFactor (true) * delta.x()));
 
         if (delta.y())
-            mCamera->pitch (Ogre::Degree (getFactor (true) * delta.y()));
+        {
+            Ogre::Radian oldPitch = mCamera->getOrientation().getPitch();
+            float deltaPitch = getFactor (true) * delta.y();
+            Ogre::Radian newPitch = oldPitch + Ogre::Degree (deltaPitch);
+
+            Ogre::Radian limit (Ogre::Math::PI/2-0.5);
+
+            if ((deltaPitch>0 && newPitch<limit) || (deltaPitch<0 && newPitch>-limit))
+                mCamera->pitch (Ogre::Degree (deltaPitch));
+        }
 
         return true;
     }
