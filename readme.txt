@@ -133,6 +133,7 @@ Bug #1158: Armor rating should always stay below inventory mannequin
 Bug #1159: Quick keys can be set during character generation
 Bug #1160: Crash on equip lockpick when
 Bug #1167: Editor: Referenceables are not correctly loaded when dealing with more than one content file
+Bug #1184: Game Save: overwriting an existing save does not actually overwrites the file
 Feature #30: Loading/Saving (still missing a few parts)
 Feature #101: AI Package: Activate
 Feature #103: AI Package: Follow, FollowCell
