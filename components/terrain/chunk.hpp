@@ -20,6 +20,7 @@ namespace Terrain
 
         virtual ~Chunk();
 
+        /// @note Takes ownership of \a material
         void setMaterial (const Ogre::MaterialPtr& material);
 
         void setIndexBuffer(Ogre::HardwareIndexBufferSharedPtr buffer);

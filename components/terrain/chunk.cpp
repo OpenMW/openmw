@@ -3,6 +3,10 @@
 #include <OgreSceneNode.h>
 #include <OgreHardwareBufferManager.h>
 #include <OgreRenderQueue.h>
+#include <OgreMaterialManager.h>
+
+#include <extern/shiny/Main/Factory.hpp>
+
 
 #include "world.hpp" // FIXME: for LoadResponseData, move to backgroundloader.hpp
 
@@ -63,6 +67,11 @@ namespace Terrain
 
     Chunk::~Chunk()
     {
+#if TERRAIN_USE_SHADER
+        sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
+#endif
+        Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
+
         OGRE_DELETE mVertexData;
         OGRE_DELETE mIndexData;
     }
