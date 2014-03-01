@@ -5,6 +5,7 @@
 
 #include "../render/navigation1st.hpp"
 #include "../render/navigationfree.hpp"
+#include "../render/navigationorbit.hpp"
 
 class QModelIndex;
 
@@ -32,6 +33,7 @@ namespace CSVWorld
             CSVRender::SceneWidget *mScene;
             CSVRender::Navigation1st m1st;
             CSVRender::NavigationFree mFree;
+            CSVRender::NavigationOrbit mOrbit;
 
         public:
 
