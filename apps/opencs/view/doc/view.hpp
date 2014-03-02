@@ -168,8 +168,6 @@ namespace CSVDoc
 
             void addFiltersSubView();
 
-            void addSceneSubView();
-
             void addTopicsSubView();
 
             void addJournalsSubView();

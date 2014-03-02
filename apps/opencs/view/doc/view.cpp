@@ -115,10 +115,6 @@ void CSVDoc::View::setupWorldMenu()
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
-    QAction *scene = new QAction (tr ("Scene"), this);
-    connect (scene, SIGNAL (triggered()), this, SLOT (addSceneSubView()));
-    world->addAction (scene);
-
     QAction *regionMap = new QAction (tr ("Region Map"), this);
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
     world->addAction (regionMap);
@@ -430,11 +426,6 @@ void CSVDoc::View::addRegionMapSubView()
 void CSVDoc::View::addFiltersSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Filters);
-}
-
-void CSVDoc::View::addSceneSubView()
-{
-    addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, "default"));
 }
 
 void CSVDoc::View::addTopicsSubView()

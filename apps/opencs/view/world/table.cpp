@@ -35,8 +35,12 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
         if (selectedRows.size()==1)
         {
             menu.addAction (mEditAction);
+
             if (mCreateAction)
                 menu.addAction(mCloneAction);
+
+            if (mModel->getViewing()!=CSMWorld::IdTable::Viewing_None)
+                menu.addAction (mViewAction);
         }
 
         if (mCreateAction)
@@ -230,6 +234,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
 
+    mViewAction = new QAction (tr ("View"), this);
+    connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
+    addAction (mViewAction);
+
     connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
 
@@ -378,6 +386,23 @@ void CSVWorld::Table::moveDownRecord()
 
             mUndoStack.push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
         }
+    }
+}
+
+void CSVWorld::Table::viewRecord()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    if (selectedRows.size()==1)
+    {
+        int row =selectedRows.begin()->row();
+
+        row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
+
+        std::pair<CSMWorld::UniversalId, std::string> params = mModel->view (row);
+
+        if (params.first.getType()!=CSMWorld::UniversalId::Type_None)
+            emit editRequest (params.first, params.second);
     }
 }
 
