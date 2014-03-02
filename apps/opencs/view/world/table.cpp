@@ -306,7 +306,7 @@ void CSVWorld::Table::editRecord()
         QModelIndexList selectedRows = selectionModel()->selectedRows();
 
         if (selectedRows.size()==1)
-            emit editRequest (selectedRows.begin()->row());
+            emit editRequest (getUniversalId (selectedRows.begin()->row()), "");
     }
 }
 

@@ -329,8 +329,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
-    connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
-        SLOT (addSubView (const CSMWorld::UniversalId&)));
+    connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
+        SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
 
     CSMSettings::UserSettings::instance().updateSettings("Display Format");
 

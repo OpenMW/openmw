@@ -45,7 +45,7 @@ namespace CSVDoc
 
         signals:
 
-            void focusId (const CSMWorld::UniversalId& universalId);
+            void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
     };
 }
 

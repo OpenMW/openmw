@@ -86,7 +86,7 @@ namespace CSVWorld
 
         signals:
 
-            void editRequest (int row);
+            void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
 
             void selectionSizeChanged (int size);
 
