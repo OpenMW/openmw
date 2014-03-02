@@ -43,7 +43,7 @@ namespace
       mPhysics (physics), mRendering (rendering)
     {}
 
-    bool InsertFunctor::InsertFunctor::operator() (const MWWorld::Ptr& ptr)
+    bool InsertFunctor::operator() (const MWWorld::Ptr& ptr)
     {
         if (mRescale)
         {
