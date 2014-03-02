@@ -310,7 +310,7 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
     mOperations->setProgress (current, max, type, threads);
 }
 
-void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
+void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::string& hint)
 {
     /// \todo add an user setting for limiting the number of sub views per top level view. Automatically open a new top level view if this
     /// number is exceeded
@@ -321,6 +321,9 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
+
+    if (!hint.empty())
+        view->useHint (hint);
 
     view->setStatusBar (mShowStatusBar->isChecked());
 

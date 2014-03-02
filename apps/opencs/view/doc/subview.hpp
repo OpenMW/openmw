@@ -40,6 +40,9 @@ namespace CSVDoc
             virtual void setStatusBar (bool show);
             ///< Default implementation: ignored
 
+            virtual void useHint (const std::string& hint);
+            ///< Default implementation: ignored
+
         signals:
 
             void focusId (const CSMWorld::UniversalId& universalId);
