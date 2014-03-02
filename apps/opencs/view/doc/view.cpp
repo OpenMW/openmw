@@ -431,7 +431,7 @@ void CSVDoc::View::addFiltersSubView()
 
 void CSVDoc::View::addSceneSubView()
 {
-    addSubView (CSMWorld::UniversalId::Type_Scene);
+    addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, "default"));
 }
 
 void CSVDoc::View::addTopicsSubView()
