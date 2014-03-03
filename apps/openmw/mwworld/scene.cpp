@@ -79,55 +79,6 @@ namespace
 
         return true;
     }
-
-    template<typename T>
-    void insertCellRefList(MWRender::RenderingManager& rendering,
-        T& cellRefList, MWWorld::CellStore &cell, MWWorld::PhysicsSystem& physics, bool rescale, Loading::Listener* loadingListener)
-    {
-        if (!cellRefList.mList.empty())
-        {
-            const MWWorld::Class& class_ =
-                MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.mList.begin(), &cell));
-            for (typename T::List::iterator it = cellRefList.mList.begin();
-                it != cellRefList.mList.end(); it++)
-            {
-                if (rescale)
-                {
-                    if (it->mRef.mScale<0.5)
-                        it->mRef.mScale = 0.5;
-                    else if (it->mRef.mScale>2)
-                        it->mRef.mScale = 2;
-                }
-
-                if (it->mData.getCount() && it->mData.isEnabled())
-                {
-                    MWWorld::Ptr ptr (&*it, &cell);
-
-                    try
-                    {
-                        rendering.addObject(ptr);
-                        class_.insertObject(ptr, physics);
-
-                        float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
-                        float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
-                        float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, ax, ay, az);
-
-                        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
-                        class_.adjustPosition(ptr);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        std::string error ("error during rendering: ");
-                        std::cerr << error + e.what() << std::endl;
-                    }
-                }
-
-                loadingListener->increaseProgress(1);
-            }
-        }
-    }
-
 }
 
 
