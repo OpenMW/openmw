@@ -1,6 +1,9 @@
 #ifndef MWRENDER_TERRAINSTORAGE_H
 #define MWRENDER_TERRAINSTORAGE_H
 
+#include <components/esm/loadland.hpp>
+#include <components/esm/loadltex.hpp>
+
 #include <components/terrain/storage.hpp>
 
 namespace MWRender
@@ -14,7 +17,7 @@ namespace MWRender
     public:
 
         /// Get bounds of the whole terrain in cell units
-        virtual Ogre::AxisAlignedBox getBounds();
+        virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY);
 
         /// Get the minimum and maximum heights of a terrain chunk.
         /// @note Should only be called for chunks <= 1 cell, i.e. leafs of the quad tree.

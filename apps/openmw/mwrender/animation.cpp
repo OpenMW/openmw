@@ -293,6 +293,17 @@ void Animation::addAnimSource(const std::string &model)
             }
         }
 
+        if (grp == 0 && dstval->getNode()->getName() == "Bip01")
+        {
+            mNonAccumRoot = dstval->getNode();
+            mAccumRoot = mNonAccumRoot->getParent();
+            if(!mAccumRoot)
+            {
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                mNonAccumRoot = NULL;
+            }
+        }
+
         ctrls[i].setSource(mAnimationTimePtr[grp]);
         grpctrls[grp].push_back(ctrls[i]);
     }

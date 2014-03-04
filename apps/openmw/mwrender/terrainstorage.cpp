@@ -16,9 +16,9 @@
 namespace MWRender
 {
 
-    Ogre::AxisAlignedBox TerrainStorage::getBounds()
+    void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)
     {
-        int minX = 0, minY = 0, maxX = 0, maxY = 0;
+        minX = 0, minY = 0, maxX = 0, maxY = 0;
 
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
@@ -39,8 +39,6 @@ namespace MWRender
         // since grid coords are at cell origin, we need to add 1 cell
         maxX += 1;
         maxY += 1;
-
-        return Ogre::AxisAlignedBox(minX, minY, 0, maxX, maxY, 0);
     }
 
     ESM::Land* TerrainStorage::getLand(int cellX, int cellY)

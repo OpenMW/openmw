@@ -105,7 +105,7 @@ namespace Terrain
         Ogre::SceneManager* mCompositeMapSceneMgr;
 
         /// Bounds in cell units
-        Ogre::AxisAlignedBox mBounds;
+        float mMinX, mMaxX, mMinY, mMaxY;
 
         /// Minimum size of a terrain batch along one side (in cell units)
         float mMinBatchSize;
