@@ -28,7 +28,6 @@ override_dh_auto_configure:
 
 override_dh_clean:
 	dh_clean
-	#-rm -f include/config.h
 
 #override_dh_auto_clean:
 #	dh_auto_clean
