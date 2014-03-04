@@ -1,3 +1,12 @@
+openmw (0.29.0-1) experimental; urgency=low
+
+  [ Bret Curtis ]
+  * New release: OpenMW-0.29.0
+  * Out-of-tree build and easy cleanup
+  * Updated system-font patch
+
+ -- Bret Curtis <psi29a@gmail.com>  Tue, 04 Mar 2014 08:13:09 +0200
+
 openmw (0.28.0-1) experimental; urgency=low
 
   [ Bret Curtis ]

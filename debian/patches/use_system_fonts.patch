@@ -2,15 +2,7 @@ Description: use system fonts instead of installing new ones
 Author: Scott Howard <showard@debian.org>
 --- a/files/mygui/CMakeLists.txt
 +++ b/files/mygui/CMakeLists.txt
-@@ -8,7 +8,6 @@ set(MYGUI_FILES
-     black.png
-     core.skin
-     core.xml
--    EBGaramond-Regular.ttf
-     openmw_alchemy_window.layout
-     openmw_book.layout
-     openmw_box.skin.xml
-@@ -83,7 +82,6 @@ set(MYGUI_FILES
+@@ -82,7 +82,6 @@ set(MYGUI_FILES
      openmw_savegame_dialog.layout
      openmw_recharge_dialog.layout
      smallbars.png
@@ -20,12 +12,12 @@ Author: Scott Howard <showard@debian.org>
  )
 --- a/files/mygui/openmw_font.xml
 +++ b/files/mygui/openmw_font.xml
-@@ -24,7 +24,7 @@
-     </Resource>
- 
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <MyGUI type="Resource" version="1.1">
      <Resource type="ResourceTrueTypeFont" name="MonoFont">
 -        <Property key="Source" value="DejaVuLGCSansMono.ttf"/>
 +        <Property key="Source" value="DejaVuSansMono.ttf"/>
-         <Property key="Size" value="18"/>
+         <Property key="Size" value="17"/>
          <Property key="Resolution" value="50"/>
          <Property key="Antialias" value="false"/>
