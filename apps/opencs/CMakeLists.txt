@@ -64,7 +64,7 @@ opencs_units (view/world
     )
 
 opencs_units (view/render
-    scenewidget
+    scenewidget worldspacewidget
     )
 
 opencs_units_noqt (view/render

@@ -9,7 +9,7 @@
 
 #include "../filter/filterbox.hpp"
 
-#include "../render/scenewidget.hpp"
+#include "../render/worldspacewidget.hpp"
 
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -44,7 +44,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout2->addWidget (toolbar, 0);
 
-    mScene = new CSVRender::SceneWidget(this);
+    mScene = new CSVRender::WorldspaceWidget (this);
 
     layout2->addWidget (mScene, 1);
 
