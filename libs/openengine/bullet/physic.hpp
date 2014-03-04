@@ -162,7 +162,7 @@ namespace Physic
 
         Ogre::Vector3 mBoxScaledTranslation;
         Ogre::Quaternion mBoxRotation;
-        btQuaternion mBoxRotationInverse;
+        Ogre::Quaternion mBoxRotationInverse;
 
         Ogre::Vector3 mForce;
         bool mOnGround;

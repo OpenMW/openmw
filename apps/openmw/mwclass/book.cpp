@@ -140,6 +140,7 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -188,12 +189,12 @@ namespace MWClass
         return MWWorld::Ptr(&cell.mBooks.insert(*ref), &cell);
     }
 
-    float Book::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Book::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Book> *ref =
                 ptr.get<ESM::Book>();
 
-        return ref->mBase->mData.mEnchant/10.f;
+        return ref->mBase->mData.mEnchant;
     }
 
     bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const

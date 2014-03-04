@@ -4,9 +4,17 @@
 #include <string>
 #include <map>
 
+#include <libs/platform/stdint.h>
+
 #include "locals.hpp"
 
-namespace MWWorld 
+namespace ESM
+{
+    class ESMWriter;
+    class ESMReader;
+}
+
+namespace MWWorld
 {
     struct ESMStore;
 }
@@ -22,8 +30,6 @@ namespace MWScript
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void reset();
-
             void addScript (const std::string& name);
 
             void removeScript (const std::string& name);
@@ -32,6 +38,24 @@ namespace MWScript
 
             void run();
             ///< run all active global scripts
+
+            void clear();
+
+            void addStartup();
+            ///< Add startup script
+
+            int countSavedGameRecords() const;
+
+            void write (ESM::ESMWriter& writer) const;
+
+            bool readRecord (ESM::ESMReader& reader, int32_t type);
+            ///< Records for variables that do not exist are dropped silently.
+            ///
+            /// \return Known type?
+
+            Locals& getLocals (const std::string& name);
+            ///< If the script \a name has not been added as a global script yet, it is added
+            /// automatically, but is not set to running state.
     };
 }
 

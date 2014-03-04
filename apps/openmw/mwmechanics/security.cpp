@@ -1,12 +1,12 @@
 #include "security.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -46,6 +46,7 @@ namespace MWMechanics
             resultMessage = "#{sLockImpossible}";
         else
         {
+            MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {
@@ -87,6 +88,7 @@ namespace MWMechanics
             resultMessage = "#{sTrapImpossible}";
         else
         {
+            MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, trap);
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {

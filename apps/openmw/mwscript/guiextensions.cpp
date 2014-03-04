@@ -1,8 +1,6 @@
 
 #include "guiextensions.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
@@ -15,7 +13,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwbase/mechanicsmanager.hpp"
+
 #include "interpretercontext.hpp"
+#include "ref.hpp"
 
 namespace MWScript
 {
@@ -43,6 +44,20 @@ namespace MWScript
                 {
                     MWBase::Environment::get().getWindowManager()->enableRest();
                 }
+        };
+
+        template <class R>
+        class OpShowRestMenu : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr bed = R()(runtime, false);
+
+                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWBase::Environment::get().getWorld()->getPlayerPtr(),
+                                                                             bed))
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_RestBed);
+            }
         };
 
         class OpShowDialogue : public Interpreter::Opcode0
@@ -172,7 +187,8 @@ namespace MWScript
                 new OpEnableRest ());
 
             interpreter.installSegment5 (Compiler::Gui::opcodeShowRestMenu,
-                new OpShowDialogue (MWGui::GM_RestBed));
+                new OpShowRestMenu<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Gui::opcodeShowRestMenuExplicit, new OpShowRestMenu<ExplicitRef>);
 
             interpreter.installSegment5 (Compiler::Gui::opcodeGetButtonPressed, new OpGetButtonPressed);
 

@@ -8,7 +8,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "inventoryitemmodel.hpp"
@@ -143,9 +142,9 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
-        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
-        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr());
         mSortModel = new SortFilterItemModel(model);
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
         mItemView->setModel (mSortModel);
@@ -154,7 +153,7 @@ namespace MWGui
 
         int index = 0;
 
-        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy.beginTools());
             iter!=mAlchemy.endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)

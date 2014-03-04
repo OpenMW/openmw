@@ -11,7 +11,7 @@ namespace
 {
     template<typename T>
     void listCellScripts (MWWorld::LocalScripts& localScripts,
-        MWWorld::CellRefList<T>& cellRefList,  MWWorld::Ptr::CellStore *cell)
+        MWWorld::CellRefList<T>& cellRefList,  MWWorld::CellStore *cell)
     {
         for (typename MWWorld::CellRefList<T>::List::iterator iter (
             cellRefList.mList.begin());
@@ -27,15 +27,15 @@ namespace
     // Adds scripts for items in containers (containers/npcs/creatures)
     template<typename T>
     void listCellScriptsCont (MWWorld::LocalScripts& localScripts,
-        MWWorld::CellRefList<T>& cellRefList,  MWWorld::Ptr::CellStore *cell)
+        MWWorld::CellRefList<T>& cellRefList,  MWWorld::CellStore *cell)
     {
         for (typename MWWorld::CellRefList<T>::List::iterator iter (
             cellRefList.mList.begin());
             iter!=cellRefList.mList.end(); ++iter)
         {
-           
-            MWWorld::Ptr containerPtr (&*iter, cell); 
-            
+
+            MWWorld::Ptr containerPtr (&*iter, cell);
+
             MWWorld::ContainerStore& container = MWWorld::Class::get(containerPtr).getContainerStore(containerPtr);
             for(MWWorld::ContainerStoreIterator it3 = container.begin(); it3 != container.end(); ++it3)
             {
@@ -99,7 +99,7 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
     }
 }
 
-void MWWorld::LocalScripts::addCell (Ptr::CellStore *cell)
+void MWWorld::LocalScripts::addCell (CellStore *cell)
 {
     listCellScripts (*this, cell->mActivators, cell);
     listCellScripts (*this, cell->mPotions, cell);
@@ -128,7 +128,7 @@ void MWWorld::LocalScripts::clear()
     mScripts.clear();
 }
 
-void MWWorld::LocalScripts::clearCell (Ptr::CellStore *cell)
+void MWWorld::LocalScripts::clearCell (CellStore *cell)
 {
     std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin();
 

@@ -102,10 +102,12 @@ namespace Compiler
             const std::string& name);
 
         void assignToMember (CodeContainer& code, Literals& literals, char memberType,
-            const std::string& name, const std::string& id, const CodeContainer& value, char valueType);
+            const std::string& name, const std::string& id, const CodeContainer& value, char valueType, bool global);
+        ///< \param global Member of a global script instead of a script of a reference.
 
         void fetchMember (CodeContainer& code, Literals& literals, char memberType,
-            const std::string& name, const std::string& id);
+            const std::string& name, const std::string& id, bool global);
+        ///< \param global Member of a global script instead of a script of a reference.
 
         void random (CodeContainer& code);
 

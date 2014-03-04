@@ -71,9 +71,10 @@ namespace OMW
             std::vector<std::string> mContentFiles;
             int mFpsLevel;
             bool mVerboseScripts;
-            bool mNewGame;
+            bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
+            int mWarningsMode;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
             bool mScriptConsoleMode;
@@ -151,8 +152,7 @@ namespace OMW
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
 
-            /// Start as a new game.
-            void setNewGame(bool newGame);
+            void setSkipMenu (bool skipMenu);
 
             void setGrabMouse(bool grab) { mGrab = grab; }
 
@@ -181,6 +181,8 @@ namespace OMW
 
             /// Override the game setting specified activation distance.
             void setActivationDistanceOverride (int distance);
+
+            void setWarningsMode (int mode);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

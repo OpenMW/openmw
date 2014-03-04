@@ -341,7 +341,7 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
         Nif::ControllerPtr ctrl = shape->controller;
         do {
             // Load GeomMorpherController into an Ogre::Pose and Animation
-            if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+            if(ctrl->recType == Nif::RC_NiGeomMorpherController && ctrl->flags & Nif::NiNode::ControllerFlag_Active)
             {
                 const Nif::NiGeomMorpherController *geom =
                         static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());

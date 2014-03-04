@@ -12,7 +12,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
 #include "../mwworld/player.hpp"
 
 #include "interpretercontext.hpp"
@@ -89,7 +88,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool interior =
-                        !MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->isExterior();
+                        !MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->mCell->isExterior();
 
                     runtime.push (interior ? 1 : 0);
                 }
@@ -104,17 +103,19 @@ namespace MWScript
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell;
+                    const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->mCell;
 
                     std::string current = cell->mName;
 
-                    if (!(cell->mData.mFlags & ESM::Cell::Interior) && current.empty())
+                    if (!(cell->mData.mFlags & ESM::Cell::Interior) && current.empty()
+                            && !cell->mRegion.empty())
                     {
                         const ESM::Region *region =
                             MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find (cell->mRegion);
 
                         current = region->mName;
                     }
+                    Misc::StringUtils::toLower(current);
 
                     bool match = current.length()>=name.length() &&
                         current.substr (0, name.length())==name;
@@ -129,8 +130,11 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
-                    runtime.push (cell->mWaterLevel);
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
+                    if (cell->mCell->hasWater())
+                        runtime.push (cell->mWaterLevel);
+                    else
+                        runtime.push (-std::numeric_limits<float>().max());
                 }
         };
 
@@ -142,7 +146,7 @@ namespace MWScript
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
                     if (cell->mCell->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");
@@ -160,7 +164,7 @@ namespace MWScript
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
                     if (cell->mCell->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");

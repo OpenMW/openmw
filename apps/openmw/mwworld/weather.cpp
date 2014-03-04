@@ -1,6 +1,5 @@
 #include "weather.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -665,7 +664,7 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
 
     mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
 
-    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
+    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->mCell->mRegion;
     if (Misc::StringUtils::ciEqual(region, playerRegion))
         setWeather(weather);
 }
@@ -696,7 +695,7 @@ void WeatherManager::switchToNextWeather(bool instantly)
     MWBase::World* world = MWBase::Environment::get().getWorld();
     if (world->isCellExterior() || world->isCellQuasiExterior())
     {
-        std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayer().getPlayer().getCell()->mCell->mRegion);
+        std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->mCell->mRegion);
 
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {

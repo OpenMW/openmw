@@ -235,7 +235,7 @@ namespace
         {
             for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
             {
-                if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+                if(Misc::StringUtils::ciEqual(dir->path().filename().string(), filename))
                     return dir->path();
             }
         }
@@ -243,7 +243,7 @@ namespace
         {
             for ( bfs::directory_iterator end, dir(in); dir != end; ++dir )
             {
-                if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+                if(Misc::StringUtils::ciEqual(dir->path().filename().string(), filename))
                     return dir->path();
             }
         }
@@ -255,7 +255,7 @@ namespace
     {
         for(bfs::directory_iterator end, dir(in); dir != end; ++dir)
         {
-            if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+            if(Misc::StringUtils::ciEqual(dir->path().filename().string(), filename))
                 return true;
         }
 

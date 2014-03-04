@@ -8,7 +8,6 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/player.hpp"
 
 #include "formatting.hpp"
 
@@ -44,6 +43,11 @@ namespace MWGui
         adjustButton(mNextPageButton);
         adjustButton(mPrevPageButton);
 
+        mLeftPage->setNeedMouseFocus(true);
+        mLeftPage->eventMouseWheel += MyGUI::newDelegate(this, &BookWindow::onMouseWheel);
+        mRightPage->setNeedMouseFocus(true);
+        mRightPage->eventMouseWheel += MyGUI::newDelegate(this, &BookWindow::onMouseWheel);
+
         if (mNextPageButton->getSize().width == 64)
         {
             // english button has a 7 pixel wide strip of garbage on its right edge
@@ -52,6 +56,14 @@ namespace MWGui
         }
 
         center();
+    }
+
+    void BookWindow::onMouseWheel(MyGUI::Widget *_sender, int _rel)
+    {
+        if (_rel < 0)
+            nextPage();
+        else
+            prevPage();
     }
 
     void BookWindow::clearPages()
@@ -89,6 +101,7 @@ namespace MWGui
                 parent = mRightPage;
 
             MyGUI::Widget* pageWidget = parent->createWidgetReal<MyGUI::Widget>("", MyGUI::FloatCoord(0.0,0.0,1.0,1.0), MyGUI::Align::Default, "BookPage" + boost::lexical_cast<std::string>(i));
+            pageWidget->setNeedMouseFocus(false);
             parser.parsePage(*it, pageWidget, mLeftPage->getSize().width);
             mPages.push_back(pageWidget);
             ++i;
@@ -124,7 +137,7 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound("Item Book Up", 1.0, 1.0);
 
         MWWorld::ActionTake take(mBook);
-        take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        take.execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }

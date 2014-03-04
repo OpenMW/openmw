@@ -19,6 +19,15 @@ void ESM::Header::blank()
 
 void ESM::Header::load (ESMReader &esm)
 {
+    if (esm.isNextSub ("FORM"))
+    {
+        esm.getHT (mFormat);
+        if (mFormat<0)
+            esm.fail ("invalid format code");
+    }
+    else
+        mFormat = 0;
+
     if (esm.isNextSub("HEDR"))
     {
       esm.getSubHeader();
@@ -28,15 +37,6 @@ void ESM::Header::load (ESMReader &esm)
       mData.desc.assign(esm.getString(sizeof(mData.desc.name)));
       esm.getT(mData.records);
     }
-
-    if (esm.isNextSub ("FORM"))
-    {
-        esm.getHT (mFormat);
-        if (mFormat<0)
-            esm.fail ("invalid format code");
-    }
-    else
-        mFormat = 0;
 
     while (esm.isNextSub ("MAST"))
     {
@@ -49,10 +49,10 @@ void ESM::Header::load (ESMReader &esm)
 
 void ESM::Header::save (ESMWriter &esm)
 {
-    esm.writeHNT ("HEDR", mData, 300);
-
     if (mFormat>0)
         esm.writeHNT ("FORM", mFormat);
+
+    esm.writeHNT ("HEDR", mData, 300);
 
     for (std::vector<Header::MasterData>::iterator iter = mMaster.begin();
          iter != mMaster.end(); ++iter)

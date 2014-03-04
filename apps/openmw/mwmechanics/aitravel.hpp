@@ -23,8 +23,8 @@ namespace MWMechanics
             float mY;
             float mZ;
 
-            int cellX;
-            int cellY;
+            int mCellX;
+            int mCellY;
 
             PathFinder mPathFinder;
     };

@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_OBJECTS_H
-#define _GAME_RENDER_OBJECTS_H
+#ifndef GAME_RENDER_OBJECTS_H
+#define GAME_RENDER_OBJECTS_H
 
 #include <OgreColourValue.h>
 #include <OgreAxisAlignedBox.h>

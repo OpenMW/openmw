@@ -5,7 +5,7 @@
 
 namespace Compiler
 {
-    SkipParser::SkipParser (ErrorHandler& errorHandler, Context& context)
+    SkipParser::SkipParser (ErrorHandler& errorHandler, const Context& context)
     : Parser (errorHandler, context)
     {}
 
@@ -34,7 +34,7 @@ namespace Compiler
     {
         if (code==Scanner::S_newline)
             return false;
-            
+
         return true;
     }
 }

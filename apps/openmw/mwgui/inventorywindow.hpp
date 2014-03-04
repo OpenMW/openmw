@@ -31,10 +31,6 @@ namespace MWGui
 
             void pickUpObject (MWWorld::Ptr object);
 
-            int getPlayerGold();
-
-            MyGUI::IntCoord getAvatarScreenCoord();
-
             MWWorld::Ptr getAvatarSelectedItem(int x, int y);
 
             void rebuildAvatar() {
@@ -47,6 +43,8 @@ namespace MWGui
             void updateItemView();
 
             void updatePlayer();
+
+            void useItem(const MWWorld::Ptr& ptr);
 
             void setGuiMode(GuiMode mode);
 
@@ -75,6 +73,8 @@ namespace MWGui
             MyGUI::Button* mFilterApparel;
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
+
+            MWWorld::Ptr mSkippedToEquip;
 
             GuiMode mGuiMode;
 

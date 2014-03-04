@@ -8,6 +8,7 @@
 namespace ESM
 {
     struct InventoryList;
+    struct InventoryState;
 }
 
 namespace MWWorld
@@ -35,6 +36,8 @@ namespace MWWorld
 
             static const int Type_All = 0xffff;
 
+            static const std::string sGoldId;
+
         private:
 
             MWWorld::CellRefList<ESM::Potion>            potions;
@@ -51,8 +54,26 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Weapon>            weapons;
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
-            ContainerStoreIterator addImp (const Ptr& ptr);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance=0, bool topLevel=true);
+            ContainerStoreIterator addImp (const Ptr& ptr, int count);
+            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true);
+
+            template<typename T>
+            ContainerStoreIterator getState (CellRefList<T>& collection,
+                const ESM::ObjectState& state);
+
+            template<typename T>
+            void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
+
+            template<typename T>
+            void storeStates (const CellRefList<T>& collection,
+                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states,
+                bool equipable = false) const;
+
+            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+
+            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
 
         public:
 
@@ -60,11 +81,13 @@ namespace MWWorld
 
             virtual ~ContainerStore();
 
+            virtual ContainerStore* clone() { return new ContainerStore(*this); }
+
             ContainerStoreIterator begin (int mask = Type_All);
 
             ContainerStoreIterator end();
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
@@ -72,10 +95,12 @@ namespace MWWorld
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
             ///
+            /// @param setOwner Set the owner of the added item to \a actorPtr?
+            ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
             ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
-            ///< Utility to construct a ManualRef and call add(ptr, actorPtr)
+            ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
             int remove(const std::string& itemId, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a itemId from this container.
@@ -90,8 +115,11 @@ namespace MWWorld
             void unstack (const Ptr& ptr, const Ptr& container);
             ///< Unstack an item in this container. The item's count will be set to 1, then a new stack will be added with (origCount-1).
 
+            /// @return How many items with refID \a id are in this container?
+            int count (const std::string& id);
+
         protected:
-            ContainerStoreIterator addNewStack (const Ptr& ptr);
+            ContainerStoreIterator addNewStack (const Ptr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();
@@ -101,10 +129,10 @@ namespace MWWorld
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
-            void clear();
+            virtual void clear();
             ///< Empty container.
 
             float getWeight() const;
@@ -115,6 +143,10 @@ namespace MWWorld
             /// put into a container.
 
             Ptr search (const std::string& id);
+
+            void writeState (ESM::InventoryState& state) const;
+
+            void readState (const ESM::InventoryState& state);
 
         friend class ContainerStoreIterator;
     };
@@ -165,6 +197,8 @@ namespace MWWorld
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon>::List::iterator);
 
+            void copy (const ContainerStoreIterator& src);
+
             void incType();
 
             void nextType();
@@ -181,6 +215,8 @@ namespace MWWorld
 
         public:
 
+            ContainerStoreIterator(const ContainerStoreIterator& src);
+
             Ptr *operator->() const;
 
             Ptr operator*() const;
@@ -188,6 +224,8 @@ namespace MWWorld
             ContainerStoreIterator& operator++();
 
             ContainerStoreIterator operator++ (int);
+
+            ContainerStoreIterator& operator= (const ContainerStoreIterator& rhs);
 
             bool isEqual (const ContainerStoreIterator& iter) const;
 

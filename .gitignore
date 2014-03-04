@@ -43,6 +43,7 @@ resources
 
 ## generated objects
 apps/openmw/config.hpp
+components/version/version.hpp
 Docs/mainpage.hpp
 moc_*.cxx
 *.cxx_parameters

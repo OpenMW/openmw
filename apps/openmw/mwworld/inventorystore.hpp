@@ -105,6 +105,12 @@ namespace MWWorld
 
             void fireEquipmentChangedEvent();
 
+            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+
+            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
+
         public:
 
             InventoryStore();
@@ -113,7 +119,9 @@ namespace MWWorld
 
             InventoryStore& operator= (const InventoryStore& store);
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
+            virtual InventoryStore* clone() { return new InventoryStore(*this); }
+
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             /// Auto-equip items if specific conditions are fulfilled (see the implementation).
             ///
@@ -121,6 +129,8 @@ namespace MWWorld
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
+            ///
+            /// @param setOwner Set the owner of the added item to \a actorPtr?
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
@@ -158,12 +168,10 @@ namespace MWWorld
             ///
             /// @return the number of items actually removed
 
-            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor, bool restack = true);
+            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor);
             ///< Unequip \a slot.
             ///
             /// @return an iterator to the item that was previously in the slot
-            /// (if \a restack is true, the item can be re-stacked so its count
-            /// may differ from when it was equipped).
 
             ContainerStoreIterator unequipItem(const Ptr& item, const Ptr& actor);
             ///< Unequip an item identified by its Ptr. An exception is thrown
@@ -183,6 +191,9 @@ namespace MWWorld
 
             void purgeEffect (short effectId);
             ///< Remove a magic effect
+
+            virtual void clear();
+            ///< Empty container.
     };
 }
 

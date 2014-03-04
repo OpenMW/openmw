@@ -5,8 +5,14 @@
 #include <string>
 
 #include <QTableView>
+#include <QtGui/qevent.h>
 
 #include "../../model/filter/node.hpp"
+#include "../../model/world/columnbase.hpp"
+
+namespace CSMDoc {
+    class Document;
+}
 
 class QUndoStack;
 class QAction;
@@ -32,6 +38,7 @@ namespace CSVWorld
             QUndoStack& mUndoStack;
             QAction *mEditAction;
             QAction *mCreateAction;
+            QAction *mCloneAction;
             QAction *mRevertAction;
             QAction *mDeleteAction;
             QAction *mMoveUpAction;
@@ -41,6 +48,10 @@ namespace CSVWorld
             bool mEditLock;
             int mRecordStatusDisplay;
 
+            /// \brief This variable is used exclusivly for checking if dropEvents came from the same document. Most likely you
+            /// should NOT use it for anything else.
+            const CSMDoc::Document& mDocument;
+
         private:
 
             void contextMenuEvent (QContextMenuEvent *event);
@@ -49,9 +60,19 @@ namespace CSVWorld
 
             std::vector<std::string> listDeletableSelectedIds() const;
 
+            void mouseMoveEvent(QMouseEvent *event);
+
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dragMoveEvent(QDragMoveEvent *event);
+
+            void dropEvent(QDropEvent *event);
+
         public:
 
-            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete, bool sorting);
+            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete,
+                   bool sorting, const CSMDoc::Document& document);
+
             ///< \param createAndDelete Allow creation and deletion of records.
             /// \param sorting Allow changing order of rows in the view via column headers.
 
@@ -60,6 +81,8 @@ namespace CSVWorld
             CSMWorld::UniversalId getUniversalId (int row) const;
 
             void updateEditorSetting (const QString &settingName, const QString &settingValue);
+
+            std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 
         signals:
 
@@ -73,6 +96,7 @@ namespace CSVWorld
             /// \param modified Number of added and modified records
 
             void createRequest();
+            void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:
 
@@ -81,6 +105,8 @@ namespace CSVWorld
             void deleteRecord();
 
             void editRecord();
+
+            void cloneRecord();
 
             void moveUpRecord();
 

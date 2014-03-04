@@ -14,6 +14,7 @@
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -200,14 +201,15 @@ namespace MWGui
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w,h);
-        mMap = new MapWindow("");
+        mMap = new MapWindow(mDragAndDrop, "");
         trackWindow(mMap, "map");
-        mStatsWindow = new StatsWindow();
+        mStatsWindow = new StatsWindow(mDragAndDrop);
         trackWindow(mStatsWindow, "stats");
         mConsole = new Console(w,h, mConsoleOnlyScripts);
         trackWindow(mConsole, "console");
         mJournal = JournalWindow::create(JournalViewModel::create ());
-        mMessageBoxManager = new MessageBoxManager();
+        mMessageBoxManager = new MessageBoxManager(
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
         mTradeWindow = new TradeWindow();
         trackWindow(mTradeWindow, "barter");
@@ -226,7 +228,7 @@ namespace MWGui
         mConfirmationDialog = new ConfirmationDialog();
         mAlchemyWindow = new AlchemyWindow();
         trackWindow(mAlchemyWindow, "alchemy");
-        mSpellWindow = new SpellWindow();
+        mSpellWindow = new SpellWindow(mDragAndDrop);
         trackWindow(mSpellWindow, "spells");
         mQuickKeysMenu = new QuickKeysMenu();
         mLevelupDialog = new LevelupDialog();
@@ -249,12 +251,12 @@ namespace MWGui
         // Setup player stats
         for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
-            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::Stat<int>()));
+            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue()));
         }
 
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::Stat<float>()));
+            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue()));
         }
 
         // Set up visibility
@@ -544,7 +546,7 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void WindowManager::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         mStatsWindow->setValue (id, value);
         mCharGen->setValue(id, value);
@@ -575,7 +577,7 @@ namespace MWGui
     }
 
 
-    void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& value)
+    void WindowManager::setValue (int parSkill, const MWMechanics::SkillValue& value)
     {
         /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
         /// allow custom skills.
@@ -646,19 +648,14 @@ namespace MWGui
         mGarbageDialogs.push_back(dialog);
     }
 
-    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, bool showInDialogueModeOnly)
+    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
     {
         if (buttons.empty()) {
             /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-            if (getMode() == GM_Dialogue) {
+            if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
                 mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-            } else {
-                if (showInDialogueModeOnly) {
-                    if (getMode() == GM_Dialogue)
-                        mMessageBoxManager->createMessageBox(message);
-                } else {
-                    mMessageBoxManager->createMessageBox(message);
-                }
+            } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
+                mMessageBoxManager->createMessageBox(message);
             }
         } else {
             mMessageBoxManager->createInteractiveMessageBox(message, buttons);
@@ -674,17 +671,6 @@ namespace MWGui
     void WindowManager::removeStaticMessageBox()
     {
         mMessageBoxManager->removeStaticMessageBox();
-    }
-
-    void WindowManager::enterPressed ()
-    {
-        mMessageBoxManager->okayPressed();
-    }
-
-    void WindowManager::activateKeyPressed ()
-    {
-        mMessageBoxManager->okayPressed();
-        mCountDialog->cancel();
     }
 
     int WindowManager::readPressedButton ()
@@ -709,6 +695,10 @@ namespace MWGui
 
         mToolTips->onFrame(frameDuration);
 
+        if (MWBase::Environment::get().getStateManager()->getState()==
+            MWBase::StateManager::State_NoGame)
+            return;
+
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             assert(mDragAndDrop->mDraggedWidget);
@@ -719,7 +709,9 @@ namespace MWGui
 
         mInventoryWindow->onFrame();
 
-        mStatsWindow->onFrame();
+        mStatsWindow->onFrame(frameDuration);
+        mMap->onFrame(frameDuration);
+        mSpellWindow->onFrame(frameDuration);
 
         mWaitDialog->onFrame(frameDuration);
 
@@ -740,30 +732,19 @@ namespace MWGui
         mCompanionWindow->onFrame();
     }
 
-    void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
+    void WindowManager::changeCell(MWWorld::CellStore* cell)
     {
+        std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
+
+        mMap->setCellName( name );
+        mHud->setCellName( name );
+
         if (cell->mCell->isExterior())
         {
-            std::string name;
-            if (cell->mCell->mName != "")
-            {
-                name = cell->mCell->mName;
+            if (!cell->mCell->mName.empty())
                 mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
-            }
-            else
-            {
-                const ESM::Region* region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
-                if (region)
-                    name = region->mName;
-                else
-                    name = getGameSettingString("sDefaultCellname", "Wilderness");
-            }
 
             mMap->cellExplored(cell->mCell->getGridX(), cell->mCell->getGridY());
-
-            mMap->setCellName( name );
-            mHud->setCellName( name );
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
@@ -772,8 +753,6 @@ namespace MWGui
         }
         else
         {
-            mMap->setCellName( cell->mCell->mName );
-            mHud->setCellName( cell->mCell->mName );
             mMap->setCellPrefix( cell->mCell->mName );
             mHud->setCellPrefix( cell->mCell->mName );
 
@@ -784,7 +763,6 @@ namespace MWGui
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
         }
-
     }
 
     void WindowManager::setInteriorMapTexture(const int x, const int y)
@@ -1052,6 +1030,11 @@ namespace MWGui
     {
         mSelectedSpell = "";
         mHud->unsetSelectedSpell();
+
+        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+        if (player->getDrawState() == MWMechanics::DrawState_Spell)
+            player->setDrawState(MWMechanics::DrawState_Nothing);
+
         mSpellWindow->setTitle("#{sNone}");
     }
 
@@ -1178,12 +1161,12 @@ namespace MWGui
         return mGuiModes.back();
     }
 
-    std::map<int, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
+    std::map<int, MWMechanics::SkillValue > WindowManager::getPlayerSkillValues()
     {
         return mPlayerSkillValues;
     }
 
-    std::map<int, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
+    std::map<int, MWMechanics::AttributeValue > WindowManager::getPlayerAttributeValues()
     {
         return mPlayerAttributes;
     }
@@ -1247,7 +1230,7 @@ namespace MWGui
     bool WindowManager::getRestEnabled()
     {
         //Enable rest dialogue if character creation finished
-        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalVariable ("chargenstate").mFloat==-1)
+        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             mRestAllowed=true;
         return mRestAllowed;
     }
@@ -1398,6 +1381,21 @@ namespace MWGui
         Settings::Manager::setFloat(setting + " y", "Windows", y);
         Settings::Manager::setFloat(setting + " w", "Windows", w);
         Settings::Manager::setFloat(setting + " h", "Windows", h);
+    }
+
+    void WindowManager::clear()
+    {
+        mMap->clear();
+    }
+
+    void WindowManager::write(ESM::ESMWriter &writer)
+    {
+        mMap->write(writer);
+    }
+
+    void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        mMap->readRecord(reader, type);
     }
 
 }

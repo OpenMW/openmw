@@ -25,6 +25,7 @@ namespace MWGui
             void onPrevPageButtonClicked (MyGUI::Widget* sender);
             void onCloseButtonClicked (MyGUI::Widget* sender);
             void onTakeButtonClicked (MyGUI::Widget* sender);
+            void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
             void updatePages();
             void clearPages();

@@ -6,6 +6,8 @@
 
 #include <limits>
 
+#include <components/esm/statstate.hpp>
+
 namespace MWMechanics
 {
     template<typename T>
@@ -85,6 +87,18 @@ namespace MWMechanics
             void setModifier (const T& modifier)
             {
                 mModified = mBase + modifier;
+            }
+
+            void writeState (ESM::StatState<T>& state) const
+            {
+                state.mBase = mBase;
+                state.mMod = mModified;
+            }
+
+            void readState (const ESM::StatState<T>& state)
+            {
+                mBase = state.mBase;
+                mModified = state.mMod;
             }
     };
 
@@ -190,6 +204,18 @@ namespace MWMechanics
                 mStatic.setModifier (modifier);
                 setCurrent (getCurrent()+diff);
             }
+
+            void writeState (ESM::StatState<T>& state) const
+            {
+                mStatic.writeState (state);
+                state.mCurrent = mCurrent;
+            }
+
+            void readState (const ESM::StatState<T>& state)
+            {
+                mStatic.readState (state);
+                mCurrent = state.mCurrent;
+            }
     };
 
     template<typename T>
@@ -204,6 +230,67 @@ namespace MWMechanics
     inline bool operator!= (const DynamicStat<T>& left, const DynamicStat<T>& right)
     {
         return !(left==right);
+    }
+
+    class AttributeValue
+    {
+        int mBase;
+        int mModifier;
+        int mDamage;
+
+    public:
+        AttributeValue() : mBase(0), mModifier(0), mDamage(0) {}
+
+        int getModified() const { return std::max(0, mBase - mDamage + mModifier); }
+        int getBase() const { return mBase; }
+        int getModifier() const {  return mModifier; }
+
+        void setBase(int base) { mBase = std::max(0, base); }
+        void setModifier(int mod) { mModifier = mod; }
+
+        void damage(int damage) { mDamage += damage; }
+        void restore(int amount) { mDamage -= std::min(mDamage, amount); }
+        int getDamage() const { return mDamage; }
+
+        void writeState (ESM::StatState<int>& state) const;
+
+        void readState (const ESM::StatState<int>& state);
+    };
+
+    class SkillValue : public AttributeValue
+    {
+        float mProgress;
+    public:
+        SkillValue() : mProgress(0) {}
+        float getProgress() const { return mProgress; }
+        void setProgress(float progress) { mProgress = progress; }
+
+        void writeState (ESM::StatState<int>& state) const;
+
+        void readState (const ESM::StatState<int>& state);
+    };
+
+    inline bool operator== (const AttributeValue& left, const AttributeValue& right)
+    {
+        return left.getBase() == right.getBase()
+                && left.getModifier() == right.getModifier()
+                && left.getDamage() == right.getDamage();
+    }
+    inline bool operator!= (const AttributeValue& left, const AttributeValue& right)
+    {
+        return !(left == right);
+    }
+
+    inline bool operator== (const SkillValue& left, const SkillValue& right)
+    {
+        return left.getBase() == right.getBase()
+                && left.getModifier() == right.getModifier()
+                && left.getDamage() == right.getDamage()
+                && left.getProgress() == right.getProgress();
+    }
+    inline bool operator!= (const SkillValue& left, const SkillValue& right)
+    {
+        return !(left == right);
     }
 }
 

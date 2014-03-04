@@ -45,7 +45,9 @@ namespace CSMWorld
 
         virtual RecordBase& getRecord (int index)= 0;
 
-        virtual void appendRecord (const std::string& id) = 0;
+        virtual void appendRecord (const std::string& id, bool base) = 0;
+
+        virtual void insertRecord (RecordBase& record) = 0;
 
         virtual void load (int index,  ESM::ESMReader& reader, bool base) = 0;
 
@@ -67,7 +69,9 @@ namespace CSMWorld
 
         virtual RecordBase& getRecord (int index);
 
-        virtual void appendRecord (const std::string& id);
+        virtual void appendRecord (const std::string& id, bool base);
+
+        virtual void insertRecord (RecordBase& record);
 
         virtual void load (int index,  ESM::ESMReader& reader, bool base);
 
@@ -77,6 +81,13 @@ namespace CSMWorld
 
         virtual void save (int index, ESM::ESMWriter& writer) const;
     };
+
+    template<typename RecordT>
+    void RefIdDataContainer<RecordT>::insertRecord(RecordBase& record)
+    {
+        Record<RecordT>& newRecord = dynamic_cast<Record<RecordT>& >(record);
+        mContainer.push_back(newRecord);
+    }
 
     template<typename RecordT>
     int RefIdDataContainer<RecordT>::getSize() const
@@ -97,12 +108,15 @@ namespace CSMWorld
     }
 
     template<typename RecordT>
-    void RefIdDataContainer<RecordT>::appendRecord (const std::string& id)
+    void RefIdDataContainer<RecordT>::appendRecord (const std::string& id, bool base)
     {
         Record<RecordT> record;
+
+        record.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+
+        record.mBase.mId = id;
         record.mModified.mId = id;
-        record.mModified.blank();
-        record.mState = RecordBase::State_ModifiedOnly;
+        (base ? record.mBase : record.mModified).blank();
 
         mContainer.push_back (record);
     }
@@ -136,15 +150,10 @@ namespace CSMWorld
         if (state==CSMWorld::RecordBase::State_Modified ||
             state==CSMWorld::RecordBase::State_ModifiedOnly)
         {
-            std::string type;
-            for (int i=0; i<4; ++i)
-                /// \todo make endianess agnostic (change ESMWriter interface?)
-                type += reinterpret_cast<const char *> (&mContainer.at (index).mModified.sRecordId)[i];
-
-            writer.startRecord (type);
+            writer.startRecord (mContainer.at (index).mModified.sRecordId);
             writer.writeHNCString ("NAME", getId (index));
             mContainer.at (index).mModified.save (writer);
-            writer.endRecord (type);
+            writer.endRecord (mContainer.at (index).mModified.sRecordId);
         }
         else if (state==CSMWorld::RecordBase::State_Deleted)
         {
@@ -201,11 +210,13 @@ namespace CSMWorld
 
             void erase (int index, int count);
 
+            void insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id);
+
             const RecordBase& getRecord (const LocalIndex& index) const;
 
             RecordBase& getRecord (const LocalIndex& index);
 
-            void appendRecord (UniversalId::Type type, const std::string& id);
+            void appendRecord (UniversalId::Type type, const std::string& id, bool base);
 
             int getAppendIndex (UniversalId::Type type) const;
 
@@ -219,7 +230,33 @@ namespace CSMWorld
             /// \param listDeleted include deleted record in the list
 
             void save (int index, ESM::ESMWriter& writer) const;
+
+	    //RECORD CONTAINERS ACCESS METHODS
+	    const RefIdDataContainer<ESM::Book>& getBooks() const;
+	    const RefIdDataContainer<ESM::Activator>& getActivators() const;
+	    const RefIdDataContainer<ESM::Potion>& getPotions() const;
+	    const RefIdDataContainer<ESM::Apparatus>& getApparati() const;
+	    const RefIdDataContainer<ESM::Armor>& getArmors() const;
+	    const RefIdDataContainer<ESM::Clothing>& getClothing() const;
+	    const RefIdDataContainer<ESM::Container>& getContainers() const;
+	    const RefIdDataContainer<ESM::Creature>& getCreatures() const;
+	    const RefIdDataContainer<ESM::Door>& getDoors() const;
+	    const RefIdDataContainer<ESM::Ingredient>& getIngredients() const;
+	    const RefIdDataContainer<ESM::CreatureLevList>& getCreatureLevelledLists() const;
+	    const RefIdDataContainer<ESM::ItemLevList>& getItemLevelledList() const;
+	    const RefIdDataContainer<ESM::Light>& getLights() const;
+	    const RefIdDataContainer<ESM::Lockpick>& getLocpicks() const;
+	    const RefIdDataContainer<ESM::Miscellaneous>& getMiscellaneous() const;
+	    const RefIdDataContainer<ESM::NPC>& getNPCs() const;
+	    const RefIdDataContainer<ESM::Weapon >& getWeapons() const;
+	    const RefIdDataContainer<ESM::Probe >& getProbes() const;
+	    const RefIdDataContainer<ESM::Repair>& getRepairs() const;
+	    const RefIdDataContainer<ESM::Static>& getStatics() const;
     };
 }
 
 #endif
+
+
+
+

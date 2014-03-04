@@ -3,18 +3,20 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/windowmanager.hpp"
-
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"
-#include "inventorywindow.hpp"
 
 namespace
 {
@@ -334,7 +336,10 @@ namespace MWGui
             return;
         }
 
-        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
+        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
@@ -342,9 +347,7 @@ namespace MWGui
 
         mSpell.mName = mNameEdit->getCaption();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
-        player.getClass().getContainerStore(player).remove("gold_001", boost::lexical_cast<int>(mPriceLabel->getCaption()), player);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, boost::lexical_cast<int>(mPriceLabel->getCaption()), player);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
@@ -414,7 +417,7 @@ namespace MWGui
 
         mPriceLabel->setCaption(boost::lexical_cast<std::string>(int(price)));
 
-        float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWBase::Environment::get().getWorld()->getPlayerPtr());
         mSuccessChance->setCaption(boost::lexical_cast<std::string>(int(chance)));
     }
 
@@ -441,7 +444,7 @@ namespace MWGui
     {
         // get the list of magic effects that are known to the player
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 

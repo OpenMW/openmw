@@ -71,6 +71,14 @@ namespace MWClass
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
 
             std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const;
+            ///< Read additional state from \a state into \a ptr.
+
+            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+                const;
+            ///< Write additional state from \a ptr into \a state.
     };
 }
 

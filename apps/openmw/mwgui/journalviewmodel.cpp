@@ -20,8 +20,6 @@ namespace MWGui {
 
 struct JournalViewModelImpl;
 
-static void injectMonthName (std::ostream & os, int month);
-
 struct JournalViewModelImpl : JournalViewModel
 {
     typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
@@ -206,10 +204,12 @@ struct JournalViewModelImpl : JournalViewModel
             if (active_only && i->second.isFinished ())
                 continue;
 
-            /// \todo quest.getName() is broken? returns empty string
-            //const MWDialogue::Quest& quest = i->second;
-
-            visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (i->first));
+            const MWDialogue::Quest& quest = i->second;
+            // Unfortunately Morrowind.esm has no quest names, since the quest book was added with tribunal.
+            // Note that even with Tribunal, some quests still don't have quest names. I'm assuming those are not supposed
+            // to appear in the quest book.
+            if (!quest.getName().empty())
+                visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (quest.getName()));
         }
     }
 
@@ -235,21 +235,21 @@ struct JournalViewModelImpl : JournalViewModel
 
         std::string getText () const
         {
-            return itr->getText(MWBase::Environment::get().getWorld()->getStore());
+            return itr->getText();
         }
 
         Utf8Span timestamp () const
         {
             if (timestamp_buffer.empty ())
             {
+                std::string dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
+
                 std::ostringstream os;
 
-                os << itr->mDayOfMonth << ' ';
-
-                injectMonthName (os, itr->mMonth);
-
-                const std::string& dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
-                os << " (" << dayStr << " " << (itr->mDay + 1) << ')';
+                os
+                    << itr->mDayOfMonth << ' '
+                    << MWBase::Environment::get().getWorld()->getMonthName (itr->mMonth)
+                    << " (" << dayStr << " " << (itr->mDay + 1) << ')';
 
                 timestamp_buffer = os.str ();
             }
@@ -270,7 +270,7 @@ struct JournalViewModelImpl : JournalViewModel
             {
                 for (MWDialogue::Topic::TEntryIter j = quest->begin (); j != quest->end (); ++j)
                 {
-                    if (i->mInfoId == *j)
+                    if (i->mInfoId == j->mInfoId)
                         visitor (JournalEntryImpl <MWBase::Journal::TEntryIter> (this, i));
                 }
             }
@@ -290,9 +290,7 @@ struct JournalViewModelImpl : JournalViewModel
     void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const
     {
         MWDialogue::Topic const & topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
-        // This is to get the correct case for the topic
-        const std::string& name = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic.getName())->mId;
-        visitor (toUtf8Span (name));
+        visitor (toUtf8Span (topic.getName()));
     }
 
     void visitTopicNamesStartingWith (char character, boost::function < void (TopicId , Utf8Span) > visitor) const
@@ -304,10 +302,7 @@ struct JournalViewModelImpl : JournalViewModel
             if (i->first [0] != std::tolower (character, mLocale))
                 continue;
 
-            // This is to get the correct case for the topic
-            const std::string& name = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(i->first)->mId;
-
-            visitor (TopicId (&i->second), toUtf8Span (name));
+            visitor (TopicId (&i->second), toUtf8Span (i->second.getName()));
         }
 
     }
@@ -316,24 +311,18 @@ struct JournalViewModelImpl : JournalViewModel
     {
         MWDialogue::Topic const & mTopic;
 
-        mutable std::string source_buffer;
-
         TopicEntryImpl (JournalViewModelImpl const * model, MWDialogue::Topic const & topic, iterator_t itr) :
             BaseEntry (model, itr), mTopic (topic)
         {}
 
         std::string getText () const
         {
-            /// \todo defines are not replaced (%PCName etc). should probably be done elsewhere though since we need the actor
-            return  mTopic.getEntry (*itr).getText(MWBase::Environment::get().getWorld()->getStore());
-
+            return  itr->getText();
         }
 
         Utf8Span source () const
         {
-            if (source_buffer.empty ())
-                source_buffer = "someone";
-            return toUtf8Span (source_buffer);
+            return toUtf8Span (itr->mActorName);
         }
 
     };
@@ -348,38 +337,6 @@ struct JournalViewModelImpl : JournalViewModel
             visitor (TopicEntryImpl (this, topic, i));
     }
 };
-
-static void injectMonthName (std::ostream & os, int month)
-{
-    MyGUI::LanguageManager& lm = MyGUI::LanguageManager::getInstance();
-
-    if (month  == 0)
-        os << lm.replaceTags ("#{sMonthMorningstar}");
-    else if (month == 1)
-        os << lm.replaceTags ("#{sMonthSunsdawn}");
-    else if (month == 2)
-        os << lm.replaceTags ("#{sMonthFirstseed}");
-    else if (month == 3)
-        os << lm.replaceTags ("#{sMonthRainshand}");
-    else if (month == 4)
-        os << lm.replaceTags ("#{sMonthSecondseed}");
-    else if (month == 5)
-        os << lm.replaceTags ("#{sMonthMidyear}");
-    else if (month == 6)
-        os << lm.replaceTags ("#{sMonthSunsheight}");
-    else if (month == 7)
-        os << lm.replaceTags ("#{sMonthLastseed}");
-    else if (month == 8)
-        os << lm.replaceTags ("#{sMonthHeartfire}");
-    else if (month == 9)
-        os << lm.replaceTags ("#{sMonthFrostfall}");
-    else if (month == 10)
-        os << lm.replaceTags ("#{sMonthSunsdusk}");
-    else if (month == 11)
-        os << lm.replaceTags ("#{sMonthEveningstar}");
-    else
-        os << month;
-}
 
 JournalViewModel::Ptr JournalViewModel::create ()
 {
