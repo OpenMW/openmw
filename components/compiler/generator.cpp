@@ -260,34 +260,34 @@ namespace
         code.push_back (Compiler::Generator::segment5 (44));
     }
 
-    void opStoreMemberShort (Compiler::Generator::CodeContainer& code)
+    void opStoreMemberShort (Compiler::Generator::CodeContainer& code, bool global)
     {
-        code.push_back (Compiler::Generator::segment5 (59));
+        code.push_back (Compiler::Generator::segment5 (global ? 65 : 59));
     }
 
-    void opStoreMemberLong (Compiler::Generator::CodeContainer& code)
+    void opStoreMemberLong (Compiler::Generator::CodeContainer& code, bool global)
     {
-        code.push_back (Compiler::Generator::segment5 (60));
+        code.push_back (Compiler::Generator::segment5 (global ? 66 : 60));
     }
 
-    void opStoreMemberFloat (Compiler::Generator::CodeContainer& code)
+    void opStoreMemberFloat (Compiler::Generator::CodeContainer& code, bool global)
     {
-        code.push_back (Compiler::Generator::segment5 (61));
+        code.push_back (Compiler::Generator::segment5 (global ? 67 : 61));
     }
 
-    void opFetchMemberShort (Compiler::Generator::CodeContainer& code)
+    void opFetchMemberShort (Compiler::Generator::CodeContainer& code, bool global)
     {
-        code.push_back (Compiler::Generator::segment5 (62));
+        code.push_back (Compiler::Generator::segment5 (global ? 68 : 62));
     }
 
-    void opFetchMemberLong (Compiler::Generator::CodeContainer& code)
+    void opFetchMemberLong (Compiler::Generator::CodeContainer& code, bool global)
     {
-        code.push_back (Compiler::Generator::segment5 (63));
+        code.push_back (Compiler::Generator::segment5 (global ? 69 : 63));
     }
 
-    void opFetchMemberFloat (Compiler::Generator::CodeContainer& code)
+    void opFetchMemberFloat (Compiler::Generator::CodeContainer& code, bool global)
     {
-        code.push_back (Compiler::Generator::segment5 (64));
+        code.push_back (Compiler::Generator::segment5 (global ? 70 : 64));
     }
 
     void opRandom (Compiler::Generator::CodeContainer& code)
@@ -593,7 +593,7 @@ namespace Compiler
             else if (offset<0)
                 opJumpBackward (code, -offset);
             else
-                throw std::logic_error ("inifite loop");
+                throw std::logic_error ("infinite loop");
         }
 
         void jumpOnZero (CodeContainer& code, int offset)
@@ -738,7 +738,8 @@ namespace Compiler
         }
 
         void assignToMember (CodeContainer& code, Literals& literals, char localType,
-            const std::string& name, const std::string& id, const CodeContainer& value, char valueType)
+            const std::string& name, const std::string& id, const CodeContainer& value,
+            char valueType, bool global)
         {
             int index = literals.addString (name);
 
@@ -766,17 +767,17 @@ namespace Compiler
             {
                 case 'f':
 
-                    opStoreMemberFloat (code);
+                    opStoreMemberFloat (code, global);
                     break;
 
                 case 's':
 
-                    opStoreMemberShort (code);
+                    opStoreMemberShort (code, global);
                     break;
 
                 case 'l':
 
-                    opStoreMemberLong (code);
+                    opStoreMemberLong (code, global);
                     break;
 
                 default:
@@ -786,7 +787,7 @@ namespace Compiler
         }
 
         void fetchMember (CodeContainer& code, Literals& literals, char localType,
-            const std::string& name, const std::string& id)
+            const std::string& name, const std::string& id, bool global)
         {
             int index = literals.addString (name);
 
@@ -800,17 +801,17 @@ namespace Compiler
             {
                 case 'f':
 
-                    opFetchMemberFloat (code);
+                    opFetchMemberFloat (code, global);
                     break;
 
                 case 's':
 
-                    opFetchMemberShort (code);
+                    opFetchMemberShort (code, global);
                     break;
 
                 case 'l':
 
-                    opFetchMemberLong (code);
+                    opFetchMemberLong (code, global);
                     break;
 
                 default:

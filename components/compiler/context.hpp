@@ -33,11 +33,18 @@ namespace Compiler
             virtual char getGlobalType (const std::string& name) const = 0;
             ///< 'l: long, 's': short, 'f': float, ' ': does not exist.
 
-            virtual char getMemberType (const std::string& name, const std::string& id) const = 0;
-            ///< 'l: long, 's': short, 'f': float, ' ': does not exist.
+            virtual std::pair<char, bool> getMemberType (const std::string& name,
+                const std::string& id) const = 0;
+            ///< Return type of member variable \a name in script \a id or in script of reference of
+            /// \a id
+            /// \return first: 'l: long, 's': short, 'f': float, ' ': does not exist.
+            /// second: true: script of reference
 
             virtual bool isId (const std::string& name) const = 0;
             ///< Does \a name match an ID, that can be referenced?
+
+            virtual bool isJournalId (const std::string& name) const = 0;
+            ///< Does \a name match a journal ID?
     };
 }
 

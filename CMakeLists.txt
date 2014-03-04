@@ -6,19 +6,63 @@ if (APPLE)
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
 endif (APPLE)
 
-# Macros
-
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
-include (OpenMWMacros)
-
 # Version
+message(STATUS "Configuring OpenMW...")
 
-set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 28)
-set (OPENMW_VERSION_RELEASE 0)
+set(OPENMW_VERSION_MAJOR 0)
+set(OPENMW_VERSION_MINOR 29)
+set(OPENMW_VERSION_RELEASE 0)
 
-set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+set(OPENMW_VERSION_COMMITHASH "")
+set(OPENMW_VERSION_TAGHASH "")
+
+set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
+
+if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
+        find_package(Git)
+
+        if(GIT_FOUND)
+            include(GetGitRevisionDescription)
+            get_git_tag_revision(TAGHASH --tags --max-count=1)
+            get_git_head_revision(REFSPEC COMMITHASH)
+            git_describe(VERSION --tags ${TAGHASH})
+
+            string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
+            if(MATCH)
+                string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" GIT_VERSION_MAJOR "${VERSION}")
+                string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_MINOR "${VERSION}")
+                string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_RELEASE "${VERSION}")
+
+                set(GIT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_RELEASE}")
+
+                if(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+                    message(FATAL_ERROR "Silly Zini forgot to update the version again...")
+                else(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+                    set(OPENMW_VERSION_MAJOR ${GIT_VERSION_MAJOR})
+                    set(OPENMW_VERSION_MINOR ${GIT_VERSION_MINOR})
+                    set(OPENMW_VERSION_RELEASE ${GIT_VERSION_RELEASE})
+
+                    set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+                    set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+                endif(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+
+                message(STATUS "OpenMW version ${OPENMW_VERSION}")
+            else(MATCH)
+                message(WARNING "Failed to get valid version information from Git")
+            endif(MATCH)
+        else(GIT_FOUND)
+            message(WARNING "Git executable not found")
+        endif(GIT_FOUND)
+    else(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
+        message(STATUS "Shallow Git clone detected, not attempting to retrieve version info")
+    endif(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
+
+# Macros
+include(OpenMWMacros)
 
 # doxygen main page
 
@@ -89,8 +133,6 @@ set(OENGINE_GUI
 )
 
 set(OENGINE_BULLET
-    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.cpp
-    ${LIBDIR}/openengine/bullet/btKinematicCharacterController.h
     ${LIBDIR}/openengine/bullet/BtOgre.cpp
     ${LIBDIR}/openengine/bullet/BtOgreExtras.h
     ${LIBDIR}/openengine/bullet/BtOgreGP.h
@@ -179,10 +221,11 @@ if (WIN32)
     set(Boost_USE_STATIC_LIBS   ON)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
+
+    # Suppress WinMain(), provided by SDL
+    add_definitions(-DSDL_MAIN_HANDLED)
 else (WIN32)
     set(PLATFORM_INCLUDE_DIR "")
-    find_path (UUID_INCLUDE_DIR uuid/uuid.h)
-    include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
@@ -230,7 +273,6 @@ include_directories("."
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
-    ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
@@ -239,9 +281,8 @@ link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MY
 if (APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
-                          ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
-    
+
     # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
     # not reliable and equals TRUE even if there's no Ogre Cg plugin
     if (Cg_FOUND)
@@ -262,8 +303,6 @@ if (APPLE)
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-
-    #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
@@ -407,46 +446,6 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
     INSTALL(DIRECTORY DESTINATION "${DATADIR}/data" COMPONENT "Resources")
-
-    IF (DPKG_PROGRAM)
-        ## Debian Specific
-        IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
-            EXEC_PROGRAM("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
-            STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
-            EXEC_PROGRAM("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
-            EXEC_PROGRAM("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
-            SET(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
-        ELSE()
-            SET(VERSION_STRING "${OPENMW_VERSION}")
-            SET(PACKAGE_MAINTAINER "unknown")
-        ENDIF()
-
-        SET(CPACK_GENERATOR "DEB")
-        SET(CPACK_PACKAGE_NAME "openmw")
-        SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.org")
-        SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
-        SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
- OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
- Data files from the original game is required to run it.")
-        SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
-        SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW opencs;OpenCS bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
-
-        SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
-
-        STRING(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
-        EXECUTE_PROCESS(
-            COMMAND ${DPKG_PROGRAM} --print-architecture
-            OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
-
-
-        INCLUDE(CPack)
-    ENDIF(DPKG_PROGRAM)
 ENDIF(NOT WIN32 AND NOT APPLE)
 
 if(WIN32)
@@ -683,7 +682,7 @@ if (APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
     set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
-    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
+    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
     set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
@@ -698,18 +697,29 @@ if (APPLE)
         set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
+    install(CODE "
+        set(BU_CHMOD_BUNDLE_ITEMS ON)
+        include(BundleUtilities)
+    " COMPONENT Runtime)
+
     # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
     # and returns list of install paths for all installed plugins
     function (install_plugins_for_bundle bundle_path plugins_var)
-        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Plugins")
-        install(FILES ${ABSOLUTE_PLUGINS} DESTINATION ${RELATIVE_PLUGIN_INSTALL_BASE} COMPONENT Runtime)
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Frameworks")
 
         set(PLUGINS "")
         set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
 
         foreach (PLUGIN ${ABSOLUTE_PLUGINS})
             get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
-            set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
+            get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
+
+            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}/${PLUGIN_RELATIVE_WE}")
+            set(PLUGINS ${PLUGINS} "${PLUGIN_DYLIB_IN_BUNDLE}")
+
+            install(CODE "
+                copy_resolved_framework_into_bundle(\"${PLUGIN}/${PLUGIN_RELATIVE_WE}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
+            " COMPONENT Runtime)
         endforeach ()
 
         set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
@@ -729,6 +739,7 @@ if (APPLE)
     # Current limitations:
     #   1. Handles only frameworks, not simple libs
     INSTALL(CODE "
+        cmake_policy(SET CMP0009 OLD)
         set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
         set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
         set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
@@ -760,9 +771,6 @@ if (APPLE)
             endif()
         endfunction(gp_resolve_item_override)
 
-        cmake_policy(SET CMP0009 OLD)
-        set(BU_CHMOD_BUNDLE_ITEMS ON)
-        include(BundleUtilities)
         fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
         fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)

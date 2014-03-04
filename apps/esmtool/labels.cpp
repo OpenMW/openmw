@@ -680,7 +680,7 @@ std::string creatureFlags(int flags)
     if (flags & ESM::Creature::Walks) properties += "Walks ";
     if (flags & ESM::Creature::Swims) properties += "Swims ";
     if (flags & ESM::Creature::Flies) properties += "Flies ";
-    if (flags & ESM::Creature::Biped) properties += "Biped ";   
+    if (flags & ESM::Creature::Bipedal) properties += "Bipedal ";
     if (flags & ESM::Creature::Respawn) properties += "Respawn ";
     if (flags & ESM::Creature::Weapon) properties += "Weapon ";
     if (flags & ESM::Creature::Skeleton) properties += "Skeleton ";
@@ -691,7 +691,7 @@ std::string creatureFlags(int flags)
                    ESM::Creature::Walks|
                    ESM::Creature::Swims|
                    ESM::Creature::Flies|
-                   ESM::Creature::Biped|
+                   ESM::Creature::Bipedal|
                    ESM::Creature::Respawn|
                    ESM::Creature::Weapon|
                    ESM::Creature::Skeleton|
@@ -717,16 +717,26 @@ std::string landFlags(int flags)
     return properties;
 }
 
-std::string leveledListFlags(int flags)
+std::string itemListFlags(int flags)
 {
     std::string properties = "";
     if (flags == 0) properties += "[None] ";
-    if (flags & ESM::LeveledListBase::AllLevels) properties += "AllLevels ";
-    // This flag apparently not present on creature lists...
-    if (flags & ESM::LeveledListBase::Each) properties += "Each ";
+    if (flags & ESM::ItemLevList::AllLevels) properties += "AllLevels ";
+    if (flags & ESM::ItemLevList::Each) properties += "Each ";
     int unused = (0xFFFFFFFF ^
-                  (ESM::LeveledListBase::AllLevels|
-                   ESM::LeveledListBase::Each));
+                  (ESM::ItemLevList::AllLevels|
+                   ESM::ItemLevList::Each));
+    if (flags & unused) properties += "Invalid ";
+    properties += str(boost::format("(0x%08X)") % flags);
+    return properties;
+}
+
+std::string creatureListFlags(int flags)
+{
+    std::string properties = "";
+    if (flags == 0) properties += "[None] ";
+    if (flags & ESM::CreatureLevList::AllLevels) properties += "AllLevels ";
+    int unused = (0xFFFFFFFF ^ ESM::CreatureLevList::AllLevels);
     if (flags & unused) properties += "Invalid ";
     properties += str(boost::format("(0x%08X)") % flags);
     return properties;
@@ -764,34 +774,19 @@ std::string magicEffectFlags(int flags)
 {
     std::string properties = "";
     if (flags == 0) properties += "[None] ";
-    // Enchanting & SpellMaking occur on the same list of effects.
-    // "EXTRA SPELL" appears in the construction set under both the
-    // spell making and enchanting tabs as an allowed effect.  Since
-    // most of the effects without this flags are defective in various
-    // ways, it's still very unclear what these flag bits are.
-    if (flags & ESM::MagicEffect::SpellMaking) properties += "SpellMaking ";
-    if (flags & ESM::MagicEffect::Enchanting) properties += "Enchanting ";
-    if (flags & 0x00000040) properties += "RangeNoSelf ";
-    if (flags & 0x00000080) properties += "RangeTouch ";
-    if (flags & 0x00000100) properties += "RangeTarget ";
-    if (flags & 0x00001000) properties += "Unknown2 ";
-    if (flags & 0x00000001) properties += "AffectSkill ";
-    if (flags & 0x00000002) properties += "AffectAttribute ";
+    if (flags & ESM::MagicEffect::TargetAttribute) properties += "TargetAttribute ";
+    if (flags & ESM::MagicEffect::TargetSkill) properties += "TargetSkill ";
     if (flags & ESM::MagicEffect::NoDuration) properties += "NoDuration ";
-    if (flags & 0x00000008) properties += "NoMagnitude ";
-    if (flags & 0x00000010) properties += "Negative ";
-    if (flags & 0x00000020) properties += "Unknown1 ";
-    // ESM componet says 0x800 is negative, but none of the magic
-    // effects have this flags set.
-    if (flags & ESM::MagicEffect::Negative) properties += "Unused ";
-    // Since only Chameleon has this flag it could be anything
-    // that uniquely distinguishes Chameleon.
-    if (flags & 0x00002000) properties += "Chameleon ";
-    if (flags & 0x00004000) properties += "Bound ";
-    if (flags & 0x00008000) properties += "Summon ";
-    // Calm, Demoralize, Frenzy, Lock, Open, Rally, Soultrap, Turn Unded
-    if (flags & 0x00010000) properties += "Unknown3 ";
-    if (flags & 0x00020000) properties += "Absorb ";
+    if (flags & ESM::MagicEffect::NoMagnitude) properties += "NoMagnitude ";
+    if (flags & ESM::MagicEffect::Harmful) properties += "Harmful ";
+    if (flags & ESM::MagicEffect::ContinuousVfx) properties += "ContinuousVFX ";
+    if (flags & ESM::MagicEffect::CastSelf) properties += "CastSelf ";
+    if (flags & ESM::MagicEffect::CastTouch) properties += "CastTouch ";
+    if (flags & ESM::MagicEffect::CastTarget) properties += "CastTarget ";
+    if (flags & ESM::MagicEffect::UncappedDamage) properties += "UncappedDamage ";
+    if (flags & ESM::MagicEffect::NonRecastable) properties += "NonRecastable ";
+    if (flags & ESM::MagicEffect::Unreflectable) properties += "Unreflectable ";
+    if (flags & ESM::MagicEffect::CasterLinked) properties += "CasterLinked ";
     if (flags & 0xFFFC0000) properties += "Invalid ";
     properties += str(boost::format("(0x%08X)") % flags);
     return properties;

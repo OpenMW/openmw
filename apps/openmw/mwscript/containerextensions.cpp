@@ -21,7 +21,6 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -55,7 +54,7 @@ namespace MWScript
                     MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
-                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer() )
+                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr() )
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
                         std::string msgBox;
@@ -71,7 +70,7 @@ namespace MWScript
                             msgBox = boost::str(boost::format(msgBox) % count % itemName);
                         }
                         std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, /*showInDialogueModeOnly*/ true);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
@@ -88,15 +87,9 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
-                    Interpreter::Type_Integer sum = 0;
-
-                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
-                            sum += iter->getRefData().getCount();
-
-                    runtime.push (sum);
+                    runtime.push (store.count(item));
                 }
         };
 
@@ -133,7 +126,7 @@ namespace MWScript
 
                     // Spawn a messagebox (only for items removed from player's inventory)
                     if ((numRemoved > 0)
-                        && (ptr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer()))
+                        && (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()))
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
@@ -149,7 +142,7 @@ namespace MWScript
                             msgBox = boost::str (boost::format(msgBox) % itemName);
                         }
                         std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, /*showInDialogueModeOnly*/ true);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
@@ -166,7 +159,7 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ContainerStoreIterator it = invStore.begin();
                     for (; it != invStore.end(); ++it)
                     {
@@ -178,6 +171,9 @@ namespace MWScript
 
                     MWWorld::ActionEquip action (*it);
                     action.execute(ptr);
+
+                    if (ptr.getRefData().getHandle() == "player" && !ptr.getClass().getScript(ptr).empty())
+                        ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
                 }
         };
 
@@ -289,7 +285,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
       
-		    const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
+                    const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);

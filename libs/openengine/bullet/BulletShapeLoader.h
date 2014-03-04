@@ -1,5 +1,5 @@
-#ifndef _BULLET_SHAPE_LOADER_H_
-#define _BULLET_SHAPE_LOADER_H_
+#ifndef OPENMW_BULLET_SHAPE_LOADER_H_
+#define OPENMW_BULLET_SHAPE_LOADER_H_
 
 #include <OgreResource.h>
 #include <OgreResourceManager.h>

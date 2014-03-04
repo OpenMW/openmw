@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
     <Widget type="ExposedWindow" skin="MW_Window_Pinnable" layer="Windows" position="0 0 600 300" name="_Main">
-        <Property key="MinSize" value="470 235"/>
+        <Property key="MinSize" value="40 40"/>
 
         <Widget type="Widget" skin="" position="0 0 224 223" align="Left Top" name="LeftPane">
 
@@ -12,11 +12,10 @@
 
             <!-- Avatar -->
             <Widget type="Widget" skin="MW_Box" position="8 38 212 185" name="Avatar" align="Left Top Stretch">
-                <UserString key="ToolTipType" value="AvatarItemSelection"/>
-                <Widget type="ImageBox" skin="ImageBox" position="0 0 212 185" align="Stretch" name="AvatarImage">
-                    <Property key="NeedMouse" value="false"/>
+                <Widget type="ImageBox" skin="ImageBox" position="0 0 212 161" align="Stretch" name="AvatarImage">
+                    <UserString key="ToolTipType" value="AvatarItemSelection"/>
                 </Widget>
-                <Widget type="TextBox" skin="ProgressText" position="0 150 212 24" align="HCenter Bottom" name="ArmorRating">
+                <Widget type="TextBox" skin="ProgressText" position="0 161 212 24" align="HStretch Bottom" name="ArmorRating">
                     <Property key="NeedMouse" value="false"/>
                 </Widget>
             </Widget>

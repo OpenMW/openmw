@@ -4,13 +4,13 @@
 #include <OgreSceneManager.h>
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreCamera.h>
 
 #include <libs/openengine/ogre/selectionbuffer.hpp>
 
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
@@ -140,10 +140,9 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
-        // TODO: can we avoid this. Vampire state needs to be updated.
-        mAnimation->rebuild();
+        mAnimation->updateParts();
 
-        MWWorld::InventoryStore &inv = MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter);
+        MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         std::string groupname;
         if(iter == inv.end())
@@ -161,7 +160,10 @@ namespace MWRender
                 if(type == ESM::Weapon::ShortBladeOneHand ||
                    type == ESM::Weapon::LongBladeOneHand ||
                    type == ESM::Weapon::BluntOneHand ||
-                   type == ESM::Weapon::AxeOneHand)
+                   type == ESM::Weapon::AxeOneHand ||
+                   type == ESM::Weapon::MarksmanThrown ||
+                   type == ESM::Weapon::MarksmanCrossbow ||
+                   type == ESM::Weapon::MarksmanBow)
                     groupname = "inventoryweapononehand";
                 else if(type == ESM::Weapon::LongBladeTwoHand ||
                         type == ESM::Weapon::BluntTwoClose ||
@@ -177,12 +179,8 @@ namespace MWRender
                 groupname = "inventoryhandtohand";
         }
 
-        // TODO see above
-        //if(groupname != mCurrentAnimGroup)
-        //{
-            mCurrentAnimGroup = groupname;
-            mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
-        //}
+        mCurrentAnimGroup = groupname;
+        mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
@@ -194,7 +192,6 @@ namespace MWRender
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
 
-        mAnimation->updateParts();
         mAnimation->runAnimation(0.0f);
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
@@ -225,7 +222,7 @@ namespace MWRender
     // --------------------------------------------------------------------------------------------------
 
     RaceSelectionPreview::RaceSelectionPreview()
-        : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
+        : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayerPtr(),
             512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 6, -35), Ogre::Vector3(0,125,0))
         , mRef(&mBase)
     {

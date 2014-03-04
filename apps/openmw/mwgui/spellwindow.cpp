@@ -4,12 +4,15 @@
 #include <boost/format.hpp>
 
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/actionequip.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "spellicons.hpp"
 #include "inventorywindow.hpp"
@@ -39,8 +42,9 @@ namespace
 
 namespace MWGui
 {
-    SpellWindow::SpellWindow()
+    SpellWindow::SpellWindow(DragAndDrop* drag)
         : WindowPinnableBase("openmw_spell_window.layout")
+        , NoDrop(drag, mMainWidget)
         , mHeight(0)
         , mWidth(0)
     {
@@ -81,7 +85,7 @@ namespace MWGui
 
         // retrieve all player spells, divide them into Powers and Spells and sort them
         std::vector<std::string> spellList;
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
@@ -232,8 +236,7 @@ namespace MWGui
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
 
             float enchantCost = enchant->mData.mCost;
-            MWMechanics::NpcStats &stats = player.getClass().getNpcStats(player);
-            int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+            int eSkill = player.getClass().getSkill(player, ESM::Skill::Enchant);
             int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
             std::string cost = boost::lexical_cast<std::string>(castCost);
@@ -298,7 +301,7 @@ namespace MWGui
 
     void SpellWindow::onEnchantedItemSelected(MyGUI::Widget* _sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWWorld::Ptr item = *_sender->getUserData<MWWorld::Ptr>();
 
@@ -317,13 +320,7 @@ namespace MWGui
         if (_sender->getUserString("Equipped") == "false"
             && !MWWorld::Class::get(item).getEquipmentSlots(item).first.empty())
         {
-            // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
-
-            MWWorld::ActionEquip action(item);
-            action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
-
-            // since we changed equipping status, update the inventory window
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
         }
 
         store.setSelectedEnchantItem(it);
@@ -335,7 +332,7 @@ namespace MWGui
     void SpellWindow::onSpellSelected(MyGUI::Widget* _sender)
     {
         std::string spellId = _sender->getUserString("Spell");
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
 
         if (MyGUI::InputManager::getInstance().isShiftPressed())
@@ -389,11 +386,11 @@ namespace MWGui
 
     void SpellWindow::onDeleteSpellAccept()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
-        if (spells.getSelectedSpell() == mSpellToDelete)
+        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == mSpellToDelete)
             MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
 
         spells.remove(mSpellToDelete);

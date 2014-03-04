@@ -1,11 +1,11 @@
 #include "aitravel.hpp"
 
-#include "movement.hpp"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
+
+#include "steering.hpp"
+#include "movement.hpp"
 
 namespace
 {
@@ -21,8 +21,8 @@ namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z)
     : mX(x),mY(y),mZ(z),mPathFinder()
-    , cellX(std::numeric_limits<int>::max())
-    , cellY(std::numeric_limits<int>::max())
+    , mCellX(std::numeric_limits<int>::max())
+    , mCellY(std::numeric_limits<int>::max())
     {
     }
 
@@ -38,7 +38,7 @@ namespace MWMechanics
         Movement &movement = actor.getClass().getMovementSettings(actor);
         const ESM::Cell *cell = actor.getCell()->mCell;
 
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->mCell->mData.mX)
         {
             int sideX = sgn(cell->mData.mX - player.getCell()->mCell->mData.mX);
@@ -62,20 +62,11 @@ namespace MWMechanics
             }
         }
 
-        const ESM::Pathgrid *pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
-        bool cellChange = cell->mData.mX != cellX || cell->mData.mY != cellY;
+        bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
-            cellX = cell->mData.mX;
-            cellY = cell->mData.mY;
-            float xCell = 0;
-            float yCell = 0;
-
-            if(cell->isExterior())
-            {
-                xCell = cell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = cell->mData.mY * ESM::Land::REAL_SIZE;
-            }
+            mCellX = cell->mData.mX;
+            mCellY = cell->mData.mY;
 
             ESM::Pathgrid::Point dest;
             dest.mX = mX;
@@ -87,7 +78,7 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
 
         if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
@@ -96,8 +87,7 @@ namespace MWMechanics
             return true;
         }
 
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        world->rotateObject(actor, 0, 0, zAngle, false);
+        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
         movement.mPosition[1] = 1;
 
         return false;
@@ -105,7 +95,7 @@ namespace MWMechanics
 
     int AiTravel::getTypeId() const
     {
-        return 1;
+        return TypeIdTravel;
     }
 }
 

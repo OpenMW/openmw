@@ -26,9 +26,9 @@ class MouseListener
 {
 public:
     virtual ~MouseListener() {}
-    virtual bool mouseMoved( const MouseMotionEvent &arg ) = 0;
-    virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
-    virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
+    virtual void mouseMoved( const MouseMotionEvent &arg ) = 0;
+    virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
+    virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
 };
 
 class KeyListener
@@ -36,8 +36,8 @@ class KeyListener
 public:
     virtual ~KeyListener() {}
     virtual void textInput (const SDL_TextInputEvent& arg) {}
-    virtual bool keyPressed(const SDL_KeyboardEvent &arg) = 0;
-    virtual bool keyReleased(const SDL_KeyboardEvent &arg) = 0;
+    virtual void keyPressed(const SDL_KeyboardEvent &arg) = 0;
+    virtual void keyReleased(const SDL_KeyboardEvent &arg) = 0;
 };
 
 class JoyListener
@@ -45,18 +45,18 @@ class JoyListener
 public:
     virtual ~JoyListener() {}
     /** @remarks Joystick button down event */
-    virtual bool buttonPressed( const SDL_JoyButtonEvent &evt, int button ) = 0;
+    virtual void buttonPressed( const SDL_JoyButtonEvent &evt, int button ) = 0;
 
     /** @remarks Joystick button up event */
-    virtual bool buttonReleased( const SDL_JoyButtonEvent &evt, int button ) = 0;
+    virtual void buttonReleased( const SDL_JoyButtonEvent &evt, int button ) = 0;
 
     /** @remarks Joystick axis moved event */
-    virtual bool axisMoved( const SDL_JoyAxisEvent &arg, int axis ) = 0;
+    virtual void axisMoved( const SDL_JoyAxisEvent &arg, int axis ) = 0;
 
     //-- Not so common control events, so are not required --//
 
     //! Joystick Event, and povID
-    virtual bool povMoved( const SDL_JoyHatEvent &arg, int index) {return true;}
+    virtual void povMoved( const SDL_JoyHatEvent &arg, int index) {}
 };
 
 class WindowListener

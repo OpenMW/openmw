@@ -24,8 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------- */
 
-#ifndef _Channel_H_
-#define _Channel_H_
+#ifndef OICS_Channel_H_
+#define OICS_Channel_H_
 
 #include "ICSPrerequisites.h"
 

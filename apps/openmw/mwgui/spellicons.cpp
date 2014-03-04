@@ -9,7 +9,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
@@ -22,7 +21,8 @@ namespace MWGui
 {
 
     void EffectSourceVisitor::visit (MWMechanics::EffectKey key,
-                                           const std::string& sourceName, float magnitude, float remainingTime)
+                                           const std::string& sourceName, const std::string& casterHandle,
+                                     float magnitude, float remainingTime)
     {
         MagicEffectInfo newEffectSource;
         newEffectSource.mKey = key;
@@ -39,7 +39,7 @@ namespace MWGui
     {
         // TODO: Tracking add/remove/expire would be better than force updating every frame
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
 
 

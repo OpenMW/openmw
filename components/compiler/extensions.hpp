@@ -1,5 +1,5 @@
 #ifndef COMPILER_EXTENSIONS_H_INCLUDED
-#define COMPILER_EXTENSINOS_H_INCLUDED
+#define COMPILER_EXTENSIONS_H_INCLUDED
 
 #include <string>
 #include <map>
@@ -47,13 +47,17 @@ namespace Compiler
             /// - keyword must be all lower case.
 
             bool isFunction (int keyword, char& returnType, std::string& argumentType,
-                bool explicitReference) const;
+                bool& explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return return and argument
             /// types.
+            /// \param explicitReference In: has explicit reference; Out: set to false, if
+            /// explicit reference is not available for this instruction.
 
             bool isInstruction (int keyword, std::string& argumentType,
-                bool explicitReference) const;
+                bool& explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return argument types.
+            /// \param explicitReference In: has explicit reference; Out: set to false, if
+            /// explicit reference is not available for this instruction.
 
             void registerFunction (const std::string& keyword, char returnType,
                 const std::string& argumentType, int code, int codeExplicit = -1);

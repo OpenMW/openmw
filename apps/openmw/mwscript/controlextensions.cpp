@@ -11,7 +11,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -77,34 +76,34 @@ namespace MWScript
         template<class R>
         class OpClearMovementFlag : public Interpreter::Opcode0
         {
-                MWMechanics::NpcStats::Flag mFlag;
+                MWMechanics::CreatureStats::Flag mFlag;
 
             public:
 
-                OpClearMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
+                OpClearMovementFlag (MWMechanics::CreatureStats::Flag flag) : mFlag (flag) {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, false);
+                    ptr.getClass().getCreatureStats(ptr).setMovementFlag (mFlag, false);
                 }
         };
 
         template<class R>
         class OpSetMovementFlag : public Interpreter::Opcode0
         {
-                MWMechanics::NpcStats::Flag mFlag;
+                MWMechanics::CreatureStats::Flag mFlag;
 
             public:
 
-                OpSetMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
+                OpSetMovementFlag (MWMechanics::CreatureStats::Flag flag) : mFlag (flag) {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, true);
+                    ptr.getClass().getCreatureStats(ptr).setMovementFlag (mFlag, true);
                 }
         };
 
@@ -117,9 +116,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWMechanics::NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats (ptr);
-
-                    runtime.push (npcStats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun));
+                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+                    runtime.push (stats.getMovementFlag (MWMechanics::CreatureStats::Flag_ForceRun));
                 }
         };
 
@@ -132,9 +130,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWMechanics::NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats (ptr);
-
-                    runtime.push (npcStats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak));
+                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+                    runtime.push (stats.getMovementFlag (MWMechanics::CreatureStats::Flag_ForceSneak));
                 }
         };
 
@@ -144,8 +141,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
-                    runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Run));
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+                    runtime.push (ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run));
                 }
         };
 
@@ -155,8 +152,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
-                    runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Sneak));
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+                    runtime.push (ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak));
                 }
         };
 
@@ -173,22 +170,22 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Control::opcodeToggleCollision, new OpToggleCollision);
 
             interpreter.installSegment5 (Compiler::Control::opcodeClearForceRun,
-                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
             interpreter.installSegment5 (Compiler::Control::opcodeForceRun,
-                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
             interpreter.installSegment5 (Compiler::Control::opcodeClearForceSneak,
-                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
             interpreter.installSegment5 (Compiler::Control::opcodeForceSneak,
-                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
 
             interpreter.installSegment5 (Compiler::Control::opcodeClearForceRunExplicit,
-                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
             interpreter.installSegment5 (Compiler::Control::opcodeForceRunExplicit,
-                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceRun));
             interpreter.installSegment5 (Compiler::Control::opcodeClearForceSneakExplicit,
-                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
             interpreter.installSegment5 (Compiler::Control::opcodeForceSneakExplicit,
-                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::CreatureStats::Flag_ForceSneak));
             interpreter.installSegment5 (Compiler::Control::opcodeGetPcRunning, new OpGetPcRunning);
             interpreter.installSegment5 (Compiler::Control::opcodeGetPcSneaking, new OpGetPcSneaking);
             interpreter.installSegment5 (Compiler::Control::opcodeGetForceRun, new OpGetForceRun<ImplicitRef>);

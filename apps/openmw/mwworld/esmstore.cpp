@@ -52,7 +52,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         if (index == (int)~0) {
             // Tried to load a parent file that has not been loaded yet. This is bad,
             //  the launcher should have taken care of this.
-            std::string fstring = "File " + fname + " asks for parent file " + masters[j].name
+            std::string fstring = "File " + esm.getName() + " asks for parent file " + masters[j].name
                 + ", but it has not been loaded yet. Please check your load order.";
             esm.fail(fstring);
         }
@@ -108,7 +108,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             }
             // Insert the reference into the global lookup
             if (!id.empty() && isCacheableRecord(n.val)) {
-                mIds[id] = n.val;
+                mIds[Misc::StringUtils::lowerCase (id)] = n.val;
             }
         }
         listener->setProgress(esm.getFileOffset() / (float)esm.getFileSize() * 1000);
@@ -138,5 +138,69 @@ void ESMStore::setUp()
     mMagicEffects.setUp();
     mAttributes.setUp();
 }
+
+    int ESMStore::countSavedGameRecords() const
+    {
+        return
+            mPotions.getDynamicSize()
+            +mArmors.getDynamicSize()
+            +mBooks.getDynamicSize()
+            +mClasses.getDynamicSize()
+            +mClothes.getDynamicSize()
+            +mEnchants.getDynamicSize()
+            +mNpcs.getDynamicSize()
+            +mSpells.getDynamicSize()
+            +mWeapons.getDynamicSize();
+    }
+
+    void ESMStore::write (ESM::ESMWriter& writer) const
+    {
+        mPotions.write (writer);
+        mArmors.write (writer);
+        mBooks.write (writer);
+        mClasses.write (writer);
+        mClothes.write (writer);
+        mEnchants.write (writer);
+        mSpells.write (writer);
+        mWeapons.write (writer);
+        mNpcs.write (writer);
+    }
+
+    bool ESMStore::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        switch (type)
+        {
+            case ESM::REC_ALCH:
+            case ESM::REC_ARMO:
+            case ESM::REC_BOOK:
+            case ESM::REC_CLAS:
+            case ESM::REC_CLOT:
+            case ESM::REC_ENCH:
+            case ESM::REC_SPEL:
+            case ESM::REC_WEAP:
+            case ESM::REC_NPC_:
+
+                mStores[type]->read (reader);
+
+                if (type==ESM::REC_NPC_)
+                {
+                    // NPC record will always be last and we know that there can be only one
+                    // dynamic NPC record (player) -> We are done here with dynamic record laoding
+                    setUp();
+
+                    const ESM::NPC *player = mNpcs.find ("player");
+
+                    if (!mRaces.find (player->mRace) ||
+                        !mClasses.find (player->mClass))
+                        throw std::runtime_error ("Invalid player record (race or class unavilable");
+                }
+
+                return true;
+
+            default:
+
+                return false;
+        }
+    }
 
 } // end namespace

@@ -14,11 +14,14 @@
 #define NEED_DEPTH
 #endif
 
+#define SPECULAR 1
+
 #define NORMAL_MAP @shPropertyHasValue(normalMap)
 #define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
 #define DETAIL_MAP @shPropertyHasValue(detailMap)
 #define DIFFUSE_MAP @shPropertyHasValue(diffuseMap)
 #define DARK_MAP @shPropertyHasValue(darkMap)
+#define SPEC_MAP @shPropertyHasValue(specMap) && SPECULAR
 
 #define PARALLAX @shPropertyBool(use_parallax)
 #define PARALLAX_SCALE 0.04
@@ -37,8 +40,6 @@
 #define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
 #define ENV_MAP @shPropertyBool(env_map)
-
-#define SPECULAR 1
 
 #define NEED_NORMAL (!VERTEX_LIGHTING || ENV_MAP) || SPECULAR
 
@@ -271,6 +272,10 @@
 #if ENV_MAP
         shSampler2D(envMap)
         shUniform(float3, env_map_color) @shUniformProperty3f(env_map_color, env_map_color)
+#endif
+
+#if SPEC_MAP
+        shSampler2D(specMap)
 #endif
 
 #if ENV_MAP || SPECULAR || PARALLAX
@@ -511,8 +516,20 @@
         float NdotL = max(dot(normal, light0Dir), 0);
         float3 halfVec = normalize (light0Dir + eyeDir);
 
-        float3 specular = pow(max(dot(normal, halfVec), 0), matShininess) * lightSpec0 * matSpec;
-        shOutputColour(0).xyz += specular * shadow * diffuse.a;
+        float shininess = matShininess;
+#if SPEC_MAP
+        float4 specTex = shSample(specMap, UV.xy);
+        shininess *= (specTex.a);
+#endif
+
+        float3 specular = pow(max(dot(normal, halfVec), 0), shininess) * lightSpec0 * matSpec;
+#if SPEC_MAP
+        specular *= specTex.xyz;
+#else
+        specular *= diffuse.a;
+#endif
+
+        shOutputColour(0).xyz += specular * shadow;
 #endif
 
 #if FOG

@@ -4,6 +4,8 @@
 #include "aipackage.hpp"
 #include <string>
 
+#include "pathfinding.hpp"
+
 namespace MWMechanics
 {
 
@@ -18,6 +20,10 @@ namespace MWMechanics
 
         private:
             std::string mObjectId;
+
+            PathFinder mPathFinder;
+            int mCellX;
+            int mCellY;
     };
 }
 #endif // GAME_MWMECHANICS_AIACTIVATE_H

@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_NPCANIMATION_H
-#define _GAME_RENDER_NPCANIMATION_H
+#ifndef GAME_RENDER_NPCANIMATION_H
+#define GAME_RENDER_NPCANIMATION_H
 
 #include "animation.hpp"
 
@@ -13,17 +13,34 @@ namespace ESM
 namespace MWRender
 {
 
-class SayAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+class HeadAnimationTime : public Ogre::ControllerValue<Ogre::Real>
 {
 private:
     MWWorld::Ptr mReference;
 public:
-    SayAnimationValue(MWWorld::Ptr reference) : mReference(reference) {}
+    HeadAnimationTime(MWWorld::Ptr reference) : mReference(reference) {}
 
     virtual Ogre::Real getValue() const;
     virtual void setValue(Ogre::Real value)
     { }
 };
+
+class WeaponAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+{
+private:
+    Animation* mAnimation;
+    std::string mWeaponGroup;
+    float mStartTime;
+public:
+    WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0) {}
+    void setGroup(const std::string& group);
+    void updateStartTime();
+
+    virtual Ogre::Real getValue() const;
+    virtual void setValue(Ogre::Real value)
+    { }
+};
+
 
 class NpcAnimation : public Animation, public MWWorld::InventoryStoreListener
 {
@@ -55,6 +72,14 @@ private:
     bool mShowWeapons;
     bool mShowCarriedLeft;
 
+    enum NpcType
+    {
+        Type_Normal,
+        Type_Werewolf,
+        Type_Vampire
+    };
+    NpcType mNpcType;
+
     int mVisibilityFlags;
 
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
@@ -62,9 +87,11 @@ private:
 
     Ogre::Vector3 mFirstPersonOffset;
 
-    Ogre::SharedPtr<SayAnimationValue> mSayAnimationValue;
+    Ogre::SharedPtr<HeadAnimationTime> mHeadAnimationTime;
+    Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
+    float mPitchFactor;
 
     void updateNpcBase();
 
@@ -97,10 +124,21 @@ public:
                  ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
+    virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
+
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
+    /// to indicate the facing orientation of the character.
+    virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool showa);
+
+    virtual void attachArrow();
+    virtual void releaseArrow();
+
+    NifOgre::ObjectScenePtr mAmmunition;
 
     void setViewMode(ViewMode viewMode);
 

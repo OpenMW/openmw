@@ -220,7 +220,7 @@ int CSMWorld::Columns::getId (const std::string& name)
     std::string name2 = Misc::StringUtils::lowerCase (name);
 
     for (int i=0; sNames[i].mName; ++i)
-        if (name2==Misc::StringUtils::lowerCase (sNames[i].mName))
+        if (Misc::StringUtils::ciEqual(sNames[i].mName, name2))
             return sNames[i].mId;
 
     return -1;
@@ -263,7 +263,7 @@ namespace
 
     static const char *sCreatureTypes[] =
     {
-        "Creature", "Deadra", "Undead", "Humanoid", 0
+        "Creature", "Daedra", "Undead", "Humanoid", 0
     };
 
     static const char *sWeaponTypes[] =

@@ -7,6 +7,8 @@
 
 #include "scanner.hpp"
 #include "generator.hpp"
+#include "errorhandler.hpp"
+#include "skipparser.hpp"
 
 namespace Compiler
 {
@@ -70,7 +72,7 @@ namespace Compiler
             }
             else if (keyword==Scanner::K_else)
             {
-                mState = IfElseEndState;
+                mState = IfElseJunkState; /// \todo should be IfElseEndState; add an option for that
             }
 
             return true;
@@ -106,7 +108,7 @@ namespace Compiler
             Codes expr;
             mExprParser.append (expr);
 
-            Generator::jump (loop, -static_cast<int> (mCodeBlock.size()-expr.size()));
+            Generator::jump (loop, -static_cast<int> (mCodeBlock.size()+expr.size()));
 
             std::copy (expr.begin(), expr.end(), std::back_inserter (mCode));
 
@@ -120,7 +122,7 @@ namespace Compiler
 
             Codes loop2;
 
-            Generator::jump (loop2, -static_cast<int> (mCodeBlock.size()-expr.size()-skip.size()));
+            Generator::jump (loop2, -static_cast<int> (mCodeBlock.size()+expr.size()+skip.size()));
 
             if (loop.size()!=loop2.size())
                 throw std::logic_error (
@@ -153,7 +155,7 @@ namespace Compiler
         }
     }
 
-    ControlParser::ControlParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+    ControlParser::ControlParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
         Literals& literals)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
       mLineParser (errorHandler, context, locals, literals, mCodeBlock),
@@ -186,8 +188,11 @@ namespace Compiler
     {
         if (mState==StartState)
         {
-            if (keyword==Scanner::K_if)
+            if (keyword==Scanner::K_if || keyword==Scanner::K_elseif)
             {
+                if (keyword==Scanner::K_elseif)
+                    getErrorHandler().warning ("elseif without matching if", loc);
+
                 mExprParser.reset();
                 scanner.scan (mExprParser);
 
@@ -203,7 +208,8 @@ namespace Compiler
                 return true;
             }
         }
-        else if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState)
+        else if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState ||
+            mState==IfElseJunkState)
         {
             if (parseIfBody (keyword, loc, scanner))
                 return true;
@@ -226,6 +232,7 @@ namespace Compiler
                 case IfEndState: mState = IfBodyState; return true;
                 case IfElseifEndState: mState = IfElseifBodyState; return true;
                 case IfElseEndState: mState = IfElseBodyState; return true;
+                case IfElseJunkState: mState = IfElseBodyState; return true;
 
                 case WhileEndState: mState = WhileBodyState; return true;
 
@@ -243,7 +250,13 @@ namespace Compiler
 
                 default: ;
             }
-
+        }
+        else if (code==Scanner::S_open && mState==IfElseJunkState)
+        {
+            SkipParser skip (getErrorHandler(), getContext());
+            scanner.scan (skip);
+            mState = IfElseBodyState;
+            return true;
         }
 
         return Parser::parseSpecial (code, loc, scanner);

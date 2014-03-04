@@ -85,7 +85,7 @@ namespace ICS
 
 		return SDLK_UNKNOWN;
 	}
-	bool InputControlSystem::keyPressed(const SDL_KeyboardEvent &evt)
+    void InputControlSystem::keyPressed(const SDL_KeyboardEvent &evt)
 	{
 		if(mActive)
 		{
@@ -118,11 +118,9 @@ namespace ICS
 					mDetectingBindingControl, evt.keysym.sym, mDetectingBindingDirection);
 			}
 		}
-	    
-		return true;
-	}
+    }
 
-	bool InputControlSystem::keyReleased(const SDL_KeyboardEvent &evt)
+    void InputControlSystem::keyReleased(const SDL_KeyboardEvent &evt)
 	{
 		if(mActive)
 		{
@@ -132,8 +130,6 @@ namespace ICS
 				it->second.control->setChangingDirection(Control::STOP);
 			}
 		}
-
-		return true;
 	}
 
 	void DetectingBindingListener::keyBindingDetected(InputControlSystem* ICS, Control* control

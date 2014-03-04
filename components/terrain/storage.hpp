@@ -1,9 +1,6 @@
 #ifndef COMPONENTS_TERRAIN_STORAGE_H
 #define COMPONENTS_TERRAIN_STORAGE_H
 
-#include <components/esm/loadland.hpp>
-#include <components/esm/loadltex.hpp>
-
 #include <OgreAxisAlignedBox.h>
 
 #include <OgreHardwareVertexBuffer.h>
@@ -16,6 +13,7 @@ namespace Terrain
         std::string mDiffuseMap;
         std::string mNormalMap;
         bool mParallax; // Height info in normal map alpha channel?
+        bool mSpecular; // Specular info in diffuse map alpha channel?
     };
 
     /// We keep storage of terrain data abstract here since we need different implementations for game and editor
@@ -23,13 +21,10 @@ namespace Terrain
     {
     public:
         virtual ~Storage() {}
-    private:
-        virtual ESM::Land* getLand (int cellX, int cellY) = 0;
-        virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
 
     public:
         /// Get bounds of the whole terrain in cell units
-        virtual Ogre::AxisAlignedBox getBounds() = 0;
+        virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) = 0;
 
         /// Get the minimum and maximum heights of a terrain chunk.
         /// @note Should only be called for chunks <= 1 cell, i.e. leafs of the quad tree.
@@ -39,7 +34,7 @@ namespace Terrain
         /// @param min min height will be stored here
         /// @param max max height will be stored here
         /// @return true if there was data available for this terrain chunk
-        bool getMinMaxHeights (float size, const Ogre::Vector2& center, float& min, float& max);
+        virtual bool getMinMaxHeights (float size, const Ogre::Vector2& center, float& min, float& max) = 0;
 
         /// Fill vertex buffers for a terrain chunk.
         /// @param lodLevel LOD level, 0 = most detailed
@@ -48,10 +43,10 @@ namespace Terrain
         /// @param vertexBuffer buffer to write vertices
         /// @param normalBuffer buffer to write vertex normals
         /// @param colourBuffer buffer to write vertex colours
-        void fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center,
+        virtual void fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center,
                                 Ogre::HardwareVertexBufferSharedPtr vertexBuffer,
                                 Ogre::HardwareVertexBufferSharedPtr normalBuffer,
-                                Ogre::HardwareVertexBufferSharedPtr colourBuffer);
+                                Ogre::HardwareVertexBufferSharedPtr colourBuffer) = 0;
 
         /// Create textures holding layer blend values for a terrain chunk.
         /// @note The terrain chunk shouldn't be larger than one cell since otherwise we might
@@ -63,31 +58,19 @@ namespace Terrain
         ///        can utilize packing, FFP can't.
         /// @param blendmaps created blendmaps will be written here
         /// @param layerList names of the layer textures used will be written here
-        void getBlendmaps (float chunkSize, const Ogre::Vector2& chunkCenter, bool pack,
+        virtual void getBlendmaps (float chunkSize, const Ogre::Vector2& chunkCenter, bool pack,
                            std::vector<Ogre::TexturePtr>& blendmaps,
-                           std::vector<LayerInfo>& layerList);
+                           std::vector<LayerInfo>& layerList) = 0;
 
-        float getHeightAt (const Ogre::Vector3& worldPos);
+        virtual float getHeightAt (const Ogre::Vector3& worldPos) = 0;
 
-    private:
-        void fixNormal (Ogre::Vector3& normal, int cellX, int cellY, int col, int row);
-        void fixColour (Ogre::ColourValue& colour, int cellX, int cellY, int col, int row);
-        void averageNormal (Ogre::Vector3& normal, int cellX, int cellY, int col, int row);
+        virtual LayerInfo getDefaultLayer() = 0;
 
-        float getVertexHeight (const ESM::Land* land, int x, int y);
+        /// Get the transformation factor for mapping cell units to world units.
+        virtual float getCellWorldSize() = 0;
 
-        // Since plugins can define new texture palettes, we need to know the plugin index too
-        // in order to retrieve the correct texture name.
-        // pair  <texture id, plugin id>
-        typedef std::pair<short, short> UniqueTextureId;
-
-        UniqueTextureId getVtexIndexAt(int cellX, int cellY,
-                                               int x, int y);
-        std::string getTextureName (UniqueTextureId id);
-
-        std::map<std::string, LayerInfo> mLayerInfoMap;
-
-        LayerInfo getLayerInfo(const std::string& texture);
+        /// Get the number of vertices on one side for each cell. Should be (power of two)+1
+        virtual int getCellVertices() = 0;
     };
 
 }
