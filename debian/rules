@@ -26,24 +26,6 @@ LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 override_dh_auto_configure:
 	dh_auto_configure -- -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE="Release" -DUSE_SYSTEM_TINYXML="TRUE" -DCMAKE_VERBOSE_MAKEFILE="FALSE" -DBUILD_ESMTOOL="FALSE" -DBUILD_WITH_DPKG="ON"
 
-override_dh_clean:
-	dh_clean
-
-#override_dh_auto_clean:
-#	dh_auto_clean
-
-#	find . -name CMakeFiles -type d -exec rm -rf {} \; || /bin/true
-#	find . -name Makefile -type f -exec rm -f {} \; || /bin/true
-#	find . -name cmake_install.cmake -type f -exec rm -f {} \; || /bin/true
-#	find . -name openmw -type f -exec rm -f {} \; || /bin/true
-#	find . -name opencs -type f -exec rm -f {} \; || /bin/true
-#	find . -name mwiniimport -type f -exec rm -f {} \; || /bin/true
-#	find . -name omwlauncher -type f -exec rm -f {} \; || /bin/true
-#	find . -name libcomponents.a -type f -exec rm -f {} \; || /bin/true
-
-#	rm -rf resources || /bin/true
-#	rm -f CMakeCache.txt install_manifest.txt CPackConfig.cmake CPackSourceConfig.cmake plugins.cfg launcher.cfg  openmw.cfg.install openmw.cfg opencs.cfg openmw.desktop settings-default.cfg transparency-overrides.cfg apps/launcher/resources.qrc.depends apps/openmw/config.hpp Docs/mainpage.hpp
-
 override_dh_installchangelogs:
 	dh_installchangelogs readme.txt
 
