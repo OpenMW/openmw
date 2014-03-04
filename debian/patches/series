@@ -1,1 +1,2 @@
 use_system_fonts.patch
+use_system_stdint.patch

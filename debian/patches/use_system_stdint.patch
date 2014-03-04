@@ -1,0 +1,221 @@
+diff --git a/apps/openmw/mwbase/dialoguemanager.hpp b/apps/openmw/mwbase/dialoguemanager.hpp
+index 33bba07..3d70fdc 100644
+--- a/apps/openmw/mwbase/dialoguemanager.hpp
++++ b/apps/openmw/mwbase/dialoguemanager.hpp
+@@ -3,7 +3,7 @@
+ 
+ #include <string>
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ namespace ESM
+ {
+diff --git a/apps/openmw/mwbase/journal.hpp b/apps/openmw/mwbase/journal.hpp
+index 56d9601..8e4e970 100644
+--- a/apps/openmw/mwbase/journal.hpp
++++ b/apps/openmw/mwbase/journal.hpp
+@@ -5,7 +5,7 @@
+ #include <deque>
+ #include <map>
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ #include "../mwdialogue/journalentry.hpp"
+ #include "../mwdialogue/topic.hpp"
+diff --git a/apps/openmw/mwgui/bookpage.cpp b/apps/openmw/mwgui/bookpage.cpp
+index 694970e..5268234 100644
+--- a/apps/openmw/mwgui/bookpage.cpp
++++ b/apps/openmw/mwgui/bookpage.cpp
+@@ -6,7 +6,7 @@
+ #include "MyGUI_TextureUtility.h"
+ #include "MyGUI_FactoryManager.h"
+ 
+-#include <platform/stdint.h>
++#include <stdint.h>
+ #include <boost/function.hpp>
+ #include <boost/shared_ptr.hpp>
+ #include <boost/make_shared.hpp>
+diff --git a/apps/openmw/mwgui/bookpage.hpp b/apps/openmw/mwgui/bookpage.hpp
+index 28aa371..458cf2a 100644
+--- a/apps/openmw/mwgui/bookpage.hpp
++++ b/apps/openmw/mwgui/bookpage.hpp
+@@ -5,7 +5,7 @@
+ #include "MyGUI_Widget.h"
+ 
+ #include <functional>
+-#include <platform/stdint.h>
++#include <stdint.h>
+ #include <boost/function.hpp>
+ #include <boost/shared_ptr.hpp>
+ 
+diff --git a/apps/openmw/mwgui/journalviewmodel.hpp b/apps/openmw/mwgui/journalviewmodel.hpp
+index 21c3a11..9efdeae 100644
+--- a/apps/openmw/mwgui/journalviewmodel.hpp
++++ b/apps/openmw/mwgui/journalviewmodel.hpp
+@@ -4,7 +4,7 @@
+ #include <string>
+ #include <memory>
+ #include <functional>
+-#include <platform/stdint.h>
++#include <stdint.h>
+ #include <boost/function.hpp>
+ #include <boost/shared_ptr.hpp>
+ 
+diff --git a/apps/openmw/mwgui/mapwindow.hpp b/apps/openmw/mwgui/mapwindow.hpp
+index 1e52ff2..2494775 100644
+--- a/apps/openmw/mwgui/mapwindow.hpp
++++ b/apps/openmw/mwgui/mapwindow.hpp
+@@ -1,7 +1,7 @@
+ #ifndef MWGUI_MAPWINDOW_H
+ #define MWGUI_MAPWINDOW_H
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ #include "windowpinnablebase.hpp"
+ 
+diff --git a/apps/openmw/mwscript/globalscripts.hpp b/apps/openmw/mwscript/globalscripts.hpp
+index a4a7662..de63b99 100644
+--- a/apps/openmw/mwscript/globalscripts.hpp
++++ b/apps/openmw/mwscript/globalscripts.hpp
+@@ -4,7 +4,7 @@
+ #include <string>
+ #include <map>
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ #include "locals.hpp"
+ 
+diff --git a/apps/openmw/mwsound/openal_output.cpp b/apps/openmw/mwsound/openal_output.cpp
+index 7563ad0..9a3dd73 100644
+--- a/apps/openmw/mwsound/openal_output.cpp
++++ b/apps/openmw/mwsound/openal_output.cpp
+@@ -3,6 +3,8 @@
+ #include <iostream>
+ #include <vector>
+ 
++#include <stdint.h>
++
+ #include <boost/thread.hpp>
+ 
+ #include "openal_output.hpp"
+diff --git a/apps/openmw/mwworld/globals.hpp b/apps/openmw/mwworld/globals.hpp
+index 8f521c8..d8d2cef 100644
+--- a/apps/openmw/mwworld/globals.hpp
++++ b/apps/openmw/mwworld/globals.hpp
+@@ -5,7 +5,7 @@
+ #include <string>
+ #include <map>
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ #include <components/interpreter/types.hpp>
+ #include <components/esm/variant.hpp>
+diff --git a/components/bsa/bsa_file.hpp b/components/bsa/bsa_file.hpp
+index 6f3ab3b..017adf1 100644
+--- a/components/bsa/bsa_file.hpp
++++ b/components/bsa/bsa_file.hpp
+@@ -24,7 +24,7 @@
+ #ifndef BSA_BSA_FILE_H
+ #define BSA_BSA_FILE_H
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ #include <libs/platform/strings.h>
+ #include <string>
+ #include <vector>
+diff --git a/components/esm/defs.hpp b/components/esm/defs.hpp
+index c1f1679..5784279 100644
+--- a/components/esm/defs.hpp
++++ b/components/esm/defs.hpp
+@@ -1,7 +1,7 @@
+ #ifndef OPENMW_ESM_DEFS_H
+ #define OPENMW_ESM_DEFS_H
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ namespace ESM
+ {
+diff --git a/components/esm/esmcommon.hpp b/components/esm/esmcommon.hpp
+index 6f51c76..d3e6e7f 100644
+--- a/components/esm/esmcommon.hpp
++++ b/components/esm/esmcommon.hpp
+@@ -4,7 +4,7 @@
+ #include <string>
+ #include <cstring>
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ #include <libs/platform/string.h>
+ 
+ namespace ESM
+diff --git a/components/esm/esmreader.hpp b/components/esm/esmreader.hpp
+index 897c8fe..b6c0ebc 100644
+--- a/components/esm/esmreader.hpp
++++ b/components/esm/esmreader.hpp
+@@ -1,7 +1,7 @@
+ #ifndef OPENMW_ESM_READER_H
+ #define OPENMW_ESM_READER_H
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ #include <libs/platform/string.h>
+ #include <cassert>
+ #include <vector>
+diff --git a/components/esm/loadland.hpp b/components/esm/loadland.hpp
+index 32abb77..028341c 100644
+--- a/components/esm/loadland.hpp
++++ b/components/esm/loadland.hpp
+@@ -1,7 +1,7 @@
+ #ifndef OPENMW_ESM_LAND_H
+ #define OPENMW_ESM_LAND_H
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ #include "esmcommon.hpp"
+ 
+diff --git a/components/files/constrainedfiledatastream.cpp b/components/files/constrainedfiledatastream.cpp
+index 321bcf7..66f6fde 100644
+--- a/components/files/constrainedfiledatastream.cpp
++++ b/components/files/constrainedfiledatastream.cpp
+@@ -4,7 +4,7 @@
+ #include <stdexcept>
+ #include <cassert>
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ namespace {
+ 
+diff --git a/components/nif/niffile.hpp b/components/nif/niffile.hpp
+index 91ae93b..79e1cc2 100644
+--- a/components/nif/niffile.hpp
++++ b/components/nif/niffile.hpp
+@@ -42,7 +42,7 @@
+ #include <boost/make_shared.hpp>
+ #include <boost/detail/endian.hpp>
+ 
+-#include <libs/platform/stdint.h>
++#include <stdint.h>
+ 
+ #include "record.hpp"
+ #include "niftypes.hpp"
+diff --git a/extern/shiny/Main/Preprocessor.hpp b/extern/shiny/Main/Preprocessor.hpp
+index 7ee30ae..4eb5334 100644
+--- a/extern/shiny/Main/Preprocessor.hpp
++++ b/extern/shiny/Main/Preprocessor.hpp
+@@ -1,6 +1,8 @@
+ #ifndef SH_PREPROCESSOR_H
+ #define SH_PREPROCESSOR_H
+ 
++#include <stdint.h>
++
+ #include <string>
+ #include <vector>
+ 
