@@ -1,3 +1,5 @@
+Description: use system stdint instead of one shipped with openmw
+Author: Bret Curtis <psi29a@gmail.com>
 diff --git a/apps/openmw/mwbase/dialoguemanager.hpp b/apps/openmw/mwbase/dialoguemanager.hpp
 index 33bba07..3d70fdc 100644
 --- a/apps/openmw/mwbase/dialoguemanager.hpp
