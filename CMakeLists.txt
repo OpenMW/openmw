@@ -238,6 +238,14 @@ if (UNIX AND NOT APPLE)
     find_package (Threads)
 endif()
 
+# Look for stdint.h
+include(CheckIncludeFile)
+check_include_file(stdint.h HAVE_STDINT_H)
+if(NOT HAVE_STDINT_H)
+    unset(HAVE_STDINT_H CACHE)
+    message(FATAL_ERROR "stdint.h was not found" )
+endif()
+
 include (CheckIncludeFileCXX)
 check_include_file_cxx(unordered_map HAVE_UNORDERED_MAP)
 if (HAVE_UNORDERED_MAP)

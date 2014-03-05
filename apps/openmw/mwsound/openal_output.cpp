@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+#include <stdint.h>
+
 #include <boost/thread.hpp>
 
 #include "openal_output.hpp"

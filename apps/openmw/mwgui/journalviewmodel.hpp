@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include <platform/stdint.h>
+#include <stdint.h>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 

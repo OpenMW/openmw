@@ -6,7 +6,7 @@
 #include "MyGUI_TextureUtility.h"
 #include "MyGUI_FactoryManager.h"
 
-#include <platform/stdint.h>
+#include <stdint.h>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
