@@ -122,14 +122,19 @@ namespace Terrain
         /// Maximum size of a terrain batch along one side (in cell units)
         float mMaxBatchSize;
 
-        void buildQuadTree(QuadTreeNode* node);
+        void buildQuadTree(QuadTreeNode* node, std::vector<QuadTreeNode*>& leafs);
 
         BufferCache mCache;
+
+        // Are layers for leaf nodes loaded? This is done once at startup (but in a background thread)
+        bool mLayerLoadPending;
 
     public:
         // ----INTERNAL----
         Ogre::SceneManager* getCompositeMapSceneManager() { return mCompositeMapSceneMgr; }
         BufferCache& getBufferCache() { return mCache; }
+
+        bool areLayersLoaded() { return !mLayerLoadPending; }
 
         // Delete all quads
         void clearCompositeMapSceneManager();
@@ -151,7 +156,6 @@ namespace Terrain
     struct LoadRequestData
     {
         QuadTreeNode* mNode;
-        bool mPack;
 
         friend std::ostream& operator<<(std::ostream& o, const LoadRequestData& r)
         { return o; }
@@ -162,13 +166,25 @@ namespace Terrain
         std::vector<float> mPositions;
         std::vector<float> mNormals;
         std::vector<Ogre::uint8> mColours;
-        // Since we can't create a texture from a different thread, this only holds the raw texel data
-        std::vector< std::vector<Ogre::uint8> > mBlendmaps;
-        std::vector<Terrain::LayerInfo> mLayerList;
-
-        unsigned long time;
 
         friend std::ostream& operator<<(std::ostream& o, const LoadResponseData& r)
+        { return o; }
+    };
+
+    struct LayersRequestData
+    {
+        std::vector<QuadTreeNode*> mNodes;
+        bool mPack;
+
+        friend std::ostream& operator<<(std::ostream& o, const LayersRequestData& r)
+        { return o; }
+    };
+
+    struct LayersResponseData
+    {
+        std::vector<LayerCollection> mLayerCollections;
+
+        friend std::ostream& operator<<(std::ostream& o, const LayersResponseData& r)
         { return o; }
     };
 

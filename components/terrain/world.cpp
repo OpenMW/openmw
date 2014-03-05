@@ -7,7 +7,6 @@
 #include <OgreRenderTexture.h>
 #include <OgreSceneNode.h>
 #include <OgreRoot.h>
-#include <OgreTimer.h> // TEMP
 
 #include "storage.hpp"
 #include "quadtreenode.hpp"
@@ -52,6 +51,9 @@ namespace
 namespace Terrain
 {
 
+    const Ogre::uint REQ_ID_CHUNK = 1;
+    const Ogre::uint REQ_ID_LAYERS = 2;
+
     World::World(Ogre::SceneManager* sceneMgr,
                      Storage* storage, int visibilityFlags, bool distantLand, bool shaders, Alignment align, float minBatchSize, float maxBatchSize)
         : mStorage(storage)
@@ -70,6 +72,7 @@ namespace Terrain
         , mChunksLoading(0)
         , mWorkQueueChannel(0)
         , mCache(storage->getCellVertices())
+        , mLayerLoadPending(true)
     {
 #if TERRAIN_USE_SHADER == 0
         if (mShaders)
@@ -102,8 +105,12 @@ namespace Terrain
 
         mRootSceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
+        // While building the quadtree, remember leaf nodes since we need to load their layers
+        LayersRequestData data;
+        data.mPack = getShadersEnabled();
+
         mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(centerX, centerY), NULL);
-        buildQuadTree(mRootNode);
+        buildQuadTree(mRootNode, data.mNodes);
         //loadingListener->indicateProgress();
         mRootNode->initAabb();
         //loadingListener->indicateProgress();
@@ -114,6 +121,9 @@ namespace Terrain
         mWorkQueueChannel = wq->getChannel("LargeTerrain");
         wq->addRequestHandler(mWorkQueueChannel, this);
         wq->addResponseHandler(mWorkQueueChannel, this);
+
+        // Start loading layers in the background (for leaf nodes)
+        wq->addRequest(mWorkQueueChannel, REQ_ID_LAYERS, Ogre::Any(data));
     }
 
     World::~World()
@@ -126,7 +136,7 @@ namespace Terrain
         delete mStorage;
     }
 
-    void World::buildQuadTree(QuadTreeNode *node)
+    void World::buildQuadTree(QuadTreeNode *node, std::vector<QuadTreeNode*>& leafs)
     {
         float halfSize = node->getSize()/2.f;
 
@@ -142,6 +152,7 @@ namespace Terrain
                                     Ogre::Vector3(halfSize*cellWorldSize, halfSize*cellWorldSize, maxZ));
                 convertBounds(bounds);
                 node->setBoundingBox(bounds);
+                leafs.push_back(node);
             }
             else
                 node->markAsDummy(); // no data available for this node, skip it
@@ -164,10 +175,10 @@ namespace Terrain
         node->createChild(SE, halfSize, node->getCenter() + Ogre::Vector2(halfSize/2.f, -halfSize/2.f));
         node->createChild(NW, halfSize, node->getCenter() + Ogre::Vector2(-halfSize/2.f, halfSize/2.f));
         node->createChild(NE, halfSize, node->getCenter() + halfSize/2.f);
-        buildQuadTree(node->getChild(SW));
-        buildQuadTree(node->getChild(SE));
-        buildQuadTree(node->getChild(NW));
-        buildQuadTree(node->getChild(NE));
+        buildQuadTree(node->getChild(SW), leafs);
+        buildQuadTree(node->getChild(SE), leafs);
+        buildQuadTree(node->getChild(NW), leafs);
+        buildQuadTree(node->getChild(NE), leafs);
 
         // if all children are dummy, we are also dummy
         for (int i=0; i<4; ++i)
@@ -267,7 +278,7 @@ namespace Terrain
 
     void World::syncLoad()
     {
-        while (mChunksLoading)
+        while (mChunksLoading || mLayerLoadPending)
         {
             OGRE_THREAD_SLEEP(0);
             Ogre::Root::getSingleton().getWorkQueue()->processResponses();
@@ -276,27 +287,36 @@ namespace Terrain
 
     Ogre::WorkQueue::Response* World::handleRequest(const Ogre::WorkQueue::Request *req, const Ogre::WorkQueue *srcQ)
     {
-        const LoadRequestData data = Ogre::any_cast<LoadRequestData>(req->getData());
+        if (req->getType() == REQ_ID_CHUNK)
+        {
+            const LoadRequestData data = Ogre::any_cast<LoadRequestData>(req->getData());
 
-        QuadTreeNode* node = data.mNode;
+            QuadTreeNode* node = data.mNode;
 
-        LoadResponseData* responseData = new LoadResponseData();
+            LoadResponseData* responseData = new LoadResponseData();
 
-        Ogre::Timer timer;
-        getStorage()->fillVertexBuffers(node->getNativeLodLevel(), node->getSize(), node->getCenter(), getAlign(),
-                                        responseData->mPositions, responseData->mNormals, responseData->mColours);
+            getStorage()->fillVertexBuffers(node->getNativeLodLevel(), node->getSize(), node->getCenter(), getAlign(),
+                                            responseData->mPositions, responseData->mNormals, responseData->mColours);
 
-        std::cout << "THREAD" << std::endl;
+            return OGRE_NEW Ogre::WorkQueue::Response(req, true, Ogre::Any(responseData));
+        }
+        else // REQ_ID_LAYERS
+        {
+            const LayersRequestData data = Ogre::any_cast<LayersRequestData>(req->getData());
 
-        responseData->time = timer.getMicroseconds();
+            LayersResponseData* responseData = new LayersResponseData();
 
-        return OGRE_NEW Ogre::WorkQueue::Response(req, true, Ogre::Any(responseData));
+            getStorage()->getBlendmaps(data.mNodes, responseData->mLayerCollections, data.mPack);
+
+            return OGRE_NEW Ogre::WorkQueue::Response(req, true, Ogre::Any(responseData));
+        }
     }
 
     void World::handleResponse(const Ogre::WorkQueue::Response *res, const Ogre::WorkQueue *srcQ)
     {
-        static unsigned long time = 0;
-        if (res->succeeded())
+        assert(res->succeeded() && "Response failure not handled");
+
+        if (res->getRequest()->getType() == REQ_ID_CHUNK)
         {
             LoadResponseData* data = Ogre::any_cast<LoadResponseData*>(res->getData());
 
@@ -304,23 +324,31 @@ namespace Terrain
 
             requestData.mNode->load(*data);
 
-            time += data->time;
-
             delete data;
 
-            std::cout << "RESPONSE, reqs took ms" << time/1000.f << std::endl;
+            --mChunksLoading;
         }
-        --mChunksLoading;
+        else // REQ_ID_LAYERS
+        {
+            LayersResponseData* data = Ogre::any_cast<LayersResponseData*>(res->getData());
+
+            for (std::vector<LayerCollection>::iterator it = data->mLayerCollections.begin(); it != data->mLayerCollections.end(); ++it)
+            {
+                it->mTarget->loadLayers(*it);
+            }
+
+            mRootNode->loadMaterials();
+
+            mLayerLoadPending = false;
+        }
     }
 
     void World::queueLoad(QuadTreeNode *node)
     {
         LoadRequestData data;
         data.mNode = node;
-        data.mPack = getShadersEnabled();
 
-        const Ogre::uint16 loadRequestId = 1;
-        Ogre::Root::getSingleton().getWorkQueue()->addRequest(mWorkQueueChannel, loadRequestId, Ogre::Any(data));
+        Ogre::Root::getSingleton().getWorkQueue()->addRequest(mWorkQueueChannel, REQ_ID_CHUNK, Ogre::Any(data));
         ++mChunksLoading;
     }
 }

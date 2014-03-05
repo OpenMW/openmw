@@ -651,13 +651,20 @@ void RenderingManager::setGlare(bool glare)
     mSkyManager->setGlare(glare);
 }
 
+void RenderingManager::updateTerrain()
+{
+    if (mTerrain)
+    {
+        // Avoid updating with dims.getCenter for each cell. Player position should be good enough
+        mTerrain->update(mRendering.getCamera()->getRealPosition());
+        mTerrain->syncLoad();
+        // need to update again so the chunks that were just loaded can be made visible
+        mTerrain->update(mRendering.getCamera()->getRealPosition());
+    }
+}
+
 void RenderingManager::requestMap(MWWorld::CellStore* cell)
 {
-    // FIXME: move to other method
-    // TODO: probably not needed when crossing a cell border. Could delay the map render until we are loaded.
-    if (mTerrain)
-        mTerrain->syncLoad();
-
     if (cell->getCell()->isExterior())
     {
         assert(mTerrain);
@@ -665,9 +672,6 @@ void RenderingManager::requestMap(MWWorld::CellStore* cell)
         Ogre::AxisAlignedBox dims = mObjects->getDimensions(cell);
         Ogre::Vector2 center (cell->getCell()->getGridX() + 0.5, cell->getCell()->getGridY() + 0.5);
         dims.merge(mTerrain->getWorldBoundingBox(center));
-
-        if (dims.isFinite())
-            mTerrain->update(dims.getCenter());
 
         mLocalMap->requestMap(cell, dims.getMinimum().z, dims.getMaximum().z);
     }
@@ -1059,8 +1063,7 @@ void RenderingManager::enableTerrain(bool enable)
         }
         mTerrain->setVisible(true);
     }
-    else
-        if (mTerrain)
+    else if (mTerrain)
             mTerrain->setVisible(false);
 }
 

@@ -48,11 +48,15 @@ namespace Terrain
 
     Ogre::MaterialPtr MaterialGenerator::generate(Ogre::MaterialPtr mat)
     {
+        assert(!mLayerList.empty() && "Can't create material with no layers");
+
         return create(mat, false, false);
     }
 
     Ogre::MaterialPtr MaterialGenerator::generateForCompositeMapRTT(Ogre::MaterialPtr mat)
     {
+        assert(!mLayerList.empty() && "Can't create material with no layers");
+
         return create(mat, true, false);
     }
 

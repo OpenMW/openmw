@@ -180,6 +180,10 @@ public:
     void removeWaterRippleEmitter (const MWWorld::Ptr& ptr);
     void updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
 
+    void updateTerrain ();
+    ///< update the terrain according to the player position. Usually done automatically, but should be done manually
+    /// before calling requestMap
+
     void requestMap (MWWorld::CellStore* cell);
     ///< request the local map for a cell
 

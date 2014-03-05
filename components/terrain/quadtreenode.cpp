@@ -144,7 +144,6 @@ namespace
 
 QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
     : mMaterialGenerator(NULL)
-    , mIsActive(false)
     , mIsDummy(false)
     , mSize(size)
     , mLodLevel(Log2(mSize))
@@ -262,11 +261,13 @@ const Ogre::AxisAlignedBox& QuadTreeNode::getWorldBoundingBox()
     return mWorldBounds;
 }
 
-void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
+bool QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
 {
-    const Ogre::AxisAlignedBox& bounds = getBoundingBox();
-    if (bounds.isNull())
-        return;
+    if (isDummy())
+        return true;
+
+    if (mBounds.isNull())
+        return true;
 
     float dist = distance(mWorldBounds, cameraPos);
 
@@ -291,10 +292,8 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
         wantedLod = 3;
     else if (dist > cellWorldSize*2)
         wantedLod = 2;
-    else if (dist > cellWorldSize)
+    else if (dist > cellWorldSize * 1.42) // < sqrt2 so the 3x3 grid around player is always highest lod
         wantedLod = 1;
-
-    mIsActive = true;
 
     bool wantToDisplay = mSize <= mTerrain->getMaxBatchSize() && mLodLevel <= wantedLod;
 
@@ -305,6 +304,7 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
         {
             mLoadState = LS_Loading;
             mTerrain->queueLoad(this);
+            return false;
         }
 
         if (mLoadState == LS_Loaded)
@@ -331,47 +331,60 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
 
             if (!mChunk->getVisible() && hasChildren())
             {
-                // Make sure child scene nodes are detached
-                mSceneNode->removeAllChildren();
-
-                // TODO: unload
-                //for (int i=0; i<4; ++i)
-                //    mChildren[i]->unload();
+                for (int i=0; i<4; ++i)
+                    mChildren[i]->unload(true);
             }
-
             mChunk->setVisible(true);
+
+            return true;
         }
+        return false; // LS_Loading
     }
 
-    if (wantToDisplay && mLoadState != LS_Loaded)
+    // We do not want to display this node - delegate to children if they are already loaded
+    if (!wantToDisplay && hasChildren())
     {
-        // We want to display, but aren't ready yet. Perhaps our child nodes are ready?
-        // TODO: this doesn't check child-child nodes...
-        if (hasChildren())
-        {
-            for (int i=0; i<4; ++i)
-                if (mChildren[i]->hasChunk())
-                    mChildren[i]->update(cameraPos);
-        }
-    }
-    if (!wantToDisplay)
-    {
-        // We do not want to display this node - delegate to children
         if (mChunk)
-            mChunk->setVisible(false);
-        if (hasChildren())
         {
+            // Are children already loaded?
+            bool childrenLoaded = true;
             for (int i=0; i<4; ++i)
-                mChildren[i]->update(cameraPos);
+                if (!mChildren[i]->update(cameraPos))
+                    childrenLoaded = false;
+
+            if (!childrenLoaded)
+            {
+                // Make sure child scene nodes are detached until all children are loaded
+                mSceneNode->removeAllChildren();
+            }
+            else
+            {
+                // Delegation went well, we can unload now
+                unload();
+
+                for (int i=0; i<4; ++i)
+                {
+                    if (!mChildren[i]->getSceneNode()->isInSceneGraph())
+                        mSceneNode->addChild(mChildren[i]->getSceneNode());
+                }
+            }
+            return true;
+        }
+        else
+        {
+            bool success = true;
+            for (int i=0; i<4; ++i)
+                success = mChildren[i]->update(cameraPos) & success;
+            return success;
         }
     }
+    return false;
 }
 
 void QuadTreeNode::load(const LoadResponseData &data)
 {
     assert (!mChunk);
 
-    std::cout << "loading " << std::endl;
     mChunk = new Chunk(mTerrain->getBufferCache().getUVBuffer(), mBounds, data);
     mChunk->setVisibilityFlags(mTerrain->getVisiblityFlags());
     mChunk->setCastShadows(true);
@@ -380,50 +393,49 @@ void QuadTreeNode::load(const LoadResponseData &data)
     mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());
     mMaterialGenerator->enableSplitShadows(mTerrain->getSplitShadowsEnabled());
 
-    if (mSize == 1)
+    if (mTerrain->areLayersLoaded())
     {
-        ensureLayerInfo();
-        mChunk->setMaterial(mMaterialGenerator->generate(mChunk->getMaterial()));
+        if (mSize == 1)
+        {
+            mChunk->setMaterial(mMaterialGenerator->generate(mChunk->getMaterial()));
+        }
+        else
+        {
+            ensureCompositeMap();
+            mMaterialGenerator->setCompositeMap(mCompositeMap->getName());
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(mChunk->getMaterial()));
+        }
     }
-    else
-    {
-        ensureCompositeMap();
-        mMaterialGenerator->setCompositeMap(mCompositeMap->getName());
-        mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(mChunk->getMaterial()));
-    }
-
+    // else: will be loaded in loadMaterials() after background thread has finished loading layers
     mChunk->setVisible(false);
 
     mLoadState = LS_Loaded;
 }
 
-void QuadTreeNode::unload()
+void QuadTreeNode::unload(bool recursive)
 {
     if (mChunk)
     {
-        Ogre::MaterialManager::getSingleton().remove(mChunk->getMaterial()->getName());
         mSceneNode->detachObject(mChunk);
 
         delete mChunk;
         mChunk = NULL;
-        // destroy blendmaps
-        if (mMaterialGenerator)
-        {
-            const std::vector<Ogre::TexturePtr>& list = mMaterialGenerator->getBlendmapList();
-            for (std::vector<Ogre::TexturePtr>::const_iterator it = list.begin(); it != list.end(); ++it)
-                Ogre::TextureManager::getSingleton().remove((*it)->getName());
-            mMaterialGenerator->setBlendmapList(std::vector<Ogre::TexturePtr>());
-            mMaterialGenerator->setLayerList(std::vector<LayerInfo>());
-            mMaterialGenerator->setCompositeMap("");
-        }
 
         if (!mCompositeMap.isNull())
         {
             Ogre::TextureManager::getSingleton().remove(mCompositeMap->getName());
             mCompositeMap.setNull();
         }
+
+        // Do *not* set this when we are still loading!
+        mLoadState = LS_Unloaded;
     }
-    mLoadState = LS_Unloaded;
+
+    if (recursive && hasChildren())
+    {
+        for (int i=0; i<4; ++i)
+            mChildren[i]->unload();
+    }
 }
 
 void QuadTreeNode::updateIndexBuffers()
@@ -479,17 +491,53 @@ size_t QuadTreeNode::getActualLodLevel()
     return mLodLevel /* + mChunk->getAdditionalLod() */;
 }
 
-void QuadTreeNode::ensureLayerInfo()
+void QuadTreeNode::loadLayers(const LayerCollection& collection)
 {
-    if (mMaterialGenerator->hasLayers())
+    assert (!mMaterialGenerator->hasLayers());
+
+    std::vector<Ogre::TexturePtr> blendTextures;
+    for (std::vector<Ogre::PixelBox>::const_iterator it = collection.mBlendmaps.begin(); it != collection.mBlendmaps.end(); ++it)
+    {
+        // TODO: clean up blend textures on destruction
+        static int count=0;
+        Ogre::TexturePtr map = Ogre::TextureManager::getSingleton().createManual("terrain/blend/"
+            + Ogre::StringConverter::toString(count++), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            Ogre::TEX_TYPE_2D, it->getWidth(), it->getHeight(), 0, it->format);
+
+        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(it->data, it->getWidth()*it->getHeight()*Ogre::PixelUtil::getNumElemBytes(it->format), true));
+        map->loadRawData(stream, it->getWidth(), it->getHeight(), it->format);
+        blendTextures.push_back(map);
+    }
+
+    mMaterialGenerator->setLayerList(collection.mLayers);
+    mMaterialGenerator->setBlendmapList(blendTextures);
+}
+
+void QuadTreeNode::loadMaterials()
+{
+    if (isDummy())
         return;
 
-    std::vector<Ogre::TexturePtr> blendmaps;
-    std::vector<LayerInfo> layerList;
-    mTerrain->getStorage()->getBlendmaps(mSize, mCenter, mTerrain->getShadersEnabled(), blendmaps, layerList);
+    // Load children first since we depend on them when creating a composite map
+    if (hasChildren())
+    {
+        for (int i=0; i<4; ++i)
+            mChildren[i]->loadMaterials();
+    }
 
-    mMaterialGenerator->setLayerList(layerList);
-    mMaterialGenerator->setBlendmapList(blendmaps);
+    if (mChunk)
+    {
+        if (mSize == 1)
+        {
+            mChunk->setMaterial(mMaterialGenerator->generate(mChunk->getMaterial()));
+        }
+        else
+        {
+            ensureCompositeMap();
+            mMaterialGenerator->setCompositeMap(mCompositeMap->getName());
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(mChunk->getMaterial()));
+        }
+    }
 }
 
 void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
@@ -525,8 +573,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
     }
     else
     {
-        ensureLayerInfo();
-
+        // TODO: when to destroy?
         Ogre::MaterialPtr material = mMaterialGenerator->generateForCompositeMapRTT(Ogre::MaterialPtr());
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, material);
     }
@@ -569,14 +616,4 @@ void QuadTreeNode::applyMaterials()
     if (hasChildren())
         for (int i=0; i<4; ++i)
             mChildren[i]->applyMaterials();
-}
-
-void QuadTreeNode::setVisible(bool visible)
-{
-    if (!visible && mChunk)
-        mChunk->setVisible(false);
-
-    if (hasChildren())
-        for (int i=0; i<4; ++i)
-            mChildren[i]->setVisible(visible);
 }

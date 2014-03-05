@@ -51,8 +51,6 @@ namespace Terrain
         QuadTreeNode (World* terrain, ChildDirection dir, float size, const Ogre::Vector2& center, QuadTreeNode* parent);
         ~QuadTreeNode();
 
-        void setVisible(bool visible);
-
         /// Rebuild all materials
         void applyMaterials();
 
@@ -100,7 +98,9 @@ namespace Terrain
         World* getTerrain() { return mTerrain; }
 
         /// Adjust LODs for the given camera position, possibly splitting up chunks or merging them.
-        void update (const Ogre::Vector3& cameraPos);
+        /// @param force Always choose to render this node, even if not the perfect LOD.
+        /// @return Did we (or all of our children) choose to render?
+        bool update (const Ogre::Vector3& cameraPos);
 
         /// Adjust index buffers of chunks to stitch together chunks of different LOD, so that cracks are avoided.
         /// Call after QuadTreeNode::update!
@@ -122,13 +122,17 @@ namespace Terrain
         /// Add a textured quad to a specific 2d area in the composite map scenemanager.
         /// Only nodes with size <= 1 can be rendered with alpha blending, so larger nodes will simply
         /// call this method on their children.
+        /// @note Do not call this before World::areLayersLoaded() == true
         /// @param area area in image space to put the quad
         /// @param quads collect quads here so they can be deleted later
         void prepareForCompositeMap(Ogre::TRect<float> area);
 
         /// Create a chunk for this node from the given data.
         void load (const LoadResponseData& data);
-        void unload();
+        void unload(bool recursive=false);
+        void loadLayers (const LayerCollection& collection);
+        /// This is recursive! Call it once on the root node after all leafs have loaded layers.
+        void loadMaterials();
 
         LoadState getLoadState() { return mLoadState; }
 
@@ -137,10 +141,6 @@ namespace Terrain
         MaterialGenerator* mMaterialGenerator;
 
         LoadState mLoadState;
-
-        /// Is this node (or any of its child nodes) currently configured to render itself?
-        /// (only relevant when distant land is disabled, otherwise whole terrain is always rendered)
-        bool mIsActive;
 
         bool mIsDummy;
         float mSize;
@@ -162,7 +162,6 @@ namespace Terrain
 
         Ogre::TexturePtr mCompositeMap;
 
-        void ensureLayerInfo();
         void ensureCompositeMap();
     };
 

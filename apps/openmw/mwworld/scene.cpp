@@ -195,10 +195,12 @@ namespace MWWorld
         mechMgr->updateCell(old, player);
         mechMgr->watchActor(player);
 
-        MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
+        mRendering.updateTerrain();
 
         for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
             mRendering.requestMap(*active);
+
+        MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
     }
 
     void Scene::changeToVoid()

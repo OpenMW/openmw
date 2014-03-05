@@ -3,6 +3,7 @@
 
 namespace Terrain
 {
+    class QuadTreeNode;
 
     /// The alignment of the terrain
     enum Alignment
@@ -50,6 +51,14 @@ namespace Terrain
         std::string mNormalMap;
         bool mParallax; // Height info in normal map alpha channel?
         bool mSpecular; // Specular info in diffuse map alpha channel?
+    };
+
+    struct LayerCollection
+    {
+        QuadTreeNode* mTarget;
+        // Since we can't create a texture from a different thread, this only holds the raw texel data
+        std::vector<Ogre::PixelBox> mBlendmaps;
+        std::vector<LayerInfo> mLayers;
     };
 }
 
