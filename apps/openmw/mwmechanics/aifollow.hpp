@@ -14,6 +14,7 @@ namespace MWMechanics
         public:
             AiFollow(const std::string &ActorId,float duration, float X, float Y, float Z);
             AiFollow(const std::string &ActorId,const std::string &CellId,float duration, float X, float Y, float Z);
+            AiFollow(const std::string &ActorId);
             virtual AiFollow *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
                     ///< \return Package completed?
@@ -22,6 +23,7 @@ namespace MWMechanics
             std::string getFollowedActor();
 
         private:
+            bool mAlwaysFollow; //this will make the actor always follow, thus ignoring mDuration and mX,mY,mZ (used for summoned creatures).
             float mDuration;
             float mX;
             float mY;

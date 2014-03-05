@@ -10,11 +10,16 @@
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), mTimer(0), mStuckTimer(0)
+: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), mTimer(0), mStuckTimer(0)
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId), mTimer(0), mStuckTimer(0)
+: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId), mTimer(0), mStuckTimer(0)
+{
+}
+
+MWMechanics::AiFollow::AiFollow(const std::string &actorId)
+: mAlwaysFollow(true), mDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId(""), mTimer(0), mStuckTimer(0)
 {
 }
 
@@ -30,22 +35,25 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
     ESM::Position pos = actor.getRefData().getPosition();
 
-    if(mTotalTime > mDuration && mDuration != 0)
-        return true;
-
-    if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
-        (pos.pos[1]-mY)*(pos.pos[1]-mY) +
-        (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < 100*100) 
+    if(!mAlwaysFollow)
     {
-        if(actor.getCell()->isExterior())
+        if(mTotalTime > mDuration && mDuration != 0)
+            return true;
+
+        if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
+            (pos.pos[1]-mY)*(pos.pos[1]-mY) +
+            (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < 100*100) 
         {
-            if(mCellId == "") 
-                return true;
-        }
-        else
-        {
-            if(mCellId == actor.getCell()->mCell->mName)
-                return true;
+            if(actor.getCell()->isExterior())
+            {
+                if(mCellId == "") 
+                    return true;
+            }
+            else
+            {
+                if(mCellId == actor.getCell()->mCell->mName)
+                    return true;
+            }
         }
     }
 
