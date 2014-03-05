@@ -27,7 +27,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorId, false);
     
-    if(target == MWWorld::Ptr()) return false;
+    if(target == MWWorld::Ptr()) return true;
 
     mTimer = mTimer + duration;
     mStuckTimer = mStuckTimer + duration;
