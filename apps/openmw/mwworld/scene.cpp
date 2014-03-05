@@ -214,11 +214,12 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
-        mRendering.enableTerrain(true);
         Nif::NIFFile::CacheLock cachelock;
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
+
+        mRendering.enableTerrain(true);
 
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
@@ -364,10 +365,10 @@ namespace MWWorld
         Nif::NIFFile::CacheLock lock;
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
 
-        mRendering.enableTerrain(false);
-
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
+
+        mRendering.enableTerrain(false);
 
         std::string loadingInteriorText = "#{sLoadingMessage2}";
         loadingListener->setLabel(loadingInteriorText);

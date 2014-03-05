@@ -72,6 +72,10 @@ namespace MWGui
 
     void LoadingScreen::loadingOn()
     {
+        // Early-out if already on
+        if (mRectangle->getVisible())
+            return;
+
         // Temporarily turn off VSync, we want to do actual loading rather than waiting for the screen to sync.
         // Threaded loading would be even better, of course - especially because some drivers force VSync to on and we can't change it.
         // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
@@ -79,6 +83,15 @@ namespace MWGui
         #if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
         mWindow->setVSyncEnabled(false);
         #endif
+
+        if (!mFirstLoad)
+        {
+            // When the loading screen is updated, we will disable render target clearing and only draw the loading bar itself.
+            // But if using page flipping, this can cause jitteriness as it will alternate between the last two rendered frames.
+            // Even though we attempt to disable vsync above, this may not work if it's forced on the driver level.
+            // Therefore render the same frame twice before activating the loading bar.
+            mWindow->update();
+        }
 
         setVisible(true);
 
