@@ -4,8 +4,9 @@
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
-CSMWorld::IdTable::IdTable (CollectionBase *idCollection, Reordering reordering)
-: mIdCollection (idCollection), mReordering (reordering)
+CSMWorld::IdTable::IdTable (CollectionBase *idCollection, Reordering reordering,
+    Viewing viewing)
+: mIdCollection (idCollection), mReordering (reordering), mViewing (viewing)
 {}
 
 CSMWorld::IdTable::~IdTable()
@@ -188,4 +189,45 @@ void CSMWorld::IdTable::reorderRows (int baseIndex, const std::vector<int>& newO
 CSMWorld::IdTable::Reordering CSMWorld::IdTable::getReordering() const
 {
     return mReordering;
+}
+
+CSMWorld::IdTable::Viewing CSMWorld::IdTable::getViewing() const
+{
+    return mViewing;
+}
+
+std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) const
+{
+    std::string id;
+    std::string hint;
+
+    if (mViewing==Viewing_Cell)
+    {
+        int cellColumn = mIdCollection->searchColumnIndex (Columns::ColumnId_Cell);
+        int idColumn = mIdCollection->searchColumnIndex (Columns::ColumnId_Id);
+
+        if (cellColumn!=-1 && idColumn!=-1)
+        {
+            id = mIdCollection->getData (row, cellColumn).toString().toUtf8().constData();
+            hint = "r:" + std::string (mIdCollection->getData (row, idColumn).toString().toUtf8().constData());
+        }
+    }
+    else if (mViewing==Viewing_Id)
+    {
+        int column = mIdCollection->searchColumnIndex (Columns::ColumnId_Id);
+
+        if (column!=-1)
+        {
+            id = mIdCollection->getData (row, column).toString().toUtf8().constData();
+            hint = "c:" + id;
+        }
+    }
+
+    if (id.empty())
+        return std::make_pair (UniversalId::Type_None, "");
+
+    if (id[0]=='#')
+        id = "sys::default";
+
+    return std::make_pair (UniversalId (UniversalId::Type_Scene, id), hint);
 }

@@ -3,10 +3,6 @@
 
 #include "../doc/subview.hpp"
 
-#include "../render/navigation1st.hpp"
-#include "../render/navigationfree.hpp"
-#include "../render/navigationorbit.hpp"
-
 class QModelIndex;
 
 namespace CSMDoc
@@ -16,7 +12,7 @@ namespace CSMDoc
 
 namespace CSVRender
 {
-    class SceneWidget;
+    class WorldspaceWidget;
 }
 
 namespace CSVWorld
@@ -30,10 +26,7 @@ namespace CSVWorld
             Q_OBJECT
 
             TableBottomBox *mBottom;
-            CSVRender::SceneWidget *mScene;
-            CSVRender::Navigation1st m1st;
-            CSVRender::NavigationFree mFree;
-            CSVRender::NavigationOrbit mOrbit;
+            CSVRender::WorldspaceWidget *mScene;
 
         public:
 
@@ -47,7 +40,7 @@ namespace CSVWorld
 
         private slots:
 
-            void selectNavigationMode (const std::string& mode);
+            void closeRequest();
     };
 }
 
