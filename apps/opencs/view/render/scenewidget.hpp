@@ -25,6 +25,8 @@ namespace CSVRender
 
             QPaintEngine*	paintEngine() const;
 
+        protected:
+
             void setNavigation (Navigation *navigation);
             ///< \attention The ownership of \a navigation is not transferred to *this.
 

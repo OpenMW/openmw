@@ -33,18 +33,12 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     SceneToolbar *toolbar = new SceneToolbar (48, this);
 
-    // navigation mode
-    SceneToolMode *tool = new SceneToolMode (toolbar);
-    tool->addButton (":door.png", "1st"); /// \todo replace icons
-    tool->addButton (":GMST.png", "free");
-    tool->addButton (":Info.png", "orbit");
+    mScene = new CSVRender::WorldspaceWidget (this);
+
+    SceneToolMode *tool = mScene->makeNavigationSelector (toolbar);
     toolbar->addTool (tool);
-    connect (tool, SIGNAL (modeChanged (const std::string&)),
-        this, SLOT (selectNavigationMode (const std::string&)));
 
     layout2->addWidget (toolbar, 0);
-
-    mScene = new CSVRender::WorldspaceWidget (this);
 
     layout2->addWidget (mScene, 1);
 
@@ -60,7 +54,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     setWidget (widget);
 
-    mScene->setNavigation (&m1st);
+    mScene->selectDefaultNavigationMode();
 }
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
@@ -78,14 +72,4 @@ void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, con
 void CSVWorld::SceneSubView::setStatusBar (bool show)
 {
     mBottom->setStatusBar (show);
-}
-
-void CSVWorld::SceneSubView::selectNavigationMode (const std::string& mode)
-{
-    if (mode=="1st")
-        mScene->setNavigation (&m1st);
-    else if (mode=="free")
-        mScene->setNavigation (&mFree);
-    else if (mode=="orbit")
-        mScene->setNavigation (&mOrbit);
 }
