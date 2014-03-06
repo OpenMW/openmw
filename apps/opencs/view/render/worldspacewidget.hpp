@@ -36,6 +36,10 @@ namespace CSVRender
         private slots:
 
             void selectNavigationMode (const std::string& mode);
+
+        signals:
+
+            void closeRequest();
     };
 }
 

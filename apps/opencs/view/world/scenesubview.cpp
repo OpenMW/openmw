@@ -59,6 +59,8 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     setWidget (widget);
 
     mScene->selectDefaultNavigationMode();
+
+    connect (mScene, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
 }
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
@@ -76,4 +78,9 @@ void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, con
 void CSVWorld::SceneSubView::setStatusBar (bool show)
 {
     mBottom->setStatusBar (show);
+}
+
+void CSVWorld::SceneSubView::closeRequest()
+{
+    deleteLater();
 }

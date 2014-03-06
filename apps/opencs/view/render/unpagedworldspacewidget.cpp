@@ -38,13 +38,21 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
-    QModelIndex cellIndex = mCellsModel->getModelIndex (mCellId, 0);
+    int index = mCellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
+    QModelIndex cellIndex = mCellsModel->getModelIndex (mCellId, index);
 
-    if (cellIndex.row()>=topLeft.row() && cellIndex.row()<bottomRight.row())
+    if (cellIndex.row()>=topLeft.row() && cellIndex.row()<=bottomRight.row())
     {
-        /// \todo possible optimisation: check columns and update only if relevant columns have
-        /// changed
-        update();
+        if (mCellsModel->data (cellIndex).toInt()==CSMWorld::RecordBase::State_Deleted)
+        {
+            emit closeRequest();
+        }
+        else
+        {
+            /// \todo possible optimisation: check columns and update only if relevant columns have
+            /// changed
+            update();
+        }
     }
 }
 
@@ -54,7 +62,5 @@ void CSVRender::UnpagedWorldspaceWidget::cellRowsAboutToBeRemoved (const QModelI
     QModelIndex cellIndex = mCellsModel->getModelIndex (mCellId, 0);
 
     if (cellIndex.row()>=start && cellIndex.row()<=end)
-    {
-
-    }
+        emit closeRequest();
 }

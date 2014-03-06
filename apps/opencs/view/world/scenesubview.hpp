@@ -37,6 +37,10 @@ namespace CSVWorld
             virtual void updateEditorSetting (const QString& key, const QString& value);
 
             virtual void setStatusBar (bool show);
+
+        private slots:
+
+            void closeRequest();
     };
 }
 
