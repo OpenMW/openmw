@@ -24,7 +24,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this), 0);
 
     layout->insertWidget (0, mTable =
-        new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete(), sorting, document), 2);
+        new Table (id, mBottom->canCreateAndDelete(), sorting, document), 2);
 
     CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (document.getData(), this);
 

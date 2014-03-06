@@ -10,12 +10,13 @@
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
 
-namespace CSMDoc {
-    class Document;
-}
-
 class QUndoStack;
 class QAction;
+
+namespace CSMDoc
+{
+    class Document;
+}
 
 namespace CSMWorld
 {
@@ -35,7 +36,6 @@ namespace CSVWorld
             Q_OBJECT
 
             std::vector<CommandDelegate *> mDelegates;
-            QUndoStack& mUndoStack;
             QAction *mEditAction;
             QAction *mCreateAction;
             QAction *mCloneAction;
@@ -48,11 +48,7 @@ namespace CSVWorld
             CSMWorld::IdTable *mModel;
             bool mEditLock;
             int mRecordStatusDisplay;
-            CSMWorld::Data& mData;
-
-            /// \brief This variable is used exclusivly for checking if dropEvents came from the same document. Most likely you
-            /// should NOT use it for anything else.
-            const CSMDoc::Document& mDocument;
+            CSMDoc::Document& mDocument;
 
         private:
 
@@ -72,9 +68,8 @@ namespace CSVWorld
 
         public:
 
-            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete,
-                   bool sorting, const CSMDoc::Document& document);
-
+            Table (const CSMWorld::UniversalId& id, bool createAndDelete,
+                bool sorting, CSMDoc::Document& document);
             ///< \param createAndDelete Allow creation and deletion of records.
             /// \param sorting Allow changing order of rows in the view via column headers.
 

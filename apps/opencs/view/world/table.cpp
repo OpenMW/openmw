@@ -2,13 +2,14 @@
 #include "table.hpp"
 
 #include <QHeaderView>
-
 #include <QAction>
 #include <QApplication>
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
 #include <QtCore/qnamespace.h>
+
+#include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
@@ -47,7 +48,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
                 CSMWorld::UniversalId id = mModel->view (row).first;
 
-                if (!mData.getCells().getRecord (id.getId()).isDeleted())
+                if (!mDocument.getData().getCells().getRecord (id.getId()).isDeleted())
                     menu.addAction (mViewAction);
             }
         }
@@ -175,11 +176,12 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
     return deletableIds;
 }
 
-CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
-    bool createAndDelete, bool sorting, const CSMDoc::Document& document)
-    : mUndoStack (undoStack), mCreateAction (0), mCloneAction(0), mEditLock (false), mRecordStatusDisplay (0), mDocument(document), mData (data)
+CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
+    bool createAndDelete, bool sorting, CSMDoc::Document& document)
+: mCreateAction (0), mCloneAction(0), mEditLock (false), mRecordStatusDisplay (0),
+  mDocument (document)
 {
-    mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
+    mModel = &dynamic_cast<CSMWorld::IdTable&> (*mDocument.getData().getTableModel (id));
 
     mProxyModel = new CSMWorld::IdTableProxyModel (this);
     mProxyModel->setSourceModel (mModel);
@@ -203,7 +205,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
                 mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
             CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate (display,
-                undoStack, this);
+                mDocument.getUndoStack(), this);
 
             mDelegates.push_back (delegate);
             setItemDelegateForColumn (i, delegate);
@@ -285,13 +287,13 @@ void CSVWorld::Table::revertRecord()
         if (revertableIds.size()>0)
         {
             if (revertableIds.size()>1)
-                mUndoStack.beginMacro (tr ("Revert multiple records"));
+                mDocument.getUndoStack().beginMacro (tr ("Revert multiple records"));
 
             for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
-                mUndoStack.push (new CSMWorld::RevertCommand (*mModel, *iter));
+                mDocument.getUndoStack().push (new CSMWorld::RevertCommand (*mModel, *iter));
 
             if (revertableIds.size()>1)
-                mUndoStack.endMacro();
+                mDocument.getUndoStack().endMacro();
         }
     }
 }
@@ -305,13 +307,13 @@ void CSVWorld::Table::deleteRecord()
         if (deletableIds.size()>0)
         {
             if (deletableIds.size()>1)
-                mUndoStack.beginMacro (tr ("Delete multiple records"));
+                mDocument.getUndoStack().beginMacro (tr ("Delete multiple records"));
 
             for (std::vector<std::string>::const_iterator iter (deletableIds.begin()); iter!=deletableIds.end(); ++iter)
-                mUndoStack.push (new CSMWorld::DeleteCommand (*mModel, *iter));
+                mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (*mModel, *iter));
 
             if (deletableIds.size()>1)
-                mUndoStack.endMacro();
+                mDocument.getUndoStack().endMacro();
         }
     }
 }
@@ -364,7 +366,7 @@ void CSVWorld::Table::moveUpRecord()
             for (int i=1; i<row2-row; ++i)
                 newOrder[i] = i;
 
-            mUndoStack.push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
+            mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
         }
     }
 }
@@ -393,7 +395,7 @@ void CSVWorld::Table::moveDownRecord()
             for (int i=1; i<row2-row; ++i)
                 newOrder[i] = i;
 
-            mUndoStack.push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
+            mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
         }
     }
 }
@@ -551,7 +553,7 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
             std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
                     (*mProxyModel, index, QVariant (QString::fromUtf8 (record.getId().c_str()))));
 
-            mUndoStack.push (command.release());
+            mDocument.getUndoStack().push (command.release());
         }
     } //TODO handle drops from different document
 }
