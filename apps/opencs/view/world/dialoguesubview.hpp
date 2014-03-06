@@ -18,7 +18,7 @@ namespace CSVWorld
 
         public:
 
-            DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete);
+            DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete = false);
 
             virtual void setEditLock (bool locked);
     };

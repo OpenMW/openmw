@@ -12,6 +12,9 @@
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
 
+#include "recordstatusdelegate.hpp"
+#include "util.hpp"
+
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     bool createAndDelete)
 : SubView (id)
