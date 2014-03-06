@@ -9,7 +9,8 @@
 
 #include "../filter/filterbox.hpp"
 
-#include "../render/worldspacewidget.hpp"
+#include "../render/pagedworldspacewidget.hpp"
+#include "../render/unpagedworldspacewidget.hpp"
 
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -33,7 +34,10 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     SceneToolbar *toolbar = new SceneToolbar (48, this);
 
-    mScene = new CSVRender::WorldspaceWidget (this);
+    if (id.getId()[0]=='#')
+        mScene = new CSVRender::PagedWorldspaceWidget (this);
+    else
+        mScene = new CSVRender::UnpagedWorldspaceWidget (this);
 
     SceneToolMode *tool = mScene->makeNavigationSelector (toolbar);
     toolbar->addTool (tool);
