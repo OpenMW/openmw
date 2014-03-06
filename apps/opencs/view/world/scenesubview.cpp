@@ -37,7 +37,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     if (id.getId()[0]=='#')
         mScene = new CSVRender::PagedWorldspaceWidget (this);
     else
-        mScene = new CSVRender::UnpagedWorldspaceWidget (this);
+        mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
     SceneToolMode *tool = mScene->makeNavigationSelector (toolbar);
     toolbar->addTool (tool);

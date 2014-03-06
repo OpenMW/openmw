@@ -8,6 +8,7 @@ namespace Ogre
     class Camera;
     class SceneManager;
     class RenderWindow;
+    class ColourValue;
 }
 
 namespace CSVRender
@@ -24,6 +25,9 @@ namespace CSVRender
             virtual ~SceneWidget();
 
             QPaintEngine*	paintEngine() const;
+
+            void setAmbient (const Ogre::ColourValue& colour);
+            ///< \note The actual ambient colour may differ based on lighting settings.
 
         protected:
 

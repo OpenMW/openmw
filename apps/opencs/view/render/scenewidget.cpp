@@ -59,6 +59,11 @@ namespace CSVRender
         timer->start (20); /// \todo make this configurable
     }
 
+    void SceneWidget::setAmbient (const Ogre::ColourValue& colour)
+    {
+        mSceneMgr->setAmbientLight (colour);
+    }
+
     void SceneWidget::updateOgreWindow()
     {
         if (mWindow)
