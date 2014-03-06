@@ -7,6 +7,7 @@
 #include <OgreSceneNode.h>
 #include <OgreTextureManager.h>
 #include <OgreViewport.h>
+#include <OgreHardwarePixelBuffer.h>
 
 #include <openengine/ogre/fader.hpp>
 
@@ -86,11 +87,26 @@ namespace MWGui
 
         if (!mFirstLoad)
         {
-            // When the loading screen is updated, we will disable render target clearing and only draw the loading bar itself.
-            // But if using page flipping, this can cause jitteriness as it will alternate between the last two rendered frames.
-            // Even though we attempt to disable vsync above, this may not work if it's forced on the driver level.
-            // Therefore render the same frame twice before activating the loading bar.
-            mWindow->update();
+            mBackgroundImage->setImageTexture("");
+            int width = mWindow->getWidth();
+            int height = mWindow->getHeight();
+            const std::string textureName = "@loading_background";
+            Ogre::TexturePtr texture;
+            texture = Ogre::TextureManager::getSingleton().getByName(textureName);
+            if (texture.isNull())
+            {
+                texture = Ogre::TextureManager::getSingleton().createManual(textureName,
+                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                    Ogre::TEX_TYPE_2D,
+                    width, height, 0, mWindow->suggestPixelFormat(), Ogre::TU_DYNAMIC_WRITE_ONLY);
+            }
+            texture->unload();
+            texture->setWidth(width);
+            texture->setHeight(height);
+            texture->createInternalResources();
+            mWindow->copyContentsToMemory(texture->getBuffer()->lock(Ogre::Image::Box(0,0,width,height), Ogre::HardwareBuffer::HBL_DISCARD));
+            texture->getBuffer()->unlock();
+            mBackgroundImage->setImageTexture(texture->getName());
         }
 
         setVisible(true);
@@ -98,10 +114,6 @@ namespace MWGui
         if (mFirstLoad)
         {
             changeWallpaper();
-        }
-        else
-        {
-            mBackgroundImage->setImageTexture("");
         }
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(mFirstLoad ? GM_LoadingWallpaper : GM_Loading);
@@ -216,8 +228,6 @@ namespace MWGui
 
             MWBase::Environment::get().getInputManager()->update(0, true);
 
-            mWindow->getViewport(0)->setClearEveryFrame(false);
-
             // First, swap buffers from last draw, then, queue an update of the
             // window contents, but don't swap buffers (which would have
             // caused a sync / flush and would be expensive).
@@ -226,9 +236,6 @@ namespace MWGui
             mWindow->swapBuffers();
 
             mWindow->update(false);
-
-            mWindow->getViewport(0)->setClearEveryFrame(true);
-
 
             mRectangle->setVisible(false);
 
