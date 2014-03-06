@@ -94,7 +94,11 @@ namespace CSVRender
 
     SceneWidget::~SceneWidget()
     {
-        Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
+        if (mWindow)
+            Ogre::Root::getSingleton().destroyRenderTarget (mWindow);
+
+        if (mSceneMgr)
+            Ogre::Root::getSingleton().destroySceneManager (mSceneMgr);
     }
 
     void SceneWidget::setNavigation (Navigation *navigation)
