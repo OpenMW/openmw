@@ -282,6 +282,9 @@ bool QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     size_t wantedLod = 0;
     float cellWorldSize = mTerrain->getStorage()->getCellWorldSize();
 
+    if (!mTerrain->getDistantLandEnabled() && dist > cellWorldSize)
+        return true;
+
     if (dist > cellWorldSize*64)
         wantedLod = 6;
     else if (dist > cellWorldSize*32)
