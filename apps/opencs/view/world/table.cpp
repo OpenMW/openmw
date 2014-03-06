@@ -40,7 +40,16 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 menu.addAction(mCloneAction);
 
             if (mModel->getViewing()!=CSMWorld::IdTable::Viewing_None)
-                menu.addAction (mViewAction);
+            {
+                int row = selectedRows.begin()->row();
+
+                row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
+
+                CSMWorld::UniversalId id = mModel->view (row).first;
+
+                if (!mData.getCells().getRecord (id.getId()).isDeleted())
+                    menu.addAction (mViewAction);
+            }
         }
 
         if (mCreateAction)
@@ -168,7 +177,7 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
     bool createAndDelete, bool sorting, const CSMDoc::Document& document)
-    : mUndoStack (undoStack), mCreateAction (0), mCloneAction(0), mEditLock (false), mRecordStatusDisplay (0), mDocument(document)
+    : mUndoStack (undoStack), mCreateAction (0), mCloneAction(0), mEditLock (false), mRecordStatusDisplay (0), mDocument(document), mData (data)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
 

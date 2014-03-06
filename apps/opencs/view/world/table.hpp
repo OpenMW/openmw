@@ -48,6 +48,7 @@ namespace CSVWorld
             CSMWorld::IdTable *mModel;
             bool mEditLock;
             int mRecordStatusDisplay;
+            CSMWorld::Data& mData;
 
             /// \brief This variable is used exclusivly for checking if dropEvents came from the same document. Most likely you
             /// should NOT use it for anything else.
