@@ -1,12 +1,17 @@
 
 #include "dialoguesubview.hpp"
 
+#include <utility>
+#include <memory>
+
 #include <QGridLayout>
 #include <QLabel>
+#include <QSize>
 #include <QAbstractItemModel>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QLineEdit>
+#include <QEvent>
 #include <QDataWidgetMapper>
 
 #include "../../model/world/columnbase.hpp"
@@ -15,9 +20,88 @@
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
 
+CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, QUndoStack& undoStack) :
+mParent(parent),
+mTable(table),
+mUndoStack(undoStack)
+{}
+
+CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CSMWorld::ColumnBase::Display display)
+{
+    CommandDelegate *delegate = NULL;
+    std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
+    if (delegateIt == mDelegates.end())
+    {
+        delegate = CommandDelegateFactoryCollection::get().makeDelegate (
+                                    display, mUndoStack, mParent);
+        mDelegates.insert(std::make_pair<int, CommandDelegate*>(display, delegate));
+    } else
+    {
+        delegate = delegateIt->second;
+    }
+    connect(this, SIGNAL(closeEditor(QWidget *)), this, SLOT(editorDataCommited(QWidget*)));
+    return delegate;
+}
+
+void CSVWorld::DialogueDelegateDispatcher::editorDataCommited( QWidget * editor )
+{
+     std::cout<<"triggered"<<std::endl;
+}
+
+void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const QModelIndex& index) const
+{
+    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
+    (mTable->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+
+    std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
+    if (delegateIt != mDelegates.end())
+    {
+        delegateIt->second->setEditorData(editor, index);
+    }
+}
+
+void CSVWorld::DialogueDelegateDispatcher::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
+    (mTable->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+
+    std::cout<<"setting data\n";
+    std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
+    if (delegateIt != mDelegates.end())
+    {
+        delegateIt->second->setModelData(editor, model, index);
+    } else {
+        std::cout<<"oooops\n";
+    }
+}
+
+void CSVWorld::DialogueDelegateDispatcher::paint (QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    //Does nothing
+}
+
+QSize CSVWorld::DialogueDelegateDispatcher::sizeHint (const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    return QSize(); //silencing warning, otherwise does nothing
+}
+
+QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::Display display, const QModelIndex& index)
+{
+    QWidget* editor = NULL;
+    std::map<int, CommandDelegate*>::iterator delegateIt(mDelegates.find(display));
+    if (delegateIt != mDelegates.end())
+    {
+        editor = delegateIt->second->createEditor(dynamic_cast<QWidget*>(mParent), QStyleOptionViewItem(), index);
+    }
+    return editor;
+}
+
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
-    bool createAndDelete)
-: SubView (id)
+    bool createAndDelete) :
+
+    SubView (id),
+    mDispatcher(new DialogueDelegateDispatcher(this, dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id)), document.getUndoStack()))
+
 {
     QWidget *widget = new QWidget (this);
 
@@ -33,6 +117,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mWidgetMapper = new QDataWidgetMapper (this);
     mWidgetMapper->setModel (model);
+    mWidgetMapper->setItemDelegate(mDispatcher.get());
 
     for (int i=0; i<columns; ++i)
     {
@@ -45,49 +130,19 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
             CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
                 (model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-            QWidget *widget = 0;
+            mDispatcher->makeDelegate(display);
+            QWidget *widget = mDispatcher->makeEditor(display, (model->index (0, i)));
+
+            if (widget)
+            {
+                layout->addWidget (widget, i, 1);
+                mWidgetMapper->addMapping (widget, i);
+            }
 
             if (model->flags (model->index (0, i)) & Qt::ItemIsEditable)
             {
-                switch (display)
-                {
-                    case CSMWorld::ColumnBase::Display_String:
 
-                        layout->addWidget (widget = new QLineEdit, i, 1);
-                        break;
-
-                    case CSMWorld::ColumnBase::Display_Integer:
-
-                        /// \todo configure widget properly (range)
-                        layout->addWidget (widget = new QSpinBox, i, 1);
-                        break;
-
-                    case CSMWorld::ColumnBase::Display_Float:
-
-                        /// \todo configure widget properly (range, format?)
-                        layout->addWidget (widget = new QDoubleSpinBox, i, 1);
-                        break;
-
-                    default: break; // silence warnings for other times for now
-                }
             }
-            else
-            {
-                switch (display)
-                {
-                    case CSMWorld::ColumnBase::Display_String:
-                    case CSMWorld::ColumnBase::Display_Integer:
-                    case CSMWorld::ColumnBase::Display_Float:
-
-                        layout->addWidget (widget = new QLabel, i, 1);
-                        break;
-
-                    default: break; // silence warnings for other times for now
-                }
-            }
-
-            if (widget)
-                mWidgetMapper->addMapping (widget, i);
         }
     }
 
