@@ -82,27 +82,21 @@ namespace MWScript
                     Interpreter::Type_Float angle = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
-
-                    float *objRot = ptr.getRefData().getPosition().rot;
-
-                    float lx = Ogre::Radian(objRot[0]).valueDegrees();
-                    float ly = Ogre::Radian(objRot[1]).valueDegrees();
-                    float lz = Ogre::Radian(objRot[2]).valueDegrees();
+                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
 
                     if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,angle-lx,ay,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
                     else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,angle-ly,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,angle-lz);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -152,15 +146,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -313,7 +307,7 @@ namespace MWScript
                     }
                     if(store)
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,*store,x,y,z);
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
                         float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                         float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                         if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
@@ -361,7 +355,7 @@ namespace MWScript
                     int cx,cy;
                     MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                     MWBase::Environment::get().getWorld()->moveObject(ptr,
-                        *MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
+                        MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
@@ -421,7 +415,7 @@ namespace MWScript
                         pos.rot[2]  = zRot;
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().mPos = pos;
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,pos);
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                     }
                     else
                     {
@@ -462,7 +456,7 @@ namespace MWScript
                         pos.rot[2]  = zRot;
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().mPos = pos;
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,pos);
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                     }
                     else
                     {
@@ -530,7 +524,7 @@ namespace MWScript
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, count);
                     ref.getPtr().getCellRef().mPos = ipos;
 
-                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
+                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
                 }
         };
 

@@ -313,6 +313,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
         mAnimation->disable(mCurrentMovement);
         mCurrentMovement = movement;
+        mMovementAnimVelocity = 0.0f;
         if(!mCurrentMovement.empty())
         {
             float vel, speedmult = 1.0f;
@@ -320,7 +321,10 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
+            {
+                mMovementAnimVelocity = vel;
                 speedmult = mMovementSpeed / vel;
+            }
             else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
                 speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
             else if (mMovementSpeed > 0.0f)
@@ -330,10 +334,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
-
-            mMovementAnimVelocity = vel;
         }
-        else mMovementAnimVelocity = 0.0f;
     }
 }
 
@@ -1194,7 +1195,10 @@ void CharacterController::update(float duration)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
             }
-            else if(rot.z != 0.0f && !inwater && !sneak)
+            // Don't play turning animations during attack. It would break positioning of the arrow bone when releasing a shot.
+            // Actually, in vanilla the turning animation is not even played when merely having equipped the weapon,
+            // but I don't think we need to go as far as that.
+            else if(rot.z != 0.0f && !inwater && !sneak && mUpperBodyState < UpperCharState_StartToMinAttack)
             {
                 if(rot.z > 0.0f)
                     movestate = CharState_TurnRight;

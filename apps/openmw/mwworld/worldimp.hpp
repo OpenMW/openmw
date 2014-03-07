@@ -90,7 +90,7 @@ namespace MWWorld
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening
 
-            struct ProjectileState
+            struct MagicBoltState
             {
                 // Id of spell or enchantment to apply when it hits
                 std::string mId;
@@ -108,6 +108,17 @@ namespace MWWorld
                 bool mStack;
             };
 
+            struct ProjectileState
+            {
+                // Actor who shot this projectile
+                std::string mActorHandle;
+
+                MWWorld::Ptr mBow; // bow or crossbow the projectile was fired from
+
+                float mSpeed;
+            };
+
+            std::map<MWWorld::Ptr, MagicBoltState> mMagicBolts;
             std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
             void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
@@ -117,7 +128,7 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, ESM::Position pos, bool adjustPos=true);
+            Ptr copyObjectToCell(const Ptr &ptr, CellStore* cell, ESM::Position pos, bool adjustPos=true);
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
@@ -134,6 +145,7 @@ namespace MWWorld
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            void moveMagicBolts(float duration);
             void moveProjectiles(float duration);
 
             void doPhysics(float duration);
@@ -341,7 +353,7 @@ namespace MWWorld
             virtual void deleteObject (const Ptr& ptr);
 
             virtual void moveObject (const Ptr& ptr, float x, float y, float z);
-            virtual void moveObject (const Ptr& ptr, CellStore &newCell, float x, float y, float z);
+            virtual void moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 
@@ -351,7 +363,7 @@ namespace MWWorld
 
             virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
 
-            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -552,8 +564,10 @@ namespace MWWorld
              */
             virtual void castSpell (const MWWorld::Ptr& actor);
 
-            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
+            virtual void launchMagicBolt (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
+            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
+                                           const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed);
 
 
             virtual const std::vector<std::string>& getContentFiles() const;

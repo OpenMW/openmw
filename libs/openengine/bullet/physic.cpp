@@ -597,6 +597,8 @@ namespace Physic
     std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
     {
         RigidBody* body = getRigidBody(name);
+        if (!body) // fall back to raycasting body if there is no collision body
+            body = getRigidBody(name, true);
         ContactTestResultCallback callback;
         dynamicsWorld->contactTest(body, callback);
         return callback.mResult;

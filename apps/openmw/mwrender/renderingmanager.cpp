@@ -280,13 +280,12 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 
     if(ptr.getRefData().getHandle() == mCamera->getHandle() &&
        !mCamera->isVanityOrPreviewModeEnabled())
-        mCamera->rotateCamera(rot, false);
+        mCamera->rotateCamera(-rot, false);
 
-    Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
+    Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(rot.z), Ogre::Vector3::NEGATIVE_UNIT_Z);
     if(!MWWorld::Class::get(ptr).isActor())
-        newo = Ogre::Quaternion(Ogre::Radian(-rot.x), Ogre::Vector3::UNIT_X) *
-               Ogre::Quaternion(Ogre::Radian(-rot.y), Ogre::Vector3::UNIT_Y) * newo;
-
+        newo = Ogre::Quaternion(Ogre::Radian(rot.x), Ogre::Vector3::NEGATIVE_UNIT_X) *
+               Ogre::Quaternion(Ogre::Radian(rot.y), Ogre::Vector3::NEGATIVE_UNIT_Y) * newo;
     ptr.getRefData().getBaseNode()->setOrientation(newo);
 }
 

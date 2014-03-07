@@ -57,7 +57,7 @@ namespace MWClass
                 MWWorld::ManualRef ref(store, id);
                 ref.getPtr().getCellRef().mPos = ptr.getCellRef().mPos;
                 // TODO: hold on to this for respawn purposes later
-                MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), *ptr.getCell() , ptr.getCellRef().mPos);
+                MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), ptr.getCell() , ptr.getCellRef().mPos);
             }
 
             ptr.getRefData().setCustomData(data.release());

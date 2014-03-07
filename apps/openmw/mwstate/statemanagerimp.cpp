@@ -148,7 +148,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
     MWBase::World& world = *MWBase::Environment::get().getWorld();
 
-    MWWorld::Ptr player = world.getPlayer().getPlayer();
+    MWWorld::Ptr player = world.getPlayerPtr();
 
     profile.mContentFiles = world.getContentFiles();
 
@@ -300,7 +300,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         MWBase::Environment::get().getWindowManager()->updatePlayer();
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
 
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
