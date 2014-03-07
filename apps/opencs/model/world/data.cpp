@@ -247,12 +247,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
     addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
     addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
-    addModel (new IdTable (&mTopicInfos), UniversalId::Type_TopicInfos, UniversalId::Type_TopicInfo);
-    addModel (new IdTable (&mJournalInfos), UniversalId::Type_JournalInfos, UniversalId::Type_JournalInfo);
-    addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
+    addModel (new IdTable (&mTopicInfos, IdTable::Reordering_WithinTopic), UniversalId::Type_TopicInfos, UniversalId::Type_TopicInfo);
+    addModel (new IdTable (&mJournalInfos, IdTable::Reordering_WithinTopic), UniversalId::Type_JournalInfos, UniversalId::Type_JournalInfo);
+    addModel (new IdTable (&mCells, IdTable::Reordering_None, IdTable::Viewing_Id), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
-    addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference, false);
+    addModel (new IdTable (&mRefs, IdTable::Reordering_None, IdTable::Viewing_Cell), UniversalId::Type_References, UniversalId::Type_Reference, false);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter, false);
 }
 

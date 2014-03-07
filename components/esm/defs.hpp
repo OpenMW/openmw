@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_DEFS_H
 #define OPENMW_ESM_DEFS_H
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 namespace ESM
 {

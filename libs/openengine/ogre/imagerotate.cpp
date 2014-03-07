@@ -8,6 +8,13 @@
 #include <OgreCamera.h>
 #include <OgreTextureUnitState.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreTechnique.h>
+#include <OgreMaterialManager.h>
+#include <OgreRectangle2D.h>
+#include <OgreSceneNode.h>
+#include <OgreTextureManager.h>
+#include <OgreRenderTexture.h>
+#include <OgreViewport.h>
 
 using namespace Ogre;
 using namespace OEngine::Render;

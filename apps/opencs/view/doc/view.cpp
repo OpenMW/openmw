@@ -115,10 +115,6 @@ void CSVDoc::View::setupWorldMenu()
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
-    QAction *scene = new QAction (tr ("Scene"), this);
-    connect (scene, SIGNAL (triggered()), this, SLOT (addSceneSubView()));
-    world->addAction (scene);
-
     QAction *regionMap = new QAction (tr ("Region Map"), this);
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
     world->addAction (regionMap);
@@ -310,7 +306,7 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
     mOperations->setProgress (current, max, type, threads);
 }
 
-void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
+void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::string& hint)
 {
     /// \todo add an user setting for limiting the number of sub views per top level view. Automatically open a new top level view if this
     /// number is exceeded
@@ -322,12 +318,15 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
 
+    if (!hint.empty())
+        view->useHint (hint);
+
     view->setStatusBar (mShowStatusBar->isChecked());
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
-    connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
-        SLOT (addSubView (const CSMWorld::UniversalId&)));
+    connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
+        SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
 
     CSMSettings::UserSettings::instance().updateSettings("Display Format");
 
@@ -427,11 +426,6 @@ void CSVDoc::View::addRegionMapSubView()
 void CSVDoc::View::addFiltersSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Filters);
-}
-
-void CSVDoc::View::addSceneSubView()
-{
-    addSubView (CSMWorld::UniversalId::Type_Scene);
 }
 
 void CSVDoc::View::addTopicsSubView()

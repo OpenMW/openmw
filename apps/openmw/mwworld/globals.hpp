@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 #include <components/interpreter/types.hpp>
 #include <components/esm/variant.hpp>

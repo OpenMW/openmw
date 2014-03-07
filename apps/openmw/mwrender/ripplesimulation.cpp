@@ -4,6 +4,10 @@
 #include <OgreStringConverter.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
+#include <OgreRectangle2D.h>
+#include <OgreSceneNode.h>
+#include <OgreRenderTexture.h>
+#include <OgreViewport.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 

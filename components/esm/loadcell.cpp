@@ -249,7 +249,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
 
         if (id.mPaged)
         {
-            id.mWorldspace = "default";
+            id.mWorldspace = "sys::default";
             id.mIndex.mX = mData.mX;
             id.mIndex.mY = mData.mY;
         }

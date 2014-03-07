@@ -3,6 +3,8 @@
 #include <cassert>
 #include <iterator>
 
+#include <OgreTextureManager.h>
+
 #include "MyGUI_UString.h"
 #include "MyGUI_IPointer.h"
 #include "MyGUI_ResourceImageSetPointer.h"

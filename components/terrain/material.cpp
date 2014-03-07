@@ -6,7 +6,9 @@
 
 #include <boost/functional/hash.hpp>
 
+#if TERRAIN_USE_SHADER
 #include <extern/shiny/Main/Factory.hpp>
+#endif
 
 namespace
 {
@@ -46,11 +48,15 @@ namespace Terrain
 
     Ogre::MaterialPtr MaterialGenerator::generate(Ogre::MaterialPtr mat)
     {
+        assert(!mLayerList.empty() && "Can't create material with no layers");
+
         return create(mat, false, false);
     }
 
     Ogre::MaterialPtr MaterialGenerator::generateForCompositeMapRTT(Ogre::MaterialPtr mat)
     {
+        assert(!mLayerList.empty() && "Can't create material with no layers");
+
         return create(mat, true, false);
     }
 
@@ -64,7 +70,9 @@ namespace Terrain
         assert(!renderCompositeMap || !displayCompositeMap);
         if (!mat.isNull())
         {
+#if TERRAIN_USE_SHADER
             sh::Factory::getInstance().destroyMaterialInstance(mat->getName());
+#endif
             Ogre::MaterialManager::getSingleton().remove(mat->getName());
         }
 
@@ -144,6 +152,7 @@ namespace Terrain
 
             return mat;
         }
+#if TERRAIN_USE_SHADER
         else
         {
             sh::MaterialInstance* material = sh::Factory::getInstance().createMaterialInstance (name.str());
@@ -235,7 +244,6 @@ namespace Terrain
 
 
                     sh::MaterialInstancePass* p = material->createPass ();
-
                     p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
                     p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
                     if (layerOffset != 0)
@@ -344,6 +352,7 @@ namespace Terrain
                 }
             }
         }
+#endif
         return Ogre::MaterialManager::getSingleton().getByName(name.str());
     }
 

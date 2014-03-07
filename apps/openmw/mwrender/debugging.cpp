@@ -7,6 +7,8 @@
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
 #include <OgreManualObject.h>
+#include <OgreTechnique.h>
+#include <OgreSceneNode.h>
 
 #include <openengine/bullet/physic.hpp>
 

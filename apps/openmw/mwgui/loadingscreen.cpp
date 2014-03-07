@@ -1,6 +1,13 @@
 #include "loadingscreen.hpp"
 
 #include <OgreRenderWindow.h>
+#include <OgreMaterialManager.h>
+#include <OgreTechnique.h>
+#include <OgreRectangle2D.h>
+#include <OgreSceneNode.h>
+#include <OgreTextureManager.h>
+#include <OgreViewport.h>
+#include <OgreHardwarePixelBuffer.h>
 
 #include <openengine/ogre/fader.hpp>
 
@@ -66,6 +73,10 @@ namespace MWGui
 
     void LoadingScreen::loadingOn()
     {
+        // Early-out if already on
+        if (mRectangle->getVisible())
+            return;
+
         // Temporarily turn off VSync, we want to do actual loading rather than waiting for the screen to sync.
         // Threaded loading would be even better, of course - especially because some drivers force VSync to on and we can't change it.
         // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
@@ -74,15 +85,35 @@ namespace MWGui
         mWindow->setVSyncEnabled(false);
         #endif
 
+        if (!mFirstLoad)
+        {
+            mBackgroundImage->setImageTexture("");
+            int width = mWindow->getWidth();
+            int height = mWindow->getHeight();
+            const std::string textureName = "@loading_background";
+            Ogre::TexturePtr texture;
+            texture = Ogre::TextureManager::getSingleton().getByName(textureName);
+            if (texture.isNull())
+            {
+                texture = Ogre::TextureManager::getSingleton().createManual(textureName,
+                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                    Ogre::TEX_TYPE_2D,
+                    width, height, 0, mWindow->suggestPixelFormat(), Ogre::TU_DYNAMIC_WRITE_ONLY);
+            }
+            texture->unload();
+            texture->setWidth(width);
+            texture->setHeight(height);
+            texture->createInternalResources();
+            mWindow->copyContentsToMemory(texture->getBuffer()->lock(Ogre::Image::Box(0,0,width,height), Ogre::HardwareBuffer::HBL_DISCARD));
+            texture->getBuffer()->unlock();
+            mBackgroundImage->setImageTexture(texture->getName());
+        }
+
         setVisible(true);
 
         if (mFirstLoad)
         {
             changeWallpaper();
-        }
-        else
-        {
-            mBackgroundImage->setImageTexture("");
         }
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(mFirstLoad ? GM_LoadingWallpaper : GM_Loading);
@@ -197,8 +228,6 @@ namespace MWGui
 
             MWBase::Environment::get().getInputManager()->update(0, true);
 
-            mWindow->getViewport(0)->setClearEveryFrame(false);
-
             // First, swap buffers from last draw, then, queue an update of the
             // window contents, but don't swap buffers (which would have
             // caused a sync / flush and would be expensive).
@@ -207,9 +236,6 @@ namespace MWGui
             mWindow->swapBuffers();
 
             mWindow->update(false);
-
-            mWindow->getViewport(0)->setClearEveryFrame(true);
-
 
             mRectangle->setVisible(false);
 

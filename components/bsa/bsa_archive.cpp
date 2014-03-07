@@ -29,6 +29,7 @@
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
+#include <OgreResourceGroupManager.h>
 #include "bsa_file.hpp"
 
 #include "../files/constrainedfiledatastream.hpp"

@@ -9,6 +9,7 @@
 #include <OgreTexture.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreCamera.h>
+#include <OgreViewport.h>
 
 #include <extern/sdl4ogre/sdlwindowhelper.hpp>
 

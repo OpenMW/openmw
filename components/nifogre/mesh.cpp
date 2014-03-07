@@ -11,6 +11,8 @@
 #include <OgreSkeletonManager.h>
 #include <OgreRenderSystem.h>
 #include <OgreRoot.h>
+#include <OgreSkeleton.h>
+#include <OgreKeyFrame.h>
 
 #include <components/nif/node.hpp>
 #include <components/misc/stringops.hpp>

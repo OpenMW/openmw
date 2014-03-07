@@ -53,7 +53,7 @@ namespace CSVWorld
 
         private slots:
 
-            void editRequest (int row);
+            void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
             void cloneRequest (const CSMWorld::UniversalId& toClone);
             void createFilterRequest(std::vector< CSMWorld::UniversalId >& types,
                                      Qt::DropAction action);

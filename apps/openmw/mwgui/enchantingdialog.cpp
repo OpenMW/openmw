@@ -1,5 +1,7 @@
 #include "enchantingdialog.hpp"
 
+#include <iomanip>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"

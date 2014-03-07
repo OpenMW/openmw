@@ -25,10 +25,20 @@ namespace CSMWorld
                 Reordering_WithinTopic
             };
 
+            enum Viewing
+            {
+                Viewing_None,
+                Viewing_Id, // use ID column to generate view request (ID is transformed into
+                            // worldspace and original ID is passed as hint with c: prefix)
+                Viewing_Cell // use cell column to generate view request (cell ID is transformed
+                             // into worldspace and record ID is passed as hint with r: prefix)
+            };
+
         private:
 
             CollectionBase *mIdCollection;
             Reordering mReordering;
+            Viewing mViewing;
 
             // not implemented
             IdTable (const IdTable&);
@@ -36,7 +46,8 @@ namespace CSMWorld
 
         public:
 
-            IdTable (CollectionBase *idCollection, Reordering reordering = Reordering_WithinTopic);
+            IdTable (CollectionBase *idCollection, Reordering reordering = Reordering_None,
+                Viewing viewing = Viewing_None);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();
@@ -63,8 +74,8 @@ namespace CSMWorld
             void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            void cloneRecord(const std::string& origin, 
-                             const std::string& destination, 
+            void cloneRecord(const std::string& origin,
+                             const std::string& destination,
                              UniversalId::Type type = UniversalId::Type_None);
 
             QModelIndex getModelIndex (const std::string& id, int column) const;
@@ -86,6 +97,12 @@ namespace CSMWorld
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
 
             Reordering getReordering() const;
+
+            Viewing getViewing() const;
+
+            std::pair<UniversalId, std::string> view (int row) const;
+            ///< Return the UniversalId and the hint for viewing \a row. If viewing is not
+            /// supported by this table, return (UniversalId::Type_None, "").
     };
 }
 

@@ -73,8 +73,9 @@ add_component_dir (translation
     translation
     )
 
+add_definitions(-DTERRAIN_USE_SHADER=1)
 add_component_dir (terrain
-    quadtreenode chunk world storage material
+    quadtreenode chunk world storage material buffercache defs
     )
 
 add_component_dir (loadinglistener

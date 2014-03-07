@@ -6,6 +6,8 @@
 #include <OgreSceneNode.h>
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
+#include <OgreRenderTexture.h>
+#include <OgreViewport.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

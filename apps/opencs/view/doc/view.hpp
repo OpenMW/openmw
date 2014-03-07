@@ -120,7 +120,9 @@ namespace CSVDoc
 
         public slots:
 
-            void addSubView (const CSMWorld::UniversalId& id);
+            void addSubView (const CSMWorld::UniversalId& id, const std::string& hint = "");
+            ///< \param hint Suggested view point (e.g. coordinates in a 3D scene or a line number
+            /// in a script).
 
             void abortOperation (int type);
 
@@ -165,8 +167,6 @@ namespace CSVDoc
             void addRegionMapSubView();
 
             void addFiltersSubView();
-
-            void addSceneSubView();
 
             void addTopicsSubView();
 

@@ -15,7 +15,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 
-#include "npcstats.hpp"
+#include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
 #include "character.hpp" // fixme: for getActiveWeapon
@@ -140,11 +140,12 @@ namespace MWMechanics
         {
             MWMechanics::DrawState_ state = actor.getClass().getCreatureStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                actor.getClass().getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
+                actor.getClass().getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
 
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot =
-                MWMechanics::getActiveWeapon(cls.getNpcStats(actor), cls.getInventoryStore(actor), &weaptype);
+                MWMechanics::getActiveWeapon(cls.getCreatureStats(actor), cls.getInventoryStore(actor), &weaptype);
+
             if (weaptype == WeapType_HandToHand)
             {
                 const MWWorld::Store<ESM::GameSetting> &gmst =
@@ -242,17 +243,21 @@ namespace MWMechanics
             //target is at far distance: build path to target OR follow target (if previously actor had reached it once)
             mFollowTarget = false;
 
-            buildNewPath(actor);
+            buildNewPath(actor); //may fail to build a path, check before use
 
             //delete visited path node
             mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
-            //try shortcut
-            if(vDir.length() < mPathFinder.getDistToNext(pos.pos[0],pos.pos[1],pos.pos[2]) && MWBase::Environment::get().getWorld()->getLOS(actor, mTarget))
-                mTargetAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / vDir.length()) * sgn(Ogre::Math::ASin(vDir.x / vDir.length())) ).valueDegrees();
-            else
-                mTargetAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            mRotate = true;
+            //if no new path leave mTargetAngle unchanged
+            if(!mPathFinder.getPath().empty())
+            {
+                //try shortcut
+                if(vDir.length() < mPathFinder.getDistToNext(pos.pos[0],pos.pos[1],pos.pos[2]) && MWBase::Environment::get().getWorld()->getLOS(actor, mTarget))
+                    mTargetAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / vDir.length()) * sgn(Ogre::Math::ASin(vDir.x / vDir.length())) ).valueDegrees();
+                else
+                    mTargetAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+                mRotate = true;
+            }
 
             mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
@@ -302,9 +307,13 @@ namespace MWMechanics
         dest.mZ = mTarget.getRefData().getPosition().pos[2];
         Ogre::Vector3 newPathTarget = Ogre::Vector3(dest.mX, dest.mY, dest.mZ);
 
-        ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
-        Ogre::Vector3 currPathTarget(lastPt.mX, lastPt.mY, lastPt.mZ);
-        float dist = Ogre::Math::Abs((newPathTarget - currPathTarget).length());
+        float dist = -1; //hack to indicate first time, to construct a new path
+        if(!mPathFinder.getPath().empty())
+        {
+            ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
+            Ogre::Vector3 currPathTarget(lastPt.mX, lastPt.mY, lastPt.mZ);
+            dist = Ogre::Math::Abs((newPathTarget - currPathTarget).length());
+        }
 
         float targetPosThreshold;
         bool isOutside = actor.getCell()->getCell()->isExterior();
@@ -313,7 +322,7 @@ namespace MWMechanics
         else
             targetPosThreshold = 100;
 
-        if(dist > targetPosThreshold)
+        if((dist < 0) || (dist > targetPosThreshold))
         {
             //construct new path only if target has moved away more than on <targetPosThreshold>
             ESM::Position pos = actor.getRefData().getPosition();
@@ -334,8 +343,11 @@ namespace MWMechanics
                 //maybe here is a mistake (?): PathFinder::getPathSize() returns number of grid points in the path,
                 //not the actual path length. Here we should know if the new path is actually more effective.
                 //if(pathFinder2.getPathSize() < mPathFinder.getPathSize())
-                newPathFinder.syncStart(mPathFinder.getPath());
-                mPathFinder = newPathFinder;
+                if(!mPathFinder.getPath().empty())
+                {
+                    newPathFinder.syncStart(mPathFinder.getPath());
+                    mPathFinder = newPathFinder;
+                }
             }
         }
     }

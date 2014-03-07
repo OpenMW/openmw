@@ -23,7 +23,7 @@ namespace Physic
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
         mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, true);
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
-        mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
+        mBoxRotationInverse = Ogre::Quaternion(inverse.w, inverse.x, inverse.y,inverse.z);
         mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
     }
 
@@ -85,8 +85,8 @@ namespace Physic
     Ogre::Quaternion PhysicActor::getRotation()
     {
         assert(mBody);
-        btQuaternion quat = mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
-        return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
+        btQuaternion quat = mBody->getWorldTransform().getRotation();
+        return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ()) * mBoxRotationInverse;
     }
 
     void PhysicActor::setScale(float scale){
