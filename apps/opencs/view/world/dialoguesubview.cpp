@@ -20,11 +20,45 @@
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
 
+/*
+==============================DialogueDelegateDispatcherProxy==========================================
+*/
+CSVWorld::refWrapper::refWrapper(const QModelIndex& index) :
+mIndex(index)
+{}
+
+CSVWorld::DialogueDelegateDispatcherProxy::DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display) :
+mEditor(editor),
+mDisplay(display),
+mIndexWrapper(NULL)
+{
+}
+
+void CSVWorld::DialogueDelegateDispatcherProxy::editorDataCommited()
+{
+    emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+}
+
+void CSVWorld::DialogueDelegateDispatcherProxy::setIndex(const QModelIndex& index)
+{
+    mIndexWrapper.reset(new refWrapper(index));
+}
+
+QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const
+{
+    return mEditor;
+}
+
+/*
+==============================DialogueDelegateDispatcher==========================================
+*/
+
 CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, QUndoStack& undoStack) :
 mParent(parent),
 mTable(table),
 mUndoStack(undoStack)
-{}
+{
+}
 
 CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CSMWorld::ColumnBase::Display display)
 {
@@ -39,13 +73,13 @@ CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CS
     {
         delegate = delegateIt->second;
     }
-    connect(this, SIGNAL(closeEditor(QWidget *)), this, SLOT(editorDataCommited(QWidget*)));
     return delegate;
 }
 
-void CSVWorld::DialogueDelegateDispatcher::editorDataCommited( QWidget * editor )
+void CSVWorld::DialogueDelegateDispatcher::editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display)
 {
-     std::cout<<"triggered"<<std::endl;
+    std::cout<<"triggered"<<std::endl;
+    setModelData(editor, mTable, index, display);
 }
 
 void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const QModelIndex& index) const
@@ -58,20 +92,22 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const
     {
         delegateIt->second->setEditorData(editor, index);
     }
+
+    for (unsigned i = 0; i < mProxys.size(); ++i)
+    {
+       if (mProxys[i]->getEditor() == editor)
+        {
+            mProxys[i]->setIndex(index);
+        }
+    }
 }
 
-void CSVWorld::DialogueDelegateDispatcher::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+void CSVWorld::DialogueDelegateDispatcher::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
-    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-    (mTable->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
-    std::cout<<"setting data\n";
     std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
     if (delegateIt != mDelegates.end())
     {
         delegateIt->second->setModelData(editor, model, index);
-    } else {
-        std::cout<<"oooops\n";
     }
 }
 
@@ -92,15 +128,31 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
     if (delegateIt != mDelegates.end())
     {
         editor = delegateIt->second->createEditor(dynamic_cast<QWidget*>(mParent), QStyleOptionViewItem(), index);
+        DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
+        connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+        connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
+        mProxys.push_back(proxy); //deleted in the destructor
     }
     return editor;
 }
+
+CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
+{
+    for (unsigned i = 0; i < mProxys.size(); ++i)
+    {
+        delete mProxys[i]; //unique_ptr could be handy
+    }
+}
+
+/*
+==============================DialogueSubView==========================================
+*/
 
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     bool createAndDelete) :
 
     SubView (id),
-    mDispatcher(new DialogueDelegateDispatcher(this, dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id)), document.getUndoStack()))
+    mDispatcher(this, dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id)), document.getUndoStack())
 
 {
     QWidget *widget = new QWidget (this);
@@ -117,7 +169,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mWidgetMapper = new QDataWidgetMapper (this);
     mWidgetMapper->setModel (model);
-    mWidgetMapper->setItemDelegate(mDispatcher.get());
+    mWidgetMapper->setItemDelegate(&mDispatcher);
 
     for (int i=0; i<columns; ++i)
     {
@@ -130,8 +182,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
             CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
                 (model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-            mDispatcher->makeDelegate(display);
-            QWidget *widget = mDispatcher->makeEditor(display, (model->index (0, i)));
+            mDispatcher.makeDelegate(display);
+            QWidget *widget = mDispatcher.makeEditor(display, (model->index (0, i)));
 
             if (widget)
             {

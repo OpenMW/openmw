@@ -27,6 +27,36 @@ namespace CSVWorld
 {
     class CommandDelegate;
 
+    class refWrapper
+    {
+    public:
+        refWrapper(const QModelIndex& index);
+
+        const QModelIndex& mIndex;
+    };
+
+    class DialogueDelegateDispatcherProxy : public QObject
+    {
+        Q_OBJECT
+        QWidget* mEditor;
+
+        CSMWorld::ColumnBase::Display mDisplay;
+
+
+
+        std::auto_ptr<refWrapper> mIndexWrapper;
+    public:
+        DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display);
+        QWidget* getEditor() const;
+
+    public slots:
+        void editorDataCommited();
+        void setIndex(const QModelIndex& index);
+
+    signals:
+        void editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display);
+    };
+
     class DialogueDelegateDispatcher : public QAbstractItemDelegate
     {
         Q_OBJECT
@@ -34,12 +64,16 @@ namespace CSVWorld
 
         QObject* mParent;
 
-        const CSMWorld::IdTable* mTable; //nor sure if it is needed TODO
+        CSMWorld::IdTable* mTable; //nor sure if it is needed TODO
 
         QUndoStack& mUndoStack;
 
+        std::vector<DialogueDelegateDispatcherProxy*> mProxys; //once we move to the C++11 we should use unique_ptr
+
     public:
         DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, QUndoStack& undoStack);
+
+        ~DialogueDelegateDispatcher();
 
         CSVWorld::CommandDelegate* makeDelegate(CSMWorld::ColumnBase::Display display);
 
@@ -48,7 +82,7 @@ namespace CSVWorld
 
         virtual void setEditorData (QWidget* editor, const QModelIndex& index) const;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
+        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const;
 
         virtual void paint (QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
         ///< does nothing
@@ -56,15 +90,15 @@ namespace CSVWorld
         virtual QSize sizeHint (const QStyleOptionViewItem& option, const QModelIndex& index) const;
         ///< does nothing
 
-        private slots:
-            void editorDataCommited( QWidget * editor );
+    private slots:
+        void editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display);
 
     };
 
     class DialogueSubView : public CSVDoc::SubView
     {
             QDataWidgetMapper *mWidgetMapper;
-            std::auto_ptr<DialogueDelegateDispatcher> mDispatcher;
+            DialogueDelegateDispatcher mDispatcher;
 
         public:
 

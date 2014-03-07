@@ -80,4 +80,5 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
 
     manager.add(CSMWorld::UniversalId::Type_Region, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Spell, new CSVDoc::SubViewFactory<DialogueSubView>);
 }
