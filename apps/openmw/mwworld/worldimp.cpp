@@ -1873,6 +1873,8 @@ namespace MWWorld
 
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
+        if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
+            return false; // cannot get LOS unless both NPC's are enabled
         Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(npc.getRefData().getHandle())->getHalfExtents();
         float* pos1 = npc.getRefData().getPosition().pos;
         Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetNpc.getRefData().getHandle())->getHalfExtents();
