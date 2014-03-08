@@ -60,7 +60,14 @@ void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& 
 {
     if (QComboBox *comboBox = dynamic_cast<QComboBox *> (editor))
     {
-        int value = index.data (Qt::EditRole).toInt();
+        QVariant data = index.data (Qt::EditRole);
+
+        if (!data.isValid())
+        {
+            data = index.data (Qt::DisplayRole);
+        }
+
+        int value = data.toInt();
 
         std::size_t size = mValues.size();
 
