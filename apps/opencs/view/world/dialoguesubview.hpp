@@ -27,22 +27,22 @@ namespace CSVWorld
 {
     class CommandDelegate;
 
-    class refWrapper
-    {
-    public:
-        refWrapper(const QModelIndex& index);
 
-        const QModelIndex& mIndex;
-    };
-
+    //this can't be nested into the DialogueDelegateDispatcher, because it needs to emit signals
     class DialogueDelegateDispatcherProxy : public QObject
     {
         Q_OBJECT
+        class refWrapper
+        {
+        public:
+            refWrapper(const QModelIndex& index);
+
+            const QModelIndex& mIndex;
+        };
+
         QWidget* mEditor;
 
         CSMWorld::ColumnBase::Display mDisplay;
-
-
 
         std::auto_ptr<refWrapper> mIndexWrapper;
     public:

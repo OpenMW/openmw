@@ -23,7 +23,7 @@
 /*
 ==============================DialogueDelegateDispatcherProxy==========================================
 */
-CSVWorld::refWrapper::refWrapper(const QModelIndex& index) :
+CSVWorld::DialogueDelegateDispatcherProxy::refWrapper::refWrapper(const QModelIndex& index) :
 mIndex(index)
 {}
 
