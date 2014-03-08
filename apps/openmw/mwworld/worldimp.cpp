@@ -28,7 +28,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
-
+#include "../mwmechanics/combat.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -2141,7 +2141,7 @@ namespace MWWorld
         ProjectileState state;
         state.mActorHandle = actor.getRefData().getHandle();
         state.mBow = bow;
-        state.mSpeed = speed;
+        state.mVelocity = orient.yAxis() * speed;
 
         MWWorld::ManualRef ref(getStore(), projectile.getCellRef().mRefID);
 
@@ -2258,14 +2258,19 @@ namespace MWWorld
 
             MWWorld::Ptr ptr = it->first;
 
-            Ogre::Quaternion orient = ptr.getRefData().getBaseNode()->getOrientation();
+            // gravity constant - must be way lower than the gravity affecting actors, since we're not
+            // simulating aerodynamics at all
+            it->second.mVelocity -= Ogre::Vector3(0, 0, 627.2f * 0.1f) * duration;
 
-            float speed = it->second.mSpeed;
-
-            Ogre::Vector3 direction = orient.yAxis();
-            direction.normalise();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
-            Ogre::Vector3 newPos = pos + direction * duration * speed;
+            Ogre::Vector3 newPos = pos + it->second.mVelocity * duration;
+
+            Ogre::Quaternion orient = Ogre::Vector3::UNIT_Y.getRotationTo(it->second.mVelocity);
+            Ogre::Matrix3 mat;
+            orient.ToRotationMatrix(mat);
+            Ogre::Radian xr,yr,zr;
+            mat.ToEulerAnglesXYZ(xr, yr, zr);
+            rotateObject(ptr, -xr.valueDegrees(), -yr.valueDegrees(), -zr.valueDegrees());
 
             // Check for impact
             btVector3 from(pos.x, pos.y, pos.z);
@@ -2300,13 +2305,13 @@ namespace MWWorld
                 }
                 else if (obstacle.getClass().isActor())
                 {
-                    // Fargoth
-                    obstacle.getClass().getCreatureStats(obstacle).setHealth(0);
+                    MWMechanics::projectileHit(caster, obstacle, it->second.mBow, ptr, pos + (newPos - pos) * cIt->first);
                 }
                 hit = true;
             }
             if (hit)
             {
+                deleteObject(ptr);
                 mProjectiles.erase(it++);
                 continue;
             }

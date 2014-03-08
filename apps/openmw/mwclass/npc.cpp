@@ -498,15 +498,7 @@ namespace MWClass
         if(!weapon.isEmpty())
             weapskill = get(weapon).getEquipmentSkill(weapon);
 
-        MWMechanics::NpcStats &stats = getNpcStats(ptr);
-        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-        float hitchance = stats.getSkill(weapskill).getModified() +
-                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
-                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
-        hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
-                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
-        hitchance -= otherstats.getEvasion();
+        float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
@@ -516,6 +508,7 @@ namespace MWClass
 
         bool healthdmg;
         float damage = 0.0f;
+        MWMechanics::NpcStats &stats = getNpcStats(ptr);
         if(!weapon.isEmpty())
         {
             const bool weaphashealth = get(weapon).hasItemHealth(weapon);
@@ -615,6 +608,8 @@ namespace MWClass
         if (healthdmg && damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
+        MWMechanics::diseaseContact(victim, ptr);
+
         othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
 
@@ -647,9 +642,6 @@ namespace MWClass
             if(!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
-
-        if (!attacker.isEmpty())
-            MWMechanics::diseaseContact(ptr, attacker);
 
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);

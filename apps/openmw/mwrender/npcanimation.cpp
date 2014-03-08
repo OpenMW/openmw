@@ -779,6 +779,23 @@ void NpcAnimation::releaseArrow()
     Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(mPtr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
             Ogre::Quaternion(Ogre::Radian(mPtr.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
 
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    // Reduce fatigue
+    // somewhat of a guess, but using the weapon weight makes sense
+    const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
+    const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
+    const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
+    MWMechanics::CreatureStats& attackerStats = mPtr.getClass().getCreatureStats(mPtr);
+    MWMechanics::DynamicStat<float> fatigue = attackerStats.getFatigue();
+    const float normalizedEncumbrance = mPtr.getClass().getEncumbrance(mPtr) / mPtr.getClass().getCapacity(mPtr);
+    float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
+    if (!weapon->isEmpty())
+        fatigueLoss += weapon->getClass().getWeight(*weapon) * attackerStats.getAttackStrength() * fWeaponFatigueMult;
+    fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
+    attackerStats.setFatigue(fatigue);
+
     if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
     {
         // Thrown weapons get detached now
@@ -795,7 +812,12 @@ void NpcAnimation::releaseArrow()
             launchPos = objects->mEntities[0]->getParentNode()->_getDerivedPosition();
         }
 
-        MWBase::Environment::get().getWorld()->launchProjectile(mPtr, *weapon, launchPos, orient, *weapon, 400);
+        float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
+        float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
+        float speed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) *
+                mPtr.getClass().getCreatureStats(mPtr).getAttackStrength();
+
+        MWBase::Environment::get().getWorld()->launchProjectile(mPtr, *weapon, launchPos, orient, *weapon, speed);
 
         showWeapons(false);
 
@@ -819,8 +841,11 @@ void NpcAnimation::releaseArrow()
             launchPos = mAmmunition->mEntities[0]->getParentNode()->_getDerivedPosition();
         }
 
-        /// \todo speed
-        MWBase::Environment::get().getWorld()->launchProjectile(mPtr, *ammo, launchPos, orient, *weapon, 400);
+        float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
+        float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
+        float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * mPtr.getClass().getCreatureStats(mPtr).getAttackStrength();
+
+        MWBase::Environment::get().getWorld()->launchProjectile(mPtr, *ammo, launchPos, orient, *weapon, speed);
 
         inv.remove(*ammo, 1, mPtr);
         mAmmunition.setNull();

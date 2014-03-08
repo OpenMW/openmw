@@ -7,6 +7,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -243,15 +244,7 @@ namespace MWClass
 
         Ogre::Vector3 hitPosition = result.second;
 
-        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-        float hitchance = ref->mBase->mData.mCombat +
-                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
-                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
-        hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
-                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
-        hitchance -= otherstats.getEvasion();
+        float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
@@ -333,6 +326,8 @@ namespace MWClass
 
         if (damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+
+        MWMechanics::diseaseContact(victim, ptr);
 
         victim.getClass().onHit(victim, damage, true, weapon, ptr, true);
     }

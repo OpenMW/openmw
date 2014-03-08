@@ -115,7 +115,7 @@ namespace MWWorld
 
                 MWWorld::Ptr mBow; // bow or crossbow the projectile was fired from
 
-                float mSpeed;
+                Ogre::Vector3 mVelocity;
             };
 
             std::map<MWWorld::Ptr, MagicBoltState> mMagicBolts;
