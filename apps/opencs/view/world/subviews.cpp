@@ -81,4 +81,12 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add(CSMWorld::UniversalId::Type_Region, new CSVDoc::SubViewFactory<DialogueSubView>);
     manager.add(CSMWorld::UniversalId::Type_Spell, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Referenceable, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Birthsign, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Global, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Gmst, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Race, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Class, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Topic, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Reference, new CSVDoc::SubViewFactory<DialogueSubView>);
 }
