@@ -105,6 +105,8 @@ namespace CSMWorld
         ///< Can this column be edited directly by the user?
 
         virtual std::string getTitle() const;
+
+        virtual int getId() const;
     };
 
     template<typename ESXRecordT>

@@ -16,6 +16,7 @@
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/columns.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -123,13 +124,20 @@ QSize CSVWorld::DialogueDelegateDispatcher::sizeHint (const QStyleOptionViewItem
 
 QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::Display display, const QModelIndex& index)
 {
+    bool hasEnums = CSMWorld::Columns::hasEnums(static_cast<CSMWorld::Columns::ColumnId>(mTable->getColumnId(index.column() ) ) );
     QWidget* editor = NULL;
     std::map<int, CommandDelegate*>::iterator delegateIt(mDelegates.find(display));
     if (delegateIt != mDelegates.end())
     {
         editor = delegateIt->second->createEditor(dynamic_cast<QWidget*>(mParent), QStyleOptionViewItem(), index);
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
-        connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+        if (hasEnums) //combox is used for all enums
+        {
+            connect(editor, SIGNAL(currentIndexChanged ( int)), proxy, SLOT(editorDataCommited()));
+        } else
+        {
+            connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+        }
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
         mProxys.push_back(proxy); //deleted in the destructor
     }
