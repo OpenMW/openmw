@@ -37,7 +37,10 @@ mIndexWrapper(NULL)
 
 void CSVWorld::DialogueDelegateDispatcherProxy::editorDataCommited()
 {
-    emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+    if (mIndexWrapper.get())
+    {
+        emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+    }
 }
 
 void CSVWorld::DialogueDelegateDispatcherProxy::setIndex(const QModelIndex& index)
@@ -79,7 +82,6 @@ CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CS
 
 void CSVWorld::DialogueDelegateDispatcher::editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display)
 {
-    std::cout<<"triggered"<<std::endl;
     setModelData(editor, mTable, index, display);
 }
 
@@ -125,6 +127,11 @@ QSize CSVWorld::DialogueDelegateDispatcher::sizeHint (const QStyleOptionViewItem
 QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::Display display, const QModelIndex& index)
 {
     bool hasEnums = CSMWorld::Columns::hasEnums(static_cast<CSMWorld::Columns::ColumnId>(mTable->getColumnId(index.column() ) ) );
+    if (display == CSMWorld::ColumnBase::Display_Boolean)
+    {
+        hasEnums = true;
+    }
+
     QWidget* editor = NULL;
     std::map<int, CommandDelegate*>::iterator delegateIt(mDelegates.find(display));
     if (delegateIt != mDelegates.end())
@@ -133,7 +140,7 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
         if (hasEnums) //combox is used for all enums
         {
-            connect(editor, SIGNAL(currentIndexChanged ( int)), proxy, SLOT(editorDataCommited()));
+            connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
         } else
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
