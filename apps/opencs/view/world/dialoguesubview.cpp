@@ -189,11 +189,10 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
             {
                 layout->addWidget (widget, i, 1);
                 mWidgetMapper->addMapping (widget, i);
-            }
-
-            if (model->flags (model->index (0, i)) & Qt::ItemIsEditable)
-            {
-
+                if (! (model->flags (model->index (0, i)) & Qt::ItemIsEditable))
+                {
+                    widget->setDisabled(true);
+                }
             }
         }
     }
