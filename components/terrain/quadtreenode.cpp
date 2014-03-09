@@ -438,7 +438,7 @@ void QuadTreeNode::unload(bool recursive)
     if (recursive && hasChildren())
     {
         for (int i=0; i<4; ++i)
-            mChildren[i]->unload();
+            mChildren[i]->unload(true);
     }
 }
 
