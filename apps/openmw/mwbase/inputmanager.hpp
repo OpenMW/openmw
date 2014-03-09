@@ -20,6 +20,9 @@ namespace MWBase
 
             InputManager() {}
 
+            /// Clear all savegame-specific data
+            virtual void clear() = 0;
+
             virtual ~InputManager() {}
 
             virtual void update(float dt, bool loading) = 0;

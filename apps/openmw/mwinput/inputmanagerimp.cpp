@@ -143,6 +143,13 @@ namespace MWInput
         mControlSwitch["vanitymode"]          = true;
     }
 
+    void InputManager::clear()
+    {
+        // Enable all controls
+        for (std::map<std::string, bool>::iterator it = mControlSwitch.begin(); it != mControlSwitch.end(); ++it)
+            it->second = true;
+    }
+
     InputManager::~InputManager()
     {
         mInputBinder->save (mUserFile);
