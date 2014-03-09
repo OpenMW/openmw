@@ -89,4 +89,5 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add(CSMWorld::UniversalId::Type_Class, new CSVDoc::SubViewFactory<DialogueSubView>);
     manager.add(CSMWorld::UniversalId::Type_Topic, new CSVDoc::SubViewFactory<DialogueSubView>);
     manager.add(CSMWorld::UniversalId::Type_Reference, new CSVDoc::SubViewFactory<DialogueSubView>);
+    manager.add(CSMWorld::UniversalId::Type_Cell, new CSVDoc::SubViewFactory<DialogueSubView>);
 }

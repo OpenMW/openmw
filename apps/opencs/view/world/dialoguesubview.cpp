@@ -192,9 +192,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
         if (flags & CSMWorld::ColumnBase::Flag_Dialogue)
         {
-            if(i) //the first run adds the pointless id field
-            {
-                layout->addWidget (new QLabel (model->headerData (i, Qt::Horizontal).toString()), i-1, 0);
+            layout->addWidget (new QLabel (model->headerData (i, Qt::Horizontal).toString()), i, 0);
 
             CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
                 (model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
@@ -204,13 +202,12 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
             if (widget)
             {
-                layout->addWidget (widget, i-1, 1);
+                layout->addWidget (widget, i, 1);
                 mWidgetMapper->addMapping (widget, i);
                 if (! (model->flags (model->index (0, i)) & Qt::ItemIsEditable))
                 {
                     widget->setDisabled(true);
                 }
-            }
             }
         }
     }
