@@ -174,9 +174,21 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     setWidget (widget);
 
-    QGridLayout *layout = new QGridLayout;
+    QFrame* line = new QFrame(this);
+    line->setObjectName(QString::fromUtf8("line"));
+    line->setGeometry(QRect(320, 150, 118, 3));
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
 
-    widget->setLayout (layout);
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QGridLayout *unlockedLayout = new QGridLayout;
+    QGridLayout *lockedLayout = new QGridLayout;
+    mainLayout->addLayout(lockedLayout, 0);
+    mainLayout->addWidget(line, 1);
+    mainLayout->addLayout(unlockedLayout, 2);
+    mainLayout->addStretch(1);
+
+    widget->setLayout (mainLayout);
 
     QAbstractItemModel *model = document.getData().getTableModel (id);
 
@@ -186,27 +198,39 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mWidgetMapper->setModel (model);
     mWidgetMapper->setItemDelegate(&mDispatcher);
 
+    int unlocked = 0;
+    int locked = 0;
+    std::vector<QWidget*> editors;
     for (int i=0; i<columns; ++i)
     {
         int flags = model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
 
         if (flags & CSMWorld::ColumnBase::Flag_Dialogue)
         {
-            layout->addWidget (new QLabel (model->headerData (i, Qt::Horizontal).toString()), i, 0);
-
             CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
                 (model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
             mDispatcher.makeDelegate(display);
-            QWidget *widget = mDispatcher.makeEditor(display, (model->index (0, i)));
+            QWidget *editor = mDispatcher.makeEditor(display, (model->index (0, i)));
 
-            if (widget)
+            if (editor)
             {
-                layout->addWidget (widget, i, 1);
-                mWidgetMapper->addMapping (widget, i);
+                editors.push_back(editor);
+                mWidgetMapper->addMapping (editor, i);
+                QLabel* label = new QLabel(model->headerData (i, Qt::Horizontal).toString());
+                label->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+                editor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
                 if (! (model->flags (model->index (0, i)) & Qt::ItemIsEditable))
                 {
-                    widget->setDisabled(true);
+                    editor->setDisabled(true);
+                    lockedLayout->addWidget (label, locked, 0);
+                    lockedLayout->addWidget (editor, locked, 1);
+                    ++locked;
+                } else
+                {
+                    unlockedLayout->addWidget (label, unlocked, 0);
+                    unlockedLayout->addWidget (editor, unlocked, 1);
+                    ++unlocked;
                 }
             }
         }
