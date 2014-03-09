@@ -11,6 +11,8 @@
 
 #include <components/ogreinit/ogreinit.hpp>
 
+#include <components/bsa/resources.hpp>
+
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
@@ -18,13 +20,16 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS")
 {
-    Files::PathContainer dataDirs = readConfig();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
-    setupDataFiles (dataDirs);
+    setupDataFiles (config.first);
 
     CSMSettings::UserSettings::instance().loadSettings ("opencs.cfg");
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+
+    Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
+        mFsStrict);
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
@@ -58,7 +63,7 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
     }
 }
 
-Files::PathContainer CS::Editor::readConfig()
+std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig()
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
@@ -68,13 +73,17 @@ Files::PathContainer CS::Editor::readConfig()
     ("data-local", boost::program_options::value<std::string>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
     ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
-    ("resources", boost::program_options::value<std::string>()->default_value("resources"));
+    ("resources", boost::program_options::value<std::string>()->default_value("resources"))
+    ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
+        default_value(std::vector<std::string>(), "fallback-archive")->multitoken());
 
     boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc);
 
     mDocumentManager.setResourceDir (variables["resources"].as<std::string>());
+
+    mFsStrict = variables["fs-strict"].as<bool>();
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
@@ -105,7 +114,7 @@ Files::PathContainer CS::Editor::readConfig()
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
-    return dataDirs;
+    return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
 }
 
 void CS::Editor::createGame()

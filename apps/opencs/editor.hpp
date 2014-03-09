@@ -41,12 +41,12 @@ namespace CS
             CSVDoc::NewGameDialogue mNewGame;
             CSVSettings::UserSettingsDialog mSettings;
             CSVDoc::FileDialog mFileDialog;
-
             boost::filesystem::path mLocal;
+            bool mFsStrict;
 
             void setupDataFiles (const Files::PathContainer& dataDirs);
 
-            Files::PathContainer readConfig();
+            std::pair<Files::PathContainer, std::vector<std::string> > readConfig();
             ///< \return data paths
 
             // not implemented
