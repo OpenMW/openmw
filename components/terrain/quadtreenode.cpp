@@ -357,6 +357,7 @@ bool QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
 
             if (!childrenLoaded)
             {
+                mChunk->setVisible(true);
                 // Make sure child scene nodes are detached until all children are loaded
                 mSceneNode->removeAllChildren();
             }
