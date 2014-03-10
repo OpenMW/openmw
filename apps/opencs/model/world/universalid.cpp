@@ -92,6 +92,8 @@ namespace
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Filter, "Filter", ":./filter.png" },
         { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Scene, "Scene", 0 },
 
+        { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Preview, "Preview", 0 },
+
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
