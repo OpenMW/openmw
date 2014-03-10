@@ -45,11 +45,6 @@ namespace CSVRender
 
         mCamera = mSceneMgr->createCamera("foo");
 
-        Ogre::Entity* ent = mSceneMgr->createEntity("cube", Ogre::SceneManager::PT_CUBE);
-        ent->setMaterialName("BaseWhite");
-
-        mSceneMgr->getRootSceneNode()->attachObject(ent);
-
         mCamera->setPosition(300,300,300);
         mCamera->lookAt(0,0,0);
         mCamera->setNearClipDistance(0.1);
@@ -116,6 +111,11 @@ namespace CSVRender
             if (mNavigation->activate (mCamera))
                 mUpdate = true;
         }
+    }
+
+    Ogre::SceneManager *SceneWidget::getSceneManager()
+    {
+        return mSceneMgr;
     }
 
     void SceneWidget::paintEvent(QPaintEvent* e)
