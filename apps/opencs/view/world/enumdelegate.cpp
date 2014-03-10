@@ -42,9 +42,9 @@ CSVWorld::EnumDelegate::EnumDelegate (const std::vector<std::pair<int, QString> 
 }
 
 QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem& option,
-    const QModelIndex& index) const
+    const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
-    if (!index.data().isValid())
+    if (!index.data(Qt::EditRole).isValid() && !index.data(Qt::DisplayRole).isValid())
         return 0;
 
     QComboBox *comboBox = new QComboBox (parent);

@@ -31,8 +31,10 @@ namespace CSVWorld
             EnumDelegate (const std::vector<std::pair<int, QString> >& values,
                 QUndoStack& undoStack, QObject *parent);
 
-            virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem& option,
-                const QModelIndex& index) const;
+            virtual QWidget *createEditor(QWidget *parent,
+                                          const QStyleOptionViewItem& option,
+                                          const QModelIndex& index,
+                                          CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
 
             virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
 

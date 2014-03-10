@@ -6,6 +6,11 @@
 #include <QUndoStack>
 #include <QMetaProperty>
 #include <QStyledItemDelegate>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QComboBox>
+#include <QCheckBox>
 
 #include "../../model/world/commands.hpp"
 
@@ -119,10 +124,32 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 }
 
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
-    const QModelIndex& index) const
+    const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
     if (!(index.data(Qt::EditRole).isValid() or index.data(Qt::DisplayRole).isValid()))
+    {
         return 0;
+    }
+
+    if (display != CSMWorld::ColumnBase::Display_None)
+    {
+        if (display == CSMWorld::ColumnBase::Display_Integer)
+        {
+            return new QSpinBox(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_Integer)
+        {
+            return new QDoubleSpinBox(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_String)
+        {
+            return new QLineEdit(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_Boolean)
+        {
+            return new QCheckBox(parent);
+        }
+    }
 
     return QStyledItemDelegate::createEditor (parent, option, index);
 }

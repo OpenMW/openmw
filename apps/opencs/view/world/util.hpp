@@ -101,8 +101,10 @@ namespace CSVWorld
             virtual void setModelData (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;
 
-            virtual QWidget *createEditor (QWidget *parent, const QStyleOptionViewItem& option,
-                const QModelIndex& index) const;
+            virtual QWidget *createEditor (QWidget *parent,
+                                           const QStyleOptionViewItem& option,
+                                           const QModelIndex& index,
+                                           CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
 
             void setEditLock (bool locked);
 

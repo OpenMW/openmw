@@ -136,14 +136,20 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
     std::map<int, CommandDelegate*>::iterator delegateIt(mDelegates.find(display));
     if (delegateIt != mDelegates.end())
     {
-        editor = delegateIt->second->createEditor(dynamic_cast<QWidget*>(mParent), QStyleOptionViewItem(), index);
+        editor = delegateIt->second->createEditor(dynamic_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
-        if (hasEnums) //combox is used for all enums
+        if (display == CSMWorld::ColumnBase::Display_Boolean)
         {
-            connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
+            connect(editor, SIGNAL(stateChanged(int)), proxy, SLOT(editorDataCommited()));
         } else
         {
-            connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+            if (hasEnums) //combox is used for all enums
+            {
+                connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
+            } else
+            {
+                connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+            }
         }
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
         mProxys.push_back(proxy); //deleted in the destructor
