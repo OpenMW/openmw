@@ -147,6 +147,10 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         {
             return new QSpinBox(parent);
         }
+        if (display == CSMWorld::ColumnBase::Display_Var)
+        {
+            return new QLineEdit(parent);
+        }
         if (display == CSMWorld::ColumnBase::Display_Float)
         {
             return new QDoubleSpinBox(parent);
