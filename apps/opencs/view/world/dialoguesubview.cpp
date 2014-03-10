@@ -113,8 +113,10 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const
             label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
         } else
         {
-            label->clear();
-            label->setText(v.toString());
+            if (QVariant::String == v.type())
+            {
+                label->setText(v.toString());
+            }
         }
         return;
     }
