@@ -9,6 +9,7 @@
 #include <QUndoStack>
 
 #include "../../model/world/commands.hpp"
+#include <iostream>
 
 void CSVWorld::EnumDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
     const QModelIndex& index) const

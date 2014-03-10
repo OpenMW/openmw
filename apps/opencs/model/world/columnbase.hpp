@@ -28,6 +28,7 @@ namespace CSMWorld
         {
             Display_None, //Do not use
             Display_String,
+            Display_LongString,
 
             //CONCRETE TYPES STARTS HERE
             Display_Skill,

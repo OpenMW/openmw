@@ -11,6 +11,7 @@
 #include <QDoubleSpinBox>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QPlainTextEdit>
 
 #include "../../model/world/commands.hpp"
 #include <iostream>
@@ -155,7 +156,11 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         {
             return new QDoubleSpinBox(parent);
         }
-        if (display == CSMWorld::ColumnBase::Display_String)
+        if (display == CSMWorld::ColumnBase::Display_LongString)
+        {
+            return new QTextEdit(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_String || display == CSMWorld::ColumnBase::Display_Skill)
         {
             return new QLineEdit(parent);
         }
@@ -185,7 +190,7 @@ bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
     return false;
 }
 
-void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
+void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay)
 {
     QVariant v = index.data(Qt::EditRole);
     if (tryDisplay)
@@ -198,7 +203,16 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
                 return;
             }
         }
+        QPlainTextEdit* plainTextEdit = qobject_cast<QPlainTextEdit*>(editor);
+        if(plainTextEdit)
+        {
+            if(plainTextEdit->toPlainText() == v.toString())
+            {
+                return;
+            }
+        }
     }
+
     QByteArray n = editor->metaObject()->userProperty().name();
 
     if (n == "dateTime") {
@@ -213,4 +227,5 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
             v = QVariant(editor->property(n).userType(), (const void *)0);
         editor->setProperty(n, v);
     }
+
 }
