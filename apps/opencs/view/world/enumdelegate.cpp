@@ -56,13 +56,13 @@ QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptio
     return comboBox;
 }
 
-void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& index) const
+void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
     if (QComboBox *comboBox = dynamic_cast<QComboBox *> (editor))
     {
         QVariant data = index.data (Qt::EditRole);
 
-        if (!data.isValid())
+        if (tryDisplay && !data.isValid())
         {
             data = index.data (Qt::DisplayRole);
             if (!data.isValid())

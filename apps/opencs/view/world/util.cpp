@@ -144,18 +144,20 @@ bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
     return false;
 }
 
-void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index) const
+void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
     QVariant v = index.data(Qt::EditRole);
-    if (!v.isValid())
+    if (tryDisplay)
     {
-        v = index.data(Qt::DisplayRole);
         if (!v.isValid())
         {
-            return;
+            v = index.data(Qt::DisplayRole);
+            if (!v.isValid())
+            {
+                return;
+            }
         }
     }
-
     QByteArray n = editor->metaObject()->userProperty().name();
 
     if (n == "dateTime") {

@@ -93,7 +93,7 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const
     std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
     if (delegateIt != mDelegates.end())
     {
-        delegateIt->second->setEditorData(editor, index);
+        delegateIt->second->setEditorData(editor, index, true);
     }
 
     for (unsigned i = 0; i < mProxys.size(); ++i)

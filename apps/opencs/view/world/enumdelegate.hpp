@@ -34,7 +34,7 @@ namespace CSVWorld
             virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem& option,
                 const QModelIndex& index) const;
 
-            virtual void setEditorData (QWidget *editor, const QModelIndex& index) const;
+            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
 
             virtual void paint (QPainter *painter, const QStyleOptionViewItem& option,
                 const QModelIndex& index) const;
