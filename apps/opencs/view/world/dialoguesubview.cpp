@@ -127,9 +127,14 @@ QSize CSVWorld::DialogueDelegateDispatcher::sizeHint (const QStyleOptionViewItem
 QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::Display display, const QModelIndex& index)
 {
     bool hasEnums = CSMWorld::Columns::hasEnums(static_cast<CSMWorld::Columns::ColumnId>(mTable->getColumnId(index.column() ) ) );
-    if (display == CSMWorld::ColumnBase::Display_Boolean)
+    QVariant variant = index.data();
+    if (!variant.isValid())
     {
-        hasEnums = true;
+        variant = index.data(Qt::DisplayRole);
+        if (!variant.isValid())
+        {
+            return 0;
+        }
     }
 
     QWidget* editor = NULL;
@@ -138,11 +143,6 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
     {
         editor = delegateIt->second->createEditor(dynamic_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
-        if (display == CSMWorld::ColumnBase::Display_Boolean)
-        {
-            connect(editor, SIGNAL(stateChanged(int)), proxy, SLOT(editorDataCommited()));
-        } else
-        {
             if (hasEnums) //combox is used for all enums
             {
                 connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
@@ -150,7 +150,6 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
             {
                 connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
             }
-        }
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
         mProxys.push_back(proxy); //deleted in the destructor
     }

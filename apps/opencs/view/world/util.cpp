@@ -13,6 +13,7 @@
 #include <QCheckBox>
 
 #include "../../model/world/commands.hpp"
+#include <iostream>
 
 CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
 : mModel (model)
@@ -126,18 +127,27 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
     const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
-    if (!(index.data(Qt::EditRole).isValid() or index.data(Qt::DisplayRole).isValid()))
+    QVariant variant = index.data();
+    if (!variant.isValid())
     {
-        return 0;
+        variant = index.data(Qt::DisplayRole);
+        if (!variant.isValid())
+        {
+            return 0;
+        }
     }
 
     if (display != CSMWorld::ColumnBase::Display_None)
     {
+        if (variant.type() == QVariant::Color)
+        {
+            return new QLineEdit(parent);
+        }
         if (display == CSMWorld::ColumnBase::Display_Integer)
         {
             return new QSpinBox(parent);
         }
-        if (display == CSMWorld::ColumnBase::Display_Integer)
+        if (display == CSMWorld::ColumnBase::Display_Float)
         {
             return new QDoubleSpinBox(parent);
         }
