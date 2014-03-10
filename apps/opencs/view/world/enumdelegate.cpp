@@ -65,6 +65,10 @@ void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& 
         if (!data.isValid())
         {
             data = index.data (Qt::DisplayRole);
+            if (!data.isValid())
+            {
+                return;
+            }
         }
 
         int value = data.toInt();

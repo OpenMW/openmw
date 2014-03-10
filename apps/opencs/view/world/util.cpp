@@ -4,6 +4,8 @@
 #include <stdexcept>
 
 #include <QUndoStack>
+#include <QMetaProperty>
+#include <QStyledItemDelegate>
 
 #include "../../model/world/commands.hpp"
 
@@ -119,7 +121,7 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
     const QModelIndex& index) const
 {
-    if (!index.data().isValid())
+    if (!(index.data(Qt::EditRole).isValid() or index.data(Qt::DisplayRole).isValid()))
         return 0;
 
     return QStyledItemDelegate::createEditor (parent, option, index);
@@ -140,4 +142,32 @@ bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
     const QString &settingValue)
 {
     return false;
+}
+
+void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index) const
+{
+    QVariant v = index.data(Qt::EditRole);
+    if (!v.isValid())
+    {
+        v = index.data(Qt::DisplayRole);
+        if (!v.isValid())
+        {
+            return;
+        }
+    }
+
+    QByteArray n = editor->metaObject()->userProperty().name();
+
+    if (n == "dateTime") {
+        if (editor->inherits("QTimeEdit"))
+            n = "time";
+        else if (editor->inherits("QDateEdit"))
+            n = "date";
+    }
+
+    if (!n.isEmpty()) {
+        if (!v.isValid())
+            v = QVariant(editor->property(n).userType(), (const void *)0);
+        editor->setProperty(n, v);
+    }
 }
