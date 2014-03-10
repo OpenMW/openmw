@@ -94,6 +94,31 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const
     CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
     (mTable->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
+    QLabel* label = qobject_cast<QLabel*>(editor);
+    if(label)
+    {
+        QVariant v = index.data(Qt::EditRole);
+        if (!v.isValid())
+        {
+            v = index.data(Qt::DisplayRole);
+            if (!v.isValid())
+            {
+                return;
+            }
+        }
+        if (CSMWorld::Columns::hasEnums(static_cast<CSMWorld::Columns::ColumnId>(mTable->getColumnId(index.column()))))
+        {
+            int data = v.toInt();
+            std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mTable->getColumnId (index.column()))));
+            label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
+        } else
+        {
+            label->clear();
+            label->setText(v.toString());
+        }
+        return;
+    }
+
     std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
     if (delegateIt != mDelegates.end())
     {
@@ -140,12 +165,17 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         }
     }
 
-    
     QWidget* editor = NULL;
+    if (! (mTable->flags (index) & Qt::ItemIsEditable))
+    {
+        editor = new QLabel(qobject_cast<QWidget*>(mParent));
+        return editor;
+    }
+
     std::map<int, CommandDelegate*>::iterator delegateIt(mDelegates.find(display));
     if (delegateIt != mDelegates.end())
     {
-        editor = delegateIt->second->createEditor(dynamic_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
+        editor = delegateIt->second->createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
 
         bool skip = false;
@@ -247,7 +277,6 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
                 editor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
                 if (! (model->flags (model->index (0, i)) & Qt::ItemIsEditable))
                 {
-                    editor->setDisabled(true);
                     lockedLayout->addWidget (label, locked, 0);
                     lockedLayout->addWidget (editor, locked, 1);
                     ++locked;
