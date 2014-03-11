@@ -14,7 +14,7 @@
 void CSVWorld::EnumDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
     const QModelIndex& index) const
 {
-    if (QComboBox *comboBox = dynamic_cast<QComboBox *> (editor))
+    if (QComboBox *comboBox = qobject_cast<QComboBox *> (editor))
     {
         QString value = comboBox->currentText();
 
@@ -57,9 +57,24 @@ QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptio
     return comboBox;
 }
 
+QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem& option,
+    const QModelIndex& index) const
+{
+    if (!index.data(Qt::EditRole).isValid())
+        return 0;
+
+    QComboBox *comboBox = new QComboBox (parent);
+
+    for (std::vector<std::pair<int, QString> >::const_iterator iter (mValues.begin());
+         iter!=mValues.end(); ++iter)
+         comboBox->addItem (iter->second);
+
+    return comboBox;
+}
+
 void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
-    if (QComboBox *comboBox = dynamic_cast<QComboBox *> (editor))
+    if (QComboBox *comboBox = qobject_cast<QComboBox *> (editor)) //qobject_cast is faster than dynamic_cast
     {
         QVariant data = index.data (Qt::EditRole);
 
