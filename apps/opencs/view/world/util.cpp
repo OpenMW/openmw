@@ -160,7 +160,9 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         {
             return new QTextEdit(parent);
         }
-        if (display == CSMWorld::ColumnBase::Display_String || display == CSMWorld::ColumnBase::Display_Skill)
+        if (display == CSMWorld::ColumnBase::Display_String ||
+            display == CSMWorld::ColumnBase::Display_Skill ||
+            display == CSMWorld::ColumnBase::Display_Script)
         {
             return new QLineEdit(parent);
         }
