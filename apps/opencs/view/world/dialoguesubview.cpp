@@ -260,6 +260,10 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mDispatcher(this, dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id)), document.getUndoStack())
 
 {
+    CSMWorld::IdTable* model = dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id));
+    const QModelIndex indexToFocus(model->getModelIndex (id.getId(), 0));
+    const int focusedRow = indexToFocus.row();
+
     QWidget *widget = new QWidget (this);
 
     setWidget (widget);
@@ -280,9 +284,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     widget->setLayout (mainLayout);
 
-    QAbstractItemModel *model = document.getData().getTableModel (id);
-
-    int columns = model->columnCount();
+    const int columns = model->columnCount();
 
     mWidgetMapper = new QDataWidgetMapper (this);
     mWidgetMapper->setModel (model);
@@ -301,7 +303,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
                 (model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
             mDispatcher.makeDelegate(display);
-            QWidget *editor = mDispatcher.makeEditor(display, (model->index (0, i)));
+            QWidget *editor = mDispatcher.makeEditor(display, (model->index (focusedRow, i)));
 
             if (editor)
             {
@@ -325,8 +327,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
         }
     }
 
-    mWidgetMapper->setCurrentModelIndex (
-        dynamic_cast<CSMWorld::IdTable&> (*model).getModelIndex (id.getId(), 0));
+    mWidgetMapper->setCurrentModelIndex (indexToFocus);
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
