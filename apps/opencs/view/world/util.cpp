@@ -190,7 +190,7 @@ bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
     return false;
 }
 
-void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay)
+void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
     QVariant v = index.data(Qt::EditRole);
     if (tryDisplay)
@@ -204,7 +204,7 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
             }
         }
         QPlainTextEdit* plainTextEdit = qobject_cast<QPlainTextEdit*>(editor);
-        if(plainTextEdit)
+        if(plainTextEdit) //for some reason it is easier to brake the loop here
         {
             if(plainTextEdit->toPlainText() == v.toString())
             {

@@ -113,7 +113,7 @@ namespace CSVWorld
             virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
             ///< \return Does column require update?
 
-            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false);
+            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
 
 
         private slots:

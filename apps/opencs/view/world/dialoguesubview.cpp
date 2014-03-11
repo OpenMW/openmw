@@ -24,6 +24,59 @@
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
+/*
+==============================NotEditableSubDelegate==========================================
+*/
+CSVWorld::NotEditableSubDelegate::NotEditableSubDelegate(const CSMWorld::IdTable* table, QObject * parent) :
+QAbstractItemDelegate(parent),
+mTable(table)
+{}
+
+void CSVWorld::NotEditableSubDelegate::setEditorData (QLabel* editor, const QModelIndex& index) const
+{
+    QVariant v = index.data(Qt::EditRole);
+    if (!v.isValid())
+    {
+        v = index.data(Qt::DisplayRole);
+        if (!v.isValid())
+        {
+            return;
+        }
+    }
+
+    if (QVariant::String == v.type())
+    {
+        editor->setText(v.toString());
+    } else //else we are facing enums
+    {
+        int data = v.toInt();
+        std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mTable->getColumnId (index.column()))));
+        editor->setText(QString::fromUtf8(enumNames.at(data).c_str()));
+    }
+}
+
+void CSVWorld::NotEditableSubDelegate::setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
+{
+    //not editable widgets will not save model data
+}
+
+void CSVWorld::NotEditableSubDelegate::paint (QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    //does nothing
+}
+
+QSize CSVWorld::NotEditableSubDelegate::sizeHint (const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    return QSize();
+}
+
+QWidget* CSVWorld::NotEditableSubDelegate::createEditor (QWidget *parent,
+                                const QStyleOptionViewItem& option,
+                                const QModelIndex& index,
+                                CSMWorld::ColumnBase::Display display) const
+{
+    return new QLabel(parent);
+}
 
 /*
 ==============================DialogueDelegateDispatcherProxy==========================================
@@ -64,7 +117,8 @@ QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const
 CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, QUndoStack& undoStack) :
 mParent(parent),
 mTable(table),
-mUndoStack(undoStack)
+mUndoStack(undoStack),
+mNotEditableDelegate(table, parent)
 {
 }
 
@@ -97,27 +151,7 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const
     QLabel* label = qobject_cast<QLabel*>(editor);
     if(label)
     {
-        QVariant v = index.data(Qt::EditRole);
-        if (!v.isValid())
-        {
-            v = index.data(Qt::DisplayRole);
-            if (!v.isValid())
-            {
-                return;
-            }
-        }
-        if (CSMWorld::Columns::hasEnums(static_cast<CSMWorld::Columns::ColumnId>(mTable->getColumnId(index.column()))))
-        {
-            int data = v.toInt();
-            std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mTable->getColumnId (index.column()))));
-            label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
-        } else
-        {
-            if (QVariant::String == v.type())
-            {
-                label->setText(v.toString());
-            }
-        }
+        mNotEditableDelegate.setEditorData(label, index);
         return;
     }
 
@@ -170,8 +204,7 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
     QWidget* editor = NULL;
     if (! (mTable->flags (index) & Qt::ItemIsEditable))
     {
-        editor = new QLabel(qobject_cast<QWidget*>(mParent));
-        return editor;
+        return mNotEditableDelegate.createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
     }
 
     std::map<int, CommandDelegate*>::iterator delegateIt(mDelegates.find(display));

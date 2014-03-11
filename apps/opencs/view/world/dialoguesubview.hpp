@@ -12,6 +12,7 @@
 class QDataWidgetMapper;
 class QSize;
 class QEvent;
+class QLabel;
 
 namespace CSMWorld
 {
@@ -27,6 +28,27 @@ namespace CSVWorld
 {
     class CommandDelegate;
 
+    class NotEditableSubDelegate : public QAbstractItemDelegate
+    {
+        const CSMWorld::IdTable* mTable;
+    public:
+        NotEditableSubDelegate(const CSMWorld::IdTable* table, QObject * parent = 0);
+
+        virtual void setEditorData (QLabel* editor, const QModelIndex& index) const;
+
+        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const;
+
+        virtual void paint (QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+        ///< does nothing
+
+        virtual QSize sizeHint (const QStyleOptionViewItem& option, const QModelIndex& index) const;
+        ///< does nothing
+
+        virtual QWidget *createEditor (QWidget *parent,
+                                const QStyleOptionViewItem& option,
+                                const QModelIndex& index,
+                                CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
+    };
 
     //this can't be nested into the DialogueDelegateDispatcher, because it needs to emit signals
     class DialogueDelegateDispatcherProxy : public QObject
@@ -67,6 +89,8 @@ namespace CSVWorld
         CSMWorld::IdTable* mTable; //nor sure if it is needed TODO
 
         QUndoStack& mUndoStack;
+
+        NotEditableSubDelegate mNotEditableDelegate;
 
         std::vector<DialogueDelegateDispatcherProxy*> mProxys; //once we move to the C++11 we should use unique_ptr
 
