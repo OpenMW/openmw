@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <QString>
+#include <QStyledItemDelegate>
 
 #include <components/esm/defs.hpp>
 
@@ -33,12 +34,12 @@ namespace CSVWorld
 
             virtual QWidget *createEditor(QWidget *parent,
                                           const QStyleOptionViewItem& option,
-                                          const QModelIndex& index,
-                                          CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
+                                          const QModelIndex& index) const;
 
             virtual QWidget *createEditor(QWidget *parent,
                                           const QStyleOptionViewItem& option,
-                                          const QModelIndex& index) const;
+                                          const QModelIndex& index,
+                                          CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
 
             virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
 
