@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QComboBox>
+#include <QScrollArea>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
@@ -264,9 +265,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     const QModelIndex indexToFocus(model->getModelIndex (id.getId(), 0));
     const int focusedRow = indexToFocus.row();
 
-    QWidget *widget = new QWidget (this);
-
-    setWidget (widget);
+    QScrollArea *scrollArea = new QScrollArea(this);
+    QWidget *widget = new QWidget (scrollArea);
 
     QFrame* line = new QFrame(this);
     line->setObjectName(QString::fromUtf8("line"));
@@ -328,6 +328,11 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     }
 
     mWidgetMapper->setCurrentModelIndex (indexToFocus);
+
+    scrollArea->setMinimumWidth(250);
+    scrollArea->setWidget(widget);
+    scrollArea->setWidgetResizable(true);
+    setWidget (scrollArea);
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)

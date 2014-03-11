@@ -162,7 +162,10 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         }
         if (display == CSMWorld::ColumnBase::Display_String ||
             display == CSMWorld::ColumnBase::Display_Skill ||
-            display == CSMWorld::ColumnBase::Display_Script)
+            display == CSMWorld::ColumnBase::Display_Script ||
+            display == CSMWorld::ColumnBase::Display_Race ||
+            display == CSMWorld::ColumnBase::Display_Class ||
+            display == CSMWorld::ColumnBase::Display_Faction)
         {
             return new QLineEdit(parent);
         }
