@@ -14,6 +14,7 @@ class QDataWidgetMapper;
 class QSize;
 class QEvent;
 class QLabel;
+class QVBoxLayout;
 
 namespace CSMWorld
 {
@@ -130,18 +131,32 @@ namespace CSVWorld
 
         public:
 
-            EditWidget (QWidget *parent, const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete = false);
+            EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table, QUndoStack& undoStack, bool createAndDelete = false);
 
-            void remake(const CSMWorld::UniversalId& id);
+            void remake(int row);
     };
 
     class DialogueSubView : public CSVDoc::SubView
     {
+        Q_OBJECT
+
+        EditWidget* mEditWidget;
+        QVBoxLayout* mMainLayout;
+        CSMWorld::IdTable* mTable;
+        QUndoStack& mUndoStack;
+        int mRow;
+
         public:
 
             DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete = false);
 
             virtual void setEditLock (bool locked);
+
+        private slots:
+
+            void nextId();
+
+            void prevId();
     };
 }
 

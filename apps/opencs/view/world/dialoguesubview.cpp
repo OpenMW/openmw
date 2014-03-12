@@ -255,21 +255,19 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 =============================================================EditWidget=====================================================
 */
 
-CSVWorld::EditWidget::EditWidget(QWidget *parent, const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete) :
-mDispatcher(this, dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id)), document.getUndoStack()),
+CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, QUndoStack& undoStack, bool createAndDelete) :
+mDispatcher(this, table, undoStack),
 QScrollArea(parent),
 mWidgetMapper(NULL),
 mMainWidget(NULL),
-mUndoStack(document.getUndoStack()),
-mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id)))
+mUndoStack(undoStack),
+mTable(table)
 {
-    remake (id);
+    remake (row);
 }
 
-void CSVWorld::EditWidget::remake(const CSMWorld::UniversalId& id)
+void CSVWorld::EditWidget::remake(int row)
 {
-    const QModelIndex indexToFocus(mTable->getModelIndex (id.getId(), 0));
-
     if (mMainWidget)
     {
         delete mMainWidget;
@@ -300,7 +298,6 @@ void CSVWorld::EditWidget::remake(const CSMWorld::UniversalId& id)
 
     int unlocked = 0;
     int locked = 0;
-    const int focusedRow = indexToFocus.row();
     const int columns = mTable->columnCount();
     for (int i=0; i<columns; ++i)
     {
@@ -312,7 +309,7 @@ void CSVWorld::EditWidget::remake(const CSMWorld::UniversalId& id)
                 (mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
             mDispatcher.makeDelegate(display);
-            QWidget *editor = mDispatcher.makeEditor(display, (mTable->index (focusedRow, i)));
+            QWidget *editor = mDispatcher.makeEditor(display, (mTable->index (row, i)));
 
             if (editor)
             {
@@ -335,7 +332,7 @@ void CSVWorld::EditWidget::remake(const CSMWorld::UniversalId& id)
         }
     }
 
-    mWidgetMapper->setCurrentModelIndex (indexToFocus);
+    mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
     this->setMinimumWidth(300);
     this->setWidget(mMainWidget);
@@ -349,25 +346,71 @@ void CSVWorld::EditWidget::remake(const CSMWorld::UniversalId& id)
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     bool createAndDelete) :
 
-    SubView (id)
+    SubView (id),
+    mEditWidget(0),
+    mMainLayout(NULL),
+    mUndoStack(document.getUndoStack()),
+    mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
+    mRow (-1)
 
 {
+    mRow = mTable->getModelIndex (id.getId(), 0).row();
     QWidget *mainWidget = new QWidget(this);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
-    QPushButton* mPrevButton = new QPushButton(tr("Previous"));
-    QPushButton* mNextButton = new QPushButton(tr("Next"));
-    buttonsLayout->addWidget(mPrevButton);
-    buttonsLayout->addWidget(mNextButton);
+    QPushButton* prevButton = new QPushButton(tr("Previous"), mainWidget);
+    QPushButton* nextButton = new QPushButton(tr("Next"), mainWidget);
+    buttonsLayout->addWidget(prevButton);
+    buttonsLayout->addWidget(nextButton);
+    connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
+    connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(mainWidget);
+    mMainLayout = new QVBoxLayout(mainWidget);
 
-    EditWidget* editWidget = new EditWidget(mainWidget, id, document, false);
-    mainLayout->addLayout(buttonsLayout);
-    mainLayout->addWidget(editWidget);
-    editWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    mEditWidget = new EditWidget(mainWidget, mRow, mTable, mUndoStack, false);
+    mMainLayout->addLayout(buttonsLayout);
+    mMainLayout->addWidget(mEditWidget);
+    mEditWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+
     setWidget(mainWidget);
+}
 
+void CSVWorld::DialogueSubView::prevId()
+{
+    if (mRow < 1)
+    {
+        return;
+    }
+
+    int newRow = mRow - 1;
+    QModelIndex newIndex(mTable->index(newRow, 0));
+
+    if (!newIndex.isValid())
+    {
+        return;
+    }
+
+    mEditWidget->remake(newRow);
+    mRow = newRow;
+}
+
+void CSVWorld::DialogueSubView::nextId()
+{
+    if (mRow == -1)
+    {
+        return;
+    }
+
+    int newRow = mRow + 1;
+    QModelIndex newIndex(mTable->index(newRow, 0));
+
+    if (!newIndex.isValid())
+    {
+        return;
+    }
+
+    mEditWidget->remake(newRow);
+    mRow = newRow;
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
