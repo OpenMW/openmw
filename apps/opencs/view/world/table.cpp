@@ -528,7 +528,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
 void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
 {
-        event->acceptProposedAction();
+    event->acceptProposedAction();
 }
 
 void CSVWorld::Table::dropEvent(QDropEvent *event)
@@ -560,7 +560,7 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
 {
-        event->accept();
+    event->accept();
 }
 
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const

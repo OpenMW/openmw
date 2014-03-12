@@ -12,9 +12,10 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPlainTextEdit>
+#include <QEvent>
 
 #include "../../model/world/commands.hpp"
-#include <iostream>
+#include "../../model/world/tablemimedata.hpp"
 
 CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
 : mModel (model)
@@ -167,7 +168,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             display == CSMWorld::ColumnBase::Display_Class ||
             display == CSMWorld::ColumnBase::Display_Faction)
         {
-            return new QLineEdit(parent);
+            return new DropLineEdit(parent);
         }
         if (display == CSMWorld::ColumnBase::Display_Boolean)
         {
@@ -233,4 +234,26 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
         editor->setProperty(n, v);
     }
 
+}
+
+CSVWorld::DropLineEdit::DropLineEdit(QWidget* parent) :
+QLineEdit(parent)
+{
+    setAcceptDrops(true);
+}
+
+void CSVWorld::DropLineEdit::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void CSVWorld::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->accept();
+}
+
+void CSVWorld::DropLineEdit::dropEvent(QDropEvent *event)
+{
+    emit tableMimeDataDropped(dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->getData());
+    //WIP
 }
