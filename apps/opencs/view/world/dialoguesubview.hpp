@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <QAbstractItemDelegate>
+#include <QScrollArea>
 
 #include "../doc/subview.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -119,11 +120,23 @@ namespace CSVWorld
 
     };
 
-    class DialogueSubView : public CSVDoc::SubView
+    class EditWidget : public QScrollArea
     {
             QDataWidgetMapper *mWidgetMapper;
             DialogueDelegateDispatcher mDispatcher;
+            QWidget* mMainWidget;
+            CSMWorld::IdTable* mTable;
+            QUndoStack& mUndoStack;
 
+        public:
+
+            EditWidget (QWidget *parent, const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete = false);
+
+            void remake(const CSMWorld::UniversalId& id);
+    };
+
+    class DialogueSubView : public CSVDoc::SubView
+    {
         public:
 
             DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete = false);

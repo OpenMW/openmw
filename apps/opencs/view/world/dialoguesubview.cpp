@@ -251,68 +251,75 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 }
 
 /*
-==============================DialogueSubView==========================================
+=============================================================EditWidget=====================================================
 */
 
-CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
-    bool createAndDelete) :
-
-    SubView (id),
-    mDispatcher(this, dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id)), document.getUndoStack())
-
+CSVWorld::EditWidget::EditWidget(QWidget *parent, const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete) :
+mDispatcher(this, dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id)), document.getUndoStack()),
+QScrollArea(parent),
+mWidgetMapper(NULL),
+mMainWidget(NULL),
+mUndoStack(document.getUndoStack()),
+mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id)))
 {
-    CSMWorld::IdTable* model = dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel (id));
-    const QModelIndex indexToFocus(model->getModelIndex (id.getId(), 0));
-    const int focusedRow = indexToFocus.row();
+    remake (id);
+}
 
-    QScrollArea *scrollArea = new QScrollArea(this);
-    QWidget *widget = new QWidget (scrollArea);
+void CSVWorld::EditWidget::remake(const CSMWorld::UniversalId& id)
+{
+    const QModelIndex indexToFocus(mTable->getModelIndex (id.getId(), 0));
 
-    QFrame* line = new QFrame(this);
+    if (mMainWidget)
+    {
+        delete mMainWidget;
+    }
+    mMainWidget = new QWidget (this);
+
+    if (mWidgetMapper)
+    {
+        delete mWidgetMapper;
+    }
+    mWidgetMapper = new QDataWidgetMapper (this);
+    mWidgetMapper->setModel(mTable);
+    mWidgetMapper->setItemDelegate(&mDispatcher);
+
+    QFrame* line = new QFrame(mMainWidget);
     line->setObjectName(QString::fromUtf8("line"));
     line->setGeometry(QRect(320, 150, 118, 3));
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    QGridLayout *unlockedLayout = new QGridLayout;
-    QGridLayout *lockedLayout = new QGridLayout;
+    QVBoxLayout *mainLayout = new QVBoxLayout(mMainWidget);
+    QGridLayout *unlockedLayout = new QGridLayout();
+    QGridLayout *lockedLayout = new QGridLayout();
     mainLayout->addLayout(lockedLayout, 0);
     mainLayout->addWidget(line, 1);
     mainLayout->addLayout(unlockedLayout, 2);
     mainLayout->addStretch(1);
 
-    widget->setLayout (mainLayout);
-
-    const int columns = model->columnCount();
-
-    mWidgetMapper = new QDataWidgetMapper (this);
-    mWidgetMapper->setModel (model);
-    mWidgetMapper->setItemDelegate(&mDispatcher);
-
     int unlocked = 0;
     int locked = 0;
-    std::vector<QWidget*> editors;
+    const int focusedRow = indexToFocus.row();
+    const int columns = mTable->columnCount();
     for (int i=0; i<columns; ++i)
     {
-        int flags = model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
+        int flags = mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
 
         if (flags & CSMWorld::ColumnBase::Flag_Dialogue)
         {
             CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-                (model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+                (mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
             mDispatcher.makeDelegate(display);
-            QWidget *editor = mDispatcher.makeEditor(display, (model->index (focusedRow, i)));
+            QWidget *editor = mDispatcher.makeEditor(display, (mTable->index (focusedRow, i)));
 
             if (editor)
             {
-                editors.push_back(editor);
                 mWidgetMapper->addMapping (editor, i);
-                QLabel* label = new QLabel(model->headerData (i, Qt::Horizontal).toString());
+                QLabel* label = new QLabel(mTable->headerData (i, Qt::Horizontal).toString(), mMainWidget);
                 label->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
                 editor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-                if (! (model->flags (model->index (0, i)) & Qt::ItemIsEditable))
+                if (! (mTable->flags (mTable->index (0, i)) & Qt::ItemIsEditable))
                 {
                     lockedLayout->addWidget (label, locked, 0);
                     lockedLayout->addWidget (editor, locked, 1);
@@ -329,10 +336,24 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mWidgetMapper->setCurrentModelIndex (indexToFocus);
 
-    scrollArea->setMinimumWidth(250);
-    scrollArea->setWidget(widget);
-    scrollArea->setWidgetResizable(true);
-    setWidget (scrollArea);
+    this->setMinimumWidth(300);
+    this->setWidget(mMainWidget);
+    this->setWidgetResizable(true);
+}
+
+/*
+==============================DialogueSubView==========================================
+*/
+
+CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
+    bool createAndDelete) :
+
+    SubView (id)
+
+{
+    EditWidget* widget = new EditWidget(this, id, document, false);
+
+    setWidget (widget);
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
