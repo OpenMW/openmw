@@ -24,6 +24,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/record.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -115,7 +116,19 @@ QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const
 
 void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data)
 {
-    std::cout<<"Test!"<<std::endl;
+    for (unsigned i = 0; i < data.size();  ++i)
+    {
+        if (mDisplay == CSMWorld::TableMimeData::convertEnums(data[i].getType()))
+        {
+                QLineEdit* lineEdit = qobject_cast<QLineEdit*>(mEditor);
+                if (lineEdit && mIndexWrapper.get())
+                {
+                    lineEdit->setText(data[i].getId().c_str());
+                    emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+                    break;
+                }
+        }
+    }
 }
 /*
 ==============================DialogueDelegateDispatcher==========================================
@@ -240,6 +253,11 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         if(!skip && qobject_cast<QComboBox*>(editor))
         {
             connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
+            skip = true;
+        }
+        if(!skip && qobject_cast<QAbstractSpinBox*>(editor))
+        {
+            connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
             skip = true;
         }
 

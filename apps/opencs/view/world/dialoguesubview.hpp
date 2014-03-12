@@ -90,7 +90,7 @@ namespace CSVWorld
 
         QObject* mParent;
 
-        CSMWorld::IdTable* mTable; //nor sure if it is needed TODO
+        CSMWorld::IdTable* mTable;
 
         QUndoStack& mUndoStack;
 
