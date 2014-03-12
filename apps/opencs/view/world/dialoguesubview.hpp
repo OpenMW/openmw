@@ -69,6 +69,7 @@ namespace CSVWorld
         CSMWorld::ColumnBase::Display mDisplay;
 
         std::auto_ptr<refWrapper> mIndexWrapper;
+
     public:
         DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display);
         QWidget* getEditor() const;
@@ -76,6 +77,7 @@ namespace CSVWorld
     public slots:
         void editorDataCommited();
         void setIndex(const QModelIndex& index);
+        void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data);
 
     signals:
         void editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display);

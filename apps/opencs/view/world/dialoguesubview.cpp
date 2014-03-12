@@ -113,6 +113,10 @@ QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const
     return mEditor;
 }
 
+void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data)
+{
+    std::cout<<"Test!"<<std::endl;
+}
 /*
 ==============================DialogueDelegateDispatcher==========================================
 */
@@ -217,9 +221,10 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
 
         bool skip = false;
-        if (qobject_cast<QLineEdit*>(editor))
+        if (qobject_cast<DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+            connect(editor, SIGNAL(tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>&)), proxy, SLOT(tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>&)));
             skip = true;
         }
         if(!skip && qobject_cast<QCheckBox*>(editor))
