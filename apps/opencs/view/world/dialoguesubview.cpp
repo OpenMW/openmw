@@ -23,6 +23,7 @@
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
+#include "../../model/world/record.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -387,6 +388,13 @@ void CSVWorld::DialogueSubView::prevId()
         return;
     }
 
+    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (newRow, 1)).toInt());
+    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Deleted)
+    {
+        prevId();
+        return;
+    }
+
     mEditWidget->remake(newRow);
     setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
                                           mTable->data (mTable->index (newRow, 0)).toString().toStdString()));
@@ -401,6 +409,13 @@ void CSVWorld::DialogueSubView::nextId()
 
     if (!newIndex.isValid())
     {
+        return;
+    }
+
+    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (newRow, 1)).toInt());
+    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Deleted)
+    {
+        nextId();
         return;
     }
 
