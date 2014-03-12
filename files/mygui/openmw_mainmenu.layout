@@ -2,5 +2,9 @@
 
 <MyGUI type="Layout">
     <!-- The entire screen -->
-    <Widget type="Widget" layer="Windows" position="0 0 300 300" name="_Main" />
+    <Widget type="Widget" layer="Windows" position="0 0 300 300" name="_Main" >
+        <Widget type="TextBox" skin="SandText" position="0 250 300 50" align="Bottom" name="VersionText">
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+    </Widget>	
 </MyGUI>
