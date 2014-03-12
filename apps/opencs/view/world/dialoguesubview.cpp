@@ -377,14 +377,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     setWidget(mainWidget);
 
-    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
-    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
-    {
-        mEditWidget->setDisabled(true);
-    } else
-    {
-        mEditWidget->setDisabled(mLocked);
-    }
+    dataChanged();
 }
 
 void CSVWorld::DialogueSubView::prevId()
@@ -421,6 +414,7 @@ void CSVWorld::DialogueSubView::nextId()
 
     if (newRow > mTable->rowCount())
     {
+        std::cout<<"test"<<std::endl;
         return;
     }
 
