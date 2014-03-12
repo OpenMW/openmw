@@ -158,6 +158,9 @@ namespace CSVWorld
             void nextId();
 
             void prevId();
+
+            void dataChanged();
+            ///\brief we need to care for deleting currently edited record
     };
 }
 

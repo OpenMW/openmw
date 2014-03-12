@@ -356,6 +356,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mLocked(false)
 
 {
+    connect(mTable, SIGNAL(dataChanged ( const QModelIndex &, const QModelIndex &)), this, SLOT(dataChanged()));
     mRow = mTable->getModelIndex (id.getId(), 0).row();
     QWidget *mainWidget = new QWidget(this);
 
@@ -375,12 +376,24 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mEditWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     setWidget(mainWidget);
-    mEditWidget->setDisabled(mLocked);
+
+    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
+    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
+    {
+        mEditWidget->setDisabled(true);
+    } else
+    {
+        mEditWidget->setDisabled(mLocked);
+    }
 }
 
 void CSVWorld::DialogueSubView::prevId()
 {
     int newRow = mRow - 1;
+    if (newRow < 0)
+    {
+        return;
+    }
     QModelIndex newIndex(mTable->index(newRow, 0));
 
     if (!newIndex.isValid())
@@ -389,7 +402,7 @@ void CSVWorld::DialogueSubView::prevId()
     }
 
     CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (newRow, 1)).toInt());
-    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Deleted)
+    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
     {
         prevId();
         return;
@@ -405,6 +418,12 @@ void CSVWorld::DialogueSubView::prevId()
 void CSVWorld::DialogueSubView::nextId()
 {
     int newRow = mRow + 1;
+
+    if (newRow > mTable->rowCount())
+    {
+        return;
+    }
+
     QModelIndex newIndex(mTable->index(newRow, 0));
 
     if (!newIndex.isValid())
@@ -413,7 +432,7 @@ void CSVWorld::DialogueSubView::nextId()
     }
 
     CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (newRow, 1)).toInt());
-    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Deleted)
+    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
     {
         nextId();
         return;
@@ -430,4 +449,16 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
 {
     mLocked = locked;
     mEditWidget->setDisabled(mLocked);
+}
+
+void CSVWorld::DialogueSubView::dataChanged()
+{
+    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
+    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
+    {
+        mEditWidget->setDisabled(true);
+    } else
+    {
+        mEditWidget->setDisabled(mLocked);
+    }
 }
