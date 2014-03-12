@@ -76,27 +76,6 @@ float HeadAnimationTime::getValue() const
         return 1;
 }
 
-float WeaponAnimationTime::getValue() const
-{
-    if (mWeaponGroup.empty())
-        return 0;
-    float current = mAnimation->getCurrentTime(mWeaponGroup);
-    if (current == -1)
-        return 0;
-    return current - mStartTime;
-}
-
-void WeaponAnimationTime::setGroup(const std::string &group)
-{
-    mWeaponGroup = group;
-    mStartTime = mAnimation->getStartTime(mWeaponGroup);
-}
-
-void WeaponAnimationTime::updateStartTime()
-{
-    setGroup(mWeaponGroup);
-}
-
 static NpcAnimation::PartBoneMap createPartListMap()
 {
     NpcAnimation::PartBoneMap result;
@@ -147,8 +126,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
-    mNpcType(Type_Normal),
-    mPitchFactor(0)
+    mNpcType(Type_Normal)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -538,14 +516,10 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         // updateSkeletonInstance, below, touches the hands.
         node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
     }
-    else if (mPitchFactor > 0)
+    else
     {
         // In third person mode we may still need pitch for ranged weapon targeting
-        float pitch = mPtr.getRefData().getPosition().rot[0] * mPitchFactor;
-        Ogre::Node *node = baseinst->getBone("Bip01 Spine2");
-        node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
-        node = baseinst->getBone("Bip01 Spine1");
-        node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
+        pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
@@ -695,13 +669,14 @@ void NpcAnimation::showWeapons(bool showWeapon)
     {
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(weapon != inv.end()) // special case for weapons
+        if(weapon != inv.end())
         {
             Ogre::Vector3 glowColor = getEnchantmentColor(*weapon);
             std::string mesh = MWWorld::Class::get(*weapon).getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
+            // Crossbows start out with a bolt attached
             if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
                     weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
             {
@@ -743,113 +718,24 @@ void NpcAnimation::showCarriedLeft(bool show)
         removeIndividualPart(ESM::PRT_Shield);
 }
 
+void NpcAnimation::configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot)
+{
+    Ogre::Vector3 glowColor = getEnchantmentColor(ptr);
+    setRenderProperties(object, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
+                        !ptr.getClass().getEnchantment(ptr).empty(), &glowColor);
+
+    std::for_each(object->mEntities.begin(), object->mEntities.end(), SetObjectGroup(slot));
+    std::for_each(object->mParticles.begin(), object->mParticles.end(), SetObjectGroup(slot));
+}
+
 void NpcAnimation::attachArrow()
 {
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weaponSlot != inv.end() && weaponSlot->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
-        showWeapons(true);
-    else
-    {
-        NifOgre::ObjectScenePtr weapon = mObjectParts[ESM::PRT_Weapon];
-
-        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-        if (ammo == inv.end())
-            return;
-        std::string model = ammo->getClass().getModel(*ammo);
-
-        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, "ArrowBone", mInsert, model);
-        Ogre::Vector3 glowColor = getEnchantmentColor(*ammo);
-        setRenderProperties(mAmmunition, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
-                            !ammo->getClass().getEnchantment(*ammo).empty(), &glowColor);
-
-        std::for_each(mAmmunition->mEntities.begin(), mAmmunition->mEntities.end(), SetObjectGroup(MWWorld::InventoryStore::Slot_Ammunition));
-        std::for_each(mAmmunition->mParticles.begin(), mAmmunition->mParticles.end(), SetObjectGroup(MWWorld::InventoryStore::Slot_Ammunition));
-    }
+    WeaponAnimation::attachArrow(mPtr);
 }
 
 void NpcAnimation::releaseArrow()
 {
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weapon == inv.end())
-        return;
-
-    // The orientation of the launched projectile. Always the same as the actor orientation, even if the ArrowBone's orientation dictates otherwise.
-    Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(mPtr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
-            Ogre::Quaternion(Ogre::Radian(mPtr.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
-
-    const MWWorld::Store<ESM::GameSetting> &gmst =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
-    // Reduce fatigue
-    // somewhat of a guess, but using the weapon weight makes sense
-    const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
-    const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
-    const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
-    MWMechanics::CreatureStats& attackerStats = mPtr.getClass().getCreatureStats(mPtr);
-    MWMechanics::DynamicStat<float> fatigue = attackerStats.getFatigue();
-    const float normalizedEncumbrance = mPtr.getClass().getEncumbrance(mPtr) / mPtr.getClass().getCapacity(mPtr);
-    float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-    if (!weapon->isEmpty())
-        fatigueLoss += weapon->getClass().getWeight(*weapon) * attackerStats.getAttackStrength() * fWeaponFatigueMult;
-    fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-    attackerStats.setFatigue(fatigue);
-
-    if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
-    {
-        // Thrown weapons get detached now
-        NifOgre::ObjectScenePtr objects = mObjectParts[ESM::PRT_Weapon];
-
-        Ogre::Vector3 launchPos(0,0,0);
-        if (objects->mSkelBase)
-        {
-            launchPos = objects->mSkelBase->getParentNode()->_getDerivedPosition();
-        }
-        else if (objects->mEntities.size())
-        {
-            objects->mEntities[0]->getParentNode()->needUpdate(true);
-            launchPos = objects->mEntities[0]->getParentNode()->_getDerivedPosition();
-        }
-
-        float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
-        float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
-        float speed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) *
-                mPtr.getClass().getCreatureStats(mPtr).getAttackStrength();
-
-        MWBase::Environment::get().getWorld()->launchProjectile(mPtr, *weapon, launchPos, orient, *weapon, speed);
-
-        showWeapons(false);
-
-        inv.remove(*weapon, 1, mPtr);
-    }
-    else
-    {
-        // With bows and crossbows only the used arrow/bolt gets detached
-        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-        if (ammo == inv.end())
-            return;
-
-        Ogre::Vector3 launchPos(0,0,0);
-        if (mAmmunition->mSkelBase)
-        {
-            launchPos = mAmmunition->mSkelBase->getParentNode()->_getDerivedPosition();
-        }
-        else if (mAmmunition->mEntities.size())
-        {
-            mAmmunition->mEntities[0]->getParentNode()->needUpdate(true);
-            launchPos = mAmmunition->mEntities[0]->getParentNode()->_getDerivedPosition();
-        }
-
-        float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
-        float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
-        float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * mPtr.getClass().getCreatureStats(mPtr).getAttackStrength();
-
-        MWBase::Environment::get().getWorld()->launchProjectile(mPtr, *ammo, launchPos, orient, *weapon, speed);
-
-        inv.remove(*ammo, 1, mPtr);
-        mAmmunition.setNull();
-    }
+    WeaponAnimation::releaseArrow(mPtr);
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)

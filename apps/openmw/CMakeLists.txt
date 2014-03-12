@@ -15,7 +15,7 @@ add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
     characterpreview globalmap videoplayer ripplesimulation refraction
-    terrainstorage renderconst effectmanager
+    terrainstorage renderconst effectmanager weaponanimation
     )
 
 add_openmw_dir (mwinput
