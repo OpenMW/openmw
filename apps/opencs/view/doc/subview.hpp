@@ -27,6 +27,8 @@ namespace CSVDoc
             // not implemented
             SubView (const SubView&);
             SubView& operator= (SubView&);
+        protected:
+            void setUniversalId(const CSMWorld::UniversalId& id);
 
         public:
 

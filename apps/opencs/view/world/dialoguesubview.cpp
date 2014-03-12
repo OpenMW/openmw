@@ -391,6 +391,8 @@ void CSVWorld::DialogueSubView::prevId()
     }
 
     mEditWidget->remake(newRow);
+    setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
+                                          mTable->data (mTable->index (newRow, 0)).toString().toStdString()));
     mRow = newRow;
 }
 
@@ -410,6 +412,8 @@ void CSVWorld::DialogueSubView::nextId()
     }
 
     mEditWidget->remake(newRow);
+    setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
+                                          mTable->data (mTable->index (newRow, 0)).toString().toStdString()));
     mRow = newRow;
 }
 
