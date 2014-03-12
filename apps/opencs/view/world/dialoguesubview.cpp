@@ -351,7 +351,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mMainLayout(NULL),
     mUndoStack(document.getUndoStack()),
     mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
-    mRow (-1)
+    mRow (-1),
+    mLocked(false)
 
 {
     mRow = mTable->getModelIndex (id.getId(), 0).row();
@@ -373,6 +374,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mEditWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     setWidget(mainWidget);
+    mEditWidget->setDisabled(mLocked);
 }
 
 void CSVWorld::DialogueSubView::prevId()
@@ -389,6 +391,7 @@ void CSVWorld::DialogueSubView::prevId()
     setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
                                           mTable->data (mTable->index (newRow, 0)).toString().toStdString()));
     mRow = newRow;
+    mEditWidget->setDisabled(mLocked);
 }
 
 void CSVWorld::DialogueSubView::nextId()
@@ -405,9 +408,11 @@ void CSVWorld::DialogueSubView::nextId()
     setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
                                           mTable->data (mTable->index (newRow, 0)).toString().toStdString()));
     mRow = newRow;
+    mEditWidget->setDisabled(mLocked);
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
 {
-
+    mLocked = locked;
+    mEditWidget->setDisabled(mLocked);
 }

@@ -145,6 +145,7 @@ namespace CSVWorld
         CSMWorld::IdTable* mTable;
         QUndoStack& mUndoStack;
         int mRow;
+        bool mLocked;
 
         public:
 
