@@ -18,6 +18,7 @@
 #include <QPlainTextEdit>
 #include <QComboBox>
 #include <QScrollArea>
+#include <QPushButton>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
@@ -317,7 +318,7 @@ void CSVWorld::EditWidget::remake(const CSMWorld::UniversalId& id)
             {
                 mWidgetMapper->addMapping (editor, i);
                 QLabel* label = new QLabel(mTable->headerData (i, Qt::Horizontal).toString(), mMainWidget);
-                label->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+                label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
                 editor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
                 if (! (mTable->flags (mTable->index (0, i)) & Qt::ItemIsEditable))
                 {
@@ -351,9 +352,22 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     SubView (id)
 
 {
-    EditWidget* widget = new EditWidget(this, id, document, false);
+    QWidget *mainWidget = new QWidget(this);
 
-    setWidget (widget);
+    QHBoxLayout *buttonsLayout = new QHBoxLayout;
+    QPushButton* mPrevButton = new QPushButton(tr("Previous"));
+    QPushButton* mNextButton = new QPushButton(tr("Next"));
+    buttonsLayout->addWidget(mPrevButton);
+    buttonsLayout->addWidget(mNextButton);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(mainWidget);
+
+    EditWidget* editWidget = new EditWidget(mainWidget, id, document, false);
+    mainLayout->addLayout(buttonsLayout);
+    mainLayout->addWidget(editWidget);
+    editWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    setWidget(mainWidget);
+
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
