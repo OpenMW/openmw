@@ -377,11 +377,6 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
 void CSVWorld::DialogueSubView::prevId()
 {
-    if (mRow < 1)
-    {
-        return;
-    }
-
     int newRow = mRow - 1;
     QModelIndex newIndex(mTable->index(newRow, 0));
 
@@ -398,11 +393,6 @@ void CSVWorld::DialogueSubView::prevId()
 
 void CSVWorld::DialogueSubView::nextId()
 {
-    if (mRow == -1)
-    {
-        return;
-    }
-
     int newRow = mRow + 1;
     QModelIndex newIndex(mTable->index(newRow, 0));
 
