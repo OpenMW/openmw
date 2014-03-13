@@ -254,6 +254,8 @@ void CSVWorld::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
 
 void CSVWorld::DropLineEdit::dropEvent(QDropEvent *event)
 {
-    emit tableMimeDataDropped(dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->getData());
+    const CSMWorld::TableMimeData* data(dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData()));
+    emit tableMimeDataDropped(data->getData(), data->getDocumentPtr());
+    emit editingFinished ();
     //WIP
 }

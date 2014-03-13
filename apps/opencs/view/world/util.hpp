@@ -8,6 +8,7 @@
 #include <QLineEdit>
 
 #include "../../model/world/columnbase.hpp"
+#include "../../model/doc/document.hpp"
 
 class QUndoStack;
 
@@ -101,7 +102,7 @@ namespace CSVWorld
             void dropEvent(QDropEvent *event);
 
         signals:
-            void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data);
+            void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document);
     };
 
     ///< \brief Use commands instead of manipulating the model directly

@@ -77,10 +77,15 @@ namespace CSVWorld
     public slots:
         void editorDataCommited();
         void setIndex(const QModelIndex& index);
-        void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data);
+        void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document);
 
     signals:
         void editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display);
+
+        void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
+                                  const CSMWorld::UniversalId& id,
+                                  const CSMDoc::Document* document);
+
     };
 
     class DialogueDelegateDispatcher : public QAbstractItemDelegate
@@ -121,10 +126,17 @@ namespace CSVWorld
     private slots:
         void editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display);
 
+    signals:
+        void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
+                                  const CSMWorld::UniversalId& id,
+                                  const CSMDoc::Document* document);
+
+
     };
 
     class EditWidget : public QScrollArea
     {
+        Q_OBJECT
             QDataWidgetMapper *mWidgetMapper;
             DialogueDelegateDispatcher mDispatcher;
             QWidget* mMainWidget;
@@ -136,6 +148,11 @@ namespace CSVWorld
             EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table, QUndoStack& undoStack, bool createAndDelete = false);
 
             void remake(int row);
+
+        signals:
+            void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
+                                      const CSMWorld::UniversalId& id,
+                                      const CSMDoc::Document* document);
     };
 
     class DialogueSubView : public CSVDoc::SubView
@@ -148,6 +165,7 @@ namespace CSVWorld
         QUndoStack& mUndoStack;
         int mRow;
         bool mLocked;
+        const CSMDoc::Document& mDocument;
 
         public:
 
@@ -163,6 +181,10 @@ namespace CSVWorld
 
             void dataChanged();
             ///\brief we need to care for deleting currently edited record
+
+            void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
+                                      const CSMWorld::UniversalId& id,
+                                      const CSMDoc::Document* document);
     };
 }
 
