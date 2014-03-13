@@ -508,20 +508,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
-
-        Qt::DropActions action = Qt::IgnoreAction;
-        switch (QApplication::keyboardModifiers())
-        {
-            case Qt::ControlModifier:
-                action = Qt::CopyAction;
-                break;
-
-            case Qt::ShiftModifier:
-                action = Qt::MoveAction;
-                break;
-        }
-
-        drag->exec(action);
+        drag->exec(Qt::CopyAction);
     }
 
 }
