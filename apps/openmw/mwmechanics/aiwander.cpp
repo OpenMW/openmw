@@ -27,7 +27,7 @@ namespace
 
 namespace MWMechanics
 {
-    // NOTE: determined empherically but probably need further tweaking
+    // NOTE: determined empirically but probably need further tweaking
     static const int COUNT_BEFORE_STUCK = 20;
     static const int COUNT_BEFORE_RESET = 200;
     static const int COUNT_EVADE = 7;
@@ -338,7 +338,7 @@ namespace MWMechanics
                         }
                         else
                         {
-                            // consider stuck only if position unchanges consequitively
+                            // consider stuck only if position unchanges consecutively
                             if((mStuckCount++ % COUNT_BEFORE_STUCK) == 0)
                                 mWalkState = State_Evade;
                                 // NOTE: mStuckCount is purposely not cleared here
