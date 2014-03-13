@@ -179,7 +179,7 @@ namespace CSVWorld
 
             void prevId();
 
-            void dataChanged();
+            void dataChanged(const QModelIndex & index);
             ///\brief we need to care for deleting currently edited record
 
             void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,

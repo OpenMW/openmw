@@ -363,7 +363,7 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    this->setMinimumWidth(300);
+    this->setMinimumWidth(325); //TODO find better way to set the width
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }
@@ -385,7 +385,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mDocument(document)
 
 {
-    connect(mTable, SIGNAL(dataChanged ( const QModelIndex &, const QModelIndex &)), this, SLOT(dataChanged()));
+    connect(mTable, SIGNAL(dataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT(dataChanged(const QModelIndex&)));
     mRow = mTable->getModelIndex (id.getId(), 0).row();
     QWidget *mainWidget = new QWidget(this);
 
@@ -403,14 +403,12 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)), 
             this, SLOT(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 
-
     mMainLayout->addLayout(buttonsLayout);
     mMainLayout->addWidget(mEditWidget);
     mEditWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
+    dataChanged(mTable->index(mRow, 0));
     setWidget(mainWidget);
-
-    dataChanged();
 }
 
 void CSVWorld::DialogueSubView::prevId()
@@ -478,11 +476,6 @@ void CSVWorld::DialogueSubView::nextId()
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
 {
     mLocked = locked;
-    mEditWidget->setDisabled(mLocked);
-}
-
-void CSVWorld::DialogueSubView::dataChanged()
-{
     CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
     if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
     {
@@ -490,6 +483,21 @@ void CSVWorld::DialogueSubView::dataChanged()
     } else
     {
         mEditWidget->setDisabled(mLocked);
+    }
+}
+
+void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
+{
+    if (index.row() == mRow)
+    {
+        CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
+        if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
+        {
+            mEditWidget->setDisabled(true);
+        } else
+        {
+            mEditWidget->setDisabled(mLocked);
+        }
     }
 }
 
