@@ -125,6 +125,7 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
                 if (lineEdit && mIndexWrapper.get())
                 {
                     emit tableMimeDataDropped(mEditor, mIndexWrapper->mIndex, data[i], document);
+                    emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
                     break;
                 }
         }
