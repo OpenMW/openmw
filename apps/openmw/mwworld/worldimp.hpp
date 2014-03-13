@@ -120,6 +120,9 @@ namespace MWWorld
 
             std::map<MWWorld::Ptr, MagicBoltState> mMagicBolts;
             std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
+
+            std::string mStartCell;
+
             void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
 
@@ -179,11 +182,13 @@ namespace MWWorld
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
-                ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
+                ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
+                int activationDistanceOverride, const std::string& startCell);
 
             virtual ~World();
 
-            virtual void startNewGame();
+            virtual void startNewGame (bool bypass);
+            ///< \param bypass Bypass regular game start.
 
             virtual void clear();
 
