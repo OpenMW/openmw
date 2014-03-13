@@ -44,6 +44,9 @@ namespace MWMechanics
             float mYCell;
 
             // for checking if we're stuck (but don't check Z axis)
+            float mPrevX;
+            float mPrevY;
+
             enum WalkState
             {
                 State_Norm,
@@ -52,8 +55,6 @@ namespace MWMechanics
             };
             WalkState mWalkState;
 
-            float mPrevX;
-            float mPrevY;
             int mStuckCount;
             int mEvadeCount;
 
