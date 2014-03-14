@@ -391,8 +391,8 @@ namespace MWMechanics
 
                 // update position
                 ESM::Position updatedPos = actor.getRefData().getPosition();
-                mPrevX = pos.pos[0];
-                mPrevY = pos.pos[1];
+                mPrevX = updatedPos.pos[0];
+                mPrevY = updatedPos.pos[1];
             }
         }
 
