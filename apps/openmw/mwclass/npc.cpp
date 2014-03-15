@@ -673,12 +673,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(object.isEmpty())
-            {
-                if(ishealth)
-                    damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
-            }
-            else if(ishealth)
+            if(ishealth)
             {
                 // Hit percentages:
                 // cuirass = 30%
