@@ -1073,7 +1073,7 @@ float RenderingManager::getCameraDistance() const
 
 void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition, float scale)
 {
-    mEffectManager->addEffect(model, "", worldPosition, scale);
+    mEffectManager->addEffect(model, texture, worldPosition, scale);
 }
 
 } // namespace
