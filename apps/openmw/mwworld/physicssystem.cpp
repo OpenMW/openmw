@@ -129,8 +129,7 @@ namespace MWWorld
             /* Anything to collide with? */
             btCollisionObject *colobj = physicActor->getCollisionBody();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
-            Ogre::Vector3 newPosition = position; // FIXME: not sure if a copy is needed
-            newPosition.z += halfExtents.z; // NOTE: remember to restore before returning
+            Ogre::Vector3 newPosition = position + halfExtents.z; // NOTE: remember to restore before returning
             float actorWaterlevel = waterlevel - halfExtents.z * 0.5;
 
             /*
@@ -186,7 +185,7 @@ namespace MWWorld
                 {
                     wasOnGround = physicActor->getOnGround();
                     // TODO: Find out if there is a significance with the value 2 used here
-                    tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine);
+                    tracer.doTrace(colobj, newPosition, newPosition - Ogre::Vector3(0,0,2), engine);
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                         isOnGround = true;
                 }
@@ -211,6 +210,7 @@ namespace MWWorld
                 // If not able to fly, walk or bipedal don't allow to move out of water
                 // FIXME: this if condition may not work for large creatures or situations
                 //        where the creature gets above the waterline for some reason
+                //        Therefore starting under water is commented out below.
                 if(//(newPosition.z + halfExtents.z) <= waterlevel && // started fully under water
                    !isFlying &&  // can't fly
                    !canWalk &&   // can't walk
@@ -269,7 +269,7 @@ namespace MWWorld
                     isOnGround = false;
             }
 
-            if(isOnGround || ((newPosition.z) < actorWaterlevel) || isFlying)
+            if(isOnGround || (newPosition.z < actorWaterlevel) || isFlying)
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
