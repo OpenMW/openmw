@@ -1649,7 +1649,7 @@ namespace MWWorld
         if (ptr.getClass().getCreatureStats(ptr).isDead())
             return false;
 
-        if (ptr.getClass().isFlying(ptr))
+        if (ptr.getClass().canFly(ptr))
             return true;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);

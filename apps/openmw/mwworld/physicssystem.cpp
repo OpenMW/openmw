@@ -116,8 +116,9 @@ namespace MWWorld
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
 
-            /* Anything to collide with? */
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
+
+            // If no need to check for collision simply return the new position.
             if(!physicActor || !physicActor->getCollisionMode())
             {
                 return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -125,36 +126,67 @@ namespace MWWorld
                                 * movement * time;
             }
 
+            /* Anything to collide with? */
             btCollisionObject *colobj = physicActor->getCollisionBody();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
-            position.z += halfExtents.z;
+            Ogre::Vector3 newPosition = position; // FIXME: not sure if a copy is needed
+            newPosition.z += halfExtents.z; // NOTE: remember to restore before returning
+            float actorWaterlevel = waterlevel - halfExtents.z * 0.5;
 
-            waterlevel -= halfExtents.z * 0.5;
+            /*
+             * A 3/4 submerged example
+             *
+             *  +---+
+             *  |   |
+             *  |   |                     <- waterlevel
+             *  |   |
+             *  |   |  <- newPosition     <- actorWaterlevel
+             *  |   |
+             *  |   |
+             *  |   |
+             *  +---+  <- position
+             */
 
             OEngine::Physic::ActorTracer tracer;
             bool wasOnGround = false;
             bool isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
-            if(position.z < waterlevel || isFlying)
+
+            bool canWalk = ptr.getClass().canWalk(ptr);
+            bool isBipedal = ptr.getClass().isBipedal(ptr);
+            bool isNpc = ptr.getClass().isNpc();
+
+            //if(!canWalk && !isBipedal && !isNpc && (position.z  >= waterlevel))
+            //{
+                //std::cout << "Swim Creature \""<<ptr.getClass().getName(ptr)<<"\""
+                   //<< " above waterline, z pos = "<<std::to_string(position.z ) << std::endl; 
+            //}
+
+            // FIXME: Choose one
+            //if((position.z < waterlevel) || isFlying) // under water by any amount or can fly
+            if((newPosition.z < actorWaterlevel) || isFlying) // 3/4 under water or can fly
             {
+                // TODO: Shouldn't water have higher drag in calculating velocity?
                 velocity = (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian(refpos.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)) * movement;
             }
             else
             {
-                velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) * movement;
+                velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z)* movement;
+                // not in water nor can fly, so need to deal with gravity
                 if(!physicActor->getOnGround())
                 {
                     // If falling, add part of the incoming velocity with the current inertia
-                    velocity = velocity*time + physicActor->getInertialForce();
+                    velocity = velocity * time + physicActor->getInertialForce();
                 }
-                inertia = velocity;
+                inertia = velocity; // REM velocity is for z axis only in this code block
 
                 if(!(movement.z > 0.0f))
                 {
                     wasOnGround = physicActor->getOnGround();
-                    tracer.doTrace(colobj, position, position-Ogre::Vector3(0,0,2), engine);
+                    // TODO: Find out if there is a significance with the value 2 used here
+                    tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine);
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                         isOnGround = true;
                 }
@@ -163,24 +195,36 @@ namespace MWWorld
             if(isOnGround)
             {
                 // if we're on the ground, don't try to fall
-                velocity.z = std::max(0.0f, velocity.z);
+                velocity.z = std::max(0.0f, velocity.z); // NOTE: two different velocity assignments above
             }
 
-            Ogre::Vector3 newPosition = position;
+            /*
+             * A loop to find newPosition using tracer, if successful different from the starting position.
+             * nextpos is the local variable used to find potential newPosition, using velocity and remainingTime
+             * The initial velocity was set earlier (see above).
+             */
             float remainingTime = time;
-            for(int iterations = 0;iterations < sMaxIterations && remainingTime > 0.01f;++iterations)
+            for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
             {
-                Ogre::Vector3 nextpos = newPosition + velocity*remainingTime;
+                Ogre::Vector3 nextpos = newPosition + velocity * remainingTime;
 
-                if(newPosition.z < waterlevel && !isFlying &&
-                   nextpos.z > waterlevel && newPosition.z <= waterlevel)
+                // If not able to fly, walk or bipedal don't allow to move out of water
+                // FIXME: this if condition may not work for large creatures or situations
+                //        where the creature gets above the waterline for some reason
+                if(//(newPosition.z + halfExtents.z) <= waterlevel && // started fully under water
+                   !isFlying &&  // can't fly
+                   !canWalk &&   // can't walk
+                   !isBipedal && // not bipedal (assume bipedals can walk)
+                   !isNpc &&     // FIXME: shouldn't really need this
+                   ((nextpos.z + halfExtents.z) > waterlevel)) // but about to go above water
                 {
                     const Ogre::Vector3 down(0,0,-1);
                     Ogre::Real movelen = velocity.normalise();
                     Ogre::Vector3 reflectdir = velocity.reflect(down);
                     reflectdir.normalise();
                     velocity = slide(reflectdir, down)*movelen;
-                    continue;
+                    // FIXME: remainingTime is unchanged before the loop continues
+                    continue; // velocity updated, calculate nextpos again
                 }
 
                 // trace to where character would go if there were no obstructions
@@ -189,14 +233,15 @@ namespace MWWorld
                 // check for obstructions
                 if(tracer.mFraction >= 1.0f)
                 {
-                    newPosition = tracer.mEndPos;
-                    remainingTime *= (1.0f-tracer.mFraction);
+                    newPosition = tracer.mEndPos; // ok to move, so set newPosition
+                    remainingTime *= (1.0f-tracer.mFraction); // TODO: remainingTime is no longer used so don't set it?
                     break;
                 }
 
                 // We hit something. Try to step up onto it.
-                if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
-                    isOnGround = !(newPosition.z < waterlevel || isFlying); // Only on the ground if there's gravity
+                // NOTE: May need to stop slaughterfish step out  of the water.
+                if((canWalk || isBipedal || isNpc) && stepMove(colobj, newPosition, velocity, remainingTime, engine))
+                    isOnGround = !((newPosition.z < actorWaterlevel) || isFlying); // Only on the ground if there's gravity
                 else
                 {
                     // Can't move this way, try to find another spot along the plane
@@ -207,14 +252,14 @@ namespace MWWorld
 
                     // Do not allow sliding upward if there is gravity. Stepping will have taken
                     // care of that.
-                    if(!(newPosition.z < waterlevel || isFlying))
+                    if(!(newPosition.z < actorWaterlevel) || isFlying)
                         velocity.z = std::min(velocity.z, 0.0f);
                 }
             }
 
             if(isOnGround || wasOnGround)
             {
-                tracer.doTrace(colobj, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+2.0f), engine);
+                tracer.doTrace(colobj, newPosition, newPosition - Ogre::Vector3(0,0,sStepSize+2.0f), engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                 {
                     newPosition.z = tracer.mEndPos.z + 1.0f;
@@ -224,7 +269,7 @@ namespace MWWorld
                     isOnGround = false;
             }
 
-            if(isOnGround || newPosition.z < waterlevel || isFlying)
+            if(isOnGround || ((newPosition.z) < actorWaterlevel) || isFlying)
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
@@ -236,7 +281,7 @@ namespace MWWorld
             }
             physicActor->setOnGround(isOnGround);
 
-            newPosition.z -= halfExtents.z;
+            newPosition.z -= halfExtents.z; // remove what was added at the beggining
             return newPosition;
         }
     };
@@ -574,7 +619,7 @@ namespace MWWorld
             {
                 float waterlevel = -std::numeric_limits<float>::max();
                 const ESM::Cell *cell = iter->first.getCell()->getCell();
-                if(cell->hasWater())
+                if(cell->hasWater()) // should also check cell->mHasWaterLevelRecord
                     waterlevel = cell->mWater;
 
                 float oldHeight = iter->first.getRefData().getPosition().pos[2];
