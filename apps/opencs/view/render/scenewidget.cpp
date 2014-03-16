@@ -45,7 +45,7 @@ namespace CSVRender
 
         mCamera = mSceneMgr->createCamera("foo");
 
-        mCamera->setPosition(300,300,300);
+        mCamera->setPosition(300,0,000);
         mCamera->lookAt(0,0,0);
         mCamera->setNearClipDistance(0.1);
         mCamera->setFarClipDistance(3000);
