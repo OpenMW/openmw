@@ -21,9 +21,13 @@ namespace CSVRender
             const CSMWorld::Data& mData;
             CSVRender::NavigationOrbit mOrbit;
             NifOgre::ObjectScenePtr mObject;
+            Ogre::SceneNode *mNode;
 
             void setup (const std::string& id);
             ///< \param id ID of the referenceable to be viewed
+
+            void adjust (const std::string& id);
+            ///< \param id ID of the reference to be viewed
 
         public:
 

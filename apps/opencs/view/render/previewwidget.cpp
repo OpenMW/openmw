@@ -23,15 +23,42 @@ void CSVRender::PreviewWidget::setup (const std::string& id)
     if (model.empty())
         return;
 
-    Ogre::SceneNode* node = getSceneManager()->getRootSceneNode()->createChildSceneNode();
-    node->setPosition (Ogre::Vector3 (0, 0, 0));
+    mNode = getSceneManager()->getRootSceneNode()->createChildSceneNode();
+    mNode->setPosition (Ogre::Vector3 (0, 0, 0));
 
-    mObject = NifOgre::Loader::createObjects (node, "Meshes\\" + model);
+    mObject = NifOgre::Loader::createObjects (mNode, "Meshes\\" + model);
+}
+
+void CSVRender::PreviewWidget::adjust (const std::string& id)
+{
+    if (mNode)
+    {
+        int row = mData.getReferences().getIndex (id);
+
+        float scale = mData.getReferences().getData (row, mData.getReferences().
+            findColumnIndex (CSMWorld::Columns::ColumnId_Scale)).toFloat();
+        float rotX = mData.getReferences().getData (row, mData.getReferences().
+            findColumnIndex (CSMWorld::Columns::ColumnId_PositionXRot)).toFloat();
+        float rotY = mData.getReferences().getData (row, mData.getReferences().
+            findColumnIndex (CSMWorld::Columns::ColumnId_PositionYRot)).toFloat();
+        float rotZ = mData.getReferences().getData (row, mData.getReferences().
+            findColumnIndex (CSMWorld::Columns::ColumnId_PositionZRot)).toFloat();
+
+        mNode->setScale (scale, scale, scale);
+
+        Ogre::Quaternion xr (Ogre::Radian(-rotX), Ogre::Vector3::UNIT_X);
+
+        Ogre::Quaternion yr (Ogre::Radian(-rotY), Ogre::Vector3::UNIT_Y);
+
+        Ogre::Quaternion zr (Ogre::Radian(-rotZ), Ogre::Vector3::UNIT_Z);
+
+        mNode->setOrientation (xr*yr*zr);
+    }
 }
 
 CSVRender::PreviewWidget::PreviewWidget (const CSMWorld::Data& data,
     const std::string& referenceableId, QWidget *parent)
-: SceneWidget (parent), mData (data)
+: SceneWidget (parent), mData (data), mNode (0)
 {
     setup (referenceableId);
 }
@@ -41,5 +68,5 @@ CSVRender::PreviewWidget::PreviewWidget (const CSMWorld::Data& data,
 : SceneWidget (parent), mData (data)
 {
     setup (referenceableId);
-    /// \todo apply reference modifications (scale, rotation)
+    adjust (referenceId);
 }
