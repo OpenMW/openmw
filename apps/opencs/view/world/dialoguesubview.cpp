@@ -117,17 +117,20 @@ QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const
 
 void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document)
 {
+    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(mEditor);
+    {
+      if (!lineEdit or !mIndexWrapper.get())
+      {
+	return;
+      }
+    }
     for (unsigned i = 0; i < data.size();  ++i)
     {
         if (mDisplay == CSMWorld::TableMimeData::convertEnums(data[i].getType()))
         {
-                QLineEdit* lineEdit = qobject_cast<QLineEdit*>(mEditor);
-                if (lineEdit && mIndexWrapper.get())
-                {
-                    emit tableMimeDataDropped(mEditor, mIndexWrapper->mIndex, data[i], document);
-                    emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
-                    break;
-                }
+	    emit tableMimeDataDropped(mEditor, mIndexWrapper->mIndex, data[i], document);
+	    emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+	    break;
         }
     }
 }
