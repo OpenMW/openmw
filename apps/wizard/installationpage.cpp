@@ -148,13 +148,18 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
         break;
     }
 
-    QString fileName = QFileDialog::getOpenFileName(
-                    this,
-                    tr("Select %1 installation file").arg(name),
-                    QDir::rootPath(),
-                    tr("InstallShield header files (*.hdr)"));
+//    QString fileName = QFileDialog::getOpenFileName(
+//                    this,
+//                    tr("Select %1 installation file").arg(name),
+//                    QDir::rootPath(),
+//                    tr("InstallShield header files (*.hdr)"));
 
-    if (fileName.isEmpty()) {
+
+    QString path = QFileDialog::getExistingDirectory(this,
+                                                     tr("Select %1 installation media").arg(name),
+                                                     QDir::rootPath());
+
+    if (path.isEmpty()) {
         qDebug() << "Cancel was clicked!";
 
         logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
@@ -164,8 +169,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
         return;
     }
 
-    QFileInfo info(fileName);
-    mUnshield->setComponentPath(component, info.absolutePath());
+    mUnshield->setDiskPath(path);
 }
 
 void Wizard::InstallationPage::installationFinished()

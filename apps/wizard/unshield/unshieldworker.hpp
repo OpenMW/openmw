@@ -31,7 +31,8 @@ namespace Wizard
 
         void setInstallComponent(Wizard::Component component, bool install);
 
-        void setComponentPath(Wizard::Component component, const QString &path);
+//        void setComponentPath(Wizard::Component component, const QString &path);
+        void setDiskPath(const QString &path);
 
         void setPath(const QString &path);
         void setIniPath(const QString &path);
@@ -49,7 +50,8 @@ namespace Wizard
 
         bool getInstallComponent(Component component);
 
-        QString getComponentPath(Component component);
+        //QString getComponentPath(Component component);
+        QString getDiskPath();
 
         void setComponentDone(Component component, bool done = true);
         bool getComponentDone(Component component);
@@ -66,18 +68,14 @@ namespace Wizard
         bool extractFile(Unshield *unshield, const QString &destination, const QString &prefix, int index, int counter);
         bool findInCab(const QString &cabFile, const QString &fileName);
 
-        QString findFile(const QString &fileName, const QString &path);
-        QStringList findFiles(const QString &fileName, const QString &path);
+        QString findFile(const QString &fileName, const QString &path, int depth = 0);
+        QStringList findFiles(const QString &fileName, const QString &path, int depth = 0);
 
         bool installFile(const QString &fileName, const QString &path);
         bool installDirectory(const QString &dirName, const QString &path, bool recursive = true);
 
-        bool installMorrowind();
-        bool installTribunal();
-        bool installBloodmoon();
-
-        bool installComponent(Component component);
-        void setupAddon(Component component);
+        bool installComponent(Component component, const QString &path);
+        bool setupComponent(Component component);
 
         bool mInstallMorrowind;
         bool mInstallTribunal;
@@ -87,12 +85,9 @@ namespace Wizard
         bool mTribunalDone;
         bool mBloodmoonDone;
 
-        QString mMorrowindPath;
-        QString mTribunalPath;
-        QString mBloodmoonPath;
-
         QString mPath;
         QString mIniPath;
+        QString mDiskPath;
 
         IniSettings mIniSettings;
 
