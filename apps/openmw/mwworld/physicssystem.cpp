@@ -619,7 +619,7 @@ namespace MWWorld
             {
                 float waterlevel = -std::numeric_limits<float>::max();
                 const ESM::Cell *cell = iter->first.getCell()->getCell();
-                if(cell->hasWater()) // should also check cell->mHasWaterLevelRecord
+                if(cell->hasWater())
                     waterlevel = cell->mWater;
 
                 float oldHeight = iter->first.getRefData().getPosition().pos[2];
