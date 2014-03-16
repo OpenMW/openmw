@@ -20,7 +20,7 @@ namespace CSVRender
 
             const CSMWorld::Data& mData;
             CSVRender::NavigationOrbit mOrbit;
-             NifOgre::ObjectScenePtr mObject;
+            NifOgre::ObjectScenePtr mObject;
 
             void setup (const std::string& id);
             ///< \param id ID of the referenceable to be viewed

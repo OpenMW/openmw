@@ -21,6 +21,8 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
         std::string referenceableId =
             document.getData().getReferences().getRecord (id.getId()).get().mRefID;
 
+        setWindowTitle (("Preview: Reference to " + referenceableId).c_str());
+
         mScene =
             new CSVRender::PreviewWidget (document.getData(), referenceableId, id.getId(), this);
     }
