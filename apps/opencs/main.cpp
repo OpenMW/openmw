@@ -7,6 +7,8 @@
 #include <QApplication>
 #include <QIcon>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include <components/ogreinit/ogreinit.hpp>
 
 #ifdef Q_OS_MAC
@@ -42,6 +44,8 @@ int main(int argc, char *argv[])
 
     OgreInit::OgreInit ogreInit;
 
+    std::auto_ptr<sh::Factory> shinyFactory;
+
     Application application (argc, argv);
 
 #ifdef Q_OS_MAC
@@ -72,6 +76,8 @@ int main(int argc, char *argv[])
         editor.connectToIPCServer();
        // return 0;
     }
+
+    shinyFactory = editor.setupGraphics();
 
     return editor.run();
 }

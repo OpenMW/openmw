@@ -16,6 +16,7 @@
 #include "scenesubview.hpp"
 #include "dialoguecreator.hpp"
 #include "infocreator.hpp"
+#include "previewsubview.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -78,4 +79,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CreatorFactory<CSVFilter::FilterCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
+
+    manager.add (CSMWorld::UniversalId::Type_Preview, new CSVDoc::SubViewFactory<PreviewSubView>);
 }
