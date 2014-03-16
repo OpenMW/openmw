@@ -111,7 +111,7 @@ void BSAFile::readHeader()
         fail("Directory information larger than entire archive");
 
     // Read the offset info into a temporary buffer
-    vector<uint32_t> offsets(3*filenum);
+    std::vector<uint32_t> offsets(3*filenum);
     input.read(reinterpret_cast<char*>(&offsets[0]), 12*filenum);
 
     // Read the string table

@@ -15,16 +15,6 @@
 #include "steering.hpp"
 #include "movement.hpp"
 
-namespace
-{
-    float sgn(float a)
-    {
-        if(a > 0)
-            return 1.0;
-        return -1.0;
-    }
-}
-
 namespace MWMechanics
 {
     // NOTE: determined empirically but probably need further tweaking

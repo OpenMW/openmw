@@ -28,16 +28,16 @@
 
 namespace
 {
-    struct CustomData : public MWWorld::CustomData
+    struct ContainerCustomData : public MWWorld::CustomData
     {
         MWWorld::ContainerStore mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
     };
 
-    MWWorld::CustomData *CustomData::clone() const
+    MWWorld::CustomData *ContainerCustomData::clone() const
     {
-        return new CustomData (*this);
+        return new ContainerCustomData (*this);
     }
 }
 
@@ -47,7 +47,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CustomData> data (new CustomData);
+            std::auto_ptr<ContainerCustomData> data (new ContainerCustomData);
 
             MWWorld::LiveCellRef<ESM::Container> *ref =
                 ptr.get<ESM::Container>();
@@ -174,7 +174,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     std::string Container::getScript (const MWWorld::Ptr& ptr) const
@@ -267,7 +267,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+        dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             readState (state2.mInventory);
     }
 
@@ -278,7 +278,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+        dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             writeState (state2.mInventory);
     }
 }

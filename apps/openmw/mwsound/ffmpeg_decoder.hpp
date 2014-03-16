@@ -61,6 +61,8 @@ namespace MWSound
         virtual void rewind();
         virtual size_t getSampleOffset();
 
+        void fail(const std::string &msg);
+
         FFmpeg_Decoder& operator=(const FFmpeg_Decoder &rhs);
         FFmpeg_Decoder(const FFmpeg_Decoder &rhs);
 

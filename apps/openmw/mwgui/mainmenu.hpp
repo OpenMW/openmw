@@ -1,3 +1,6 @@
+#ifndef OPENMW_GAME_MWGUI_MAINMENU_H
+#define OPENMW_GAME_MWGUI_MAINMENU_H
+
 #include <openengine/gui/layout.hpp>
 
 #include "imagebutton.hpp"
@@ -36,3 +39,5 @@ namespace MWGui
     };
 
 }
+
+#endif
