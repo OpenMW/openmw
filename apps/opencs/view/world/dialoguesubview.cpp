@@ -306,6 +306,7 @@ void CSVWorld::EditWidget::remake(int row)
     }
     mMainWidget = new QWidget (this);
 
+    //not sure if widget mapper can handle deleting the widgets that were mapped
     if (mWidgetMapper)
     {
         delete mWidgetMapper;
