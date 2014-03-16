@@ -62,11 +62,15 @@ namespace Wizard
         bool moveFile(const QString &source, const QString &destination);
         bool moveDirectory(const QString &source, const QString &destination);
 
-        bool extractCab(const QString &cabFile, const QString &outputDir);
-        bool extractFile(Unshield *unshield, const QString &outputDir, const QString &prefix, int index, int counter);
-        bool findFile(const QString &cabFile, const QString &fileName);
+        bool extractCab(const QString &cabFile, const QString &destination);
+        bool extractFile(Unshield *unshield, const QString &destination, const QString &prefix, int index, int counter);
+        bool findInCab(const QString &cabFile, const QString &fileName);
 
-        void installDirectories(const QString &source);
+        QString findFile(const QString &fileName, const QString &path);
+        QStringList findFiles(const QString &fileName, const QString &path);
+
+        bool installFile(const QString &fileName, const QString &path);
+        bool installDirectory(const QString &dirName, const QString &path, bool recursive = true);
 
         bool installMorrowind();
         bool installTribunal();

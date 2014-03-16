@@ -66,7 +66,7 @@ bool Wizard::IniSettings::readFile(QTextStream &stream)
             if (!currentSection.isEmpty())
                 key = currentSection + QLatin1Char('/') + key;
 
-            qDebug() << "adding: " << key << value;
+            //qDebug() << "adding: " << key << value;
             mSettings[key] = QVariant(value);
         }
     }

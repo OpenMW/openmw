@@ -224,6 +224,19 @@ void Wizard::MainWizard::accept()
     QWizard::accept();
 }
 
+void Wizard::MainWizard::reject()
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Quit Wizard"));
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setText(tr("Are you sure you want to exit the Wizard?"));
+
+    if (msgBox.exec() == QMessageBox::Yes) {
+        QWizard::reject();
+    }
+}
+
 void Wizard::MainWizard::writeSettings()
 {
     QString path(field(QLatin1String("installation.path")).toString());

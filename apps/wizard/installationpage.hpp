@@ -42,7 +42,6 @@ namespace Wizard
     protected:
         void initializePage();
 
-
     };
 
 }

@@ -61,7 +61,6 @@ void Wizard::ExistingInstallationPage::textChanged(const QString &text)
 
 void Wizard::ExistingInstallationPage::initializePage()
 {
-
     QStringList paths(mWizard->mInstallations.keys());
 
     if (paths.isEmpty())

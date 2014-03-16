@@ -44,6 +44,8 @@ void Wizard::InstallationPage::initializePage()
             installProgressBar->setMaximum(installProgressBar->maximum() + 100);
     }
 
+    // Handle when cancel is clicked
+
     startInstallation();
 }
 
