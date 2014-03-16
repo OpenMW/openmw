@@ -48,7 +48,7 @@ namespace CSVRender
         mCamera->setPosition(300,0,000);
         mCamera->lookAt(0,0,0);
         mCamera->setNearClipDistance(0.1);
-        mCamera->setFarClipDistance(3000);
+        mCamera->setFarClipDistance(30000);
 
         QTimer *timer = new QTimer (this);
 
