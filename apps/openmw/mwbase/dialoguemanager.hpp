@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 namespace ESM
 {

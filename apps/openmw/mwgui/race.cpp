@@ -41,9 +41,13 @@ namespace MWGui
         getWidget(mPreviewImage, "PreviewImage");
 
         getWidget(mHeadRotate, "HeadRotate");
-        mHeadRotate->setScrollRange(50);
-        mHeadRotate->setScrollPosition(25);
-        mHeadRotate->setScrollViewPage(10);
+
+        // Mouse wheel step is hardcoded to 50 in MyGUI 3.2 ("FIXME").
+        // Give other steps the same value to accomodate.
+        mHeadRotate->setScrollRange(1000);
+        mHeadRotate->setScrollPosition(500);
+        mHeadRotate->setScrollViewPage(50);
+        mHeadRotate->setScrollPage(50);
         mHeadRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 
         // Set up next/previous buttons
@@ -171,9 +175,9 @@ namespace MWGui
         eventBack();
     }
 
-    void RaceDialog::onHeadRotate(MyGUI::ScrollBar*, size_t _position)
+    void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
-        float angle = (float(_position) / 49.f - 0.5) * 3.14 * 2;
+        float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5) * 3.14 * 2;
         float diff = angle - mCurrentAngle;
         mPreview->update (diff);
         mPreviewDirty = true;

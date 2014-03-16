@@ -9,6 +9,11 @@
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRenderWindow.h>
+#include <OgreTextureManager.h>
+#include <OgreTechnique.h>
+#include <OgreRectangle2D.h>
+#include <OgreMaterialManager.h>
+#include <OgreSceneNode.h>
 
 #include <boost/thread.hpp>
 

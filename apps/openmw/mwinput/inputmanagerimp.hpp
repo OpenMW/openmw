@@ -65,6 +65,9 @@ namespace MWInput
 
         virtual ~InputManager();
 
+        /// Clear all savegame-specific data
+        virtual void clear();
+
         virtual void update(float dt, bool loading);
 
         void setPlayer (MWWorld::Player* player) { mPlayer = player; }
@@ -86,13 +89,13 @@ namespace MWInput
         virtual void resetToDefaultBindings();
 
     public:
-        virtual bool keyPressed(const SDL_KeyboardEvent &arg );
-        virtual bool keyReleased( const SDL_KeyboardEvent &arg );
+        virtual void keyPressed(const SDL_KeyboardEvent &arg );
+        virtual void keyReleased( const SDL_KeyboardEvent &arg );
         virtual void textInput (const SDL_TextInputEvent &arg);
 
-        virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
-        virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
-        virtual bool mouseMoved( const SFO::MouseMotionEvent &arg );
+        virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual void mouseMoved( const SFO::MouseMotionEvent &arg );
 
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );

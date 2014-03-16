@@ -1,6 +1,7 @@
 #include "sdlcursormanager.hpp"
 
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreTextureManager.h>
 #include <OgreRoot.h>
 
 #include <openengine/ogre/imagerotate.hpp>

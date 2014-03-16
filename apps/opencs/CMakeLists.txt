@@ -64,8 +64,12 @@ opencs_units (view/world
     )
 
 opencs_units (view/render
-	scenewidget
-	)
+    scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
+    )
+
+opencs_units_noqt (view/render
+    navigation navigation1st navigationfree navigationorbit
+    )
 
 opencs_units_noqt (view/world
     dialoguesubview subviews

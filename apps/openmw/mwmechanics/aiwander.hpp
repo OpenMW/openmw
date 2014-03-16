@@ -43,6 +43,21 @@ namespace MWMechanics
             float mXCell;
             float mYCell;
 
+            // for checking if we're stuck (but don't check Z axis)
+            float mPrevX;
+            float mPrevY;
+
+            enum WalkState
+            {
+                State_Norm,
+                State_CheckStuck,
+                State_Evade
+            };
+            WalkState mWalkState;
+
+            int mStuckCount;
+            int mEvadeCount;
+
             bool mStoredAvailableNodes;
             bool mChooseAction;
             bool mIdleNow;

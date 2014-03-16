@@ -24,7 +24,7 @@
 #ifndef BSA_BSA_FILE_H
 #define BSA_BSA_FILE_H
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 #include <libs/platform/strings.h>
 #include <string>
 #include <vector>

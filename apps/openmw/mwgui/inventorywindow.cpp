@@ -514,6 +514,9 @@ namespace MWGui
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)
     {
+        // If the inventory is not yet enabled, don't pick anything up
+        if (!MWBase::Environment::get().getWindowManager()->isAllowed(GW_Inventory))
+            return;
         // make sure the object is of a type that can be picked up
         std::string type = object.getTypeName();
         if ( (type != typeid(ESM::Apparatus).name())

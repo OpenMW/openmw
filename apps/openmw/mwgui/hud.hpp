@@ -112,6 +112,8 @@ namespace MWGui
         void onMagicClicked(MyGUI::Widget* _sender);
         void onMapClicked(MyGUI::Widget* _sender);
 
+        void updateEnemyHealthBar();
+
         void updatePositions();
     };
 }

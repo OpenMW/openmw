@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.28.0
+Version: 0.29.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -96,6 +96,74 @@ Allowed options:
   --activate-dist arg (=-1)             activation distance override
 
 CHANGELOG
+
+0.29.0
+
+Bug #556: Video soundtrack not played when music volume is set to zero
+Bug #829: OpenMW uses up all available vram, when playing for extended time
+Bug #848: Wrong amount of footsteps playing in 1st person
+Bug #888: Ascended Sleepers have movement issues
+Bug #892: Explicit references are allowed on all script functions
+Bug #999: Graphic Herbalism (mod): sometimes doesn't activate properly
+Bug #1009: Lake Fjalding AI related slowdown.
+Bug #1041: Music playback issues on OS X >= 10.9
+Bug #1043: No message box when advancing skill "Speechcraft" while in dialog window
+Bug #1060: Some message boxes are cut off at the bottom
+Bug #1062: Bittercup script does not work ('end' variable)
+Bug #1074: Inventory paperdoll obscures armour rating
+Bug #1077: Message after killing an essential NPC disappears too fast
+Bug #1078: "Clutterbane" shows empty charge bar
+Bug #1083: UndoWerewolf fails
+Bug #1088: Better Clothes Bloodmoon Plus 1.5 by Spirited Treasure pants are not rendered
+Bug #1090: Start scripts fail when going to a non-predefined cell
+Bug #1091: Crash: Assertion `!q.isNaN() && "Invalid orientation supplied as parameter"' failed.
+Bug #1093: Weapons of aggressive NPCs are invisible after you exit and re-enter interior
+Bug #1105: Magicka is depleted when using uncastable spells
+Bug #1106: Creatures should be able to run
+Bug #1107: TR cliffs have way too huge collision boxes in OpenMW
+Bug #1109: Cleaning True Light and Darkness with Tes3cmd makes Addamasartus , Zenarbael and Yasamsi flooded.
+Bug #1114: Bad output for desktop-file-validate on openmw.desktop (and opencs.desktop)
+Bug #1115: Memory leak when spying on Fargoth
+Bug #1137: Script execution fails (drenSlaveOwners script)
+Bug #1143: Mehra Milo quest (vivec informants) is broken
+Bug #1145: Issues with moving gold between inventory and containers
+Bug #1146: Issues with picking up stacks of gold
+Bug #1147: Dwemer Crossbows are held incorrectly
+Bug #1158: Armor rating should always stay below inventory mannequin
+Bug #1159: Quick keys can be set during character generation
+Bug #1160: Crash on equip lockpick when
+Bug #1167: Editor: Referenceables are not correctly loaded when dealing with more than one content file
+Bug #1184: Game Save: overwriting an existing save does not actually overwrites the file
+Feature #30: Loading/Saving (still missing a few parts)
+Feature #101: AI Package: Activate
+Feature #103: AI Package: Follow, FollowCell
+Feature #138: Editor: Drag & Drop
+Feature #428: Player death
+Feature #505: Editor: Record Cloning
+Feature #701: Levelled creatures
+Feature #708: Improved Local Variable handling
+Feature #709: Editor: Script verifier
+Feature #764: Missing journal backend features
+Feature #777: Creature weapons/shields
+Feature #789: Editor: Referenceable record verifier
+Feature #924: Load/Save GUI (still missing loading screen and progress bars)
+Feature #946: Knockdown
+Feature #947: Decrease fatigue when running, swimming and attacking
+Feature #956: Melee Combat: Blocking
+Feature #957: Area magic
+Feature #960: Combat/AI combat for creatures
+Feature #962: Combat-Related AI instructions
+Feature #1075: Damage/Restore skill/attribute magic effects
+Feature #1076: Soultrap magic effect
+Feature #1081: Disease contraction
+Feature #1086: Blood particles
+Feature #1092: Interrupt resting
+Feature #1101: Inventory equip scripts
+Feature #1116: Version/Build number in Launcher window
+Feature #1119: Resistance/weakness to normal weapons magic effect
+Feature #1123: Slow Fall magic effect
+Feature #1130: Auto-calculate spells
+Feature #1164: Editor: Case-insensitive sorting in tables
 
 0.28.0
 

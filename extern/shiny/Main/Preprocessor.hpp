@@ -1,6 +1,8 @@
 #ifndef SH_PREPROCESSOR_H
 #define SH_PREPROCESSOR_H
 
+#include <stdint.h>
+
 #include <string>
 #include <vector>
 

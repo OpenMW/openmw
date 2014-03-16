@@ -7,6 +7,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -243,15 +244,7 @@ namespace MWClass
 
         Ogre::Vector3 hitPosition = result.second;
 
-        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-        float hitchance = ref->mBase->mData.mCombat +
-                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
-                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
-        hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
-                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
-        hitchance -= otherstats.getEvasion();
+        float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
@@ -333,6 +326,8 @@ namespace MWClass
 
         if (damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+
+        MWMechanics::diseaseContact(victim, ptr);
 
         victim.getClass().onHit(victim, damage, true, weapon, ptr, true);
     }
@@ -530,7 +525,7 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(isFlying(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+        else if(canFly(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
                 world->isLevitationEnabled()))
         {
             float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
@@ -683,12 +678,36 @@ namespace MWClass
         return MWWorld::Ptr(&cell.get<ESM::Creature>().insert(*ref), &cell);
     }
 
-    bool Creature::isFlying(const MWWorld::Ptr &ptr) const
+    bool Creature::isBipedal(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Bipedal;
+    }
+
+    bool Creature::canFly(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->mBase->mFlags & ESM::Creature::Flies;
+    }
+
+    bool Creature::canSwim(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Swims;
+    }
+
+    bool Creature::canWalk(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Walks;
     }
 
     int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)

@@ -70,7 +70,7 @@ namespace MWRender
         if (!mVanity.enabled && !mPreviewMode) {
             mCamera->getParentNode()->setOrientation(xr);
         } else {
-            Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
+            Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::UNIT_Z);
             mCamera->getParentNode()->setOrientation(zr * xr);
         }
     }

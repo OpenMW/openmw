@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 #include "locals.hpp"
 

@@ -10,6 +10,8 @@
 #include <OgreSceneManager.h>
 #include <OgreControllerManager.h>
 #include <OgreStaticGeometry.h>
+#include <OgreSceneNode.h>
+#include <OgreTechnique.h>
 
 #include <components/esm/loadligh.hpp>
 #include <components/esm/loadweap.hpp>
@@ -283,6 +285,17 @@ void Animation::addAnimSource(const std::string &model)
         size_t grp = detectAnimGroup(dstval->getNode());
 
         if(!mAccumRoot && grp == 0)
+        {
+            mNonAccumRoot = dstval->getNode();
+            mAccumRoot = mNonAccumRoot->getParent();
+            if(!mAccumRoot)
+            {
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                mNonAccumRoot = NULL;
+            }
+        }
+
+        if (grp == 0 && dstval->getNode()->getName() == "Bip01")
         {
             mNonAccumRoot = dstval->getNode();
             mAccumRoot = mNonAccumRoot->getParent();

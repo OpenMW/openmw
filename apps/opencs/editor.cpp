@@ -9,15 +9,22 @@
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
+#include <components/ogreinit/ogreinit.hpp>
+
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
-CS::Editor::Editor()
-    : mDocumentManager (mCfgMgr), mViewManager (mDocumentManager)
+CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
+: mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
+  mIpcServerName ("org.openmw.OpenCS")
 {
-    mIpcServerName = "org.openmw.OpenCS";
+    Files::PathContainer dataDirs = readConfig();
 
-    setupDataFiles();
+    setupDataFiles (dataDirs);
+
+    CSMSettings::UserSettings::instance().loadSettings ("opencs.cfg");
+
+    ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
@@ -42,7 +49,16 @@ CS::Editor::Editor()
              this, SLOT (createNewGame (const boost::filesystem::path&)));
 }
 
-void CS::Editor::setupDataFiles()
+void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
+{
+    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    {
+        QString path = QString::fromStdString(iter->string());
+        mFileDialog.addFiles(path);
+    }
+}
+
+Files::PathContainer CS::Editor::readConfig()
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
@@ -57,6 +73,8 @@ void CS::Editor::setupDataFiles()
     boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc);
+
+    mDocumentManager.setResourceDir (variables["resources"].as<std::string>());
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
@@ -83,23 +101,11 @@ void CS::Editor::setupDataFiles()
         messageBox.exec();
 
         QApplication::exit (1);
-        return;
     }
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
-    mDocumentManager.setResourceDir (variables["resources"].as<std::string>());
-
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-    {
-
-        QString path = QString::fromStdString(iter->string());
-        mFileDialog.addFiles(path);
-    }
-
-    //load the settings into the userSettings instance.
-    const QString settingFileName = "opencs.cfg";
-    CSMSettings::UserSettings::instance().loadSettings(settingFileName);
+    return dataDirs;
 }
 
 void CS::Editor::createGame()
@@ -210,8 +216,6 @@ int CS::Editor::run()
     if (mLocal.empty())
         return 1;
 
-// temporarily disable OGRE-integration (need to fix path problem first)
-#if 0
     // TODO: setting
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName("OpenGL Rendering Subsystem"));
 
@@ -228,7 +232,6 @@ int CS::Editor::run()
 #endif
     Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
     hiddenWindow->setActive(false);
-#endif
 
     mStartup.show();
 

@@ -5,6 +5,8 @@
 
 #include "../mwworld/inventorystore.hpp"
 
+#include "weaponanimation.hpp"
+
 namespace ESM
 {
     struct NPC;
@@ -25,24 +27,7 @@ public:
     { }
 };
 
-class WeaponAnimationTime : public Ogre::ControllerValue<Ogre::Real>
-{
-private:
-    Animation* mAnimation;
-    std::string mWeaponGroup;
-    float mStartTime;
-public:
-    WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0) {}
-    void setGroup(const std::string& group);
-    void updateStartTime();
-
-    virtual Ogre::Real getValue() const;
-    virtual void setValue(Ogre::Real value)
-    { }
-};
-
-
-class NpcAnimation : public Animation, public MWWorld::InventoryStoreListener
+class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
     virtual void equipmentChanged() { updateParts(); }
@@ -91,7 +76,6 @@ private:
     Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
-    float mPitchFactor;
 
     void updateNpcBase();
 
@@ -138,7 +122,10 @@ public:
     virtual void attachArrow();
     virtual void releaseArrow();
 
-    NifOgre::ObjectScenePtr mAmmunition;
+    // WeaponAnimation
+    virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }
+    virtual void showWeapon(bool show) { showWeapons(show); }
+    virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot);
 
     void setViewMode(ViewMode viewMode);
 

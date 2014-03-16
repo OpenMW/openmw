@@ -2,6 +2,8 @@
 
 #include <OgreSceneManager.h>
 #include <OgreParticleSystem.h>
+#include <OgreSceneNode.h>
+#include <OgreTechnique.h>
 
 #include "animation.hpp"
 #include "renderconst.hpp"

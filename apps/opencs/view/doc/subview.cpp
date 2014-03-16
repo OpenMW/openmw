@@ -17,3 +17,5 @@ void CSVDoc::SubView::updateEditorSetting (const QString &settingName, const QSt
 }
 
 void CSVDoc::SubView::setStatusBar (bool show) {}
+
+void CSVDoc::SubView::useHint (const std::string& hint) {}

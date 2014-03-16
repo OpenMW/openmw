@@ -24,6 +24,7 @@ namespace MWGui
         private:
 
             MyGUI::Widget* mButtonBox;
+            MyGUI::TextBox* mVersionText;
 
             std::map<std::string, MWGui::ImageButton*> mButtons;
 
