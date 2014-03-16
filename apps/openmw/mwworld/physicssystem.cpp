@@ -116,9 +116,8 @@ namespace MWWorld
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
 
+            /* Anything to collide with? */
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
-
-            // If no need to check for collision simply return the new position.
             if(!physicActor || !physicActor->getCollisionMode())
             {
                 return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -126,10 +125,10 @@ namespace MWWorld
                                 * movement * time;
             }
 
-            /* Anything to collide with? */
             btCollisionObject *colobj = physicActor->getCollisionBody();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
             position.z += halfExtents.z;
+
             waterlevel -= halfExtents.z * 0.5;
             /*
              * A 3/4 submerged example
@@ -155,13 +154,7 @@ namespace MWWorld
             bool isBipedal = ptr.getClass().isBipedal(ptr);
             bool isNpc = ptr.getClass().isNpc();
 
-            //if(!canWalk && !isBipedal && !isNpc && (position.z  >= waterlevel))
-            //{
-                //std::cout << "Swim Creature \""<<ptr.getClass().getName(ptr)<<"\""
-                   //<< " above waterline, z pos = "<<std::to_string(position.z ) << std::endl; 
-            //}
-
-            if(position.z < waterlevel || isFlying) // under water by any amount or can fly
+            if(position.z < waterlevel || isFlying) // under water by 3/4 or can fly
             {
                 // TODO: Shouldn't water have higher drag in calculating velocity?
                 velocity = (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z)*
@@ -206,9 +199,9 @@ namespace MWWorld
                 Ogre::Vector3 nextpos = newPosition + velocity * remainingTime;
 
                 // If not able to fly, walk or bipedal don't allow to move out of water
-                // FIXME: this if condition may not work for large creatures or situations
+                // TODO: this if condition may not work for large creatures or situations
                 //        where the creature gets above the waterline for some reason
-                if(newPosition.z < waterlevel && // started fully under water
+                if(newPosition.z < waterlevel && // started 3/4 under water
                    !isFlying &&  // can't fly
                    !canWalk &&   // can't walk
                    !isBipedal && // not bipedal (assume bipedals can walk)
@@ -221,7 +214,7 @@ namespace MWWorld
                     Ogre::Vector3 reflectdir = velocity.reflect(down);
                     reflectdir.normalise();
                     velocity = slide(reflectdir, down)*movelen;
-                    // FIXME: remainingTime is unchanged before the loop continues
+                    // NOTE: remainingTime is unchanged before the loop continues
                     continue; // velocity updated, calculate nextpos again
                 }
 
@@ -232,7 +225,7 @@ namespace MWWorld
                 if(tracer.mFraction >= 1.0f)
                 {
                     newPosition = tracer.mEndPos; // ok to move, so set newPosition
-                    remainingTime *= (1.0f-tracer.mFraction); // TODO: remainingTime is no longer used so don't set it?
+                    remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                     break;
                 }
 
