@@ -251,15 +251,14 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
 {
     QDir sourceDir(source);
     QDir destDir(destination);
-    bool result = false;
+    bool result = true;
 
     if (!destDir.exists()) {
-        if (!sourceDir.mkpath(destination)) {
+        if (!sourceDir.mkpath(destination))
             return false;
-        }
-
-        destDir.refresh();
     }
+
+    destDir.refresh();
 
     if (!destDir.exists())
         return false;
@@ -387,7 +386,7 @@ void Wizard::UnshieldWorker::extract()
     writeSettings();
 
     // Remove the temporary directory
-    removeDirectory(getPath() + QDir::separator() + QLatin1String("extract-temp"));
+    //removeDirectory(getPath() + QDir::separator() + QLatin1String("extract-temp"));
 
     // Fill the progress bar
     int total = 0;
@@ -572,6 +571,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
         if (!installDirectories(dir, info.absolutePath(), false, true)) {
             emit error(tr("Could not install directory!"),
                        tr("Installing %1 to %2 failed.").arg(dir, info.absolutePath()));
+            return false;
         }
 
     }
@@ -626,6 +626,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
             if (!copyDirectory(sounds.absoluteFilePath(), dest)) {
                 emit error(tr("Could not install directory!"),
                            tr("Installing %1 to %2 failed.").arg(sounds.absoluteFilePath(), dest));
+                return false;
             }
 
         }
@@ -699,7 +700,7 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
 
 bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &destination, const QString &prefix, int index, int counter)
 {
-    bool success;
+    bool success = false;
     QString path(destination);
     path.append(QDir::separator());
 
@@ -845,7 +846,7 @@ bool Wizard::UnshieldWorker::findInCab(const QString &cabFile, const QString &fi
 
 bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &destination)
 {
-    bool success;
+    bool success = false;
 
     QByteArray array(cabFile.toUtf8());
 
