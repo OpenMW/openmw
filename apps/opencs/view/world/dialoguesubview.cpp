@@ -418,6 +418,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
 
     connect(revertButton, SIGNAL(clicked()), this, SLOT(revertRecord()));
+    connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteRecord()));
 
     mMainLayout = new QVBoxLayout(mainWidget);
 
@@ -550,7 +551,30 @@ void CSVWorld::DialogueSubView::revertRecord()
         {
             if (mTable->rowCount() == 0)
             {
-                mEditWidget->setDisabled(true);
+                mEditWidget->setDisabled(true); //closing the editor is other option
+                return;
+            }
+            if (mRow >= mTable->rowCount())
+            {
+                prevId();
+            } else {
+                dataChanged(mTable->index(mRow, 0));
+            }
+        }
+    }
+}
+
+void CSVWorld::DialogueSubView::deleteRecord()
+{
+    int rows = mTable->rowCount();
+    if (!mLocked && mTable->columnCount() > 0 && mRow < mTable->rowCount() )
+    {
+        mUndoStack.push(new CSMWorld::DeleteCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toStdString()));
+        if (rows != mTable->rowCount())
+        {
+            if (mTable->rowCount() == 0)
+            {
+                mEditWidget->setDisabled(true); //closing the editor is other option
                 return;
             }
             if (mRow >= mTable->rowCount())
