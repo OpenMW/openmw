@@ -6,6 +6,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QReadWriteLock>
+#include <QStringList>
 
 #include <libunshield.h>
 
@@ -31,7 +32,6 @@ namespace Wizard
 
         void setInstallComponent(Wizard::Component component, bool install);
 
-//        void setComponentPath(Wizard::Component component, const QString &path);
         void setDiskPath(const QString &path);
 
         void setPath(const QString &path);
@@ -50,7 +50,6 @@ namespace Wizard
 
         bool getInstallComponent(Component component);
 
-        //QString getComponentPath(Component component);
         QString getDiskPath();
 
         void setComponentDone(Component component, bool done = true);
@@ -61,18 +60,25 @@ namespace Wizard
         bool copyFile(const QString &source, const QString &destination, bool keepSource = true);
         bool copyDirectory(const QString &source, const QString &destination, bool keepSource = true);
 
-        bool moveFile(const QString &source, const QString &destination);
-        bool moveDirectory(const QString &source, const QString &destination);
-
         bool extractCab(const QString &cabFile, const QString &destination);
         bool extractFile(Unshield *unshield, const QString &destination, const QString &prefix, int index, int counter);
         bool findInCab(const QString &cabFile, const QString &fileName);
 
-        QString findFile(const QString &fileName, const QString &path, int depth = 0);
-        QStringList findFiles(const QString &fileName, const QString &path, int depth = 0);
+        QString findFile(const QString &fileName, const QString &path);
 
-        bool installFile(const QString &fileName, const QString &path);
-        bool installDirectory(const QString &dirName, const QString &path, bool recursive = true);
+        QStringList findFiles(const QString &fileName, const QString &path, int depth = 0, bool recursive = true,
+                              bool directories = false, Qt::MatchFlags flags = Qt::MatchExactly);
+
+        QStringList findDirectories(const QString &dirName, const QString &path, bool recursive = true);
+
+        bool installFile(const QString &fileName, const QString &path, Qt::MatchFlags flags = Qt::MatchExactly,
+                         bool keepSource = false);
+
+        bool installFiles(const QString &fileName, const QString &path, Qt::MatchFlags flags = Qt::MatchExactly,
+                          bool keepSource = false, bool single = false);
+
+        bool installDirectories(const QString &dirName, const QString &path,
+                                bool recursive = true, bool keepSource = false);
 
         bool installComponent(Component component, const QString &path);
         bool setupComponent(Component component);
@@ -110,7 +116,6 @@ namespace Wizard
 
         void error(const QString &text, const QString &details);
         void progressChanged(int progress);
-
 
     };
 }

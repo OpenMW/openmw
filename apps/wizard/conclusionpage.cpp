@@ -22,7 +22,7 @@ void Wizard::ConclusionPage::initializePage()
     if (!mWizard->mError)
     {
         if ((field(QLatin1String("installation.new")).toBool() == true)
-                | (field(QLatin1String("installation.import-settings")).toBool() == true))
+                || (field(QLatin1String("installation.import-settings")).toBool() == true))
         {
             qDebug() << "IMPORT SETTINGS";
             mWizard->runSettingsImporter();

@@ -44,8 +44,6 @@ void Wizard::InstallationPage::initializePage()
             installProgressBar->setMaximum(installProgressBar->maximum() + 100);
     }
 
-    // Handle when cancel is clicked
-
     startInstallation();
 }
 
@@ -54,21 +52,21 @@ void Wizard::InstallationPage::startInstallation()
     QStringList components(field(QLatin1String("installation.components")).toStringList());
     QString path(field(QLatin1String("installation.path")).toString());
 
-    QThread *thread = new QThread();
+    mThread = new QThread();
     mUnshield = new UnshieldWorker();
-    mUnshield->moveToThread(thread);
+    mUnshield->moveToThread(mThread);
 
-    connect(thread, SIGNAL(started()),
+    connect(mThread, SIGNAL(started()),
             mUnshield, SLOT(extract()));
 
     connect(mUnshield, SIGNAL(finished()),
-            thread, SLOT(quit()));
+            mThread, SLOT(quit()));
 
     connect(mUnshield, SIGNAL(finished()),
             mUnshield, SLOT(deleteLater()));
 
     connect(mUnshield, SIGNAL(finished()),
-            thread, SLOT(deleteLater()));
+            mThread, SLOT(deleteLater()));;
 
     connect(mUnshield, SIGNAL(finished()),
             this, SLOT(installationFinished()), Qt::QueuedConnection);
@@ -129,7 +127,7 @@ void Wizard::InstallationPage::startInstallation()
         mUnshield->setIniCodec(QTextCodec::codecForName("windows-1252"));
     }
 
-    thread->start();
+    mThread->start();
 }
 
 void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
@@ -148,23 +146,15 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
         break;
     }
 
-//    QString fileName = QFileDialog::getOpenFileName(
-//                    this,
-//                    tr("Select %1 installation file").arg(name),
-//                    QDir::rootPath(),
-//                    tr("InstallShield header files (*.hdr)"));
-
-
     QString path = QFileDialog::getExistingDirectory(this,
                                                      tr("Select %1 installation media").arg(name),
                                                      QDir::rootPath());
 
     if (path.isEmpty()) {
-        qDebug() << "Cancel was clicked!";
-
         logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
                                     <b>Error: The installation was aborted by the user</b></p>"));
         mWizard->mError = true;
+
         emit completeChanged();
         return;
     }
@@ -174,8 +164,6 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 
 void Wizard::InstallationPage::installationFinished()
 {
-    qDebug() << "finished!";
-
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("Installation finished"));
     msgBox.setIcon(QMessageBox::Information);
@@ -186,13 +174,10 @@ void Wizard::InstallationPage::installationFinished()
 
     mFinished = true;
     emit completeChanged();
-
 }
 
 void Wizard::InstallationPage::installationError(const QString &text, const QString &details)
 {
-    qDebug() << "error: " << text;
-
     installProgressLabel->setText(tr("Installation failed!"));
 
     logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
@@ -213,7 +198,6 @@ void Wizard::InstallationPage::installationError(const QString &text, const QStr
 
     mWizard->mError = true;
     emit completeChanged();
-
 }
 
 bool Wizard::InstallationPage::isComplete() const

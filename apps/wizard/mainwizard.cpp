@@ -143,7 +143,8 @@ void Wizard::MainWizard::runSettingsImporter()
     QStringList arguments;
 
     // Import plugin selection?
-    if (field(QLatin1String("installation.import-addons")).toBool() == true)
+    if (field(QLatin1String("installation.new")).toBool() == true
+            || field(QLatin1String("installation.import-addons")).toBool() == true)
         arguments.append(QLatin1String("--game-files"));
 
     arguments.append(QLatin1String("--encoding"));
