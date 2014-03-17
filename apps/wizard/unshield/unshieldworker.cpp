@@ -752,7 +752,7 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &dest
     success = unshield_file_save(unshield, index, array.constData());
 
     if (!success) {
-        emit error(tr("Failed to extract %1.").arg(QString::fromUtf8(unshield_file_name(unshield, index))), tr("Complete path: %1.").arg(fileName));
+        qDebug() << "error";
         dir.remove(fileName);
     }
 
@@ -783,6 +783,15 @@ bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &d
         {
             if (unshield_file_is_valid(unshield, j)) {
                 success = extractFile(unshield, destination, group->name, j, counter);
+
+                if (!success) {
+                    QString name(QString::fromUtf8(unshield_file_name(unshield, j)));
+
+                    emit error(tr("Failed to extract %1.").arg(name),
+                               tr("Complete path: %1").arg(destination + QDir::separator() + name));
+                    return false;
+                }
+
                 ++counter;
             }
         }
