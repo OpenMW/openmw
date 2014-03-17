@@ -9,7 +9,6 @@
 
 namespace Wizard
 {
-
     class MainWizard : public QWizard
     {
         Q_OBJECT

@@ -28,16 +28,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="installationsList">
-     <item>
-      <property name="text">
-       <string>No existing installations detected</string>
-      </property>
-      <property name="flags">
-       <set>NoItemFlags</set>
-      </property>
-     </item>
-    </widget>
+    <widget class="QListWidget" name="installationsList"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

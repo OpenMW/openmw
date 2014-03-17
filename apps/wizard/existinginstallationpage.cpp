@@ -14,6 +14,12 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(MainWizard *wizard) :
 {
     setupUi(this);
 
+    mEmptyItem = new QListWidgetItem(tr("No existing installations detected"));
+    mEmptyItem->setFlags(Qt::NoItemFlags);
+    installationsList->addItem(mEmptyItem);
+    mEmptyItem->setHidden(true);
+
+
     connect(installationsList, SIGNAL(currentTextChanged(QString)),
             this, SLOT(textChanged(QString)));
 
@@ -21,51 +27,17 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(MainWizard *wizard) :
             this, SIGNAL(completeChanged()));
 }
 
-void Wizard::ExistingInstallationPage::on_browseButton_clicked()
-{
-    QString selectedFile = QFileDialog::getOpenFileName(
-                this,
-                tr("Select master file"),
-                QDir::currentPath(),
-                QString(tr("Morrowind master file (*.esm)")),
-                NULL,
-                QFileDialog::DontResolveSymlinks);
-
-    QFileInfo info(selectedFile);
-    if (!info.exists())
-        return;
-
-    QString path(QDir::toNativeSeparators(info.absolutePath()));
-    QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);
-
-    if (items.isEmpty()) {
-        // Path is not yet in the list, add it
-        mWizard->addInstallation(path);
-
-        QListWidgetItem *item = new QListWidgetItem(path);
-        installationsList->addItem(item);
-        installationsList->setCurrentItem(item); // Select it too
-    } else {
-        installationsList->setCurrentItem(items.first());
-    }
-
-}
-
-void Wizard::ExistingInstallationPage::textChanged(const QString &text)
-{
-    // Set the installation path manually, as registerField doesn't work
-    // Because it doesn't accept two widgets operating on a single field
-    if (!text.isEmpty())
-        mWizard->setField(QLatin1String("installation.path"), text);
-}
-
 void Wizard::ExistingInstallationPage::initializePage()
 {
     QStringList paths(mWizard->mInstallations.keys());
 
-    if (paths.isEmpty())
+    if (paths.isEmpty()) {
+        mEmptyItem->setHidden(false);
         return;
+    }
 
+    // Make to clear list before adding items
+    // to prevent duplicates when going back and forth between pages
     installationsList->clear();
 
     foreach (const QString &path, paths) {
@@ -117,6 +89,51 @@ bool Wizard::ExistingInstallationPage::validatePage()
     }
 
     return true;
+}
+
+void Wizard::ExistingInstallationPage::on_browseButton_clicked()
+{
+    QString selectedFile = QFileDialog::getOpenFileName(
+                this,
+                tr("Select master file"),
+                QDir::currentPath(),
+                QString(tr("Morrowind master file (*.esm)")),
+                NULL,
+                QFileDialog::DontResolveSymlinks);
+
+    QFileInfo info(selectedFile);
+
+    if (!info.exists())
+        return;
+
+    if (!mWizard->findFiles(QLatin1String("Morrowind"), info.absolutePath()))
+        return; // No valid Morrowind installation found
+
+    QString path(QDir::toNativeSeparators(info.absolutePath()));
+    QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);
+
+    if (items.isEmpty()) {
+        // Path is not yet in the list, add it
+        mWizard->addInstallation(path);
+
+        // Hide the default item
+        mEmptyItem->setHidden(true);
+
+        QListWidgetItem *item = new QListWidgetItem(path);
+        installationsList->addItem(item);
+        installationsList->setCurrentItem(item); // Select it too
+    } else {
+        installationsList->setCurrentItem(items.first());
+    }
+
+}
+
+void Wizard::ExistingInstallationPage::textChanged(const QString &text)
+{
+    // Set the installation path manually, as registerField doesn't work
+    // Because it doesn't accept two widgets operating on a single field
+    if (!text.isEmpty())
+        mWizard->setField(QLatin1String("installation.path"), text);
 }
 
 bool Wizard::ExistingInstallationPage::isComplete() const
