@@ -386,7 +386,7 @@ void Wizard::UnshieldWorker::extract()
     writeSettings();
 
     // Remove the temporary directory
-    //removeDirectory(getPath() + QDir::separator() + QLatin1String("extract-temp"));
+    removeDirectory(getPath() + QDir::separator() + QLatin1String("extract-temp"));
 
     // Fill the progress bar
     int total = 0;
@@ -445,26 +445,39 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
 
         foreach (const QString &file, list) {
 
+            qDebug() << "current archive: " << file;
+
+            // Try to open the archive
+            Unshield *unshield = NULL;
+            unshield = openCab(file);
+
+            if (!unshield)
+                return false;
+
             if (component == Wizard::Component_Morrowind)
             {
-                bool morrowindFound = findInCab(file, QLatin1String("Morrowind.bsa"));
-                bool tribunalFound = findInCab(file, QLatin1String("Tribunal.bsa"));
-                bool bloodmoonFound = findInCab(file, QLatin1String("Bloodmoon.bsa"));
+                bool morrowindFound = findInCab(QLatin1String("Morrowind.bsa"), unshield);
+                bool tribunalFound = findInCab(QLatin1String("Tribunal.bsa"), unshield);
+                bool bloodmoonFound = findInCab(QLatin1String("Bloodmoon.bsa"), unshield);
 
                 if (morrowindFound) {
                     // Check if we have correct archive, other archives have Morrowind.bsa too
                     if ((tribunalFound && bloodmoonFound)
                             || (!tribunalFound && !bloodmoonFound)) {
                         cabFile = file;
-                        found = true; // We have a GoTY disk
+                        found = true; // We have a GoTY disk or a Morrowind-only disk
                     }
                 }
             } else {
-                if (findInCab(file, name + QLatin1String(".bsa"))) {
+
+                if (findInCab(name + QLatin1String(".bsa"), unshield)) {
                     cabFile = file;
                     found = true;
                 }
             }
+
+            // Close the current archive
+            unshield_close(unshield);
         }
 
         if (!found) {
@@ -746,6 +759,39 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &dest
     return success;
 }
 
+bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &destination)
+{
+    bool success = false;
+
+    QByteArray array(cabFile.toUtf8());
+
+    Unshield *unshield;
+    unshield = unshield_open(array.constData());
+
+    if (!unshield) {
+        emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
+        return false;
+    }
+
+    int counter = 0;
+
+    for (int i=0; i<unshield_file_group_count(unshield); ++i)
+    {
+        UnshieldFileGroup *group = unshield_file_group_get(unshield, i);
+
+        for (size_t j=group->first_file; j<=group->last_file; ++j)
+        {
+            if (unshield_file_is_valid(unshield, j)) {
+                success = extractFile(unshield, destination, group->name, j, counter);
+                ++counter;
+            }
+        }
+    }
+
+    unshield_close(unshield);
+    return success;
+}
+
 QString Wizard::UnshieldWorker::findFile(const QString &fileName, const QString &path)
 {
     return findFiles(fileName, path).first();
@@ -764,14 +810,16 @@ QStringList Wizard::UnshieldWorker::findFiles(const QString &fileName, const QSt
     QStringList result;
     QDir dir(path);
 
+    // Prevent parsing over the complete filesystem
+    if (dir == QDir::rootPath())
+        return QStringList();
+
     if (!dir.exists())
         return QStringList();
 
     QFileInfoList list(dir.entryInfoList(QDir::NoDotAndDotDot |
-                                         QDir::System | QDir::Hidden |
                                          QDir::AllDirs | QDir::Files, QDir::DirsFirst));
     foreach(QFileInfo info, list) {
-
         if (info.isSymLink())
             continue;
 
@@ -813,7 +861,7 @@ QStringList Wizard::UnshieldWorker::findDirectories(const QString &dirName, cons
     return findFiles(dirName, path, 0, true, true);
 }
 
-bool Wizard::UnshieldWorker::findInCab(const QString &cabFile, const QString &fileName)
+Unshield* Wizard::UnshieldWorker::openCab(const QString &cabFile)
 {
     QByteArray array(cabFile.toUtf8());
 
@@ -822,8 +870,17 @@ bool Wizard::UnshieldWorker::findInCab(const QString &cabFile, const QString &fi
 
     if (!unshield) {
         emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
-        return false;
+        unshield_close(unshield);
+        return NULL;
     }
+
+    return unshield;
+}
+
+bool Wizard::UnshieldWorker::findInCab(const QString &fileName, Unshield *unshield)
+{
+    if (!unshield)
+        return false;
 
     for (int i=0; i<unshield_file_group_count(unshield); ++i)
     {
@@ -840,39 +897,5 @@ bool Wizard::UnshieldWorker::findInCab(const QString &cabFile, const QString &fi
         }
     }
 
-    unshield_close(unshield);
     return false;
-}
-
-bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &destination)
-{
-    bool success = false;
-
-    QByteArray array(cabFile.toUtf8());
-
-    Unshield *unshield;
-    unshield = unshield_open(array.constData());
-
-    if (!unshield) {
-        emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
-        return false;
-    }
-
-    int counter = 0;
-
-    for (int i=0; i<unshield_file_group_count(unshield); ++i)
-    {
-        UnshieldFileGroup *group = unshield_file_group_get(unshield, i);
-
-        for (size_t j=group->first_file; j<=group->last_file; ++j)
-        {
-            if (unshield_file_is_valid(unshield, j)) {
-                success = extractFile(unshield, destination, group->name, j, counter);
-                ++counter;
-            }
-        }
-    }
-
-    unshield_close(unshield);
-    return success;
 }
