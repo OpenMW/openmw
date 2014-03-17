@@ -179,6 +179,8 @@ namespace CSVWorld
 
             void prevId();
 
+            void revertRecord();
+
             void dataChanged(const QModelIndex & index);
             ///\brief we need to care for deleting currently edited record
 

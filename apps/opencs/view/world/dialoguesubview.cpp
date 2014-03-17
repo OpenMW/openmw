@@ -27,6 +27,7 @@
 #include "../../model/world/record.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/doc/document.hpp"
+#include "../../model/world/commands.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -402,8 +403,21 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     buttonsLayout->addWidget(prevButton, 0);
     buttonsLayout->addWidget(nextButton, 1);
     buttonsLayout->addStretch(2);
+
+    QToolButton* cloneButton = new QToolButton(mainWidget);
+    QToolButton* addButton = new QToolButton(mainWidget);
+    QToolButton* deleteButton = new QToolButton(mainWidget);
+    QToolButton* revertButton = new QToolButton(mainWidget);
+
+    buttonsLayout->addWidget(cloneButton);
+    buttonsLayout->addWidget(addButton);
+    buttonsLayout->addWidget(deleteButton);
+    buttonsLayout->addWidget(revertButton);
+
     connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
     connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
+
+    connect(revertButton, SIGNAL(clicked()), this, SLOT(revertRecord()));
 
     mMainLayout = new QVBoxLayout(mainWidget);
 
@@ -517,5 +531,34 @@ void CSVWorld::DialogueSubView::tableMimeDataDropped(QWidget* editor,
     if (document == &mDocument)
     {
         qobject_cast<DropLineEdit*>(editor)->setText(id.getId().c_str());
+    }
+}
+
+void CSVWorld::DialogueSubView::revertRecord()
+{
+    int rows = mTable->rowCount();
+    if (!mLocked && mTable->columnCount() > 0 && mRow < mTable->rowCount() )
+    {
+         CSMWorld::RecordBase::State state =
+                static_cast<CSMWorld::RecordBase::State> (mTable->data (mTable->index (mRow, 1)).toInt());
+
+        if (state!=CSMWorld::RecordBase::State_BaseOnly)
+        {
+            mUndoStack.push(new CSMWorld::RevertCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toStdString()));
+        }
+        if (rows != mTable->rowCount())
+        {
+            if (mTable->rowCount() == 0)
+            {
+                mEditWidget->setDisabled(true);
+                return;
+            }
+            if (mRow >= mTable->rowCount())
+            {
+                prevId();
+            } else {
+                dataChanged(mTable->index(mRow, 0));
+            }
+        }
     }
 }
