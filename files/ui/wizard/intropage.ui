@@ -20,7 +20,7 @@
    <item>
     <widget class="QLabel" name="textLabel">
      <property name="text">
-      <string>This Wizard will help you install Morrowind and its add-ons for OpenMW to use.</string>
+      <string>This Wizard will help you install Morrowindand its add-ons for OpenMW to use.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -29,6 +29,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../wizard/wizard.qrc"/>
+ </resources>
  <connections/>
 </ui>

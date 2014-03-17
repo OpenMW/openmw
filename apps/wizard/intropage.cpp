@@ -5,9 +5,9 @@
 Wizard::IntroPage::IntroPage(MainWizard *wizard) :
     QWizardPage(wizard),
     mWizard(wizard)
-
 {
     setupUi(this);
+    setPixmap(QWizard::WatermarkPixmap, QPixmap(QLatin1String(":/images/intropage-background.png")));
 }
 
 int Wizard::IntroPage::nextId() const

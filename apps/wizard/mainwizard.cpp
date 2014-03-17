@@ -25,7 +25,6 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     mGameSettings(mCfgMgr),
     QWizard(parent)
 {
-
 #ifndef Q_OS_MAC
     setWizardStyle(QWizard::ModernStyle);
 #else
@@ -33,6 +32,8 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 #endif
 
     setWindowTitle(tr("OpenMW Wizard"));
+    setWindowIcon(QIcon(QLatin1String(":/images/openmw-wizard.png")));
+    setMinimumWidth(550);
 
     // Set the property for comboboxes to the text instead of index
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
