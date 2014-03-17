@@ -20,6 +20,26 @@
 
 namespace MWGui
 {
+
+    bool sortItems(const MWWorld::Ptr& left, const MWWorld::Ptr& right)
+    {
+        int cmp = left.getClass().getName(left).compare(
+                    right.getClass().getName(right));
+        return cmp < 0;
+    }
+
+    bool sortSpells(const std::string& left, const std::string& right)
+    {
+        const MWWorld::Store<ESM::Spell> &spells =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
+
+        const ESM::Spell* a = spells.find(left);
+        const ESM::Spell* b = spells.find(right);
+
+        int cmp = a->mName.compare(b->mName);
+        return cmp < 0;
+    }
+
     SpellWindow::SpellWindow(DragAndDrop* drag)
         : WindowPinnableBase("openmw_spell_window.layout")
         , NoDrop(drag, mMainWidget)

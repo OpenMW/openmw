@@ -19,6 +19,8 @@
 #include "windowmanagerimp.hpp"
 #include "itemselection.hpp"
 
+#include "spellwindow.hpp"
+
 
 namespace MWGui
 {
