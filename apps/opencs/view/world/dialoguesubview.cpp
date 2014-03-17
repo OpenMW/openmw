@@ -19,6 +19,7 @@
 #include <QComboBox>
 #include <QScrollArea>
 #include <QPushButton>
+#include <QToolButton>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
@@ -394,10 +395,13 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     QWidget *mainWidget = new QWidget(this);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
-    QPushButton* prevButton = new QPushButton(tr("Previous"), mainWidget);
-    QPushButton* nextButton = new QPushButton(tr("Next"), mainWidget);
-    buttonsLayout->addWidget(prevButton);
-    buttonsLayout->addWidget(nextButton);
+    QToolButton* prevButton = new QToolButton(mainWidget);
+    prevButton->setIcon(QIcon(":/go-previous.png"));
+    QToolButton* nextButton = new QToolButton(mainWidget);
+    nextButton->setIcon(QIcon(":/go-next.png"));
+    buttonsLayout->addWidget(prevButton, 0);
+    buttonsLayout->addWidget(nextButton, 1);
+    buttonsLayout->addStretch(2);
     connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
     connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
 
