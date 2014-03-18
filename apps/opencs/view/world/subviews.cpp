@@ -105,7 +105,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Reference,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<ReferenceCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Cell,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<CellCreator> > (false));
@@ -126,10 +126,10 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<InfoCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_TopicInfo,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, TopicCreatorFactory >(false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<InfoCreator> >(false));
 
     manager.add (CSMWorld::UniversalId::Type_Topic,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, TopicCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_Journal,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
