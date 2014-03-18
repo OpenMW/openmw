@@ -1,3 +1,6 @@
+#ifndef OPENMW_GAME_MWGUI_ITEMSELECTION_H
+#define OPENMW_GAME_MWGUI_ITEMSELECTION_H
+
 #include "container.hpp"
 
 namespace MWGui
@@ -32,3 +35,5 @@ namespace MWGui
     };
 
 }
+
+#endif

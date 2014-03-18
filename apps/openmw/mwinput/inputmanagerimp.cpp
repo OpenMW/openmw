@@ -143,6 +143,13 @@ namespace MWInput
         mControlSwitch["vanitymode"]          = true;
     }
 
+    void InputManager::clear()
+    {
+        // Enable all controls
+        for (std::map<std::string, bool>::iterator it = mControlSwitch.begin(); it != mControlSwitch.end(); ++it)
+            it->second = true;
+    }
+
     InputManager::~InputManager()
     {
         mInputBinder->save (mUserFile);
@@ -578,13 +585,13 @@ namespace MWInput
             float rot[3];
             rot[0] = -y;
             rot[1] = 0.0f;
-            rot[2] = x;
+            rot[2] = -x;
 
             // Only actually turn player when we're not in vanity mode
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
                 mPlayer->yaw(x);
-                mPlayer->pitch(-y);
+                mPlayer->pitch(y);
             }
 
             if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change

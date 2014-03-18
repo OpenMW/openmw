@@ -15,7 +15,7 @@ add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
     characterpreview globalmap videoplayer ripplesimulation refraction
-    terrainstorage renderconst effectmanager
+    terrainstorage renderconst effectmanager weaponanimation
     )
 
 add_openmw_dir (mwinput
@@ -44,7 +44,7 @@ add_openmw_dir (mwscript
     locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions transformationextensions consoleextensions userextensions locals
+    animationextensions transformationextensions consoleextensions userextensions
     )
 
 add_openmw_dir (mwsound

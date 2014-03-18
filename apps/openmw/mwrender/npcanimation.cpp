@@ -76,27 +76,6 @@ float HeadAnimationTime::getValue() const
         return 1;
 }
 
-float WeaponAnimationTime::getValue() const
-{
-    if (mWeaponGroup.empty())
-        return 0;
-    float current = mAnimation->getCurrentTime(mWeaponGroup);
-    if (current == -1)
-        return 0;
-    return current - mStartTime;
-}
-
-void WeaponAnimationTime::setGroup(const std::string &group)
-{
-    mWeaponGroup = group;
-    mStartTime = mAnimation->getStartTime(mWeaponGroup);
-}
-
-void WeaponAnimationTime::updateStartTime()
-{
-    setGroup(mWeaponGroup);
-}
-
 static NpcAnimation::PartBoneMap createPartListMap()
 {
     NpcAnimation::PartBoneMap result;
@@ -147,8 +126,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
-    mNpcType(Type_Normal),
-    mPitchFactor(0)
+    mNpcType(Type_Normal)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -532,20 +510,16 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     {
         float pitch = mPtr.getRefData().getPosition().rot[0];
         Ogre::Node *node = baseinst->getBone("Bip01 Neck");
-        node->pitch(Ogre::Radian(pitch), Ogre::Node::TS_WORLD);
+        node->pitch(Ogre::Radian(-pitch), Ogre::Node::TS_WORLD);
 
         // This has to be done before this function ends;
         // updateSkeletonInstance, below, touches the hands.
         node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
     }
-    else if (mPitchFactor > 0)
+    else
     {
         // In third person mode we may still need pitch for ranged weapon targeting
-        float pitch = mPtr.getRefData().getPosition().rot[0] * mPitchFactor;
-        Ogre::Node *node = baseinst->getBone("Bip01 Spine2");
-        node->pitch(Ogre::Radian(pitch/2), Ogre::Node::TS_WORLD);
-        node = baseinst->getBone("Bip01 Spine1");
-        node->pitch(Ogre::Radian(pitch/2), Ogre::Node::TS_WORLD);
+        pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
@@ -695,13 +669,14 @@ void NpcAnimation::showWeapons(bool showWeapon)
     {
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(weapon != inv.end()) // special case for weapons
+        if(weapon != inv.end())
         {
             Ogre::Vector3 glowColor = getEnchantmentColor(*weapon);
             std::string mesh = MWWorld::Class::get(*weapon).getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
+            // Crossbows start out with a bolt attached
             if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
                     weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
             {
@@ -743,50 +718,24 @@ void NpcAnimation::showCarriedLeft(bool show)
         removeIndividualPart(ESM::PRT_Shield);
 }
 
+void NpcAnimation::configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot)
+{
+    Ogre::Vector3 glowColor = getEnchantmentColor(ptr);
+    setRenderProperties(object, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
+                        !ptr.getClass().getEnchantment(ptr).empty(), &glowColor);
+
+    std::for_each(object->mEntities.begin(), object->mEntities.end(), SetObjectGroup(slot));
+    std::for_each(object->mParticles.begin(), object->mParticles.end(), SetObjectGroup(slot));
+}
+
 void NpcAnimation::attachArrow()
 {
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weaponSlot != inv.end() && weaponSlot->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
-        showWeapons(true);
-    else
-    {
-        NifOgre::ObjectScenePtr weapon = mObjectParts[ESM::PRT_Weapon];
-
-        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-        if (ammo == inv.end())
-            return;
-        std::string model = ammo->getClass().getModel(*ammo);
-
-        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, "ArrowBone", mInsert, model);
-        Ogre::Vector3 glowColor = getEnchantmentColor(*ammo);
-        setRenderProperties(mAmmunition, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
-                            !ammo->getClass().getEnchantment(*ammo).empty(), &glowColor);
-
-        std::for_each(mAmmunition->mEntities.begin(), mAmmunition->mEntities.end(), SetObjectGroup(MWWorld::InventoryStore::Slot_Ammunition));
-        std::for_each(mAmmunition->mParticles.begin(), mAmmunition->mParticles.end(), SetObjectGroup(MWWorld::InventoryStore::Slot_Ammunition));
-    }
+    WeaponAnimation::attachArrow(mPtr);
 }
 
 void NpcAnimation::releaseArrow()
 {
-    // Thrown weapons get detached now
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weapon != inv.end() && weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
-    {
-        showWeapons(false);
-        inv.remove(*weapon, 1, mPtr);
-    }
-    else
-    {
-        // With bows and crossbows only the used arrow/bolt gets detached
-        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-        if (ammo == inv.end())
-            return;
-        inv.remove(*ammo, 1, mPtr);
-        mAmmunition.setNull();
-    }
+    WeaponAnimation::releaseArrow(mPtr);
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)

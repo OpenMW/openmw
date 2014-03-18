@@ -73,6 +73,8 @@ option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binarie
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 
+option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
+
 # Apps and tools
 option(BUILD_BSATOOL "build BSA extractor" OFF)
 option(BUILD_ESMTOOL "build ESM inspector" ON)

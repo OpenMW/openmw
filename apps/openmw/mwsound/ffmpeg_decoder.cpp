@@ -11,9 +11,10 @@
 namespace MWSound
 {
 
-static void fail(const std::string &msg)
-{ throw std::runtime_error("FFmpeg exception: "+msg); }
-
+void FFmpeg_Decoder::fail(const std::string &msg)
+{
+    throw std::runtime_error("FFmpeg exception: "+msg);
+}
 
 int FFmpeg_Decoder::readPacket(void *user_data, uint8_t *buf, int buf_size)
 {

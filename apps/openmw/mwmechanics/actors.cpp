@@ -210,7 +210,7 @@ namespace MWMechanics
                     && LOS
                     )
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()));
+                    creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()));
                     creatureStats.setHostile(true);
                 }
             }
@@ -541,7 +541,7 @@ namespace MWMechanics
                         // TODO: Add AI to follow player and fight for him
                         // TODO: VFX_SummonStart, VFX_SummonEnd
                         creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
-                            MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
+                            MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos).getRefData().getHandle()));
                     }
                 }
                 else

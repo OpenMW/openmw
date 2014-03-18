@@ -4,6 +4,8 @@
 #include <components/esm/loadpgrd.hpp>
 #include <list>
 
+#include <OgreMath.h>
+
 namespace MWWorld
 {
     class CellStore;
@@ -15,6 +17,20 @@ namespace MWMechanics
     {
         public:
             PathFinder();
+
+            static float sgn(Ogre::Radian a)
+            {
+                if(a.valueRadians() > 0)
+                    return 1.0;
+                return -1.0;
+            }
+
+            static float sgn(float a)
+            {
+                if(a > 0)
+                    return 1.0;
+                return -1.0;
+            }
 
             void clearPath();
 

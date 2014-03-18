@@ -1,5 +1,7 @@
 #include "mainmenu.hpp"
 
+#include <components/version/version.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -20,6 +22,22 @@ namespace MWGui
         , mButtonBox(0), mWidth (w), mHeight (h)
         , mSaveGameDialog(NULL)
     {
+        getWidget(mVersionText, "VersionText");
+        std::stringstream sstream;
+        sstream << "OpenMW version: " << OPENMW_VERSION;
+
+        // adding info about git hash if availible
+        std::string rev = OPENMW_VERSION_COMMITHASH;
+        std::string tag = OPENMW_VERSION_TAGHASH;
+        if (!rev.empty() && !tag.empty())
+        {
+                rev = rev.substr(0,10);
+                sstream << "\nrevision: " <<  rev;
+        }
+        
+        std::string output = sstream.str();
+        mVersionText->setCaption(output);
+
         updateMenu();
     }
 

@@ -26,12 +26,12 @@
 
 namespace
 {
-    struct CustomData : public MWWorld::CustomData
+    struct LightCustomData : public MWWorld::CustomData
     {
         float mTime;
         ///< Time remaining
 
-        CustomData(MWWorld::Ptr ptr)
+        LightCustomData(MWWorld::Ptr ptr)
         {
             MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
             mTime = ref->mBase->mData.mTime;
@@ -40,7 +40,7 @@ namespace
 
         virtual MWWorld::CustomData *clone() const
         {
-            return new CustomData (*this);
+            return new LightCustomData (*this);
         }
     };
 }
@@ -210,7 +210,7 @@ namespace MWClass
     {
         ensureCustomData(ptr);
 
-        float &timeRemaining = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        float &timeRemaining = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
         timeRemaining = duration;
     }
 
@@ -218,7 +218,7 @@ namespace MWClass
     {
         ensureCustomData(ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        return dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 
     MWWorld::Ptr
@@ -233,7 +233,7 @@ namespace MWClass
     void Light::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
-            ptr.getRefData().setCustomData(new CustomData(ptr));
+            ptr.getRefData().setCustomData(new LightCustomData(ptr));
     }
 
     bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
@@ -278,7 +278,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime = state2.mTime;
+        dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime = state2.mTime;
     }
 
     void Light::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
@@ -288,6 +288,6 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        state2.mTime = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        state2.mTime = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 }

@@ -50,7 +50,7 @@ namespace Interpreter
         return literalBlock+offset;
     }
 
-    void Runtime::configure (const Interpreter::Type_Code *code, int codeSize, Context& context)
+    void Runtime::configure (const Type_Code *code, int codeSize, Context& context)
     {
         clear();
 

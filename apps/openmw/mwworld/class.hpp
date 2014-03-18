@@ -307,7 +307,10 @@ namespace MWWorld
                 return false;
             }
 
-            virtual bool isFlying(const MWWorld::Ptr& ptr) const;
+            virtual bool isBipedal(const MWWorld::Ptr& ptr) const;
+            virtual bool canFly(const MWWorld::Ptr& ptr) const;
+            virtual bool canSwim(const MWWorld::Ptr& ptr) const;
+            virtual bool canWalk(const MWWorld::Ptr& ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
 

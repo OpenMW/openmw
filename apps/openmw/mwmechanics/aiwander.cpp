@@ -15,18 +15,13 @@
 #include "steering.hpp"
 #include "movement.hpp"
 
-namespace
-{
-    float sgn(float a)
-    {
-        if(a > 0)
-            return 1.0;
-        return -1.0;
-    }
-}
-
 namespace MWMechanics
 {
+    // NOTE: determined empirically but probably need further tweaking
+    static const int COUNT_BEFORE_STUCK = 20;
+    static const int COUNT_BEFORE_RESET = 200;
+    static const int COUNT_EVADE = 7;
+
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
       , mCellX(std::numeric_limits<int>::max())
@@ -36,6 +31,11 @@ namespace MWMechanics
       , mX(0)
       , mY(0)
       , mZ(0)
+      , mPrevX(0)
+      , mPrevY(0)
+      , mWalkState(State_Norm)
+      , mStuckCount(0)
+      , mEvadeCount(0)
       , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
@@ -298,9 +298,91 @@ namespace MWMechanics
             }
             else
             {
-                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+                /*               1                    n
+                 *  State_Norm <---> State_CheckStuck --> State_Evade
+                 *   ^  ^   |          ^   |               ^   |  |
+                 *   |  |   |          |   |               |   |  |
+                 *   |  +---+          +---+               +---+  | m
+                 *   |   any            < n                 < m   |
+                 *   +--------------------------------------------+
+                 */
+                bool samePosition = (abs(pos.pos[0] - mPrevX) < 1) && (abs(pos.pos[1] - mPrevY) < 1);
+                switch(mWalkState)
+                {
+                    case State_Norm:
+                    {
+                        if(!samePosition)
+                            break;
+                        else
+                            mWalkState = State_CheckStuck;
+                    }
+                        /* FALL THROUGH */
+                    case State_CheckStuck:
+                    {
+                        if(!samePosition)
+                        {
+                            mWalkState = State_Norm;
+                            // to do this properly need yet another variable, simply don't clear for now
+                            //mStuckCount = 0;
+                            break;
+                        }
+                        else
+                        {
+                            // consider stuck only if position unchanges consecutively
+                            if((mStuckCount++ % COUNT_BEFORE_STUCK) == 0)
+                                mWalkState = State_Evade;
+                                // NOTE: mStuckCount is purposely not cleared here
+                            else
+                                break; // still in the same state, but counter got incremented
+                        }
+                    }
+                        /* FALL THROUGH */
+                    case State_Evade:
+                    {
+                        if(mEvadeCount++ < COUNT_EVADE)
+                            break;
+                        else
+                        {
+                            mWalkState = State_Norm; // tried to evade, assume all is ok and start again
+                            // NOTE: mStuckCount is purposely not cleared here
+                            mEvadeCount = 0;
+                        }
+                    }
+                    /* NO DEFAULT CASE */
+                }
 
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+                if(mWalkState == State_Evade)
+                {
+                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+
+                    // diagonal should have same animation as walk forward
+                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.01f;
+                    // change the angle a bit, too
+                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                }
+                else
+                {
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+                }
+
+                if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
+                {
+                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+                    mWalkState = State_Norm;
+                    mStuckCount = 0;
+
+                    stopWalking(actor);
+                    mMoveNow = false;
+                    mWalking = false;
+                    mChooseAction = true;
+                }
+
+                // update position
+                ESM::Position updatedPos = actor.getRefData().getPosition();
+                mPrevX = updatedPos.pos[0];
+                mPrevY = updatedPos.pos[1];
             }
         }
 
