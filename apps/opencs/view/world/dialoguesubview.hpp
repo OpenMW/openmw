@@ -29,6 +29,8 @@ namespace CSMDoc
 namespace CSVWorld
 {
     class CommandDelegate;
+    class CreatorFactoryBase;
+    class TableBottomBox;
 
     class NotEditableSubDelegate : public QAbstractItemDelegate
     {
@@ -166,10 +168,14 @@ namespace CSVWorld
         int mRow;
         bool mLocked;
         const CSMDoc::Document& mDocument;
+        TableBottomBox* mBottom;
 
         public:
 
-            DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete = false);
+            DialogueSubView (const CSMWorld::UniversalId& id,
+                             CSMDoc::Document& document,
+                             const CreatorFactoryBase& creatorFactory,
+                             bool sorting = false);
 
             virtual void setEditLock (bool locked);
 
@@ -182,12 +188,16 @@ namespace CSVWorld
             void revertRecord();
             void deleteRecord();
 
+            void cloneRequest();
+
             void dataChanged(const QModelIndex & index);
             ///\brief we need to care for deleting currently edited record
 
             void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
                                       const CSMWorld::UniversalId& id,
                                       const CSMDoc::Document* document);
+
+            void requestFocus (const std::string& id);
     };
 }
 

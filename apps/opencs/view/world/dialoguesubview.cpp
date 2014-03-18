@@ -31,6 +31,7 @@
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
+#include "tablebottombox.hpp"
 /*
 ==============================NotEditableSubDelegate==========================================
 */
@@ -379,7 +380,7 @@ void CSVWorld::EditWidget::remake(int row)
 */
 
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
-    bool createAndDelete) :
+    const CreatorFactoryBase& creatorFactory, bool sorting) :
 
     SubView (id),
     mEditWidget(0),
@@ -416,7 +417,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
     connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
-
+    connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneRequest()));
     connect(revertButton, SIGNAL(clicked()), this, SLOT(revertRecord()));
     connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteRecord()));
 
@@ -428,7 +429,21 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mMainLayout->addLayout(buttonsLayout);
     mMainLayout->addWidget(mEditWidget);
-    mEditWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+    mMainLayout->addWidget (mBottom =
+        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this));
+
+    mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+    connect(mBottom, SIGNAL(requestFocus(const std::string&)), this, SLOT(requestFocus(const std::string&)));
+    connect(addButton, SIGNAL(clicked()), mBottom, SLOT(createRequest()));
+
+    if(!mBottom->canCreateAndDelete())
+    {
+        cloneButton->setDisabled(true);
+        addButton->setDisabled(true);
+        deleteButton->setDisabled(true);
+    }
 
     dataChanged(mTable->index(mRow, 0));
     setWidget(mainWidget);
@@ -567,7 +582,10 @@ void CSVWorld::DialogueSubView::revertRecord()
 void CSVWorld::DialogueSubView::deleteRecord()
 {
     int rows = mTable->rowCount();
-    if (!mLocked && mTable->columnCount() > 0 && mRow < mTable->rowCount() )
+    if (!mLocked &&
+        mTable->columnCount() > 0 &&
+        mRow < mTable->rowCount() &&
+        mBottom->canCreateAndDelete())
     {
         mUndoStack.push(new CSMWorld::DeleteCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toStdString()));
         if (rows != mTable->rowCount())
@@ -585,4 +603,16 @@ void CSVWorld::DialogueSubView::deleteRecord()
             }
         }
     }
+}
+
+void CSVWorld::DialogueSubView::requestFocus (const std::string& id)
+{
+    mRow = mTable->getModelIndex (id, 0).row();
+    mEditWidget->remake(mRow);
+}
+
+void CSVWorld::DialogueSubView::cloneRequest ()
+{
+    mBottom->cloneRequest(mTable->data(mTable->index (mRow, 0)).toString().toStdString(),
+                          static_cast<CSMWorld::UniversalId::Type>(mTable->data(mTable->index(mRow, 2)).toInt()));
 }
