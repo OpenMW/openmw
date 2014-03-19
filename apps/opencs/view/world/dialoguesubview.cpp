@@ -405,21 +405,30 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     buttonsLayout->addWidget(nextButton, 1);
     buttonsLayout->addStretch(2);
 
-    QToolButton* previewButton = new QToolButton(mainWidget);
     QToolButton* cloneButton = new QToolButton(mainWidget);
     QToolButton* addButton = new QToolButton(mainWidget);
     QToolButton* deleteButton = new QToolButton(mainWidget);
     QToolButton* revertButton = new QToolButton(mainWidget);
 
-    previewButton->setEnabled(mTable->hasPreview());
+    if (mTable->hasPreview())
+    {
+        QToolButton* previewButton = new QToolButton(mainWidget);
+        buttonsLayout->addWidget(previewButton);
+        connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
+    }
 
-    buttonsLayout->addWidget(previewButton);
+    if (mTable->getViewing()!=CSMWorld::IdTable::Viewing_None)
+    {
+        QToolButton* viewButton = new QToolButton(mainWidget);
+        buttonsLayout->addWidget(viewButton);
+        connect(viewButton, SIGNAL(clicked()), this, SLOT(viewRecord()));
+    }
+
     buttonsLayout->addWidget(cloneButton);
     buttonsLayout->addWidget(addButton);
     buttonsLayout->addWidget(deleteButton);
     buttonsLayout->addWidget(revertButton);
 
-    connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
     connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
     connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
     connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneRequest()));
@@ -624,8 +633,19 @@ void CSVWorld::DialogueSubView::cloneRequest ()
 
 void CSVWorld::DialogueSubView::showPreview ()
 {
-    if (mTable->hasPreview())
+    if (mTable->hasPreview() && mRow < mTable->rowCount())
     {
        emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, mTable->data(mTable->index (mRow, 0)).toString().toStdString()), "");
+    }
+}
+
+void CSVWorld::DialogueSubView::viewRecord()
+{
+    if (mRow < mTable->rowCount())
+    {
+        std::pair<CSMWorld::UniversalId, std::string> params = mTable->view (mRow);
+
+        if (params.first.getType()!=CSMWorld::UniversalId::Type_None)
+            emit focusId (params.first, params.second);
     }
 }

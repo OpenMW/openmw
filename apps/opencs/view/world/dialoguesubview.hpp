@@ -187,6 +187,8 @@ namespace CSVWorld
 
             void showPreview();
 
+            void viewRecord();
+
             void revertRecord();
 
             void deleteRecord();
