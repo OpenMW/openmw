@@ -101,9 +101,6 @@ namespace OMW
             /// add a .zip resource
             void addZipResource (const boost::filesystem::path& path);
 
-            /// Load BSA files
-            void loadBSA();
-
             void executeLocalScripts();
 
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);

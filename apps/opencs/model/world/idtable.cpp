@@ -5,8 +5,8 @@
 #include "columnbase.hpp"
 
 CSMWorld::IdTable::IdTable (CollectionBase *idCollection, Reordering reordering,
-    Viewing viewing)
-: mIdCollection (idCollection), mReordering (reordering), mViewing (viewing)
+    Viewing viewing, bool preview)
+: mIdCollection (idCollection), mReordering (reordering), mViewing (viewing), mPreview (preview)
 {}
 
 CSMWorld::IdTable::~IdTable()
@@ -194,6 +194,11 @@ CSMWorld::IdTable::Reordering CSMWorld::IdTable::getReordering() const
 CSMWorld::IdTable::Viewing CSMWorld::IdTable::getViewing() const
 {
     return mViewing;
+}
+
+bool CSMWorld::IdTable::hasPreview() const
+{
+    return mPreview;
 }
 
 std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) const

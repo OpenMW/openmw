@@ -34,7 +34,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     SceneToolbar *toolbar = new SceneToolbar (48, this);
 
-    if (id.getId()[0]=='#')
+    if (id.getId()=="sys::default")
         mScene = new CSVRender::PagedWorldspaceWidget (this);
     else
         mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
