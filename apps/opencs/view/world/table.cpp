@@ -442,6 +442,7 @@ void CSVWorld::Table::previewRecord()
         emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id) , "");
     }
 }
+
 void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
     int columns = mModel->columnCount();

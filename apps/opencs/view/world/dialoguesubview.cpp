@@ -405,16 +405,21 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     buttonsLayout->addWidget(nextButton, 1);
     buttonsLayout->addStretch(2);
 
+    QToolButton* previewButton = new QToolButton(mainWidget);
     QToolButton* cloneButton = new QToolButton(mainWidget);
     QToolButton* addButton = new QToolButton(mainWidget);
     QToolButton* deleteButton = new QToolButton(mainWidget);
     QToolButton* revertButton = new QToolButton(mainWidget);
 
+    previewButton->setEnabled(mTable->hasPreview());
+
+    buttonsLayout->addWidget(previewButton);
     buttonsLayout->addWidget(cloneButton);
     buttonsLayout->addWidget(addButton);
     buttonsLayout->addWidget(deleteButton);
     buttonsLayout->addWidget(revertButton);
 
+    connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
     connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
     connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
     connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneRequest()));
@@ -615,4 +620,12 @@ void CSVWorld::DialogueSubView::cloneRequest ()
 {
     mBottom->cloneRequest(mTable->data(mTable->index (mRow, 0)).toString().toStdString(),
                           static_cast<CSMWorld::UniversalId::Type>(mTable->data(mTable->index(mRow, 2)).toInt()));
+}
+
+void CSVWorld::DialogueSubView::showPreview ()
+{
+    if (mTable->hasPreview())
+    {
+       emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, mTable->data(mTable->index (mRow, 0)).toString().toStdString()), "");
+    }
 }

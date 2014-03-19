@@ -185,7 +185,10 @@ namespace CSVWorld
 
             void prevId();
 
+            void showPreview();
+
             void revertRecord();
+
             void deleteRecord();
 
             void cloneRequest();
