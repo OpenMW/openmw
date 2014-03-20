@@ -353,7 +353,7 @@ void CSVWorld::EditWidget::remake(int row)
                 QLabel* label = new QLabel(mTable->headerData (i, Qt::Horizontal).toString(), mMainWidget);
                 label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
                 editor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-                if (! (mTable->flags (mTable->index (0, i)) & Qt::ItemIsEditable))
+                if (!mTable->flags (mTable->index (0, i)))
                 {
                     lockedLayout->addWidget (label, locked, 0);
                     lockedLayout->addWidget (editor, locked, 1);
@@ -370,7 +370,7 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    this->setMinimumWidth(325); //TODO find better way to set the width
+    this->setMinimumWidth(325); //TODO find better way to set the width or make it customizable
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }

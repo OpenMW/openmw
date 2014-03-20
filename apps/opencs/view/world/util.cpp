@@ -166,7 +166,9 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             display == CSMWorld::ColumnBase::Display_Script ||
             display == CSMWorld::ColumnBase::Display_Race ||
             display == CSMWorld::ColumnBase::Display_Class ||
-            display == CSMWorld::ColumnBase::Display_Faction)
+            display == CSMWorld::ColumnBase::Display_Faction ||
+            display == CSMWorld::ColumnBase::Display_Miscellaneous ||
+            display == CSMWorld::ColumnBase::Display_Sound)
         {
             return new DropLineEdit(parent);
         }

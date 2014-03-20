@@ -1560,7 +1560,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ResponseColumn : public Column<ESXRecordT>
     {
-        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_String) {}
+        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_LongString) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
