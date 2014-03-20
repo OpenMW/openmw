@@ -406,13 +406,18 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     buttonsLayout->addStretch(2);
 
     QToolButton* cloneButton = new QToolButton(mainWidget);
+    cloneButton->setIcon(QIcon(":/edit-clone.png"));
     QToolButton* addButton = new QToolButton(mainWidget);
+    addButton->setIcon(QIcon(":/add.png"));
     QToolButton* deleteButton = new QToolButton(mainWidget);
+    deleteButton->setIcon(QIcon(":/edit-delete.png"));
     QToolButton* revertButton = new QToolButton(mainWidget);
+    revertButton->setIcon(QIcon(":/edit-undo.png"));
 
     if (mTable->hasPreview())
     {
         QToolButton* previewButton = new QToolButton(mainWidget);
+        previewButton->setIcon(QIcon(":/edit-preview.png"));
         buttonsLayout->addWidget(previewButton);
         connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
     }
@@ -420,6 +425,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     if (mTable->getViewing()!=CSMWorld::IdTable::Viewing_None)
     {
         QToolButton* viewButton = new QToolButton(mainWidget);
+        viewButton->setIcon(QIcon(":/cell.png"));
         buttonsLayout->addWidget(viewButton);
         connect(viewButton, SIGNAL(clicked()), this, SLOT(viewRecord()));
     }
