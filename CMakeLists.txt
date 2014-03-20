@@ -38,8 +38,8 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
                 set(GIT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_RELEASE}")
 
-#                 if(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
-#                     message(FATAL_ERROR "Silly Zini forgot to update the version again...")
+                if(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+                    message(FATAL_ERROR "Silly Zini forgot to update the version again...")
                 else(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
                     set(OPENMW_VERSION_MAJOR ${GIT_VERSION_MAJOR})
                     set(OPENMW_VERSION_MINOR ${GIT_VERSION_MINOR})
