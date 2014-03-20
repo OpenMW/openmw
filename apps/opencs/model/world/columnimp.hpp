@@ -834,7 +834,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
@@ -1114,7 +1114,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
