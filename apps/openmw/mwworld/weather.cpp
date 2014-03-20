@@ -1,5 +1,8 @@
 #include "weather.hpp"
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -14,6 +17,15 @@
 using namespace Ogre;
 using namespace MWWorld;
 using namespace MWSound;
+
+#define HOUR                    "HOUR"
+#define WINDSPEED               "WNSP"
+#define CURRENTWEATHER          "CWTH"
+#define NEXTWEATHER             "NWTH"
+#define CURRENTREGION           "CREG"
+#define FIRSTUPDATE             "FUPD"
+#define REMAININGTRANSITIONTIME "RTTM"
+#define TIMEPASSED              "TMPS"
 
 namespace
 {
@@ -91,8 +103,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
      mHour(14), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
      mWeatherUpdateTime(0), mThunderFlash(0), mThunderChance(0),
      mThunderChanceNeeded(50), mThunderSoundDelay(0), mRemainingTransitionTime(0),
-     mMonth(0), mDay(0), mTimePassed(0), mFallback(fallback), mWindSpeed(0.f),
-     mRendering(rendering)
+     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering)
 {
     //Globals
     mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
@@ -530,7 +541,7 @@ void WeatherManager::stopSounds(bool stopAll)
     }
 }
 
-Ogre::String WeatherManager::nextWeather(const ESM::Region* region) const
+std::string WeatherManager::nextWeather(const ESM::Region* region) const
 {
     std::vector<char> probability;
 
@@ -597,12 +608,6 @@ Ogre::String WeatherManager::nextWeather(const ESM::Region* region) const
 void WeatherManager::setHour(const float hour)
 {
     mHour = hour;
-}
-
-void WeatherManager::setDate(const int day, const int month)
-{
-    mDay = day;
-    mMonth = month;
 }
 
 unsigned int WeatherManager::getWeatherID() const
@@ -689,6 +694,60 @@ bool WeatherManager::isDark() const
     bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
                      || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
     return exterior && (mHour < mSunriseTime || mHour > mNightStart - 1);
+}
+
+void WeatherManager::write(ESM::ESMWriter& writer)
+{
+    writer.startRecord(ESM::REC_WTHR);
+    writer.writeHNT(HOUR, mHour);
+    writer.writeHNT(WINDSPEED, mWindSpeed);
+    writer.writeHNCString(CURRENTWEATHER, mCurrentWeather.c_str());
+    writer.writeHNCString(NEXTWEATHER, mNextWeather.c_str());
+    writer.writeHNCString(CURRENTREGION, mCurrentRegion.c_str());
+    writer.writeHNT(FIRSTUPDATE, mFirstUpdate);
+    writer.writeHNT(REMAININGTRANSITIONTIME, mRemainingTransitionTime);
+    writer.writeHNT(TIMEPASSED, mTimePassed);
+    writer.endRecord(ESM::REC_WTHR);
+}
+
+bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)
+{
+    if(ESM::REC_WTHR == type)
+    {
+        // store state in locals so that if we fail to load, we don't leave the manager in a half-way state
+        float newHour = 0.0;
+        reader.getHNT(newHour, HOUR);
+        float newWindSpeed = 0.0;
+        reader.getHNT(newWindSpeed, WINDSPEED);
+        std::string newCurrentWeather = reader.getHNString(CURRENTWEATHER);
+        std::string newNextWeather = reader.getHNString(NEXTWEATHER);
+        std::string newCurrentRegion = reader.getHNString(CURRENTREGION);
+        bool newFirstUpdate = false;
+        reader.getHNT(newFirstUpdate, FIRSTUPDATE);
+        float newRemainingTransitionTime = 0.0;
+        reader.getHNT(newRemainingTransitionTime, REMAININGTRANSITIONTIME);
+        double newTimePassed = 0.0;
+        reader.getHNT(newTimePassed, TIMEPASSED);
+
+        // reset other temporary state
+        mRegionOverrides.clear();
+        stopSounds(true); // TODO: inconsistent state if this throws...
+        mRegionMods.clear();
+
+        // swap in new values, now that we can't fail
+        mHour = newHour;
+        mWindSpeed = newWindSpeed;
+        mCurrentWeather.swap(newCurrentWeather);
+        mNextWeather.swap(newNextWeather);
+        mCurrentRegion.swap(newCurrentRegion);
+        mFirstUpdate = newFirstUpdate;
+        mRemainingTransitionTime = newRemainingTransitionTime;
+        mTimePassed = newTimePassed;
+
+        return true;
+    }
+
+    return false;
 }
 
 void WeatherManager::switchToNextWeather(bool instantly)
