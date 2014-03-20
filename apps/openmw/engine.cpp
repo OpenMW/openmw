@@ -12,7 +12,7 @@
 
 #include <components/compiler/extensions0.hpp>
 
-#include <components/bsa/bsa_archive.hpp>
+#include <components/bsa/resources.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
 #include <components/nif/niffile.hpp>
@@ -192,50 +192,6 @@ OMW::Engine::~Engine()
     SDL_Quit();
 }
 
-// Load BSA files
-
-void OMW::Engine::loadBSA()
-{
-    // We use separate resource groups to handle location priority.
-    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
-
-    int i=0;
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-    {
-        // Last data dir has the highest priority
-        std::string groupName = "Data" + Ogre::StringConverter::toString(dataDirs.size()-i, 8, '0');
-        Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
-
-        std::string dataDirectory = iter->string();
-        std::cout << "Data dir " << dataDirectory << std::endl;
-        Bsa::addDir(dataDirectory, mFSStrict, groupName);
-        ++i;
-    }
-
-    i=0;
-    for (std::vector<std::string>::const_iterator archive = mArchives.begin(); archive != mArchives.end(); ++archive)
-    {
-        if (mFileCollections.doesExist(*archive))
-        {
-            // Last BSA has the highest priority
-            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(mArchives.size()-i, 8, '0');
-
-            Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
-
-            const std::string archivePath = mFileCollections.getPath(*archive).string();
-            std::cout << "Adding BSA archive " << archivePath << std::endl;
-            Bsa::addBSA(archivePath, groupName);
-            ++i;
-        }
-        else
-        {
-            std::stringstream message;
-            message << "Archive '" << *archive << "' not found";
-            throw std::runtime_error(message.str());
-        }
-    }
-}
-
 // add resources directory
 // \note This function works recursively.
 
@@ -385,8 +341,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mOgre->createWindow("OpenMW", windowSettings);
 
-    loadBSA();
-
+    Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so

@@ -19,3 +19,9 @@ void CSVDoc::SubView::updateEditorSetting (const QString &settingName, const QSt
 void CSVDoc::SubView::setStatusBar (bool show) {}
 
 void CSVDoc::SubView::useHint (const std::string& hint) {}
+
+void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
+{
+    mUniversalId = id;
+    setWindowTitle (mUniversalId.toString().c_str());
+}

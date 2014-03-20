@@ -15,7 +15,7 @@ add_component_dir (nifoverrides
     )
 
 add_component_dir (bsa
-    bsa_archive bsa_file
+    bsa_archive bsa_file resources
     )
 
 add_component_dir (nif

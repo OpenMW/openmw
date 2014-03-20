@@ -1,10 +1,14 @@
 #ifndef CS_EDITOR_H
 #define CS_EDITOR_H
 
+#include <memory>
+
 #include <QObject>
 #include <QString>
 #include <QLocalServer>
 #include <QLocalSocket>
+
+#include <extern/shiny/Main/Factory.hpp>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
@@ -41,12 +45,13 @@ namespace CS
             CSVDoc::NewGameDialogue mNewGame;
             CSVSettings::UserSettingsDialog mSettings;
             CSVDoc::FileDialog mFileDialog;
-
             boost::filesystem::path mLocal;
+            boost::filesystem::path mResources;
+            bool mFsStrict;
 
             void setupDataFiles (const Files::PathContainer& dataDirs);
 
-            Files::PathContainer readConfig();
+            std::pair<Files::PathContainer, std::vector<std::string> > readConfig();
             ///< \return data paths
 
             // not implemented
@@ -62,6 +67,9 @@ namespace CS
 
             int run();
             ///< \return error status
+
+            std::auto_ptr<sh::Factory> setupGraphics();
+            ///< The returned factory must persist at least as long as *this.
 
         private slots:
 

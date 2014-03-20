@@ -202,7 +202,7 @@ namespace CSMWorld
     struct DescriptionColumn : public Column<ESXRecordT>
     {
         DescriptionColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_LongString)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -834,7 +834,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
@@ -1114,7 +1114,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
@@ -1380,7 +1380,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct QuestDescriptionColumn : public Column<ESXRecordT>
     {
-        QuestDescriptionColumn() : Column<ESXRecordT> (Columns::ColumnId_QuestDescription, ColumnBase::Display_String) {}
+        QuestDescriptionColumn() : Column<ESXRecordT> (Columns::ColumnId_QuestDescription, ColumnBase::Display_LongString) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1560,7 +1560,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ResponseColumn : public Column<ESXRecordT>
     {
-        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_String) {}
+        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_LongString) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

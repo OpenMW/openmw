@@ -39,18 +39,6 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
             if (mCreateAction)
                 menu.addAction(mCloneAction);
-
-            if (mModel->getViewing()!=CSMWorld::IdTable::Viewing_None)
-            {
-                int row = selectedRows.begin()->row();
-
-                row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
-
-                CSMWorld::UniversalId id = mModel->view (row).first;
-
-                if (!mDocument.getData().getCells().getRecord (id.getId()).isDeleted())
-                    menu.addAction (mViewAction);
-            }
         }
 
         if (mCreateAction)
@@ -93,6 +81,28 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 }
             }
         }
+    }
+
+    if (selectedRows.size()==1)
+    {
+        if (mModel->getViewing()!=CSMWorld::IdTable::Viewing_None)
+        {
+            int row = selectedRows.begin()->row();
+
+            row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
+
+            CSMWorld::UniversalId id = mModel->view (row).first;
+
+            int index = mDocument.getData().getCells().searchId (id.getId());
+            // index==-1: the ID references a worldspace instead of a cell (ignore for now and go
+            // ahead)
+
+            if (index==-1 || !mDocument.getData().getCells().getRecord (index).isDeleted())
+                menu.addAction (mViewAction);
+        }
+
+        if (mModel->hasPreview())
+            menu.addAction (mPreviewAction);
     }
 
     menu.exec (event->globalPos());
@@ -248,6 +258,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mViewAction = new QAction (tr ("View"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
     addAction (mViewAction);
+
+    mPreviewAction = new QAction (tr ("Preview"), this);
+    connect (mPreviewAction, SIGNAL (triggered()), this, SLOT (previewRecord()));
+    addAction (mPreviewAction);
 
     connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
@@ -406,7 +420,7 @@ void CSVWorld::Table::viewRecord()
 
     if (selectedRows.size()==1)
     {
-        int row =selectedRows.begin()->row();
+        int row = selectedRows.begin()->row();
 
         row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
 
@@ -414,6 +428,18 @@ void CSVWorld::Table::viewRecord()
 
         if (params.first.getType()!=CSMWorld::UniversalId::Type_None)
             emit editRequest (params.first, params.second);
+    }
+}
+
+void CSVWorld::Table::previewRecord()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    if (selectedRows.size()==1)
+    {
+        std::string id = getUniversalId (selectedRows.begin()->row()).getId();
+
+        emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id) , "");
     }
 }
 
@@ -508,27 +534,14 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
-
-        Qt::DropActions action = Qt::IgnoreAction;
-        switch (QApplication::keyboardModifiers())
-        {
-            case Qt::ControlModifier:
-                action = Qt::CopyAction;
-                break;
-
-            case Qt::ShiftModifier:
-                action = Qt::MoveAction;
-                break;
-        }
-
-        drag->exec(action);
+        drag->exec(Qt::CopyAction);
     }
 
 }
 
 void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
 {
-        event->acceptProposedAction();
+    event->acceptProposedAction();
 }
 
 void CSVWorld::Table::dropEvent(QDropEvent *event)
@@ -560,7 +573,7 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
 {
-        event->accept();
+    event->accept();
 }
 
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const

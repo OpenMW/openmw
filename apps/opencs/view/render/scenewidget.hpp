@@ -34,6 +34,8 @@ namespace CSVRender
             void setNavigation (Navigation *navigation);
             ///< \attention The ownership of \a navigation is not transferred to *this.
 
+            Ogre::SceneManager *getSceneManager();
+
         private:
             void paintEvent(QPaintEvent* e);
             void resizeEvent(QResizeEvent* e);

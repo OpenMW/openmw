@@ -48,6 +48,8 @@ namespace CSMWorld
 
             UniversalId returnMatching(UniversalId::Type type) const;
 
+            const CSMDoc::Document* getDocumentPtr() const;
+
             UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
 
             static CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);

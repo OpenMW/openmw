@@ -60,11 +60,12 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit
+    scenetoolmode infocreator scriptedit dialoguesubview previewsubview
     )
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
+    previewwidget
     )
 
 opencs_units_noqt (view/render
@@ -72,8 +73,7 @@ opencs_units_noqt (view/render
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview subviews
-    enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
+    subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator
     )
 
@@ -147,6 +147,9 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
+set(BOOST_COMPONENTS system filesystem program_options thread wave)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+
 find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 include(${QT_USE_FILE})
 
@@ -187,6 +190,8 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(opencs
+    ${OGRE_LIBRARIES}
+    ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}
     components
