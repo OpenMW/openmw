@@ -37,7 +37,6 @@ namespace CSMWorld
         }
     };
 
-    /// \note Shares ID with IdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct StringIdColumn : public Column<ESXRecordT>
     {
@@ -838,11 +837,11 @@ namespace CSMWorld
         }
     };
 
-    /// \note Shares ID with StringIdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct IdColumn : public Column<ESXRecordT>
     {
-        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String) {}
+        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_ReferenceableId,
+            ColumnBase::Display_Referenceable) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
