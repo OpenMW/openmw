@@ -596,9 +596,15 @@ void CSVWorld::DialogueSubView::revertRecord()
 void CSVWorld::DialogueSubView::deleteRecord()
 {
     int rows = mTable->rowCount();
+
+    //easier than disabling the button
+    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
+    bool deledetedOrErased = (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased);
+
     if (!mLocked &&
         mTable->columnCount() > 0 &&
-        mRow < mTable->rowCount() &&
+        !deledetedOrErased &&
+        mRow < rows &&
         mBottom->canCreateAndDelete())
     {
         mUndoStack.push(new CSMWorld::DeleteCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toStdString()));
