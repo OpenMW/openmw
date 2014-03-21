@@ -1,5 +1,5 @@
-#ifndef OPENMW_ESM_WEATHER_H
-#define OPENMW_ESM_WEATHER_H
+#ifndef OPENMW_ESM_WEATHERSTATE_H
+#define OPENMW_ESM_WEATHERSTATE_H
 
 #include <string>
 
