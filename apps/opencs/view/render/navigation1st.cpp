@@ -10,7 +10,7 @@ CSVRender::Navigation1st::Navigation1st() : mCamera (0) {}
 bool CSVRender::Navigation1st::activate (Ogre::Camera *camera)
 {
     mCamera = camera;
-    mCamera->setFixedYawAxis (true);
+    mCamera->setFixedYawAxis (true, Ogre::Vector3::UNIT_Z);
 
     Ogre::Radian pitch = mCamera->getOrientation().getPitch();
 

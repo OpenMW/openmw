@@ -49,6 +49,7 @@ namespace CSVRender
         mCamera->lookAt(0,0,0);
         mCamera->setNearClipDistance(0.1);
         mCamera->setFarClipDistance(30000);
+        mCamera->roll (Ogre::Degree (90));
 
         QTimer *timer = new QTimer (this);
 
