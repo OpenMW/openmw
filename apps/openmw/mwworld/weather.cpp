@@ -1,7 +1,6 @@
 #include "weather.hpp"
 
-#include <components/esm/esmreader.hpp>
-#include <components/esm/esmwriter.hpp>
+#include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -17,15 +16,6 @@
 using namespace Ogre;
 using namespace MWWorld;
 using namespace MWSound;
-
-#define HOUR                    "HOUR"
-#define WINDSPEED               "WNSP"
-#define CURRENTWEATHER          "CWTH"
-#define NEXTWEATHER             "NWTH"
-#define CURRENTREGION           "CREG"
-#define FIRSTUPDATE             "FUPD"
-#define REMAININGTRANSITIONTIME "RTTM"
-#define TIMEPASSED              "TMPS"
 
 namespace
 {
@@ -698,15 +688,18 @@ bool WeatherManager::isDark() const
 
 void WeatherManager::write(ESM::ESMWriter& writer)
 {
+    ESM::WeatherState state;
+    state.mHour = mHour;
+    state.mWindSpeed = mWindSpeed;
+    state.mCurrentWeather = mCurrentWeather;
+    state.mNextWeather = mNextWeather;
+    state.mCurrentRegion = mCurrentRegion;
+    state.mFirstUpdate = mFirstUpdate;
+    state.mRemainingTransitionTime = mRemainingTransitionTime;
+    state.mTimePassed = mTimePassed;
+
     writer.startRecord(ESM::REC_WTHR);
-    writer.writeHNT(HOUR, mHour);
-    writer.writeHNT(WINDSPEED, mWindSpeed);
-    writer.writeHNCString(CURRENTWEATHER, mCurrentWeather.c_str());
-    writer.writeHNCString(NEXTWEATHER, mNextWeather.c_str());
-    writer.writeHNCString(CURRENTREGION, mCurrentRegion.c_str());
-    writer.writeHNT(FIRSTUPDATE, mFirstUpdate);
-    writer.writeHNT(REMAININGTRANSITIONTIME, mRemainingTransitionTime);
-    writer.writeHNT(TIMEPASSED, mTimePassed);
+    state.save(writer);
     writer.endRecord(ESM::REC_WTHR);
 }
 
@@ -714,35 +707,27 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)
 {
     if(ESM::REC_WTHR == type)
     {
-        // store state in locals so that if we fail to load, we don't leave the manager in a half-way state
-        float newHour = 0.0;
-        reader.getHNT(newHour, HOUR);
-        float newWindSpeed = 0.0;
-        reader.getHNT(newWindSpeed, WINDSPEED);
-        std::string newCurrentWeather = reader.getHNString(CURRENTWEATHER);
-        std::string newNextWeather = reader.getHNString(NEXTWEATHER);
-        std::string newCurrentRegion = reader.getHNString(CURRENTREGION);
-        bool newFirstUpdate = false;
-        reader.getHNT(newFirstUpdate, FIRSTUPDATE);
-        float newRemainingTransitionTime = 0.0;
-        reader.getHNT(newRemainingTransitionTime, REMAININGTRANSITIONTIME);
-        double newTimePassed = 0.0;
-        reader.getHNT(newTimePassed, TIMEPASSED);
+        // load first so that if it fails, we haven't accidentally reset the state below
+        ESM::WeatherState state;
+        state.load(reader);
 
-        // reset other temporary state
+        // reset other temporary state, now that we loaded successfully
+        stopSounds(true); // let's hope this never throws
         mRegionOverrides.clear();
-        stopSounds(true); // TODO: inconsistent state if this throws...
         mRegionMods.clear();
+        mThunderFlash = 0.0;
+        mThunderChance = 0.0;
+        mThunderChanceNeeded = 50.0;
 
-        // swap in new values, now that we can't fail
-        mHour = newHour;
-        mWindSpeed = newWindSpeed;
-        mCurrentWeather.swap(newCurrentWeather);
-        mNextWeather.swap(newNextWeather);
-        mCurrentRegion.swap(newCurrentRegion);
-        mFirstUpdate = newFirstUpdate;
-        mRemainingTransitionTime = newRemainingTransitionTime;
-        mTimePassed = newTimePassed;
+        // swap in the loaded values now that we can't fail
+        mHour = state.mHour;
+        mWindSpeed = state.mWindSpeed;
+        mCurrentWeather.swap(state.mCurrentWeather);
+        mNextWeather.swap(state.mNextWeather);
+        mCurrentRegion.swap(state.mCurrentRegion);
+        mFirstUpdate = state.mFirstUpdate;
+        mRemainingTransitionTime = state.mRemainingTransitionTime;
+        mTimePassed = state.mTimePassed;
 
         return true;
     }
