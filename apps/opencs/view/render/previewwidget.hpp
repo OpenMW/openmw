@@ -46,6 +46,8 @@ namespace CSVRender
 
             void closeRequest();
 
+            void referenceableIdChanged (const std::string& id);
+
         private slots:
 
             void ReferenceableDataChanged (const QModelIndex& topLeft,

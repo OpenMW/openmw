@@ -149,7 +149,7 @@ void CSVRender::PreviewWidget::ReferenceDataChanged (const QModelIndex& topLeft,
         if (index.column()>=topLeft.column() && index.column()<=bottomRight.row())
         {
             mReferenceableId = references.data (index).toString().toUtf8().constData();
-            /// \todo update title
+            emit referenceableIdChanged (mReferenceableId);
             setModel();
         }
 
