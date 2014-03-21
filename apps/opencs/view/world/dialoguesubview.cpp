@@ -1,4 +1,3 @@
-
 #include "dialoguesubview.hpp"
 
 #include <utility>
@@ -122,7 +121,7 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
 {
     QLineEdit* lineEdit = qobject_cast<QLineEdit*>(mEditor);
     {
-        if (!lineEdit or !mIndexWrapper.get())
+        if (!lineEdit || !mIndexWrapper.get())
         {
             return;
         }
