@@ -143,6 +143,6 @@ void CSMTools::Tools::verifierMessage (const QString& message, int type)
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (message.toStdString());
+        mReports[iter->second]->add (message.toUtf8().constData());
 }
 

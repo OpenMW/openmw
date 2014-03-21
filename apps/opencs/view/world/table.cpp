@@ -289,7 +289,7 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
 {
     return CSMWorld::UniversalId (
         static_cast<CSMWorld::UniversalId::Type> (mProxyModel->data (mProxyModel->index (row, 2)).toInt()),
-        mProxyModel->data (mProxyModel->index (row, 0)).toString().toStdString());
+        mProxyModel->data (mProxyModel->index (row, 0)).toString().toUtf8().constData());
 }
 
 void CSVWorld::Table::revertRecord()
@@ -533,7 +533,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
         }
 
         drag->setMimeData (mime);
-        drag->setPixmap (QString::fromStdString (mime->getIcon()));
+        drag->setPixmap (QString::fromUtf8 (mime->getIcon().c_str()));
         drag->exec(Qt::CopyAction);
     }
 
@@ -588,7 +588,7 @@ std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::Column
 
         if (display == columndisplay)
         {
-            titles.push_back(mModel->headerData (i, Qt::Horizontal).toString().toStdString());
+            titles.push_back(mModel->headerData (i, Qt::Horizontal).toString().toUtf8().constData());
         }
     }
     return titles;

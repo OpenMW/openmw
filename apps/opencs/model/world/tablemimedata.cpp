@@ -8,7 +8,7 @@ CSMWorld::TableMimeData::TableMimeData (UniversalId id, const CSMDoc::Document& 
 mDocument(document)
 {
     mUniversalId.push_back (id);
-    mObjectsFormats << QString::fromStdString ("tabledata/" + id.getTypeName());
+    mObjectsFormats << QString::fromUtf8 (("tabledata/" + id.getTypeName()).c_str());
 }
 
 CSMWorld::TableMimeData::TableMimeData (std::vector< CSMWorld::UniversalId >& id, const CSMDoc::Document& document) :
@@ -16,7 +16,7 @@ CSMWorld::TableMimeData::TableMimeData (std::vector< CSMWorld::UniversalId >& id
 {
     for (std::vector<UniversalId>::iterator it (mUniversalId.begin()); it != mUniversalId.end(); ++it)
     {
-        mObjectsFormats << QString::fromStdString ("tabledata/" + it->getTypeName());
+        mObjectsFormats << QString::fromUtf8 (("tabledata/" + it->getTypeName()).c_str());
     }
 }
 

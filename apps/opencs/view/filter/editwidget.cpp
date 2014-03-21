@@ -120,7 +120,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
         {
             ss<<"!or(";
         } else {
-            ss << orAnd << oldContent.toStdString() << ',';
+            ss << orAnd << oldContent.toUtf8().constData() << ',';
         }
 
         for (unsigned i = 0; i < count; ++i)
@@ -137,7 +137,7 @@ void CSVFilter::EditWidget::createFilterRequest (std::vector< std::pair< std::st
     } else {
         if (!replaceMode)
         {
-            ss << orAnd << oldContent.toStdString() <<',';
+            ss << orAnd << oldContent.toUtf8().constData() <<',';
         } else {
             ss<<'!';
         }
