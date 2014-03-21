@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_WEATHER_H
 #define GAME_MWWORLD_WEATHER_H
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 
 #include <OgreColourValue.h>
