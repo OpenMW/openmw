@@ -27,6 +27,9 @@ namespace CSMWorld
 
     class TableMimeData : public QMimeData
     {
+            std::vector<UniversalId> mUniversalId;
+            QStringList mObjectsFormats;
+            const CSMDoc::Document& mDocument;
         public:
             TableMimeData(UniversalId id, const CSMDoc::Document& document);
 
@@ -56,9 +59,8 @@ namespace CSMWorld
             static CSMWorld::ColumnBase::Display convertEnums(CSMWorld::UniversalId::Type type);
 
         private:
-            std::vector<UniversalId> mUniversalId;
-            QStringList mObjectsFormats;
-            const CSMDoc::Document& mDocument;
+            bool isReferencable(CSMWorld::UniversalId::Type type) const;
+            bool isReferencable(CSMWorld::ColumnBase::Display type) const;
 
     };
 }

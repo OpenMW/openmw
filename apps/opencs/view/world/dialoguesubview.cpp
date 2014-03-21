@@ -122,18 +122,45 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
 {
     QLineEdit* lineEdit = qobject_cast<QLineEdit*>(mEditor);
     {
-      if (!lineEdit or !mIndexWrapper.get())
-      {
-	return;
-      }
+        if (!lineEdit or !mIndexWrapper.get())
+        {
+            return;
+        }
     }
     for (unsigned i = 0; i < data.size();  ++i)
     {
-        if (mDisplay == CSMWorld::TableMimeData::convertEnums(data[i].getType()))
+        CSMWorld::UniversalId::Type type = data[i].getType();
+        if (mDisplay == CSMWorld::ColumnBase::Display_Referenceable)
         {
-	    emit tableMimeDataDropped(mEditor, mIndexWrapper->mIndex, data[i], document);
-	    emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
-	    break;
+            if (  type == CSMWorld::UniversalId::Type_Activator
+                || type == CSMWorld::UniversalId::Type_Potion
+                || type == CSMWorld::UniversalId::Type_Apparatus
+                || type == CSMWorld::UniversalId::Type_Armor
+                || type == CSMWorld::UniversalId::Type_Book
+                || type == CSMWorld::UniversalId::Type_Clothing
+                || type == CSMWorld::UniversalId::Type_Container
+                || type == CSMWorld::UniversalId::Type_Creature
+                || type == CSMWorld::UniversalId::Type_Door
+                || type == CSMWorld::UniversalId::Type_Ingredient
+                || type == CSMWorld::UniversalId::Type_CreatureLevelledList
+                || type == CSMWorld::UniversalId::Type_ItemLevelledList
+                || type == CSMWorld::UniversalId::Type_Light
+                || type == CSMWorld::UniversalId::Type_Lockpick
+                || type == CSMWorld::UniversalId::Type_Miscellaneous
+                || type == CSMWorld::UniversalId::Type_Npc
+                || type == CSMWorld::UniversalId::Type_Probe
+                || type == CSMWorld::UniversalId::Type_Repair
+                || type == CSMWorld::UniversalId::Type_Static
+                || type == CSMWorld::UniversalId::Type_Weapon)
+            {
+                type = CSMWorld::UniversalId::Type_Referenceable;
+            }
+        }
+        if (mDisplay == CSMWorld::TableMimeData::convertEnums(type))
+        {
+            emit tableMimeDataDropped(mEditor, mIndexWrapper->mIndex, data[i], document);
+            emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+            break;
         }
     }
 }

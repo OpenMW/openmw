@@ -64,14 +64,69 @@ std::vector< CSMWorld::UniversalId > CSMWorld::TableMimeData::getData() const
     return mUniversalId;
 }
 
+bool CSMWorld::TableMimeData::isReferencable(CSMWorld::ColumnBase::Display type) const
+{
+return (  type == CSMWorld::ColumnBase::Display_Activator
+       || type == CSMWorld::ColumnBase::Display_Potion
+       || type == CSMWorld::ColumnBase::Display_Apparatus
+       || type == CSMWorld::ColumnBase::Display_Armor
+       || type == CSMWorld::ColumnBase::Display_Book
+       || type == CSMWorld::ColumnBase::Display_Clothing
+       || type == CSMWorld::ColumnBase::Display_Container
+       || type == CSMWorld::ColumnBase::Display_Creature
+       || type == CSMWorld::ColumnBase::Display_Door
+       || type == CSMWorld::ColumnBase::Display_Ingredient
+       || type == CSMWorld::ColumnBase::Display_CreatureLevelledList
+       || type == CSMWorld::ColumnBase::Display_ItemLevelledList
+       || type == CSMWorld::ColumnBase::Display_Light
+       || type == CSMWorld::ColumnBase::Display_Lockpick
+       || type == CSMWorld::ColumnBase::Display_Miscellaneous
+       || type == CSMWorld::ColumnBase::Display_Npc
+       || type == CSMWorld::ColumnBase::Display_Probe
+       || type == CSMWorld::ColumnBase::Display_Repair
+       || type == CSMWorld::ColumnBase::Display_Static
+       || type == CSMWorld::ColumnBase::Display_Weapon);
+}
+bool CSMWorld::TableMimeData::isReferencable(CSMWorld::UniversalId::Type type) const
+{
+     return (  type == CSMWorld::UniversalId::Type_Activator
+            || type == CSMWorld::UniversalId::Type_Potion
+            || type == CSMWorld::UniversalId::Type_Apparatus
+            || type == CSMWorld::UniversalId::Type_Armor
+            || type == CSMWorld::UniversalId::Type_Book
+            || type == CSMWorld::UniversalId::Type_Clothing
+            || type == CSMWorld::UniversalId::Type_Container
+            || type == CSMWorld::UniversalId::Type_Creature
+            || type == CSMWorld::UniversalId::Type_Door
+            || type == CSMWorld::UniversalId::Type_Ingredient
+            || type == CSMWorld::UniversalId::Type_CreatureLevelledList
+            || type == CSMWorld::UniversalId::Type_ItemLevelledList
+            || type == CSMWorld::UniversalId::Type_Light
+            || type == CSMWorld::UniversalId::Type_Lockpick
+            || type == CSMWorld::UniversalId::Type_Miscellaneous
+            || type == CSMWorld::UniversalId::Type_Npc
+            || type == CSMWorld::UniversalId::Type_Probe
+            || type == CSMWorld::UniversalId::Type_Repair
+            || type == CSMWorld::UniversalId::Type_Static
+            || type == CSMWorld::UniversalId::Type_Weapon);
+}
 
 bool CSMWorld::TableMimeData::holdsType (CSMWorld::UniversalId::Type type) const
 {
+    bool referencable = (type == CSMWorld::UniversalId::Type_Referenceable);
     for (std::vector<UniversalId>::const_iterator it = mUniversalId.begin(); it != mUniversalId.end(); ++it)
     {
-        if (it->getType() == type)
+        if (referencable)
         {
-            return true;
+            if (isReferencable(it->getType()))
+            {
+                return true;
+            }
+        } else {
+        if (it->getType() == type)
+            {
+                return true;
+            }
         }
     }
 
@@ -80,11 +135,20 @@ bool CSMWorld::TableMimeData::holdsType (CSMWorld::UniversalId::Type type) const
 
 bool CSMWorld::TableMimeData::holdsType (CSMWorld::ColumnBase::Display type) const
 {
+    bool referencable = (type == CSMWorld::ColumnBase::Display_Referenceable);
     for (std::vector<UniversalId>::const_iterator it = mUniversalId.begin(); it != mUniversalId.end(); ++it)
     {
-        if (it->getType() == convertEnums (type))
+        if (referencable)
         {
-            return true;
+            if (isReferencable(it->getType()))
+            {
+                return true;
+            }
+        } else {
+        if (it->getType() == convertEnums (type))
+            {
+                return true;
+            }
         }
     }
 
@@ -93,11 +157,21 @@ bool CSMWorld::TableMimeData::holdsType (CSMWorld::ColumnBase::Display type) con
 
 CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::UniversalId::Type type) const
 {
+    bool referencable = (type == CSMWorld::UniversalId::Type_Referenceable);
     for (std::vector<UniversalId>::const_iterator it = mUniversalId.begin(); it != mUniversalId.end(); ++it)
     {
-        if (it->getType() == type)
+        if (referencable)
         {
-            return *it;
+            if (isReferencable(it->getType()))
+            {
+                return *it;
+            }
+        } else
+        {
+            if (it->getType() == type)
+            {
+                return *it;
+            }
         }
     }
 
@@ -106,11 +180,20 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::Univers
 
 CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnBase::Display type) const
 {
+    bool referencable = (type == CSMWorld::ColumnBase::Display_Referenceable);
     for (std::vector<UniversalId>::const_iterator it = mUniversalId.begin(); it != mUniversalId.end(); ++it)
     {
-        if (it->getType() == convertEnums (type))
+        if (referencable)
         {
-            return *it;
+            if (isReferencable(it->getType()))
+            {
+                return *it;
+            }
+        } else {
+            if (it->getType() == convertEnums (type))
+            {
+                return *it;
+            }
         }
     }
 
