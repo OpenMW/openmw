@@ -30,9 +30,16 @@ void CSVRender::PreviewWidget::setModel()
     {
         mObject.setNull();
 
-        int column = mData.getReferenceables().findColumnIndex (CSMWorld::Columns::ColumnId_Model);
+        if (mReferenceableId.empty())
+            return;
 
-        int row = mData.getReferenceables().getIndex (mReferenceableId);
+        int column =
+            mData.getReferenceables().findColumnIndex (CSMWorld::Columns::ColumnId_Model);
+
+        int row = mData.getReferenceables().searchId (mReferenceableId);
+
+        if (row==-1)
+            return;
 
         QVariant value = mData.getReferenceables().getData (row, column);
 
@@ -142,6 +149,7 @@ void CSVRender::PreviewWidget::ReferenceDataChanged (const QModelIndex& topLeft,
         if (index.column()>=topLeft.column() && index.column()<=bottomRight.row())
         {
             mReferenceableId = references.data (index).toString().toUtf8().constData();
+            /// \todo update title
             setModel();
         }
 
