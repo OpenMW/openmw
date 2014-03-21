@@ -9,16 +9,6 @@
 #include "steering.hpp"
 #include "movement.hpp"
 
-namespace
-{
-    float sgn(float a)
-    {
-        if(a > 0)
-            return 1.0;
-        return -1.0;
-    }
-}
-
 namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z)
@@ -43,7 +33,7 @@ namespace MWMechanics
         MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
         {
-            int sideX = sgn(cell->mData.mX - player.getCell()->getCell()->mData.mX);
+            int sideX = PathFinder::sgn(cell->mData.mX - player.getCell()->getCell()->mData.mX);
             //check if actor is near the border of an inactive cell. If so, stop walking.
             if(sideX * (pos.pos[0] - cell->mData.mX*ESM::Land::REAL_SIZE) >
                sideX * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
@@ -54,7 +44,7 @@ namespace MWMechanics
         }
         if(cell->mData.mY != player.getCell()->getCell()->mData.mY)
         {
-            int sideY = sgn(cell->mData.mY - player.getCell()->getCell()->mData.mY);
+            int sideY = PathFinder::sgn(cell->mData.mY - player.getCell()->getCell()->mData.mY);
             //check if actor is near the border of an inactive cell. If so, stop walking.
             if(sideY * (pos.pos[1] - cell->mData.mY*ESM::Land::REAL_SIZE) >
                sideY * (ESM::Land::REAL_SIZE/2.0f - 200.0f))

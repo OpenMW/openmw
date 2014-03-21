@@ -121,13 +121,15 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
-        ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
+        ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
+        int activationDistanceOverride, const std::string& startCell)
     : mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
-      mActivationDistanceOverride (mActivationDistanceOverride),
+      mActivationDistanceOverride (activationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(true),
       mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles),
-      mGoToJail(false)
+      mGoToJail(false),
+      mStartCell (startCell)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -168,7 +170,7 @@ namespace MWWorld
         mWorldScene = new Scene(*mRendering, mPhysics);
     }
 
-    void World::startNewGame()
+    void World::startNewGame (bool bypass)
     {
         mGoToJail = false;
         mLevitationEnabled = true;
@@ -181,23 +183,44 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
-        // FIXME: this will add cell 0,0 as visible on the global map
-        ESM::Position pos;
-        const int cellSize = 8192;
-        pos.pos[0] = cellSize/2;
-        pos.pos[1] = cellSize/2;
-        pos.pos[2] = 0;
-        pos.rot[0] = 0;
-        pos.rot[1] = 0;
-        pos.rot[2] = 0;
-        mWorldScene->changeToExteriorCell(pos);
+        if (bypass && !mStartCell.empty())
+        {
+            ESM::Position pos;
 
-        // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
-        mPlayIntro = 2;
+            if (findExteriorPosition (mStartCell, pos))
+            {
+                changeToExteriorCell (pos);
+            }
+            else
+            {
+                findInteriorPosition (mStartCell, pos);
+                changeToInteriorCell (mStartCell, pos);
+            }
+        }
+        else
+        {
+            /// \todo if !bypass, do not add player location to global map for the duration of one
+            /// frame
+            ESM::Position pos;
+            const int cellSize = 8192;
+            pos.pos[0] = cellSize/2;
+            pos.pos[1] = cellSize/2;
+            pos.pos[2] = 0;
+            pos.rot[0] = 0;
+            pos.rot[1] = 0;
+            pos.rot[2] = 0;
+            mWorldScene->changeToExteriorCell(pos);
+        }
 
-        // set new game mark
-        mGlobalVariables["chargenstate"].setInteger (1);
-        mGlobalVariables["pcrace"].setInteger (3);
+        if (!bypass)
+        {
+            // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
+            mPlayIntro = 2;
+
+            // set new game mark
+            mGlobalVariables["chargenstate"].setInteger (1);
+            mGlobalVariables["pcrace"].setInteger (3);
+        }
 
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
@@ -1626,7 +1649,7 @@ namespace MWWorld
         if (ptr.getClass().getCreatureStats(ptr).isDead())
             return false;
 
-        if (ptr.getClass().isFlying(ptr))
+        if (ptr.getClass().canFly(ptr))
             return true;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);

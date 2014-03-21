@@ -23,18 +23,7 @@
 #include "travelwindow.hpp"
 #include "bookpage.hpp"
 
-
-namespace
-{
-    MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
-    {
-        typedef MWGui::BookTypesetter::Utf8Point point;
-
-        point begin = reinterpret_cast <point> (text);
-
-        return MWGui::BookTypesetter::Utf8Span (begin, begin + strlen (text));
-    }
-}
+#include "journalbooks.hpp" // to_utf8_span
 
 namespace MWGui
 {

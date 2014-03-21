@@ -236,3 +236,8 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
 
     return std::make_pair (UniversalId (UniversalId::Type_Scene, id), hint);
 }
+
+int CSMWorld::IdTable::getColumnId(int column) const
+{
+    return mIdCollection->getColumn(column).getId();
+}

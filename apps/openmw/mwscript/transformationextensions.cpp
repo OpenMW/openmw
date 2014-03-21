@@ -99,7 +99,7 @@ namespace MWScript
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
                     else
-                        throw std::runtime_error ("invalid ration axis: " + axis);
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -128,7 +128,7 @@ namespace MWScript
                         runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees());
                     }
                     else
-                        throw std::runtime_error ("invalid ration axis: " + axis);
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -157,7 +157,7 @@ namespace MWScript
                         runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
                     }
                     else
-                        throw std::runtime_error ("invalid ration axis: " + axis);
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -186,7 +186,7 @@ namespace MWScript
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
                     else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);                    
+                        throw std::runtime_error ("invalid axis: " + axis);                    
                 }
         };
 

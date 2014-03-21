@@ -39,7 +39,7 @@
 
 namespace
 {
-    struct CustomData : public MWWorld::CustomData
+    struct NpcCustomData : public MWWorld::CustomData
     {
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::Movement mMovement;
@@ -48,9 +48,9 @@ namespace
         virtual MWWorld::CustomData *clone() const;
     };
 
-    MWWorld::CustomData *CustomData::clone() const
+    MWWorld::CustomData *NpcCustomData::clone() const
     {
-        return new CustomData (*this);
+        return new NpcCustomData (*this);
     }
 
     void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
@@ -262,7 +262,7 @@ namespace MWClass
         }
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CustomData> data(new CustomData);
+            std::auto_ptr<NpcCustomData> data(new NpcCustomData);
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -436,14 +436,14 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
 
     MWMechanics::NpcStats& Npc::getNpcStats (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
 
 
@@ -673,12 +673,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(object.isEmpty())
-            {
-                if(ishealth)
-                    damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
-            }
-            else if(ishealth)
+            if(ishealth)
             {
                 // Hit percentages:
                 // cuirass = 30%
@@ -824,7 +819,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore (const MWWorld::Ptr& ptr)
@@ -832,7 +827,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
     }
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
@@ -846,7 +841,7 @@ namespace MWClass
     float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
 
         const float normalizedEncumbrance = Npc::getEncumbrance(ptr) / Npc::getCapacity(ptr);
@@ -901,7 +896,7 @@ namespace MWClass
 
     float Npc::getJump(const MWWorld::Ptr &ptr) const
     {
-        const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
         const float encumbranceTerm = fJumpEncumbranceBase->getFloat() +
                                           fJumpEncumbranceMultiplier->getFloat() *
@@ -940,7 +935,7 @@ namespace MWClass
         if (fallHeight >= fallDistanceMin)
         {
             const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
-            const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+            const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
             const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).mMagnitude;
             const float fallAcroBase = gmst.find("fFallAcroBase")->getFloat();
             const float fallAcroMult = gmst.find("fFallAcroMult")->getFloat();
@@ -965,7 +960,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mMovement;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
@@ -1271,7 +1266,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+        NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
 
         customData.mInventoryStore.readState (state2.mInventory);
         customData.mNpcStats.readState (state2.mNpcStats);
@@ -1285,7 +1280,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+        NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
 
         customData.mInventoryStore.writeState (state2.mInventory);
         customData.mNpcStats.writeState (state2.mNpcStats);

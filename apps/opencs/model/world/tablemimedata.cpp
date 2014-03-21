@@ -444,3 +444,8 @@ CSMWorld::ColumnBase::Display CSMWorld::TableMimeData::convertEnums (CSMWorld::U
             return CSMWorld::ColumnBase::Display_None;
     }
 }
+
+const CSMDoc::Document* CSMWorld::TableMimeData::getDocumentPtr() const
+{
+    return &mDocument;
+}

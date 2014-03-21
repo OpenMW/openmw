@@ -442,6 +442,7 @@ void CSVWorld::Table::previewRecord()
         emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id) , "");
     }
 }
+
 void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
     int columns = mModel->columnCount();
@@ -533,27 +534,14 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 
         drag->setMimeData (mime);
         drag->setPixmap (QString::fromStdString (mime->getIcon()));
-
-        Qt::DropActions action = Qt::IgnoreAction;
-        switch (QApplication::keyboardModifiers())
-        {
-            case Qt::ControlModifier:
-                action = Qt::CopyAction;
-                break;
-
-            case Qt::ShiftModifier:
-                action = Qt::MoveAction;
-                break;
-        }
-
-        drag->exec(action);
+        drag->exec(Qt::CopyAction);
     }
 
 }
 
 void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
 {
-        event->acceptProposedAction();
+    event->acceptProposedAction();
 }
 
 void CSVWorld::Table::dropEvent(QDropEvent *event)
@@ -585,7 +573,7 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
 
 void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
 {
-        event->accept();
+    event->accept();
 }
 
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const

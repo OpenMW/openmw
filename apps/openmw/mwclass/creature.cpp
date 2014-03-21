@@ -37,7 +37,7 @@
 
 namespace
 {
-    struct CustomData : public MWWorld::CustomData
+    struct CreatureCustomData : public MWWorld::CustomData
     {
         MWMechanics::CreatureStats mCreatureStats;
         MWWorld::ContainerStore* mContainerStore; // may be InventoryStore for some creatures
@@ -45,13 +45,13 @@ namespace
 
         virtual MWWorld::CustomData *clone() const;
 
-        CustomData() : mContainerStore(0) {}
-        virtual ~CustomData() { delete mContainerStore; }
+        CreatureCustomData() : mContainerStore(0) {}
+        virtual ~CreatureCustomData() { delete mContainerStore; }
     };
 
-    MWWorld::CustomData *CustomData::clone() const
+    MWWorld::CustomData *CreatureCustomData::clone() const
     {
-        CustomData* cloned = new CustomData (*this);
+        CreatureCustomData* cloned = new CreatureCustomData (*this);
         cloned->mContainerStore = mContainerStore->clone();
         return cloned;
     }
@@ -63,7 +63,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CustomData> data (new CustomData);
+            std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
 
             static bool inited = false;
             if(!inited)
@@ -192,7 +192,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
+        return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
     }
 
 
@@ -456,7 +456,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return *dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return *dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const
@@ -525,7 +525,7 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(isFlying(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+        else if(canFly(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
                 world->isLevitationEnabled()))
         {
             float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
@@ -559,7 +559,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mMovement;
+        return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
     Ogre::Vector3 Creature::getMovementVector (const MWWorld::Ptr& ptr) const
@@ -678,12 +678,36 @@ namespace MWClass
         return MWWorld::Ptr(&cell.get<ESM::Creature>().insert(*ref), &cell);
     }
 
-    bool Creature::isFlying(const MWWorld::Ptr &ptr) const
+    bool Creature::isBipedal(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Bipedal;
+    }
+
+    bool Creature::canFly(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->mBase->mFlags & ESM::Creature::Flies;
+    }
+
+    bool Creature::canSwim(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Swims;
+    }
+
+    bool Creature::canWalk(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->mBase->mFlags & ESM::Creature::Walks;
     }
 
     int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)
@@ -762,7 +786,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+        CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
 
         customData.mContainerStore->readState (state2.mInventory);
         customData.mCreatureStats.readState (state2.mCreatureStats);
@@ -776,7 +800,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        CustomData& customData = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData());
+        CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
 
         customData.mContainerStore->writeState (state2.mInventory);
         customData.mCreatureStats.writeState (state2.mCreatureStats);

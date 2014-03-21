@@ -9,15 +9,15 @@
 
 namespace
 {
-    struct CustomData : public MWWorld::CustomData
+    struct CreatureLevListCustomData : public MWWorld::CustomData
     {
         // TODO: save the creature we spawned here
         virtual MWWorld::CustomData *clone() const;
     };
 
-    MWWorld::CustomData *CustomData::clone() const
+    MWWorld::CustomData *CreatureLevListCustomData::clone() const
     {
-        return new CustomData (*this);
+        return new CreatureLevListCustomData (*this);
     }
 }
 
@@ -44,7 +44,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CustomData> data (new CustomData);
+            std::auto_ptr<CreatureLevListCustomData> data (new CreatureLevListCustomData);
 
             MWWorld::LiveCellRef<ESM::CreatureLevList> *ref =
                 ptr.get<ESM::CreatureLevList>();

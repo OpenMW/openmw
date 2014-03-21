@@ -41,10 +41,18 @@ CSVWorld::EnumDelegate::EnumDelegate (const std::vector<std::pair<int, QString> 
 
 }
 
-QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem& option,
-    const QModelIndex& index) const
+QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent,
+                                              const QStyleOptionViewItem& option,
+                                              const QModelIndex& index) const
 {
-    if (!index.data().isValid())
+    return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_None);
+    //overloading virtual functions is HARD
+}
+
+QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem& option,
+    const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
+{
+    if (!index.data(Qt::EditRole).isValid() && !index.data(Qt::DisplayRole).isValid())
         return 0;
 
     QComboBox *comboBox = new QComboBox (parent);
@@ -56,11 +64,22 @@ QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptio
     return comboBox;
 }
 
-void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& index) const
+void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
     if (QComboBox *comboBox = dynamic_cast<QComboBox *> (editor))
     {
-        int value = index.data (Qt::EditRole).toInt();
+        QVariant data = index.data (Qt::EditRole);
+
+        if (tryDisplay && !data.isValid())
+        {
+            data = index.data (Qt::DisplayRole);
+            if (!data.isValid())
+            {
+                return;
+            }
+        }
+
+        int value = data.toInt();
 
         std::size_t size = mValues.size();
 

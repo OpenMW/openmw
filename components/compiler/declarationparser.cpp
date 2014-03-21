@@ -18,7 +18,7 @@ bool Compiler::DeclarationParser::parseName (const std::string& name, const Toke
 {
     if (mState==State_Name)
     {
-        std::string name2 = Misc::StringUtils::lowerCase (name);
+        std::string name2 = ::Misc::StringUtils::lowerCase (name);
 
         char type = mLocals.getType (name2);
 

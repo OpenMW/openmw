@@ -24,7 +24,7 @@ namespace MWScript
     void GlobalScripts::addScript (const std::string& name)
     {
         std::map<std::string, std::pair<bool, Locals> >::iterator iter =
-            mScripts.find (Misc::StringUtils::lowerCase (name));
+            mScripts.find (::Misc::StringUtils::lowerCase (name));
 
         if (iter==mScripts.end())
         {
@@ -44,7 +44,7 @@ namespace MWScript
     void GlobalScripts::removeScript (const std::string& name)
     {
         std::map<std::string, std::pair<bool, Locals> >::iterator iter =
-            mScripts.find (Misc::StringUtils::lowerCase (name));
+            mScripts.find (::Misc::StringUtils::lowerCase (name));
 
         if (iter!=mScripts.end())
             iter->second.first = false;
@@ -53,7 +53,7 @@ namespace MWScript
     bool GlobalScripts::isRunning (const std::string& name) const
     {
         std::map<std::string, std::pair<bool, Locals> >::const_iterator iter =
-            mScripts.find (Misc::StringUtils::lowerCase (name));
+            mScripts.find (::Misc::StringUtils::lowerCase (name));
 
         if (iter==mScripts.end())
             return false;
@@ -151,7 +151,7 @@ namespace MWScript
 
     Locals& GlobalScripts::getLocals (const std::string& name)
     {
-        std::string name2 = Misc::StringUtils::lowerCase (name);
+        std::string name2 = ::Misc::StringUtils::lowerCase (name);
         std::map<std::string, std::pair<bool, Locals> >::iterator iter =
             mScripts.find (name2);
 

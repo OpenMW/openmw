@@ -101,7 +101,8 @@ namespace MWBase
 
             virtual ~World() {}
 
-            virtual void startNewGame() = 0;
+            virtual void startNewGame (bool bypass) = 0;
+            ///< \param bypass Bypass regular game start.
 
             virtual void clear() = 0;
 

@@ -316,8 +316,16 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
-    SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
-
+    const std::vector<CSMWorld::UniversalId::Type> referenceables(CSMWorld::UniversalId::listReferenceableTypes());
+    SubView *view = NULL;
+    if(std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end())
+    {
+        view = mSubViewFactory.makeSubView (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
+    } else
+    {
+        view = mSubViewFactory.makeSubView (id, *mDocument);
+    }
+    assert(view);
     if (!hint.empty())
         view->useHint (hint);
 

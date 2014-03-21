@@ -18,8 +18,16 @@
 #include "inventorywindow.hpp"
 #include "confirmationdialog.hpp"
 
-namespace
+namespace MWGui
 {
+
+    bool sortItems(const MWWorld::Ptr& left, const MWWorld::Ptr& right)
+    {
+        int cmp = left.getClass().getName(left).compare(
+                    right.getClass().getName(right));
+        return cmp < 0;
+    }
+
     bool sortSpells(const std::string& left, const std::string& right)
     {
         const MWWorld::Store<ESM::Spell> &spells =
@@ -32,16 +40,6 @@ namespace
         return cmp < 0;
     }
 
-    bool sortItems(const MWWorld::Ptr& left, const MWWorld::Ptr& right)
-    {
-        int cmp = MWWorld::Class::get(left).getName(left).compare(
-                    MWWorld::Class::get(right).getName(right));
-        return cmp < 0;
-    }
-}
-
-namespace MWGui
-{
     SpellWindow::SpellWindow(DragAndDrop* drag)
         : WindowPinnableBase("openmw_spell_window.layout")
         , NoDrop(drag, mMainWidget)

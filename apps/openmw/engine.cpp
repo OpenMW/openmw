@@ -359,7 +359,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
-        mActivationDistanceOverride));
+        mActivationDistanceOverride, mCellName));
     MWBase::Environment::get().getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
@@ -395,31 +395,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mechanics->buildPlayer();
     window->updatePlayer();
 
-    // load cell
-    ESM::Position pos;
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-
-    if (!mCellName.empty())
-    {
-        if (world->findExteriorPosition(mCellName, pos)) {
-            world->changeToExteriorCell (pos);
-        }
-        else {
-            world->findInteriorPosition(mCellName, pos);
-            world->changeToInteriorCell (mCellName, pos);
-        }
-    }
-    else
-    {
-        pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
-        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-        world->changeToExteriorCell (pos);
-    }
-
-    Ogre::FrameEvent event;
-    event.timeSinceLastEvent = 0;
-    event.timeSinceLastFrame = 0;
-    frameRenderingQueued(event);
     mOgre->getRoot()->addFrameListener (this);
 
     // scripts
@@ -457,14 +432,14 @@ void OMW::Engine::go()
     // Play some good 'ol tunes
     MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
-    if (!mStartupScript.empty())
-        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
-
     // start in main menu
     if (!mSkipMenu)
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
     else
         MWBase::Environment::get().getStateManager()->newGame (true);
+
+    if (!mStartupScript.empty())
+        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
     while (!mEnvironment.get().getStateManager()->hasQuitRequest())

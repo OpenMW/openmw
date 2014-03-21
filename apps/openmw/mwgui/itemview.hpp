@@ -30,6 +30,8 @@ namespace MWGui
 
         void update();
 
+        static std::string getCountString(int count);
+
     private:
         virtual void initialiseOverride();
 

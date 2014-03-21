@@ -82,12 +82,14 @@ Sandy Carter (bwrsandman) - Arch Linux
 
 
 Public Relations and Translations:
+Alex McKibben (WeirdSexy) - Podcaster
 Artem Kotsynyak (greye) - Russian News Writer
+Jim Clauwaert (Zedd) - Public Outreach
 Julien Voisin (jvoisin/ap0) - French News Writer
+Lukasz Gromanowski (lgro) - English News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
-sir_herrbatka - English/Polish News Writer
-Alex McKibben (WeirdSexy) - Podcaster
+sir_herrbatka - Polish News Writer
 
 
 Website:

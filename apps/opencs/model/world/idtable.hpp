@@ -106,6 +106,8 @@ namespace CSMWorld
             std::pair<UniversalId, std::string> view (int row) const;
             ///< Return the UniversalId and the hint for viewing \a row. If viewing is not
             /// supported by this table, return (UniversalId::Type_None, "").
+
+            int getColumnId(int column) const;
     };
 }
 

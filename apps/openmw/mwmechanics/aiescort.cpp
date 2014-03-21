@@ -11,16 +11,6 @@
 #include "steering.hpp"
 #include "movement.hpp"
 
-namespace
-{
-    float sgn(float a)
-    {
-        if(a > 0)
-            return 1.0;
-        return -1.0;
-    }
-}
-
 /*
     TODO: Test vanilla behavior on passing x0, y0, and z0 with duration of anything including 0.
     TODO: Different behavior for AIEscort a d x y z and AIEscortCell a c d x y z.
@@ -91,7 +81,7 @@ namespace MWMechanics
 
         if(actor.getCell()->getCell()->mData.mX != player.getCell()->getCell()->mData.mX)
         {
-            int sideX = sgn(actor.getCell()->getCell()->mData.mX - player.getCell()->getCell()->mData.mX);
+            int sideX = PathFinder::sgn(actor.getCell()->getCell()->mData.mX - player.getCell()->getCell()->mData.mX);
             // Check if actor is near the border of an inactive cell. If so, pause walking.
             if(sideX * (pos.pos[0] - actor.getCell()->getCell()->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
                 2.0 - 200))
@@ -102,7 +92,7 @@ namespace MWMechanics
         }
         if(actor.getCell()->getCell()->mData.mY != player.getCell()->getCell()->mData.mY)
         {
-            int sideY = sgn(actor.getCell()->getCell()->mData.mY - player.getCell()->getCell()->mData.mY);
+            int sideY = PathFinder::sgn(actor.getCell()->getCell()->mData.mY - player.getCell()->getCell()->mData.mY);
             // Check if actor is near the border of an inactive cell. If so, pause walking.
             if(sideY*(pos.pos[1] - actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
                 2.0 - 200))

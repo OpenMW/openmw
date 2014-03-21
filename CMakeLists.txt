@@ -73,6 +73,8 @@ option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binarie
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 
+option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
+
 # Apps and tools
 option(BUILD_BSATOOL "build BSA extractor" OFF)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
@@ -463,7 +465,6 @@ if(WIN32)
     INSTALL(FILES
         "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_SOURCE_DIR}/GPL3.txt"
-        "${OpenMW_SOURCE_DIR}/OFL.txt"
         "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"

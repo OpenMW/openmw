@@ -55,6 +55,8 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr)
 
         updateParts();
     }
+
+    mWeaponAnimationTime = Ogre::SharedPtr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 }
 
 void CreatureWeaponAnimation::showWeapons(bool showWeapon)
@@ -110,6 +112,20 @@ void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slo
     setRenderProperties(scene, RV_Actors, RQG_Main, RQG_Alpha, 0,
                         !item.getClass().getEnchantment(item).empty(), &glowColor);
 
+    // Crossbows start out with a bolt attached
+    if (slot == MWWorld::InventoryStore::Slot_CarriedRight &&
+            item.getTypeName() == typeid(ESM::Weapon).name() &&
+            item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+    {
+        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+        if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
+            attachArrow();
+        else
+            mAmmunition.setNull();
+    }
+    else
+        mAmmunition.setNull();
+
     if(scene->mSkelBase)
     {
         Ogre::SkeletonInstance *skel = scene->mSkelBase->getSkeleton();
@@ -133,15 +149,42 @@ void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slo
         updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
     }
 
-    // TODO:
-    // type == ESM::PRT_Weapon should get an animation source based on the current offset
-    // of the weapon attack animation (from its beginning, or start marker?)
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(scene->mControllers.begin());
     for(;ctrl != scene->mControllers.end();ctrl++)
     {
         if(ctrl->getSource().isNull())
-            ctrl->setSource(Ogre::SharedPtr<NullAnimationTime>(new NullAnimationTime()));
+        {
+            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+                ctrl->setSource(mWeaponAnimationTime);
+            else
+                ctrl->setSource(Ogre::SharedPtr<NullAnimationTime>(new NullAnimationTime()));
+        }
     }
+}
+
+void CreatureWeaponAnimation::configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot)
+{
+    Ogre::Vector3 glowColor = getEnchantmentColor(ptr);
+
+    setRenderProperties(object, RV_Actors, RQG_Main, RQG_Alpha, 0,
+                        !ptr.getClass().getEnchantment(ptr).empty(), &glowColor);
+}
+
+void CreatureWeaponAnimation::attachArrow()
+{
+    WeaponAnimation::attachArrow(mPtr);
+}
+
+void CreatureWeaponAnimation::releaseArrow()
+{
+    WeaponAnimation::releaseArrow(mPtr);
+}
+
+Ogre::Vector3 CreatureWeaponAnimation::runAnimation(float duration)
+{
+    Ogre::Vector3 ret = Animation::runAnimation(duration);
+    pitchSkeleton(mPtr.getRefData().getPosition().rot[0], mSkelBase->getSkeleton());
+    return ret;
 }
 
 }

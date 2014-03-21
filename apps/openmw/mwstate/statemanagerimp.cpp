@@ -20,6 +20,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -39,6 +40,7 @@ void MWState::StateManager::cleanup (bool force)
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().clear();
         MWBase::Environment::get().getWorld()->clear();
         MWBase::Environment::get().getWindowManager()->clear();
+        MWBase::Environment::get().getInputManager()->clear();
 
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
@@ -123,11 +125,10 @@ void MWState::StateManager::newGame (bool bypass)
 {
     cleanup();
 
+    MWBase::Environment::get().getWorld()->startNewGame (bypass);
+
     if (!bypass)
-    {
-        MWBase::Environment::get().getWorld()->startNewGame();
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
-    }
     else
         MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
 
