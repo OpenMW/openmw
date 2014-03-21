@@ -61,7 +61,7 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 {
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
-        QString path = QString::fromStdString(iter->string());
+        QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
     }
 }
@@ -148,7 +148,7 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath)
     std::vector<boost::filesystem::path> files;
 
     foreach (const QString &path, mFileDialog.selectedFilePaths())
-        files.push_back(path.toStdString());
+        files.push_back(path.toUtf8().constData());
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
@@ -161,10 +161,10 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     std::vector<boost::filesystem::path> files;
 
     foreach (const QString &path, mFileDialog.selectedFilePaths()) {
-        files.push_back(path.toStdString());
+        files.push_back(path.toUtf8().constData());
     }
 
-    files.push_back(mFileDialog.filename().toStdString());
+    files.push_back(mFileDialog.filename().toUtf8().constData());
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
 

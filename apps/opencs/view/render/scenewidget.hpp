@@ -36,6 +36,8 @@ namespace CSVRender
 
             Ogre::SceneManager *getSceneManager();
 
+            void flagAsModified();
+
         private:
             void paintEvent(QPaintEvent* e);
             void resizeEvent(QResizeEvent* e);

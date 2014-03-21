@@ -471,7 +471,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mMainLayout = new QVBoxLayout(mainWidget);
 
     mEditWidget = new EditWidget(mainWidget, mRow, mTable, mUndoStack, false);
-    connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)), 
+    connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
             this, SLOT(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 
     mMainLayout->addWidget(mEditWidget);
@@ -517,7 +517,7 @@ void CSVWorld::DialogueSubView::prevId()
         {
                 mEditWidget->remake(newRow);
                 setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
-                                        mTable->data (mTable->index (newRow, 0)).toString().toStdString()));
+                                        mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
                 mRow = newRow;
                 mEditWidget->setDisabled(mLocked);
                 return;
@@ -549,7 +549,7 @@ void CSVWorld::DialogueSubView::nextId()
         {
                 mEditWidget->remake(newRow);
                 setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
-                                          mTable->data (mTable->index (newRow, 0)).toString().toStdString()));
+                                          mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
                 mRow = newRow;
                 mEditWidget->setDisabled(mLocked);
                 return;
@@ -607,7 +607,7 @@ void CSVWorld::DialogueSubView::revertRecord()
 
         if (state!=CSMWorld::RecordBase::State_BaseOnly)
         {
-            mUndoStack.push(new CSMWorld::RevertCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toStdString()));
+            mUndoStack.push(new CSMWorld::RevertCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toUtf8().constData()));
         }
         if (rows != mTable->rowCount())
         {
@@ -640,7 +640,7 @@ void CSVWorld::DialogueSubView::deleteRecord()
         mRow < rows &&
         mBottom->canCreateAndDelete())
     {
-        mUndoStack.push(new CSMWorld::DeleteCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toStdString()));
+        mUndoStack.push(new CSMWorld::DeleteCommand(*mTable, mTable->data(mTable->index (mRow, 0)).toString().toUtf8().constData()));
         if (rows != mTable->rowCount())
         {
             if (mTable->rowCount() == 0)
@@ -666,7 +666,7 @@ void CSVWorld::DialogueSubView::requestFocus (const std::string& id)
 
 void CSVWorld::DialogueSubView::cloneRequest ()
 {
-    mBottom->cloneRequest(mTable->data(mTable->index (mRow, 0)).toString().toStdString(),
+    mBottom->cloneRequest(mTable->data(mTable->index (mRow, 0)).toString().toUtf8().constData(),
                           static_cast<CSMWorld::UniversalId::Type>(mTable->data(mTable->index(mRow, 2)).toInt()));
 }
 
@@ -674,7 +674,7 @@ void CSVWorld::DialogueSubView::showPreview ()
 {
     if (mTable->hasPreview() && mRow < mTable->rowCount())
     {
-       emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, mTable->data(mTable->index (mRow, 0)).toString().toStdString()), "");
+       emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, mTable->data(mTable->index (mRow, 0)).toString().toUtf8().constData()), "");
     }
 }
 

@@ -40,7 +40,7 @@ OpenDialog::OpenDialog(QWidget * parent) : QDialog(parent)
     mCfgMgr.processPaths(mDataLocal);
 
     // Set the charset for reading the esm/esp files
-    QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
+    QString encoding = QString::fromUtf8 (variables["encoding"].as<std::string>().c_str());
 
     Files::PathContainer dataDirs;
     dataDirs.insert(dataDirs.end(), mDataDirs.begin(), mDataDirs.end());

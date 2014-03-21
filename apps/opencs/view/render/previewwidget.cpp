@@ -4,36 +4,55 @@
 #include <OgreSceneManager.h>
 
 #include "../../model/world/data.hpp"
+#include "../../model/world/idtable.hpp"
 
-void CSVRender::PreviewWidget::setup (const std::string& id)
+void CSVRender::PreviewWidget::setup()
 {
     setNavigation (&mOrbit);
-
-    int column = mData.getReferenceables().findColumnIndex (CSMWorld::Columns::ColumnId_Model);
-
-    int row = mData.getReferenceables().getIndex (id);
-
-    QVariant value = mData.getReferenceables().getData (row, column);
-
-    if (!value.isValid())
-        return;
-
-    std::string model = value.toString().toUtf8().constData();
-
-    if (model.empty())
-        return;
 
     mNode = getSceneManager()->getRootSceneNode()->createChildSceneNode();
     mNode->setPosition (Ogre::Vector3 (0, 0, 0));
 
-    mObject = NifOgre::Loader::createObjects (mNode, "Meshes\\" + model);
+    setModel();
+
+    QAbstractItemModel *referenceables =
+        mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables);
+
+    connect (referenceables, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (ReferenceableDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (referenceables, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (ReferenceableAboutToBeRemoved (const QModelIndex&, int, int)));
 }
 
-void CSVRender::PreviewWidget::adjust (const std::string& id)
+void CSVRender::PreviewWidget::setModel()
 {
     if (mNode)
     {
-        int row = mData.getReferences().getIndex (id);
+        mObject.setNull();
+
+        int column = mData.getReferenceables().findColumnIndex (CSMWorld::Columns::ColumnId_Model);
+
+        int row = mData.getReferenceables().getIndex (mReferenceableId);
+
+        QVariant value = mData.getReferenceables().getData (row, column);
+
+        if (!value.isValid())
+            return;
+
+        std::string model = value.toString().toUtf8().constData();
+
+        if (model.empty())
+            return;
+
+        mObject = NifOgre::Loader::createObjects (mNode, "Meshes\\" + model);
+    }
+}
+
+void CSVRender::PreviewWidget::adjust()
+{
+    if (mNode)
+    {
+        int row = mData.getReferences().getIndex (mReferenceId);
 
         float scale = mData.getReferences().getData (row, mData.getReferences().
             findColumnIndex (CSMWorld::Columns::ColumnId_Scale)).toFloat();
@@ -56,17 +75,82 @@ void CSVRender::PreviewWidget::adjust (const std::string& id)
     }
 }
 
-CSVRender::PreviewWidget::PreviewWidget (const CSMWorld::Data& data,
+CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     const std::string& referenceableId, QWidget *parent)
-: SceneWidget (parent), mData (data), mNode (0)
+: SceneWidget (parent), mData (data), mNode (0), mReferenceableId (referenceableId)
 {
-    setup (referenceableId);
+    setup();
 }
 
-CSVRender::PreviewWidget::PreviewWidget (const CSMWorld::Data& data,
+CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     const std::string& referenceableId, const std::string& referenceId, QWidget *parent)
-: SceneWidget (parent), mData (data)
+: SceneWidget (parent), mData (data), mReferenceableId (referenceableId),
+  mReferenceId (referenceId)
 {
-    setup (referenceableId);
-    adjust (referenceId);
+    setup();
+
+    adjust();
+
+    QAbstractItemModel *references =
+        mData.getTableModel (CSMWorld::UniversalId::Type_References);
+
+    connect (references, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (ReferenceDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (references, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (ReferenceAboutToBeRemoved (const QModelIndex&, int, int)));
+}
+
+void CSVRender::PreviewWidget::ReferenceableDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    CSMWorld::IdTable& referenceables = dynamic_cast<CSMWorld::IdTable&> (
+        *mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables));
+
+    QModelIndex index = referenceables.getModelIndex (mReferenceableId, 0);
+
+    if (index.row()>=topLeft.row() && index.row()<=bottomRight.row())
+    {
+        /// \todo possible optimisation; check columns and only update if relevant columns have
+        /// changed
+        setModel();
+        flagAsModified();
+    }
+}
+
+void CSVRender::PreviewWidget::ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start,
+    int end)
+{
+
+}
+
+void CSVRender::PreviewWidget::ReferenceDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
+        *mData.getTableModel (CSMWorld::UniversalId::Type_References));
+
+    int columnIndex = references.findColumnIndex (CSMWorld::Columns::ColumnId_ReferenceableId);
+
+    QModelIndex index = references.getModelIndex (mReferenceId, columnIndex);
+
+    if (index.row()>=topLeft.row() && index.row()<=bottomRight.row())
+    {
+        /// \todo possible optimisation; check columns and only update if relevant columns have
+        /// changed
+        adjust();
+
+        if (index.column()>=topLeft.column() && index.column()<=bottomRight.row())
+        {
+            mReferenceableId = references.data (index).toString().toUtf8().constData();
+            setModel();
+        }
+
+        flagAsModified();
+    }
+}
+
+void CSVRender::PreviewWidget::ReferenceAboutToBeRemoved (const QModelIndex& parent, int start,
+    int end)
+{
+
 }

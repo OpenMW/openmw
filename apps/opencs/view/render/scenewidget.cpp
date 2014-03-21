@@ -118,6 +118,11 @@ namespace CSVRender
         return mSceneMgr;
     }
 
+    void SceneWidget::flagAsModified()
+    {
+        mUpdate = true;
+    }
+
     void SceneWidget::paintEvent(QPaintEvent* e)
     {
         if (!mWindow)

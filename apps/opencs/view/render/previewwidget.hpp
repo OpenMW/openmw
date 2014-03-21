@@ -7,6 +7,8 @@
 
 #include "navigationorbit.hpp"
 
+class QModelIndex;
+
 namespace CSMWorld
 {
     class Data;
@@ -18,28 +20,42 @@ namespace CSVRender
     {
             Q_OBJECT
 
-            const CSMWorld::Data& mData;
+            CSMWorld::Data& mData;
             CSVRender::NavigationOrbit mOrbit;
             NifOgre::ObjectScenePtr mObject;
             Ogre::SceneNode *mNode;
+            std::string mReferenceId;
+            std::string mReferenceableId;
 
-            void setup (const std::string& id);
-            ///< \param id ID of the referenceable to be viewed
+            void setup();
 
-            void adjust (const std::string& id);
-            ///< \param id ID of the reference to be viewed
+            void setModel();
+
+            void adjust();
+            ///< Adjust referenceable preview according to the reference
 
         public:
 
-            PreviewWidget (const CSMWorld::Data& data, const std::string& referenceableId,
+            PreviewWidget (CSMWorld::Data& data, const std::string& referenceableId,
                 QWidget *parent = 0);
 
-            PreviewWidget (const CSMWorld::Data& data, const std::string& referenceableId,
+            PreviewWidget (CSMWorld::Data& data, const std::string& referenceableId,
                 const std::string& referenceId, QWidget *parent = 0);
 
         signals:
 
             void closeRequest();
+
+        private slots:
+
+            void ReferenceableDataChanged (const QModelIndex& topLeft,
+                const QModelIndex& bottomRight);
+
+            void ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void ReferenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void ReferenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
     };
 }
 
