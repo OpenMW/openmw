@@ -171,6 +171,7 @@ namespace MWGui
         if (item.mBase.getCellRef().mRefID.size() > 6
                 && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
         {
+            MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
             MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
             return;
         }
