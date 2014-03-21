@@ -110,6 +110,9 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
 void CSVRender::PreviewWidget::ReferenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
+    if (mReferenceableId.empty())
+        return;
+
     CSMWorld::IdTable& referenceables = dynamic_cast<CSMWorld::IdTable&> (
         *mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables));
 
@@ -127,12 +130,36 @@ void CSVRender::PreviewWidget::ReferenceableDataChanged (const QModelIndex& topL
 void CSVRender::PreviewWidget::ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start,
     int end)
 {
+    if (mReferenceableId.empty())
+        return;
 
+    CSMWorld::IdTable& referenceables = dynamic_cast<CSMWorld::IdTable&> (
+        *mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables));
+
+    QModelIndex index = referenceables.getModelIndex (mReferenceableId, 0);
+
+    if (index.row()>=start && index.row()<=end)
+    {
+        if (mReferenceId.empty())
+        {
+            // this is a preview for a referenceble
+            emit closeRequest();
+        }
+        else
+        {
+            // this is a preview for a reference
+            mObject.setNull();
+            flagAsModified();
+        }
+    }
 }
 
 void CSVRender::PreviewWidget::ReferenceDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
+    if (mReferenceId.empty())
+        return;
+
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
         *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
@@ -160,5 +187,14 @@ void CSVRender::PreviewWidget::ReferenceDataChanged (const QModelIndex& topLeft,
 void CSVRender::PreviewWidget::ReferenceAboutToBeRemoved (const QModelIndex& parent, int start,
     int end)
 {
+    if (mReferenceId.empty())
+        return;
 
+    CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
+        *mData.getTableModel (CSMWorld::UniversalId::Type_References));
+
+    QModelIndex index = references.getModelIndex (mReferenceId, 0);
+
+    if (index.row()>=start && index.row()<=end)
+        emit closeRequest();
 }
