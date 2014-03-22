@@ -64,9 +64,9 @@ namespace MWWorld
 
             ~RefData();
 
-            void write (ESM::ObjectState& objectState) const;
-            ///< Ignores local variables and custom data (not enough context available here to
-            /// perform these operations).
+            void write (ESM::ObjectState& objectState, const std::string& scriptId = "") const;
+            ///< Ignores custom data (not enough context available here to
+            /// perform this operations).
 
             RefData& operator= (const RefData& refData);
 
@@ -82,6 +82,8 @@ namespace MWWorld
             int getCount() const;
 
             void setLocals (const ESM::Script& script);
+
+            void setLocals (const ESM::Locals& locals, const std::string& scriptId);
 
             void setCount (int count);
             /// Set object count (an object pile is a simple object with a count >1).
