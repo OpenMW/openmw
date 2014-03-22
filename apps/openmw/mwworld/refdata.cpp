@@ -152,12 +152,6 @@ namespace MWWorld
         }
     }
 
-    void RefData::setLocals (const ESM::Locals& locals, const std::string& scriptId)
-    {
-        mHasLocals = true;
-        mLocals.read (locals, scriptId);
-    }
-
     void RefData::setCount (int count)
     {
         if(count == 0)
