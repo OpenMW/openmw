@@ -2,6 +2,7 @@
 #include "previewwidget.hpp"
 
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
