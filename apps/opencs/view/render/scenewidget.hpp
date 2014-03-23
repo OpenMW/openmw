@@ -26,9 +26,6 @@ namespace CSVRender
 
             QPaintEngine*	paintEngine() const;
 
-            void setAmbient (const Ogre::ColourValue& colour);
-            ///< \note The actual ambient colour may differ based on lighting settings.
-
         protected:
 
             void setNavigation (Navigation *navigation);
@@ -37,6 +34,9 @@ namespace CSVRender
             Ogre::SceneManager *getSceneManager();
 
             void flagAsModified();
+
+            void setDefaultAmbient (const Ogre::ColourValue& colour);
+            ///< \note The actual ambient colour may differ based on lighting settings.
 
         private:
             void paintEvent(QPaintEvent* e);

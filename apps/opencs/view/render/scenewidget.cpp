@@ -32,11 +32,7 @@ namespace CSVRender
 
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
-        // Throw in a random color just to make sure multiple scenes work
-        Ogre::Real r = Ogre::Math::RangeRandom(0, 1);
-        Ogre::Real g = Ogre::Math::RangeRandom(0, 1);
-        Ogre::Real b = Ogre::Math::RangeRandom(0, 1);
-        mSceneMgr->setAmbientLight(Ogre::ColourValue(r,g,b,1));
+        mSceneMgr->setAmbientLight (Ogre::ColourValue (0,0,0,1));
 
         Ogre::Light* l = mSceneMgr->createLight();
         l->setType (Ogre::Light::LT_DIRECTIONAL);
@@ -57,7 +53,7 @@ namespace CSVRender
         timer->start (20); /// \todo make this configurable
     }
 
-    void SceneWidget::setAmbient (const Ogre::ColourValue& colour)
+    void SceneWidget::setDefaultAmbient (const Ogre::ColourValue& colour)
     {
         mSceneMgr->setAmbientLight (colour);
     }
