@@ -3,11 +3,10 @@
 
 #include <QHBoxLayout>
 
-#include "../render/scenewidget.hpp"
+#include "../render/previewwidget.hpp"
 
 #include "scenetoolbar.hpp"
-
-#include "../render/previewwidget.hpp"
+#include "scenetoolmode.hpp"
 
 CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id)
@@ -30,6 +29,9 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
         mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), this);
 
     SceneToolbar *toolbar = new SceneToolbar (48, this);
+
+    SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
+    toolbar->addTool (lightingTool);
 
     layout->addWidget (toolbar, 0);
 

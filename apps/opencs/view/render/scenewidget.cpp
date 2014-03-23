@@ -11,7 +11,10 @@
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
 
+#include "../world/scenetoolmode.hpp"
+
 #include "navigation.hpp"
+#include "lighting.hpp"
 
 namespace CSVRender
 {
@@ -19,11 +22,12 @@ namespace CSVRender
         : QWidget(parent)
         , mWindow(NULL)
         , mCamera(NULL)
-        , mSceneMgr(NULL), mNavigation (0), mUpdate (false)
+        , mSceneMgr(NULL), mNavigation (0), mLighting (0), mUpdate (false)
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
         , mKeyRollLeft (false), mKeyRollRight (false)
         , mFast (false), mDragging (false), mMod1 (false)
         , mFastFactor (4) /// \todo make this configurable
+        , mDefaultAmbient (0, 0, 0, 0), mHasDefaultAmbient (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);
@@ -53,9 +57,27 @@ namespace CSVRender
         timer->start (20); /// \todo make this configurable
     }
 
+    CSVWorld::SceneToolMode *SceneWidget::makeLightingSelector (CSVWorld::SceneToolbar *parent)
+    {
+        CSVWorld::SceneToolMode *tool = new CSVWorld::SceneToolMode (parent);
+
+        tool->addButton (":door.png", "day"); /// \todo replace icons
+        tool->addButton (":GMST.png", "night");
+        tool->addButton (":Info.png", "bright");
+
+        connect (tool, SIGNAL (modeChanged (const std::string&)),
+            this, SLOT (selectLightingMode (const std::string&)));
+
+        return tool;
+    }
+
     void SceneWidget::setDefaultAmbient (const Ogre::ColourValue& colour)
     {
-        mSceneMgr->setAmbientLight (colour);
+        mDefaultAmbient = colour;
+        mHasDefaultAmbient = true;
+
+        if (mLighting)
+            mLighting->setDefaultAmbient (colour);
     }
 
     void SceneWidget::updateOgreWindow()
@@ -311,5 +333,19 @@ namespace CSVRender
     int SceneWidget::getFastFactor() const
     {
         return mFast ? mFastFactor : 1;
+    }
+
+    void SceneWidget::setLighting (Lighting *lighting)
+    {
+        if (mLighting)
+            mLighting->deactivate();
+
+        mLighting = lighting;
+        mLighting->activate (mSceneManager, mHasDefaultAmbient ? &mDefaultAmbient : 0);
+    }
+
+    void SceneWidget::selectLightingMode (const std::string& mode)
+    {
+
     }
 }

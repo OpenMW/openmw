@@ -3,17 +3,25 @@
 
 #include <QWidget>
 
+#include <OgreColourValue.h>
+
 namespace Ogre
 {
     class Camera;
     class SceneManager;
     class RenderWindow;
-    class ColourValue;
+}
+
+namespace CSVWorld
+{
+    class SceneToolMode;
+    class SceneToolbar;
 }
 
 namespace CSVRender
 {
     class Navigation;
+    class Lighting;
 
     class SceneWidget : public QWidget
     {
@@ -25,6 +33,10 @@ namespace CSVRender
             virtual ~SceneWidget();
 
             QPaintEngine*	paintEngine() const;
+
+            CSVWorld::SceneToolMode *makeLightingSelector (CSVWorld::SceneToolbar *parent);
+            ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
+            /// is the responsibility of the calling function.
 
         protected:
 
@@ -61,11 +73,15 @@ namespace CSVRender
 
             int getFastFactor() const;
 
+            void setLighting (Lighting *lighting);
+            ///< \attention The ownership of \a lighting is not transferred to *this.
+
             Ogre::Camera*	    mCamera;
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
 
             Navigation *mNavigation;
+            Lighting *mLighting;
             bool mUpdate;
             bool mKeyForward;
             bool mKeyBackward;
@@ -78,10 +94,14 @@ namespace CSVRender
             bool mMod1;
             QPoint mOldPos;
             int mFastFactor;
+            Ogre::ColourValue mDefaultAmbient;
+            bool mHasDefaultAmbient;
 
         private slots:
 
             void update();
+
+            void selectLightingMode (const std::string& mode);
     };
 }
 
