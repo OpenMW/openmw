@@ -279,6 +279,7 @@ namespace MWWorld
         mGlobalVariables.write (writer);
         mCells.write (writer);
         mPlayer->write (writer);
+        mWeatherManager->write (writer);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -287,6 +288,7 @@ namespace MWWorld
         if (!mStore.readRecord (reader, type) &&
             !mGlobalVariables.readRecord (reader, type) &&
             !mPlayer->readRecord (reader, type) &&
+            !mWeatherManager->readRecord (reader, type) &&
             !mCells.readRecord (reader, type, contentFileMap))
         {
             throw std::runtime_error ("unknown record in saved game");
@@ -680,8 +682,6 @@ namespace MWWorld
         mGlobalVariables["month"].setInteger (month);
 
         mRendering->skySetDate (day, month);
-
-        mWeatherManager->setDate (day, month);
     }
 
     void World::setMonth (int month)
