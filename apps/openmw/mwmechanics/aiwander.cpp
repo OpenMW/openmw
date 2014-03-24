@@ -69,6 +69,7 @@ namespace MWMechanics
         return new AiWander(*this);
     }
 
+    // TODO: duration is passed in but never used, check if it is needed
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
@@ -102,20 +103,21 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
 
+        // Once off initialization to discover & store allowed node points for this actor.
         if(!mStoredAvailableNodes)
         {
-            mStoredAvailableNodes = true;
             mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
 
             mCellX = actor.getCell()->getCell()->mData.mX;
             mCellY = actor.getCell()->getCell()->mData.mY;
 
+            // TODO: If there is no path does this actor get stuck forever?
             if(!mPathgrid)
                 mDistance = 0;
             else if(mPathgrid->mPoints.empty())
                 mDistance = 0;
 
-            if(mDistance)
+            if(mDistance) // A distance value is initially passed into the constructor.
             {
                 mXCell = 0;
                 mYCell = 0;
@@ -151,10 +153,13 @@ namespace MWMechanics
                     }
                     mCurrentNode = mAllowedNodes[index];
                     mAllowedNodes.erase(mAllowedNodes.begin() + index);
+
+                    mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
                 }
             }
         }
 
+        // TODO: Does this actor stay in one spot forever while in AiWander?
         if(mAllowedNodes.empty())
             mDistance = 0;
 
@@ -162,7 +167,7 @@ namespace MWMechanics
         if(mDistance && (mCellX != actor.getCell()->getCell()->mData.mX || mCellY != actor.getCell()->getCell()->mData.mY))
             mDistance = 0;
 
-        if(mChooseAction)
+        if(mChooseAction) // Initially set true by the constructor.
         {
             mPlayedIdle = 0;
             unsigned short idleRoll = 0;
@@ -208,7 +213,8 @@ namespace MWMechanics
             }
         }
 
-        if(mIdleNow)
+        // Allow interrupting a walking actor to trigger a greeting
+        if(mIdleNow || (mWalking && (mWalkState != State_Norm)))
         {
             // Play a random voice greeting if the player gets too close
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -221,6 +227,14 @@ namespace MWMechanics
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             float playerDist = Ogre::Vector3(player.getRefData().getPosition().pos).distance(
                         Ogre::Vector3(actor.getRefData().getPosition().pos));
+
+            if(mWalking && playerDist <= helloDistance)
+            {
+                stopWalking(actor);
+                mMoveNow = false;
+                mWalking = false;
+                mWalkState = State_Norm;
+            }
 
             if (!mSaidGreeting)
             {
@@ -353,7 +367,7 @@ namespace MWMechanics
 
                 if(mWalkState == State_Evade)
                 {
-                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl;
 
                     // diagonal should have same animation as walk forward
                     actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
@@ -369,7 +383,7 @@ namespace MWMechanics
 
                 if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
                 {
-                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl;
                     mWalkState = State_Norm;
                     mStuckCount = 0;
 
