@@ -11,7 +11,7 @@ void ESM::SavedGame::load (ESMReader &esm)
 {
     mPlayerName = esm.getHNString("PLNA");
     esm.getHNOT (mPlayerLevel, "PLLE");
-    mPlayerClass = esm.getHNString("PLCL");
+    mPlayerClassName = esm.getHNString("PLCL");
     mPlayerCell = esm.getHNString("PLCE");
     esm.getHNT (mInGameTime, "TSTM", 16);
     esm.getHNT (mTimePlayed, "TIME");
@@ -30,7 +30,7 @@ void ESM::SavedGame::save (ESMWriter &esm) const
 {
     esm.writeHNString ("PLNA", mPlayerName);
     esm.writeHNT ("PLLE", mPlayerLevel);
-    esm.writeHNString ("PLCL", mPlayerClass);
+    esm.writeHNString ("PLCL", mPlayerClassName);
     esm.writeHNString ("PLCE", mPlayerCell);
     esm.writeHNT ("TSTM", mInGameTime, 16);
     esm.writeHNT ("TIME", mTimePlayed);

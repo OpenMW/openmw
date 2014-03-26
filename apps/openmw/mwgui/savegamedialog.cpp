@@ -86,7 +86,7 @@ namespace MWGui
             {
                 std::stringstream title;
                 title << it->getSignature().mPlayerName;
-                title << " (Level " << it->getSignature().mPlayerLevel << " " << it->getSignature().mPlayerClass << ")";
+                title << " (Level " << it->getSignature().mPlayerLevel << " " << it->getSignature().mPlayerClassName << ")";
 
                 mCharacterSelection->addItem (title.str());
 
