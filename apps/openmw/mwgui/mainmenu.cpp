@@ -68,6 +68,11 @@ namespace MWGui
         MWBase::Environment::get().getStateManager()->newGame();
     }
 
+    void MainMenu::onExitConfirmed()
+    {
+        MWBase::Environment::get().getStateManager()->requestQuit();
+    }
+
     void MainMenu::onButtonClicked(MyGUI::Widget *sender)
     {
         std::string name = *sender->getUserData<std::string>();
@@ -82,7 +87,18 @@ namespace MWGui
         else if (name == "credits")
             MWBase::Environment::get().getWorld()->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
-            MWBase::Environment::get().getStateManager()->requestQuit();
+        {
+            if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
+                onExitConfirmed();
+            else
+            {
+                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+                dialog->open("#{sMessage2}");
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onExitConfirmed);
+                dialog->eventCancelClicked.clear();
+            }
+        }
         else if (name == "newgame")
         {
             if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)

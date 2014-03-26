@@ -33,6 +33,7 @@ namespace MWGui
 
             void onButtonClicked (MyGUI::Widget* sender);
             void onNewGameConfirmed();
+            void onExitConfirmed();
 
             void updateMenu();
 
