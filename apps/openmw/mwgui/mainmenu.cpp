@@ -13,6 +13,7 @@
 #include "../mwstate/character.hpp"
 
 #include "savegamedialog.hpp"
+#include "confirmationdialog.hpp"
 
 namespace MWGui
 {
@@ -62,6 +63,11 @@ namespace MWGui
         OEngine::GUI::Layout::setVisible (visible);
     }
 
+    void MainMenu::onNewGameConfirmed()
+    {
+        MWBase::Environment::get().getStateManager()->newGame();
+    }
+
     void MainMenu::onButtonClicked(MyGUI::Widget *sender)
     {
         std::string name = *sender->getUserData<std::string>();
@@ -77,7 +83,16 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->requestQuit();
         else if (name == "newgame")
         {
-            MWBase::Environment::get().getStateManager()->newGame();
+            if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
+                onNewGameConfirmed();
+            else
+            {
+                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+                dialog->open("#{sNotifyMessage54}");
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onNewGameConfirmed);
+                dialog->eventCancelClicked.clear();
+            }
         }
 
         else

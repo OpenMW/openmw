@@ -32,6 +32,7 @@ namespace MWGui
             std::map<std::string, MWGui::ImageButton*> mButtons;
 
             void onButtonClicked (MyGUI::Widget* sender);
+            void onNewGameConfirmed();
 
             void updateMenu();
 
