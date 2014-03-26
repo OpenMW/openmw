@@ -345,6 +345,8 @@ namespace CSVRender
     {
         if (mode=="day")
             setLighting (&mLightingDay);
+        else if (mode=="night")
+            setLighting (&mLightingNight);
 
     }
 }

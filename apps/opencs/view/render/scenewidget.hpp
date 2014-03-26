@@ -6,6 +6,7 @@
 #include <OgreColourValue.h>
 
 #include "lightingday.hpp"
+#include "lightingnight.hpp"
 
 namespace Ogre
 {
@@ -99,6 +100,7 @@ namespace CSVRender
             Ogre::ColourValue mDefaultAmbient;
             bool mHasDefaultAmbient;
             LightingDay mLightingDay;
+            LightingNight mLightingNight;
 
         private slots:
 
