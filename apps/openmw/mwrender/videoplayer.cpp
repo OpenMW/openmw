@@ -994,6 +994,9 @@ void VideoState::init(const std::string& resourceName)
             audio_index = i;
     }
 
+    if (audio_index != -1)
+        MWBase::Environment::get().getSoundManager()->pauseSounds();
+
     this->external_clock_base = av_gettime();
     if(audio_index >= 0)
         this->stream_open(audio_index, this->format_ctx);
@@ -1163,8 +1166,6 @@ void VideoPlayer::playVideo(const std::string &resourceName, bool allowSkipping)
             mSceneMgr->addSpecialCaseRenderQueue(i);
     }
     mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-
-    MWBase::Environment::get().getSoundManager()->pauseSounds();
 
     try {
         mState = new VideoState;
