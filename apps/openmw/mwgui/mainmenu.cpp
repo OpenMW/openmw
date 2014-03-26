@@ -27,7 +27,7 @@ namespace MWGui
         std::stringstream sstream;
         sstream << "OpenMW version: " << OPENMW_VERSION;
 
-        // adding info about git hash if availible
+        // adding info about git hash if available
         std::string rev = OPENMW_VERSION_COMMITHASH;
         std::string tag = OPENMW_VERSION_TAGHASH;
         if (!rev.empty() && !tag.empty())
@@ -79,6 +79,8 @@ namespace MWGui
         }
         else if (name == "options")
             MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
+        else if (name == "credits")
+            MWBase::Environment::get().getWorld()->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
             MWBase::Environment::get().getStateManager()->requestQuit();
         else if (name == "newgame")
@@ -135,7 +137,10 @@ namespace MWGui
             buttons.push_back("savegame");
 
         buttons.push_back("options");
-        //buttons.push_back("credits");
+
+        if (state==MWBase::StateManager::State_NoGame)
+            buttons.push_back("credits");
+
         buttons.push_back("exitgame");
 
         // Create new buttons if needed
