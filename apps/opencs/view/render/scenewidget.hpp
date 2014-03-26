@@ -7,6 +7,7 @@
 
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
+#include "lightingbright.hpp"
 
 namespace Ogre
 {
@@ -101,6 +102,7 @@ namespace CSVRender
             bool mHasDefaultAmbient;
             LightingDay mLightingDay;
             LightingNight mLightingNight;
+            LightingBright mLightingBright;
 
         private slots:
 
