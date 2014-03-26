@@ -156,7 +156,7 @@ namespace MWBase
             /// paused we may want to do it manually (after equipping permanent enchantment)
             virtual void updateMagicEffects (const MWWorld::Ptr& ptr) = 0;
 
-            virtual void toggleAI() = 0;
+            virtual bool toggleAI() = 0;
             virtual bool isAIActive() = 0;
 
             virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
