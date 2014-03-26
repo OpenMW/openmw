@@ -69,7 +69,7 @@ opencs_units (view/render
     )
 
 opencs_units_noqt (view/render
-    navigation navigation1st navigationfree navigationorbit lighting
+    navigation navigation1st navigationfree navigationorbit lighting lightingday
     )
 
 opencs_units_noqt (view/world

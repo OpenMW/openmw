@@ -5,6 +5,8 @@
 
 #include <OgreColourValue.h>
 
+#include "lightingday.hpp"
+
 namespace Ogre
 {
     class Camera;
@@ -96,6 +98,7 @@ namespace CSVRender
             int mFastFactor;
             Ogre::ColourValue mDefaultAmbient;
             bool mHasDefaultAmbient;
+            LightingDay mLightingDay;
 
         private slots:
 

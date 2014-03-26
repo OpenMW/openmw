@@ -38,18 +38,15 @@ namespace CSVRender
 
         mSceneMgr->setAmbientLight (Ogre::ColourValue (0,0,0,1));
 
-        Ogre::Light* l = mSceneMgr->createLight();
-        l->setType (Ogre::Light::LT_DIRECTIONAL);
-        l->setDirection (Ogre::Vector3(-0.4, -0.7, 0.3));
-        l->setDiffuseColour (Ogre::ColourValue(0.7,0.7,0.7));
-
         mCamera = mSceneMgr->createCamera("foo");
 
-        mCamera->setPosition(300,0,000);
-        mCamera->lookAt(0,0,0);
-        mCamera->setNearClipDistance(0.1);
-        mCamera->setFarClipDistance(30000);
+        mCamera->setPosition (300, 0, 0);
+        mCamera->lookAt (0, 0, 0);
+        mCamera->setNearClipDistance (0.1);
+        mCamera->setFarClipDistance (30000);
         mCamera->roll (Ogre::Degree (90));
+
+        setLighting (&mLightingDay);
 
         QTimer *timer = new QTimer (this);
 
@@ -341,11 +338,13 @@ namespace CSVRender
             mLighting->deactivate();
 
         mLighting = lighting;
-        mLighting->activate (mSceneManager, mHasDefaultAmbient ? &mDefaultAmbient : 0);
+        mLighting->activate (mSceneMgr, mHasDefaultAmbient ? &mDefaultAmbient : 0);
     }
 
     void SceneWidget::selectLightingMode (const std::string& mode)
     {
+        if (mode=="day")
+            setLighting (&mLightingDay);
 
     }
 }
