@@ -169,7 +169,10 @@ namespace MWGui
         else
         {
             if (mCurrentCharacter && slot)
+            {
                 MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot);
+                MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
+            }
         }
 
         setVisible(false);
