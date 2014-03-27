@@ -8,6 +8,9 @@
 #include <OgreShadowCameraSetupLiSPSM.h>
 #include <OgreShadowCameraSetupPSSM.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreCamera.h>
+#include <OgreRenderTexture.h>
+#include <OgreViewport.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 

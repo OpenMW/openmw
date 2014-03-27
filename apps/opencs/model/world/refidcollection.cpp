@@ -2,6 +2,7 @@
 #include "refidcollection.hpp"
 
 #include <stdexcept>
+#include <memory>
 
 #include <components/esm/esmreader.hpp>
 
@@ -58,7 +59,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Name, ColumnBase::Display_String));
     nameColumns.mName = &mColumns.back();
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Script, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Script, ColumnBase::Display_Script));
     nameColumns.mScript = &mColumns.back();
 
     InventoryColumns inventoryColumns (nameColumns);
@@ -181,7 +182,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
         unsigned int mFlag;
     } sCreatureFlagTable[] =
     {
-        { Columns::ColumnId_Biped, ESM::Creature::Biped },
+        { Columns::ColumnId_Biped, ESM::Creature::Bipedal },
         { Columns::ColumnId_HasWeapon, ESM::Creature::Weapon },
         { Columns::ColumnId_NoMovement, ESM::Creature::None },
         { Columns::ColumnId_Swims, ESM::Creature::Swims },
@@ -213,10 +214,10 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_OpenSound, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_OpenSound, ColumnBase::Display_Sound));
     const RefIdColumn *openSound = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_CloseSound, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_CloseSound, ColumnBase::Display_Sound));
     const RefIdColumn *closeSound = &mColumns.back();
 
     LightColumns lightColumns (inventoryColumns);
@@ -230,7 +231,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Colour, ColumnBase::Display_Integer));
     lightColumns.mColor = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Sound, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Sound, ColumnBase::Display_Sound));
     lightColumns.mSound = &mColumns.back();
 
     static const struct
@@ -262,13 +263,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     NpcColumns npcColumns (actorsColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Race, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Race, ColumnBase::Display_Race));
     npcColumns.mRace = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Class, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Class, ColumnBase::Display_Class));
     npcColumns.mClass = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Faction, ColumnBase::Display_Faction));
     npcColumns.mFaction = &mColumns.back();
 
     mColumns.push_back (RefIdColumn (Columns::Columnid_Hair, ColumnBase::Display_String));
@@ -431,7 +432,7 @@ void CSMWorld::RefIdCollection::removeRows (int index, int count)
 
 void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
 {
-    mData.appendRecord (type, id);
+    mData.appendRecord (type, id, false);
 }
 
 int CSMWorld::RefIdCollection::searchId (const std::string& id) const
@@ -449,6 +450,16 @@ void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
     mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
 }
 
+void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
+                                     const std::string& destination,
+                                     const CSMWorld::UniversalId::Type type)
+{
+        std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).clone());
+        newRecord->mState = RecordBase::State_ModifiedOnly;
+        mAdapters.find(type)->second->setId(*newRecord, destination);
+        mData.insertRecord(*newRecord, type, destination);
+}
+
 void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
     UniversalId::Type type)
 {
@@ -456,7 +467,7 @@ void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
 
     int index = mData.getAppendIndex (type);
 
-    mData.appendRecord (type, id);
+    mData.appendRecord (type, id, false);
 
     mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
 }
@@ -504,7 +515,7 @@ void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, Univers
         {
             // new record
             int index = mData.getAppendIndex (type);
-            mData.appendRecord (type, id);
+            mData.appendRecord (type, id, base);
 
             RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
 
@@ -530,7 +541,7 @@ void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, Univers
     }
 }
 
-int CSMWorld::RefIdCollection::getAppendIndex (UniversalId::Type type) const
+int CSMWorld::RefIdCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const
 {
     return mData.getAppendIndex (type);
 }
@@ -540,7 +551,18 @@ std::vector<std::string> CSMWorld::RefIdCollection::getIds (bool listDeleted) co
     return mData.getIds (listDeleted);
 }
 
+bool CSMWorld::RefIdCollection::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+{
+    return false;
+}
+
 void CSMWorld::RefIdCollection::save (int index, ESM::ESMWriter& writer) const
 {
     mData.save (index, writer);
 }
+
+const CSMWorld::RefIdData& CSMWorld::RefIdCollection::getDataSet() const
+{
+    return mData;
+}
+

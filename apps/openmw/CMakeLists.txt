@@ -1,23 +1,21 @@
-
-# config file
-configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp")
-
 # local files
 set(GAME
     main.cpp
     engine.cpp
 )
+if(NOT WIN32)
+    set(GAME ${GAME} crashcatcher.cpp)
+endif()
 set(GAME_HEADER
     engine.hpp
-    config.hpp
 )
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
-    compositors characterpreview externalrendering globalmap videoplayer ripplesimulation refraction
-    terrainstorage
+    characterpreview globalmap videoplayer ripplesimulation refraction
+    terrainstorage renderconst effectmanager weaponanimation
     )
 
 add_openmw_dir (mwinput
@@ -34,7 +32,8 @@ add_openmw_dir (mwgui
     enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
-    tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers
+    tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
+    recharge
     )
 
 add_openmw_dir (mwdialogue
@@ -45,7 +44,7 @@ add_openmw_dir (mwscript
     locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions transformationextensions consoleextensions userextensions locals
+    animationextensions transformationextensions consoleextensions userextensions
     )
 
 add_openmw_dir (mwsound
@@ -58,7 +57,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader
+    contentloader esmloader omwloader actiontrap cellreflist
     )
 
 add_openmw_dir (mwclass
@@ -69,15 +68,22 @@ add_openmw_dir (mwclass
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
-    aiescort aiactivate repair enchanting pathfinding security
+    aiescort aiactivate aicombat repair enchanting pathfinding security spellsuccess spellcasting
+    disease pickpocket levelledlist combat steering
+    )
+
+add_openmw_dir (mwstate
+    statemanagerimp charactermanager character
     )
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager windowmanager
+    inputmanager windowmanager statemanager
     )
 
 # Main executable
+set(BOOST_COMPONENTS system filesystem program_options thread wave)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 IF(OGRE_STATIC)
 ADD_DEFINITIONS(-DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_GL)
@@ -107,6 +113,7 @@ add_definitions(${SOUND_DEFINE})
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
+    ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
@@ -114,7 +121,6 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
-    ${SHINY_LIBRARIES}
     "oics"
     "sdl4ogre"
     components
@@ -132,12 +138,6 @@ endif()
 if (UNIX AND NOT APPLE)
 target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()
-
-# Workaround for binutil => 2.23 problem when linking, should be fixed eventually upstream
-if (UNIX AND NOT APPLE)
-target_link_libraries(openmw dl Xt)
-endif()
-
 
 if(APPLE)
     find_library(COCOA_FRAMEWORK Cocoa)
@@ -159,3 +159,10 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(openmw gcov)
 endif()
+
+if (MSVC)
+    # Debug version needs increased number of sections beyond 2^16
+    if (CMAKE_CL_64)
+        set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
+    endif (CMAKE_CL_64)
+endif (MSVC)

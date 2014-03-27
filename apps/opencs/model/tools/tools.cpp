@@ -19,6 +19,8 @@
 #include "regioncheck.hpp"
 #include "birthsigncheck.hpp"
 #include "spellcheck.hpp"
+#include "referenceablecheck.hpp"
+#include "scriptcheck.hpp"
 
 CSMDoc::Operation *CSMTools::Tools::get (int type)
 {
@@ -74,6 +76,10 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new BirthsignCheckStage (mData.getBirthsigns()));
 
         mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
+
+	mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
+
+        mVerifier->appendStage (new ScriptCheckStage (mData));
     }
 
     return mVerifier;
@@ -137,5 +143,6 @@ void CSMTools::Tools::verifierMessage (const QString& message, int type)
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (message.toStdString());
+        mReports[iter->second]->add (message.toUtf8().constData());
 }
+

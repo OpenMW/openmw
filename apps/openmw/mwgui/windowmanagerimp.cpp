@@ -3,6 +3,8 @@
 #include <cassert>
 #include <iterator>
 
+#include <OgreTextureManager.h>
+
 #include "MyGUI_UString.h"
 #include "MyGUI_IPointer.h"
 #include "MyGUI_ResourceImageSetPointer.h"
@@ -14,8 +16,11 @@
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -43,6 +48,7 @@
 #include "waitdialog.hpp"
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
+#include "recharge.hpp"
 #include "exposedwindow.hpp"
 #include "cursor.hpp"
 #include "merchantrepair.hpp"
@@ -95,10 +101,10 @@ namespace MWGui
       , mTrainingWindow(NULL)
       , mMerchantRepair(NULL)
       , mSoulgemDialog(NULL)
+      , mRecharge(NULL)
       , mRepair(NULL)
       , mCompanionWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
-      , mSoftwareCursor(NULL)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
@@ -111,9 +117,6 @@ namespace MWGui
       , mPlayerMinorSkills()
       , mPlayerMajorSkills()
       , mPlayerSkillValues()
-      , mPlayerHealth()
-      , mPlayerMagicka()
-      , mPlayerFatigue()
       , mGui(NULL)
       , mGuiModes()
       , mCursorManager(NULL)
@@ -126,7 +129,6 @@ namespace MWGui
       , mFPS(0.0f)
       , mTriangleCount(0)
       , mBatchCount(0)
-      , mUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"))
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
@@ -171,16 +173,19 @@ namespace MWGui
         mLoadingScreen->onResChange (w,h);
 
         //set up the hardware cursor manager
-        mSoftwareCursor = new Cursor();
         mCursorManager = new SFO::SDLCursorManager();
 
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
-        setUseHardwareCursors(mUseHardwareCursors);
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        mCursorManager->cursorVisibilityChange(false);
+        SDL_ShowCursor(false);
+
+        mCursorManager->setEnabled(true);
+
+        // hide mygui's pointer
+        MyGUI::PointerManager::getInstance().setVisible(false);
     }
 
     void WindowManager::initUI()
@@ -197,18 +202,26 @@ namespace MWGui
         mDragAndDrop->mDraggedWidget = 0;
         mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
+        mRecharge = new Recharge();
         mMenu = new MainMenu(w,h);
-        mMap = new MapWindow("");
-        mStatsWindow = new StatsWindow();
+        mMap = new MapWindow(mDragAndDrop, "");
+        trackWindow(mMap, "map");
+        mStatsWindow = new StatsWindow(mDragAndDrop);
+        trackWindow(mStatsWindow, "stats");
         mConsole = new Console(w,h, mConsoleOnlyScripts);
+        trackWindow(mConsole, "console");
         mJournal = JournalWindow::create(JournalViewModel::create ());
-        mMessageBoxManager = new MessageBoxManager();
+        mMessageBoxManager = new MessageBoxManager(
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
         mTradeWindow = new TradeWindow();
+        trackWindow(mTradeWindow, "barter");
         mSpellBuyingWindow = new SpellBuyingWindow();
         mTravelWindow = new TravelWindow();
         mDialogueWindow = new DialogueWindow();
+        trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
+        trackWindow(mContainerWindow, "container");
         mHud = new HUD(w,h, mShowFPSLevel, mDragAndDrop);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
@@ -217,7 +230,9 @@ namespace MWGui
         mSettingsWindow = new SettingsWindow();
         mConfirmationDialog = new ConfirmationDialog();
         mAlchemyWindow = new AlchemyWindow();
-        mSpellWindow = new SpellWindow();
+        trackWindow(mAlchemyWindow, "alchemy");
+        mSpellWindow = new SpellWindow(mDragAndDrop);
+        trackWindow(mSpellWindow, "spells");
         mQuickKeysMenu = new QuickKeysMenu();
         mLevelupDialog = new LevelupDialog();
         mWaitDialog = new WaitDialog();
@@ -228,6 +243,7 @@ namespace MWGui
         mRepair = new Repair();
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
+        trackWindow(mCompanionWindow, "companion");
 
         mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
@@ -238,16 +254,13 @@ namespace MWGui
         // Setup player stats
         for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
-            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::Stat<int>()));
+            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue()));
         }
 
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::Stat<float>()));
+            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue()));
         }
-
-        unsetSelectedSpell();
-        unsetSelectedWeapon();
 
         // Set up visibility
         updateVisible();
@@ -313,8 +326,9 @@ namespace MWGui
         delete mMerchantRepair;
         delete mRepair;
         delete mSoulgemDialog;
-        delete mSoftwareCursor;
         delete mCursorManager;
+        delete mRecharge;
+        delete mCompanionWindow;
 
         cleanupGarbage();
 
@@ -343,8 +357,6 @@ namespace MWGui
         mHud->setBatchCount(mBatchCount);
 
         mHud->update();
-
-        mSoftwareCursor->update();
     }
 
     void WindowManager::updateVisible()
@@ -378,6 +390,7 @@ namespace MWGui
         mRepair->setVisible(false);
         mCompanionWindow->setVisible(false);
         mInventoryWindow->setTrading(false);
+        mRecharge->setVisible(false);
 
         mHud->setVisible(mHudEnabled);
 
@@ -495,6 +508,9 @@ namespace MWGui
             case GM_SpellCreation:
                 mSpellCreationDialog->setVisible(true);
                 break;
+            case GM_Recharge:
+                mRecharge->setVisible(true);
+                break;
             case GM_Enchanting:
                 mEnchantingDialog->setVisible(true);
                 break;
@@ -533,7 +549,7 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void WindowManager::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         mStatsWindow->setValue (id, value);
         mCharGen->setValue(id, value);
@@ -564,7 +580,7 @@ namespace MWGui
     }
 
 
-    void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& value)
+    void WindowManager::setValue (int parSkill, const MWMechanics::SkillValue& value)
     {
         /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
         /// allow custom skills.
@@ -578,34 +594,7 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
         mHud->setValue (id, value);
         mCharGen->setValue(id, value);
-        if (id == "HBar")
-        {
-            mPlayerHealth = value;
-            mCharGen->setPlayerHealth (value);
-        }
-        else if (id == "MBar")
-        {
-            mPlayerMagicka = value;
-            mCharGen->setPlayerMagicka (value);
-        }
-        else if (id == "FBar")
-        {
-            mPlayerFatigue = value;
-            mCharGen->setPlayerFatigue (value);
-        }
     }
-
-    #if 0
-    MWMechanics::DynamicStat<int> WindowManager::getValue(const std::string& id)
-    {
-        if(id == "HBar")
-            return layerHealth;
-        else if (id == "MBar")
-            return mPlayerMagicka;
-        else if (id == "FBar")
-            return mPlayerFatigue;
-    }
-    #endif
 
     void WindowManager::setValue (const std::string& id, const std::string& value)
     {
@@ -662,19 +651,14 @@ namespace MWGui
         mGarbageDialogs.push_back(dialog);
     }
 
-    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, bool showInDialogueModeOnly)
+    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
     {
         if (buttons.empty()) {
             /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-            if (getMode() == GM_Dialogue) {
+            if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
                 mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-            } else {
-                if (showInDialogueModeOnly) {
-                    if (getMode() == GM_Dialogue)
-                        mMessageBoxManager->createMessageBox(message);
-                } else {
-                    mMessageBoxManager->createMessageBox(message);
-                }
+            } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
+                mMessageBoxManager->createMessageBox(message);
             }
         } else {
             mMessageBoxManager->createInteractiveMessageBox(message, buttons);
@@ -690,17 +674,6 @@ namespace MWGui
     void WindowManager::removeStaticMessageBox()
     {
         mMessageBoxManager->removeStaticMessageBox();
-    }
-
-    void WindowManager::enterPressed ()
-    {
-        mMessageBoxManager->okayPressed();
-    }
-
-    void WindowManager::activateKeyPressed ()
-    {
-        mMessageBoxManager->okayPressed();
-        mCountDialog->cancel();
     }
 
     int WindowManager::readPressedButton ()
@@ -725,6 +698,10 @@ namespace MWGui
 
         mToolTips->onFrame(frameDuration);
 
+        if (MWBase::Environment::get().getStateManager()->getState()==
+            MWBase::StateManager::State_NoGame)
+            return;
+
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             assert(mDragAndDrop->mDraggedWidget);
@@ -735,7 +712,9 @@ namespace MWGui
 
         mInventoryWindow->onFrame();
 
-        mStatsWindow->onFrame();
+        mStatsWindow->onFrame(frameDuration);
+        mMap->onFrame(frameDuration);
+        mSpellWindow->onFrame(frameDuration);
 
         mWaitDialog->onFrame(frameDuration);
 
@@ -756,44 +735,37 @@ namespace MWGui
         mCompanionWindow->onFrame();
     }
 
-    void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
+    void WindowManager::changeCell(MWWorld::CellStore* cell)
     {
-        if (cell->mCell->isExterior())
+        std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
+
+        mMap->setCellName( name );
+        mHud->setCellName( name );
+
+        if (cell->getCell()->isExterior())
         {
-            std::string name;
-            if (cell->mCell->mName != "")
-            {
-                name = cell->mCell->mName;
-                mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
-            }
-            else
-            {
-                const ESM::Region* region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
-                if (region)
-                    name = region->mName;
-                else
-                    name = getGameSettingString("sDefaultCellname", "Wilderness");
-            }
+            if (!cell->getCell()->mName.empty())
+                mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->getCell()->getGridX (), cell->getCell()->getGridY ());
 
-            mMap->cellExplored(cell->mCell->getGridX(), cell->mCell->getGridY());
-
-            mMap->setCellName( name );
-            mHud->setCellName( name );
+            mMap->cellExplored (cell->getCell()->getGridX(), cell->getCell()->getGridY());
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
-            mMap->setActiveCell( cell->mCell->getGridX(), cell->mCell->getGridY() );
-            mHud->setActiveCell( cell->mCell->getGridX(), cell->mCell->getGridY() );
+            mMap->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
+            mHud->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
         }
         else
         {
-            mMap->setCellName( cell->mCell->mName );
-            mHud->setCellName( cell->mCell->mName );
-            mMap->setCellPrefix( cell->mCell->mName );
-            mHud->setCellPrefix( cell->mCell->mName );
-        }
+            mMap->setCellPrefix (cell->getCell()->mName );
+            mHud->setCellPrefix (cell->getCell()->mName );
 
+            Ogre::Vector3 worldPos;
+            if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
+                worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
+            else
+                MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
+            mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
+        }
     }
 
     void WindowManager::setInteriorMapTexture(const int x, const int y)
@@ -877,21 +849,9 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->setDragDrop(dragDrop);
     }
 
-    void WindowManager::setUseHardwareCursors(bool use)
-    {
-        mCursorManager->setEnabled(use);
-        mSoftwareCursor->setVisible(!use && mCursorVisible);
-    }
-
     void WindowManager::setCursorVisible(bool visible)
     {
-        if(mCursorVisible == visible)
-            return;
-
         mCursorVisible = visible;
-        mCursorManager->cursorVisibilityChange(visible);
-
-        mSoftwareCursor->setVisible(!mUseHardwareCursors && visible);
     }
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
@@ -922,8 +882,6 @@ namespace MWGui
         mHud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
-        setUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"));
-
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
             it != changed.end(); ++it)
         {
@@ -940,6 +898,17 @@ namespace MWGui
         mLoadingScreen->onResChange (x,y);
         if (!mHud)
             return; // UI not initialized yet
+
+        for (std::map<MyGUI::Window*, std::string>::iterator it = mTrackedWindows.begin(); it != mTrackedWindows.end(); ++it)
+        {
+            MyGUI::IntPoint pos (Settings::Manager::getFloat(it->second + " x", "Windows") * x,
+                                 Settings::Manager::getFloat(it->second+ " y", "Windows") * y);
+            MyGUI::IntSize size (Settings::Manager::getFloat(it->second + " w", "Windows") * x,
+                                 Settings::Manager::getFloat(it->second + " h", "Windows") * y);
+            it->first->setPosition(pos);
+            it->first->setSize(size);
+        }
+
         mHud->onResChange(x, y);
         mConsole->onResChange(x, y);
         mMenu->onResChange(x, y);
@@ -975,8 +944,6 @@ namespace MWGui
 
     void WindowManager::onCursorChange(const std::string &name)
     {
-        mSoftwareCursor->onCursorChange(name);
-
         if(!mCursorManager->cursorChanged(name))
             return; //the cursor manager doesn't want any more info about this cursor
         //See if we can get the information we need out of the cursor resource
@@ -1033,6 +1000,7 @@ namespace MWGui
 
     void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
     {
+        mSelectedSpell = spellId;
         mHud->setSelectedSpell(spellId, successChancePercent);
 
         const ESM::Spell* spell =
@@ -1043,6 +1011,7 @@ namespace MWGui
 
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
+        mSelectedSpell = "";
         const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
                 .find(MWWorld::Class::get(item).getEnchantment(item));
 
@@ -1062,7 +1031,13 @@ namespace MWGui
 
     void WindowManager::unsetSelectedSpell()
     {
+        mSelectedSpell = "";
         mHud->unsetSelectedSpell();
+
+        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+        if (player->getDrawState() == MWMechanics::DrawState_Spell)
+            player->setDrawState(MWMechanics::DrawState_Nothing);
+
         mSpellWindow->setTitle("#{sNone}");
     }
 
@@ -1189,12 +1164,12 @@ namespace MWGui
         return mGuiModes.back();
     }
 
-    std::map<int, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
+    std::map<int, MWMechanics::SkillValue > WindowManager::getPlayerSkillValues()
     {
         return mPlayerSkillValues;
     }
 
-    std::map<int, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
+    std::map<int, MWMechanics::AttributeValue > WindowManager::getPlayerAttributeValues()
     {
         return mPlayerAttributes;
     }
@@ -1258,7 +1233,7 @@ namespace MWGui
     bool WindowManager::getRestEnabled()
     {
         //Enable rest dialogue if character creation finished
-        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalVariable ("chargenstate").mFloat==-1)
+        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             mRestAllowed=true;
         return mRestAllowed;
     }
@@ -1320,6 +1295,7 @@ namespace MWGui
 
     void WindowManager::changePointer(const std::string &name)
     {
+        MyGUI::PointerManager::getInstance().setPointer(name);
         onCursorChange(name);
     }
 
@@ -1336,6 +1312,9 @@ namespace MWGui
 
     void WindowManager::updatePlayer()
     {
+        unsetSelectedSpell();
+        unsetSelectedWeapon();
+
         mInventoryWindow->updatePlayer();
     }
 
@@ -1364,6 +1343,62 @@ namespace MWGui
     Loading::Listener* WindowManager::getLoadingScreen()
     {
         return mLoadingScreen;
+    }
+
+    void WindowManager::startRecharge(MWWorld::Ptr soulgem)
+    {
+        mRecharge->start(soulgem);
+    }
+
+    bool WindowManager::getCursorVisible()
+    {
+        return mCursorVisible;
+    }
+
+    void WindowManager::trackWindow(OEngine::GUI::Layout *layout, const std::string &name)
+    {
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::IntPoint pos (Settings::Manager::getFloat(name + " x", "Windows") * viewSize.width,
+                             Settings::Manager::getFloat(name + " y", "Windows") * viewSize.height);
+        MyGUI::IntSize size (Settings::Manager::getFloat(name + " w", "Windows") * viewSize.width,
+                             Settings::Manager::getFloat(name + " h", "Windows") * viewSize.height);
+        layout->mMainWidget->setPosition(pos);
+        layout->mMainWidget->setSize(size);
+
+        MyGUI::Window* window = dynamic_cast<MyGUI::Window*>(layout->mMainWidget);
+        if (!window)
+            throw std::runtime_error("Attempting to track size of a non-resizable window");
+        window->eventWindowChangeCoord += MyGUI::newDelegate(this, &WindowManager::onWindowChangeCoord);
+        mTrackedWindows[window] = name;
+    }
+
+    void WindowManager::onWindowChangeCoord(MyGUI::Window *_sender)
+    {
+        std::string setting = mTrackedWindows[_sender];
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        float x = _sender->getPosition().left / float(viewSize.width);
+        float y = _sender->getPosition().top / float(viewSize.height);
+        float w = _sender->getSize().width / float(viewSize.width);
+        float h = _sender->getSize().height / float(viewSize.height);
+        Settings::Manager::setFloat(setting + " x", "Windows", x);
+        Settings::Manager::setFloat(setting + " y", "Windows", y);
+        Settings::Manager::setFloat(setting + " w", "Windows", w);
+        Settings::Manager::setFloat(setting + " h", "Windows", h);
+    }
+
+    void WindowManager::clear()
+    {
+        mMap->clear();
+    }
+
+    void WindowManager::write(ESM::ESMWriter &writer)
+    {
+        mMap->write(writer);
+    }
+
+    void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        mMap->readRecord(reader, type);
     }
 
 }

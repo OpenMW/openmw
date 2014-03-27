@@ -76,7 +76,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
-        return ref->mBase->mData.mValue;
+        if (ptr.getCellRef().mCharge == -1)
+            return ref->mBase->mData.mValue;
+        else
+            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
     }
 
     void Repair::registerSelf()
@@ -141,10 +144,11 @@ namespace MWClass
         text += "\n#{sUses}: " + MWGui::ToolTips::toString(remainingUses);
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -159,7 +163,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
-        return MWWorld::Ptr(&cell.mRepairs.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Repair>().insert(*ref), &cell);
     }
 
     boost::shared_ptr<MWWorld::Action> Repair::use (const MWWorld::Ptr& ptr) const

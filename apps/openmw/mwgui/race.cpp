@@ -1,6 +1,5 @@
 #include "race.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
@@ -42,9 +41,13 @@ namespace MWGui
         getWidget(mPreviewImage, "PreviewImage");
 
         getWidget(mHeadRotate, "HeadRotate");
-        mHeadRotate->setScrollRange(50);
-        mHeadRotate->setScrollPosition(25);
-        mHeadRotate->setScrollViewPage(10);
+
+        // Mouse wheel step is hardcoded to 50 in MyGUI 3.2 ("FIXME").
+        // Give other steps the same value to accomodate.
+        mHeadRotate->setScrollRange(1000);
+        mHeadRotate->setScrollPosition(500);
+        mHeadRotate->setScrollViewPage(50);
+        mHeadRotate->setScrollPage(50);
         mHeadRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 
         // Set up next/previous buttons
@@ -71,8 +74,7 @@ namespace MWGui
         setText("RaceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu5", "Race"));
         getWidget(mRaceList, "RaceList");
         mRaceList->setScrollVisible(true);
-        mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
-        mRaceList->eventListMouseItemActivate += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
+        mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onAccept);
         mRaceList->eventListChangePosition += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
         setText("SkillsT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
@@ -140,7 +142,7 @@ namespace MWGui
         size_t count = mRaceList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (boost::iequals(*mRaceList->getItemDataAt<std::string>(i), raceId))
+            if (Misc::StringUtils::ciEqual(*mRaceList->getItemDataAt<std::string>(i), raceId))
             {
                 mRaceList->setIndexSelected(i);
                 MyGUI::Button* okButton;
@@ -173,9 +175,9 @@ namespace MWGui
         eventBack();
     }
 
-    void RaceDialog::onHeadRotate(MyGUI::ScrollBar*, size_t _position)
+    void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
-        float angle = (float(_position) / 49.f - 0.5) * 3.14 * 2;
+        float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5) * 3.14 * 2;
         float diff = angle - mCurrentAngle;
         mPreview->update (diff);
         mPreviewDirty = true;
@@ -230,7 +232,7 @@ namespace MWGui
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
-        if (boost::iequals(mCurrentRaceId, *raceId))
+        if (Misc::StringUtils::ciEqual(mCurrentRaceId, *raceId))
             return;
 
         mCurrentRaceId = *raceId;
@@ -240,6 +242,14 @@ namespace MWGui
         updatePreview();
         updateSkills();
         updateSpellPowers();
+    }
+
+    void RaceDialog::onAccept(MyGUI::ListBox *_sender, size_t _index)
+    {
+        onSelectRace(_sender, _index);
+        if(mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
+            return;
+        eventDone(this);
     }
 
     void RaceDialog::getBodyParts (int part, std::vector<std::string>& out)
@@ -320,7 +330,7 @@ namespace MWGui
                 continue;
 
             mRaceList->addItem(it->mName, it->mId);
-            if (boost::iequals(it->mId, mCurrentRaceId))
+            if (Misc::StringUtils::ciEqual(it->mId, mCurrentRaceId))
                 mRaceList->setIndexSelected(index);
             ++index;
         }

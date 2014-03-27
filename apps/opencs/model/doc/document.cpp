@@ -2221,7 +2221,7 @@ void CSMDoc::Document::createBase()
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, const boost::filesystem::path& resDir, bool new_)
     : mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
-      mProjectPath ((configuration.getUserPath() / "projects") /
+      mProjectPath ((configuration.getUserDataPath() / "projects") /
                     (savePath.filename().string() + ".project")),
       mSaving (*this, mProjectPath)
 {
@@ -2245,28 +2245,38 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
         mData.setDescription ("");
         mData.setAuthor ("");
     }
-/// \todo un-outcomment the else, once loading an existing content file works properly again.
+
+    bool filtersFound = false;
+
+    if (boost::filesystem::exists (mProjectPath))
+    {
+        filtersFound = true;
+    }
     else
     {
-        if (boost::filesystem::exists (mProjectPath))
+        boost::filesystem::path locCustomFiltersPath (configuration.getUserDataPath());
+        locCustomFiltersPath /= "defaultfilters";
+
+        if (boost::filesystem::exists(locCustomFiltersPath))
         {
-            getData().loadFile (mProjectPath, false, true);
+            boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
+            filtersFound = true;
         }
         else
         {
-            boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
-            locCustomFiltersPath /= "defaultfilters";
-            if (boost::filesystem::exists(locCustomFiltersPath))
+            boost::filesystem::path filters(mResDir);
+            filters /= "defaultfilters";
+
+            if (boost::filesystem::exists(filters))
             {
-                boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
-            } else {
-                boost::filesystem::path filters(mResDir);
-                filters /= "defaultfilters";
                 boost::filesystem::copy_file(filters, mProjectPath);
+                filtersFound = true;
             }
-            getData().loadFile (mProjectPath, false, true);
         }
     }
+
+    if (filtersFound)
+        getData().loadFile (mProjectPath, false, true);
 
     addOptionalGmsts();
     addOptionalGlobals();

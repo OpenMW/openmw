@@ -6,6 +6,8 @@
 #include <map>
 #include <stdexcept>
 
+#include <components/esm/esmwriter.hpp>
+
 #include "recordcmp.hpp"
 
 namespace MWWorld
@@ -18,10 +20,16 @@ namespace MWWorld
         virtual void listIdentifier(std::vector<std::string> &list) const {}
 
         virtual size_t getSize() const = 0;
+        virtual int getDynamicSize() const { return 0; }
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
+
+        virtual void write (ESM::ESMWriter& writer) const {}
+
+        virtual void read (ESM::ESMReader& reader) {}
+        ///< Read into dynamic storage
     };
 
     template <class T>
@@ -193,6 +201,7 @@ namespace MWWorld
         void setUp() {
             //std::sort(mStatic.begin(), mStatic.end(), RecordCmp());
 
+            mShared.clear();
             mShared.reserve(mStatic.size());
             typename std::map<std::string, T>::iterator it = mStatic.begin();
             for (; it != mStatic.end(); ++it) {
@@ -210,6 +219,11 @@ namespace MWWorld
 
         size_t getSize() const {
             return mShared.size();
+        }
+
+        int getDynamicSize() const
+        {
+            return mDynamic.size();
         }
 
         void listIdentifier(std::vector<std::string> &list) const {
@@ -258,7 +272,7 @@ namespace MWWorld
                 typename std::vector<T *>::iterator sharedIter = mShared.begin();
                 typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
 
-                while (sharedIter != mShared.end() && sharedIter != end) { 
+                while (sharedIter != mShared.end() && sharedIter != end) {
                     if((*sharedIter)->mId == item.mId) {
                         mShared.erase(sharedIter);
                         break;
@@ -290,7 +304,41 @@ namespace MWWorld
         bool erase(const T &item) {
             return erase(item.mId);
         }
+
+        void write (ESM::ESMWriter& writer) const
+        {
+            for (typename Dynamic::const_iterator iter (mDynamic.begin()); iter!=mDynamic.end();
+                 ++iter)
+            {
+                writer.startRecord (T::sRecordId);
+                writer.writeHNString ("NAME", iter->second.mId);
+                iter->second.save (writer);
+                writer.endRecord (T::sRecordId);
+            }
+        }
+
+        void read (ESM::ESMReader& reader)
+        {
+            T record;
+            record.mId = reader.getHNString ("NAME");
+            record.load (reader);
+            insert (record);
+        }
     };
+
+    template <>
+    inline void Store<ESM::NPC>::clearDynamic()
+    {
+        std::map<std::string, ESM::NPC>::iterator iter = mDynamic.begin();
+
+        while (iter!=mDynamic.end())
+            if (iter->first=="player")
+                ++iter;
+            else
+                mDynamic.erase (iter++);
+
+        mShared.clear();
+    }
 
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
@@ -340,6 +388,8 @@ namespace MWWorld
 
         typedef std::vector<ESM::LandTexture>::const_iterator iterator;
 
+        // Must be threadsafe! Called from terrain background loading threads.
+        // Not a big deal here, since ESM::LandTexture can never be modified or inserted/erased
         const ESM::LandTexture *search(size_t index, size_t plugin) const {
             assert(plugin < mStatic.size());
             const LandTextureList &ltexl = mStatic[plugin];
@@ -439,6 +489,8 @@ namespace MWWorld
             return iterator(mStatic.end());
         }
 
+        // Must be threadsafe! Called from terrain background loading threads.
+        // Not a big deal here, since ESM::Land can never be modified or inserted/erased
         ESM::Land *search(int x, int y) const {
             ESM::Land land;
             land.mX = x, land.mY = y;

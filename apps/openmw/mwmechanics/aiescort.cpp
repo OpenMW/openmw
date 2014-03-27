@@ -1,23 +1,15 @@
 #include "aiescort.hpp"
 
-#include "movement.hpp"
-
-#include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwworld/timestamp.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-namespace
-{
-    float sgn(float a)
-    {
-        if(a > 0)
-            return 1.0;
-        return -1.0;
-    }
-}
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/timestamp.hpp"
+
+#include "steering.hpp"
+#include "movement.hpp"
 
 /*
     TODO: Test vanilla behavior on passing x0, y0, and z0 with duration of anything including 0.
@@ -29,12 +21,12 @@ namespace MWMechanics
 {
     AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
     : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration)
-    , cellX(std::numeric_limits<int>::max())
-    , cellY(std::numeric_limits<int>::max())
+    , mCellX(std::numeric_limits<int>::max())
+    , mCellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 470;
 
-        // The CS Help File states that if a duration is givin, the AI package will run for that long
+        // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
         if(mX != 0 || mY != 0 || mZ != 0)
             mDuration = 0;
@@ -48,12 +40,12 @@ namespace MWMechanics
 
     AiEscort::AiEscort(const std::string &actorId, const std::string &cellId,int duration, float x, float y, float z)
     : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration)
-    , cellX(std::numeric_limits<int>::max())
-    , cellY(std::numeric_limits<int>::max())
+    , mCellX(std::numeric_limits<int>::max())
+    , mCellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 470;
 
-        // The CS Help File states that if a duration is givin, the AI package will run for that long
+        // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
         if(mX != 0 || mY != 0 || mZ != 0)
             mDuration = 0;
@@ -71,7 +63,7 @@ namespace MWMechanics
         return new AiEscort(*this);
     }
 
-    bool AiEscort::execute (const MWWorld::Ptr& actor)
+    bool AiEscort::execute (const MWWorld::Ptr& actor,float duration)
     {
         // If AiEscort has ran for as long or longer then the duration specified
         // and the duration is not infinite, the package is complete.
@@ -83,49 +75,38 @@ namespace MWMechanics
                 return true;
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ESM::Position pos = actor.getRefData().getPosition();
-        bool cellChange = actor.getCell()->mCell->mData.mX != cellX || actor.getCell()->mCell->mData.mY != cellY;
-        const ESM::Pathgrid *pathgrid =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+        bool cellChange = actor.getCell()->getCell()->mData.mX != mCellX || actor.getCell()->getCell()->mData.mY != mCellY;
 
-        if(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX)
+        if(actor.getCell()->getCell()->mData.mX != player.getCell()->getCell()->mData.mX)
         {
-            int sideX = sgn(actor.getCell()->mCell->mData.mX - player.getCell()->mCell->mData.mX);
-            // Check if actor is near the border of an inactive cell. If so, disable AiEscort.
-            // FIXME: This *should* pause the AiEscort package instead of terminating it.
-            if(sideX * (pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
+            int sideX = PathFinder::sgn(actor.getCell()->getCell()->mData.mX - player.getCell()->getCell()->mData.mX);
+            // Check if actor is near the border of an inactive cell. If so, pause walking.
+            if(sideX * (pos.pos[0] - actor.getCell()->getCell()->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
+                2.0 - 200))
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return true;
+                return false;
             }
         }
-        if(actor.getCell()->mCell->mData.mY != player.getCell()->mCell->mData.mY)
+        if(actor.getCell()->getCell()->mData.mY != player.getCell()->getCell()->mData.mY)
         {
-            int sideY = sgn(actor.getCell()->mCell->mData.mY - player.getCell()->mCell->mData.mY);
-            // Check if actor is near the border of an inactive cell. If so, disable AiEscort.
-            // FIXME: This *should* pause the AiEscort package instead of terminating it.
-            if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
+            int sideY = PathFinder::sgn(actor.getCell()->getCell()->mData.mY - player.getCell()->getCell()->mData.mY);
+            // Check if actor is near the border of an inactive cell. If so, pause walking.
+            if(sideY*(pos.pos[1] - actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
+                2.0 - 200))
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return true;
+                return false;
             }
         }
 
 
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
-            cellX = actor.getCell()->mCell->mData.mX;
-            cellY = actor.getCell()->mCell->mData.mY;
-            float xCell = 0;
-            float yCell = 0;
-            if (actor.getCell()->mCell->isExterior())
-            {
-                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
-            }
+            mCellX = actor.getCell()->getCell()->mData.mX;
+            mCellY = actor.getCell()->getCell()->mData.mY;
 
             ESM::Pathgrid::Point dest;
             dest.mX = mX;
@@ -137,7 +118,7 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
 
         if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
@@ -161,7 +142,7 @@ namespace MWMechanics
         if(distanceBetweenResult <= mMaxDist * mMaxDist)
         {
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            zTurn(actor, Ogre::Degree(zAngle));
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
             mMaxDist = 470;
         }
@@ -178,7 +159,7 @@ namespace MWMechanics
 
     int AiEscort::getTypeId() const
     {
-        return 2;
+        return TypeIdEscort;
     }
 }
 

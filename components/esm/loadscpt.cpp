@@ -26,24 +26,24 @@ void Script::load(ESMReader &esm)
     if (esm.isNextSub("SCVR"))
     {
         int s = mData.mStringTableSize;
-        char* tmp = new char[s];
-        esm.getHExact(tmp, s);
+
+        std::vector<char> tmp (s);
+        esm.getHExact (&tmp[0], s);
 
         // Set up the list of variable names
         mVarNames.resize(mData.mNumShorts + mData.mNumLongs + mData.mNumFloats);
 
         // The tmp buffer is a null-byte separated string list, we
         // just have to pick out one string at a time.
-        char* str = tmp;
+        char* str = &tmp[0];
         for (size_t i = 0; i < mVarNames.size(); i++)
         {
             mVarNames[i] = std::string(str);
             str += mVarNames[i].size() + 1;
 
-            if (str - tmp > s)
+            if (str - &tmp[0] > s)
                 esm.fail("String table overflow");
         }
-        delete[] tmp;
     }
 
     // Script mData

@@ -5,17 +5,13 @@
 #include <typeinfo>
 #include <stdexcept>
 
-#include <boost/algorithm/string.hpp>
-
-#include <components/esm/loadcont.hpp>
-#include <components/compiler/locals.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/esm/inventorystate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/levelledlist.hpp"
 
 #include "manualref.hpp"
 #include "refdata.hpp"
@@ -51,7 +47,7 @@ namespace
         for (typename MWWorld::CellRefList<T>::List::iterator iter (list.mList.begin());
              iter!=list.mList.end(); ++iter)
         {
-            if (Misc::StringUtils::lowerCase (iter->mBase->mId)==id2)
+            if (Misc::StringUtils::ciEqual(iter->mBase->mId, id2))
             {
                 MWWorld::Ptr ptr (&*iter, 0);
                 ptr.setContainerStore (store);
@@ -63,7 +59,57 @@ namespace
     }
 }
 
-MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
+template<typename T>
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState (CellRefList<T>& collection,
+    const ESM::ObjectState& state)
+{
+    if (!LiveCellRef<T>::checkState (state))
+        return ContainerStoreIterator (this); // not valid anymore with current content files -> skip
+
+    const T *record = MWBase::Environment::get().getWorld()->getStore().
+        get<T>().search (state.mRef.mRefID);
+
+    if (!record)
+        return ContainerStoreIterator (this);
+
+    LiveCellRef<T> ref (record);
+    ref.load (state);
+    ref.mRef.mRefNum.mContentFile = -1;
+    collection.mList.push_back (ref);
+
+    return ContainerStoreIterator (this, --collection.mList.end());
+}
+
+template<typename T>
+void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const
+{
+    ref.save (state);
+}
+
+template<typename T>
+void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
+    std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states, bool equipable) const
+{
+    for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
+        iter!=collection.mList.end(); ++iter)
+    {
+        ESM::ObjectState state;
+        storeState (*iter, state);
+        int slot = equipable ? getSlot (*iter) : -1;
+        states.push_back (std::make_pair (state, std::make_pair (T::sRecordId, slot)));
+    }
+}
+
+int MWWorld::ContainerStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+{
+    return -1;
+}
+
+void MWWorld::ContainerStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot) {}
+
+const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
+
+MWWorld::ContainerStore::ContainerStore() : mCachedWeight (0), mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
@@ -77,35 +123,91 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
-bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+int MWWorld::ContainerStore::count(const std::string &id)
 {
-    /// \todo add current enchantment charge here when it is implemented
-    if (  Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID)
-          && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
-          && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
-        && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
-        && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
-          // item that is already partly used up never stacks
-          && (!MWWorld::Class::get(ptr1).hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
-              || MWWorld::Class::get(ptr1).getItemMaxHealth(ptr1) == ptr1.getCellRef().mCharge)
-        && (!MWWorld::Class::get(ptr2).hasItemHealth(ptr2) || ptr2.getCellRef().mCharge == -1
-            || MWWorld::Class::get(ptr2).getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge))
-        return true;
-
-    return false;
+    int total=0;
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, id))
+            total += iter->getRefData().getCount();
+    return total;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, const Ptr& actorPtr)
+void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
 {
-    MWWorld::ContainerStoreIterator it = addImp(itemPtr);
+    if (ptr.getRefData().getCount() <= 1)
+        return;
+    addNewStack(ptr, ptr.getRefData().getCount()-1);
+    remove(ptr, ptr.getRefData().getCount()-1, container);
+}
+
+bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+{
+    const MWWorld::Class& cls1 = MWWorld::Class::get(ptr1);
+    const MWWorld::Class& cls2 = MWWorld::Class::get(ptr2);
+
+    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID))
+        return false;
+
+    // If it has an enchantment, don't stack when some of the charge is already used
+    if (!ptr1.getClass().getEnchantment(ptr1).empty())
+    {
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                    ptr1.getClass().getEnchantment(ptr1));
+        float maxCharge = enchantment->mData.mCharge;
+        float enchantCharge1 = ptr1.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr1.getCellRef().mEnchantmentCharge;
+        float enchantCharge2 = ptr2.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr2.getCellRef().mEnchantmentCharge;
+        if (enchantCharge1 != maxCharge || enchantCharge2 != maxCharge)
+            return false;
+    }
+
+    return ptr1 != ptr2 // an item never stacks onto itself
+        && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
+        && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
+
+        && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
+
+        && cls1.getScript(ptr1) == cls2.getScript(ptr2)
+
+        // item that is already partly used up never stacks
+        && (!cls1.hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
+            || cls1.getItemMaxHealth(ptr1) == ptr1.getCellRef().mCharge)
+        && (!cls2.hasItemHealth(ptr2) || ptr2.getCellRef().mCharge == -1
+            || cls2.getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge);
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
+{
+    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
+    // a bit pointless to set owner for the player
+    if (actorPtr.getRefData().getHandle() != "player")
+        return add(ref.getPtr(), count, actorPtr, true);
+    else
+        return add(ref.getPtr(), count, actorPtr, false);
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
+{
+    MWWorld::ContainerStoreIterator it = addImp(itemPtr, count);
     MWWorld::Ptr item = *it;
+
+    // we may have copied an item from the world, so reset a few things first
+    item.getRefData().setBaseNode(NULL);
+    item.getCellRef().mPos.rot[0] = 0;
+    item.getCellRef().mPos.rot[1] = 0;
+    item.getCellRef().mPos.rot[2] = 0;
+    item.getCellRef().mPos.pos[0] = 0;
+    item.getCellRef().mPos.pos[1] = 0;
+    item.getCellRef().mPos.pos[2] = 0;
+
+    if (setOwner && actorPtr.getClass().isActor())
+        item.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
 
     std::string script = MWWorld::Class::get(item).getScript(item);
     if(script != "")
     {
         CellStore *cell;
 
-        Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
@@ -125,7 +227,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     return it;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr, int count)
 {
     int type = getType(ptr);
 
@@ -140,22 +242,20 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        MWWorld::ManualRef ref(esmStore, "Gold_001");
+        int realCount = count * ptr.getClass().getValue(ptr);
 
-        int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
-
-        ref.getPtr().getRefData().setCount(count);
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
+            if (Misc::StringUtils::ciEqual((*iter).getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
             {
-                (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
+                iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
                 return iter;
             }
         }
 
-        return addImpl(ref.getPtr());
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, realCount);
+        return addNewStack(ref.getPtr(), realCount);
     }
 
     // determine whether to stack or not
@@ -164,17 +264,17 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         if (stacks(*iter, ptr))
         {
             // stack
-            iter->getRefData().setCount( iter->getRefData().getCount() + ptr.getRefData().getCount() );
+            iter->getRefData().setCount( iter->getRefData().getCount() + count );
 
             flagAsModified();
             return iter;
         }
     }
     // if we got here, this means no stacking
-    return addImpl(ptr);
+    return addNewStack(ptr, count);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr, int count)
 {
     ContainerStoreIterator it = begin();
 
@@ -194,88 +294,92 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
         case Type_Weapon: weapons.mList.push_back (*ptr.get<ESM::Weapon>()); it = ContainerStoreIterator(this, --weapons.mList.end()); break;
     }
 
+    it->getRefData().setCount(count);
+
     flagAsModified();
     return it;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store)
+int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor)
+{
+    int toRemove = count;
+
+    for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, itemId))
+            toRemove -= remove(*iter, toRemove, actor);
+
+    flagAsModified();
+
+    // number of removed items
+    return count - toRemove;
+}
+
+int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor)
+{
+    assert(this == item.getContainerStore());
+
+    int toRemove = count;
+    RefData& itemRef = item.getRefData();
+
+    if (itemRef.getCount() <= toRemove)
+    {
+        toRemove -= itemRef.getCount();
+        itemRef.setCount(0);
+    }
+    else
+    {
+        itemRef.setCount(itemRef.getCount() - toRemove);
+        toRemove = 0;
+    }
+
+    flagAsModified();
+
+    // number of removed items
+    return count - toRemove;
+}
+
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
         std::string id = iter->mItem.toString();
-        addInitialItem(id, owner, iter->mCount);
+        addInitialItem(id, owner, faction, iter->mCount);
     }
 
     flagAsModified();
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance, bool topLevel)
+void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction,
+                                              int count, bool topLevel)
 {
     count = std::abs(count); /// \todo implement item restocking (indicated by negative count)
 
-    try
+    ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
+
+    if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
     {
-        ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id);
+        const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
 
-        if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
+        if (topLevel && count > 1 && levItem->mFlags & ESM::ItemLevList::Each)
         {
-            const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
-            const std::vector<ESM::LeveledListBase::LevelItem>& items = levItem->mList;
-
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            int playerLevel = MWWorld::Class::get(player).getCreatureStats(player).getLevel();
-
-            failChance += levItem->mChanceNone;
-
-            if (topLevel && count > 1 && levItem->mFlags & ESM::ItemLevList::Each)
-            {
-                for (int i=0; i<count; ++i)
-                    addInitialItem(id, owner, 1, failChance, false);
-                return;
-            }
-
-            float random = static_cast<float> (std::rand()) / RAND_MAX;
-            if (random >= failChance/100.f)
-            {
-                std::vector<std::string> candidates;
-                int highestLevel = 0;
-                for (std::vector<ESM::LeveledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
-                {
-                    if (it->mLevel > highestLevel)
-                        highestLevel = it->mLevel;
-                }
-
-                std::pair<int, std::string> highest = std::make_pair(-1, "");
-                for (std::vector<ESM::LeveledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
-                {
-                    if (playerLevel >= it->mLevel
-                            && (levItem->mFlags & ESM::ItemLevList::AllLevels || it->mLevel == highestLevel))
-                    {
-                        candidates.push_back(it->mId);
-                        if (it->mLevel >= highest.first)
-                            highest = std::make_pair(it->mLevel, it->mId);
-                    }
-
-                }
-                if (candidates.empty())
-                    return;
-                std::string item = candidates[std::rand()%candidates.size()];
-                addInitialItem(item, owner, count, failChance, false);
-            }
+            for (int i=0; i<count; ++i)
+                addInitialItem(id, owner, faction, 1);
+            return;
         }
         else
         {
-            ref.getPtr().getRefData().setCount (count);
-            ref.getPtr().getCellRef().mOwner = owner;
-            addImp (ref.getPtr());
+            std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
+            if (id.empty())
+                return;
+            addInitialItem(id, owner, faction, count, false);
         }
     }
-    catch (std::logic_error& e)
+    else
     {
-        // Vanilla doesn't fail on nonexistent items in levelled lists
-        std::cerr << "Warning: ignoring nonexistent item '" << id << "'" << std::endl;
-        return;
+        ref.getPtr().getCellRef().mOwner = owner;
+        ref.getPtr().getCellRef().mFaction = faction;
+        addImp (ref.getPtr(), count);
     }
 }
 
@@ -289,13 +393,7 @@ void MWWorld::ContainerStore::clear()
 
 void MWWorld::ContainerStore::flagAsModified()
 {
-    ++mStateId;
     mWeightUpToDate = false;
-}
-
-int MWWorld::ContainerStore::getStateId() const
-{
-    return mStateId;
 }
 
 float MWWorld::ContainerStore::getWeight() const
@@ -445,6 +543,69 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     return Ptr();
 }
 
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
+{
+    state.mItems.clear();
+
+    storeStates (potions, state.mItems);
+    storeStates (appas, state.mItems);
+    storeStates (armors, state.mItems, true);
+    storeStates (books, state.mItems);
+    storeStates (clothes, state.mItems, true);
+    storeStates (ingreds, state.mItems);
+    storeStates (lockpicks, state.mItems, true);
+    storeStates (miscItems, state.mItems);
+    storeStates (probes, state.mItems, true);
+    storeStates (repairs, state.mItems);
+    storeStates (weapons, state.mItems, true);
+
+    state.mLights.clear();
+
+    for (MWWorld::CellRefList<ESM::Light>::List::const_iterator iter (lights.mList.begin());
+        iter!=lights.mList.end(); ++iter)
+    {
+        ESM::LightState objectState;
+        storeState (*iter, objectState);
+        state.mLights.push_back (std::make_pair (objectState, getSlot (*iter)));
+    }
+}
+
+void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
+{
+    clear();
+
+    for (std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >::const_iterator
+        iter (state.mItems.begin()); iter!=state.mItems.end(); ++iter)
+    {
+        int slot = iter->second.second;
+
+        switch (iter->second.first)
+        {
+            case ESM::REC_ALCH: getState (potions, iter->first); break;
+            case ESM::REC_APPA: getState (appas, iter->first); break;
+            case ESM::REC_ARMO: setSlot (getState (armors, iter->first), slot); break;
+            case ESM::REC_BOOK: getState (books, iter->first); break;
+            case ESM::REC_CLOT: setSlot (getState (clothes, iter->first), slot); break;
+            case ESM::REC_INGR: getState (ingreds, iter->first); break;
+            case ESM::REC_LOCK: setSlot (getState (lockpicks, iter->first), slot); break;
+            case ESM::REC_MISC: getState (miscItems, iter->first); break;
+            case ESM::REC_PROB: setSlot (getState (probes, iter->first), slot); break;
+            case ESM::REC_REPA: getState (repairs, iter->first); break;
+            case ESM::REC_WEAP: setSlot (getState (weapons, iter->first), slot); break;
+
+            default:
+
+                std::cerr << "invalid item type in inventory state" << std::endl;
+        }
+    }
+
+    for (std::vector<std::pair<ESM::LightState, int> >::const_iterator iter (state.mLights.begin());
+        iter!=state.mLights.end(); ++iter)
+    {
+        getState (lights, iter->first);
+    }
+}
+
 
 MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container)
 : mType (-1), mMask (0), mContainer (container)
@@ -485,6 +646,11 @@ MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *contain
     : mType(MWWorld::ContainerStore::Type_Repair), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mRepair(iterator){}
 MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Weapon), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mWeapon(iterator){}
+
+MWWorld::ContainerStoreIterator::ContainerStoreIterator( const ContainerStoreIterator& src )
+{
+    copy(src);
+}
 
 void MWWorld::ContainerStoreIterator::incType()
 {
@@ -736,6 +902,41 @@ int MWWorld::ContainerStoreIterator::getType() const
 const MWWorld::ContainerStore *MWWorld::ContainerStoreIterator::getContainerStore() const
 {
     return mContainer;
+}
+
+void MWWorld::ContainerStoreIterator::copy(const ContainerStoreIterator& src)
+{
+    mType = src.mType;
+    mMask = src.mMask;
+    mContainer = src.mContainer;
+    mPtr = src.mPtr;
+
+    switch (mType)
+    {
+        case MWWorld::ContainerStore::Type_Potion: mPotion = src.mPotion; break;
+        case MWWorld::ContainerStore::Type_Apparatus: mApparatus = src.mApparatus; break;
+        case MWWorld::ContainerStore::Type_Armor: mArmor = src.mArmor; break;
+        case MWWorld::ContainerStore::Type_Book: mBook = src.mBook; break;
+        case MWWorld::ContainerStore::Type_Clothing: mClothing = src.mClothing; break;
+        case MWWorld::ContainerStore::Type_Ingredient: mIngredient = src.mIngredient; break;
+        case MWWorld::ContainerStore::Type_Light: mLight = src.mLight; break;
+        case MWWorld::ContainerStore::Type_Lockpick: mLockpick = src.mLockpick; break;
+        case MWWorld::ContainerStore::Type_Miscellaneous: mMiscellaneous = src.mMiscellaneous; break;
+        case MWWorld::ContainerStore::Type_Probe: mProbe = src.mProbe; break;
+        case MWWorld::ContainerStore::Type_Repair: mRepair = src.mRepair; break;
+        case MWWorld::ContainerStore::Type_Weapon: mWeapon = src.mWeapon; break;
+        case -1: break;
+        default: assert(0);
+    }
+}
+
+MWWorld::ContainerStoreIterator& MWWorld::ContainerStoreIterator::operator=( const ContainerStoreIterator& rhs )
+{
+    if (this!=&rhs)
+    {
+        copy(rhs);
+    }
+    return *this;
 }
 
 bool MWWorld::operator== (const ContainerStoreIterator& left, const ContainerStoreIterator& right)

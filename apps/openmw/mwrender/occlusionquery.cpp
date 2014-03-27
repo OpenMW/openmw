@@ -8,6 +8,9 @@
 #include <OgreSubEntity.h>
 #include <OgreMeshManager.h>
 #include <OgreMaterialManager.h>
+#include <OgreCamera.h>
+#include <OgreSceneNode.h>
+#include <OgreMesh.h>
 
 #include "renderconst.hpp"
 

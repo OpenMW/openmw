@@ -160,7 +160,20 @@ namespace CSMWorld
             { ColumnId_DoorPositionYRot, "Teleport Rot Y" },
             { ColumnId_DoorPositionZRot, "Teleport Rot Z" },
             { ColumnId_DialogueType, "Dialogue Type" },
-            { ColumnId_Scope, "Scope", },
+            { ColumnId_QuestIndex, "Quest Index" },
+            { ColumnId_QuestStatusType, "Quest Status" },
+            { ColumnId_QuestDescription, "Quest Description" },
+            { ColumnId_Topic, "Topic" },
+            { ColumnId_Journal, "Journal" },
+            { ColumnId_Actor, "Actor" },
+            { ColumnId_PcFaction, "PC Faction" },
+            { ColumnId_Response, "Response" },
+            { ColumnId_Disposition, "Disposition" },
+            { ColumnId_Rank, "Rank" },
+            { ColumnId_Gender, "Gender" },
+            { ColumnId_PcRank, "PC Rank" },
+            { ColumnId_Scope, "Scope" },
+            { ColumnId_ReferenceableId, "Referenceable ID" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -208,7 +221,7 @@ int CSMWorld::Columns::getId (const std::string& name)
     std::string name2 = Misc::StringUtils::lowerCase (name);
 
     for (int i=0; sNames[i].mName; ++i)
-        if (name2==Misc::StringUtils::lowerCase (sNames[i].mName))
+        if (Misc::StringUtils::ciEqual(sNames[i].mName, name2))
             return sNames[i].mId;
 
     return -1;
@@ -251,7 +264,7 @@ namespace
 
     static const char *sCreatureTypes[] =
     {
-        "Creature", "Deadra", "Undead", "Humanoid", 0
+        "Creature", "Daedra", "Undead", "Humanoid", 0
     };
 
     static const char *sWeaponTypes[] =
@@ -276,6 +289,16 @@ namespace
         "Topic", "Voice", "Greeting", "Persuasion", 0
     };
 
+    static const char *sQuestStatusTypes[] =
+    {
+        "None", "Name", "Finished", "Restart", 0
+    };
+
+    static const char *sGenderEnums[] =
+    {
+        "Male", "Female", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -291,6 +314,8 @@ namespace
             case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
             case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
             case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
+            case CSMWorld::Columns::ColumnId_QuestStatusType: return sQuestStatusTypes;
+            case CSMWorld::Columns::ColumnId_Gender: return sGenderEnums;
 
             default: return 0;
         }

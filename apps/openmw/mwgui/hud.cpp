@@ -6,7 +6,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -55,6 +54,8 @@ namespace MWGui
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(0)
         , mIsDrowning(false)
+        , mWeaponSpellTimer(0.f)
+        , mDrowningFlashTheta(0.f)
     {
         setCoord(0,0, width, height);
 
@@ -174,38 +175,32 @@ namespace MWGui
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
-        static const char *ids[] =
-        {
-            "HBar", "MBar", "FBar", 0
-        };
+        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int modified = static_cast<int>(value.getModified());
 
-        for (int i=0; ids[i]; ++i)
-            if (ids[i]==id)
-            {
-                MyGUI::Widget* w;
-                std::string valStr = boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
-                switch (i)
-                {
-                    case 0:
-                        mHealth->setProgressRange (value.getModified());
-                        mHealth->setProgressPosition (value.getCurrent());
-                        getWidget(w, "HealthFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
-                        break;
-                    case 1:
-                        mMagicka->setProgressRange (value.getModified());
-                        mMagicka->setProgressPosition (value.getCurrent());
-                        getWidget(w, "MagickaFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
-                        break;
-                    case 2:
-                        mStamina->setProgressRange (value.getModified());
-                        mStamina->setProgressPosition (value.getCurrent());
-                        getWidget(w, "FatigueFrame");
-                        w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
-                        break;
-                }
-            }
+        MyGUI::Widget* w;
+        std::string valStr = boost::lexical_cast<std::string>(current) + "/" + boost::lexical_cast<std::string>(modified);
+        if (id == "HBar")
+        {
+            mHealth->setProgressRange(modified);
+            mHealth->setProgressPosition(current);
+            getWidget(w, "HealthFrame");
+            w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
+        }
+        else if (id == "MBar")
+        {
+            mMagicka->setProgressRange (modified);
+            mMagicka->setProgressPosition (current);
+            getWidget(w, "MagickaFrame");
+            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+        }
+        else if (id == "FBar")
+        {
+            mStamina->setProgressRange (modified);
+            mStamina->setProgressPosition (current);
+            getWidget(w, "FatigueFrame");
+            w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
+        }
     }
 
     void HUD::setDrowningTimeLeft(float time)
@@ -243,20 +238,15 @@ namespace MWGui
             float mouseX = cursorPosition.left / float(viewSize.width);
             float mouseY = cursorPosition.top / float(viewSize.height);
 
-            int origCount = object.getRefData().getCount();
-            object.getRefData().setCount(mDragAndDrop->mDraggedCount);
-
             if (world->canPlaceObject(mouseX, mouseY))
-                world->placeObject(object, mouseX, mouseY);
+                world->placeObject(object, mouseX, mouseY, mDragAndDrop->mDraggedCount);
             else
-                world->dropObjectOnGround(world->getPlayer().getPlayer(), object);
+                world->dropObjectOnGround(world->getPlayerPtr(), object, mDragAndDrop->mDraggedCount);
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
             std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
             MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
-            object.getRefData().setCount(origCount);
 
             // remove object from the container it was coming from
             mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
@@ -277,7 +267,8 @@ namespace MWGui
             else if ((mode == GM_Container) || (mode == GM_Inventory))
             {
                 // pick up object
-                MWBase::Environment::get().getWindowManager()->getInventoryWindow()->pickUpObject(object);
+                if (!object.isEmpty())
+                    MWBase::Environment::get().getWindowManager()->getInventoryWindow()->pickUpObject(object);
             }
         }
     }
@@ -329,7 +320,7 @@ namespace MWGui
 
     void HUD::onWeaponClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -341,7 +332,7 @@ namespace MWGui
 
     void HUD::onMagicClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -526,7 +517,7 @@ namespace MWGui
         mWeapStatus->setProgressPosition(0);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        MWWorld::Ptr player = world->getPlayerPtr();
         if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
             mWeapImage->setImageTexture("icons\\k\\tx_werewolf_hand.dds");
         else
@@ -613,15 +604,22 @@ namespace MWGui
         mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
     }
 
+    void HUD::updateEnemyHealthBar()
+    {
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
+        mEnemyHealth->setProgressRange(100);
+        // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
+        // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
+        mEnemyHealth->setProgressPosition(int(stats.getHealth().getCurrent()) / stats.getHealth().getModified() * 100);
+    }
+
     void HUD::update()
     {
         mSpellIcons->updateWidgets(mEffectBox, true);
 
         if (!mEnemy.isEmpty() && mEnemyHealth->getVisible())
         {
-            MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
-            mEnemyHealth->setProgressRange(100);
-            mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
+            updateEnemyHealthBar();
         }
 
         if (mIsDrowning)
@@ -638,9 +636,7 @@ namespace MWGui
         if (!mEnemyHealth->getVisible())
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
         mEnemyHealth->setVisible(true);
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
-        mEnemyHealth->setProgressRange(100);
-        mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
+        updateEnemyHealthBar();
     }
 
 }

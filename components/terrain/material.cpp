@@ -4,7 +4,11 @@
 #include <OgreTechnique.h>
 #include <OgrePass.h>
 
+#include <boost/functional/hash.hpp>
+
+#if TERRAIN_USE_SHADER
 #include <extern/shiny/Main/Factory.hpp>
+#endif
 
 namespace
 {
@@ -36,17 +40,23 @@ namespace Terrain
         : mShaders(shaders)
         , mShadows(false)
         , mSplitShadows(false)
+        , mNormalMapping(true)
+        , mParallaxMapping(true)
     {
 
     }
 
     Ogre::MaterialPtr MaterialGenerator::generate(Ogre::MaterialPtr mat)
     {
+        assert(!mLayerList.empty() && "Can't create material with no layers");
+
         return create(mat, false, false);
     }
 
     Ogre::MaterialPtr MaterialGenerator::generateForCompositeMapRTT(Ogre::MaterialPtr mat)
     {
+        assert(!mLayerList.empty() && "Can't create material with no layers");
+
         return create(mat, true, false);
     }
 
@@ -60,7 +70,9 @@ namespace Terrain
         assert(!renderCompositeMap || !displayCompositeMap);
         if (!mat.isNull())
         {
+#if TERRAIN_USE_SHADER
             sh::Factory::getInstance().destroyMaterialInstance(mat->getName());
+#endif
             Ogre::MaterialManager::getSingleton().remove(mat->getName());
         }
 
@@ -85,7 +97,7 @@ namespace Terrain
             {
                 assert(mLayerList.size() == mBlendmapList.size()+1);
                 std::vector<Ogre::TexturePtr>::iterator blend = mBlendmapList.begin();
-                for (std::vector<std::string>::iterator layer = mLayerList.begin(); layer != mLayerList.end(); ++layer)
+                for (std::vector<LayerInfo>::iterator layer = mLayerList.begin(); layer != mLayerList.end(); ++layer)
                 {
                     Ogre::Pass* pass = technique->createPass();
                     pass->setLightingEnabled(false);
@@ -117,7 +129,7 @@ namespace Terrain
                     }
 
                     // Add the actual layer texture on top of the alpha map.
-                    tus = pass->createTextureUnitState("textures\\" + *layer);
+                    tus = pass->createTextureUnitState(layer->mDiffuseMap);
                     if (!first)
                         tus->setColourOperationEx(Ogre::LBX_BLEND_DIFFUSE_ALPHA,
                                                   Ogre::LBS_TEXTURE,
@@ -140,6 +152,7 @@ namespace Terrain
 
             return mat;
         }
+#if TERRAIN_USE_SHADER
         else
         {
             sh::MaterialInstance* material = sh::Factory::getInstance().createMaterialInstance (name.str());
@@ -156,6 +169,10 @@ namespace Terrain
                 p->mShaderProperties.setProperty ("display_composite_map", sh::makeProperty(new sh::BooleanValue(true)));
                 p->mShaderProperties.setProperty ("num_layers", sh::makeProperty (new sh::StringValue("0")));
                 p->mShaderProperties.setProperty ("num_blendmaps", sh::makeProperty (new sh::StringValue("0")));
+                p->mShaderProperties.setProperty ("normal_map_enabled", sh::makeProperty (new sh::BooleanValue(false)));
+                p->mShaderProperties.setProperty ("parallax_enabled", sh::makeProperty (new sh::BooleanValue(false)));
+                p->mShaderProperties.setProperty ("normal_maps",
+                                                  sh::makeProperty (new sh::IntValue(0)));
 
                 sh::MaterialInstanceTextureUnit* tex = p->createTextureUnit ("compositeMap");
                 tex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue(mCompositeMap)));
@@ -210,6 +227,10 @@ namespace Terrain
                             }
                         }
                         ++neededTextureUnits; // layer texture
+
+                        // Check if this layer has a normal map
+                        if (mNormalMapping && !mLayerList[layerIndex].mNormalMap.empty() && !renderCompositeMap)
+                            ++neededTextureUnits; // normal map
                         if (neededTextureUnits <= remainingTextureUnits)
                         {
                             // We can fit another!
@@ -223,7 +244,6 @@ namespace Terrain
 
 
                     sh::MaterialInstancePass* p = material->createPass ();
-
                     p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
                     p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
                     if (layerOffset != 0)
@@ -238,6 +258,8 @@ namespace Terrain
 
                     p->mShaderProperties.setProperty ("num_layers", sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(numLayersInThisPass))));
                     p->mShaderProperties.setProperty ("num_blendmaps", sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(numBlendTextures))));
+                    p->mShaderProperties.setProperty ("normal_map_enabled",
+                                                      sh::makeProperty (new sh::BooleanValue(false)));
 
                     // blend maps
                     // the index of the first blend map used in this pass
@@ -254,17 +276,43 @@ namespace Terrain
                     }
 
                     // layer maps
+                    bool anyNormalMaps = false;
+                    bool anyParallax = false;
+                    size_t normalMaps = 0;
                     for (int i = 0; i < numLayersInThisPass; ++i)
                     {
+                        const LayerInfo& layer = mLayerList[layerOffset+i];
+                        // diffuse map
                         sh::MaterialInstanceTextureUnit* diffuseTex = p->createTextureUnit ("diffuseMap" + Ogre::StringConverter::toString(i));
-                        diffuseTex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue("textures\\"+mLayerList[layerOffset+i])));
+                        diffuseTex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue(layer.mDiffuseMap)));
+
+                        // normal map (optional)
+                        bool useNormalMap = mNormalMapping && !mLayerList[layerOffset+i].mNormalMap.empty() && !renderCompositeMap;
+                        bool useParallax = useNormalMap && mParallaxMapping && layer.mParallax;
+                        bool useSpecular = layer.mSpecular;
+                        if (useNormalMap)
+                        {
+                            anyNormalMaps = true;
+                            anyParallax = anyParallax || useParallax;
+                            sh::MaterialInstanceTextureUnit* normalTex = p->createTextureUnit ("normalMap" + Ogre::StringConverter::toString(i));
+                            normalTex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue(layer.mNormalMap)));
+                        }
+                        p->mShaderProperties.setProperty ("use_normal_map_" + Ogre::StringConverter::toString(i),
+                                                          sh::makeProperty (new sh::BooleanValue(useNormalMap)));
+                        p->mShaderProperties.setProperty ("use_parallax_" + Ogre::StringConverter::toString(i),
+                                                          sh::makeProperty (new sh::BooleanValue(useParallax)));
+                        p->mShaderProperties.setProperty ("use_specular_" + Ogre::StringConverter::toString(i),
+                                                          sh::makeProperty (new sh::BooleanValue(useSpecular)));
+                        boost::hash_combine(normalMaps, useNormalMap);
+                        boost::hash_combine(normalMaps, useNormalMap && layer.mParallax);
+                        boost::hash_combine(normalMaps, useSpecular);
 
                         if (i+layerOffset > 0)
                         {
                             int blendTextureIndex = getBlendmapIndexForLayer(layerOffset+i);
                             std::string blendTextureComponent = getBlendmapComponentForLayer(layerOffset+i);
                             p->mShaderProperties.setProperty ("blendmap_component_" + Ogre::StringConverter::toString(i),
-                                sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(blendTextureIndex-blendmapStart) + "." + blendTextureComponent)));
+                                                              sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(blendTextureIndex-blendmapStart) + "." + blendTextureComponent)));
                         }
                         else
                         {
@@ -274,6 +322,14 @@ namespace Terrain
                                 sh::makeProperty (new sh::StringValue("")));
                         }
                     }
+                    p->mShaderProperties.setProperty ("normal_map_enabled",
+                                                      sh::makeProperty (new sh::BooleanValue(anyNormalMaps)));
+                    p->mShaderProperties.setProperty ("parallax_enabled",
+                                                      sh::makeProperty (new sh::BooleanValue(anyParallax)));
+                    // Since the permutation handler can't handle dynamic property names,
+                    // combine normal map settings for all layers into one value
+                    p->mShaderProperties.setProperty ("normal_maps",
+                                                      sh::makeProperty (new sh::IntValue(normalMaps)));
 
                     // shadow
                     if (shadows)
@@ -290,10 +346,13 @@ namespace Terrain
                     // Make sure the pass index is fed to the permutation handler, because blendmap components may be different
                     p->mShaderProperties.setProperty ("pass_index", sh::makeProperty(new sh::IntValue(layerOffset)));
 
+                    assert ((int)p->mTexUnits.size() == OGRE_MAX_TEXTURE_LAYERS - remainingTextureUnits);
+
                     layerOffset += numLayersInThisPass;
                 }
             }
         }
+#endif
         return Ogre::MaterialManager::getSingleton().getByName(name.str());
     }
 

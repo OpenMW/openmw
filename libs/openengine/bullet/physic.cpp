@@ -3,9 +3,7 @@
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bulletnifloader.hpp>
-#include "CMotionState.h"
 #include "OgreRoot.h"
-#include "btKinematicCharacterController.h"
 #include "BtOgrePG.h"
 #include "BtOgreGP.h"
 #include "BtOgreExtras.h"
@@ -25,7 +23,7 @@ namespace Physic
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
         mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, true);
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
-        mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
+        mBoxRotationInverse = Ogre::Quaternion(inverse.w, inverse.x, inverse.y,inverse.z);
         mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
     }
 
@@ -87,8 +85,8 @@ namespace Physic
     Ogre::Quaternion PhysicActor::getRotation()
     {
         assert(mBody);
-        btQuaternion quat = mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
-        return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
+        btQuaternion quat = mBody->getWorldTransform().getRotation();
+        return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ()) * mBoxRotationInverse;
     }
 
     void PhysicActor::setScale(float scale){
@@ -318,9 +316,7 @@ namespace Physic
         btVector3 scl(triSize, triSize, 1);
         hfShape->setLocalScaling(scl);
 
-        CMotionState* newMotionState = new CMotionState(this,name);
-
-        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,hfShape);
+        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,0,hfShape);
         RigidBody* body = new RigidBody(CI,name);
         body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
 
@@ -401,12 +397,9 @@ namespace Physic
         else
             shape->mRaycastingShape->setLocalScaling( btVector3(scale,scale,scale));
 
-        //create the motionState
-        CMotionState* newMotionState = new CMotionState(this,name);
-
         //create the real body
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
-                (0,newMotionState, raycasting ? shape->mRaycastingShape : shape->mCollisionShape);
+                (0,0, raycasting ? shape->mRaycastingShape : shape->mCollisionShape);
         RigidBody* body = new RigidBody(CI,name);
         body->mPlaceable = placeable;
 
@@ -604,6 +597,8 @@ namespace Physic
     std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
     {
         RigidBody* body = getRigidBody(name);
+        if (!body) // fall back to raycasting body if there is no collision body
+            body = getRigidBody(name, true);
         ContactTestResultCallback callback;
         dynamicsWorld->contactTest(body, callback);
         return callback.mResult;

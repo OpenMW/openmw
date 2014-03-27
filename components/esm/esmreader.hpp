@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_READER_H
 #define OPENMW_ESM_READER_H
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 #include <libs/platform/string.h>
 #include <cassert>
 #include <vector>
@@ -38,6 +38,7 @@ public:
   int getFormat() const;
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
+  std::string getName() const;
 
   /*************************************************************************
    *

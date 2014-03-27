@@ -370,9 +370,9 @@ namespace Compiler
 
         if (c=='\n')
             special = S_newline;
-        else if (c=='(')
+        else if (c=='(' || c=='[') /// \todo option to disable the use of [ as alias for (
             special = S_open;
-        else if (c==')')
+        else if (c==')' || c==']')  /// \todo option to disable the use of ] as alias for )
             special = S_close;
         else if (c=='.')
         {

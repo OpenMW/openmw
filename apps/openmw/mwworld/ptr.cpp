@@ -21,12 +21,17 @@ const std::string& MWWorld::Ptr::getTypeName() const
     throw std::runtime_error("Can't get type name from an empty object.");
 }
 
+MWWorld::LiveCellRefBase *MWWorld::Ptr::getBase() const
+{
+    if (!mRef)
+        throw std::runtime_error ("Can't access cell ref pointed to by null Ptr");
+
+    return mRef;
+}
+
 ESM::CellRef& MWWorld::Ptr::getCellRef() const
 {
     assert(mRef);
-
-    if (mContainerStore)
-        mContainerStore->flagAsModified();
 
     return mRef->mRef;
 }
@@ -34,9 +39,6 @@ ESM::CellRef& MWWorld::Ptr::getCellRef() const
 MWWorld::RefData& MWWorld::Ptr::getRefData() const
 {
     assert(mRef);
-
-    if (mContainerStore)
-        mContainerStore->flagAsModified();
 
     return mRef->mData;
 }
@@ -52,4 +54,9 @@ void MWWorld::Ptr::setContainerStore (ContainerStore *store)
 MWWorld::ContainerStore *MWWorld::Ptr::getContainerStore() const
 {
     return mContainerStore;
+}
+
+MWWorld::Ptr::operator const void *()
+{
+    return mRef;
 }

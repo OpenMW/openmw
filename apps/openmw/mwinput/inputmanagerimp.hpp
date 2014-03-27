@@ -1,5 +1,5 @@
-#ifndef _MWINPUT_MWINPUTMANAGERIMP_H
-#define _MWINPUT_MWINPUTMANAGERIMP_H
+#ifndef MWINPUT_MWINPUTMANAGERIMP_H
+#define MWINPUT_MWINPUTMANAGERIMP_H
 
 #include "../mwgui/mode.hpp"
 
@@ -61,9 +61,12 @@ namespace MWInput
     public:
         InputManager(OEngine::Render::OgreRenderer &_ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists);
+            const std::string& userFile, bool userFileExists, bool grab);
 
         virtual ~InputManager();
+
+        /// Clear all savegame-specific data
+        virtual void clear();
 
         virtual void update(float dt, bool loading);
 
@@ -86,13 +89,13 @@ namespace MWInput
         virtual void resetToDefaultBindings();
 
     public:
-        virtual bool keyPressed(const SDL_KeyboardEvent &arg );
-        virtual bool keyReleased( const SDL_KeyboardEvent &arg );
+        virtual void keyPressed(const SDL_KeyboardEvent &arg );
+        virtual void keyReleased( const SDL_KeyboardEvent &arg );
         virtual void textInput (const SDL_TextInputEvent &arg);
 
-        virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
-        virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
-        virtual bool mouseMoved( const SFO::MouseMotionEvent &arg );
+        virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual void mouseMoved( const SFO::MouseMotionEvent &arg );
 
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );
@@ -138,6 +141,8 @@ namespace MWInput
 
         bool mDragDrop;
 
+        bool mGrabCursor;
+
         bool mInvertY;
 
         float mCameraSensitivity;
@@ -171,7 +176,6 @@ namespace MWInput
         void toggleSpell();
         void toggleWeapon();
         void toggleInventory();
-        void toggleContainer();
         void toggleConsole();
         void screenshot();
         void toggleJournal();

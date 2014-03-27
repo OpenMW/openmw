@@ -13,6 +13,11 @@
 
 #include "../mwscript/compilercontext.hpp"
 
+namespace ESM
+{
+    struct Dialogue;
+}
+
 namespace MWDialogue
 {
     class DialogueManager : public MWBase::DialogueManager
@@ -40,11 +45,12 @@ namespace MWDialogue
             void parseText (const std::string& text);
 
             void updateTopics();
+            void updateGlobals();
 
             bool compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code);
             void executeScript (const std::string& script);
 
-            void executeTopic (const std::string& topic, bool randomResponse=false);
+            void executeTopic (const std::string& topic);
 
         public:
 
@@ -76,7 +82,13 @@ namespace MWDialogue
 
             virtual void persuade (int type);
             virtual int getTemporaryDispositionChange () const;
-            virtual void applyTemporaryDispositionChange (int delta);
+            virtual void applyDispositionChange (int delta);
+
+            virtual int countSavedGameRecords() const;
+
+            virtual void write (ESM::ESMWriter& writer) const;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
     };
 
 

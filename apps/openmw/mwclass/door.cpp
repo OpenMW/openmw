@@ -8,16 +8,15 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/failedaction.hpp"
-#include "../mwworld/actionapply.hpp"
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/actiondoor.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/actiontrap.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -97,7 +96,7 @@ namespace MWClass
 
         if (needKey && hasKey)
         {
-            if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+            if(actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             ptr.getCellRef().mLockLevel = 0;
             // using a key disarms the trap
@@ -109,32 +108,18 @@ namespace MWClass
             if(!ptr.getCellRef().mTrap.empty())
             {
                 // Trap activation
-                std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
-
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionApply(actor, ptr.getCellRef().mTrap));
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().mTrap, ptr));
                 action->setSound(trapActivationSound);
-                ptr.getCellRef().mTrap = "";
-
                 return action;
             }
 
             if (ref->mRef.mTeleport)
             {
-                // teleport door
-                /// \todo remove this if clause once ActionTeleport can also support other actors
-                if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
-                {
-                    boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->mRef.mDestCell, ref->mRef.mDoorDest));
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->mRef.mDestCell, ref->mRef.mDoorDest));
 
-                    action->setSound(openSound);
+                action->setSound(openSound);
 
-                    return action;
-                }
-                else
-                {
-                    // another NPC or a creature is using the door
-                    return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction);
-                }
+                return action;
             }
             else
             {
@@ -273,6 +258,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        return MWWorld::Ptr(&cell.mDoors.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Door>().insert(*ref), &cell);
     }
 }

@@ -6,12 +6,15 @@
 #include <OgreSceneNode.h>
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
-
-#include "../mwworld/esmstore.hpp"
+#include <OgreRenderTexture.h>
+#include <OgreViewport.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "renderconst.hpp"
 #include "renderingmanager.hpp"
@@ -79,7 +82,7 @@ std::string LocalMap::coordStr(const int x, const int y)
     return StringConverter::toString(x) + "_" + StringConverter::toString(y);
 }
 
-void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
+void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 {
     if (!mInterior)
     {
@@ -108,15 +111,15 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
     }
 }
 
-void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell, float zMin, float zMax)
+void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
 {
     mInterior = false;
 
     mCameraRotNode->setOrientation(Quaternion::IDENTITY);
     mCellCamera->setOrientation(Quaternion(Ogre::Math::Cos(Ogre::Degree(0)/2.f), 0, 0, -Ogre::Math::Sin(Ogre::Degree(0)/2.f)));
 
-    int x = cell->mCell->getGridX();
-    int y = cell->mCell->getGridY();
+    int x = cell->getCell()->getGridX();
+    int y = cell->getCell()->getGridY();
 
     std::string name = "Cell_"+coordStr(x, y);
 
@@ -125,7 +128,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell, float zMin, float zMax)
     render((x+0.5)*sSize, (y+0.5)*sSize, zMin, zMax, sSize, sSize, name);
 }
 
-void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
+void LocalMap::requestMap(MWWorld::CellStore* cell,
                             AxisAlignedBox bounds)
 {
     // if we're in an empty cell, don't bother rendering anything
@@ -182,7 +185,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     const int segsX = std::ceil( length.x / sSize );
     const int segsY = std::ceil( length.y / sSize );
 
-    mInteriorName = cell->mCell->mName;
+    mInteriorName = cell->getCell()->mName;
 
     for (int x=0; x<segsX; ++x)
     {
@@ -192,7 +195,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
             Vector2 newcenter = start + 4096;
 
             render(newcenter.x - center.x, newcenter.y - center.y, zMin, zMax, sSize, sSize,
-                cell->mCell->mName + "_" + coordStr(x,y));
+                cell->getCell()->mName + "_" + coordStr(x,y));
         }
     }
 }
@@ -225,64 +228,54 @@ void LocalMap::render(const float x, const float y,
     tex = TextureManager::getSingleton().getByName(texture);
     if (tex.isNull())
     {
-        // try loading from disk
-        //if (boost::filesystem::exists(texture+".jpg"))
-        //{
-            /// \todo
-        //}
-        //else
+        // render
+        tex = TextureManager::getSingleton().createManual(
+                        texture,
+                        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                        TEX_TYPE_2D,
+                        xw*sMapResolution/sSize, yw*sMapResolution/sSize,
+                        0,
+                        PF_R8G8B8,
+                        TU_RENDERTARGET);
+
+        RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
+
+        rtt->setAutoUpdated(false);
+        Viewport* vp = rtt->addViewport(mCellCamera);
+        vp->setOverlaysEnabled(false);
+        vp->setShadowsEnabled(false);
+        vp->setBackgroundColour(ColourValue(0, 0, 0));
+        vp->setVisibilityMask(RV_Map);
+        vp->setMaterialScheme("local_map");
+
+        rtt->update();
+
+        // create "fog of war" texture
+        TexturePtr tex2 = TextureManager::getSingleton().createManual(
+                        texture + "_fog",
+                        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                        TEX_TYPE_2D,
+                        xw*sFogOfWarResolution/sSize, yw*sFogOfWarResolution/sSize,
+                        0,
+                        PF_A8R8G8B8,
+                        TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+
+        // create a buffer to use for dynamic operations
+        std::vector<uint32> buffer;
+        buffer.resize(sFogOfWarResolution*sFogOfWarResolution);
+
+        // initialize to (0, 0, 0, 1)
+        for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
         {
-            // render
-            tex = TextureManager::getSingleton().createManual(
-                            texture,
-                            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                            TEX_TYPE_2D,
-                            xw*sMapResolution/sSize, yw*sMapResolution/sSize,
-                            0,
-                            PF_R8G8B8,
-                            TU_RENDERTARGET);
-
-            RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
-
-            rtt->setAutoUpdated(false);
-            Viewport* vp = rtt->addViewport(mCellCamera);
-            vp->setOverlaysEnabled(false);
-            vp->setShadowsEnabled(false);
-            vp->setBackgroundColour(ColourValue(0, 0, 0));
-            vp->setVisibilityMask(RV_Map);
-            vp->setMaterialScheme("local_map");
-
-            rtt->update();
-
-            // create "fog of war" texture
-            TexturePtr tex2 = TextureManager::getSingleton().createManual(
-                            texture + "_fog",
-                            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                            TEX_TYPE_2D,
-                            xw*sFogOfWarResolution/sSize, yw*sFogOfWarResolution/sSize,
-                            0,
-                            PF_A8R8G8B8,
-                            TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
-
-            // create a buffer to use for dynamic operations
-            std::vector<uint32> buffer;
-            buffer.resize(sFogOfWarResolution*sFogOfWarResolution);
-
-            // initialize to (0, 0, 0, 1)
-            for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
-            {
-                buffer[p] = (255 << 24);
-            }
-
-            memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
-            tex2->getBuffer()->unlock();
-
-            mBuffers[texture] = buffer;
-
-            // save to cache for next time
-            //rtt->writeContentsToFile("./" + texture + ".jpg");
+            buffer[p] = (255 << 24);
         }
+
+        memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
+        tex2->getBuffer()->unlock();
+
+        mBuffers[texture] = buffer;
     }
+
     mRenderingManager->enableLights(true);
     mLight->setVisible(false);
 
@@ -338,8 +331,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
         getInteriorMapPosition(pos, u,v, x,y);
 
     Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).yAxis();
-
-    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
 
     if (!mInterior)
     {

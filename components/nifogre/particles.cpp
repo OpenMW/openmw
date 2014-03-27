@@ -5,11 +5,22 @@
 #include <OgreParticleEmitter.h>
 #include <OgreParticleAffector.h>
 #include <OgreParticle.h>
+#include <OgreBone.h>
+#include <OgreTagPoint.h>
+#include <OgreEntity.h>
+#include <OgreSkeletonInstance.h>
+#include <OgreSceneNode.h>
+#include <OgreSceneManager.h>
 
 /* FIXME: "Nif" isn't really an appropriate emitter name. */
 class NifEmitter : public Ogre::ParticleEmitter
 {
 public:
+    Ogre::Bone* mEmitterBone;
+    Ogre::Bone* mParticleBone;
+
+    Ogre::ParticleSystem* getPartSys() { return mParent; }
+
     /** Command object for the emitter width (see Ogre::ParamCommand).*/
     class CmdWidth : public Ogre::ParamCommand
     {
@@ -120,6 +131,9 @@ public:
     NifEmitter(Ogre::ParticleSystem *psys)
       : Ogre::ParticleEmitter(psys)
     {
+        mEmitterBone = Ogre::any_cast<Ogre::Bone*>(psys->getUserObjectBindings().getUserAny());
+        Ogre::TagPoint* tag = static_cast<Ogre::TagPoint*>(mParent->getParentNode());
+        mParticleBone = static_cast<Ogre::Bone*>(tag->getParent());
         initDefaults("Nif");
     }
 
@@ -142,22 +156,40 @@ public:
         yOff = Ogre::Math::SymmetricRandom() * mYRange;
         zOff = Ogre::Math::SymmetricRandom() * mZRange;
 
-        particle->position = mPosition + xOff + yOff + zOff;
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        Ogre::Vector3& position = particle->mPosition;
+        Ogre::Vector3& direction = particle->mDirection;
+        Ogre::ColourValue& colour = particle->mColour;
+        Ogre::Real& totalTimeToLive = particle->mTotalTimeToLive;
+        Ogre::Real& timeToLive = particle->mTimeToLive;
+#else
+        Ogre::Vector3& position = particle->position;
+        Ogre::Vector3& direction = particle->direction;
+        Ogre::ColourValue& colour = particle->colour;
+        Ogre::Real& totalTimeToLive = particle->totalTimeToLive;
+        Ogre::Real& timeToLive = particle->timeToLive;
+#endif
+
+        position = xOff + yOff + zOff +
+                 mParticleBone->_getDerivedOrientation().Inverse() * (mEmitterBone->_getDerivedPosition()
+                - mParticleBone->_getDerivedPosition());
 
         // Generate complex data by reference
-        genEmissionColour(particle->colour);
+        genEmissionColour(colour);
 
         // NOTE: We do not use mDirection/mAngle for the initial direction.
         Ogre::Radian hdir = mHorizontalDir + mHorizontalAngle*Ogre::Math::SymmetricRandom();
         Ogre::Radian vdir = mVerticalDir + mVerticalAngle*Ogre::Math::SymmetricRandom();
-        particle->direction = (Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
+        direction = (mParticleBone->_getDerivedOrientation().Inverse()
+                     * mEmitterBone->_getDerivedOrientation() *
+                                Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
                                Ogre::Quaternion(vdir, Ogre::Vector3::UNIT_X)) *
                               Ogre::Vector3::UNIT_Z;
 
-        genEmissionVelocity(particle->direction);
+        genEmissionVelocity(direction);
 
         // Generate simpler data
-        particle->timeToLive = particle->totalTimeToLive = genEmissionTTL();
+        timeToLive = totalTimeToLive = genEmissionTTL();
     }
 
     /** Overloaded to update the trans. matrix */
@@ -337,9 +369,9 @@ NifEmitter::CmdHorizontalAngle NifEmitter::msHorizontalAngleCmd;
 
 Ogre::ParticleEmitter* NifEmitterFactory::createEmitter(Ogre::ParticleSystem *psys)
 {
-    Ogre::ParticleEmitter *emit = OGRE_NEW NifEmitter(psys);
-    mEmitters.push_back(emit);
-    return emit;
+    Ogre::ParticleEmitter *emitter = OGRE_NEW NifEmitter(psys);
+    mEmitters.push_back(emitter);
+    return emitter;
 }
 
 
@@ -404,9 +436,13 @@ public:
     /** See Ogre::ParticleAffector. */
     void _initParticle(Ogre::Particle *particle)
     {
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        const Ogre::Real life_time     = particle->mTotalTimeToLive;
+        Ogre::Real       particle_time = particle->mTimeToLive;
+#else
         const Ogre::Real life_time     = particle->totalTimeToLive;
         Ogre::Real       particle_time = particle->timeToLive;
-
+#endif
         Ogre::Real width = mParent->getDefaultWidth();
         Ogre::Real height = mParent->getDefaultHeight();
         if(life_time-particle_time < mGrowTime)
@@ -431,9 +467,13 @@ public:
         while (!pi.end())
         {
             Ogre::Particle *p = pi.getNext();
-            const Ogre::Real life_time     = p->totalTimeToLive;
-            Ogre::Real       particle_time = p->timeToLive;
-
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+        const Ogre::Real life_time     = p->mTotalTimeToLive;
+        Ogre::Real       particle_time = p->mTimeToLive;
+#else
+        const Ogre::Real life_time     = p->totalTimeToLive;
+        Ogre::Real       particle_time = p->timeToLive;
+#endif
             Ogre::Real width = mParent->getDefaultWidth();
             Ogre::Real height = mParent->getDefaultHeight();
             if(life_time-particle_time < mGrowTime)
@@ -492,6 +532,11 @@ class GravityAffector : public Ogre::ParticleAffector
     };
 
 public:
+    Ogre::Bone* mEmitterBone;
+    Ogre::Bone* mParticleBone;
+
+    Ogre::ParticleSystem* getPartSys() { return mParent; }
+
     /** Command object for force (see Ogre::ParamCommand).*/
     class CmdForce : public Ogre::ParamCommand
     {
@@ -586,6 +631,10 @@ public:
       , mPosition(0.0f)
       , mDirection(0.0f)
     {
+        mEmitterBone = Ogre::any_cast<Ogre::Bone*>(psys->getUserObjectBindings().getUserAny());
+        Ogre::TagPoint* tag = static_cast<Ogre::TagPoint*>(mParent->getParentNode());
+        mParticleBone = static_cast<Ogre::Bone*>(tag->getParent());
+
         mType = "Gravity";
 
         // Init parameters
@@ -656,7 +705,11 @@ protected:
         while (!pi.end())
         {
             Ogre::Particle *p = pi.getNext();
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            p->mDirection += vec;
+#else
             p->direction += vec;
+#endif
         }
     }
 
@@ -667,8 +720,18 @@ protected:
         while (!pi.end())
         {
             Ogre::Particle *p = pi.getNext();
-            const Ogre::Vector3 vec = (p->position - mPosition).normalisedCopy() * force;
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            Ogre::Vector3 position = p->mPosition;
+#else
+            Ogre::Vector3 position = p->position;
+#endif
+
+            Ogre::Vector3 vec = (mPosition - position).normalisedCopy() * force;
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            p->mDirection += vec;
+#else
             p->direction += vec;
+#endif
         }
     }
 

@@ -24,10 +24,8 @@ namespace MWWorld
         Store<ESM::BirthSign>       mBirthSigns;
         Store<ESM::Class>           mClasses;
         Store<ESM::Clothing>        mClothes;
-        Store<ESM::LoadCNTC>        mContChange;
         Store<ESM::Container>       mContainers;
         Store<ESM::Creature>        mCreatures;
-        Store<ESM::LoadCREC>        mCreaChange;
         Store<ESM::Dialogue>        mDialogs;
         Store<ESM::Door>            mDoors;
         Store<ESM::Enchantment>     mEnchants;
@@ -40,7 +38,6 @@ namespace MWWorld
         Store<ESM::Lockpick>        mLockpicks;
         Store<ESM::Miscellaneous>   mMiscItems;
         Store<ESM::NPC>             mNpcs;
-        Store<ESM::LoadNPCC>        mNpcChange;
         Store<ESM::Probe>           mProbes;
         Store<ESM::Race>            mRaces;
         Store<ESM::Region>          mRegions;
@@ -103,7 +100,7 @@ namespace MWWorld
         {
             // Cell store needs access to this for tracking moved references
             mCells.mEsmStore = this;
-            
+
             mStores[ESM::REC_ACTI] = &mActivators;
             mStores[ESM::REC_ALCH] = &mPotions;
             mStores[ESM::REC_APPA] = &mAppas;
@@ -114,10 +111,8 @@ namespace MWWorld
             mStores[ESM::REC_CELL] = &mCells;
             mStores[ESM::REC_CLAS] = &mClasses;
             mStores[ESM::REC_CLOT] = &mClothes;
-            mStores[ESM::REC_CNTC] = &mContChange;
             mStores[ESM::REC_CONT] = &mContainers;
             mStores[ESM::REC_CREA] = &mCreatures;
-            mStores[ESM::REC_CREC] = &mCreaChange;
             mStores[ESM::REC_DIAL] = &mDialogs;
             mStores[ESM::REC_DOOR] = &mDoors;
             mStores[ESM::REC_ENCH] = &mEnchants;
@@ -133,7 +128,6 @@ namespace MWWorld
             mStores[ESM::REC_LTEX] = &mLandTextures;
             mStores[ESM::REC_MISC] = &mMiscItems;
             mStores[ESM::REC_NPC_] = &mNpcs;
-            mStores[ESM::REC_NPCC] = &mNpcChange;
             mStores[ESM::REC_PGRD] = &mPathgrids;
             mStores[ESM::REC_PROB] = &mProbes;
             mStores[ESM::REC_RACE] = &mRaces;
@@ -215,6 +209,13 @@ namespace MWWorld
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
         void setUp();
+
+        int countSavedGameRecords() const;
+
+        void write (ESM::ESMWriter& writer) const;
+
+        bool readRecord (ESM::ESMReader& reader, int32_t type);
+        ///< \return Known type?
     };
 
     template <>
@@ -288,11 +289,6 @@ namespace MWWorld
     }
 
     template <>
-    inline const Store<ESM::LoadCNTC> &ESMStore::get<ESM::LoadCNTC>() const {
-        return mContChange;
-    }
-
-    template <>
     inline const Store<ESM::Container> &ESMStore::get<ESM::Container>() const {
         return mContainers;
     }
@@ -300,11 +296,6 @@ namespace MWWorld
     template <>
     inline const Store<ESM::Creature> &ESMStore::get<ESM::Creature>() const {
         return mCreatures;
-    }
-
-    template <>
-    inline const Store<ESM::LoadCREC> &ESMStore::get<ESM::LoadCREC>() const {
-        return mCreaChange;
     }
 
     template <>
@@ -365,11 +356,6 @@ namespace MWWorld
     template <>
     inline const Store<ESM::NPC> &ESMStore::get<ESM::NPC>() const {
         return mNpcs;
-    }
-
-    template <>
-    inline const Store<ESM::LoadNPCC> &ESMStore::get<ESM::LoadNPCC>() const {
-        return mNpcChange;
     }
 
     template <>

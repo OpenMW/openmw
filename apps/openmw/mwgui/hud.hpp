@@ -1,3 +1,6 @@
+#ifndef OPENMW_GAME_MWGUI_HUD_H
+#define OPENMW_GAME_MWGUI_HUD_H
+
 #include "mapwindow.hpp"
 
 #include "../mwmechanics/stat.hpp"
@@ -112,6 +115,10 @@ namespace MWGui
         void onMagicClicked(MyGUI::Widget* _sender);
         void onMapClicked(MyGUI::Widget* _sender);
 
+        void updateEnemyHealthBar();
+
         void updatePositions();
     };
 }
+
+#endif

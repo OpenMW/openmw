@@ -1,3 +1,6 @@
+#ifndef OPENMW_GAME_MWGUI_MAINMENU_H
+#define OPENMW_GAME_MWGUI_MAINMENU_H
+
 #include <openengine/gui/layout.hpp>
 
 #include "imagebutton.hpp"
@@ -5,19 +8,36 @@
 namespace MWGui
 {
 
+    class SaveGameDialog;
+
     class MainMenu : public OEngine::GUI::Layout
     {
-    public:
-        MainMenu(int w, int h);
+            int mWidth;
+            int mHeight;
 
-        void onResChange(int w, int h);
+        public:
 
-    private:
-        MyGUI::Widget* mButtonBox;
+            MainMenu(int w, int h);
+            ~MainMenu();
 
-        std::map<std::string, MWGui::ImageButton*> mButtons;
+            void onResChange(int w, int h);
 
-        void onButtonClicked (MyGUI::Widget* sender);
+            virtual void setVisible (bool visible);
+
+        private:
+
+            MyGUI::Widget* mButtonBox;
+            MyGUI::TextBox* mVersionText;
+
+            std::map<std::string, MWGui::ImageButton*> mButtons;
+
+            void onButtonClicked (MyGUI::Widget* sender);
+
+            void updateMenu();
+
+            SaveGameDialog* mSaveGameDialog;
     };
 
 }
+
+#endif

@@ -153,7 +153,19 @@ void CSVWorld::TableBottomBox::tableSizeChanged (int size, int deleted, int modi
 void CSVWorld::TableBottomBox::createRequest()
 {
     mCreator->reset();
+    mCreator->toggleWidgets(true);
     mLayout->setCurrentWidget (mCreator);
+    setVisible (true);
+    mCreating = true;
+}
+
+void CSVWorld::TableBottomBox::cloneRequest(const std::string& id, 
+                                            const CSMWorld::UniversalId::Type type) 
+{
+    mCreator->reset();
+    mCreator->cloneMode(id, type);
+    mLayout->setCurrentWidget(mCreator);
+    mCreator->toggleWidgets(false);
     setVisible (true);
     mCreating = true;
 }

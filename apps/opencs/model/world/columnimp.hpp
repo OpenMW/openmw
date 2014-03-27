@@ -9,6 +9,7 @@
 
 #include "columnbase.hpp"
 #include "columns.hpp"
+#include "info.hpp"
 
 namespace CSMWorld
 {
@@ -36,7 +37,6 @@ namespace CSMWorld
         }
     };
 
-    /// \note Shares ID with IdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct StringIdColumn : public Column<ESXRecordT>
     {
@@ -201,7 +201,7 @@ namespace CSMWorld
     struct DescriptionColumn : public Column<ESXRecordT>
     {
         DescriptionColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_LongString)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -372,7 +372,7 @@ namespace CSMWorld
         SkillsColumn (int index, bool typePrefix = false, bool major = false)
         : Column<ESXRecordT> ((typePrefix ? (
             major ? Columns::ColumnId_MajorSkill1 : Columns::ColumnId_MinorSkill1) :
-            Columns::ColumnId_Skill1) + index, ColumnBase::Display_String),
+            Columns::ColumnId_Skill1) + index, ColumnBase::Display_Skill),
             mIndex (index), mMajor (major)
         {}
 
@@ -597,7 +597,7 @@ namespace CSMWorld
     struct SoundFileColumn : public Column<ESXRecordT>
     {
         SoundFileColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_Sound)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -810,18 +810,18 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct CellColumn : public Column<ESXRecordT>
     {
-        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_String) {}
+        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            return QString::fromUtf8 (record.get().mCellId.c_str());
+            return QString::fromUtf8 (record.get().mCell.c_str());
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
             ESXRecordT record2 = record.get();
 
-            record2.mCellId = data.toString().toUtf8().constData();
+            record2.mCell = data.toString().toUtf8().constData();
 
             record.setModified (record2);
         }
@@ -833,15 +833,15 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
-    /// \note Shares ID with StringIdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct IdColumn : public Column<ESXRecordT>
     {
-        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String) {}
+        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_ReferenceableId,
+            ColumnBase::Display_Referenceable) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -889,7 +889,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct OwnerColumn : public Column<ESXRecordT>
     {
-        OwnerColumn() : Column<ESXRecordT> (Columns::ColumnId_Owner, ColumnBase::Display_String) {}
+        OwnerColumn() : Column<ESXRecordT> (Columns::ColumnId_Owner, ColumnBase::Display_Npc) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -914,7 +914,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct SoulColumn : public Column<ESXRecordT>
     {
-        SoulColumn() : Column<ESXRecordT> (Columns::ColumnId_Soul, ColumnBase::Display_String) {}
+        SoulColumn() : Column<ESXRecordT> (Columns::ColumnId_Soul, ColumnBase::Display_Creature) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -939,7 +939,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct FactionColumn : public Column<ESXRecordT>
     {
-        FactionColumn() : Column<ESXRecordT> (Columns::ColumnId_Faction, ColumnBase::Display_String) {}
+        FactionColumn() : Column<ESXRecordT> (Columns::ColumnId_Faction, ColumnBase::Display_Faction) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1089,7 +1089,7 @@ namespace CSMWorld
     struct TeleportCellColumn : public Column<ESXRecordT>
     {
         TeleportCellColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_TeleportCell, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_TeleportCell, ColumnBase::Display_Cell)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -1113,7 +1113,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
@@ -1145,7 +1145,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct KeyColumn : public Column<ESXRecordT>
     {
-        KeyColumn() : Column<ESXRecordT> (Columns::ColumnId_Key, ColumnBase::Display_String) {}
+        KeyColumn() : Column<ESXRecordT> (Columns::ColumnId_Key, ColumnBase::Display_Miscellaneous) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1346,6 +1346,340 @@ namespace CSMWorld
         virtual bool isUserEditable() const
         {
             return false;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct QuestStatusTypeColumn : public Column<ESXRecordT>
+    {
+        QuestStatusTypeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_QuestStatusType, ColumnBase::Display_QuestStatusType)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mQuestStatus);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mQuestStatus = static_cast<Info::QuestStatus> (data.toInt());
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct QuestDescriptionColumn : public Column<ESXRecordT>
+    {
+        QuestDescriptionColumn() : Column<ESXRecordT> (Columns::ColumnId_QuestDescription, ColumnBase::Display_LongString) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mResponse.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mResponse = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct QuestIndexColumn : public Column<ESXRecordT>
+    {
+        QuestIndexColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_QuestIndex, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mDisposition;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mDisposition = data.toInt();
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct TopicColumn : public Column<ESXRecordT>
+    {
+        TopicColumn (bool journal) : Column<ESXRecordT> (journal ? Columns::ColumnId_Journal : Columns::ColumnId_Topic, ColumnBase::Display_String) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mTopicId.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mTopicId = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct ActorColumn : public Column<ESXRecordT>
+    {
+        ActorColumn() : Column<ESXRecordT> (Columns::ColumnId_Actor, ColumnBase::Display_String) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mActor.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mActor = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct RaceColumn : public Column<ESXRecordT>
+    {
+        RaceColumn() : Column<ESXRecordT> (Columns::ColumnId_Race, ColumnBase::Display_Race) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mRace.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mRace = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct ClassColumn : public Column<ESXRecordT>
+    {
+        ClassColumn() : Column<ESXRecordT> (Columns::ColumnId_Class, ColumnBase::Display_Class) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mClass.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mClass = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct PcFactionColumn : public Column<ESXRecordT>
+    {
+        PcFactionColumn() : Column<ESXRecordT> (Columns::ColumnId_PcFaction, ColumnBase::Display_Faction) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mPcFaction.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mPcFaction = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct ResponseColumn : public Column<ESXRecordT>
+    {
+        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_LongString) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mResponse.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mResponse = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct DispositionColumn : public Column<ESXRecordT>
+    {
+        DispositionColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Disposition, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mDisposition;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mDisposition = data.toInt();
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct RankColumn : public Column<ESXRecordT>
+    {
+        RankColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Rank, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mData.mRank);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mRank = static_cast<signed char> (data.toInt());
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct PcRankColumn : public Column<ESXRecordT>
+    {
+        PcRankColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_PcRank, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mData.mPCrank);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mPCrank = static_cast<signed char> (data.toInt());
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct GenderColumn : public Column<ESXRecordT>
+    {
+        GenderColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Gender, ColumnBase::Display_Gender)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mData.mGender);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mGender = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
         }
     };
 }

@@ -1,16 +1,19 @@
 #include "enchantingdialog.hpp"
 
+#include <iomanip>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "itemselection.hpp"
 #include "container.hpp"
-#include "inventorywindow.hpp"
 
 #include "sortfilteritemmodel.hpp"
 
@@ -105,7 +108,7 @@ namespace MWGui
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
@@ -148,7 +151,7 @@ namespace MWGui
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
         mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyEnchantable);
     }
 
@@ -235,7 +238,7 @@ namespace MWGui
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
         mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
 
         //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
@@ -258,7 +261,7 @@ namespace MWGui
     {
         if (mEffects.size() <= 0)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage30}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu11}");
             return;
         }
 
@@ -289,18 +292,48 @@ namespace MWGui
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
-        if (mEnchanting.getEnchantPrice() > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        if (mEnchanting.getEnchantPrice() > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
         }
 
+        // check if the player is attempting to use a soulstone or item that was stolen from this actor
+        if (mPtr != player)
+        {
+            for (int i=0; i<2; ++i)
+            {
+                MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
+                if (Misc::StringUtils::ciEqual(item.getCellRef().mOwner, mPtr.getCellRef().mRefID))
+                {
+                    std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->getString();
+                    if (msg.find("%s") != std::string::npos)
+                        msg.replace(msg.find("%s"), 2, item.getClass().getName(item));
+                    MWBase::Environment::get().getWindowManager()->messageBox(msg);
+                    MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
+                    MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
+                                                                                  item.getClass().getValue(item));
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+                    return;
+                }
+            }
+        }
+
         int result = mEnchanting.create();
 
         if(result==1)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound("enchant success", 1.f, 1.f);
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
+        }
         else
+        {
+            MWBase::Environment::get().getSoundManager()->playSound("enchant fail", 1.f, 1.f);
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
+        }
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }

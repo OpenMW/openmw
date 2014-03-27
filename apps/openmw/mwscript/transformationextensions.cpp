@@ -1,9 +1,5 @@
-#include <boost/algorithm/string.hpp>
-
-#include <OgreMath.h>
 #include <OgreSceneNode.h>
 
-#include "../mwworld/esmstore.hpp"
 #include <components/esm/loadcell.hpp>
 
 #include <components/compiler/extensions.hpp>
@@ -16,8 +12,9 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -85,30 +82,24 @@ namespace MWScript
                     Interpreter::Type_Float angle = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
-
-                    float *objRot = ptr.getRefData().getPosition().rot;
-
-                    float lx = Ogre::Radian(objRot[0]).valueDegrees();
-                    float ly = Ogre::Radian(objRot[1]).valueDegrees();
-                    float lz = Ogre::Radian(objRot[2]).valueDegrees();
+                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
 
                     if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,angle-lx,ay,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
                     else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,angle-ly,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,angle-lz);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
                     else
-                        throw std::runtime_error ("invalid ration axis: " + axis);
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -137,7 +128,7 @@ namespace MWScript
                         runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees());
                     }
                     else
-                        throw std::runtime_error ("invalid ration axis: " + axis);
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -155,18 +146,18 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
                     }
                     else
-                        throw std::runtime_error ("invalid ration axis: " + axis);
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -195,7 +186,7 @@ namespace MWScript
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
                     else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);                    
+                        throw std::runtime_error ("invalid axis: " + axis);                    
                 }
         };
 
@@ -207,6 +198,14 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -272,6 +271,14 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
+
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
                     Interpreter::Type_Float y = runtime[0].mFloat;
@@ -300,7 +307,7 @@ namespace MWScript
                     }
                     if(store)
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,*store,x,y,z);
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
                         float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                         float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                         if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
@@ -329,6 +336,14 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (!ptr.isInCell())
+                        return;
+
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
+                    }
+
                     Interpreter::Type_Float x = runtime[0].mFloat;
                     runtime.pop();
                     Interpreter::Type_Float y = runtime[0].mFloat;
@@ -340,7 +355,7 @@ namespace MWScript
                     int cx,cy;
                     MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                     MWBase::Environment::get().getWorld()->moveObject(ptr,
-                        *MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
+                        MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
@@ -400,7 +415,7 @@ namespace MWScript
                         pos.rot[2]  = zRot;
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().mPos = pos;
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,pos);
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                     }
                     else
                     {
@@ -441,7 +456,7 @@ namespace MWScript
                         pos.rot[2]  = zRot;
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().mPos = pos;
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,pos);
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                     }
                     else
                     {
@@ -450,62 +465,16 @@ namespace MWScript
                 }
         };
 
-        template<class R>
-        class OpPlaceAtPc : public Interpreter::Opcode0
+        template<class R, bool pc>
+        class OpPlaceAt : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer count = runtime[0].mInteger;
-                    runtime.pop();
-                    Interpreter::Type_Float distance = runtime[0].mFloat;
-                    runtime.pop();
-                    Interpreter::Type_Integer direction = runtime[0].mInteger;
-                    runtime.pop();
-
-                    if (count<0)
-                        throw std::runtime_error ("count must be non-negative");
-
-                    // no-op
-                    if (count == 0)
-                        return;
-
-                    ESM::Position ipos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
-                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
-                    Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
-                    if(direction == 0) pos = pos + distance*rot.yAxis();
-                    else if(direction == 1) pos = pos - distance*rot.yAxis();
-                    else if(direction == 2) pos = pos - distance*rot.xAxis();
-                    else if(direction == 3) pos = pos + distance*rot.xAxis();
-                    else throw std::runtime_error ("direction must be 0,1,2 or 3");
-
-                    ipos.pos[0] = pos.x;
-                    ipos.pos[1] = pos.y;
-                    ipos.pos[2] = pos.z;
-                    ipos.rot[0] = 0;
-                    ipos.rot[1] = 0;
-                    ipos.rot[2] = 0;
-
-                    MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();                    
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
-                    ref.getPtr().getCellRef().mPos = ipos;
-                    ref.getPtr().getRefData().setCount(count);
-                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
-                }
-        };
-
-        template<class R>
-        class OpPlaceAtMe : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr me = R()(runtime);
+                    MWWorld::Ptr actor = pc
+                        ? MWBase::Environment::get().getWorld()->getPlayerPtr()
+                        : R()(runtime);
 
                     std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -524,7 +493,7 @@ namespace MWScript
                     if (count == 0)
                         return;
 
-                    ESM::Position ipos = me.getRefData().getPosition();
+                    ESM::Position ipos = actor.getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
                     Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
                     if(direction == 0) pos = pos + distance*rot.yAxis();
@@ -536,16 +505,26 @@ namespace MWScript
                     ipos.pos[0] = pos.x;
                     ipos.pos[1] = pos.y;
                     ipos.pos[2] = pos.z;
-                    ipos.rot[0] = 0;
-                    ipos.rot[1] = 0;
-                    ipos.rot[2] = 0;
 
-                    MWWorld::CellStore* store = me.getCell();                    
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    if (actor.getClass().isActor())
+                    {
+                        // TODO: should this depend on the 'direction' parameter?
+                        ipos.rot[0] = 0;
+                        ipos.rot[1] = 0;
+                        ipos.rot[2] = 0;
+                    }
+                    else
+                    {
+                        ipos.rot[0] = actor.getRefData().getPosition().rot[0];
+                        ipos.rot[1] = actor.getRefData().getPosition().rot[1];
+                        ipos.rot[2] = actor.getRefData().getPosition().rot[2];
+                    }
+                    // create item
+                    MWWorld::CellStore* store = actor.getCell();
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, count);
                     ref.getPtr().getCellRef().mPos = ipos;
-                    ref.getPtr().getRefData().setCount(count);
-                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
 
+                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
                 }
         };
 
@@ -629,6 +608,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
+
                     ptr.getRefData().getLocalRotation().rot[0] = 0;
                     ptr.getRefData().getLocalRotation().rot[1] = 0;
                     ptr.getRefData().getLocalRotation().rot[2] = 0;
@@ -647,6 +630,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     const MWWorld::Ptr& ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -682,6 +668,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (!ptr.isInCell())
+                        return;
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -730,9 +719,9 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAtPc<ImplicitRef>);   
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAtMe<ImplicitRef>);   
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);
             interpreter.installSegment5(Compiler::Transformation::opcodeModScale,new OpModScale<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeRotate,new OpRotate<ImplicitRef>);

@@ -1,7 +1,5 @@
 #include "class.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -29,11 +27,12 @@ namespace MWGui
 
         MyGUI::Button* backButton;
         getWidget(backButton, "BackButton");
+        backButton->setCaptionWithReplacing("#{sMessageQuestionAnswer3}");
         backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
-        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
+        okButton->setCaptionWithReplacing("#{sMessageQuestionAnswer2}");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
     }
 
@@ -83,8 +82,7 @@ namespace MWGui
 
         getWidget(mClassList, "ClassList");
         mClassList->setScrollVisible(true);
-        mClassList->eventListSelectAccept += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
-        mClassList->eventListMouseItemActivate += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+        mClassList->eventListSelectAccept += MyGUI::newDelegate(this, &PickClassDialog::onAccept);
         mClassList->eventListChangePosition += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
 
         getWidget(mClassImage, "ClassImage");
@@ -127,7 +125,7 @@ namespace MWGui
         size_t count = mClassList->getItemCount();
         for (size_t i = 0; i < count; ++i)
         {
-            if (boost::iequals(*mClassList->getItemDataAt<std::string>(i), classId))
+            if (Misc::StringUtils::ciEqual(*mClassList->getItemDataAt<std::string>(i), classId))
             {
                 mClassList->setIndexSelected(i);
                 MyGUI::Button* okButton;
@@ -153,6 +151,14 @@ namespace MWGui
         eventBack();
     }
 
+    void PickClassDialog::onAccept(MyGUI::ListBox* _sender, size_t _index)
+    {
+        onSelectClass(_sender, _index);
+        if(mClassList->getIndexSelected() == MyGUI::ITEM_NONE)
+            return;
+        eventDone(this);
+    }
+
     void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
     {
         if (_index == MyGUI::ITEM_NONE)
@@ -162,7 +168,7 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         const std::string *classId = mClassList->getItemDataAt<std::string>(_index);
-        if (boost::iequals(mCurrentClassId, *classId))
+        if (Misc::StringUtils::ciEqual(mCurrentClassId, *classId))
             return;
 
         mCurrentClassId = *classId;
@@ -192,7 +198,7 @@ namespace MWGui
                 mCurrentClassId = id;
                 mClassList->setIndexSelected(index);
             }
-            else if (boost::iequals(id, mCurrentClassId))
+            else if (Misc::StringUtils::ciEqual(id, mCurrentClassId))
             {
                 mClassList->setIndexSelected(index);
             }
@@ -466,7 +472,7 @@ namespace MWGui
 
     std::string CreateClassDialog::getName() const
     {
-        return mEditName->getOnlyText();
+        return mEditName->getCaption();
     }
 
     std::string CreateClassDialog::getDescription() const

@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_OBJECTS_H
-#define _GAME_RENDER_OBJECTS_H
+#ifndef GAME_RENDER_OBJECTS_H
+#define GAME_RENDER_OBJECTS_H
 
 #include <OgreColourValue.h>
 #include <OgreAxisAlignedBox.h>
@@ -33,6 +33,8 @@ class Objects{
 
     void insertBegin(const MWWorld::Ptr& ptr);
 
+
+
 public:
     Objects(OEngine::Render::OgreRenderer &renderer)
         : mRenderer(renderer)
@@ -41,10 +43,12 @@ public:
     ~Objects(){}
     void insertModel(const MWWorld::Ptr& ptr, const std::string &model);
 
+    ObjectAnimation* getAnimation(const MWWorld::Ptr &ptr);
+
     void enableLights();
     void disableLights();
 
-    void update (const float dt);
+    void update (float dt, Ogre::Camera* camera);
     ///< per-frame update
 
     Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);

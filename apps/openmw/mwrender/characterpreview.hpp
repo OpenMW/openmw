@@ -3,10 +3,9 @@
 
 #include <OgreRenderTarget.h>
 #include <OgreMaterialManager.h>
+#include <OgreVector3.h>
 
 #include <components/esm/loadnpc.hpp>
-
-#include "externalrendering.hpp"
 
 #include "../mwworld/ptr.hpp"
 

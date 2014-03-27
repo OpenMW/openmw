@@ -71,14 +71,17 @@ namespace OMW
             std::vector<std::string> mContentFiles;
             int mFpsLevel;
             bool mVerboseScripts;
-            bool mNewGame;
+            bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
+            int mWarningsMode;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
             bool mScriptConsoleMode;
             std::string mStartupScript;
             int mActivationDistanceOverride;
+            // Grab mouse?
+            bool mGrab;
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
@@ -97,9 +100,6 @@ namespace OMW
 
             /// add a .zip resource
             void addZipResource (const boost::filesystem::path& path);
-
-            /// Load BSA files
-            void loadBSA();
 
             void executeLocalScripts();
 
@@ -149,8 +149,9 @@ namespace OMW
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
 
-            /// Start as a new game.
-            void setNewGame(bool newGame);
+            void setSkipMenu (bool skipMenu);
+
+            void setGrabMouse(bool grab) { mGrab = grab; }
 
             /// Initialise and enter main loop.
             void go();
@@ -167,8 +168,6 @@ namespace OMW
             /// Font encoding
             void setEncoding(const ToUTF8::FromType& encoding);
 
-            void setAnimationVerbose(bool animverbose);
-
             void setFallbackValues(std::map<std::string,std::string> map);
 
             /// Enable console-only script functionality
@@ -179,6 +178,8 @@ namespace OMW
 
             /// Override the game setting specified activation distance.
             void setActivationDistanceOverride (int distance);
+
+            void setWarningsMode (int mode);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

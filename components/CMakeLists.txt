@@ -1,5 +1,9 @@
 project (Components)
 set (CMAKE_BUILD_TYPE DEBUG)
+
+# Version file
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp")
+
 # source files
 
 add_component_dir (settings
@@ -11,7 +15,7 @@ add_component_dir (nifoverrides
     )
 
 add_component_dir (bsa
-    bsa_archive bsa_file
+    bsa_archive bsa_file resources
     )
 
 add_component_dir (nif
@@ -19,7 +23,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogrenifloader skeleton material mesh particles
+    ogrenifloader skeleton material mesh particles controller
     )
 
 add_component_dir (nifbullet
@@ -40,6 +44,8 @@ add_component_dir (esm
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
+    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate dialoguestate statstate
+    npcstats creaturestats weatherstate
     )
 
 add_component_dir (misc
@@ -47,14 +53,15 @@ add_component_dir (misc
     )
 
 add_component_dir (files
-    linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
-    filelibrary constrainedfiledatastream lowlevelfile
+    linuxpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    constrainedfiledatastream lowlevelfile
     )
 
 add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
-    stringparser tokenloc nullerrorhandler opcodes extensions0
+    stringparser tokenloc nullerrorhandler opcodes extensions0 declarationparser
+    quickfileparser
     )
 
 add_component_dir (interpreter
@@ -65,17 +72,27 @@ add_component_dir (interpreter
 add_component_dir (translation
     translation
     )
-    
+
+add_definitions(-DTERRAIN_USE_SHADER=1)
 add_component_dir (terrain
-    quadtreenode chunk world storage material
+    quadtreenode chunk world storage material buffercache defs
     )
-    
+
 add_component_dir (loadinglistener
     loadinglistener
     )
 
+add_component_dir (ogreinit
+    ogreinit ogreplugin
+    )
+
+add_component_dir (version
+    version
+    )
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
+
 find_package(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)

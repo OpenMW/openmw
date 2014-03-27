@@ -10,6 +10,9 @@
 namespace ESM
 {
     class ESMReader;
+    class ESMWriter;
+    struct CellId;
+    struct Cell;
 }
 
 namespace MWWorld
@@ -21,8 +24,8 @@ namespace MWWorld
     {
             const MWWorld::ESMStore& mStore;
             std::vector<ESM::ESMReader>& mReader;
-            std::map<std::string, CellStore> mInteriors;
-            std::map<std::pair<int, int>, CellStore> mExteriors;
+            mutable std::map<std::string, CellStore> mInteriors;
+            mutable std::map<std::pair<int, int>, CellStore> mExteriors;
             std::vector<std::pair<std::string, CellStore *> > mIdCache;
             std::size_t mIdCacheIndex;
 
@@ -33,22 +36,43 @@ namespace MWWorld
 
             Ptr getPtrAndCache (const std::string& name, CellStore& cellStore);
 
+            void writeCell (ESM::ESMWriter& writer, CellStore& cell) const;
+
         public:
 
             void clear();
 
             Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader);
-            ///< \todo pass the dynamic part of the ESMStore isntead (once it is written) of the whole
-            /// world
 
             CellStore *getExterior (int x, int y);
 
             CellStore *getInterior (const std::string& name);
 
+            CellStore *getCell (const ESM::CellId& id);
+
             Ptr getPtr (const std::string& name, CellStore& cellStore, bool searchInContainers = false);
             ///< \param searchInContainers Only affect loaded cells.
+            /// @note name must be lower case
 
+            /// @note name must be lower case
             Ptr getPtr (const std::string& name);
+
+            /// Get all Ptrs referencing \a name in exterior cells
+            /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
+            /// @note name must be lower case
+            void getExteriorPtrs (const std::string& name, std::vector<MWWorld::Ptr>& out);
+
+            /// Get all Ptrs referencing \a name in interior cells
+            /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
+            /// @note name must be lower case
+            void getInteriorPtrs (const std::string& name, std::vector<MWWorld::Ptr>& out);
+
+            int countSavedGameRecords() const;
+
+            void write (ESM::ESMWriter& writer) const;
+
+            bool readRecord (ESM::ESMReader& reader, int32_t type,
+                const std::map<int, int>& contentFileMap);
     };
 }
 

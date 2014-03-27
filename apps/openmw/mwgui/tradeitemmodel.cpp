@@ -1,5 +1,7 @@
 #include "tradeitemmodel.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -149,13 +151,20 @@ namespace MWGui
             if(!mMerchant.isEmpty())
             {
                 MWWorld::Ptr base = item.mBase;
-                if(Misc::StringUtils::ciEqual(base.getCellRef().mRefID, "gold_001"))
+                if(Misc::StringUtils::ciEqual(base.getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
                     continue;
                 if(!MWWorld::Class::get(base).canSell(base, services))
                     continue;
 
+                // Bound items may not be bought
+                if (item.mBase.getCellRef().mRefID.size() > 6
+                        && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
+                {
+                    continue;
+                }
+
                 // don't show equipped items
-                if(mMerchant.getTypeName() == typeid(ESM::NPC).name())
+                if(mMerchant.getClass().hasInventoryStore(mMerchant))
                 {
                     bool isEquipped = false;
                     MWWorld::InventoryStore& store = MWWorld::Class::get(mMerchant).getInventoryStore(mMerchant);

@@ -52,7 +52,7 @@ namespace Compiler
 
     // Return context
 
-    Context& Parser::getContext()
+    const Context& Parser::getContext() const
     {
         return mContext;
     }
@@ -64,7 +64,7 @@ namespace Compiler
         return lowerCase;
     }
 
-    Parser::Parser (ErrorHandler& errorHandler, Context& context)
+    Parser::Parser (ErrorHandler& errorHandler, const Context& context)
     : mErrorHandler (errorHandler), mContext (context), mOptional (false), mEmpty (true)
     {}
 

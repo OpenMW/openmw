@@ -2,15 +2,6 @@
 
 namespace
 {
-    MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
-    {
-        typedef MWGui::BookTypesetter::Utf8Point point;
-
-        point begin = reinterpret_cast <point> (text);
-
-        return MWGui::BookTypesetter::Utf8Span (begin, begin + strlen (text));
-    }
-
     const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
     const MyGUI::Colour linkNormal (0.20f, 0.20f, 0.60f);
     const MyGUI::Colour linkActive (0.50f, 0.50f, 1.00f);
@@ -178,6 +169,15 @@ namespace
 namespace MWGui
 {
 
+MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
+{
+    typedef MWGui::BookTypesetter::Utf8Point point;
+
+    point begin = reinterpret_cast <point> (text);
+
+    return MWGui::BookTypesetter::Utf8Span (begin, begin + strlen (text));
+}
+
 typedef TypesetBook::Ptr book;
 
 JournalBooks::JournalBooks (JournalViewModel::Ptr model) :
@@ -195,34 +195,6 @@ book JournalBooks::createEmptyJournalBook ()
     typesetter->write (header, to_utf8_span ("You have no journal entries!"));
     typesetter->lineBreak ();
     typesetter->write (body, to_utf8_span ("You should have gone though the starting quest and got an initial quest."));
-
-    BookTypesetter::Style* big    = typesetter->createStyle ("", MyGUI::Colour::Black);
-    BookTypesetter::Style* test   = typesetter->createStyle ("MonoFont", MyGUI::Colour::Blue);
-
-    typesetter->sectionBreak (20);
-    typesetter->write (body, to_utf8_span (
-        "The layout engine doesn't currently support aligning fonts to "
-        "their baseline within a single line so the following text looks "
-        "funny. In order to properly implement it, a stupidly simple "
-        "change is needed in MyGUI to report the where the baseline is for "
-        "a particular font"
-    ));
-
-    typesetter->sectionBreak (20);
-    typesetter->write (big, to_utf8_span ("big text g"));
-    typesetter->write (body, to_utf8_span (" проверяем только в дебаге"));
-    typesetter->write (body, to_utf8_span (" normal g"));
-    typesetter->write (big, to_utf8_span (" done g"));
-
-    typesetter->sectionBreak (20);
-    typesetter->write (test, to_utf8_span (
-        "int main (int argc,\n"
-        "          char ** argv)\n"
-        "{\n"
-        "    print (\"hello world!\\n\");\n"
-        "    return 0;\n"
-        "}\n"
-    ));
 
     return typesetter->complete ();
 }

@@ -1,27 +1,27 @@
 #include "aiwander.hpp"
 
-#include "movement.hpp"
+#include <OgreVector3.h>
 
-#include "../mwworld/class.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
-#include <OgreVector3.h>
+#include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
-namespace
-{
-    float sgn(float a)
-    {
-        if(a > 0)
-            return 1.0;
-        return -1.0;
-    }
-}
+#include "creaturestats.hpp"
+#include "steering.hpp"
+#include "movement.hpp"
 
 namespace MWMechanics
 {
+    // NOTE: determined empirically but probably need further tweaking
+    static const int COUNT_BEFORE_STUCK = 20;
+    static const int COUNT_BEFORE_RESET = 200;
+    static const int COUNT_EVADE = 7;
+
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
       , mCellX(std::numeric_limits<int>::max())
@@ -31,6 +31,12 @@ namespace MWMechanics
       , mX(0)
       , mY(0)
       , mZ(0)
+      , mPrevX(0)
+      , mPrevY(0)
+      , mWalkState(State_Norm)
+      , mStuckCount(0)
+      , mEvadeCount(0)
+      , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
         {
@@ -63,8 +69,10 @@ namespace MWMechanics
         return new AiWander(*this);
     }
 
-    bool AiWander::execute (const MWWorld::Ptr& actor)
+    bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {
@@ -97,10 +105,10 @@ namespace MWMechanics
         if(!mStoredAvailableNodes)
         {
             mStoredAvailableNodes = true;
-            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
 
-            mCellX = actor.getCell()->mCell->mData.mX;
-            mCellY = actor.getCell()->mCell->mData.mY;
+            mCellX = actor.getCell()->getCell()->mData.mX;
+            mCellY = actor.getCell()->getCell()->mData.mY;
 
             if(!mPathgrid)
                 mDistance = 0;
@@ -111,7 +119,7 @@ namespace MWMechanics
             {
                 mXCell = 0;
                 mYCell = 0;
-                if(actor.getCell()->mCell->isExterior())
+                if(actor.getCell()->getCell()->isExterior())
                 {
                     mXCell = mCellX * ESM::Land::REAL_SIZE;
                     mYCell = mCellY * ESM::Land::REAL_SIZE;
@@ -144,14 +152,14 @@ namespace MWMechanics
                     mCurrentNode = mAllowedNodes[index];
                     mAllowedNodes.erase(mAllowedNodes.begin() + index);
                 }
-
-                if(mAllowedNodes.empty())
-                    mDistance = 0;
             }
         }
 
+        if(mAllowedNodes.empty())
+            mDistance = 0;
+
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-        if(mDistance && (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY))
+        if(mDistance && (mCellX != actor.getCell()->getCell()->mData.mX || mCellY != actor.getCell()->getCell()->mData.mY))
             mDistance = 0;
 
         if(mChooseAction)
@@ -183,11 +191,57 @@ namespace MWMechanics
                 playIdle(actor, mPlayedIdle);
                 mChooseAction = false;
                 mIdleNow = true;
+
+                // Play idle voiced dialogue entries randomly
+                int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+                if (hello > 0)
+                {
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+                    // Don't bother if the player is out of hearing range
+                    if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
+                        MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+                }
             }
         }
 
         if(mIdleNow)
         {
+            // Play a random voice greeting if the player gets too close
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+
+            int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+            float helloDistance = hello;
+            int iGreetDistanceMultiplier = store.get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
+            helloDistance *= iGreetDistanceMultiplier;
+
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            float playerDist = Ogre::Vector3(player.getRefData().getPosition().pos).distance(
+                        Ogre::Vector3(actor.getRefData().getPosition().pos));
+
+            if (!mSaidGreeting)
+            {
+                // TODO: check if actor is aware / has line of sight
+                if (playerDist <= helloDistance
+                        // Only play a greeting if the player is not moving
+                        && Ogre::Vector3(player.getClass().getMovementSettings(player).mPosition).squaredLength() == 0)
+                {
+                    mSaidGreeting = true;
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                    // TODO: turn to face player and interrupt the idle animation?
+                }
+            }
+            else
+            {
+                float fGreetDistanceReset = store.get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
+                if (playerDist >= fGreetDistanceReset * iGreetDistanceMultiplier)
+                    mSaidGreeting = false;
+            }
+
+            // Check if idle animation finished
             if(!checkIdle(actor, mPlayedIdle))
             {
                 mPlayedIdle = 0;
@@ -200,6 +254,7 @@ namespace MWMechanics
         {
             if(!mPathFinder.isPathConstructed())
             {
+                assert(mAllowedNodes.size());
                 unsigned int randNode = (int)(rand() / ((double)RAND_MAX + 1) * mAllowedNodes.size());
                 Ogre::Vector3 destNodePos(mAllowedNodes[randNode].mX, mAllowedNodes[randNode].mY, mAllowedNodes[randNode].mZ);
 
@@ -213,7 +268,7 @@ namespace MWMechanics
                 start.mY = pos.pos[1];
                 start.mZ = pos.pos[2];
 
-                mPathFinder.buildPath(start, dest, mPathgrid, mXCell, mYCell, false);
+                mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
                 if(mPathFinder.isPathConstructed())
                 {
@@ -234,16 +289,100 @@ namespace MWMechanics
 
         if(mWalking)
         {
-            float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            world->rotateObject(actor, 0, 0, zAngle, false);
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
-
             if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
             {
                 stopWalking(actor);
                 mMoveNow = false;
                 mWalking = false;
                 mChooseAction = true;
+            }
+            else
+            {
+                /*               1                    n
+                 *  State_Norm <---> State_CheckStuck --> State_Evade
+                 *   ^  ^   |          ^   |               ^   |  |
+                 *   |  |   |          |   |               |   |  |
+                 *   |  +---+          +---+               +---+  | m
+                 *   |   any            < n                 < m   |
+                 *   +--------------------------------------------+
+                 */
+                bool samePosition = (abs(pos.pos[0] - mPrevX) < 1) && (abs(pos.pos[1] - mPrevY) < 1);
+                switch(mWalkState)
+                {
+                    case State_Norm:
+                    {
+                        if(!samePosition)
+                            break;
+                        else
+                            mWalkState = State_CheckStuck;
+                    }
+                        /* FALL THROUGH */
+                    case State_CheckStuck:
+                    {
+                        if(!samePosition)
+                        {
+                            mWalkState = State_Norm;
+                            // to do this properly need yet another variable, simply don't clear for now
+                            //mStuckCount = 0;
+                            break;
+                        }
+                        else
+                        {
+                            // consider stuck only if position unchanges consecutively
+                            if((mStuckCount++ % COUNT_BEFORE_STUCK) == 0)
+                                mWalkState = State_Evade;
+                                // NOTE: mStuckCount is purposely not cleared here
+                            else
+                                break; // still in the same state, but counter got incremented
+                        }
+                    }
+                        /* FALL THROUGH */
+                    case State_Evade:
+                    {
+                        if(mEvadeCount++ < COUNT_EVADE)
+                            break;
+                        else
+                        {
+                            mWalkState = State_Norm; // tried to evade, assume all is ok and start again
+                            // NOTE: mStuckCount is purposely not cleared here
+                            mEvadeCount = 0;
+                        }
+                    }
+                    /* NO DEFAULT CASE */
+                }
+
+                if(mWalkState == State_Evade)
+                {
+                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+
+                    // diagonal should have same animation as walk forward
+                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.01f;
+                    // change the angle a bit, too
+                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                }
+                else
+                {
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+                }
+
+                if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
+                {
+                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+                    mWalkState = State_Norm;
+                    mStuckCount = 0;
+
+                    stopWalking(actor);
+                    mMoveNow = false;
+                    mWalking = false;
+                    mChooseAction = true;
+                }
+
+                // update position
+                ESM::Position updatedPos = actor.getRefData().getPosition();
+                mPrevX = updatedPos.pos[0];
+                mPrevY = updatedPos.pos[1];
             }
         }
 
@@ -252,7 +391,7 @@ namespace MWMechanics
 
     int AiWander::getTypeId() const
     {
-        return 0;
+        return TypeIdWander;
     }
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor)

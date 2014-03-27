@@ -16,7 +16,7 @@ namespace MWMechanics
 
             AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat);
             virtual AiPackage *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor);
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
             ///< \return Package completed?
             virtual int getTypeId() const;
             ///< 0: Wander
@@ -32,6 +32,8 @@ namespace MWMechanics
             std::vector<int> mIdle;
             bool mRepeat;
 
+            bool mSaidGreeting;
+
             float mX;
             float mY;
             float mZ;
@@ -40,6 +42,21 @@ namespace MWMechanics
             int mCellY;
             float mXCell;
             float mYCell;
+
+            // for checking if we're stuck (but don't check Z axis)
+            float mPrevX;
+            float mPrevY;
+
+            enum WalkState
+            {
+                State_Norm,
+                State_CheckStuck,
+                State_Evade
+            };
+            WalkState mWalkState;
+
+            int mStuckCount;
+            int mEvadeCount;
 
             bool mStoredAvailableNodes;
             bool mChooseAction;

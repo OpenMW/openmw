@@ -37,7 +37,7 @@ material Water
         
         texture_unit normalMap
         {
-            texture water_nm.png 5
+            texture water_nm.png
         }
 
         texture_unit rippleNormalMap

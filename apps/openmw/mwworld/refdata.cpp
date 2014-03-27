@@ -3,6 +3,8 @@
 
 #include <OgreSceneNode.h>
 
+#include <components/esm/objectstate.hpp>
+
 #include "customdata.hpp"
 #include "cellstore.hpp"
 
@@ -32,6 +34,17 @@ namespace MWWorld
         mCustomData = 0;
     }
 
+    RefData::RefData()
+    : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0)
+    {
+        for (int i=0; i<3; ++i)
+        {
+            mLocalRotation.rot[i] = 0;
+            mPosition.pos[i] = 0;
+            mPosition.rot[i] = 0;
+        }
+    }
+
     RefData::RefData (const ESM::CellRef& cellRef)
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.mPos),
       mCustomData (0)
@@ -39,6 +52,14 @@ namespace MWWorld
         mLocalRotation.rot[0]=0;
         mLocalRotation.rot[1]=0;
         mLocalRotation.rot[2]=0;
+    }
+
+    RefData::RefData (const ESM::ObjectState& objectState)
+    : mBaseNode (0), mHasLocals (false), mEnabled (objectState.mEnabled),
+      mCount (objectState.mCount), mPosition (objectState.mPosition), mCustomData (0)
+    {
+        for (int i=0; i<3; ++i)
+            mLocalRotation.rot[i] = objectState.mLocalRotation[i];
     }
 
     RefData::RefData (const RefData& refData)
@@ -53,6 +74,21 @@ namespace MWWorld
             cleanup();
             throw;
         }
+    }
+
+    void RefData::write (ESM::ObjectState& objectState, const std::string& scriptId) const
+    {
+        objectState.mHasLocals = mHasLocals;
+
+        if (mHasLocals)
+            mLocals.write (objectState.mLocals, scriptId);
+
+        objectState.mEnabled = mEnabled;
+        objectState.mCount = mCount;
+        objectState.mPosition = mPosition;
+
+        for (int i=0; i<3; ++i)
+            objectState.mLocalRotation[i] = mLocalRotation.rot[i];
     }
 
     RefData& RefData::operator= (const RefData& refData)
@@ -88,7 +124,7 @@ namespace MWWorld
             static const std::string empty;
             return empty;
         }
-            
+
         return mBaseNode->getName();
     }
 
@@ -120,7 +156,7 @@ namespace MWWorld
     {
         if(count == 0)
             MWBase::Environment::get().getWorld()->removeRefScript(this);
-        
+
         mCount = count;
     }
 

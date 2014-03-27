@@ -28,11 +28,7 @@ struct MagicEffect
         UncappedDamage = 0x1000, // Negates multiple cap behaviours. Allows an effect to reduce an attribute below zero; removes the normal minimum effect duration of 1 second.
         NonRecastable = 0x4000,	// Does not land if parent spell is already affecting target. Shows "you cannot re-cast" message for self target.
         Unreflectable = 0x10000, // Cannot be reflected, the effect always lands normally.
-        CasterLinked = 0x20000,	// Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
-        SpellMaking = 0x0200,
-        Enchanting = 0x0400,
-        Negative = 0x0800 // A harmful effect. Will determine whether
-                          // eg. NPCs regard this spell as an attack. (same as 0x10?)
+        CasterLinked = 0x20000	// Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
     };
     enum MagnitudeDisplayType
     {
@@ -49,8 +45,9 @@ struct MagicEffect
         int mSchool; // SpellSchool, see defs.hpp
         float mBaseCost;
         int mFlags;
-        // Properties of the fired magic 'ball' I think
-        int mRed, mBlue, mGreen;
+        // Glow color for enchanted items with this effect
+        int mRed, mGreen, mBlue;
+        // Properties of the fired magic 'ball'
         float mSpeed, mSize, mSizeCap;
     }; // 36 bytes
 
@@ -58,14 +55,20 @@ struct MagicEffect
 
     static const std::string &effectIdToString(short effectID);
     static short effectStringToId(const std::string &effect);
+
+    /// Returns the effect that provides resistance against \a effect (or -1 if there's none)
+    static short getResistanceEffect(short effect);
+    /// Returns the effect that induces weakness against \a effect (or -1 if there's none)
+    static short getWeaknessEffect(short effect);
+
     MagnitudeDisplayType getMagnitudeDisplayType() const;
 
 
     MEDTstruct mData;
 
     std::string mIcon, mParticle; // Textures
-    std::string mCasting, mHit, mArea; // Statics
-    std::string mBolt; // Weapon
+    std::string mCasting, mHit, mArea; // ESM::Static
+    std::string mBolt; // ESM::Weapon
     std::string mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
     std::string mDescription;
 
@@ -232,7 +235,9 @@ struct MagicEffect
         SummonBear = 139,
         SummonBonewolf = 140,
         SummonCreature04 = 141,
-        SummonCreature05 = 142
+        SummonCreature05 = 142,
+
+        Length
     };
 };
 }

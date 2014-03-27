@@ -52,7 +52,7 @@ namespace MWScript
         public:
 
             ScriptManager (const MWWorld::ESMStore& store, bool verbose,
-                Compiler::Context& compilerContext);
+                Compiler::Context& compilerContext, int warningsMode);
 
             virtual void run (const std::string& name, Interpreter::Context& interpreterContext);
             ///< Run the script with the given name (compile first, if not compiled yet)
@@ -60,8 +60,6 @@ namespace MWScript
             virtual bool compile (const std::string& name);
             ///< Compile script with the given namen
             /// \return Success?
-
-            virtual void resetGlobalScripts();
 
             virtual std::pair<int, int> compileAll();
             ///< Compile all scripts

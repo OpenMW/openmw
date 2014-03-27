@@ -26,7 +26,50 @@ namespace CSMWorld
 
         enum Display
         {
+            Display_None, //Do not use
             Display_String,
+            Display_LongString,
+
+            //CONCRETE TYPES STARTS HERE
+            Display_Skill,
+            Display_Class,
+            Display_Faction,
+            Display_Race,
+            Display_Sound,
+            Display_Region,
+            Display_Birthsign,
+            Display_Spell,
+            Display_Cell,
+            Display_Referenceable,
+            Display_Activator,
+            Display_Potion,
+            Display_Apparatus,
+            Display_Armor,
+            Display_Book,
+            Display_Clothing,
+            Display_Container,
+            Display_Creature,
+            Display_Door,
+            Display_Ingredient,
+            Display_CreatureLevelledList,
+            Display_ItemLevelledList,
+            Display_Light,
+            Display_Lockpick,
+            Display_Miscellaneous,
+            Display_Npc,
+            Display_Probe,
+            Display_Repair,
+            Display_Static,
+            Display_Weapon,
+            Display_Reference,
+            Display_Filter,
+            Display_Topic,
+            Display_Journal,
+            Display_TopicInfo,
+            Display_JournalInfo,
+            Display_Scene,
+            //CONCRETE TYPES ENDS HERE
+
             Display_Integer,
             Display_Float,
             Display_Var,
@@ -44,7 +87,9 @@ namespace CSMWorld
             Display_WeaponType,
             Display_RecordState,
             Display_RefRecordType,
-            Display_DialogueType
+            Display_DialogueType,
+            Display_QuestStatusType,
+            Display_Gender
         };
 
         int mColumnId;
@@ -61,6 +106,8 @@ namespace CSMWorld
         ///< Can this column be edited directly by the user?
 
         virtual std::string getTitle() const;
+
+        virtual int getId() const;
     };
 
     template<typename ESXRecordT>

@@ -13,7 +13,7 @@ namespace MWMechanics
             AiTravel(float x, float y, float z);
             virtual AiTravel *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor);
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
                     ///< \return Package completed?
 
             virtual int getTypeId() const;
@@ -23,8 +23,8 @@ namespace MWMechanics
             float mY;
             float mZ;
 
-            int cellX;
-            int cellY;
+            int mCellX;
+            int mCellY;
 
             PathFinder mPathFinder;
     };

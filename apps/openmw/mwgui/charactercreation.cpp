@@ -10,10 +10,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
-#include "../mwworld/player.hpp"
 
 namespace
 {
@@ -47,10 +46,9 @@ namespace
 
     void updatePlayerHealth()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats(player);
-
-        creatureStats.updateHealth();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats(player);
+        npcStats.updateHealth();
     }
 }
 
@@ -75,7 +73,7 @@ namespace MWGui
         mGenerateClassSpecializations[2] = 0;
     }
 
-    void CharacterCreation::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+    void CharacterCreation::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
         if (mReviewDialog)
         {
@@ -113,7 +111,7 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+    void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         if (mReviewDialog)
             mReviewDialog->setSkillValue(parSkill, value);
@@ -219,13 +217,18 @@ namespace MWGui
                 mReviewDialog->setClass(mPlayerClass);
                 mReviewDialog->setBirthSign(mPlayerBirthSignId);
 
-                mReviewDialog->setHealth(mPlayerHealth);
-                mReviewDialog->setMagicka(mPlayerMagicka);
-                mReviewDialog->setFatigue(mPlayerFatigue);
+                {
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+
+                    mReviewDialog->setHealth ( stats.getHealth()  );
+                    mReviewDialog->setMagicka( stats.getMagicka() );
+                    mReviewDialog->setFatigue( stats.getFatigue() );
+                }
 
                 {
-                    std::map<int, MWMechanics::Stat<int> > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
-                    for (std::map<int, MWMechanics::Stat<int> >::iterator it = attributes.begin();
+                    std::map<int, MWMechanics::AttributeValue > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
+                    for (std::map<int, MWMechanics::AttributeValue >::iterator it = attributes.begin();
                         it != attributes.end(); ++it)
                     {
                         mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (it->first), it->second);
@@ -233,8 +236,8 @@ namespace MWGui
                 }
 
                 {
-                    std::map<int, MWMechanics::Stat<float> > skills = MWBase::Environment::get().getWindowManager()->getPlayerSkillValues();
-                    for (std::map<int, MWMechanics::Stat<float> >::iterator it = skills.begin();
+                    std::map<int, MWMechanics::SkillValue > skills = MWBase::Environment::get().getWindowManager()->getPlayerSkillValues();
+                    for (std::map<int, MWMechanics::SkillValue >::iterator it = skills.begin();
                         it != skills.end(); ++it)
                     {
                         mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (it->first), it->second);
@@ -258,21 +261,6 @@ namespace MWGui
             mRaceDialog->doRenderUpdate();
     }
 
-    void CharacterCreation::setPlayerHealth (const MWMechanics::DynamicStat<float>& value)
-    {
-        mPlayerHealth = value;
-    }
-
-    void CharacterCreation::setPlayerMagicka (const MWMechanics::DynamicStat<float>& value)
-    {
-        mPlayerMagicka = value;
-    }
-
-    void CharacterCreation::setPlayerFatigue (const MWMechanics::DynamicStat<float>& value)
-    {
-        mPlayerFatigue = value;
-    }
-
     void CharacterCreation::onReviewDialogDone(WindowBase* parWindow)
     {
         MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
@@ -285,7 +273,9 @@ namespace MWGui
     {
         MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
         mReviewDialog = 0;
+        mCreationStage = CSE_ReviewBack;
 
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
     }
 
@@ -332,24 +322,22 @@ namespace MWGui
             mPickClassDialog = 0;
         }
 
+        updatePlayerHealth();
+
         //TODO This bit gets repeated a few times; wrap it in a function
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_ClassChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
         }
         else
         {
             mCreationStage = CSE_ClassChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onPickClassDialogBack()
@@ -403,20 +391,18 @@ namespace MWGui
             mNameDialog = 0;
         }
 
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_NameChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Race);
         }
         else
         {
             mCreationStage = CSE_NameChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
     }
 
@@ -462,23 +448,21 @@ namespace MWGui
             mRaceDialog = 0;
         }
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_RaceChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
         }
         else
         {
             mCreationStage = CSE_RaceChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
@@ -492,18 +476,17 @@ namespace MWGui
             mBirthSignDialog = 0;
         }
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage >= CSE_BirthSignChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else
         {
             mCreationStage = CSE_BirthSignChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onBirthSignDialogBack()
@@ -552,23 +535,21 @@ namespace MWGui
             mCreateClassDialog = 0;
         }
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_ClassChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
         }
         else
         {
             mCreationStage = CSE_ClassChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onCreateClassDialogBack()
@@ -722,23 +703,21 @@ namespace MWGui
         mPlayerClass = *klass;
         MWBase::Environment::get().getWindowManager()->setPlayerClass(mPlayerClass);
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_ClassChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
         }
         else
         {
             mCreationStage = CSE_ClassChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     CharacterCreation::~CharacterCreation()

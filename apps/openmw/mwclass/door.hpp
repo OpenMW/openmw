@@ -1,6 +1,8 @@
 #ifndef GAME_MWCLASS_DOOR_H
 #define GAME_MWCLASS_DOOR_H
 
+#include <components/esm/loaddoor.hpp>
+
 #include "../mwworld/class.hpp"
 
 namespace MWClass

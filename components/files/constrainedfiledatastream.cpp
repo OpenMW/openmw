@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <cassert>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 namespace {
 

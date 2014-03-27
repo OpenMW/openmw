@@ -16,6 +16,7 @@ namespace MyGUI
 {
     class Gui;
     class Widget;
+    class Window;
     class UString;
 }
 
@@ -77,6 +78,7 @@ namespace MWGui
   class MerchantRepair;
   class Repair;
   class SoulgemDialog;
+  class Recharge;
   class CompanionWindow;
 
   class WindowManager : public MWBase::WindowManager
@@ -103,6 +105,7 @@ namespace MWGui
      */
     virtual void update();
 
+    /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
     virtual void setKeyFocusWidget (MyGUI::Widget* widget);
 
     virtual void setNewGame(bool newgame);
@@ -150,8 +153,8 @@ namespace MWGui
     virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
     ///< Set value for the given ID.
-    virtual void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
-    virtual void setValue (int parSkill, const MWMechanics::Stat<float>& value);
+    virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
+    virtual void setValue (int parSkill, const MWMechanics::SkillValue& value);
     virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
     virtual void setValue (const std::string& id, const std::string& value);
     virtual void setValue (const std::string& id, int value);
@@ -198,6 +201,7 @@ namespace MWGui
 
     virtual void activateQuickKey  (int index);
 
+    virtual std::string getSelectedSpell() { return mSelectedSpell; }
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
     virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
     virtual void setSelectedWeapon(const MWWorld::Ptr& item);
@@ -216,18 +220,16 @@ namespace MWGui
 
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false);
+    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
     virtual void staticMessageBox(const std::string& message);
     virtual void removeStaticMessageBox();
-    virtual void enterPressed ();
-    virtual void activateKeyPressed ();
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
     virtual void onFrame (float frameDuration);
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-    virtual std::map<int, MWMechanics::Stat<float> > getPlayerSkillValues();
-    virtual std::map<int, MWMechanics::Stat<int> > getPlayerAttributeValues();
+    virtual std::map<int, MWMechanics::SkillValue > getPlayerSkillValues();
+    virtual std::map<int, MWMechanics::AttributeValue > getPlayerAttributeValues();
     virtual SkillList getPlayerMinorSkills();
     virtual SkillList getPlayerMajorSkills();
 
@@ -263,6 +265,7 @@ namespace MWGui
     virtual void startTraining(MWWorld::Ptr actor);
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
+    virtual void startRecharge(MWWorld::Ptr soulgem);
 
     virtual void frameStarted(float dt);
 
@@ -276,8 +279,22 @@ namespace MWGui
 
     void onSoulgemDialogButtonPressed (int button);
 
+    virtual bool getCursorVisible();
+
+    /// Clear all savegame-specific data
+    virtual void clear();
+
+    virtual void write (ESM::ESMWriter& writer);
+    virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+
   private:
     bool mConsoleOnlyScripts;
+
+    std::map<MyGUI::Window*, std::string> mTrackedWindows;
+    void trackWindow(OEngine::GUI::Layout* layout, const std::string& name);
+    void onWindowChangeCoord(MyGUI::Window* _sender);
+
+    std::string mSelectedSpell;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;
@@ -313,6 +330,7 @@ namespace MWGui
     MerchantRepair* mMerchantRepair;
     SoulgemDialog* mSoulgemDialog;
     Repair* mRepair;
+    Recharge* mRecharge;
     CompanionWindow* mCompanionWindow;
 
     Translation::Storage& mTranslationDataStorage;
@@ -333,11 +351,9 @@ namespace MWGui
     // Various stats about player as needed by window manager
     std::string mPlayerName;
     std::string mPlayerRaceId;
-    std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;
+    std::map<int, MWMechanics::AttributeValue > mPlayerAttributes;
     SkillList mPlayerMajorSkills, mPlayerMinorSkills;
-    std::map<int, MWMechanics::Stat<float> > mPlayerSkillValues;
-    MWMechanics::DynamicStat<float> mPlayerHealth, mPlayerMagicka, mPlayerFatigue;
-
+    std::map<int, MWMechanics::SkillValue > mPlayerSkillValues;
 
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
@@ -365,9 +381,6 @@ namespace MWGui
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
-
-    bool mUseHardwareCursors;
-    void setUseHardwareCursors(bool use);
 
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,

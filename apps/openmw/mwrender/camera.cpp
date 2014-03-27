@@ -19,23 +19,27 @@ namespace MWRender
     Camera::Camera (Ogre::Camera *camera)
     : mCamera(camera),
       mCameraNode(NULL),
+      mAnimation(NULL),
       mFirstPersonView(true),
       mPreviewMode(false),
       mFreeLook(true),
-      mHeight(128.f),
-      mCameraDistance(300.f),
-      mDistanceAdjusted(false),
-      mAnimation(NULL),
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
-      mIsFurthest(false)
+      mIsFurthest(false),
+      mHeight(128.f),
+      mCameraDistance(300.f),
+      mDistanceAdjusted(false),
+      mVanityToggleQueued(false),
+      mViewModeToggleQueued(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
 
+        mPreviewCam.pitch = 0.f;
         mPreviewCam.yaw = 0.f;
         mPreviewCam.offset = 400.f;
+        mMainCam.pitch = 0.f;
         mMainCam.yaw = 0.f;
         mMainCam.offset = 400.f;
     }
@@ -66,7 +70,7 @@ namespace MWRender
         if (!mVanity.enabled && !mPreviewMode) {
             mCamera->getParentNode()->setOrientation(xr);
         } else {
-            Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
+            Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::UNIT_Z);
             mCamera->getParentNode()->setOrientation(zr * xr);
         }
     }
@@ -103,6 +107,23 @@ namespace MWRender
 
     void Camera::update(float duration, bool paused)
     {
+        if (mAnimation->allowSwitchViewMode())
+        {
+            // Now process the view changes we queued earlier
+            if (mVanityToggleQueued)
+            {
+                toggleVanityMode(!mVanity.enabled);
+                mVanityToggleQueued = false;
+            }
+            if (mViewModeToggleQueued)
+            {
+
+                togglePreviewMode(false);
+                toggleViewMode();
+                mViewModeToggleQueued = false;
+            }
+        }
+
         updateListener();
         if (paused)
             return;
@@ -121,6 +142,14 @@ namespace MWRender
 
     void Camera::toggleViewMode()
     {
+        // Changing the view will stop all playing animations, so if we are playing
+        // anything important, queue the view change for later
+        if (!mAnimation->allowSwitchViewMode())
+        {
+            mViewModeToggleQueued = true;
+            return;
+        }
+
         mFirstPersonView = !mFirstPersonView;
         processViewChange();
 
@@ -140,6 +169,14 @@ namespace MWRender
 
     bool Camera::toggleVanityMode(bool enable)
     {
+        // Changing the view will stop all playing animations, so if we are playing
+        // anything important, queue the view change for later
+        if (!mPreviewMode)
+        {
+            mVanityToggleQueued = true;
+            return false;
+        }
+
         if(!mVanity.allowed && enable)
             return false;
 
@@ -168,6 +205,9 @@ namespace MWRender
 
     void Camera::togglePreviewMode(bool enable)
     {
+        if (mFirstPersonView && !mAnimation->allowSwitchViewMode())
+            return;
+
         if(mPreviewMode == enable)
             return;
 
@@ -184,13 +224,12 @@ namespace MWRender
         }
 
         mCamera->setPosition(0.f, 0.f, offset);
-        rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
-    void Camera::setSneakOffset()
+    void Camera::setSneakOffset(float offset)
     {
         if(mAnimation)
-            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -9.8f));
+            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -offset));
     }
 
     float Camera::getYaw()
@@ -239,6 +278,11 @@ namespace MWRender
         } else {
             mMainCam.pitch = angle;
         }
+    }
+
+    float Camera::getCameraDistance() const
+    {
+        return mCamera->getPosition().z;
     }
 
     void Camera::setCameraDistance(float dist, bool adjust, bool override)
@@ -294,11 +338,9 @@ namespace MWRender
         if(mAnimation && mAnimation != anim)
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
-            mAnimation->setCamera(NULL);
             mAnimation->detachObjectFromBone(mCamera);
         }
         mAnimation = anim;
-        mAnimation->setCamera(this);
 
         processViewChange();
     }
@@ -314,11 +356,12 @@ namespace MWRender
             Ogre::TagPoint *tag = mAnimation->attachObjectToBone("Head", mCamera);
             tag->setInheritOrientation(false);
         }
-        else
+        else 
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
             mCameraNode->attachObject(mCamera);
         }
+        rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
     void Camera::getPosition(Ogre::Vector3 &focal, Ogre::Vector3 &camera)

@@ -1,6 +1,7 @@
 #include "weather.hpp"
 
-#include <boost/algorithm/string.hpp>
+#include <components/esm/weatherstate.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -10,6 +11,7 @@
 #include "player.hpp"
 #include "esmstore.hpp"
 #include "fallback.hpp"
+#include "cellstore.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;
@@ -91,8 +93,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
      mHour(14), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
      mWeatherUpdateTime(0), mThunderFlash(0), mThunderChance(0),
      mThunderChanceNeeded(50), mThunderSoundDelay(0), mRemainingTransitionTime(0),
-     mMonth(0), mDay(0), mTimePassed(0), mFallback(fallback), mWindSpeed(0.f),
-     mRendering(rendering)
+     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering)
 {
     //Globals
     mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
@@ -195,7 +196,7 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         }
 
         mNextWeather = weather;
-        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600;
+        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600.f;
     }
     mFirstUpdate = false;
 }
@@ -324,7 +325,8 @@ void WeatherManager::update(float duration)
 
     mWeatherUpdateTime -= timePassed;
 
-    const bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
+    MWBase::World* world = MWBase::Environment::get().getWorld();
+    const bool exterior = (world->isCellExterior() || world->isCellQuasiExterior());
     if (!exterior)
     {
         mRendering->sunDisable(false);
@@ -334,32 +336,7 @@ void WeatherManager::update(float duration)
         return;
     }
 
-    // Exterior
-    std::string regionstr = Misc::StringUtils::lowerCase(MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion);
-
-    if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
-    {
-        mCurrentRegion = regionstr;
-        mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
-
-        std::string weatherType = "clear";
-
-        if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
-            weatherType = mRegionOverrides[regionstr];
-        else
-        {
-            // get weather probabilities for the current region
-            const ESM::Region *region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search (regionstr);
-
-            if (region != 0)
-            {
-                weatherType = nextWeather(region);
-            }
-        }
-
-        setWeather(weatherType, false);
-    }
+    switchToNextWeather(false);
 
     if (mNextWeather != "")
     {
@@ -473,7 +450,7 @@ void WeatherManager::update(float duration)
             {
                 // pick a random sound
                 int sound = rand() % 4;
-                std::string* soundName;
+                std::string* soundName = NULL;
                 if (sound == 0) soundName = &mThunderSoundID0;
                 else if (sound == 1) soundName = &mThunderSoundID1;
                 else if (sound == 2) soundName = &mThunderSoundID2;
@@ -554,7 +531,7 @@ void WeatherManager::stopSounds(bool stopAll)
     }
 }
 
-Ogre::String WeatherManager::nextWeather(const ESM::Region* region) const
+std::string WeatherManager::nextWeather(const ESM::Region* region) const
 {
     std::vector<char> probability;
 
@@ -623,12 +600,6 @@ void WeatherManager::setHour(const float hour)
     mHour = hour;
 }
 
-void WeatherManager::setDate(const int day, const int month)
-{
-    mDay = day;
-    mMonth = month;
-}
-
 unsigned int WeatherManager::getWeatherID() const
 {
     // Source: http://www.uesp.net/wiki/Tes3Mod:GetCurrentWeather
@@ -689,7 +660,7 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
 
     mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
 
-    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
+    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->mRegion;
     if (Misc::StringUtils::ciEqual(region, playerRegion))
         setWeather(weather);
 }
@@ -706,4 +677,94 @@ void WeatherManager::modRegion(const std::string &regionid, const std::vector<ch
 float WeatherManager::getWindSpeed() const
 {
     return mWindSpeed;
+}
+
+bool WeatherManager::isDark() const
+{
+    bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
+                     || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
+    return exterior && (mHour < mSunriseTime || mHour > mNightStart - 1);
+}
+
+void WeatherManager::write(ESM::ESMWriter& writer)
+{
+    ESM::WeatherState state;
+    state.mHour = mHour;
+    state.mWindSpeed = mWindSpeed;
+    state.mCurrentWeather = mCurrentWeather;
+    state.mNextWeather = mNextWeather;
+    state.mCurrentRegion = mCurrentRegion;
+    state.mFirstUpdate = mFirstUpdate;
+    state.mRemainingTransitionTime = mRemainingTransitionTime;
+    state.mTimePassed = mTimePassed;
+
+    writer.startRecord(ESM::REC_WTHR);
+    state.save(writer);
+    writer.endRecord(ESM::REC_WTHR);
+}
+
+bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)
+{
+    if(ESM::REC_WTHR == type)
+    {
+        // load first so that if it fails, we haven't accidentally reset the state below
+        ESM::WeatherState state;
+        state.load(reader);
+
+        // reset other temporary state, now that we loaded successfully
+        stopSounds(true); // let's hope this never throws
+        mRegionOverrides.clear();
+        mRegionMods.clear();
+        mThunderFlash = 0.0;
+        mThunderChance = 0.0;
+        mThunderChanceNeeded = 50.0;
+
+        // swap in the loaded values now that we can't fail
+        mHour = state.mHour;
+        mWindSpeed = state.mWindSpeed;
+        mCurrentWeather.swap(state.mCurrentWeather);
+        mNextWeather.swap(state.mNextWeather);
+        mCurrentRegion.swap(state.mCurrentRegion);
+        mFirstUpdate = state.mFirstUpdate;
+        mRemainingTransitionTime = state.mRemainingTransitionTime;
+        mTimePassed = state.mTimePassed;
+
+        return true;
+    }
+
+    return false;
+}
+
+void WeatherManager::switchToNextWeather(bool instantly)
+{
+    MWBase::World* world = MWBase::Environment::get().getWorld();
+    if (world->isCellExterior() || world->isCellQuasiExterior())
+    {
+        std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->getCell()->mRegion);
+
+        if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
+        {
+            mCurrentRegion = regionstr;
+            mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
+
+            std::string weatherType = "clear";
+
+            if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
+            {
+                weatherType = mRegionOverrides[regionstr];
+            }
+            else
+            {
+                // get weather probabilities for the current region
+                const ESM::Region *region = world->getStore().get<ESM::Region>().search (regionstr);
+
+                if (region != 0)
+                {
+                    weatherType = nextWeather(region);
+                }
+            }
+
+            setWeather(weatherType, instantly);
+        }
+    }
 }

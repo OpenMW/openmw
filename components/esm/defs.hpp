@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_DEFS_H
 #define OPENMW_ESM_DEFS_H
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 namespace ESM
 {
@@ -82,6 +82,17 @@ enum RecNameInts
     REC_SSCR = 0x52435353,
     REC_STAT = 0x54415453,
     REC_WEAP = 0x50414557,
+
+    // format 0 - saved games
+    REC_SAVE = 0x45564153,
+    REC_JOUR = 0x524f55a4,
+    REC_QUES = 0x53455551,
+    REC_GSCR = 0x52435347,
+    REC_PLAY = 0x59414c50,
+    REC_CSTA = 0x41545343,
+    REC_GMAP = 0x50414d47,
+    REC_DIAS = 0x53414944,
+    REC_WTHR = 0x52485457,
 
     // format 1
     REC_FILT = 0x544C4946

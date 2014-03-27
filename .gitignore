@@ -3,7 +3,6 @@ CMakeFiles
 */CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
-CMakeLists.txt.user
 Makefile
 makefile
 build
@@ -22,6 +21,8 @@ Doxygen
 .project
 .settings
 .directory
+## qt-creator
+CMakeLists.txt.user*
 
 ## resources
 data
@@ -39,6 +40,7 @@ resources
 
 ## generated objects
 apps/openmw/config.hpp
+components/version/version.hpp
 Docs/mainpage.hpp
 moc_*.cxx
 *.cxx_parameters

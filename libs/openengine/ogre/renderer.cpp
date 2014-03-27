@@ -8,8 +8,12 @@
 #include <OgreTextureManager.h>
 #include <OgreTexture.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreCamera.h>
+#include <OgreViewport.h>
 
 #include <extern/sdl4ogre/sdlwindowhelper.hpp>
+
+#include <components/ogreinit/ogreinit.hpp>
 
 #include <cassert>
 #include <stdexcept>
@@ -22,6 +26,13 @@ void OgreRenderer::cleanup()
 {
     delete mFader;
     mFader = NULL;
+
+    if (mWindow)
+        Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
+    mWindow = NULL;
+
+    delete mOgreInit;
+    mOgreInit = NULL;
 
     // If we don't do this, the desktop resolution is not restored on exit
     SDL_SetWindowFullscreen(mSDLWindow, 0);
@@ -50,7 +61,8 @@ void OgreRenderer::configure(const std::string &logPath,
                              const std::string& rttMode
                             )
 {
-    mRoot = mOgreInit.init(logPath);
+    mOgreInit = new OgreInit::OgreInit();
+    mRoot = mOgreInit->init(logPath + "/ogre.log");
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)

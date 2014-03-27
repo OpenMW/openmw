@@ -124,10 +124,11 @@ namespace MWClass
         std::string text;
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
         info.text = text;
@@ -147,7 +148,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Apparatus> *ref =
             ptr.get<ESM::Apparatus>();
 
-        return MWWorld::Ptr(&cell.mAppas.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Apparatus>().insert(*ref), &cell);
     }
 
     bool Apparatus::canSell (const MWWorld::Ptr& item, int npcServices) const

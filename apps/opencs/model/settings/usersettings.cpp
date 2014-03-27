@@ -258,6 +258,7 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     bool localOk = loadSettingsFromFile(localFilePath);
 
     //user
+
     mUserFilePath = QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName;
     loadSettingsFromFile(mUserFilePath);
 

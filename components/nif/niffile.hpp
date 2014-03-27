@@ -42,7 +42,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/detail/endian.hpp>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 #include "record.hpp"
 #include "niftypes.hpp"
@@ -200,7 +200,7 @@ struct KeyListT {
             }
         }
         else
-            nif->file->warn("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+            nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
     }
 };
 typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;

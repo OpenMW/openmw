@@ -4,6 +4,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 
 namespace
 {
@@ -31,6 +32,8 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Spells, "Spells", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Topics, "Topics", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Journals, "Journals", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_TopicInfos, "Topic Infos", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_JournalInfos, "Journal Infos", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Cells, "Cells", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Referenceables,
             "Referenceables", 0 },
@@ -58,6 +61,8 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell", ":./spell.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Topic, "Topic", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Journal, "Journal", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_TopicInfo, "TopicInfo", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_JournalInfo, "JournalInfo", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell", ":./cell.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Referenceables", 0 },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Activator, "Activator", ":./activator.png" },
@@ -85,14 +90,16 @@ namespace
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Weapon, "Weapon", ":./weapon.png" },
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Reference", 0 },
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Filter, "Filter", ":./filter.png" },
+        { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Scene, "Scene", 0 },
+
+        { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Preview, "Preview", 0 },
+
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
     static const TypeData sIndexArg[] =
     {
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", 0 },
-        { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Scene, "Scene", 0 },
-
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 }
@@ -182,7 +189,6 @@ CSMWorld::UniversalId::UniversalId (Type type, const std::string& id)
             mClass = sIdArg[i].mClass;
             return;
         }
-
     throw std::logic_error ("invalid ID argument UniversalId type");
 }
 

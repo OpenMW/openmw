@@ -9,6 +9,9 @@
 
 #include "../filter/filterbox.hpp"
 
+#include "../render/pagedworldspacewidget.hpp"
+#include "../render/unpagedworldspacewidget.hpp"
+
 #include "tablebottombox.hpp"
 #include "creator.hpp"
 #include "scenetoolbar.hpp"
@@ -30,26 +33,18 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     layout2->setContentsMargins (QMargins (0, 0, 0, 0));
 
     SceneToolbar *toolbar = new SceneToolbar (48, this);
-// test
-SceneToolMode *tool = new SceneToolMode (toolbar);
-tool->addButton (":door.png", "a");
-tool->addButton (":GMST.png", "b");
-tool->addButton (":Info.png", "c");
-toolbar->addTool (tool);
-toolbar->addTool (new SceneToolMode (toolbar));
-toolbar->addTool (new SceneToolMode (toolbar));
-toolbar->addTool (new SceneToolMode (toolbar));
+
+    if (id.getId()=="sys::default")
+        mScene = new CSVRender::PagedWorldspaceWidget (this);
+    else
+        mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
+
+    SceneToolMode *tool = mScene->makeNavigationSelector (toolbar);
+    toolbar->addTool (tool);
+
     layout2->addWidget (toolbar, 0);
 
-    /// \todo replace with rendering widget
-    QPalette palette2 (palette());
-    palette2.setColor (QPalette::Background, Qt::white);
-    QLabel *placeholder = new QLabel ("Here goes the 3D scene", this);
-    placeholder->setAutoFillBackground (true);
-    placeholder->setPalette (palette2);
-    placeholder->setAlignment (Qt::AlignHCenter);
-
-    layout2->addWidget (placeholder, 1);
+    layout2->addWidget (mScene, 1);
 
     layout->insertLayout (0, layout2, 1);
 
@@ -62,6 +57,10 @@ toolbar->addTool (new SceneToolMode (toolbar));
     widget->setLayout (layout);
 
     setWidget (widget);
+
+    mScene->selectDefaultNavigationMode();
+
+    connect (mScene, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
 }
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
@@ -79,4 +78,9 @@ void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, con
 void CSVWorld::SceneSubView::setStatusBar (bool show)
 {
     mBottom->setStatusBar (show);
+}
+
+void CSVWorld::SceneSubView::closeRequest()
+{
+    deleteLater();
 }

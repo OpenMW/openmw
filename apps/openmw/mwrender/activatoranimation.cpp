@@ -1,8 +1,10 @@
 #include "activatoranimation.hpp"
 
-#include "renderconst.hpp"
+#include <components/esm/loadacti.hpp>
 
 #include "../mwbase/world.hpp"
+
+#include "renderconst.hpp"
 
 namespace MWRender
 {

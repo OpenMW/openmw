@@ -24,11 +24,11 @@ opencs_units (model/world
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata
     )
 
 opencs_hdrs_noqt (model/world
-    columnimp idcollection collection
+    columnimp idcollection collection info
     )
 
 
@@ -38,7 +38,7 @@ opencs_units (model/tools
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck spellcheck
+    birthsigncheck spellcheck referenceablecheck scriptcheck
     )
 
 
@@ -60,12 +60,20 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode
+    scenetoolmode infocreator scriptedit dialoguesubview previewsubview
+    )
+
+opencs_units (view/render
+    scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
+    previewwidget
+    )
+
+opencs_units_noqt (view/render
+    navigation navigation1st navigationfree navigationorbit
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview subviews
-    enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
+    subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator
     )
 
@@ -136,7 +144,10 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork QtXml QtXmlPatterns REQUIRED)
+set(BOOST_COMPONENTS system filesystem program_options thread wave)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+
+find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 include(${QT_USE_FILE})
 
 qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
@@ -145,15 +156,48 @@ qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+if(APPLE)
+    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
+else()
+    set (OPENCS_MAC_ICON "")
+endif(APPLE)
+
 add_executable(opencs
+    MACOSX_BUNDLE
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
     ${OPENCS_RES_SRC}
+    ${OPENCS_MAC_ICON}
 )
 
+if(APPLE)
+    set_target_properties(opencs PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
+        OUTPUT_NAME "OpenCS"
+        MACOSX_BUNDLE_ICON_FILE "opencs.icns"
+        MACOSX_BUNDLE_BUNDLE_NAME "OpenCS"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
+        MACOSX_BUNDLE_BUNDLE_VERSION ${OPENMW_VERSION}
+        )
+
+    set_source_files_properties(${OPENCS_MAC_ICON} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+endif(APPLE)
+
 target_link_libraries(opencs
+    ${OGRE_LIBRARIES}
+    ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}
     components
 )
+
+if(DPKG_PROGRAM)
+    INSTALL(TARGETS opencs RUNTIME DESTINATION games COMPONENT opencs)
+endif()
+
+if(APPLE)
+    INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
+endif()

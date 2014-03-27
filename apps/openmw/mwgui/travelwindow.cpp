@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <OgreVector3.h>
+
 #include <libs/openengine/ogre/fader.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -9,11 +11,10 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
-
-#include "inventorywindow.hpp"
-#include "tradewindow.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 namespace MWGui
 {
@@ -51,13 +52,15 @@ namespace MWGui
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
         if(interior)
         {
             price = gmst.find("fMagesGuildTravel")->getFloat();
         }
         else
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
             price = d/gmst.find("fTravelMult")->getFloat();
@@ -65,7 +68,8 @@ namespace MWGui
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        toAdd->setEnabled(price<=playerGold);
         mCurrentY += sLineHeight;
         if(interior)
             toAdd->setUserString("interior","y");
@@ -107,7 +111,11 @@ namespace MWGui
             int x,y;
             MWBase::Environment::get().getWorld()->positionToIndex(mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos.pos[0],
                                                                    mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos.pos[1],x,y);
-            if(cellname == "") {cellname = MWBase::Environment::get().getWorld()->getExterior(x,y)->mCell->mName; interior=  false;}
+            if (cellname == "")
+            {
+                cellname = MWBase::Environment::get().getWorld()->getExterior(x,y)->getCell()->mName;
+                interior = false;
+            }
             addDestination(cellname,mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos,interior);
         }
 
@@ -121,13 +129,16 @@ namespace MWGui
         int price;
         iss >> price;
 
-        if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()<price)
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
+        if (playerGold<price)
             return;
 
-        MWBase::Environment::get().getWindowManager()->getTradeWindow ()->addOrRemoveGold (-price);
+
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
         std::string cellname = _sender->getUserString("Destination");
         int x,y;
@@ -143,7 +154,7 @@ namespace MWGui
             int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
             for(int i = 0;i < hours;i++)
             {
-                MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
+                MWBase::Environment::get().getMechanicsManager ()->rest (true);
             }
             MWBase::Environment::get().getWorld()->advanceTime(hours);
 
@@ -164,7 +175,10 @@ namespace MWGui
 
     void TravelWindow::updateLabels()
     {
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
         mPlayerGold->setCoord(8,
                               mPlayerGold->getTop(),
                               mPlayerGold->getTextSize().width,

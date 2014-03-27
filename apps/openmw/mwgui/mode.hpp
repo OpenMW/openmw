@@ -28,6 +28,7 @@ namespace MWGui
       GM_Travel,
       GM_SpellCreation,
       GM_Enchanting,
+      GM_Recharge,
       GM_Training,
       GM_MerchantRepair,
 
