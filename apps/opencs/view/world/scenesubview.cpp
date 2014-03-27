@@ -39,8 +39,11 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     else
         mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
-    SceneToolMode *tool = mScene->makeNavigationSelector (toolbar);
-    toolbar->addTool (tool);
+    SceneToolMode *navigationTool = mScene->makeNavigationSelector (toolbar);
+    toolbar->addTool (navigationTool);
+
+    SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
+    toolbar->addTool (lightingTool);
 
     layout2->addWidget (toolbar, 0);
 
