@@ -7,13 +7,10 @@
 #include <QApplication>
 #include <QIcon>
 
-<<<<<<< HEAD
 #include <QDebug>
 
 #include <extern/shiny/Main/Factory.hpp>
 
-=======
->>>>>>> esxSelector
 #include <components/ogreinit/ogreinit.hpp>
 
 #ifdef Q_OS_MAC

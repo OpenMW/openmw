@@ -237,21 +237,12 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     filepaths << QString::fromStdString
                                 (mCfgMgr.getLocalPath().string()) + fileName;
     //user
-<<<<<<< HEAD
 
-    mUserFilePath = QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName;
-    loadSettingsFromFile(mUserFilePath);
+    filepaths << QString::fromStdString (mCfgMgr.getUserPath().string()) + fileName;
 
-    if (!(localOk || globalOk))
-=======
-    filepaths << QString::fromStdString
-                            (mCfgMgr.getUserConfigPath().string()) + fileName;
-
-    qDebug () << "load settings";
     bool success = loadSettingsFromFile (filepaths);
 
     if (!success)
->>>>>>> esxSelector
     {
         QString message = QObject::tr("<br><b>Could not open user settings \
                 files for reading</b><br><br> Global and local settings files \
