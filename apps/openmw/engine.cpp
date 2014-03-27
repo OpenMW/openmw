@@ -362,9 +362,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
 
-    std::string logo = mFallbackMap["Movies_Company_Logo"];
-    if (!logo.empty())
-        window->playVideo(logo, 1);
+    if (!mSkipMenu)
+    {
+        std::string logo = mFallbackMap["Movies_Company_Logo"];
+        if (!logo.empty())
+            window->playVideo(logo, 1);
+    }
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
