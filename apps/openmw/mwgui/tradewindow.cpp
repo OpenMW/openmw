@@ -484,7 +484,6 @@ namespace MWGui
     void TradeWindow::checkTradeTime() 
     {
         MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
-        MWWorld::LiveCellRef<ESM::NPC> *ref = mPtr.get<ESM::NPC>();
         const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
         double delay = boost::lexical_cast<double>(MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getInt());
 
@@ -492,7 +491,7 @@ namespace MWGui
         if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getTradeTime() + delay)
         {
             addOrRemoveGold(-store.count(MWWorld::ContainerStore::sGoldId), mPtr);
-            addOrRemoveGold(+ref->mBase->mNpdt52.mGold, mPtr);
+            addOrRemoveGold(+sellerStats.getGoldPool(), mPtr);
         }
     }
 

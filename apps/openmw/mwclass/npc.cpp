@@ -358,7 +358,7 @@ namespace MWClass
                                        MWBase::Environment::get().getWorld()->getStore());
 
             // Relates to NPC gold reset delay
-            data->mNpcStats.setTradeTime(MWBase::Environment::get().getWorld()->getTimeStamp());
+            data->mNpcStats.setTradeTime(MWWorld::TimeStamp(0.0, 0));
 
             data->mNpcStats.setGoldPool(gold);
 
