@@ -307,7 +307,10 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         
         //Update the weapon icon in the hud with whatever the player is currently holding.
         MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-        MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight));
+        MWWorld::ContainerStoreIterator item = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        
+        if (item != invStore.end())
+            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*item);
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
