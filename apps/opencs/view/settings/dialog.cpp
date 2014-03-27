@@ -23,8 +23,8 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 
-CSVSettings::Dialog::Dialog(QMainWindow *parent) :
-    SettingWindow (parent), mStackedWidget (0), mDebugMode (false), mModel (0)
+CSVSettings::Dialog::Dialog(QMainWindow *parent)
+    : mStackedWidget (0), mDebugMode (false), SettingWindow (parent)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
 
@@ -48,13 +48,11 @@ void CSVSettings::Dialog::setupDialog()
 
     buildPageListWidget (centralWidget);
     buildStackedWidget (centralWidget);
-
-    buildPages();
 }
 
 void CSVSettings::Dialog::buildPages()
 {
-    SettingWindow::createPages (CSMSettings::UserSettings::instance());
+    SettingWindow::createPages ();
 
     QFontMetrics fm (QApplication::font());
 
@@ -77,12 +75,23 @@ void CSVSettings::Dialog::buildPages()
 
 void CSVSettings::Dialog::addDebugPage()
 {
+    QComboBox *cbox = new QComboBox();
+
+    QStringList vals;
+    vals << "1" << "2" << "3" << "4";
+
+    QStringListModel *model = new QStringListModel (vals);
+    cbox->setModel (model);
+
+    mStackedWidget->addWidget (cbox);
+    new QListWidgetItem ("test", mPageListWidget);
+    /*
   QTreeView *tree = new QTreeView();
 
-  tree->setModel( &CSMSettings::UserSettings::instance().model() );
+  //tree->setModel( &CSMSettings::UserSettings::instance().model() );
 
   mStackedWidget->addWidget(tree);
-     new QListWidgetItem ("Standard Item Model", mPageListWidget);
+     new QListWidgetItem ("Standard Item Model", mPageListWidget);*/
 }
 
 void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
@@ -125,6 +134,9 @@ void CSVSettings::Dialog::slotChangePage(QListWidgetItem *current,
 
 void CSVSettings::Dialog::show()
 {
+    if (pages().size()==0)
+        buildPages();
+
     QRect scr = QApplication::desktop()->screenGeometry();
     QRect rect = geometry();
 

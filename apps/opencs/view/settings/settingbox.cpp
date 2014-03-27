@@ -33,7 +33,7 @@ void CSVSettings::SettingBox::addWidget (QWidget *widget)
 void CSVSettings::SettingBox::addWidget (QWidget *widget, int row, int column)
 {
     if (row == -1)
-        row = mLayout->rowCount() - 1;
+        row = mLayout->rowCount();
 
     if (column == -1)
         column = 0;

@@ -98,11 +98,13 @@ opencs_units_noqt (view/settings
 
 opencs_units (model/settings
     usersettings
-    booleanadapter
-    textadapter
-    setting
     settingmanager
-    adapter
+    selector
+    )
+
+opencs_units (model/settings
+    setting
+    settingfiltermodel
     )
 
 opencs_units_noqt (model/filter

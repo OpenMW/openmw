@@ -4,24 +4,23 @@
 #include "view.hpp"
 #include "../../model/settings/setting.hpp"
 
-class QLineEdit;
-class QStandardItemModel;
-
 namespace CSVSettings
 {
     class TextView : public View
     {
+        Q_OBJECT
 
         QWidget *mTextWidget;
 
     public:
-        explicit TextView (const CSMSettings::Setting &setting,
-                            QWidget *parent = 0);
+        explicit TextView (CSMSettings::Setting *setting,
+                           Page *parent = 0);
 
-    protected:
+        void slotUpdateView (QStringList list);
 
-        void buildView (const CSMSettings::Setting &setting);
-        void buildModel (const CSMSettings::Setting &setting);
+    protected slots:
+
+        void slotTextEdited (QString value);
     };
 
     class TextViewFactory : public QObject, public IViewFactory
@@ -33,7 +32,8 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        TextView *createView (const CSMSettings::Setting &setting);
+        TextView *createView (CSMSettings::Setting *setting,
+                              Page *parent);
     };
 }
 #endif // CSVSETTINGS_TEXTVIEW_HPP

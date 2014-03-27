@@ -3,9 +3,10 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QList>
-#include <QStandardItem>
 
+#include "setting.hpp"
 #include "settingmanager.hpp"
+#include "settingfiltermodel.hpp"
 
 CSMSettings::SettingManager::SettingManager(QObject *parent) :
     QObject(parent)
@@ -20,67 +21,26 @@ CSMSettings::SettingManager::SettingManager(QObject *parent) :
 
 }
 
-void CSMSettings::SettingManager::addDefinition (const QString &settingName,
-                                                 const QString &pageName,
-                                                 const QString &value)
-{
-    RowItemList *settingItems = findSetting (settingName, pageName);
-
-    if (!settingItems)
-    {
-        qWarning() << "Definition found for undelcared setting "
-                  << pageName << '.' << settingName;
-        return;
-    }
-
-    //find the definitions list under the first item of the setting row
-    QStandardItem *nameItem = settingItems->at (Property_Name);
-    QStandardItem *definitions = nameItem->child (PropertyList_DefinedValues);
-    QStringList values = definitions->data (Qt::UserRole).toStringList();
-
-    values.append (value);
-
-    definitions->setData (values, Qt::UserRole);
-
-    definitions->removeColumn (0);
-    definitions->appendColumn (buildItemList (values));
-}
-
-QList <QStandardItem *> CSMSettings::SettingManager::buildItemList
-                                                (const QStringList &list) const
-{
-    QList <QStandardItem *> itemList;
-
-    foreach (const QString &item, list)
-        itemList.append (new QStandardItem (item));
-
-    return itemList;
-}
-void CSMSettings::SettingManager::addDeclaration (Setting *setting)
+void CSMSettings::SettingManager::addSetting (Setting *setting)
 {
     if (!setting)
         return;
 
     //get list of all settings for the current setting name
-    RowList *rows = findSettings (setting->name(), Property_Name);
+    Setting *exSetting = findSetting (setting->page(), setting->name());
 
-    //if there are multiple records with the same name, filter by page name
-    if (rows->size() > 1)
-        rows = findSettings (rows, setting->page(), Property_Page);
-
-    //if settings share name and page, abort.  Duplicate setting found.
-    if (rows->size() > 0)
+    if (exSetting)
     {
         qWarning() << "Duplicate declaration encountered: "
                    << setting->page() << '.' << setting->name();
         return;
     }
 
-    //add declaration to t1he model
-    mSettingModel.appendRow (setting->rowList());
+    //add declaration to the model
+    mSettings.append (setting);
 }
 
-CSMSettings::PageMap
+CSMSettings::DefinitionPageMap
                 CSMSettings::SettingManager::readFilestream (QTextStream *stream)
 {
     //regEx's for page names and keys / values
@@ -89,7 +49,7 @@ CSMSettings::PageMap
 
     QString currPage = "Unassigned";
 
-    PageMap pageMap;
+    DefinitionPageMap pageMap;
 
     if (!stream)
     {
@@ -100,7 +60,7 @@ CSMSettings::PageMap
     if (stream->atEnd())
         return pageMap;
 
-    SettingMap *settingMap = new SettingMap();
+    DefinitionMap *settingMap = new DefinitionMap();
     pageMap[currPage] = settingMap;
 
     while (!stream->atEnd())
@@ -114,7 +74,7 @@ CSMSettings::PageMap
         if (pageRegEx.exactMatch(line))
         {
             currPage = pageRegEx.cap(1).simplified().trimmed();
-            settingMap = new SettingMap();
+            settingMap = new DefinitionMap();
             pageMap[currPage] = settingMap;
             continue;
         }
@@ -151,60 +111,54 @@ bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream)
         return false;
     }
 
-    WriterSortModel sortModel;
-
-    sortModel.setSourceModel (&mSettingModel);
-    sortModel.sort(0);
-
-    QString currPage = "";
-
-    for (int i = 0; i < sortModel.rowCount(); i++)
+    foreach (const QString &page, mSelectors.keys())
     {
-        QModelIndex name_idx = sortModel.index (i, Property_Name);
-        QModelIndex page_idx = sortModel.index (i, Property_Page);
-        QModelIndex value_idx = sortModel.index
-                                        (i, static_cast<SettingProperty>(2));
+        QList <SelectorPair> list = mSelectors.value (page);
 
-        QString pageName = sortModel.data (page_idx).toString();
-        QString settingName = sortModel.data (name_idx).toString();
-        QString value = sortModel.data (value_idx).toString();
+        if (list.size() == 0)
+            continue;
 
-        if (currPage != pageName)
+        *stream << "[" << page << "]" << "\n";
+
+        foreach (const SelectorPair &pair, list)
         {
-            currPage = pageName;
-            *stream << "[" << currPage << "]" << "\n";
-        }
+            //skip settings that are proxy masters
+            if (pair.second->proxyIndex() == 0)
+                continue;
 
-        *stream << settingName << " = "
-                << value << "\n";
+            QStringList values = pair.second->selectionToStringList();
+
+            foreach (const QString &value, values)
+                *stream << pair.first << " = " << value << "\n";
+        }
     }
 
     destroyStream (stream);
     return true;
 }
 
-void CSMSettings::SettingManager::mergeSettings(PageMap &destMap, PageMap &srcMap,
+void CSMSettings::SettingManager::mergeSettings(DefinitionPageMap &destMap, DefinitionPageMap &srcMap,
                                               MergeMethod mergeMethod)
 {
     if (srcMap.size() == 0)
         return;
 
     //merge srcMap values into destMap according to the specified merge method.
-    //Merge method indcates action taken on SettingMap objects which share the
+    //Merge method indcates action taken on DefinitionMap objects which share the
     //same key in both maps.  It does not discriminate between duplicate values
     //found within the two SettingMaps.
     //
-    //Merge_Accept - add all values in the SettingMap in srcMap to destMap
+    //Merge_Accept - add all values in the DefinitionMap in srcMap to destMap
     //Merge_Ignore - skip all SettingMaps in srcMap which share a key with
-    //               SettingMap in destMap.
-    //Merge_Overwrite - replace all SettingMap objects in dest map with the
-    //                 SettingMap objects in srcMap which share the same keys
+    //               DefinitionMap in destMap.
+    //Merge_Overwrite - replace all DefinitionMap objects in dest map with the
+    //                 DefinitionMap objects in srcMap which share the same keys
 
 
     //iterate each page in the source map
     foreach (const QString &pageKey, srcMap.keys())
     {
-        SettingMap *srcSetting = srcMap.value(pageKey);
+        DefinitionMap *srcSetting = srcMap.value(pageKey);
 
         //Unique Page:
         //insertfrom the source map
@@ -219,7 +173,7 @@ void CSMSettings::SettingManager::mergeSettings(PageMap &destMap, PageMap &srcMa
         //destination
         foreach (const QString &srcKey, srcSetting->keys())
         {
-            SettingMap *destSetting = destMap.value (pageKey);
+            DefinitionMap *destSetting = destMap.value (pageKey);
 
             //Unique Setting:
             //insert and continue
@@ -297,184 +251,160 @@ void CSMSettings::SettingManager::displayFileErrorMessage(const QString &message
         msgBox.exec();
 }
 
-void CSMSettings::SettingManager::buildModel (PageMap &pageMap)
+void CSMSettings::SettingManager::addDefinitions (DefinitionPageMap &pageMap)
 {
-    foreach (const QString &pageName, pageMap.keys())
+    foreach (QString pageName, pageMap.keys())
     {
-        SettingMap *settingMap = pageMap.value (pageName);
+        DefinitionMap *settingMap = pageMap.value (pageName);
 
-        foreach (const QString &settingName, (*settingMap).keys())
+        foreach (QString settingName, (*settingMap).keys())
         {
             QStringList *values = settingMap->value (settingName);
+            Setting *setting = findSetting (pageName, settingName);
 
-            foreach (const QString &value, *values)
-               addDefinition (settingName, pageName, value);
+            if (!setting)
+            {
+                qWarning() << "Found definitions for undeclared setting "
+                           << pageName << "." << settingName;
+                continue;
+            }
+
+            if (values->size() == 0)
+                values->append (setting->defaultValues());
+
+            setting->setDefinedValues (*values);
         }
     }
 }
 
-void CSMSettings::SettingManager::validate (PageMap &pageMap)
+CSMSettings::SettingList CSMSettings::SettingManager::
+                                        findSettings(const QStringList &list)
 {
-    //iterate each declared setting, verifying that every defined item
-    //matches a value in the value list, if one exists.
+    SettingList settings;
 
-    foreach (const QString &pageName, pageMap.keys())
+    foreach (const QString &value, list)
     {
-        SettingMap *settingMap = pageMap.value (pageName);
+        QStringList names = value.split(".", QString::SkipEmptyParts);
 
-        foreach (const QString &settingName, settingMap->keys())
-        {
-            RowItemList *settingItems = findSetting (settingName, pageName);
+        if (names.size() != 2)
+            continue;
 
-            //skip if the setting was not found
-            if (settingItems->size() == 0)
-            {
-                qWarning() << "Definition found for undeclared setting";
-                continue;
-            }
+        Setting *setting = findSetting (names.at(0), names.at(1));
 
-            QStandardItem *nameItem = settingItems->at(Property_Name);
-            QStandardItem *valueListItem = nameItem->child
-                                                (PropertyList_DeclaredValues);
+        if (!setting)
+            continue;
 
-            //skip if no declared values exist
-            if (!valueListItem->hasChildren())
-                continue;
-
-            QStringList valueList =
-                            valueListItem->data (Qt::UserRole).toStringList();
-
-            QStringList *definedValues = settingMap->value (settingName);
-
-            //iterate all the values defined for this setting, checking against
-            //the value list.  Remove values not found in the list
-            QStringList::Iterator it = definedValues->begin();
-
-            while (it != definedValues->end())
-            {
-                if (!valueList.contains (*it))
-                {
-                    qWarning() << "invalid setting definition found: " << *it;
-                    it = valueList.erase (it);
-                }
-                else
-                    it++;
-            }
-
-        }
-    }
-}
-
-CSMSettings::RowList *CSMSettings::SettingManager::findSettings
-                (CSMSettings::RowList *source, const QString &text, int column)
-{
-    RowList *list = 0;
-
-    //pull from entire model if no source is provided
-    if (!source)
-        return findSettings (text, column);
-
-    //iterate each row in the list, looking for rows matching the search
-    //critereon
-    foreach (RowItemList *itemList, *source)
-    {
-        QStandardItem *item = itemList->at(column);
-
-        if (item->data().toString()==text)
-            list->append (itemList);
+        settings.append (setting);
     }
 
-    return list;
+    return settings;
 }
 
-CSMSettings::RowList *CSMSettings::SettingManager::findSettings
-                (const QString &text, int column)
-{
-    RowList *retList = new RowList();
 
-    //Use the QStandardItem model's findItems() function to return a list of
-    //matching items.  Then, iterate the list and append the entire row to the
-    //return row list.
-    RowItemList itemList = mSettingModel.findItems
-                                            (text, Qt::MatchExactly, column);
-
-    foreach (QStandardItem *item, itemList)
-        retList->append (findSetting (item->row()));
-
-    return retList;
-}
-
-CSMSettings::RowItemList *CSMSettings::SettingManager::findSetting
-                        (const QString &settingName, const QString &pageName)
-{
-    RowList *settingRows = findSettings (settingName, Property_Name);
-
-    //if multiple settings found, filter list by page name
-    if (settingRows->size() > 1)
-        settingRows = findSettings (settingRows, pageName, Property_Page);
-
-    if (settingRows->size() > 1)
-        qWarning() << "multiple declarations for setting "
-                   << pageName << '.' << settingName << " found.";
-
-    if (settingRows->size() < 1)
-    {
-        qWarning() << "setting "
-                   << pageName << '.' << settingName << " not found.";
-        return 0;
-    }
-
-    if (settingRows->at(0)->at(Property_Page)->text() != pageName)
-    {
-        qWarning() << "setting "
-                   << pageName << '.' << settingName << " not found.";
-        return 0;
-    }
-
-    return settingRows->at(0);
-}
-
-CSMSettings::RowItemList *CSMSettings::SettingManager::findSetting
-                                                                (int row) const
-{
-    if (!(row > -1 && row < mSettingModel.rowCount()))
-        return 0;
-
-    RowItemList *rowItems = new RowItemList();
-
-    for (int i = 0; i < sSettingPropertyCount; i++)
-        rowItems->append(mSettingModel.item(row, i));
-
-    return rowItems;
-}
-
-CSMSettings::Setting CSMSettings::SettingManager::getSetting
+CSMSettings::Setting *CSMSettings::SettingManager::findSetting
                         (const QString &pageName, const QString &settingName)
 {
-    RowItemList *settingRow = findSetting (settingName, pageName);
-
-    Setting theSetting;
-    int i = 0;
-
-     foreach (QStandardItem *item, *settingRow)
-        theSetting.setProperty(i++, item);
-
-    return theSetting;
+    foreach (Setting *setting, mSettings)
+    {
+        if (setting->name() == settingName)
+        {
+            if (setting->page() == pageName)
+                return setting;
+        }
+    }
+    return 0;
 }
 
-QList <CSMSettings::Setting> CSMSettings::SettingManager::getSettings
+CSMSettings::SettingList CSMSettings::SettingManager::findSettings
                                                     (const QString &pageName)
 {
-    RowList *settingRows = findSettings (pageName, Property_Page);
-    QList <CSMSettings::Setting> settingList;
+    SettingList settings;
 
-    foreach (RowItemList *items, *settingRows)
+    foreach (Setting *setting, mSettings)
     {
-        QString settingName =
-                    items->at(Property_Name)->data (Qt::DisplayRole).toString();
+        if (setting->page() == pageName)
+            settings.append (setting);
+    }
+    return settings;
+}
 
-        settingList.append (getSetting (pageName, settingName));
+CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const
+{
+    SettingPageMap pageMap;
+
+    foreach (Setting *setting, mSettings)
+        pageMap[setting->page()].append (setting);
+
+    return pageMap;
+}
+
+CSMSettings::Selector *CSMSettings::SettingManager::findSelector
+                        (const QString &pageName, const QString &settingName)
+{
+    if (!mSelectors.keys().contains(pageName))
+        return 0;
+
+    QList <SelectorPair> list = mSelectors[pageName];
+    foreach (const SelectorPair &pair, list)
+    {
+        if (pair.first == settingName)
+            return pair.second;
     }
 
-    return settingList;
+    return 0;
+}
+
+CSMSettings::Selector * CSMSettings::SettingManager::createSelector
+                                                (CSMSettings::Setting *setting)
+{
+    qDebug() << "Creating selector for setting " << setting->name();
+
+    QStringList definitions = setting->definedValues();
+    Selector *selector = 0;
+
+    qDebug() << "defns: " << setting->definedValues();
+    qDebug() << "deflts" << setting->defaultValues();
+
+    //add default value if no definitions are found
+    if (definitions.size() == 0)
+    {
+        definitions.append (setting->defaultValues());
+        setting->setDefinedValues (definitions);
+    }
+
+    // use the declared values as the model and the definitions for selection,
+    // if there are declared values.  Otherwise, use the definitions as the
+    // model and select everything
+    if (setting->declaredValues().size() > 0)
+        selector = new Selector (setting->name(), setting->declaredValues());
+    else
+    {
+        selector = new Selector (setting->name(), definitions);
+        selector->setSelectAll();
+    }
+
+    selector->setViewSelection (definitions);
+
+    mSelectors[setting->page()].append( SelectorPair
+                                                (setting->name(), selector));
+
+    return selector;
+}
+
+
+
+CSMSettings::Selector *CSMSettings::SettingManager::selector
+                        (const QString &pageName, const QString &settingName)
+{
+    Selector *selector = findSelector (pageName, settingName);
+
+    if (selector)
+        return selector;
+
+    Setting *setting = findSetting (pageName, settingName);
+
+    if (!setting)
+        return 0;
+
+    return createSelector (setting);
 }

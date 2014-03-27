@@ -5,43 +5,46 @@
 
 #include "support.hpp"
 #include "settingbox.hpp"
-#include <QAbstractItemModel>
+#include "../../model/settings/setting.hpp"
 
-class QSortFilterProxyModel;
 class QGroupBox;
 
-namespace CSMSettings
-{
-    class Setting;
-}
-
+namespace CSMSettings { class Selector; }
 namespace CSVSettings
 {
     class View;
     class SettingBox;
     class IViewFactory;
+    class SettingWindow;
 
     class Page : public QWidget
     {
         Q_OBJECT
 
         QList<View *> mViews;
+        CSMSettings::SettingList mSettingList;
+
+        SettingWindow *mParent;
         SettingBox *mBox;
         static QMap <ViewType, IViewFactory *> mViewFactories;
 
     public:
         explicit Page(const QString &pageName,
-                      const QList <CSMSettings::Setting> &settingList,
-                                                        QWidget *parent = 0);
+                      CSMSettings::SettingList &settingList,
+                      SettingWindow *parent);
 
-        void addView (const CSMSettings::Setting &setting);
+        void addView (CSMSettings::Setting *setting);
+
+        CSMSettings::Selector *selector (const QString &settingName);
+        void buildProxy (CSMSettings::Setting *setting,
+                         CSMSettings::Selector *selector);
 
         QGroupBox *pageFrame() { return mBox; }
 
     private:
 
         void setupPage ();
-        void setupViews (const QList <CSMSettings::Setting> &settingList);
+        void setupViews (CSMSettings::SettingList &settingList);
 
         void buildFactories();
     };

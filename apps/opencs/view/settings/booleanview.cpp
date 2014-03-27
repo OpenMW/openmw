@@ -5,75 +5,91 @@
 #include <QRadioButton>
 #include <QGroupBox>
 
-#include <QDataWidgetMapper>
-#include <QStandardItemModel>
-#include <QStringListModel>
+#include <QAbstractButton>
 
 #include "booleanview.hpp"
-#include "../../model/settings/booleanadapter.hpp"
 #include "../../model/settings/setting.hpp"
+#include "../../model/settings/selector.hpp"
 #include "settingbox.hpp"
 
 #include <QDebug>
 
-CSVSettings::BooleanView::BooleanView (const CSMSettings::Setting &setting,
-                                       CSMSettings::Adapter *adapter,
-                                       QWidget *parent)
-    : View (setting, adapter, parent)
+CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
+                                       Page *parent)
+    : View (setting, parent)
 {
-    createView (setting);
-    createModel (setting);
-}
-
-void CSVSettings::BooleanView::createView(const CSMSettings::Setting &setting)
-{
-   // setObjectName (setting->settingName + "_view");
-
-    QStringList declaration = setting.propertyList
-                                    (CSMSettings::PropertyList_DeclaredValues);
-
-    foreach (const QString &value, declaration)
+    foreach (const QString &value, setting->declaredValues())
     {
-        QWidget *widget = 0;
+        QAbstractButton *button = 0;
 
-        if (setting.isMultiValue())
-            widget = new QCheckBox (value, this);
+        if (setting->isMultiValue())
+            button = new QCheckBox (value, this);
         else
-            widget = new QRadioButton (value, this);
+            button = new QRadioButton (value, this);
 
-        widget->setObjectName (value);
+        connect (button, SIGNAL (clicked (bool)),
+                this, SLOT (slotToggled (bool)));
 
-        viewFrame()->addWidget (widget);
-
-        mWidgets.append (widget);
+        viewFrame()->addWidget (button);
+        mButtons[value] = button;
     }
 }
 
-void CSVSettings::BooleanView::createModel (const CSMSettings::Setting &setting)
+void CSVSettings::BooleanView::slotToggled (bool state)
 {
-    int i = 0;
+    //test only for true to avoid multiple selection updates with radiobuttons
+    if (!setting()->isMultiValue() && !state)
+        return;
 
-    mModel = new QStringListModel (setting.declarationList());
+    QStringList values;
 
-    foreach (QWidget *widget, mWidgets)
+    foreach (QString key, mButtons.keys())
     {
-        QDataWidgetMapper *mapper = new QDataWidgetMapper (widget);
-        mapper->setObjectName
-                    (setting.name() + '.' + widget->objectName() + "_mapper");
-        mapper->setModel (mModel);
-        mapper->addMapping (widget, CSMSettings::BooleanProperty_ValueState);
-        mapper->setCurrentIndex(i);
-        i++;
+        if (mButtons.value(key)->isChecked())
+            values.append (key);
     }
+    qDebug () << "slotToggled::values = " << values;
+    selector()->setViewSelection (values);
+}
+
+void CSVSettings::BooleanView::slotUpdateView (const QStringList values)
+{
+qDebug() << objectName() << "boolean view update" << values;
+
+    foreach (const QString &buttonName, mButtons.keys())
+    {
+
+        QAbstractButton *button = mButtons[buttonName];
+
+        //if the value is not found in the list, the widget is checked false
+        bool buttonValue = values.contains(buttonName);
+
+        //skip if the butotn value will not change
+        if (button->isChecked() == buttonValue)
+            continue;
+
+qDebug() << objectName() << buttonName <<  " = " << buttonValue;
+
+        //disable autoexclusive if it's enabled and we're setting
+        //the button value to false
+        bool switchExclusive = (!buttonValue && button->autoExclusive());
+
+        if (switchExclusive)
+            button->setAutoExclusive (false);
+
+qDebug () << objectName() << buttonName << " setting check state";
+
+        button->setChecked (buttonValue);
+
+        if (switchExclusive)
+            button->setAutoExclusive(true);
+    }
+qDebug() << objectName() << "::boleanView::slotUpdateView() complete";
 }
 
 CSVSettings::BooleanView *CSVSettings::BooleanViewFactory::createView
-    (const CSMSettings::Setting &setting)
+                                        (CSMSettings::Setting *setting,
+                                         Page *parent)
 {
-    QWidget *widgParent = static_cast<QWidget *>(parent());
-
-    CSMSettings::BooleanAdapter *adapter =
-            new CSMSettings::BooleanAdapter (model, setting, widgParent);
-
-    return new BooleanView (setting, adapter, widgParent);
+    return new BooleanView (setting, parent);
 }

@@ -1,40 +1,30 @@
 #ifndef CSVSETTINGS_BOOLEANVIEW_HPP
 #define CSVSETTINGS_BOOELANVIEW_HPP
 
-#include <QList>
 #include <QWidget>
+#include <QAbstractButton>
 
 #include "view.hpp"
 #include "support.hpp"
 
-class QDataWidgetMapper;
-class QAbstractItemModel;
-class QSortFilterProxyModel;
-class QStandardItemModel;
 class QStringListModel;
-
-namespace CSMSettings {
-    class Adapter;
-}
 
 namespace CSVSettings
 {
     class BooleanView : public View
     {
-        QList <QWidget *> mWidgets;
+        Q_OBJECT
 
-        QStringListModel *mModel;
+        QMap <QString, QAbstractButton *> mButtons;
 
     public:
-        explicit BooleanView (const CSMSettings::Setting &setting,
-                              CSMSettings::Adapter *adapter,
-                              QWidget *parent = 0);
+        explicit BooleanView (CSMSettings::Setting *setting,
+                              Page *parent);
 
+        void slotUpdateView (const QStringList values);
 
-    protected:
-
-        void createView (const CSMSettings::Setting &setting);
-        void createModel (const CSMSettings::Setting &setting);
+    private slots:
+        void slotToggled (bool state);
     };
 
     class BooleanViewFactory : public QObject, public IViewFactory
@@ -46,8 +36,8 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        BooleanView *createView (QStandardItemModel *model,
-                                 const CSMSettings::Setting &setting);
+        BooleanView *createView (CSMSettings::Setting *setting,
+                                 Page *parent);
     };
 }
 #endif // CSVSETTINGS_BOOLEANVIEW_HPP

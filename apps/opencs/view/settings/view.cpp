@@ -1,37 +1,52 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QAbstractItemModel>
 #include <QGroupBox>
-#include <QDataWidgetMapper>
 
 #include "view.hpp"
 #include "support.hpp"
 #include "../../model/settings/setting.hpp"
 #include "settingbox.hpp"
+#include "../../model/settings/selector.hpp"
+#include "page.hpp"
 
 #include <QDebug>
+CSVSettings::View::View(CSMSettings::Setting *setting,
+                        Page *parent)
 
-CSVSettings::View::View(const CSMSettings::Setting &setting,
-                        CSMSettings::Adapter *adapter,
-                        QWidget *parent)
-
-    : mModel (adapter), QWidget(parent)
+    : mSetting (setting), mSelector (0), QWidget(parent)
 {
-    mViewFrame = new SettingBox(true, setting.name(), parent);
+    mViewFrame = new SettingBox(true, setting->name(), parent);
     mViewFrame->setFlat (true);
+    mViewFrame->setHLayout();
 
-        mViewFrame->setHLayout();
-
-
-        setObjectName (setting.name());
+    setObjectName (setting->page() + '.' + setting->name() + '.' + "View");
 }
 
-bool CSVSettings::View::isMultiValue() const
+void CSVSettings::View::showEvent ( QShowEvent * event )
 {
-    return mIsMultiValue;
-}
+    Page *parentPage = static_cast<Page *> (parent());
 
-QStringList CSVSettings::View::valueList() const
-{
-    return mValueList;
+    if (!mSelector)
+    {
+        mSelector = parentPage->selector(mSetting->name());
+
+        connect (mSelector, SIGNAL (modelUpdate (QStringList)),
+                this, SLOT (slotUpdateView (QStringList)));
+
+    }
+
+    qDebug () << objectName() << "::View::showEvent() connection complete";
+
+    if (mSetting->proxyLists().size() > 0)
+        parentPage->buildProxy (mSetting, mSelector);
+
+    qDebug () << objectName() << "::View::showEvent() proxy constructed";
+
+    if (mSelector->proxyIndex() != 0)
+    {
+        qDebug () << objectName() << "::View::showEvent() selector about to refresh...";
+        mSelector->refresh();
+    }
+
+    qDebug () << objectName() << "::View::showEvent() selector refreshed--------------------------";
 }

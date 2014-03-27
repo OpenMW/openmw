@@ -1,57 +1,86 @@
 #include "listview.hpp"
-#include "../../model/settings/adapter.hpp"
 #include "../../model/settings/setting.hpp"
+#include "../../model/settings/selector.hpp"
 #include "settingbox.hpp"
 
 #include <QListView>
 #include <QComboBox>
 #include <QApplication>
-#include <QStandardItemModel>
-CSVSettings::ListView::ListView(const CSMSettings::Setting &setting,
-                                QWidget *parent)
-    : View(setting, parent)
-{/*
-    setObjectName (setting->settingName + "_view");
+#include <QDebug>
+#include <QStringListModel>
 
+CSVSettings::ListView::ListView(CSMSettings::Setting *setting,
+                                Page *parent)
+    : mComboBox (0), mAbstractItemView (0), View(setting, parent)
+{
     QWidget *widget = 0;
 
-    if (setting->isMultiLineText) {
-        QListView *widget = new QListView (this);
-        mListWidget = widget;
-        widget->setModel (listModel);
+    if (setting->isMultiLine())
+    {
+        mAbstractItemView = new QListView (this);
+        widget = mAbstractItemView;
     }
-    else {
-        QComboBox *widget = new QComboBox (this);
-        mListWidget = widget;
-        widget->setModel (listModel);
+    else
+    {
+        mComboBox = new QComboBox (this);
+        widget = mComboBox;
     }
 
-    if (setting->widgetWidth > 0)
+    if (setting->widgetWidth() > 0)
     {
         QString widthToken;
-        widthToken.fill('P', setting->widgetWidth);
+        widthToken.fill('P', setting->widgetWidth());
         QFontMetrics fm (QApplication::font());
-        mListWidget->setFixedWidth (fm.width (widthToken));
+        widget->setFixedWidth (fm.width (widthToken));
     }
 
-    mListWidget->setObjectName (setting->settingName + "_listWidget");
-
-    viewFrame()->addWidget (mListWidget, setting->viewRow, setting->viewColumn);
-    build(setting);*/
+    viewFrame()->addWidget (widget, setting->viewRow(),
+                            setting->viewColumn());
 }
 
-void CSVSettings::ListView::build(const CSMSettings::Setting *setting)
+void CSVSettings::ListView::showEvent ( QShowEvent * event )
 {
+    if (!selector())
+        View::showEvent (event);
 
+    if (mComboBox)
+    {
+        mComboBox->setModel (selector()->model());
+        mComboBox->view()->setSelectionModel (selector()->selectionModel());
+
+         if (!selector()->selectedRows().isEmpty())
+        {
+            mComboBox->setCurrentIndex (selector()->selectedRows().back());
+        }
+       else
+            mComboBox->setCurrentIndex (-1);
+
+        mComboBox->setModelColumn (0);
+    }
+    else if (mAbstractItemView)
+    {
+        mAbstractItemView->setModel (selector()->model());
+        mAbstractItemView->setSelectionModel (selector()->selectionModel());
+    }
+}
+
+void CSVSettings::ListView::slotUpdateView (QStringList list)
+{
+    qDebug() << "list view update";
+    int idx = -1;
+
+    if (mComboBox)
+    {
+        if (list.size() > 0)
+            idx =  (mComboBox->findText(list.at(0)));
+
+        mComboBox->setCurrentIndex (idx);
+    }
 }
 
 CSVSettings::ListView *CSVSettings::ListViewFactory::createView
-                                        (const CSMSettings::Setting &setting)
-{/*
-    //create a generic adapter just for the setting filter it
-    //maintains internally.
-    CSMSettings::Adapter *adapter = new CSMSettings::Adapter(model,
-        setting->pageName,setting->settingName, setting->isMultiValue, this);
-*/
-  //  return new ListView(adapter->filter(), setting, this);
+                                        (CSMSettings::Setting *setting,
+                                         Page *parent)
+{
+    return new ListView(setting, parent);
 }

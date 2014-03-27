@@ -5,7 +5,6 @@
 #include <QStringList>
 #include <QString>
 #include <QMap>
-#include <QSortFilterProxyModel>
 
 #include <boost/filesystem/path.hpp>
 
@@ -33,9 +32,6 @@ namespace CSMSettings {
 
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
-
-        //setting name, list of setting values
-        QMap <QString, QStringList> mDefinitions;
 
     public:
 

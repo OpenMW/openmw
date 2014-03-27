@@ -3,22 +3,32 @@
 
 #include "view.hpp"
 
-class QStandardItemModel;
+
+class QStringListModel;
+class QComboBox;
+class QAbstractItemView;
 
 namespace CSVSettings
 {
     class ListView : public View
     {
 
-        QWidget *mListWidget;
+        QAbstractItemView *mAbstractItemView;
+        QComboBox *mComboBox;
 
     public:
-        explicit ListView (const CSMSettings::Setting &setting,
-                            QWidget *parent = 0);
+        explicit ListView (CSMSettings::Setting *setting,
+                            Page *parent);
 
     protected:
 
-        void build(const CSMSettings::Setting *setting);
+        void build (CSMSettings::Setting *setting);
+        void slotUpdateView (QStringList list);
+        void showEvent ( QShowEvent * event );
+
+    protected:
+
+        void slotTextEdited (QString value);
     };
 
     class ListViewFactory : public QObject, public IViewFactory
@@ -30,7 +40,8 @@ namespace CSVSettings
             : QObject (parent)
         {}
 
-        ListView *createView (const CSMSettings::Setting &setting);
+        ListView *createView (CSMSettings::Setting *setting,
+                              Page *parent);
     };
 }
 #endif // CSVSETTINGS_LISTVIEW_HPP

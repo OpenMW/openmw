@@ -5,6 +5,7 @@
 #include <QPair>
 #include <QList>
 #include <QVariant>
+#include <QStringList>
 
 //Typedefs
 namespace CSMSettings
@@ -15,50 +16,36 @@ namespace CSMSettings
     // "Pair" = Setting name and specific data
     // "ListItem" = Page name and associated setting pair
 
-    typedef QPair <QString, QString>                DefinitionPair;
+    typedef QPair <QString, QString> StringPair;
+    typedef QPair <QString, QStringList> StringListPair;
+/*
     typedef QPair <QString, DefinitionPair>    DefinitionListItem;
     typedef QList <DefinitionListItem>              DefinitionList;
 
     typedef QPair <QString, Setting *> DeclarationPair;
     typedef QPair <QString, DeclarationPair> DeclarationListItem;
-    typedef QList <DeclarationListItem> DeclarationList;
-
-    static int sSettingPropertyCount = 11;
-    static int sSettingPropertyListCount = 3;
+    typedef QList <DeclarationListItem> DeclarationList;*/
 }
 
 //Enums
 namespace CSMSettings
 {
-    enum BooleanSettingProperty
-    {
-        BooleanProperty_Value = 0,
-        BooleanProperty_ValueState = 1
-    };
-
     enum SettingProperty
     {
         Property_Name = 0,
         Property_Page = 1,
-        Property_DefaultValue = 2,
+        Property_DefaultValues = 2,
         Property_ViewType = 3,
         Property_IsMultiValue = 4,
-        Property_IsHorizontal = 5,
-        Property_IsMultiLine = 6,
-        Property_WidgetWidth = 7,
-        Property_ViewRow = 8,
-        Property_ViewColumn = 9,
-        Property_Delimiter = 10
-    };
-
-    //PropertyList_DefinedValues needs to always be the last item in the list.
-    //New declaration lists should be inserted before it and the integer values
-    //reassigned accordingly
-    enum SettingPropertyList
-    {
-        PropertyList_DeclaredValues = 0,
-        PropertyList_DefinedValues = 1,
-        PropertyList_Proxies = 2
+        Property_IsMultiLine = 5,
+        Property_WidgetWidth = 6,
+        Property_ViewRow = 7,
+        Property_ViewColumn = 8,
+        Property_Delimiter = 9,
+        Property_DeclaredValues = 10,
+        Property_DefinedValues = 11,
+        Property_Proxies = 12,
+        Property_Serializable = 13
     };
 
     enum SettingType
@@ -107,31 +94,29 @@ namespace CSMSettings
     {
         int id;
         QString name;
-        QString value;
+        QVariant value;
     };
 
-    const PropertyDefaultValues sPropertyDefaults[] =
+    const QString sPropertyNames[] =
     {
-        {Property_Name, "name", "undefined"},
-        {Property_Page, "page", "undefined"},
-        {Property_DefaultValue, "default", "undefined"},
-        {Property_ViewType, "view type",
-                QVariant (static_cast<int>
-                                (CSVSettings::ViewType_Undefined)).toString() },
-        {Property_IsMultiValue, "multi-value", QVariant (false).toString() },
-        {Property_IsHorizontal, "horizontal", QVariant (true).toString() },
-        {Property_IsMultiLine, "multi-line", QVariant (false).toString() },
-        {Property_WidgetWidth, "width", QVariant (0).toString() },
-        {Property_ViewRow, "view row", QVariant (-1).toString() },
-        {Property_ViewColumn, "view column", QVariant (-1).toString() },
-        {Property_Delimiter, "delimiter", "" }
+        "name", "page", "default", "view_type", "is_multi_value",
+        "is_multi_line", "widget_width", "view_row", "view_column", "delimiter",
+        "declarations", "definitions", "proxies", "is_serializable"
     };
 
-    const PropertyDefaultValues sPropertyListDefaults[] =
+    const QString sPropertyDefaults[] =
     {
-        {PropertyList_DeclaredValues, "declarations", ""},
-        {PropertyList_DefinedValues, "definitions", ""},
-        {PropertyList_Proxies, "proxies", ""}
+        "",         //name
+        "",         //page
+        "",         //default
+        "0",        //view type
+        "false",    //multivalue
+        "false",    //multiline
+        "0",        //widget width
+        "-1",       //view row
+        "-1",       //view column
+        ",",        //delimiter
+        "true"      //serialized
     };
 }
 

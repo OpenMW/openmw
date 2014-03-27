@@ -1,84 +1,75 @@
-#ifndef CSMSETTNIGS_SETTINGMANAGER_HPP
+#ifndef CSMSETTINGS_SETTINGMANAGER_HPP
 #define CSMSETTINGS_SETTINGMANAGER_HPP
 
 #include <QObject>
-#include <QStandardItemModel>
 #include <QMap>
 #include <QStringList>
 #include <QTextStream>
-#include <QSortFilterProxyModel>
 
 #include "../../view/settings/support.hpp"
 #include "setting.hpp"
+#include "selector.hpp"
 
 namespace CSMSettings
 {
 
-    typedef QMap <QString, QStringList *> SettingMap;
-    typedef QMap <QString, SettingMap *> PageMap;
-    typedef QList <RowItemList *> RowList;
+    typedef QMap <QString, QStringList *> DefinitionMap;
+    typedef QMap <QString, DefinitionMap *> DefinitionPageMap;
 
-    class WriterSortModel : public QSortFilterProxyModel
-    {
-        bool lessThan(const QModelIndex &rLeft, const QModelIndex &rRight) const
-        {
-            int const leftRow  = rLeft.row();
-            int const rightRow = rRight.row();
-
-            for (int column = Property_Page; column >= Property_Name; --column)
-            {
-                QModelIndex const leftIdx = sourceModel()->index
-                                    (leftRow, column, QModelIndex());
-
-                QModelIndex const rightIdx = sourceModel()->index
-                                    (rightRow, column, QModelIndex());
-
-                QString const leftData = sourceModel()->
-                                                    data(leftIdx).toString();
-
-                QString const rightData = sourceModel()->
-                                                    data(rightIdx).toString();
-
-                int const compare = QString::localeAwareCompare
-                                                        (leftData, rightData);
-                if (compare != 0)
-                    return (compare < 0);
-            }
-            return false;
-        }
-    };
+    typedef QMap <QString, SettingList> SettingPageMap;
+    typedef QPair <QString, Selector *> SelectorPair;
+    typedef QMap <QString, QList <SelectorPair> > SelectorMap;
 
     class SettingManager : public QObject
     {
         Q_OBJECT
 
-        QStandardItemModel mSettingModel;
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
+        SettingList mSettings;
+        SelectorMap mSelectors;
+
 
     public:
         explicit SettingManager(QObject *parent = 0);
 
-        QStandardItemModel &model()     { return mSettingModel; }
+        Selector *selector(const QString &pageName, const QString &settingName);
 
-        Setting getSetting
+        ///retrieve a setting object from a given page and setting name
+        Setting *findSetting
                         (const QString &pageName, const QString &settingName);
 
-        QList <Setting> getSettings (const QString &pageName);
+        ///retrieve all settings for a specified page
+        SettingList findSettings (const QString &pageName);
+
+        ///retrieve all settings named in the attached list.
+        ///Setting names are specified in "PageName.SettingName" format.
+        SettingList findSettings (const QStringList &list);
+
+        ///Retreive a map of the settings, keyed by page name
+        SettingPageMap settingPageMap() const;
 
     protected:
 
-        void addDeclaration (Setting *setting);
-        void addDefinition (const QString &settingName, const QString &pageName,
-                            const QString &value);
+        ///add a new setting to the model
+        void addSetting (Setting *setting);
 
-        void validate(PageMap &pageMap);
+        ///add definitions to the settings specified in the page map
+        void addDefinitions (DefinitionPageMap &pageMap);
 
-        PageMap readFilestream(QTextStream *stream);
+        Selector* findSelector (const QString &pageName,
+                                const QString & settingName);
 
+        Selector *createSelector (CSMSettings::Setting *setting);
+
+        ///read setting definitions from file
+        DefinitionPageMap readFilestream(QTextStream *stream);
+
+        ///write setting definitions to file
         bool writeFilestream (QTextStream *stream);
 
-        void mergeSettings (PageMap &destMap, PageMap &srcMap,
+        ///merge PageMaps of settings when loading from multiple files
+        void mergeSettings (DefinitionPageMap &destMap, DefinitionPageMap &srcMap,
                             MergeMethod mergeMethod = Merge_Accept);
 
         QTextStream *openFilestream (const QString &filePath,
@@ -88,29 +79,6 @@ namespace CSMSettings
 
         void displayFileErrorMessage(const QString &message,
                                      bool isReadOnly) const;
-
-        void buildModel (PageMap &pageMap);
-
-    private:
-
-        ///Returns a list of model rows as QStandardItems which match the text
-        ///in the indicated column exactly from the provided source list.
-        RowList *findSettings
-            (RowList *source, const QString &text, int column);
-
-        /// Returns an entire row of QStandardItems based on the matched
-        /// values of text and column.  Duplicated rows are returned only once.
-        /// Searches the entire model for matches.
-        RowList *findSettings
-            (const QString &text, int column);
-
-        RowItemList* findSetting
-                        (const QString &settingName, const QString &pageName);
-
-        RowItemList *findSetting (int row) const;
-
-        QList <QStandardItem *> buildItemList (const QStringList &list) const;
-
 
     signals:
 

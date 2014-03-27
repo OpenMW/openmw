@@ -2,79 +2,69 @@
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QLayout>
-#include <QDataWidgetMapper>
-#include <QDebug>
 #include <QApplication>
-#include <QStandardItemModel>
 
 #include "textview.hpp"
 #include "../../model/settings/setting.hpp"
-#include "../../model/settings/textadapter.hpp"
 #include "settingbox.hpp"
+#include "../../model/settings/selector.hpp"
 
-CSVSettings::TextView::TextView(const CSMSettings::Setting &setting,
-                                QWidget *parent)
+#include <QDebug>
+CSVSettings::TextView::TextView(CSMSettings::Setting *setting,
+                                Page *parent)
     : View (setting, parent)
 
 {
-    buildView (setting);
-    buildModel (setting);
-}
-
-void CSVSettings::TextView::buildView(const CSMSettings::Setting &setting)
-{/*
-    setObjectName (setting->settingName + "_view");
-
-    QWidget *widget = 0;
-
-    if (setting->isMultiLineText)
+    if (setting->isMultiLine())
         mTextWidget = new QTextEdit ("", this);
     else
         mTextWidget = new QLineEdit ("", this);
 
-    if (setting->widgetWidth > 0)
+    if (setting->widgetWidth() > 0)
     {
         QString widthToken;
-        widthToken.fill('P', setting->widgetWidth);
+        widthToken.fill('P', setting->widgetWidth());
         QFontMetrics fm (QApplication::font());
         mTextWidget->setFixedWidth (fm.width (widthToken));
     }
 
-    mTextWidget->setObjectName (setting->settingName + "_textWidget");
+    connect (mTextWidget, SIGNAL (textEdited (QString)),
+           this, SLOT (slotTextEdited (QString)));
 
-    viewFrame()->addWidget (mTextWidget, setting->viewRow, setting->viewColumn);
-    */
+    viewFrame()->addWidget (mTextWidget,
+                            setting->viewRow(), setting->viewColumn());
 }
 
-void CSVSettings::TextView::buildModel (const CSMSettings::Setting &setting)
-{/*
-    QByteArray propName;
+void CSVSettings::TextView::slotTextEdited (QString value)
+{
+    qDebug () << objectName() << "TextView::slotTextEdited() value = " << value;
 
-    if (setting->isMultiLineText)
-        propName = "plainText";
-    else
-        propName = "text";
+    QStringList values = value.split (setting()->delimiter(),
+                                      QString::SkipEmptyParts);
 
-    QDataWidgetMapper *mapper =
-            new QDataWidgetMapper (mTextWidget);
+    selector()->setData(values);
+    selector()->setViewSelection (values);
+}
 
-    mapper->setObjectName
-                (setting->settingName + '.' +
-                 mTextWidget->objectName() + "_mapper");
+void CSVSettings::TextView::slotUpdateView (const QStringList values)
+{
+    if (values.size() == 0)
+        return;
 
-    mapper->setModel (model());
-    mapper->addMapping (mTextWidget, CSMSettings::Static_cast<SettingProperty>(2), propName);
-    mapper->setCurrentIndex(0);*/
+    QString valueString;
+
+    for (int i = 0; i < values.size() - 1; i++)
+        valueString += (values.at(i) + setting()->delimiter());
+
+    valueString += values.back();
+
+    mTextWidget->setProperty ("text", valueString);
 }
 
 CSVSettings::TextView *CSVSettings::TextViewFactory::createView
-    (const CSMSettings::Setting &setting)
+                                    (CSMSettings::Setting *setting,
+                                     Page *parent)
 {
-    QWidget *widgParent = static_cast<QWidget *>(parent());
-/*
-    CSMSettings::TextAdapter *adapter =
-            new CSMSettings::TextAdapter (model, setting, widgParent);
-*/
-    return new TextView (setting);
+    return new TextView (setting, parent);
 }
 

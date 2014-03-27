@@ -1,95 +1,99 @@
 #ifndef CSMSETTINGS_SETTING_HPP
 #define CSMSETTINGS_SETTING_HPP
 
-#include <QObject>
-#include <QVariant>
 #include <QStringList>
 
 #include "../../view/settings/support.hpp"
 
-class QStandardItem;
-
 namespace CSMSettings
 {
+    typedef QList <Setting *> SettingList;
 
-    typedef QList <QStandardItem *> RowItemList;
+    //StringListPair contains master key and proxy values
+    typedef QList <StringListPair *> ProxyValueList;
 
-    class Setting : public QObject
+    //StringPair contains page / setting names
+    typedef QPair <StringPair *, ProxyValueList *> ProxySettingPair;
+
+    // A list of settings and their corresponding lists of proxy values
+    // keyed to their respective master values
+    typedef QList <ProxySettingPair *> ProxyLists;
+
+    struct Setting
     {
-        Q_OBJECT
+        QList <QStringList> mLayout;
+        QStringList mDefinitions;
+        QStringList mDeclarations;
 
-        RowItemList mSettingRow;
-        QStringList mTemp;
-        QList <QList <QStandardItem *> > mChildRows;
+        ProxyLists mProxyLists;
 
     public:
 
         explicit Setting();
 
-        explicit Setting(SettingType typ, const QString &name,
-                         const QString &page, const QString &defaultValue,
-                         QObject *parent = 0);
+        explicit Setting(SettingType typ, const QString &settingName,
+                         const QString &pageName);
 
-        Setting (const Setting &copy)
-            : mSettingRow (copy.mSettingRow), QObject (copy.parent())
-        {}
+        void setIsSerialized (bool state);
+        bool isSerialized() const;
 
-        Setting operator =(const Setting &rhv) { return Setting (rhv); }
+        void setDeclaredValues (QStringList list);
+        const QStringList &declaredValues() const;
 
-        QStringList declaredValues() const
-            { return propertyList (PropertyList_DeclaredValues); }
+        void setDefinedValues (QStringList list);
+        const QStringList &definedValues() const;
 
-        QStringList definedValues() const
-            { return propertyList (PropertyList_DefinedValues); }
+        void setDefaultValues (const QStringList &values);
+        QStringList defaultValues() const;
+
+        void setDelimiter (const QString &value);
+        QString delimiter() const;
+
+        void setIsMultiLine (bool state);
+        bool isMultiLine() const;
+
+        void setIsMultiValue (bool state);
+        bool isMultiValue() const;
+
+        void setName (const QString &value);
+        QString name() const;
+
+        void setPage (const QString &value);
+        QString page() const;
+
+        const ProxyLists &proxyLists() const;
+
+        void setSerializable (bool state);
+        bool serializable() const;
+
+        void setViewColumn (int value);
+        int viewColumn() const;
+
+        void setViewRow (int value);
+        int viewRow() const;
+
+        void setViewType (int vType);
+        CSVSettings::ViewType viewType() const;
+
+        void setWidgetWidth (int value);
+        int widgetWidth() const;
 
         ///returns the specified property value
         QVariant property (SettingProperty prop) const;
 
-        ///returns the QStringList corresponding to the child of the first
-        ///setting property of the row
-        QStringList propertyList (SettingPropertyList) const;
+        ///boilerplate code to convert setting values of common types
+        void setProperty (SettingProperty prop, bool value);
+        void setProperty (SettingProperty prop, int value);
+        void setProperty (SettingProperty prop, const QVariant &value);
+        void setProperty (SettingProperty prop, const QString &value);
+        void setProperty (SettingProperty prop, const QStringList &value);
 
-        ///returns the entire setting values (a model row)
-        const RowItemList &rowList () const         { return mSettingRow; }
+        void addProxy (Setting* setting,
+                       QMap <QString, QStringList> &proxyMap);
 
-        void setPropertyList (CSMSettings::SettingPropertyList propertyList,
-                          const QStringList &list);
+        void dumpSettingValues();
 
-        void setProperty (int column, QString value);
-        void setProperty (int column, int value);
-        void setProperty (int column, bool value);
-        void setProperty (int column, QStandardItem *item);
-
-        ///boilerplate for convenience functions
-        QString page() const     { return property (Property_Page).toString(); }
-        QString name() const     { return property (Property_Name).toString(); }
-        QString defaultValue()
-                         { return property (Property_DefaultValue).toString(); }
-        QString delimiter() { return property (Property_Delimiter).toString(); }
-
-        bool isMultiValue() const
-                            { return property (Property_IsMultiValue).toBool();}
-
-        bool isMultiLine() const
-                            { return property (Property_IsMultiLine).toBool(); }
-
-        int viewRow() const      { return property (Property_ViewRow).toInt(); }
-        int viewColumn() const{ return property (Property_ViewColumn).toInt(); }
-
-        const QStringList declarationList() const
-                          { return propertyList (PropertyList_DeclaredValues); }
-
-        const QStringList definitionList() const
-                           { return propertyList (PropertyList_DefinedValues); }
-
-        const QStringList proxyList() const
-                           { return propertyList (PropertyList_Proxies); }
-
-        CSVSettings::ViewType viewType() const
-        { return static_cast<CSVSettings::ViewType>
-                                        (property(Property_ViewType).toInt()); }
-    private:
-
+    protected:
         void buildDefaultSetting();
     };
 }

@@ -1,28 +1,24 @@
-#include <QSortFilterProxyModel>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QDataWidgetMapper>
-
 #include "page.hpp"
 #include "settingbox.hpp"
 #include "view.hpp"
 #include "booleanview.hpp"
 #include "textview.hpp"
+#include "listview.hpp"
 
-#include "../../model/settings/declarationmodel.hpp"
-#include "../../model/settings/definitionmodel.hpp"
+#include "../../model/settings/selector.hpp"
 #include "../../model/settings/setting.hpp"
+#include "../../model/settings/settingmanager.hpp"
+#include "settingwindow.hpp"
 
 #include <QDebug>
-#include <QRadioButton>
-#include <QStandardItem>
 
 QMap <CSVSettings::ViewType, CSVSettings::IViewFactory *>
                                             CSVSettings::Page::mViewFactories;
 
 CSVSettings::Page::Page(const QString &pageName,
-             const QList <CSMSettings::Setting> &settingList, QWidget *parent) :
-    QWidget(parent)
+                        CSMSettings::SettingList &settingList,
+                        SettingWindow *parent) :
+    mSettingList (settingList), mParent(parent)
 {
     setObjectName (pageName);
 
@@ -31,7 +27,6 @@ CSVSettings::Page::Page(const QString &pageName,
 
     setupPage ();
     setupViews (settingList);
-
 }
 
 void CSVSettings::Page::setupPage ()
@@ -45,46 +40,96 @@ void CSVSettings::Page::setupPage ()
 }
 
 void CSVSettings::Page::setupViews
-                            (const QList <CSMSettings::Setting> &settingList)
+                            (CSMSettings::SettingList &settingList)
 {
-    //convert valuelist to a SelectionModel / QStringListModel
-    //convert values to a QStringListModel
-    //pass separate models to view
-
-    foreach (const CSMSettings::Setting &pageSetting, settingList)
-        addView (pageSetting);
+    foreach (CSMSettings::Setting *setting, settingList)
+        addView (setting);
 }
 
-void CSVSettings::Page::addView (const CSMSettings::Setting &setting)
+void CSVSettings::Page::buildProxy (CSMSettings::Setting *setting,
+                                    CSMSettings::Selector *selector)
 {
-   if (setting.viewType() == ViewType_Undefined)
+    qDebug() << "building proxy for setting " << setting->name();
+    const CSMSettings::ProxyLists &proxyLists = setting->proxyLists();
+
+    int idx = 0;
+    selector->setProxyIndex(idx++);
+
+    //iterate each setting item's map of proxylists to master key values
+    //outermost loop retreives setting name and value map and adds the
+    //column for the setting's proxy values to be inserted
+    foreach (const CSMSettings::ProxySettingPair *settingItem, proxyLists)
+    {
+        //adds a blank column to the model
+        selector->addModelColumn(QStringList());
+
+        CSMSettings::StringPair *proxyNames = settingItem->first;
+        CSMSettings::ProxyValueList *valueMap = settingItem->second;
+
+        CSMSettings::Selector *proxySelector = mParent->selector
+                                    (proxyNames->first, proxyNames->second);
+        qDebug() << "buildProxy() proxySelector created";
+        if (!proxySelector)
+            continue;
+        qDebug () <<" build proxy adding column values";
+
+        //iterates each mapping of proxy value list to master value and inserts
+        //the proxy value list in the appropriate cell in the table
+        foreach (const CSMSettings::StringListPair *mapPair, *valueMap)
+        {
+            int row = setting->declaredValues().indexOf (mapPair->first);
+            selector->setData(row, idx, mapPair->second);
+        }
+
+        qDebug() << "buildProxy() column values added";
+
+        proxySelector->setProxyIndex (idx++);
+        proxySelector->setProxySelectionModel (selector->selectionModel());
+
+        qDebug() << "buildProxy() selector indexed and selectionModel set";
+
+        connect (selector,
+            SIGNAL (proxyUpdate (int, CSMSettings::StandardItemList)),
+            proxySelector,
+            SLOT (slotUpdateSlaveByProxy (int, CSMSettings::StandardItemList)));
+
+        connect (proxySelector,
+            SIGNAL (proxyUpdate (int, CSMSettings::StandardItemList)),
+            selector,
+            SLOT (slotUpdateMasterByProxy (int, CSMSettings::StandardItemList)));
+
+        //proxySelector->refresh();
+        qDebug() << "----------------------proxySelector construction complete-----------------";
+    }
+}
+
+void CSVSettings::Page::addView (CSMSettings::Setting *setting)
+{
+
+    if (setting->viewType() == ViewType_Undefined)
         return;
 
-    View *view = 0;
-
-    IViewFactory *factory = mViewFactories[setting.viewType()];
-
-    view = factory->createView(setting);
+    View *view = mViewFactories[setting->viewType()]->createView
+                                                    (setting, this);
 
     if (!view)
         return;
 
     mViews.append (view);
 
-    int viewRow = setting.viewRow();
-    int viewCol = setting.viewColumn();
-
-    if (viewRow == -1)
-        viewRow = mViews.count() - 1;
-
-    if (viewCol == -1)
-        viewCol = 0;
-
-    mBox->addWidget (view->viewFrame(), viewRow, viewCol);
+    mBox->addWidget (view->viewFrame(),
+                     setting->viewRow(),
+                     setting->viewColumn());
 }
 
 void CSVSettings::Page::buildFactories()
 {
     mViewFactories[ViewType_Boolean] = new BooleanViewFactory (this);
     mViewFactories[ViewType_Text] = new TextViewFactory (this);
+    mViewFactories[ViewType_List] = new ListViewFactory (this);
+}
+
+CSMSettings::Selector *CSVSettings::Page::selector (const QString &settingName)
+{
+    return mParent->selector (objectName(), settingName);
 }

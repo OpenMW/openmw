@@ -99,6 +99,7 @@ void CS::Editor::setupDataFiles()
     //load the settings into the userSettings instance.
     const QString settingFileName = "opencs.cfg";
     CSMSettings::UserSettings::instance().loadSettings(settingFileName);
+    mSettings.setModel (CSMSettings::UserSettings::instance());
 }
 
 void CS::Editor::createGame()

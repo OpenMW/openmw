@@ -2,54 +2,54 @@
 #define CSVSETTINGS_VIEW_HPP
 
 #include <QWidget>
+#include <QMap>
 
 #include "support.hpp"
 
-class QAbstractItemModel;
 class QGroupBox;
-class QDataWidgetMapper;
-class QStandardItemModel;
+class QStringList;
 
 namespace CSMSettings
 {
     class Setting;
-    class Adapter;
+    class Selector;
 }
 
 namespace CSVSettings
 {
     class SettingBox;
+    class Page;
 
     class View : public QWidget
     {
         Q_OBJECT
 
-        CSMSettings::Adapter *mModel;
-
         SettingBox *mViewFrame;
-
-       QStringList mValueList;
-        bool mIsMultiValue;
+        CSMSettings::Selector *mSelector;
+        CSMSettings::Setting *mSetting;
+        Page *mParentPage;
 
     public:
 
-        explicit View (const CSMSettings::Setting &setting,
-                       CSMSettings::Adapter *adapter,
-                       QWidget *parent = 0);
+        explicit View (CSMSettings::Setting *setting,
+                       Page *parent);
 
         SettingBox *viewFrame() const                    { return mViewFrame; }
+        CSMSettings::Selector *selector()               { return mSelector; }
+        CSMSettings::Setting *setting() const              { return mSetting; }
 
     protected:
+        void showEvent ( QShowEvent * event );
 
- //       QStandardItemModel *model()                         { return mModel; }
-        QStringList valueList() const;
-        bool isMultiValue() const;
+    public slots:
+        virtual void slotUpdateView (QStringList values) = 0;
     };
 
     class IViewFactory
     {
     public:
-        virtual View *createView (const CSMSettings::Setting &setting) = 0;
+        virtual View *createView (CSMSettings::Setting *setting,
+                                  Page *parent) = 0;
     };
 }
-#endif // SCVSETTINGS_VIEW_HPP
+#endif // CSVSETTINGS_VIEW_HPP
