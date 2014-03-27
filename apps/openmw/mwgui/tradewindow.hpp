@@ -100,6 +100,10 @@ namespace MWGui
             virtual void onReferenceUnavailable();
 
             int getMerchantGold();
+
+            // Relates to NPC gold reset delay
+            void checkTradeTime();
+            void updateTradeTime(); 
     };
 }
 

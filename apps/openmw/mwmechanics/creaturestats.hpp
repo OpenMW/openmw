@@ -54,6 +54,11 @@ namespace MWMechanics
         bool mRecalcDynamicStats;
 
         std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
+
+        MWWorld::TimeStamp mTradeTime; // Relates to NPC gold reset delay
+
+        int mGoldPool; // the pool of merchant gold not in inventory
+
     protected:
         bool mIsWerewolf;
         AttributeValue mWerewolfAttributes[8];
@@ -221,6 +226,13 @@ namespace MWMechanics
         void writeState (ESM::CreatureStats& state) const;
 
         void readState (const ESM::CreatureStats& state);
+
+        // Relates to NPC gold reset delay
+        void setTradeTime(MWWorld::TimeStamp tradeTime);
+        MWWorld::TimeStamp getTradeTime() const;
+
+        void setGoldPool(int pool);
+        int getGoldPool() const;
     };
 }
 
