@@ -22,6 +22,7 @@ namespace MWGui
         : OEngine::GUI::Layout("openmw_mainmenu.layout")
         , mButtonBox(0), mWidth (w), mHeight (h)
         , mSaveGameDialog(NULL)
+        , mBackground(NULL)
     {
         getWidget(mVersionText, "VersionText");
         std::stringstream sstream;
@@ -59,6 +60,10 @@ namespace MWGui
     {
         if (visible)
             updateMenu();
+        else
+            showBackground(
+                        MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
+                        MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame);
 
         OEngine::GUI::Layout::setVisible (visible);
     }
@@ -125,10 +130,41 @@ namespace MWGui
         }
     }
 
+    void MainMenu::showBackground(bool show)
+    {
+        if (mBackground)
+        {
+            MyGUI::Gui::getInstance().destroyWidget(mBackground);
+            mBackground = NULL;
+        }
+        if (show)
+        {
+            if (!mBackground)
+            {
+                mBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
+                    MyGUI::Align::Stretch, "Menu");
+                mBackground->setImageTexture("black.png");
+
+                // Use black bars to correct aspect ratio. The video player also does it, so we need to do it
+                // for mw_logo.bik to align correctly with menu_morrowind.dds.
+                MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
+
+                // No way to un-hardcode this right now, menu_morrowind.dds is 1024x512 but was designed for 4:3
+                double imageaspect = 4.0/3.0;
+
+                int leftPadding = std::max(0.0, (screenSize.width - screenSize.height * imageaspect) / 2);
+                int topPadding = std::max(0.0, (screenSize.height - screenSize.width / imageaspect) / 2);
+
+                MyGUI::ImageBox* image = mBackground->createWidget<MyGUI::ImageBox>("ImageBox",
+                    leftPadding, topPadding, screenSize.width - leftPadding*2, screenSize.height - topPadding*2, MyGUI::Align::Default);
+                image->setImageTexture("textures\\menu_morrowind.dds");
+            }
+        }
+    }
+
     void MainMenu::updateMenu()
     {
         setCoord(0,0, mWidth, mHeight);
-
 
         if (!mButtonBox)
             mButtonBox = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(0, 0, 0, 0), MyGUI::Align::Default);
@@ -136,6 +172,8 @@ namespace MWGui
         int curH = 0;
 
         MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
+
+        showBackground(state == MWBase::StateManager::State_NoGame);
 
         std::vector<std::string> buttons;
 
@@ -191,12 +229,27 @@ namespace MWGui
             assert(mButtons.find(*it) != mButtons.end());
             MWGui::ImageButton* button = mButtons[*it];
             button->setVisible(true);
+
             MyGUI::IntSize requested = button->getRequestedSize();
-            button->setCoord((maxwidth-requested.width) / 2, curH, requested.width, requested.height);
-            curH += requested.height;
+
+            // Trim off some of the excessive padding
+            // TODO: perhaps do this within ImageButton?
+            int trim = 8;
+            button->setImageCoord(MyGUI::IntCoord(0, trim, requested.width, requested.height-trim));
+            int height = requested.height-trim*2;
+            button->setImageTile(MyGUI::IntSize(requested.width, height));
+            button->setCoord((maxwidth-requested.width) / 2, curH, requested.width, height);
+            curH += height;
         }
 
-        mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight/2 - curH/2, maxwidth, curH);
+        if (state == MWBase::StateManager::State_NoGame)
+        {
+            // Align with the background image
+            int bottomPadding=48;
+            mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight - curH - bottomPadding, maxwidth, curH);
+        }
+        else
+            mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight/2 - curH/2, maxwidth, curH);
 
     }
 }

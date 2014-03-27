@@ -339,6 +339,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
 
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
+                settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
+
     mOgre->createWindow("OpenMW", windowSettings);
 
     Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
@@ -356,6 +359,18 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding);
     mEnvironment.setWindowManager (window);
 
+    // Create sound system
+    mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
+
+    // TODO: play pre-load intro videos. Need to find a way to have them receive input.
+    // Make videoplayer a MyGUI widget?
+    /*
+    {
+        MWRender::VideoPlayer player(mOgre->getScene(), mOgre->getWindow());
+        player.playVideo("mw_logo.bik", 1);
+    }
+    */
+
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
@@ -372,9 +387,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
       mTranslationDataStorage.loadTranslationData(mFileCollections, mContentFiles[i]);
 
     Compiler::registerExtensions (mExtensions);
-
-    // Create sound system
-    mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
@@ -434,7 +446,20 @@ void OMW::Engine::go()
 
     // start in main menu
     if (!mSkipMenu)
+    {
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        try
+        {
+            // Is there an ini setting for this filename or something?
+            MWBase::Environment::get().getSoundManager()->streamMusic("Special/morrowind title.mp3");
+
+            // TODO: there are other intro videos, too. They need to be imported from Morrowind.ini.
+            // Unfortunately those must play BEFORE any loading is done, which will currently not work.
+            // The videoplayer is created by World, so all content files must be loaded first...
+            MWBase::Environment::get().getWorld()->playVideo("mw_logo.bik", true);
+        }
+        catch (...) {}
+    }
     else
         MWBase::Environment::get().getStateManager()->newGame (true);
 
