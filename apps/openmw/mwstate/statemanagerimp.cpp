@@ -25,6 +25,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -303,6 +304,13 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
 
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        
+        //Update the weapon icon in the hud with whatever the player is currently holding.
+        MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator item = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        
+        if (item != invStore.end())
+            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*item);
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
