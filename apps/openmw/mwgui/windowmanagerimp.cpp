@@ -1437,7 +1437,7 @@ namespace MWGui
 
         while (mVideoWidget->update())
         {
-            MWBase::Environment::get().getInputManager()->update(0, false);
+            MWBase::Environment::get().getInputManager()->update(0, true, false);
 
             mRendering->getWindow()->update();
         }

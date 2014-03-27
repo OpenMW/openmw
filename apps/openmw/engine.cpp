@@ -362,14 +362,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
 
-    // TODO: play pre-load intro videos. Need to find a way to have them receive input.
-    // Make videoplayer a MyGUI widget?
-    /*
-    {
-        MWRender::VideoPlayer player(mOgre->getScene(), mOgre->getWindow());
-        player.playVideo("mw_logo.bik", 1);
-    }
-    */
+    std::string logo = mFallbackMap["Movies_Company_Logo"];
+    if (!logo.empty())
+        window->playVideo(logo, 1);
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
@@ -453,10 +448,9 @@ void OMW::Engine::go()
             // Is there an ini setting for this filename or something?
             MWBase::Environment::get().getSoundManager()->streamMusic("Special/morrowind title.mp3");
 
-            // TODO: there are other intro videos, too. They need to be imported from Morrowind.ini.
-            // Unfortunately those must play BEFORE any loading is done, which will currently not work.
-            // The videoplayer is created by World, so all content files must be loaded first...
-            MWBase::Environment::get().getWindowManager()->playVideo("mw_logo.bik", true);
+            std::string logo = mFallbackMap["Movies_Morrowind_Logo"];
+            if (!logo.empty())
+                MWBase::Environment::get().getWindowManager()->playVideo(logo, true);
         }
         catch (...) {}
     }
