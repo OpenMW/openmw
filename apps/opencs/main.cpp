@@ -7,10 +7,13 @@
 #include <QApplication>
 #include <QIcon>
 
+<<<<<<< HEAD
 #include <QDebug>
 
 #include <extern/shiny/Main/Factory.hpp>
 
+=======
+>>>>>>> esxSelector
 #include <components/ogreinit/ogreinit.hpp>
 
 #ifdef Q_OS_MAC
@@ -76,7 +79,7 @@ int main(int argc, char *argv[])
     if(!editor.makeIPCServer())
     {
     	editor.connectToIPCServer();
-        return 0;
+  //      return 0;
     }
 
     shinyFactory = editor.setupGraphics();

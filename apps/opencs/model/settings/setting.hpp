@@ -1,95 +1,101 @@
-#ifndef SETTING_HPP
-#define SETTING_HPP
+#ifndef CSMSETTINGS_SETTING_HPP
+#define CSMSETTINGS_SETTING_HPP
 
-#include <QObject>
 #include <QStringList>
-#include <QVariant>
-#include "apps/opencs/view/settings/support.hpp"
+
+#include "../../view/settings/support.hpp"
 
 namespace CSMSettings
 {
-    typedef QMap<QString, QStringList> ProxyMap;
+    typedef QList <Setting *> SettingList;
 
-    class Setting : public QObject
+    //StringListPair contains master key and proxy values
+    typedef QList <StringListPair *> ProxyValueList;
+
+    //StringPair contains page / setting names
+    typedef QPair <StringPair *, ProxyValueList *> ProxySettingPair;
+
+    // A list of settings and their corresponding lists of proxy values
+    // keyed to their respective master values
+    typedef QList <ProxySettingPair *> ProxyLists;
+
+    struct Setting
     {
-        Q_OBJECT
+        QList <QStringList> mLayout;
+        QStringList mDefinitions;
+        QStringList mDeclarations;
 
-        /// current value of the setting
-        QStringList mValues;
-
-        /// list of values for setting validation / list widgets
-        QStringList mValueList;
-
-        /// input mask for line edit widgets
-        QString mInputMask;
-
-        /// map of settings for which the setting acts as a proxy
-        /// with accompanying values which correspond to the proxy
-        /// widget's value list.
-        ProxyMap mProxyMap;
-
-        /// default value for the setting;
-        QString mDefaultValue;
-
-        /// name of section to which the setting belongs
-        QString mSectionName;
-
-        /// type of widget used to represent the setting
-        CSVSettings::WidgetType mWidgetType;
-
-        /// indicate whther the widget is oriented horzintally or vertically
-        /// in it's view.  Applies to settings that require multiple instances
-        /// of the widget to represent values (radiobutton, checkbox, togglebutton)
-        /// Value is true by default.
-        bool mIsHorizontal;
-
-        static QStringList sColumnNames;
-        static int sColumnCount;
+        ProxyLists mProxyLists;
 
     public:
 
-        explicit Setting(const QString &name, const QString &section,
-                         const QString &defaultValue, QObject *parent = 0);
+        explicit Setting();
 
-        ///getter functions
-        QString value (int index = 0) const     { return mValues.at(index); }
-        const QStringList &values() const       { return mValues; }
-        QStringList &values()                   { return mValues; }
-        const QStringList &valueList() const    { return mValueList; }
-        QStringList &valueList()                { return mValueList; }
-        QString inputMask() const               { return mInputMask; }
-        QString sectionName() const             { return mSectionName; }
-        QString name() const                    { return objectName(); }
-        const ProxyMap &proxyMap() const        { return mProxyMap; }
-        ProxyMap &proxyMap()                    { return mProxyMap; }
-        QString defaultValue() const            { return mDefaultValue; }
-        CSVSettings::WidgetType widgetType() const  { return mWidgetType; }
-        bool isHorizontal() const               { return mIsHorizontal; }
+        explicit Setting(SettingType typ, const QString &settingName,
+                         const QString &pageName);
 
-        static QStringList columnNames() { return sColumnNames; }
-        static int columnCount () { return sColumnCount; }
+        void setIsSerialized (bool state);
+        bool isSerialized() const;
 
-        ///setter functions
-        void setValue (const QString &value, int index = 0);
-        void setName (const QString &name)                  { setObjectName (name); }
-        void setSectionName (const QString &sectionName)    { mSectionName = sectionName; }
-        void setDefaultValue (const QString &defaultValue)  { mDefaultValue = defaultValue; }
-        void setValues (const QStringList &values)          { mValues = values; }
-        void setValueList (const QStringList &valueList)    { mValueList = valueList; }
-        void setInputMask (const QString &mask)             { mInputMask = mask; }
-        void setProxyMap (const ProxyMap &proxyMap)         { mProxyMap = proxyMap; }
-        void setWidgetType (CSVSettings::WidgetType wType)  { mWidgetType = wType; }
-        void setHorizontal (bool value)                     { mIsHorizontal = value; }
+        void setDeclaredValues (QStringList list);
+        const QStringList &declaredValues() const;
 
-        ///function to access the properties by index value
-        QVariant item (int index) const;
-        void setItem (int index, QVariant value);
+        void setDefinedValues (QStringList list);
+        const QStringList &definedValues() const;
 
-    signals:
+        void setDefaultValues (const QStringList &values);
+        QStringList defaultValues() const;
 
-    public slots:
+        void setDelimiter (const QString &value);
+        QString delimiter() const;
 
+        void setIsMultiLine (bool state);
+        bool isMultiLine() const;
+
+        void setIsMultiValue (bool state);
+        bool isMultiValue() const;
+
+        void setName (const QString &value);
+        QString name() const;
+
+        void setPage (const QString &value);
+        QString page() const;
+
+        const ProxyLists &proxyLists() const;
+
+        void setSerializable (bool state);
+        bool serializable() const;
+
+        void setViewColumn (int value);
+        int viewColumn() const;
+
+        void setViewRow (int value);
+        int viewRow() const;
+
+        void setViewType (int vType);
+        CSVSettings::ViewType viewType() const;
+
+        void setWidgetWidth (int value);
+        int widgetWidth() const;
+
+        ///returns the specified property value
+        QVariant property (SettingProperty prop) const;
+
+        ///boilerplate code to convert setting values of common types
+        void setProperty (SettingProperty prop, bool value);
+        void setProperty (SettingProperty prop, int value);
+        void setProperty (SettingProperty prop, const QVariant &value);
+        void setProperty (SettingProperty prop, const QString &value);
+        void setProperty (SettingProperty prop, const QStringList &value);
+
+        void addProxy (Setting* setting,
+                       QMap <QString, QStringList> &proxyMap);
+
+        void dumpSettingValues();
+
+    protected:
+        void buildDefaultSetting();
     };
 }
 
-#endif // SETTING_HPP
+#endif // CSMSETTINGS_SETTING_HPP

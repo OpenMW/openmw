@@ -14,8 +14,8 @@
 #include <components/files/configurationmanager.hpp>
 #include <boost/version.hpp>
 
-#include "settingmodel.hpp"
 #include "setting.hpp"
+#include "../../view/settings/support.hpp"
 
 #include <QDebug>
 
@@ -43,14 +43,6 @@ CSMSettings::UserSettings::UserSettings()
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 
-    mReadWriteMessage = QObject::tr("<br><b>Could not open or create file for writing</b><br><br> \
-            Please make sure you have the right permissions and try again.<br>");
-
-    mReadOnlyMessage = QObject::tr("<br><b>Could not open file for reading</b><br><br> \
-            Please make sure you have the right permissions and try again.<br>");
-
-    mSettingModel = new SettingModel (this);
-
     buildSettingModelDefaults();
 }
 
@@ -58,44 +50,137 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
     {
-        Setting *width = mSettingModel->createSetting ("Width", section, "1024");
-        Setting *height = mSettingModel->createSetting ("Height", section, "768");
-        Setting *preDefined = mSettingModel->createSetting ("Pre-Defined", section, "1024 x 768");
+        Setting *width = new Setting
+                                    (Type_SingleText, "Width", section); //, "1024");
+        Setting *height = new Setting
+                                    (Type_SingleText, "Height", section); //, "768");
 
-        preDefined->valueList() << "640 x 480" << "800 x 600" << "1024 x 768" << "1440 x 900";
+        width->setWidgetWidth (5);
+        height->setWidgetWidth (5);
 
-        // value lists for width / height are used to validate interaction with pre-defined setting
-        // lists are ignored for independent changes to width / height settings (line edit widget is not list-style)
+        addSetting (width);
+        addSetting (height);
+
+        QStringList predefinedValues;
+
+        predefinedValues    << "640 x 480"
+                            << "800 x 600"
+                            << "1024 x 768"
+                            << "1440 x 900";
+
+        Setting *preDefined = new Setting (Type_SingleList, "Pre-Defined",
+                                           section); //, "1024 x 768");
+
+        preDefined->setDeclaredValues (predefinedValues);
+
+        //do not serialize since it's values depend entirely on width / height
+        preDefined->setSerializable (false);
+
         QStringList widthValues;
         QStringList heightValues;
 
         widthValues << "640" << "800" << "1024" << "1440";
         heightValues << "480" << "600" << "768" << "900";
 
-        preDefined->proxyMap().insert("Width", widthValues);
-        preDefined->proxyMap().insert("Height", heightValues);
+    //    preDefined->addProxy (section, "Width", widthValues);
+    //    preDefined->addProxy (section, "Height", heightValues);
 
-        preDefined->setWidgetType (CSVSettings::Widget_ComboBox);
-
-        width->setWidgetType (CSVSettings::Widget_LineEdit);
-        height->setWidgetType (CSVSettings::Widget_LineEdit);
+        addSetting (preDefined);
     }
 
     section = "Display Format";
     {
         QString defaultValue = "Icon and Text";
-        Setting *recordStatusDisplay = mSettingModel->createSetting("Record Status Display", section, defaultValue);
-        Setting *refIdDisplay = mSettingModel->createSetting("Referenceable ID Type Display", section, defaultValue);
+
+        Setting *rsd = new Setting (Type_SingleBool, "Record Status Display",
+                                                        section); //, defaultValue);
+
+        Setting *ritd = new Setting (Type_SingleBool,
+                                     "Referenceable ID Type Display",
+                                                        section); //, defaultValue);
 
         QStringList values;
+
         values << defaultValue << "Icon Only" << "Text Only";
 
-        recordStatusDisplay->setValueList(values);
-        refIdDisplay->setValueList(values);
+        rsd->setDeclaredValues (values);
+        ritd->setDeclaredValues (values);
 
-        recordStatusDisplay->setWidgetType (CSVSettings::Widget_RadioButton);
-        refIdDisplay->setWidgetType (CSVSettings::Widget_RadioButton);
+        addSetting (rsd);
+        addSetting (ritd);
+    }
 
+    section = "Proxy Selection Test";
+    {
+        //create three setting objects, specifying the basic widget type,
+        //the setting view name, the page name, and the default value
+        Setting *masterBoolean = new Setting (Type_SingleBool, "Master Proxy",
+                                              section);
+        Setting *slaveBoolean = new Setting (Type_MultiBool, "Proxy Checkboxes",
+                                             section);
+        Setting *slaveSingleText = new Setting (Type_SingleText, "Proxy Textbox",
+                                          section);
+
+        Setting *slaveMultiText = new Setting (Type_MultiText, "Proxy Textbox 2",
+                                               section);
+
+        // There are three types of values:
+        //
+        // Declared values - Pre-determined values, typically for
+        // combobox drop downs and boolean (radiobutton / checkbox) labels.
+        // These values represent the total possible list of values that may
+        // define a setting.  No other values are allowed.
+        //
+        // Defined values - Values which represent the atual, current value of
+        // a setting.  For settings with declared values, this must be one or
+        // several declared values, as appropriate.
+        //
+        // Proxy values - values the proxy master updates the proxy slave when
+        // it's own definition is set / changed.  These are definitions for
+        // proxy slave settings, but must match any declared values the proxy
+        // slave has, if any.
+
+        masterBoolean->setDeclaredValues (QStringList()
+                                          << "Profile One" << "Profile Two"
+                                          << "Profile Three" << "Profile Four");
+
+        slaveBoolean->setDeclaredValues (QStringList()
+                            << "One" << "Two" << "Three" << "Four" << "Five");
+
+        QMap <QString, QStringList> booleanProxyMap;
+        QMap <QString, QStringList> textProxyMap;
+
+        booleanProxyMap["Profile One"] = QStringList() << "One" << "Three";
+        booleanProxyMap["Profile Two"] = QStringList() << "One" << "Three";
+        booleanProxyMap["Profile Three"] =
+                                QStringList() << "One" << "Three" << "Five";
+
+        booleanProxyMap["Profile Four"] = QStringList() << "Two" << "Four";
+
+        textProxyMap["Profile One"] = QStringList() << "Text A";
+        textProxyMap["Profile Two"] = QStringList() << "Text B";
+        textProxyMap["Profile Three"] = QStringList() << "Text A";
+        textProxyMap["Profile Four"] = QStringList() << "Text C";
+
+        masterBoolean->addProxy (slaveBoolean, booleanProxyMap);
+        masterBoolean->addProxy (slaveSingleText, textProxyMap);
+        masterBoolean->addProxy (slaveMultiText, booleanProxyMap);
+
+        //settings with proxies are not serialized by default
+        //masterBoolean->setSerializable (false);
+        slaveBoolean->setSerializable (false);
+        slaveSingleText->setSerializable (false);
+        slaveMultiText->setSerializable (false);
+
+        slaveBoolean->setDefaultValues (QStringList() << "One" << "Three" << "Five");
+        slaveSingleText->setDefaultValues (QStringList() << "Text A");
+        slaveMultiText->setDefaultValues(QStringList() << "One" << "Three" << "Five");
+
+        //add these settings to the model
+        addSetting (masterBoolean);
+        addSetting (slaveBoolean);
+        addSetting (slaveSingleText);
+        addSetting (slaveMultiText);
     }
 }
 
@@ -104,195 +189,91 @@ CSMSettings::UserSettings::~UserSettings()
     mUserSettingsInstance = 0;
 }
 
-QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath, bool isReadOnly) const
+bool CSMSettings::UserSettings::loadSettingsFromFile
+                                                (const QStringList &filepaths)
 {
-    QIODevice::OpenMode openFlags = QIODevice::Text;
-
-    if (isReadOnly)
-        openFlags = QIODevice::ReadOnly | openFlags;
-    else
-        openFlags = QIODevice::ReadWrite | QIODevice::Truncate | openFlags;
-
-    QFile *file = new QFile(filePath);
-    QTextStream *stream = 0;
-
-    if (file->open(openFlags))
-        stream = new QTextStream(file);
-
-    if (stream)
-        stream->setCodec(QTextCodec::codecForName("UTF-8"));
-    else
-        destroyStream (stream);
-
-    return stream;
-}
-
-bool CSMSettings::UserSettings::writeSettings()
-{
-    QTextStream *stream = openFileStream(mUserFilePath);
-
-    if (!stream)
-    {
-        displayFileErrorMessage(mReadWriteMessage, false);
-        return false;
-    }
-
-    mSettingModel->sort(1);
-    QString section = "";
-
-    for (int i =0; i < mSettingModel->rowCount(); ++i)
-    {
-        const Setting *setting = mSettingModel->getSetting(i);
-
-        if (section != setting->sectionName())
-        {
-            section = setting->sectionName();
-            *stream << "[" << section << "]" << "\n";
-        }
-
-        foreach (const QString &settingValue, setting->values())
-            *stream << setting->name() << " = " << settingValue << "\n";
-    }
-
-    destroyStream (stream);
-    return true;
-}
-
-void CSMSettings::UserSettings::destroyStream(QTextStream *stream) const
-{
-    stream->device()->close();
-    delete stream;
-    stream = 0;
-}
-
-QSortFilterProxyModel *CSMSettings::UserSettings::createProxyFilter (int column, QAbstractItemModel *model)
-{
-    QSortFilterProxyModel *proxy = new QSortFilterProxyModel(this);
-
-    if (!model)
-        proxy->setSourceModel (mSettingModel);
-    else
-        proxy->setSourceModel (model);
-
-    proxy->setFilterKeyColumn(column);
-    proxy->setFilterFixedString ("*");
-    proxy->setDynamicSortFilter (true);
-    return proxy;
-}
-
-bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
-{
-    if (filePath.isEmpty())
+    if (filepaths.isEmpty())
         return false;
 
-    QTextStream *stream = openFileStream (filePath, true);
+    bool success = true;
 
-    if (!stream)
-        return false;
+    DefinitionPageMap totalMap;
 
-    QSortFilterProxyModel *sectionFilter = createProxyFilter (1);
-    QSortFilterProxyModel *settingFilter = createProxyFilter (0, sectionFilter);
-
-    //regExp for section names
-    QRegExp sectionRe("^\\[([^]]+)\\]");
-
-    //regExp for setting definitions (name / value pair separated by '=')
-    QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
-
-    QString section = "none";
-
-    while (!stream->atEnd())
+    qDebug() << "loading settings";
+    foreach (const QString &filepath, filepaths)
     {
-        QString line = stream->readLine().simplified();
+        QTextStream *stream = openFilestream (filepath, true);
 
-        //skip if no data or comment found
-        if (line.isEmpty() || line.startsWith("#"))
-            continue;
+        DefinitionPageMap pageMap;
 
-        // parse setting section name and filter model
-        if (sectionRe.exactMatch(line))
-        {
-            //save section name and set filter proxy
-            section = sectionRe.cap(1).simplified();
-            sectionFilter->setFilterFixedString (section);
-            continue;
-        }
+        if (stream)
+            pageMap = readFilestream(stream);
+        else
+            success = success && false;
 
-        // parse setting definition, assuming valid section
-        if ( (keyRe.indexIn(line) != -1) && (section != "none"))
-        {
-            QString settingName = keyRe.cap(1).simplified();
-            QString settingValue = keyRe.cap(2).simplified();
-
-            settingFilter->setFilterFixedString(settingName);
-
-            { // test for missing setting...
-                bool success = (settingFilter->rowCount() != 0);
-
-                if (success)
-                    success = mSettingModel->setDataByName(section, settingName, settingValue);
-
-                if (!success)
-                {
-                    qDebug ("\nUndefined setting found.\n    File: %s\n    Section: %s\n    Definition: %s = %s",
-                            filePath.toStdString().c_str(), section.toStdString().c_str(),
-                            settingName.toStdString().c_str(), settingValue.toStdString().c_str());
-                }
-                else
-                    qDebug ("\nSetting %s value set to %s\n", settingName.toStdString().c_str(), settingValue.toStdString().c_str());
-            }
-         }
+        mergeSettings (totalMap, pageMap, Merge_Overwrite);
     }
-    return true;
+
+    qDebug () << "definitions found:";
+    foreach (DefinitionMap *sMap, totalMap)
+        foreach (QStringList *stng, *sMap)
+            qDebug() << *stng;
+
+    qDebug () << "adding definitions";
+    addDefinitions (totalMap);
+
+    return success;
 }
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
-    //global
-    QString globalFilePath = QString::fromStdString(mCfgMgr.getGlobalPath().string()) + fileName;
-    bool globalOk = loadSettingsFromFile(globalFilePath);
+    QStringList filepaths;
 
+    //global
+    filepaths << QString::fromStdString
+                                (mCfgMgr.getGlobalPath().string()) + fileName;
 
     //local
-    QString localFilePath = QString::fromStdString(mCfgMgr.getLocalPath().string()) + fileName;
-    bool localOk = loadSettingsFromFile(localFilePath);
-
+    filepaths << QString::fromStdString
+                                (mCfgMgr.getLocalPath().string()) + fileName;
     //user
+<<<<<<< HEAD
 
     mUserFilePath = QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName;
     loadSettingsFromFile(mUserFilePath);
 
     if (!(localOk || globalOk))
-    {
-        QString message = QObject::tr("<br><b>Could not open user settings files for reading</b><br><br> \
-                Global and local settings files could not be read.\
-                You may have incorrect file permissions or the OpenCS installation may be corrupted.<br>");
+=======
+    filepaths << QString::fromStdString
+                            (mCfgMgr.getUserConfigPath().string()) + fileName;
 
-        message += QObject::tr("<br>Global filepath: ") + globalFilePath;
-        message += QObject::tr("<br>Local filepath: ") + localFilePath;
+    qDebug () << "load settings";
+    bool success = loadSettingsFromFile (filepaths);
+
+    if (!success)
+>>>>>>> esxSelector
+    {
+        QString message = QObject::tr("<br><b>Could not open user settings \
+                files for reading</b><br><br> Global and local settings files \
+                could not be read.  You may have incorrect file permissions or \
+                the OpenCS installation may be corrupted.<br>");
+
+        message += QObject::tr("<br>Global filepath: ") + filepaths.at(0);
+        message += QObject::tr("<br>Local filepath: ") + filepaths.at(1);
 
         displayFileErrorMessage ( message, true);
     }
+
+    mUserFilePath = filepaths.at (2);
+}
+
+void CSMSettings::UserSettings::saveSettings ()
+{
+   writeFilestream (openFilestream (mUserFilePath, false));
 }
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 {
     assert(mUserSettingsInstance);
     return *mUserSettingsInstance;
-}
-
-void CSMSettings::UserSettings::displayFileErrorMessage(const QString &message, bool isReadOnly)
-{
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(QObject::tr("OpenCS configuration file I/O error"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-
-        if (!isReadOnly)
-            msgBox.setText (mReadWriteMessage + message);
-        else
-            msgBox.setText (message);
-
-        msgBox.exec();
 }
