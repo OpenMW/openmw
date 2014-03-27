@@ -448,7 +448,8 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::setRecord (int index, const Record<ESXRecordT>& record)
     {
-        if (IdAccessorT().getId (mRecords.at (index).get())!=IdAccessorT().getId (record.get()))
+        if (Misc::StringUtils::lowerCase (IdAccessorT().getId (mRecords.at (index).get()))!=
+            Misc::StringUtils::lowerCase (IdAccessorT().getId (record.get())))
             throw std::runtime_error ("attempt to change the ID of a record");
 
         mRecords.at (index) = record;
