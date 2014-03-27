@@ -1305,7 +1305,7 @@ namespace MWWorld
         {
             --mPlayIntro;
             if (mPlayIntro == 0)
-                mRendering->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
+                MWBase::Environment::get().getWindowManager()->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
         }
 
         if (mGoToJail && !paused)
@@ -1774,16 +1774,6 @@ namespace MWWorld
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
     {
         return mRendering->getAnimation(ptr);
-    }
-
-    void World::playVideo (const std::string &name, bool allowSkipping)
-    {
-        mRendering->playVideo(name, allowSkipping);
-    }
-
-    void World::stopVideo ()
-    {
-        mRendering->stopVideo();
     }
 
     void World::frameStarted (float dt, bool paused)

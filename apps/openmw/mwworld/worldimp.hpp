@@ -523,8 +523,6 @@ namespace MWWorld
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr);
 
             /// \todo this does not belong here
-            virtual void playVideo(const std::string& name, bool allowSkipping);
-            virtual void stopVideo();
             virtual void frameStarted (float dt, bool paused);
             virtual void screenshot (Ogre::Image& image, int w, int h);
 

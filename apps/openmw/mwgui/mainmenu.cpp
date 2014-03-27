@@ -90,7 +90,7 @@ namespace MWGui
         else if (name == "options")
             MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
         else if (name == "credits")
-            MWBase::Environment::get().getWorld()->playVideo("mw_credits.bik", true);
+            MWBase::Environment::get().getWindowManager()->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
         {
             if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)

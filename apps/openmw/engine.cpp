@@ -456,7 +456,7 @@ void OMW::Engine::go()
             // TODO: there are other intro videos, too. They need to be imported from Morrowind.ini.
             // Unfortunately those must play BEFORE any loading is done, which will currently not work.
             // The videoplayer is created by World, so all content files must be loaded first...
-            MWBase::Environment::get().getWorld()->playVideo("mw_logo.bik", true);
+            MWBase::Environment::get().getWindowManager()->playVideo("mw_logo.bik", true);
         }
         catch (...) {}
     }

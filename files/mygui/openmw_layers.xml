@@ -9,5 +9,6 @@
     <Layer name="Popup" overlapped="true" peek="true"/>
     <Layer name="DragAndDrop" overlapped="false" peek="false"/>
     <Layer name="LoadingScreen" overlapped="false" peek="true"/>
+    <Layer name="Overlay" overlapped="false" peek="false"/>
     <Layer name="Pointer" overlapped="false" peek="false"/>
 </MyGUI>
