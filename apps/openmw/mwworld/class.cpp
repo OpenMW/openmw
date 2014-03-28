@@ -396,4 +396,6 @@ namespace MWWorld
     void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
 
     void Class::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const {}
+
+    int Class::getBaseGold(const MWWorld::Ptr& ptr) const {}
 }

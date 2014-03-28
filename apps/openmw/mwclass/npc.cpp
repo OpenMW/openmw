@@ -367,7 +367,7 @@ namespace MWClass
 
             // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
             // (except for gold you gave him)
-            getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, gold, ptr);
+            //getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, gold, ptr);
 
             getInventoryStore(ptr).autoEquip(ptr);
 
@@ -1292,6 +1292,15 @@ namespace MWClass
         customData.mInventoryStore.writeState (state2.mInventory);
         customData.mNpcStats.writeState (state2.mNpcStats);
         static_cast<const MWMechanics::CreatureStats&> (customData.mNpcStats).writeState (state2.mCreatureStats);
+    }
+
+    int Npc::getBaseGold(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+            return ref->mBase->mNpdt52.mGold;
+        else
+            return ref->mBase->mNpdt12.mGold;
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;
