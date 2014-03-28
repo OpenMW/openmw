@@ -484,11 +484,7 @@ namespace MWGui
         // if time stamp longer than gold reset delay, reset gold.
         if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getTradeTime() + delay)
         {
-            // reset gold to the base gold
-            if ( mPtr.getClass().isNpc() )
-                sellerStats.setGoldPool(mPtr.get<ESM::NPC>()->mBase->mNpdt52.mGold);
-            else 
-                sellerStats.setGoldPool(mPtr.get<ESM::Creature>()->mBase->mData.mGold);
+            sellerStats.setGoldPool(mPtr.getClass().getBaseGold(mPtr));
         }
     }
 

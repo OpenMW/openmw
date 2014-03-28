@@ -811,6 +811,11 @@ namespace MWClass
         customData.mCreatureStats.writeState (state2.mCreatureStats);
     }
 
+    int Creature::getBaseGold(const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Creature>()->mBase->mData.mGold;
+    }
+
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
     const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
     const ESM::GameSetting *Creature::fEncumberedMoveEffect;
