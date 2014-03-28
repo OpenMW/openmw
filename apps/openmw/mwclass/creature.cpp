@@ -136,7 +136,7 @@ namespace MWClass
 
             // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
             // (except for gold you gave him)
-            getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
+            //getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
 
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
                 getInventoryStore(ptr).autoEquip(ptr);   
