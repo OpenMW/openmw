@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layer">
-    <Layer name="Scene" overlapped="false" peek="true"/>
     <Layer name="HUD" overlapped="false" peek="true"/>
+    <Layer name="Menu" overlapped="false" peek="false"/>
     <Layer name="Windows" overlapped="true" peek="true"/>
     <Layer name="Console" overlapped="false" peek="true"/>
     <Layer name="Notification" overlapped="false" peek="false"/>
     <Layer name="Popup" overlapped="true" peek="true"/>
     <Layer name="DragAndDrop" overlapped="false" peek="false"/>
     <Layer name="LoadingScreen" overlapped="false" peek="true"/>
+    <Layer name="Overlay" overlapped="false" peek="true"/>
     <Layer name="Pointer" overlapped="false" peek="false"/>
 </MyGUI>

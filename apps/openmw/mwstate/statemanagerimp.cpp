@@ -156,7 +156,12 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
     profile.mPlayerName = player.getClass().getName (player);
     profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
-    profile.mPlayerClass = player.get<ESM::NPC>()->mBase->mClass;
+
+    std::string classId = player.get<ESM::NPC>()->mBase->mClass;
+    if (world.getStore().get<ESM::Class>().isDynamic(classId))
+        profile.mPlayerClassName = world.getStore().get<ESM::Class>().find(classId)->mName;
+    else
+        profile.mPlayerClassId = classId;
 
     profile.mPlayerCell = world.getCellName();
 

@@ -17,7 +17,6 @@
 
 #include <boost/thread.hpp>
 
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwsound/sound_decoder.hpp"
@@ -126,7 +125,7 @@ struct VideoState {
 
     int stream_open(int stream_index, AVFormatContext *pFormatCtx);
 
-    bool update(Ogre::MaterialPtr &mat, Ogre::Rectangle2D *rect, int screen_width, int screen_height);
+    bool update();
 
     static void video_thread_loop(VideoState *is);
     static void decode_thread_loop(VideoState *is);
@@ -163,6 +162,7 @@ struct VideoState {
     static int OgreResource_Write(void *user_data, uint8_t *buf, int buf_size);
     static int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence);
 
+    Ogre::TexturePtr mTexture;
 
     Ogre::DataStreamPtr stream;
     AVFormatContext* format_ctx;
@@ -599,22 +599,17 @@ void VideoState::video_display()
 
     if((*this->video_st)->codec->width != 0 && (*this->video_st)->codec->height != 0)
     {
-        Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("VideoTexture");
-        if(texture.isNull() || static_cast<int>(texture->getWidth()) != (*this->video_st)->codec->width
-                            || static_cast<int>(texture->getHeight()) != (*this->video_st)->codec->height)
+
+        if(static_cast<int>(mTexture->getWidth()) != (*this->video_st)->codec->width ||
+           static_cast<int>(mTexture->getHeight()) != (*this->video_st)->codec->height)
         {
-            Ogre::TextureManager::getSingleton ().remove ("VideoTexture");
-            texture = Ogre::TextureManager::getSingleton().createManual(
-                                    "VideoTexture",
-                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                    Ogre::TEX_TYPE_2D,
-                                    (*this->video_st)->codec->width, (*this->video_st)->codec->height,
-                                    0,
-                                    Ogre::PF_BYTE_RGBA,
-                                    Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+            mTexture->unload();
+            mTexture->setWidth((*this->video_st)->codec->width);
+            mTexture->setHeight((*this->video_st)->codec->height);
+            mTexture->createInternalResources();
         }
         Ogre::PixelBox pb((*this->video_st)->codec->width, (*this->video_st)->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
-        Ogre::HardwarePixelBufferSharedPtr buffer = texture->getBuffer();
+        Ogre::HardwarePixelBufferSharedPtr buffer = mTexture->getBuffer();
         buffer->blitFromMemory(pb);
         this->display_ready = true;
     }
@@ -851,7 +846,7 @@ void VideoState::decode_thread_loop(VideoState *self)
 }
 
 
-bool VideoState::update(Ogre::MaterialPtr &mat, Ogre::Rectangle2D *rect, int screen_width, int screen_height)
+bool VideoState::update()
 {
     if(this->quit)
         return false;
@@ -860,21 +855,6 @@ bool VideoState::update(Ogre::MaterialPtr &mat, Ogre::Rectangle2D *rect, int scr
     {
         this->refresh = false;
         this->video_refresh_timer();
-        // Would be nice not to do this all the time...
-        if(this->display_ready)
-            mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("VideoTexture");
-
-        // Correct aspect ratio by adding black bars
-        double videoaspect = av_q2d((*this->video_st)->codec->sample_aspect_ratio);
-        if(videoaspect == 0.0)
-            videoaspect = 1.0;
-        videoaspect *= static_cast<double>((*this->video_st)->codec->width) / (*this->video_st)->codec->height;
-
-        double screenaspect = static_cast<double>(screen_width) / screen_height;
-        double aspect_correction = videoaspect / screenaspect;
-
-        rect->setCorners(std::max(-1.0, -1.0 * aspect_correction), std::min( 1.0,  1.0 / aspect_correction),
-                         std::min( 1.0,  1.0 * aspect_correction), std::max(-1.0, -1.0 / aspect_correction));
     }
     return true;
 }
@@ -994,11 +974,35 @@ void VideoState::init(const std::string& resourceName)
             audio_index = i;
     }
 
+    if (audio_index != -1)
+        MWBase::Environment::get().getSoundManager()->pauseSounds();
+
     this->external_clock_base = av_gettime();
     if(audio_index >= 0)
         this->stream_open(audio_index, this->format_ctx);
     if(video_index >= 0)
+    {
         this->stream_open(video_index, this->format_ctx);
+
+        int width = (*this->video_st)->codec->width;
+        int height = (*this->video_st)->codec->height;
+        static int i = 0;
+        this->mTexture = Ogre::TextureManager::getSingleton().createManual(
+                        "OpenMW/VideoTexture" + Ogre::StringConverter::toString(++i),
+                                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                Ogre::TEX_TYPE_2D,
+                                width, height, // TEST
+                                0,
+                                Ogre::PF_BYTE_RGBA,
+                                Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+
+        // initialize to (0,0,0,0)
+        std::vector<Ogre::uint32> buffer;
+        buffer.resize(width * height, 0);
+        Ogre::PixelBox pb(width, height, 1, Ogre::PF_BYTE_RGBA, &buffer[0]);
+        this->mTexture->getBuffer()->blitFromMemory(pb);
+    }
+
 
     this->parse_thread = boost::thread(decode_thread_loop, this);
 }
@@ -1070,113 +1074,26 @@ public:
 #endif // defined OPENMW_USE_FFMPEG
 
 
-VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* window)
+VideoPlayer::VideoPlayer()
     : mState(NULL)
-    , mSceneMgr(sceneMgr)
-    , mRectangle(NULL)
-    , mNode(NULL)
-    , mAllowSkipping(false)
-    , mWindow(window)
-    , mWidth(0)
-    , mHeight(0)
 {
-    mVideoMaterial = Ogre::MaterialManager::getSingleton().getByName("VideoMaterial", "General");
-    if (mVideoMaterial.isNull ())
-    {
-        mVideoMaterial = Ogre::MaterialManager::getSingleton().create("VideoMaterial", "General");
-        mVideoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-        mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-        mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-        mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState();
-        mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
-            }
-    mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 
-    Ogre::MaterialPtr blackMaterial = Ogre::MaterialManager::getSingleton().getByName("BlackBarsMaterial", "General");
-    if (blackMaterial.isNull ())
-    {
-        blackMaterial = Ogre::MaterialManager::getSingleton().create("BlackBarsMaterial", "General");
-        blackMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-        blackMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-        blackMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-        blackMaterial->getTechnique(0)->getPass(0)->createTextureUnitState()->setTextureName("black.png");
-    }
-
-    mRectangle = new Ogre::Rectangle2D(true);
-    mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
-    mRectangle->setMaterial("VideoMaterial");
-    mRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY+2);
-    mBackgroundRectangle = new Ogre::Rectangle2D(true);
-    mBackgroundRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
-    mBackgroundRectangle->setMaterial("BlackBarsMaterial");
-    mBackgroundRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY+1);
-
-    // Use infinite AAB to always stay visible
-    Ogre::AxisAlignedBox aabInf;
-    aabInf.setInfinite();
-    mRectangle->setBoundingBox(aabInf);
-    mBackgroundRectangle->setBoundingBox(aabInf);
-
-    // Attach background to the scene
-    mNode = sceneMgr->getRootSceneNode()->createChildSceneNode();
-    mNode->attachObject(mRectangle);
-    mBackgroundNode = sceneMgr->getRootSceneNode()->createChildSceneNode();
-    mBackgroundNode->attachObject(mBackgroundRectangle);
-
-    mRectangle->setVisible(false);
-    mRectangle->setVisibilityFlags(RV_Overlay);
-    mBackgroundRectangle->setVisible(false);
-    mBackgroundRectangle->setVisibilityFlags(RV_Overlay);
 }
 
 VideoPlayer::~VideoPlayer()
 {
     if(mState)
         close();
-
-    mSceneMgr->destroySceneNode(mNode);
-    mSceneMgr->destroySceneNode(mBackgroundNode);
-
-    delete mRectangle;
-    delete mBackgroundRectangle;
 }
 
-void VideoPlayer::playVideo(const std::string &resourceName, bool allowSkipping)
+void VideoPlayer::playVideo(const std::string &resourceName)
 {
-    mAllowSkipping = allowSkipping;
-
     if(mState)
         close();
-
-    mRectangle->setVisible(true);
-    mBackgroundRectangle->setVisible(true);
-    mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
-
-    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Video);
-
-    // Turn off rendering except the GUI
-    mSceneMgr->clearSpecialCaseRenderQueues();
-    // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
-    for(int i = 0;i < Ogre::RENDER_QUEUE_MAX;++i)
-    {
-        if(i > 0 && i < 96)
-            mSceneMgr->addSpecialCaseRenderQueue(i);
-    }
-    mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-
-    MWBase::Environment::get().getSoundManager()->pauseSounds();
 
     try {
         mState = new VideoState;
         mState->init(resourceName);
-
-        while (isPlaying())
-        {
-            MWBase::Environment::get().getInputManager()->update(0, false);
-            update();
-            mWindow->update();
-        }
-
     }
     catch(std::exception& e) {
         std::cerr<< "Failed to play video: "<<e.what() <<std::endl;
@@ -1188,15 +1105,38 @@ void VideoPlayer::update ()
 {
     if(mState)
     {
-        if(!mState->update(mVideoMaterial, mRectangle, mWidth, mHeight))
+        if(!mState->update())
             close();
     }
 }
 
+std::string VideoPlayer::getTextureName()
+{
+    std::string name;
+    if (mState)
+        name = mState->mTexture->getName();
+    return name;
+}
+
+int VideoPlayer::getVideoWidth()
+{
+    int width=0;
+    if (mState)
+        width = mState->mTexture->getWidth();
+    return width;
+}
+
+int VideoPlayer::getVideoHeight()
+{
+    int height=0;
+    if (mState)
+        height = mState->mTexture->getHeight();
+    return height;
+}
+
 void VideoPlayer::stopVideo ()
 {
-    if (mAllowSkipping)
-        close();
+    close();
 }
 
 void VideoPlayer::close()
@@ -1210,13 +1150,6 @@ void VideoPlayer::close()
     }
 
     MWBase::Environment::get().getSoundManager()->resumeSounds();
-
-    mRectangle->setVisible(false);
-    mBackgroundRectangle->setVisible(false);
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Video);
-
-    mSceneMgr->clearSpecialCaseRenderQueues();
-    mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
 }
 
 bool VideoPlayer::isPlaying ()

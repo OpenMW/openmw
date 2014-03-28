@@ -43,7 +43,6 @@
 #include "water.hpp"
 #include "npcanimation.hpp"
 #include "globalmap.hpp"
-#include "videoplayer.hpp"
 #include "terrainstorage.hpp"
 #include "effectmanager.hpp"
 
@@ -171,9 +170,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
-    mVideoPlayer = new VideoPlayer(mRendering.getScene (), mRendering.getWindow());
-    mVideoPlayer->setResolution (Settings::Manager::getInt ("resolution x", "Video"), Settings::Manager::getInt ("resolution y", "Video"));
-
     mSun = 0;
 
     mDebugging = new Debugging(mRootNode, engine);
@@ -197,7 +193,6 @@ RenderingManager::~RenderingManager ()
     delete mLocalMap;
     delete mOcclusionQuery;
     delete mWater;
-    delete mVideoPlayer;
     delete mActors;
     delete mObjects;
     delete mEffectManager;
@@ -333,8 +328,6 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
 
 void RenderingManager::update (float duration, bool paused)
 {
-    mVideoPlayer->update ();
-
     if (MWBase::Environment::get().getStateManager()->getState()==
         MWBase::StateManager::State_NoGame)
         return;
@@ -884,8 +877,6 @@ void RenderingManager::windowResized(int x, int y)
     Settings::Manager::setInt("resolution y", "Video", y);
     mRendering.adjustViewport();
 
-    mVideoPlayer->setResolution (x, y);
-
     MWBase::Environment::get().getWindowManager()->windowResized(x,y);
 }
 
@@ -999,16 +990,6 @@ void RenderingManager::screenshot(Image &image, int w, int h)
 
     Ogre::TextureManager::getSingleton().remove(tempName);
     mRendering.getCamera()->setAspectRatio(oldAspect);
-}
-
-void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
-{
-    mVideoPlayer->playVideo ("video/" + name, allowSkipping);
-}
-
-void RenderingManager::stopVideo()
-{
-    mVideoPlayer->stopVideo ();
 }
 
 void RenderingManager::addWaterRippleEmitter (const MWWorld::Ptr& ptr, float scale, float force)
