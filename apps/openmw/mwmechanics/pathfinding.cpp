@@ -247,7 +247,7 @@ namespace MWMechanics
         mSCCStack.push_back(v);
         int w;
 
-        for(int i = 0; i < mGraph[v].edges.size(); i++)
+        for(int i = 0; i < static_cast<int> (mGraph[v].edges.size()); i++)
         {
             w = mGraph[v].edges[i].destination;
             if(mSCCPoint[w].first == -1) // not visited
