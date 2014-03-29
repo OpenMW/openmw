@@ -5,6 +5,7 @@
 #include <OgreStringConverter.h>
 #include <OgreRenderSystem.h>
 #include <OgreResourceGroupManager.h>
+#include <OgreResourceBackgroundQueue.h>
 #include <OgreRoot.h>
 
 #include <boost/algorithm/string.hpp>
@@ -12,6 +13,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
+
+#include <components/terrain/quadtreenode.hpp>
 
 namespace MWRender
 {
@@ -46,10 +49,6 @@ namespace MWRender
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
         ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
-        // Load the data we are definitely going to need
-        int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
-        if (land && !land->isDataLoaded(mask))
-            land->loadData(mask);
         return land;
     }
 
@@ -167,10 +166,10 @@ namespace MWRender
 
     }
 
-    void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center,
-                            Ogre::HardwareVertexBufferSharedPtr vertexBuffer,
-                            Ogre::HardwareVertexBufferSharedPtr normalBuffer,
-                            Ogre::HardwareVertexBufferSharedPtr colourBuffer)
+    void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center, Terrain::Alignment align,
+                                            std::vector<float>& positions,
+                                            std::vector<float>& normals,
+                                            std::vector<Ogre::uint8>& colours)
     {
         // LOD level n means every 2^n-th vertex is kept
         size_t increment = 1 << lodLevel;
@@ -184,11 +183,8 @@ namespace MWRender
 
         size_t numVerts = size*(ESM::Land::LAND_SIZE-1)/increment + 1;
 
-        std::vector<uint8_t> colors;
-        colors.resize(numVerts*numVerts*4);
-        std::vector<float> positions;
+        colours.resize(numVerts*numVerts*4);
         positions.resize(numVerts*numVerts*3);
-        std::vector<float> normals;
         normals.resize(numVerts*numVerts*3);
 
         Ogre::Vector3 normal;
@@ -274,7 +270,7 @@ namespace MWRender
                         color.a = 1;
                         Ogre::uint32 rsColor;
                         Ogre::Root::getSingleton().getRenderSystem()->convertColourValue(color, &rsColor);
-                        memcpy(&colors[vertX*numVerts*4 + vertY*4], &rsColor, sizeof(Ogre::uint32));
+                        memcpy(&colours[vertX*numVerts*4 + vertY*4], &rsColor, sizeof(Ogre::uint32));
 
                         ++vertX;
                     }
@@ -287,10 +283,6 @@ namespace MWRender
             assert(vertX_ == numVerts); // Ensure we covered whole area
         }
         assert(vertY_ == numVerts);  // Ensure we covered whole area
-
-        vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), &positions[0], true);
-        normalBuffer->writeData(0, normalBuffer->getSizeInBytes(), &normals[0], true);
-        colourBuffer->writeData(0, colourBuffer->getSizeInBytes(), &colors[0], true);
     }
 
     TerrainStorage::UniqueTextureId TerrainStorage::getVtexIndexAt(int cellX, int cellY,
@@ -316,9 +308,6 @@ namespace MWRender
         ESM::Land* land = getLand(cellX, cellY);
         if (land)
         {
-            if (!land->isDataLoaded(ESM::Land::DATA_VTEX))
-                land->loadData(ESM::Land::DATA_VTEX);
-
             int tex = land->mLandData->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
             if (tex == 0)
                 return std::make_pair(0,0); // vtex 0 is always the base texture, regardless of plugin
@@ -343,8 +332,24 @@ namespace MWRender
         return texture;
     }
 
+    void TerrainStorage::getBlendmaps (const std::vector<Terrain::QuadTreeNode*>& nodes, std::vector<Terrain::LayerCollection>& out, bool pack)
+    {
+        for (std::vector<Terrain::QuadTreeNode*>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+        {
+            out.push_back(Terrain::LayerCollection());
+            out.back().mTarget = *it;
+            getBlendmapsImpl((*it)->getSize(), (*it)->getCenter(), pack, out.back().mBlendmaps, out.back().mLayers);
+        }
+    }
+
     void TerrainStorage::getBlendmaps(float chunkSize, const Ogre::Vector2 &chunkCenter,
-        bool pack, std::vector<Ogre::TexturePtr> &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
+        bool pack, std::vector<Ogre::PixelBox> &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
+    {
+        getBlendmapsImpl(chunkSize, chunkCenter, pack, blendmaps, layerList);
+    }
+
+    void TerrainStorage::getBlendmapsImpl(float chunkSize, const Ogre::Vector2 &chunkCenter,
+        bool pack, std::vector<Ogre::PixelBox> &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
     {
         // TODO - blending isn't completely right yet; the blending radius appears to be
         // different at a cell transition (2 vertices, not 4), so we may need to create a larger blendmap
@@ -389,16 +394,14 @@ namespace MWRender
 
         // Second iteration - create and fill in the blend maps
         const int blendmapSize = ESM::Land::LAND_TEXTURE_SIZE+1;
-        std::vector<Ogre::uchar> data;
-        data.resize(blendmapSize * blendmapSize * channels, 0);
 
         for (int i=0; i<numBlendmaps; ++i)
         {
             Ogre::PixelFormat format = pack ? Ogre::PF_A8B8G8R8 : Ogre::PF_A8;
-            static int count=0;
-            Ogre::TexturePtr map = Ogre::TextureManager::getSingleton().createManual("terrain/blend/"
-                + Ogre::StringConverter::toString(count++), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-               Ogre::TEX_TYPE_2D, blendmapSize, blendmapSize, 0, format);
+
+            Ogre::uchar* pData =
+                            OGRE_ALLOC_T(Ogre::uchar, blendmapSize*blendmapSize*channels, Ogre::MEMCATEGORY_GENERAL);
+            memset(pData, 0, blendmapSize*blendmapSize*channels);
 
             for (int y=0; y<blendmapSize; ++y)
             {
@@ -410,16 +413,12 @@ namespace MWRender
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
                     if (blendIndex == i)
-                        data[y*blendmapSize*channels + x*channels + channel] = 255;
+                        pData[y*blendmapSize*channels + x*channels + channel] = 255;
                     else
-                        data[y*blendmapSize*channels + x*channels + channel] = 0;
+                        pData[y*blendmapSize*channels + x*channels + channel] = 0;
                 }
             }
-
-            // All done, upload to GPU
-            Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
-            map->loadRawData(stream, blendmapSize, blendmapSize, format);
-            blendmaps.push_back(map);
+            blendmaps.push_back(Ogre::PixelBox(blendmapSize, blendmapSize, 1, format, pData));
         }
     }
 
@@ -540,6 +539,12 @@ namespace MWRender
             info.mDiffuseMap = "textures\\" + texture_;
             info.mSpecular = true;
         }
+
+        // This wasn't cached, so the textures are probably not loaded either.
+        // Background load them so they are hopefully already loaded once we need them!
+        Ogre::ResourceBackgroundQueue::getSingleton().load("Texture", info.mDiffuseMap, "General");
+        if (!info.mNormalMap.empty())
+            Ogre::ResourceBackgroundQueue::getSingleton().load("Texture", info.mNormalMap, "General");
 
         mLayerInfoMap[texture] = info;
 

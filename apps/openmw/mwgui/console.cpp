@@ -8,6 +8,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwworld/esmstore.hpp"
+
 namespace MWGui
 {
     class ConsoleInterpreterContext : public MWScript::InterpreterContext

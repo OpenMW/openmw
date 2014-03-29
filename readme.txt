@@ -3,12 +3,11 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.28.0
+Version: 0.29.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
 Font Licenses:
-EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
 DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
 
 
@@ -133,6 +132,7 @@ Bug #1158: Armor rating should always stay below inventory mannequin
 Bug #1159: Quick keys can be set during character generation
 Bug #1160: Crash on equip lockpick when
 Bug #1167: Editor: Referenceables are not correctly loaded when dealing with more than one content file
+Bug #1184: Game Save: overwriting an existing save does not actually overwrites the file
 Feature #30: Loading/Saving (still missing a few parts)
 Feature #101: AI Package: Activate
 Feature #103: AI Package: Follow, FollowCell

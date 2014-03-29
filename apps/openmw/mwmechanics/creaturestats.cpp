@@ -476,4 +476,24 @@ namespace MWMechanics
         for (int i=0; i<3; ++i)
             mDynamic[i].readState (state.mDynamic[i]);
     }
+
+    // Relates to NPC gold reset delay
+    void CreatureStats::setTradeTime(MWWorld::TimeStamp tradeTime) 
+    {
+        mTradeTime = tradeTime;
+    }
+
+    MWWorld::TimeStamp CreatureStats::getTradeTime() const
+    {
+        return mTradeTime;
+    }
+
+    void CreatureStats::setGoldPool(int pool) 
+    {
+        mGoldPool = pool;
+    }
+    int CreatureStats::getGoldPool() const 
+    {
+        return mGoldPool;
+    }
 }

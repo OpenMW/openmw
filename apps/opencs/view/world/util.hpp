@@ -5,10 +5,18 @@
 
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
+#include <QLineEdit>
 
 #include "../../model/world/columnbase.hpp"
+#include "../../model/doc/document.hpp"
 
 class QUndoStack;
+
+namespace CSMWorld
+{
+    class TableMimeData;
+    class UniversalId;
+}
 
 namespace CSVWorld
 {
@@ -79,6 +87,24 @@ namespace CSVWorld
 
     };
 
+    class DropLineEdit : public QLineEdit
+    {
+        Q_OBJECT
+
+        public:
+            DropLineEdit(QWidget *parent);
+
+        private:
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dragMoveEvent(QDragMoveEvent *event);
+
+            void dropEvent(QDropEvent *event);
+
+        signals:
+            void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document);
+    };
+
     ///< \brief Use commands instead of manipulating the model directly
     class CommandDelegate : public QStyledItemDelegate
     {
@@ -101,8 +127,10 @@ namespace CSVWorld
             virtual void setModelData (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;
 
-            virtual QWidget *createEditor (QWidget *parent, const QStyleOptionViewItem& option,
-                const QModelIndex& index) const;
+            virtual QWidget *createEditor (QWidget *parent,
+                                           const QStyleOptionViewItem& option,
+                                           const QModelIndex& index,
+                                           CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
 
             void setEditLock (bool locked);
 
@@ -110,6 +138,9 @@ namespace CSVWorld
 
             virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
             ///< \return Does column require update?
+
+            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
+
 
         private slots:
 

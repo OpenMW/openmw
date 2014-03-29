@@ -24,7 +24,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this), 0);
 
     layout->insertWidget (0, mTable =
-        new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete(), sorting, document), 2);
+        new Table (id, mBottom->canCreateAndDelete(), sorting, document), 2);
 
     CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (document.getData(), this);
 
@@ -36,7 +36,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     setWidget (widget);
 
-    connect (mTable, SIGNAL (editRequest (int)), this, SLOT (editRequest (int)));
+    connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
+        this, SLOT (editRequest (const CSMWorld::UniversalId&, const std::string&)));
 
     connect (mTable, SIGNAL (selectionSizeChanged (int)),
         mBottom, SLOT (selectionSizeChanged (int)));
@@ -81,9 +82,9 @@ void CSVWorld::TableSubView::setEditLock (bool locked)
     mBottom->setEditLock (locked);
 }
 
-void CSVWorld::TableSubView::editRequest (int row)
+void CSVWorld::TableSubView::editRequest (const CSMWorld::UniversalId& id, const std::string& hint)
 {
-    focusId (mTable->getUniversalId (row));
+    focusId (id, hint);
 }
 
 void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)

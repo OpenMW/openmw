@@ -385,7 +385,7 @@ namespace ICS
 					{
 						ctrl->setIgnoreAutoReverse(true);
 
-						float axisRange = SDL_JOY_AXIS_MAX - SDL_JOY_AXIS_MAX;
+						float axisRange = SDL_JOY_AXIS_MAX - SDL_JOY_AXIS_MIN;
 						float valDisplaced = (float)(evt.value - SDL_JOY_AXIS_MIN);
 
 						if(joystickBinderItem.direction == Control::INCREASE)

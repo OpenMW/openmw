@@ -363,7 +363,22 @@ namespace MWWorld
         return newPtr;
     }
 
-    bool Class::isFlying(const Ptr &ptr) const
+    bool Class::isBipedal(const Ptr &ptr) const
+    {
+        return false;
+    }
+
+    bool Class::canFly(const Ptr &ptr) const
+    {
+        return false;
+    }
+
+    bool Class::canSwim(const Ptr &ptr) const
+    {
+        return false;
+    }
+
+    bool Class::canWalk(const Ptr &ptr) const
     {
         return false;
     }
@@ -381,4 +396,9 @@ namespace MWWorld
     void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
 
     void Class::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const {}
+
+    int Class::getBaseGold(const MWWorld::Ptr& ptr) const 
+    {
+        throw std::runtime_error("class does not support base gold");
+    }
 }

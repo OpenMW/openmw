@@ -36,6 +36,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace
 {
@@ -312,6 +313,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
         mAnimation->disable(mCurrentMovement);
         mCurrentMovement = movement;
+        mMovementAnimVelocity = 0.0f;
         if(!mCurrentMovement.empty())
         {
             float vel, speedmult = 1.0f;
@@ -319,7 +321,10 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
+            {
+                mMovementAnimVelocity = vel;
                 speedmult = mMovementSpeed / vel;
+            }
             else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
                 speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
             else if (mMovementSpeed > 0.0f)
@@ -329,10 +334,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
-
-            mMovementAnimVelocity = vel;
         }
-        else mMovementAnimVelocity = 0.0f;
     }
 }
 
@@ -411,6 +413,16 @@ void CharacterController::playRandomDeath(float startpoint)
     {
         mDeathState = CharState_SwimDeath;
         mCurrentDeath = "swimdeath";
+    }
+    else if (mHitState == CharState_KnockDown)
+    {
+        mDeathState = CharState_DeathKnockDown;
+        mCurrentDeath = "deathknockdown";
+    }
+    else if (mHitState == CharState_KnockOut)
+    {
+        mDeathState = CharState_DeathKnockOut;
+        mCurrentDeath = "deathknockout";
     }
     else
     {
@@ -562,7 +574,7 @@ bool CharacterController::updateWeaponState()
             getWeaponGroup(weaptype, weapgroup);
             mAnimation->showWeapons(false);
             mAnimation->setWeaponGroup(weapgroup);
-            
+
             mAnimation->play(weapgroup, Priority_Weapon,
                              MWRender::Animation::Group_UpperBody, true,
                              1.0f, "equip start", "equip stop", 0.0f, 0);
@@ -751,7 +763,7 @@ bool CharacterController::updateWeaponState()
                                  MWRender::Animation::Group_UpperBody, false,
                                  weapSpeed, mAttackType+" start", mAttackType+" min attack",
                                  0.0f, 0);
-                mUpperBodyState = UpperCharState_StartToMinAttack;   
+                mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }
 
@@ -855,7 +867,7 @@ bool CharacterController::updateWeaponState()
 
             mUpperBodyState = UpperCharState_WeapEquiped;
             //don't allow to continue playing hit animation on UpperBody after actor had attacked during it
-            if(mHitState == CharState_Hit) 
+            if(mHitState == CharState_Hit)
             {
                 mAnimation->changeGroups(mCurrentHit, MWRender::Animation::Group_LowerBody);
                 //commenting out following 2 lines will give a bit different combat dynamics(slower)
@@ -932,7 +944,7 @@ bool CharacterController::updateWeaponState()
                                  weapSpeed, start, stop, 0.0f, 0);
         }
     }
-    
+
      //if playing combat animation and lowerbody is not busy switch to whole body animation
     if((weaptype != WeapType_None || UpperCharState_UnEquipingWeap) && animPlaying)
     {
@@ -1193,7 +1205,10 @@ void CharacterController::update(float duration)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
             }
-            else if(rot.z != 0.0f && !inwater && !sneak)
+            // Don't play turning animations during attack. It would break positioning of the arrow bone when releasing a shot.
+            // Actually, in vanilla the turning animation is not even played when merely having equipped the weapon,
+            // but I don't think we need to go as far as that.
+            else if(rot.z != 0.0f && !inwater && !sneak && mUpperBodyState < UpperCharState_StartToMinAttack)
             {
                 if(rot.z > 0.0f)
                     movestate = CharState_TurnRight;
@@ -1240,12 +1255,8 @@ void CharacterController::update(float duration)
             else //avoid z-rotating for knockdown
                 world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
 
-            // always control actual movement by animation unless this:
-            // FIXME: actor falling/landing should be controlled by physics engine
-            if(mMovementAnimVelocity == 0.0f && (vec.length() > 0.0f || mJumpState != JumpState_None))
-            {
+            if (mMovementAnimVelocity == 0)
                 world->queueMovement(mPtr, vec);
-            }
         }
 
         movement = vec;
@@ -1285,7 +1296,7 @@ void CharacterController::update(float duration)
         }
 
         // Update movement
-        if(moved.squaredLength() > 1.0f)
+        if(mMovementAnimVelocity > 0)
             world->queueMovement(mPtr, moved);
     }
     mSkipAnim = false;
@@ -1431,7 +1442,7 @@ void CharacterController::updateVisibility()
 void CharacterController::determineAttackType()
 {
     float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
-    
+
     if(mPtr.getClass().hasInventoryStore(mPtr))
     {
         if (move[0] && !move[1]) //sideway

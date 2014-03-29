@@ -8,8 +8,9 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -110,7 +111,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 
     // check cell
     if (!info.mCell.empty())
-        if (!Misc::StringUtils::ciEqual(player.getCell()->mCell->mName, info.mCell))
+        if (!Misc::StringUtils::ciEqual(player.getCell()->getCell()->mName, info.mCell))
             return false;
 
     return true;
@@ -445,7 +446,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotCell:
 
-            return !Misc::StringUtils::ciEqual(mActor.getCell()->mCell->mName, select.getName());
+            return !Misc::StringUtils::ciEqual(mActor.getCell()->getCell()->mName, select.getName());
 
         case SelectWrapper::Function_NotLocal:
         {

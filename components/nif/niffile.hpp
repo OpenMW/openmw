@@ -42,7 +42,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/detail/endian.hpp>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 #include "record.hpp"
 #include "niftypes.hpp"

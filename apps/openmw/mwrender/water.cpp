@@ -1,11 +1,16 @@
 #include "water.hpp"
 
-#include <OgreRenderTarget.h>
+#include <OgreRenderTexture.h>
 #include <OgreEntity.h>
 #include <OgreMeshManager.h>
+#include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
 #include <OgreCamera.h>
+#include <OgreTextureManager.h>
+#include <OgreViewport.h>
+#include <OgreSceneNode.h>
+#include <OgreTechnique.h>
 
 #include "sky.hpp"
 #include "renderingmanager.hpp"
@@ -413,10 +418,8 @@ void Water::applyRTT()
 void Water::applyVisibilityMask()
 {
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
-                        + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
-                        + RV_StaticsSmall * Settings::Manager::getBool("reflect small statics", "Water")
+                        + (RV_Statics + RV_StaticsSmall + RV_Misc) * Settings::Manager::getBool("reflect statics", "Water")
                         + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
-                        + RV_Misc * Settings::Manager::getBool("reflect misc", "Water")
                         + RV_Sky;
 
     if (mReflection)
@@ -439,8 +442,6 @@ void Water::processChangedSettings(const Settings::CategorySettingVector& settin
         if ( it->first == "Water" && (
                it->second == "reflect actors"
             || it->second == "reflect terrain"
-            || it->second == "reflect misc"
-            || it->second == "reflect small statics"
             || it->second == "reflect statics"))
             applyVisMask = true;
     }

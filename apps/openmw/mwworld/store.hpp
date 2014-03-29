@@ -157,6 +157,14 @@ namespace MWWorld
             return 0;
         }
 
+        /**
+         * Does the record with this ID come from the dynamic store?
+         */
+        bool isDynamic(const std::string &id) const {
+            typename Dynamic::const_iterator dit = mDynamic.find(id);
+            return (dit != mDynamic.end());
+        }
+
         /** Returns a random record that starts with the named ID, or NULL if not found. */
         const T *searchRandom(const std::string &id) const
         {
@@ -388,6 +396,8 @@ namespace MWWorld
 
         typedef std::vector<ESM::LandTexture>::const_iterator iterator;
 
+        // Must be threadsafe! Called from terrain background loading threads.
+        // Not a big deal here, since ESM::LandTexture can never be modified or inserted/erased
         const ESM::LandTexture *search(size_t index, size_t plugin) const {
             assert(plugin < mStatic.size());
             const LandTextureList &ltexl = mStatic[plugin];
@@ -487,6 +497,8 @@ namespace MWWorld
             return iterator(mStatic.end());
         }
 
+        // Must be threadsafe! Called from terrain background loading threads.
+        // Not a big deal here, since ESM::Land can never be modified or inserted/erased
         ESM::Land *search(int x, int y) const {
             ESM::Land land;
             land.mX = x, land.mY = y;

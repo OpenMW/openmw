@@ -14,6 +14,7 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -503,7 +504,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
                 if (markedCell)
                 {
-                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->mCell->mName,
+                    MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName,
                                             markedPosition);
                     action.execute(target);
                 }
@@ -586,7 +587,7 @@ namespace MWMechanics
                 inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
         }
 
-        MWBase::Environment::get().getWorld()->launchProjectile(mId, false, enchantment->mEffects, mCaster, mSourceName);
+        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, false, enchantment->mEffects, mCaster, mSourceName);
 
         return true;
     }
@@ -665,7 +666,7 @@ namespace MWMechanics
             }
         }
 
-        MWBase::Environment::get().getWorld()->launchProjectile(mId, false, spell->mEffects, mCaster, mSourceName);
+        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, false, spell->mEffects, mCaster, mSourceName);
         return true;
     }
 

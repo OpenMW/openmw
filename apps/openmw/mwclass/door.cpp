@@ -258,6 +258,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        return MWWorld::Ptr(&cell.mDoors.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Door>().insert(*ref), &cell);
     }
 }

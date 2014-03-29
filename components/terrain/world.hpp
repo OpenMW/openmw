@@ -1,15 +1,12 @@
 #ifndef COMPONENTS_TERRAIN_H
 #define COMPONENTS_TERRAIN_H
 
-#include <OgreHardwareIndexBuffer.h>
-#include <OgreHardwareVertexBuffer.h>
 #include <OgreAxisAlignedBox.h>
 #include <OgreTexture.h>
+#include <OgreWorkQueue.h>
 
-namespace Loading
-{
-    class Listener;
-}
+#include "defs.hpp"
+#include "buffercache.hpp"
 
 namespace Ogre
 {
@@ -29,11 +26,10 @@ namespace Terrain
      *        Cracks at LOD transitions are avoided using stitching.
      * @note  Multiple cameras are not supported yet
      */
-    class World
+    class World : public Ogre::WorkQueue::RequestHandler, public Ogre::WorkQueue::ResponseHandler
     {
     public:
         /// @note takes ownership of \a storage
-        /// @param loadingListener Listener to update with progress
         /// @param sceneMgr scene manager to use
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param visbilityFlags visibility flags for the created meshes
@@ -41,11 +37,12 @@ namespace Terrain
         ///         This is a temporary option until it can be streamlined.
         /// @param shaders Whether to use splatting shader, or multi-pass fixed function splatting. Shader is usually
         ///         faster so this is just here for compatibility.
-        World(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
-                Storage* storage, int visiblityFlags, bool distantLand, bool shaders);
+        /// @param align The align of the terrain, see Alignment enum
+        /// @param minBatchSize Minimum size of a terrain batch along one side (in cell units). Used for building the quad tree.
+        /// @param maxBatchSize Maximum size of a terrain batch along one side (in cell units). Used when traversing the quad tree.
+        World(Ogre::SceneManager* sceneMgr,
+                Storage* storage, int visiblityFlags, bool distantLand, bool shaders, Alignment align, float minBatchSize, float maxBatchSize);
         ~World();
-
-        void setLoadingListener(Loading::Listener* loadingListener) { mLoadingListener = loadingListener; }
 
         bool getDistantLandEnabled() { return mDistantLand; }
         bool getShadersEnabled() { return mShaders; }
@@ -86,20 +83,33 @@ namespace Terrain
 
         void enableSplattingShader(bool enabled);
 
+        Alignment getAlign() { return mAlign; }
+
+        /// Wait until all background loading is complete.
+        void syncLoad();
+
     private:
+        // Called from a background worker thread
+        Ogre::WorkQueue::Response* handleRequest(const Ogre::WorkQueue::Request* req, const Ogre::WorkQueue* srcQ);
+        // Called from the main thread
+        void handleResponse(const Ogre::WorkQueue::Response* res, const Ogre::WorkQueue* srcQ);
+        Ogre::uint16 mWorkQueueChannel;
+
         bool mDistantLand;
         bool mShaders;
         bool mShadows;
         bool mSplitShadows;
         bool mVisible;
-
-        Loading::Listener* mLoadingListener;
+        Alignment mAlign;
 
         QuadTreeNode* mRootNode;
         Ogre::SceneNode* mRootSceneNode;
         Storage* mStorage;
 
         int mVisibilityFlags;
+
+        /// The number of chunks currently loading in a background thread. If 0, we have finished loading!
+        int mChunksLoading;
 
         Ogre::SceneManager* mSceneMgr;
         Ogre::SceneManager* mCompositeMapSceneMgr;
@@ -112,41 +122,70 @@ namespace Terrain
         /// Maximum size of a terrain batch along one side (in cell units)
         float mMaxBatchSize;
 
-        void buildQuadTree(QuadTreeNode* node);
+        void buildQuadTree(QuadTreeNode* node, std::vector<QuadTreeNode*>& leafs);
+
+        BufferCache mCache;
+
+        // Are layers for leaf nodes loaded? This is done once at startup (but in a background thread)
+        bool mLayerLoadPending;
 
     public:
         // ----INTERNAL----
-
-        enum IndexBufferFlags
-        {
-            IBF_North = 1 << 0,
-            IBF_East  = 1 << 1,
-            IBF_South = 1 << 2,
-            IBF_West  = 1 << 3
-        };
-
-        /// @param flags first 4*4 bits are LOD deltas on each edge, respectively (4 bits each)
-        ///              next 4 bits are LOD level of the index buffer (LOD 0 = don't omit any vertices)
-        /// @param numIndices number of indices that were used will be written here
-        Ogre::HardwareIndexBufferSharedPtr getIndexBuffer (int flags, size_t& numIndices);
-
-        Ogre::HardwareVertexBufferSharedPtr getVertexBuffer (int numVertsOneSide);
-
         Ogre::SceneManager* getCompositeMapSceneManager() { return mCompositeMapSceneMgr; }
+        BufferCache& getBufferCache() { return mCache; }
+
+        bool areLayersLoaded() { return !mLayerLoadPending; }
 
         // Delete all quads
         void clearCompositeMapSceneManager();
         void renderCompositeMap (Ogre::TexturePtr target);
 
+        // Convert the given position from Z-up align, i.e. Align_XY to the wanted align set in mAlign
+        void convertPosition (float& x, float& y, float& z);
+        void convertPosition (Ogre::Vector3& pos);
+        void convertBounds (Ogre::AxisAlignedBox& bounds);
+
+        // Adds a WorkQueue request to load a chunk for this node in the background.
+        void queueLoad (QuadTreeNode* node);
+
     private:
-        // Index buffers are shared across terrain batches where possible. There is one index buffer for each
-        // combination of LOD deltas and index buffer LOD we may need.
-        std::map<int, Ogre::HardwareIndexBufferSharedPtr> mIndexBufferMap;
-
-        std::map<int, Ogre::HardwareVertexBufferSharedPtr> mUvBufferMap;
-
         Ogre::RenderTarget* mCompositeMapRenderTarget;
         Ogre::TexturePtr mCompositeMapRenderTexture;
+    };
+
+    struct LoadRequestData
+    {
+        QuadTreeNode* mNode;
+
+        friend std::ostream& operator<<(std::ostream& o, const LoadRequestData& r)
+        { return o; }
+    };
+
+    struct LoadResponseData
+    {
+        std::vector<float> mPositions;
+        std::vector<float> mNormals;
+        std::vector<Ogre::uint8> mColours;
+
+        friend std::ostream& operator<<(std::ostream& o, const LoadResponseData& r)
+        { return o; }
+    };
+
+    struct LayersRequestData
+    {
+        std::vector<QuadTreeNode*> mNodes;
+        bool mPack;
+
+        friend std::ostream& operator<<(std::ostream& o, const LayersRequestData& r)
+        { return o; }
+    };
+
+    struct LayersResponseData
+    {
+        std::vector<LayerCollection> mLayerCollections;
+
+        friend std::ostream& operator<<(std::ostream& o, const LayersResponseData& r)
+        { return o; }
     };
 
 }

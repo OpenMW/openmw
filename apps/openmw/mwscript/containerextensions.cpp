@@ -14,6 +14,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/esm/loadskil.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -119,7 +121,7 @@ namespace MWScript
 
                     std::string itemName;
                     for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
-                        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
+                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
                             itemName = iter->getClass().getName(*iter);
 
                     int numRemoved = store.remove(item, count, ptr);
@@ -163,7 +165,7 @@ namespace MWScript
                     MWWorld::ContainerStoreIterator it = invStore.begin();
                     for (; it != invStore.end(); ++it)
                     {
-                        if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, item))
+                        if (::Misc::StringUtils::ciEqual(it->getCellRef().mRefID, item))
                             break;
                     }
                     if (it == invStore.end())
@@ -266,7 +268,7 @@ namespace MWScript
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
                         MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
-                        if (it != invStore.end() && Misc::StringUtils::ciEqual(it->getCellRef().mRefID, item))
+                        if (it != invStore.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().mRefID, item))
                         {
                             runtime.push(1);
                             return;
@@ -284,7 +286,7 @@ namespace MWScript
                 virtual void execute(Interpreter::Runtime &runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-      
+
                     const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
@@ -293,7 +295,7 @@ namespace MWScript
                          it != invStore.end(); ++it)
                     {
 
-                        if (Misc::StringUtils::ciEqual(it->getCellRef().mSoul, name))
+                        if (::Misc::StringUtils::ciEqual(it->getCellRef().mSoul, name))
                         {
                             runtime.push(1);
                             return;

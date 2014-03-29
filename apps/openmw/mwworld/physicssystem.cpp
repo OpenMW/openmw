@@ -8,6 +8,7 @@
 #include <OgreViewport.h>
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
+#include <OgreSceneNode.h>
 
 #include <openengine/bullet/trace.h>
 #include <openengine/bullet/physic.hpp>
@@ -15,13 +16,15 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
+#include <components/esm/loadgmst.hpp>
+
 #include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
-#include <components/esm/loadgmst.hpp>
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "ptr.hpp"
 #include "class.hpp"
@@ -47,25 +50,102 @@ namespace MWWorld
                              const Ogre::Vector3 &velocity, float &remainingTime,
                              OEngine::Physic::PhysicEngine *engine)
         {
+            /*
+             * Slide up an incline or set of stairs.  Should be called only after a
+             * collision detection otherwise unnecessary tracing will be performed.
+             *
+             * NOTE: with a small change this method can be used to step over an obstacle
+             * of height sStepSize.
+             *
+             * If successful return 'true' and update 'position' to the new possible
+             * location and adjust 'remainingTime'.
+             *
+             * If not successful return 'false'.  May fail for these reasons:
+             *    - can't move directly up from current position
+             *    - having moved up by between epsilon() and sStepSize, can't move forward
+             *    - having moved forward by between epsilon() and velocity*remainingTime,
+             *        = moved down between 0 and just under sStepSize but slope was too steep, or
+             *        = moved the full sStepSize down (FIXME: this could be a bug)
+             *
+             *
+             *
+             * Starting position.  Obstacle or stairs with height upto sStepSize in front.
+             *
+             *     +--+                          +--+       |XX
+             *     |  | -------> velocity        |  |    +--+XX
+             *     |  |                          |  |    |XXXXX
+             *     |  | +--+                     |  | +--+XXXXX
+             *     |  | |XX|                     |  | |XXXXXXXX
+             *     +--+ +--+                     +--+ +--------
+             *    ==============================================
+             */
+
+            /*
+             * Try moving up sStepSize using stepper.
+             * FIXME: does not work in case there is no front obstacle but there is one above
+             *
+             *     +--+                         +--+
+             *     |  |                         |  |
+             *     |  |                         |  |       |XX
+             *     |  |                         |  |    +--+XX
+             *     |  |                         |  |    |XXXXX
+             *     +--+ +--+                    +--+ +--+XXXXX
+             *          |XX|                         |XXXXXXXX
+             *          +--+                         +--------
+             *    ==============================================
+             */
             OEngine::Physic::ActorTracer tracer, stepper;
 
             stepper.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
             if(stepper.mFraction < std::numeric_limits<float>::epsilon())
-                return false;
+                return false; // didn't even move the smallest representable amount
+                              // (TODO: shouldn't this be larger? Why bother with such a small amount?)
 
+            /*
+             * Try moving from the elevated position using tracer.
+             *
+             *                          +--+  +--+
+             *                          |  |  |YY|   FIXME: collision with object YY
+             *                          |  |  +--+
+             *                          |  |
+             *     <------------------->|  |
+             *          +--+            +--+
+             *          |XX|      the moved amount is velocity*remainingTime*tracer.mFraction
+             *          +--+
+             *    ==============================================
+             */
             tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + velocity*remainingTime, engine);
             if(tracer.mFraction < std::numeric_limits<float>::epsilon())
-                return false;
+                return false; // didn't even move the smallest representable amount
 
+            /*
+             * Try moving back down sStepSize using stepper.
+             * NOTE: if there is an obstacle below (e.g. stairs), we'll be "stepping up".
+             * Below diagram is the case where we "stepped over" an obstacle in front.
+             *
+             *                                +--+
+             *                                |YY|
+             *                          +--+  +--+
+             *                          |  |
+             *                          |  |
+             *          +--+            |  |
+             *          |XX|            |  |
+             *          +--+            +--+
+             *    ==============================================
+             */
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
             if(stepper.mFraction < 1.0f && getSlope(stepper.mPlaneNormal) <= sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
+                // TODO: stepper.mPlaneNormal does not appear to be reliable - needs more testing
+                // NOTE: caller's variables 'position' & 'remainingTime' are modified here
                 position = stepper.mEndPos;
-                remainingTime *= (1.0f-tracer.mFraction);
+                remainingTime *= (1.0f-tracer.mFraction); // remaining time is proportional to remaining distance
                 return true;
             }
 
+            // moved between 0 and just under sStepSize distance but slope was too great,
+            // or moved full sStepSize distance (FIXME: is this a bug?)
             return false;
         }
 
@@ -117,11 +197,9 @@ namespace MWWorld
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
             if(!physicActor || !physicActor->getCollisionMode())
             {
-                // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
-                return position + (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
-                                   Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                                   Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
-                                  movement * time;
+                return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                                    Ogre::Quaternion(Ogre::Radian(refpos.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X))
+                                * movement * time;
             }
 
             btCollisionObject *colobj = physicActor->getCollisionBody();
@@ -129,59 +207,94 @@ namespace MWWorld
             position.z += halfExtents.z;
 
             waterlevel -= halfExtents.z * 0.5;
+            /*
+             * A 3/4 submerged example
+             *
+             *  +---+
+             *  |   |
+             *  |   |                     <- (original waterlevel)
+             *  |   |
+             *  |   |  <- position        <- waterlevel
+             *  |   |
+             *  |   |
+             *  |   |
+             *  +---+  <- (original position)
+             */
 
             OEngine::Physic::ActorTracer tracer;
             bool wasOnGround = false;
             bool isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
-            if(position.z < waterlevel || isFlying)
+
+            bool canWalk = ptr.getClass().canWalk(ptr);
+            bool isBipedal = ptr.getClass().isBipedal(ptr);
+            bool isNpc = ptr.getClass().isNpc();
+
+            if(position.z < waterlevel || isFlying) // under water by 3/4 or can fly
             {
-                velocity = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
-                            Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                            Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
-                           movement;
+                // TODO: Shouldn't water have higher drag in calculating velocity?
+                velocity = (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z)*
+                            Ogre::Quaternion(Ogre::Radian(refpos.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)) * movement;
             }
             else
             {
-                velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) * movement;
-                if(!physicActor->getOnGround())
+                velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) * movement;
+                // not in water nor can fly, so need to deal with gravity
+                if(!physicActor->getOnGround()) // if current OnGround status is false, must be falling or jumping
                 {
                     // If falling, add part of the incoming velocity with the current inertia
-                    velocity = velocity*time + physicActor->getInertialForce();
+                    // TODO: but we could be jumping up?
+                    velocity = velocity * time + physicActor->getInertialForce();
                 }
-                inertia = velocity;
+                inertia = velocity; // NOTE: velocity is for z axis only in this code block
 
-                if(!(movement.z > 0.0f))
+                if(!(movement.z > 0.0f)) // falling or moving horizontally (or stationary?) check if we're on ground now
                 {
-                    wasOnGround = physicActor->getOnGround();
-                    tracer.doTrace(colobj, position, position-Ogre::Vector3(0,0,2), engine);
+                    wasOnGround = physicActor->getOnGround(); // store current state
+                    tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine); // check if down 2 possible
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                         isOnGround = true;
                 }
             }
 
+            // NOTE: isOnGround was initialised false, so should stay false if falling or sliding horizontally
             if(isOnGround)
             {
-                // if we're on the ground, don't try to fall
-                velocity.z = std::max(0.0f, velocity.z);
+                // if we're on the ground, don't try to fall any more
+                velocity.z = std::max(0.0f, velocity.z); // NOTE: two different velocity assignments above
             }
 
             Ogre::Vector3 newPosition = position;
+            /*
+             * A loop to find newPosition using tracer, if successful different from the starting position.
+             * nextpos is the local variable used to find potential newPosition, using velocity and remainingTime
+             * The initial velocity was set earlier (see above).
+             */
             float remainingTime = time;
-            for(int iterations = 0;iterations < sMaxIterations && remainingTime > 0.01f;++iterations)
+            for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
             {
-                Ogre::Vector3 nextpos = newPosition + velocity*remainingTime;
+                // NOTE: velocity is either z axis only or x & z axis
+                Ogre::Vector3 nextpos = newPosition + velocity * remainingTime;
 
-                if(newPosition.z < waterlevel && !isFlying &&
-                   nextpos.z > waterlevel && newPosition.z <= waterlevel)
+                // If not able to fly, walk or bipedal don't allow to move out of water
+                // TODO: this if condition may not work for large creatures or situations
+                //        where the creature gets above the waterline for some reason
+                if(newPosition.z < waterlevel && // started 3/4 under water
+                   !isFlying &&  // can't fly
+                   !canWalk &&   // can't walk
+                   !isBipedal && // not bipedal (assume bipedals can walk)
+                   !isNpc &&     // FIXME: shouldn't really need this
+                   nextpos.z > waterlevel &&     // but about to go above water
+                   newPosition.z <= waterlevel)
                 {
                     const Ogre::Vector3 down(0,0,-1);
                     Ogre::Real movelen = velocity.normalise();
                     Ogre::Vector3 reflectdir = velocity.reflect(down);
                     reflectdir.normalise();
                     velocity = slide(reflectdir, down)*movelen;
-                    continue;
+                    // NOTE: remainingTime is unchanged before the loop continues
+                    continue; // velocity updated, calculate nextpos again
                 }
 
                 // trace to where character would go if there were no obstructions
@@ -190,13 +303,15 @@ namespace MWWorld
                 // check for obstructions
                 if(tracer.mFraction >= 1.0f)
                 {
-                    newPosition = tracer.mEndPos;
-                    remainingTime *= (1.0f-tracer.mFraction);
+                    newPosition = tracer.mEndPos; // ok to move, so set newPosition
+                    remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                     break;
                 }
 
-                // We hit something. Try to step up onto it.
-                if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
+                // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
+                // NOTE: May need to stop slaughterfish step out  of the water.
+                // NOTE: stepMove may modify newPosition
+                if((canWalk || isBipedal || isNpc) && stepMove(colobj, newPosition, velocity, remainingTime, engine))
                     isOnGround = !(newPosition.z < waterlevel || isFlying); // Only on the ground if there's gravity
                 else
                 {
@@ -215,7 +330,7 @@ namespace MWWorld
 
             if(isOnGround || wasOnGround)
             {
-                tracer.doTrace(colobj, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+2.0f), engine);
+                tracer.doTrace(colobj, newPosition, newPosition - Ogre::Vector3(0,0,sStepSize+2.0f), engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                 {
                     newPosition.z = tracer.mEndPos.z + 1.0f;
@@ -237,7 +352,7 @@ namespace MWWorld
             }
             physicActor->setOnGround(isOnGround);
 
-            newPosition.z -= halfExtents.z;
+            newPosition.z -= halfExtents.z; // remove what was added at the beggining
             return newPosition;
         }
     };
@@ -574,7 +689,7 @@ namespace MWWorld
             for(;iter != mMovementQueue.end();iter++)
             {
                 float waterlevel = -std::numeric_limits<float>::max();
-                const ESM::Cell *cell = iter->first.getCell()->mCell;
+                const ESM::Cell *cell = iter->first.getCell()->getCell();
                 if(cell->hasWater())
                     waterlevel = cell->mWater;
 

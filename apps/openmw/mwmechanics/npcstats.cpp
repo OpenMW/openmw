@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <iomanip>
+
 #include <boost/format.hpp>
 
 #include <components/esm/loadskil.hpp>

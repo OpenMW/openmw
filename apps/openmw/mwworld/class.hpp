@@ -307,7 +307,10 @@ namespace MWWorld
                 return false;
             }
 
-            virtual bool isFlying(const MWWorld::Ptr& ptr) const;
+            virtual bool isBipedal(const MWWorld::Ptr& ptr) const;
+            virtual bool canFly(const MWWorld::Ptr& ptr) const;
+            virtual bool canSwim(const MWWorld::Ptr& ptr) const;
+            virtual bool canWalk(const MWWorld::Ptr& ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
@@ -329,6 +332,8 @@ namespace MWWorld
             ///< If there is no class for this pointer, an exception is thrown.
 
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
+
+            virtual int getBaseGold(const MWWorld::Ptr& ptr) const;
     };
 }
 

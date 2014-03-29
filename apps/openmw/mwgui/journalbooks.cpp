@@ -2,15 +2,6 @@
 
 namespace
 {
-    MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
-    {
-        typedef MWGui::BookTypesetter::Utf8Point point;
-
-        point begin = reinterpret_cast <point> (text);
-
-        return MWGui::BookTypesetter::Utf8Span (begin, begin + strlen (text));
-    }
-
     const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
     const MyGUI::Colour linkNormal (0.20f, 0.20f, 0.60f);
     const MyGUI::Colour linkActive (0.50f, 0.50f, 1.00f);
@@ -177,6 +168,15 @@ namespace
 
 namespace MWGui
 {
+
+MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
+{
+    typedef MWGui::BookTypesetter::Utf8Point point;
+
+    point begin = reinterpret_cast <point> (text);
+
+    return MWGui::BookTypesetter::Utf8Span (begin, begin + strlen (text));
+}
 
 typedef TypesetBook::Ptr book;
 

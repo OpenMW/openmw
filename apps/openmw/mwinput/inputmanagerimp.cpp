@@ -15,13 +15,16 @@
 
 #include "../engine.hpp"
 
-#include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+
+#include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 
 using namespace ICS;
@@ -93,12 +96,12 @@ namespace MWInput
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
-        , mMouseLookEnabled(true)
+        , mMouseLookEnabled(false)
         , mMouseX(ogre.getWindow()->getWidth ()/2.f)
         , mMouseY(ogre.getWindow()->getHeight ()/2.f)
         , mMouseWheel(0)
         , mDragDrop(false)
-        , mGuiCursorEnabled(false)
+        , mGuiCursorEnabled(true)
         , mUserFile(userFile)
         , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
@@ -140,6 +143,13 @@ namespace MWInput
         mControlSwitch["vanitymode"]          = true;
     }
 
+    void InputManager::clear()
+    {
+        // Enable all controls
+        for (std::map<std::string, bool>::iterator it = mControlSwitch.begin(); it != mControlSwitch.end(); ++it)
+            it->second = true;
+    }
+
     InputManager::~InputManager()
     {
         mInputBinder->save (mUserFile);
@@ -169,7 +179,7 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running 
+                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running
                     && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
                         toggleMainMenu ();
                 break;
@@ -246,17 +256,20 @@ namespace MWInput
         }
     }
 
-    void InputManager::update(float dt, bool loading)
+    void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
-        mInputManager->capture(loading);
+        mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
         // update values of channels (as a result of pressed keys)
-        if (!loading)
+        if (!disableControls)
             mInputBinder->update(dt);
+
+        if (disableControls)
+            return;
 
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
@@ -278,12 +291,9 @@ namespace MWInput
             mInputManager->warpMouse(mMouseX, mMouseY);
         }
 
-        if (loading)
-            return;
-
         // Disable movement in Gui mode
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running) 
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
                 return;
 
 
@@ -575,13 +585,13 @@ namespace MWInput
             float rot[3];
             rot[0] = -y;
             rot[1] = 0.0f;
-            rot[2] = x;
+            rot[2] = -x;
 
             // Only actually turn player when we're not in vanity mode
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
                 mPlayer->yaw(x);
-                mPlayer->pitch(-y);
+                mPlayer->pitch(y);
             }
 
             if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
@@ -616,9 +626,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode () && MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_Video)
-            MWBase::Environment::get().getWorld ()->stopVideo ();
-        else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
+        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
         {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);

@@ -28,6 +28,7 @@ namespace CSMWorld
         {
             Display_None, //Do not use
             Display_String,
+            Display_LongString,
 
             //CONCRETE TYPES STARTS HERE
             Display_Skill,
@@ -105,6 +106,8 @@ namespace CSMWorld
         ///< Can this column be edited directly by the user?
 
         virtual std::string getTitle() const;
+
+        virtual int getId() const;
     };
 
     template<typename ESXRecordT>

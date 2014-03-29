@@ -51,7 +51,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
             }
             else
             {
-                if(mCellId == actor.getCell()->mCell->mName)
+                if(mCellId == actor.getCell()->getCell()->mName)
                     return true;
             }
         }

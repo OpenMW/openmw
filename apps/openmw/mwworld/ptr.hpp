@@ -1,12 +1,18 @@
 #ifndef GAME_MWWORLD_PTR_H
 #define GAME_MWWORLD_PTR_H
 
-#include "cellstore.hpp"
+#include <cassert>
+
+#include <string>
+#include <sstream>
+
+#include "cellreflist.hpp"
 #include "livecellref.hpp"
 
 namespace MWWorld
 {
     class ContainerStore;
+    class CellStore;
 
     /// \brief Pointer to a LiveCellRef
 
@@ -74,6 +80,9 @@ namespace MWWorld
 
             ContainerStore *getContainerStore() const;
             ///< May return a 0-pointer, if reference is not in a container.
+
+            operator const void *();
+            ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
     };
 
     inline bool operator== (const Ptr& left, const Ptr& right)

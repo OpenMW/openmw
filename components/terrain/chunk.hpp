@@ -7,7 +7,8 @@
 namespace Terrain
 {
 
-    class QuadTreeNode;
+    class BufferCache;
+    struct LoadResponseData;
 
     /**
      * @brief Renders a chunk of terrain, either using alpha splatting or a composite map.
@@ -15,18 +16,14 @@ namespace Terrain
     class Chunk : public Ogre::Renderable, public Ogre::MovableObject
     {
     public:
-        /// @param lodLevel LOD level for the vertex buffer.
-        Chunk (QuadTreeNode* node, short lodLevel);
+        Chunk (Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds, const LoadResponseData& data);
+
         virtual ~Chunk();
 
+        /// @note Takes ownership of \a material
         void setMaterial (const Ogre::MaterialPtr& material);
 
-        /// Set additional LOD applied on top of vertex LOD. \n
-        /// This is achieved by changing the index buffer to omit vertices.
-        void setAdditionalLod (size_t lod) { mAdditionalLod = lod; }
-        size_t getAdditionalLod() { return mAdditionalLod; }
-
-        void updateIndexBuffer();
+        void setIndexBuffer(Ogre::HardwareIndexBufferSharedPtr buffer);
 
         // Inherited from MovableObject
         virtual const Ogre::String& getMovableType(void) const { static Ogre::String t = "MW_TERRAIN"; return t; }
@@ -44,18 +41,11 @@ namespace Terrain
         virtual const Ogre::LightList& getLights(void) const;
 
     private:
-        QuadTreeNode* mNode;
+        Ogre::AxisAlignedBox mBounds;
         Ogre::MaterialPtr mMaterial;
-
-        size_t mVertexLod;
-        size_t mAdditionalLod;
 
         Ogre::VertexData* mVertexData;
         Ogre::IndexData* mIndexData;
-        Ogre::HardwareVertexBufferSharedPtr mVertexBuffer;
-        Ogre::HardwareVertexBufferSharedPtr mNormalBuffer;
-        Ogre::HardwareVertexBufferSharedPtr mColourBuffer;
-        Ogre::HardwareIndexBufferSharedPtr mIndexBuffer;
     };
 
 }

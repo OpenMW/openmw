@@ -2,10 +2,15 @@
 #define MWGUI_SPELLWINDOW_H
 
 #include "windowpinnablebase.hpp"
+#include "../mwworld/ptr.hpp"
 
 namespace MWGui
 {
     class SpellIcons;
+
+    bool sortItems(const MWWorld::Ptr& left, const MWWorld::Ptr& right);
+
+    bool sortSpells(const std::string& left, const std::string& right);
 
     class SpellWindow : public WindowPinnableBase, public NoDrop
     {

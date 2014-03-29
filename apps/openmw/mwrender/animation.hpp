@@ -8,6 +8,10 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace ESM
+{
+    struct Light;
+}
 
 namespace MWRender
 {

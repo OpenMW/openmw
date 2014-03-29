@@ -64,9 +64,9 @@ namespace MWWorld
 
             ~RefData();
 
-            void write (ESM::ObjectState& objectState) const;
-            ///< Ignores local variables and custom data (not enough context available here to
-            /// perform these operations).
+            void write (ESM::ObjectState& objectState, const std::string& scriptId = "") const;
+            ///< Ignores custom data (not enough context available here to
+            /// perform this operations).
 
             RefData& operator= (const RefData& refData);
 

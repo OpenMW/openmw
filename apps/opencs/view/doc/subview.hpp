@@ -27,6 +27,8 @@ namespace CSVDoc
             // not implemented
             SubView (const SubView&);
             SubView& operator= (SubView&);
+        protected:
+            void setUniversalId(const CSMWorld::UniversalId& id);
 
         public:
 
@@ -40,9 +42,12 @@ namespace CSVDoc
             virtual void setStatusBar (bool show);
             ///< Default implementation: ignored
 
+            virtual void useHint (const std::string& hint);
+            ///< Default implementation: ignored
+
         signals:
 
-            void focusId (const CSMWorld::UniversalId& universalId);
+            void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
     };
 }
 

@@ -9,6 +9,7 @@
 #include <OgreTexture.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreCamera.h>
+#include <OgreViewport.h>
 
 #include <extern/sdl4ogre/sdlwindowhelper.hpp>
 
@@ -156,5 +157,6 @@ void OgreRenderer::setFov(float fov)
 
 void OgreRenderer::windowResized(int x, int y)
 {
-    mWindowListener->windowResized(x,y);
+    if (mWindowListener)
+        mWindowListener->windowResized(x,y);
 }

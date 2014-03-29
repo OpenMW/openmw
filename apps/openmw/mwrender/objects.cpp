@@ -11,11 +11,15 @@
 #include <OgreParticleEmitter.h>
 #include <OgreStaticGeometry.h>
 
+#include <components/esm/loadligh.hpp>
+#include <components/esm/loadstat.hpp>
+
 #include <components/nifogre/ogrenifloader.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "renderconst.hpp"
 #include "animation.hpp"
@@ -105,6 +109,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
             {
                 uniqueID = uniqueID+1;
                 sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
+                sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
                 mStaticGeometrySmall[ptr.getCell()] = sg;
 
                 sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
@@ -118,6 +123,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
             {
                 uniqueID = uniqueID+1;
                 sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
+                sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
                 mStaticGeometry[ptr.getCell()] = sg;
             }
             else

@@ -5,6 +5,7 @@
 #include <OgreRoot.h>
 #include <OgreParticleEmitterFactory.h>
 #include <OgreParticleSystemManager.h>
+#include <OgreLogManager.h>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <OSX/macUtils.h>

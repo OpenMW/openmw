@@ -5,7 +5,7 @@
 
 #include <QLineEdit>
 #include <QPalette>
-#include <qt4/QtCore/qnamespace.h>
+#include <QtCore/qnamespace.h>
 
 #include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"

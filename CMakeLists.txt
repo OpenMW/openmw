@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 28)
+set(OPENMW_VERSION_MINOR 29)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -73,6 +73,8 @@ option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binarie
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 
+option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
+
 # Apps and tools
 option(BUILD_BSATOOL "build BSA extractor" OFF)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
@@ -130,6 +132,7 @@ set(OENGINE_OGRE
 
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp
+  ${LIBDIR}/openengine/gui/layout.hpp
 )
 
 set(OENGINE_BULLET
@@ -236,6 +239,14 @@ endif()
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
     find_package (Threads)
+endif()
+
+# Look for stdint.h
+include(CheckIncludeFile)
+check_include_file(stdint.h HAVE_STDINT_H)
+if(NOT HAVE_STDINT_H)
+    unset(HAVE_STDINT_H CACHE)
+    message(FATAL_ERROR "stdint.h was not found" )
 endif()
 
 include (CheckIncludeFileCXX)
@@ -455,7 +466,6 @@ if(WIN32)
     INSTALL(FILES
         "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_SOURCE_DIR}/GPL3.txt"
-        "${OpenMW_SOURCE_DIR}/OFL.txt"
         "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"

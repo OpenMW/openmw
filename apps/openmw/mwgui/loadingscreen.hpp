@@ -2,6 +2,7 @@
 #define MWGUI_LOADINGSCREEN_H
 
 #include <OgreSceneManager.h>
+#include <OgreTimer.h>
 
 #include "windowbase.hpp"
 

@@ -113,7 +113,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 std::string cell = (runtime.getStringLiteral (runtime[0].mInteger));
-                Misc::StringUtils::toLower(cell);
+                ::Misc::StringUtils::toLower(cell);
                 runtime.pop();
 
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
@@ -126,7 +126,7 @@ namespace MWScript
                 for (; it != cells.extEnd(); ++it)
                 {
                     std::string name = it->mName;
-                    Misc::StringUtils::toLower(name);
+                    ::Misc::StringUtils::toLower(name);
                     if (name.find(cell) != std::string::npos)
                         MWBase::Environment::get().getWindowManager()->addVisitedLocation (
                             it->mName,

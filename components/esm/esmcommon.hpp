@@ -4,7 +4,7 @@
 #include <string>
 #include <cstring>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 #include <libs/platform/string.h>
 
 namespace ESM

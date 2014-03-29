@@ -604,15 +604,22 @@ namespace MWGui
         mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
     }
 
+    void HUD::updateEnemyHealthBar()
+    {
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
+        mEnemyHealth->setProgressRange(100);
+        // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
+        // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
+        mEnemyHealth->setProgressPosition(int(stats.getHealth().getCurrent()) / stats.getHealth().getModified() * 100);
+    }
+
     void HUD::update()
     {
         mSpellIcons->updateWidgets(mEffectBox, true);
 
         if (!mEnemy.isEmpty() && mEnemyHealth->getVisible())
         {
-            MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
-            mEnemyHealth->setProgressRange(100);
-            mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
+            updateEnemyHealthBar();
         }
 
         if (mIsDrowning)
@@ -629,9 +636,7 @@ namespace MWGui
         if (!mEnemyHealth->getVisible())
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
         mEnemyHealth->setVisible(true);
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
-        mEnemyHealth->setProgressRange(100);
-        mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
+        updateEnemyHealthBar();
     }
 
 }

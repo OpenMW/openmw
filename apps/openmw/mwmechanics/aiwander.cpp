@@ -1,30 +1,27 @@
 #include "aiwander.hpp"
 
-#include "movement.hpp"
+#include <OgreVector3.h>
 
-#include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
+#include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
+
 #include "creaturestats.hpp"
-#include <OgreVector3.h>
-
 #include "steering.hpp"
-
-namespace
-{
-    float sgn(float a)
-    {
-        if(a > 0)
-            return 1.0;
-        return -1.0;
-    }
-}
+#include "movement.hpp"
 
 namespace MWMechanics
 {
+    // NOTE: determined empirically but probably need further tweaking
+    static const int COUNT_BEFORE_STUCK = 20;
+    static const int COUNT_BEFORE_RESET = 200;
+    static const int COUNT_EVADE = 7;
+
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
       , mCellX(std::numeric_limits<int>::max())
@@ -34,6 +31,11 @@ namespace MWMechanics
       , mX(0)
       , mY(0)
       , mZ(0)
+      , mPrevX(0)
+      , mPrevY(0)
+      , mWalkState(State_Norm)
+      , mStuckCount(0)
+      , mEvadeCount(0)
       , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
@@ -67,6 +69,7 @@ namespace MWMechanics
         return new AiWander(*this);
     }
 
+    // TODO: duration is passed in but never used, check if it is needed
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
@@ -100,37 +103,42 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
 
+        // Once off initialization to discover & store allowed node points for this actor.
         if(!mStoredAvailableNodes)
         {
-            mStoredAvailableNodes = true;
-            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
 
-            mCellX = actor.getCell()->mCell->mData.mX;
-            mCellY = actor.getCell()->mCell->mData.mY;
+            mCellX = actor.getCell()->getCell()->mData.mX;
+            mCellY = actor.getCell()->getCell()->mData.mY;
 
+            // TODO: If there is no path does this actor get stuck forever?
             if(!mPathgrid)
                 mDistance = 0;
             else if(mPathgrid->mPoints.empty())
                 mDistance = 0;
 
-            if(mDistance)
+            if(mDistance) // A distance value is initially passed into the constructor.
             {
                 mXCell = 0;
                 mYCell = 0;
-                if(actor.getCell()->mCell->isExterior())
+                if(actor.getCell()->getCell()->isExterior())
                 {
                     mXCell = mCellX * ESM::Land::REAL_SIZE;
                     mYCell = mCellY * ESM::Land::REAL_SIZE;
                 }
 
+                // convert npcPos to local (i.e. cell) co-ordinates
                 Ogre::Vector3 npcPos(actor.getRefData().getPosition().pos);
                 npcPos[0] = npcPos[0] - mXCell;
                 npcPos[1] = npcPos[1] - mYCell;
 
+                // populate mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+                // NOTE: mPoints and mAllowedNodes contain points in local co-ordinates
                 for(unsigned int counter = 0; counter < mPathgrid->mPoints.size(); counter++)
                 {
-                    Ogre::Vector3 nodePos(mPathgrid->mPoints[counter].mX, mPathgrid->mPoints[counter].mY,
-                        mPathgrid->mPoints[counter].mZ);
+                    Ogre::Vector3 nodePos(mPathgrid->mPoints[counter].mX,
+                                          mPathgrid->mPoints[counter].mY,
+                                          mPathgrid->mPoints[counter].mZ);
                     if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
                         mAllowedNodes.push_back(mPathgrid->mPoints[counter]);
                 }
@@ -141,26 +149,30 @@ namespace MWMechanics
                     unsigned int index = 0;
                     for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
                     {
-                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
-                            mAllowedNodes[counterThree].mZ);
+                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX,
+                                              mAllowedNodes[counterThree].mY,
+                                              mAllowedNodes[counterThree].mZ);
                         float tempDist = npcPos.squaredDistance(nodePos);
                         if(tempDist < closestNode)
                             index = counterThree;
                     }
                     mCurrentNode = mAllowedNodes[index];
                     mAllowedNodes.erase(mAllowedNodes.begin() + index);
+
+                    mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
                 }
             }
         }
 
+        // TODO: Does this actor stay in one spot forever while in AiWander?
         if(mAllowedNodes.empty())
             mDistance = 0;
 
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-        if(mDistance && (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY))
+        if(mDistance && (mCellX != actor.getCell()->getCell()->mData.mX || mCellY != actor.getCell()->getCell()->mData.mY))
             mDistance = 0;
 
-        if(mChooseAction)
+        if(mChooseAction) // Initially set true by the constructor.
         {
             mPlayedIdle = 0;
             unsigned short idleRoll = 0;
@@ -206,7 +218,8 @@ namespace MWMechanics
             }
         }
 
-        if(mIdleNow)
+        // Allow interrupting a walking actor to trigger a greeting
+        if(mIdleNow || (mWalking && (mWalkState != State_Norm)))
         {
             // Play a random voice greeting if the player gets too close
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -219,6 +232,14 @@ namespace MWMechanics
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             float playerDist = Ogre::Vector3(player.getRefData().getPosition().pos).distance(
                         Ogre::Vector3(actor.getRefData().getPosition().pos));
+
+            if(mWalking && playerDist <= helloDistance)
+            {
+                stopWalking(actor);
+                mMoveNow = false;
+                mWalking = false;
+                mWalkState = State_Norm;
+            }
 
             if (!mSaidGreeting)
             {
@@ -261,16 +282,24 @@ namespace MWMechanics
                 dest.mY = destNodePos[1] + mYCell;
                 dest.mZ = destNodePos[2];
 
+                // actor position is already in world co-ordinates
                 ESM::Pathgrid::Point start;
                 start.mX = pos.pos[0];
                 start.mY = pos.pos[1];
                 start.mZ = pos.pos[2];
 
+                // don't take shortcuts for wandering
                 mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
                 if(mPathFinder.isPathConstructed())
                 {
-                    // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
+                    // buildPath inserts dest in case it is not a pathgraph point index
+                    // which is a duplicate for AiWander
+                    //if(mPathFinder.getPathSize() > 1)
+                        //mPathFinder.getPath().pop_back();
+
+                    // Remove this node as an option and add back the previously used node
+                    // (stops NPC from picking the same node):
                     ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
                     mAllowedNodes.push_back(mCurrentNode);
@@ -296,9 +325,94 @@ namespace MWMechanics
             }
             else
             {
-                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+                /*               1                    n
+                 *  State_Norm <---> State_CheckStuck --> State_Evade
+                 *   ^  ^   |          ^   |               ^   |  |
+                 *   |  |   |          |   |               |   |  |
+                 *   |  +---+          +---+               +---+  | m
+                 *   |   any            < n                 < m   |
+                 *   +--------------------------------------------+
+                 */
+                bool samePosition = (abs(pos.pos[0] - mPrevX) < 1) && (abs(pos.pos[1] - mPrevY) < 1);
+                switch(mWalkState)
+                {
+                    case State_Norm:
+                    {
+                        if(!samePosition)
+                            break;
+                        else
+                            mWalkState = State_CheckStuck;
+                    }
+                        /* FALL THROUGH */
+                    case State_CheckStuck:
+                    {
+                        if(!samePosition)
+                        {
+                            mWalkState = State_Norm;
+                            // to do this properly need yet another variable, simply don't clear for now
+                            //mStuckCount = 0;
+                            break;
+                        }
+                        else
+                        {
+                            // consider stuck only if position unchanges consecutively
+                            if((mStuckCount++ % COUNT_BEFORE_STUCK) == 0)
+                                mWalkState = State_Evade;
+                                // NOTE: mStuckCount is purposely not cleared here
+                            else
+                                break; // still in the same state, but counter got incremented
+                        }
+                    }
+                        /* FALL THROUGH */
+                    case State_Evade:
+                    {
+                        if(mEvadeCount++ < COUNT_EVADE)
+                            break;
+                        else
+                        {
+                            mWalkState = State_Norm; // tried to evade, assume all is ok and start again
+                            // NOTE: mStuckCount is purposely not cleared here
+                            mEvadeCount = 0;
+                        }
+                    }
+                    /* NO DEFAULT CASE */
+                }
 
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+                if(mWalkState == State_Evade)
+                {
+                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl;
+
+                    // diagonal should have same animation as walk forward
+                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.01f;
+                    // change the angle a bit, too
+                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                }
+                else
+                {
+                    // normal walk forward
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+                    // turn towards the next point in mPath
+                    // TODO: possibly no need to check every frame, maybe every 30 should be ok?
+                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+                }
+
+                if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
+                {
+                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl;
+                    mWalkState = State_Norm;
+                    mStuckCount = 0;
+
+                    stopWalking(actor);
+                    mMoveNow = false;
+                    mWalking = false;
+                    mChooseAction = true;
+                }
+
+                // update position
+                ESM::Position updatedPos = actor.getRefData().getPosition();
+                mPrevX = updatedPos.pos[0];
+                mPrevY = updatedPos.pos[1];
             }
         }
 

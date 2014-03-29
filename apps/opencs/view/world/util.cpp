@@ -4,8 +4,18 @@
 #include <stdexcept>
 
 #include <QUndoStack>
+#include <QMetaProperty>
+#include <QStyledItemDelegate>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QPlainTextEdit>
+#include <QEvent>
 
 #include "../../model/world/commands.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
 : mModel (model)
@@ -117,10 +127,56 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 }
 
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
-    const QModelIndex& index) const
+    const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
-    if (!index.data().isValid())
-        return 0;
+    QVariant variant = index.data();
+    if (!variant.isValid())
+    {
+        variant = index.data(Qt::DisplayRole);
+        if (!variant.isValid())
+        {
+            return 0;
+        }
+    }
+
+    if (display != CSMWorld::ColumnBase::Display_None)
+    {
+        if (variant.type() == QVariant::Color)
+        {
+            return new QLineEdit(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_Integer)
+        {
+            return new QSpinBox(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_Var)
+        {
+            return new QLineEdit(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_Float)
+        {
+            return new QDoubleSpinBox(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_LongString)
+        {
+            return new QTextEdit(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_String ||
+            display == CSMWorld::ColumnBase::Display_Skill ||
+            display == CSMWorld::ColumnBase::Display_Script ||
+            display == CSMWorld::ColumnBase::Display_Race ||
+            display == CSMWorld::ColumnBase::Display_Class ||
+            display == CSMWorld::ColumnBase::Display_Faction ||
+            display == CSMWorld::ColumnBase::Display_Miscellaneous ||
+            display == CSMWorld::ColumnBase::Display_Sound)
+        {
+            return new DropLineEdit(parent);
+        }
+        if (display == CSMWorld::ColumnBase::Display_Boolean)
+        {
+            return new QCheckBox(parent);
+        }
+    }
 
     return QStyledItemDelegate::createEditor (parent, option, index);
 }
@@ -140,4 +196,67 @@ bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
     const QString &settingValue)
 {
     return false;
+}
+
+void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
+{
+    QVariant v = index.data(Qt::EditRole);
+    if (tryDisplay)
+    {
+        if (!v.isValid())
+        {
+            v = index.data(Qt::DisplayRole);
+            if (!v.isValid())
+            {
+                return;
+            }
+        }
+        QPlainTextEdit* plainTextEdit = qobject_cast<QPlainTextEdit*>(editor);
+        if(plainTextEdit) //for some reason it is easier to brake the loop here
+        {
+            if(plainTextEdit->toPlainText() == v.toString())
+            {
+                return;
+            }
+        }
+    }
+
+    QByteArray n = editor->metaObject()->userProperty().name();
+
+    if (n == "dateTime") {
+        if (editor->inherits("QTimeEdit"))
+            n = "time";
+        else if (editor->inherits("QDateEdit"))
+            n = "date";
+    }
+
+    if (!n.isEmpty()) {
+        if (!v.isValid())
+            v = QVariant(editor->property(n).userType(), (const void *)0);
+        editor->setProperty(n, v);
+    }
+
+}
+
+CSVWorld::DropLineEdit::DropLineEdit(QWidget* parent) :
+QLineEdit(parent)
+{
+    setAcceptDrops(true);
+}
+
+void CSVWorld::DropLineEdit::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void CSVWorld::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->accept();
+}
+
+void CSVWorld::DropLineEdit::dropEvent(QDropEvent *event)
+{
+    const CSMWorld::TableMimeData* data(dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData()));
+    emit tableMimeDataDropped(data->getData(), data->getDocumentPtr());
+    //WIP
 }

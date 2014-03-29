@@ -13,6 +13,11 @@
 
 #include "../mwscript/compilercontext.hpp"
 
+namespace ESM
+{
+    struct Dialogue;
+}
+
 namespace MWDialogue
 {
     class DialogueManager : public MWBase::DialogueManager

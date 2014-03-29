@@ -5,6 +5,7 @@
 #include <OgreTexture.h>
 #include <OgreRenderTarget.h>
 #include <OgreMaterialManager.h>
+#include <OgreColourValue.h>
 
 namespace OEngine
 {

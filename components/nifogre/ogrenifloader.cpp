@@ -38,6 +38,9 @@
 #include <OgreMaterialManager.h>
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
+#include <OgreSkeletonInstance.h>
+#include <OgreSceneNode.h>
+#include <OgreMesh.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 

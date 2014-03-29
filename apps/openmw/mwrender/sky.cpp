@@ -11,6 +11,7 @@
 #include <OgreBillboardSet.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
+#include <OgreTechnique.h>
 
 #include <OgreMeshManager.h>
 

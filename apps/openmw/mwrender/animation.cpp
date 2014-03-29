@@ -10,19 +10,29 @@
 #include <OgreSceneManager.h>
 #include <OgreControllerManager.h>
 #include <OgreStaticGeometry.h>
+#include <OgreSceneNode.h>
+#include <OgreTechnique.h>
+
+#include <components/esm/loadligh.hpp>
+#include <components/esm/loadweap.hpp>
+#include <components/esm/loadench.hpp>
+#include <components/esm/loadstat.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
+
+#include <extern/shiny/Main/Factory.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include <extern/shiny/Main/Factory.hpp>
-
 #include "../mwmechanics/character.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "renderconst.hpp"
 
@@ -345,7 +355,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
     ));
     objlist->mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
 
-    bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
+    bool interior = !(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior());
     bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
                      !interior : fallback->getFallbackBool("LightAttenuation_UseQuadratic");
 
@@ -1081,7 +1091,7 @@ bool Animation::allowSwitchViewMode() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mPriority > MWMechanics::Priority_Movement 
+        if(stateiter->second.mPriority > MWMechanics::Priority_Movement
                 && stateiter->second.mPriority < MWMechanics::Priority_Torch)
             return false;
     }

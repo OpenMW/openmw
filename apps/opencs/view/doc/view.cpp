@@ -115,10 +115,6 @@ void CSVDoc::View::setupWorldMenu()
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
-    QAction *scene = new QAction (tr ("Scene"), this);
-    connect (scene, SIGNAL (triggered()), this, SLOT (addSceneSubView()));
-    world->addAction (scene);
-
     QAction *regionMap = new QAction (tr ("Region Map"), this);
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
     world->addAction (regionMap);
@@ -310,7 +306,7 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
     mOperations->setProgress (current, max, type, threads);
 }
 
-void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
+void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::string& hint)
 {
     /// \todo add an user setting for limiting the number of sub views per top level view. Automatically open a new top level view if this
     /// number is exceeded
@@ -320,14 +316,25 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
 
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
-    SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
+    const std::vector<CSMWorld::UniversalId::Type> referenceables(CSMWorld::UniversalId::listReferenceableTypes());
+    SubView *view = NULL;
+    if(std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end())
+    {
+        view = mSubViewFactory.makeSubView (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
+    } else
+    {
+        view = mSubViewFactory.makeSubView (id, *mDocument);
+    }
+    assert(view);
+    if (!hint.empty())
+        view->useHint (hint);
 
     view->setStatusBar (mShowStatusBar->isChecked());
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
-    connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
-        SLOT (addSubView (const CSMWorld::UniversalId&)));
+    connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
+        SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
 
     CSMSettings::UserSettings::instance().updateSettings("Display Format");
 
@@ -427,11 +434,6 @@ void CSVDoc::View::addRegionMapSubView()
 void CSVDoc::View::addFiltersSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Filters);
-}
-
-void CSVDoc::View::addSceneSubView()
-{
-    addSubView (CSMWorld::UniversalId::Type_Scene);
 }
 
 void CSVDoc::View::addTopicsSubView()

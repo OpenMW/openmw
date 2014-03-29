@@ -65,7 +65,10 @@ namespace MWInput
 
         virtual ~InputManager();
 
-        virtual void update(float dt, bool loading);
+        /// Clear all savegame-specific data
+        virtual void clear();
+
+        virtual void update(float dt, bool disableControls, bool disableEvents=false);
 
         void setPlayer (MWWorld::Player* player) { mPlayer = player; }
 
