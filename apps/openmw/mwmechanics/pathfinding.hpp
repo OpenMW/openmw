@@ -64,14 +64,22 @@ namespace MWMechanics
                 return mPath;
             }
 
-            //When first point of newly created path is the nearest to actor point, then
-            //the cituation can occure when this point is undesirable (if the 2nd point of new path == the 1st point of old path)
-            //This functions deletes that point.
+            // When first point of newly created path is the nearest to actor point,
+            // then a situation can occure when this point is undesirable
+            // (if the 2nd point of new path == the 1st point of old path)
+            // This functions deletes that point.
             void syncStart(const std::list<ESM::Pathgrid::Point> &path);
 
             void addPointToPath(ESM::Pathgrid::Point &point)
             {
                 mPath.push_back(point);
+            }
+
+            // While a public method is defined here, it is anticipated that
+            // mSCComp will only be used internally.
+            std::vector<int> getSCComp() const
+            {
+                return mSCComp;
             }
 
         private:
@@ -101,6 +109,26 @@ namespace MWMechanics
             std::list<ESM::Pathgrid::Point> mPath;
             bool mIsGraphConstructed;
             const MWWorld::CellStore* mCell;
+
+            // contains an integer indicating the groups of connected pathgrid points
+            // (all connected points will have the same value)
+            //
+            // In Seyda Neen there are 3:
+            //
+            //   52, 53 and 54 are one set (enclosed yard)
+            //   48, 49, 50, 51, 84, 85, 86, 87, 88, 89, 90 are another (ship & office)
+            //   all other pathgrid points are the third set
+            //
+            std::vector<int> mSCComp;
+            // variables used to calculate mSCComp
+            int mSCCId;
+            int mSCCIndex;
+            std::list<int> mSCCStack;
+            typedef std::pair<int, int> VPair; // first is index, second is lowlink
+            std::vector<VPair> mSCCPoint;
+            // methods used to calculate mSCComp
+            void recursiveStrongConnect(int v);
+            void buildConnectedPoints(const ESM::Pathgrid* pathGrid);
     };
 }
 

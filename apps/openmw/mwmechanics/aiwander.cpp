@@ -69,6 +69,7 @@ namespace MWMechanics
         return new AiWander(*this);
     }
 
+    // TODO: duration is passed in but never used, check if it is needed
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
@@ -102,20 +103,21 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
 
+        // Once off initialization to discover & store allowed node points for this actor.
         if(!mStoredAvailableNodes)
         {
-            mStoredAvailableNodes = true;
             mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
 
             mCellX = actor.getCell()->getCell()->mData.mX;
             mCellY = actor.getCell()->getCell()->mData.mY;
 
+            // TODO: If there is no path does this actor get stuck forever?
             if(!mPathgrid)
                 mDistance = 0;
             else if(mPathgrid->mPoints.empty())
                 mDistance = 0;
 
-            if(mDistance)
+            if(mDistance) // A distance value is initially passed into the constructor.
             {
                 mXCell = 0;
                 mYCell = 0;
@@ -125,14 +127,18 @@ namespace MWMechanics
                     mYCell = mCellY * ESM::Land::REAL_SIZE;
                 }
 
+                // convert npcPos to local (i.e. cell) co-ordinates
                 Ogre::Vector3 npcPos(actor.getRefData().getPosition().pos);
                 npcPos[0] = npcPos[0] - mXCell;
                 npcPos[1] = npcPos[1] - mYCell;
 
+                // populate mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+                // NOTE: mPoints and mAllowedNodes contain points in local co-ordinates
                 for(unsigned int counter = 0; counter < mPathgrid->mPoints.size(); counter++)
                 {
-                    Ogre::Vector3 nodePos(mPathgrid->mPoints[counter].mX, mPathgrid->mPoints[counter].mY,
-                        mPathgrid->mPoints[counter].mZ);
+                    Ogre::Vector3 nodePos(mPathgrid->mPoints[counter].mX,
+                                          mPathgrid->mPoints[counter].mY,
+                                          mPathgrid->mPoints[counter].mZ);
                     if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
                         mAllowedNodes.push_back(mPathgrid->mPoints[counter]);
                 }
@@ -143,18 +149,22 @@ namespace MWMechanics
                     unsigned int index = 0;
                     for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
                     {
-                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
-                            mAllowedNodes[counterThree].mZ);
+                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX,
+                                              mAllowedNodes[counterThree].mY,
+                                              mAllowedNodes[counterThree].mZ);
                         float tempDist = npcPos.squaredDistance(nodePos);
                         if(tempDist < closestNode)
                             index = counterThree;
                     }
                     mCurrentNode = mAllowedNodes[index];
                     mAllowedNodes.erase(mAllowedNodes.begin() + index);
+
+                    mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
                 }
             }
         }
 
+        // TODO: Does this actor stay in one spot forever while in AiWander?
         if(mAllowedNodes.empty())
             mDistance = 0;
 
@@ -162,7 +172,7 @@ namespace MWMechanics
         if(mDistance && (mCellX != actor.getCell()->getCell()->mData.mX || mCellY != actor.getCell()->getCell()->mData.mY))
             mDistance = 0;
 
-        if(mChooseAction)
+        if(mChooseAction) // Initially set true by the constructor.
         {
             mPlayedIdle = 0;
             unsigned short idleRoll = 0;
@@ -208,7 +218,8 @@ namespace MWMechanics
             }
         }
 
-        if(mIdleNow)
+        // Allow interrupting a walking actor to trigger a greeting
+        if(mIdleNow || (mWalking && (mWalkState != State_Norm)))
         {
             // Play a random voice greeting if the player gets too close
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -221,6 +232,14 @@ namespace MWMechanics
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             float playerDist = Ogre::Vector3(player.getRefData().getPosition().pos).distance(
                         Ogre::Vector3(actor.getRefData().getPosition().pos));
+
+            if(mWalking && playerDist <= helloDistance)
+            {
+                stopWalking(actor);
+                mMoveNow = false;
+                mWalking = false;
+                mWalkState = State_Norm;
+            }
 
             if (!mSaidGreeting)
             {
@@ -263,16 +282,24 @@ namespace MWMechanics
                 dest.mY = destNodePos[1] + mYCell;
                 dest.mZ = destNodePos[2];
 
+                // actor position is already in world co-ordinates
                 ESM::Pathgrid::Point start;
                 start.mX = pos.pos[0];
                 start.mY = pos.pos[1];
                 start.mZ = pos.pos[2];
 
+                // don't take shortcuts for wandering
                 mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
                 if(mPathFinder.isPathConstructed())
                 {
-                    // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
+                    // buildPath inserts dest in case it is not a pathgraph point index
+                    // which is a duplicate for AiWander
+                    //if(mPathFinder.getPathSize() > 1)
+                        //mPathFinder.getPath().pop_back();
+
+                    // Remove this node as an option and add back the previously used node
+                    // (stops NPC from picking the same node):
                     ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
                     mAllowedNodes.push_back(mCurrentNode);
@@ -353,7 +380,7 @@ namespace MWMechanics
 
                 if(mWalkState == State_Evade)
                 {
-                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl;
 
                     // diagonal should have same animation as walk forward
                     actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
@@ -363,13 +390,16 @@ namespace MWMechanics
                 }
                 else
                 {
+                    // normal walk forward
                     actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+                    // turn towards the next point in mPath
+                    // TODO: possibly no need to check every frame, maybe every 30 should be ok?
                     zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
                 }
 
                 if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
                 {
-                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
+                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl;
                     mWalkState = State_Norm;
                     mStuckCount = 0;
 

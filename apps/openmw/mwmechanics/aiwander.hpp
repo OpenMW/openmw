@@ -38,8 +38,10 @@ namespace MWMechanics
             float mY;
             float mZ;
 
+            // Cell location
             int mCellX;
             int mCellY;
+            // Cell location multiplied by ESM::Land::REAL_SIZE
             float mXCell;
             float mYCell;
 
