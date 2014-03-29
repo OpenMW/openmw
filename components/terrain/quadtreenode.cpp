@@ -282,9 +282,6 @@ bool QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     size_t wantedLod = 0;
     float cellWorldSize = mTerrain->getStorage()->getCellWorldSize();
 
-    if (!mTerrain->getDistantLandEnabled() && dist > cellWorldSize)
-        return true;
-
     if (dist > cellWorldSize*64)
         wantedLod = 6;
     else if (dist > cellWorldSize*32)
@@ -392,6 +389,8 @@ void QuadTreeNode::load(const LoadResponseData &data)
     mChunk = new Chunk(mTerrain->getBufferCache().getUVBuffer(), mBounds, data);
     mChunk->setVisibilityFlags(mTerrain->getVisiblityFlags());
     mChunk->setCastShadows(true);
+    if (!mTerrain->getDistantLandEnabled())
+        mChunk->setRenderingDistance(8192);
     mSceneNode->attachObject(mChunk);
 
     mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());

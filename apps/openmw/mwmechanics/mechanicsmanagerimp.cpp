@@ -750,9 +750,10 @@ namespace MWMechanics
         mActors.updateMagicEffects(ptr);
     }
 
-    void MechanicsManager::toggleAI()
+    bool MechanicsManager::toggleAI()
     {
         mAI = !mAI;
+        return mAI;
     }
 
     bool MechanicsManager::isAIActive()

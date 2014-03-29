@@ -39,6 +39,7 @@ namespace CSMWorld
             CollectionBase *mIdCollection;
             Reordering mReordering;
             Viewing mViewing;
+            bool mPreview;
 
             // not implemented
             IdTable (const IdTable&);
@@ -47,7 +48,7 @@ namespace CSMWorld
         public:
 
             IdTable (CollectionBase *idCollection, Reordering reordering = Reordering_None,
-                Viewing viewing = Viewing_None);
+                Viewing viewing = Viewing_None, bool preview = false);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();
@@ -100,9 +101,13 @@ namespace CSMWorld
 
             Viewing getViewing() const;
 
+            bool hasPreview() const;
+
             std::pair<UniversalId, std::string> view (int row) const;
             ///< Return the UniversalId and the hint for viewing \a row. If viewing is not
             /// supported by this table, return (UniversalId::Type_None, "").
+
+            int getColumnId(int column) const;
     };
 }
 

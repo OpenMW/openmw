@@ -34,13 +34,16 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     SceneToolbar *toolbar = new SceneToolbar (48, this);
 
-    if (id.getId()[0]=='#')
+    if (id.getId()=="sys::default")
         mScene = new CSVRender::PagedWorldspaceWidget (this);
     else
         mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
-    SceneToolMode *tool = mScene->makeNavigationSelector (toolbar);
-    toolbar->addTool (tool);
+    SceneToolMode *navigationTool = mScene->makeNavigationSelector (toolbar);
+    toolbar->addTool (navigationTool);
+
+    SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
+    toolbar->addTool (lightingTool);
 
     layout2->addWidget (toolbar, 0);
 

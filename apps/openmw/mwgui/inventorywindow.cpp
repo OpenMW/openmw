@@ -162,6 +162,7 @@ namespace MWGui
         }
 
         const ItemStack& item = mTradeModel->getItem(index);
+        std::string sound = MWWorld::Class::get(item.mBase).getDownSoundId(item.mBase);
 
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
@@ -170,6 +171,7 @@ namespace MWGui
         if (item.mBase.getCellRef().mRefID.size() > 6
                 && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
         {
+            MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
             MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
             return;
         }
@@ -213,6 +215,7 @@ namespace MWGui
             int services = MWBase::Environment::get().getWindowManager()->getTradeWindow()->getMerchantServices();
             if (!MWWorld::Class::get(object).canSell(object, services))
             {
+                MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
                 MWBase::Environment::get().getWindowManager()->
                         messageBox("#{sBarterDialog4}");
                 return;

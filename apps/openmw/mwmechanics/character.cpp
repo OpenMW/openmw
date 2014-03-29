@@ -414,6 +414,16 @@ void CharacterController::playRandomDeath(float startpoint)
         mDeathState = CharState_SwimDeath;
         mCurrentDeath = "swimdeath";
     }
+    else if (mHitState == CharState_KnockDown)
+    {
+        mDeathState = CharState_DeathKnockDown;
+        mCurrentDeath = "deathknockdown";
+    }
+    else if (mHitState == CharState_KnockOut)
+    {
+        mDeathState = CharState_DeathKnockOut;
+        mCurrentDeath = "deathknockout";
+    }
     else
     {
         int selected=0;
@@ -1245,12 +1255,8 @@ void CharacterController::update(float duration)
             else //avoid z-rotating for knockdown
                 world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
 
-            // always control actual movement by animation unless this:
-            // FIXME: actor falling/landing should be controlled by physics engine
-            if(mMovementAnimVelocity == 0.0f && (vec.length() > 0.0f || mJumpState != JumpState_None))
-            {
+            if (mMovementAnimVelocity == 0)
                 world->queueMovement(mPtr, vec);
-            }
         }
 
         movement = vec;
@@ -1290,7 +1296,7 @@ void CharacterController::update(float duration)
         }
 
         // Update movement
-        if(moved.squaredLength() > 1.0f)
+        if(mMovementAnimVelocity > 0)
             world->queueMovement(mPtr, moved);
     }
     mSkipAnim = false;

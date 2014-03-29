@@ -84,8 +84,11 @@ namespace MWGui
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
+        checkTradeTime(); 
+
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
+
         // Important: actor goes last, so that items purchased by the merchant go into his inventory
         itemSources.push_back(actor);
         std::vector<MWWorld::Ptr> worldItems;
@@ -360,6 +363,8 @@ namespace MWGui
             addOrRemoveGold(-mCurrentBalance, mPtr);
         }
 
+        updateTradeTime();
+
         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
 
@@ -473,5 +478,34 @@ namespace MWGui
                 merchantGold += it->getRefData().getCount();
         }
         return merchantGold;
+    }
+
+    // Relates to NPC gold reset delay
+    void TradeWindow::checkTradeTime() 
+    {
+        MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
+        const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
+        double delay = boost::lexical_cast<double>(MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getInt());
+
+        // if time stamp longer than gold reset delay, reset gold.
+        if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getTradeTime() + delay)
+        {
+            addOrRemoveGold(-store.count(MWWorld::ContainerStore::sGoldId), mPtr);
+            addOrRemoveGold(+sellerStats.getGoldPool(), mPtr);
+        }
+    }
+
+    void TradeWindow::updateTradeTime() 
+    {
+        MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
+        MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
+        double delay = boost::lexical_cast<double>(MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getInt());
+
+        // If trade timestamp is within reset delay don't set
+        if ( ! (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getTradeTime() && 
+                MWBase::Environment::get().getWorld()->getTimeStamp() < sellerStats.getTradeTime() + delay) )
+        {
+            sellerStats.setTradeTime(MWBase::Environment::get().getWorld()->getTimeStamp());
+        }
     }
 }

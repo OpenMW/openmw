@@ -1,3 +1,6 @@
+#ifndef OPENMW_GAME_MWGUI_MAINMENU_H
+#define OPENMW_GAME_MWGUI_MAINMENU_H
+
 #include <openengine/gui/layout.hpp>
 
 #include "imagebutton.hpp"
@@ -26,9 +29,15 @@ namespace MWGui
             MyGUI::Widget* mButtonBox;
             MyGUI::TextBox* mVersionText;
 
+            MyGUI::ImageBox* mBackground;
+
             std::map<std::string, MWGui::ImageButton*> mButtons;
 
             void onButtonClicked (MyGUI::Widget* sender);
+            void onNewGameConfirmed();
+            void onExitConfirmed();
+
+            void showBackground(bool show);
 
             void updateMenu();
 
@@ -36,3 +45,5 @@ namespace MWGui
     };
 
 }
+
+#endif

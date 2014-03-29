@@ -9,7 +9,12 @@
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+#include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
+
 #include <components/ogreinit/ogreinit.hpp>
+
+#include <components/bsa/resources.hpp>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
@@ -18,13 +23,16 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS")
 {
-    Files::PathContainer dataDirs = readConfig();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
-    setupDataFiles (dataDirs);
+    setupDataFiles (config.first);
 
     CSMSettings::UserSettings::instance().loadSettings ("opencs.cfg");
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+
+    Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
+        mFsStrict);
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
@@ -53,12 +61,12 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 {
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
-        QString path = QString::fromStdString(iter->string());
+        QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
     }
 }
 
-Files::PathContainer CS::Editor::readConfig()
+std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig()
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
@@ -68,13 +76,17 @@ Files::PathContainer CS::Editor::readConfig()
     ("data-local", boost::program_options::value<std::string>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
     ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
-    ("resources", boost::program_options::value<std::string>()->default_value("resources"));
+    ("resources", boost::program_options::value<std::string>()->default_value("resources"))
+    ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
+        default_value(std::vector<std::string>(), "fallback-archive")->multitoken());
 
     boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc);
 
-    mDocumentManager.setResourceDir (variables["resources"].as<std::string>());
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
+
+    mFsStrict = variables["fs-strict"].as<bool>();
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
@@ -105,7 +117,7 @@ Files::PathContainer CS::Editor::readConfig()
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
-    return dataDirs;
+    return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
 }
 
 void CS::Editor::createGame()
@@ -136,7 +148,7 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath)
     std::vector<boost::filesystem::path> files;
 
     foreach (const QString &path, mFileDialog.selectedFilePaths())
-        files.push_back(path.toStdString());
+        files.push_back(path.toUtf8().constData());
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
@@ -149,10 +161,10 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     std::vector<boost::filesystem::path> files;
 
     foreach (const QString &path, mFileDialog.selectedFilePaths()) {
-        files.push_back(path.toStdString());
+        files.push_back(path.toUtf8().constData());
     }
 
-    files.push_back(mFileDialog.filename().toStdString());
+    files.push_back(mFileDialog.filename().toUtf8().constData());
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
 
@@ -216,6 +228,15 @@ int CS::Editor::run()
     if (mLocal.empty())
         return 1;
 
+    mStartup.show();
+
+    QApplication::setQuitOnLastWindowClosed (true);
+
+    return QApplication::exec();
+}
+
+std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
+{
     // TODO: setting
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName("OpenGL Rendering Subsystem"));
 
@@ -233,9 +254,36 @@ int CS::Editor::run()
     Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
     hiddenWindow->setActive(false);
 
-    mStartup.show();
+    sh::OgrePlatform* platform =
+        new sh::OgrePlatform ("General", (mResources / "materials").string());
 
-    QApplication::setQuitOnLastWindowClosed (true);
+    if (!boost::filesystem::exists (mCfgMgr.getCachePath()))
+        boost::filesystem::create_directories (mCfgMgr.getCachePath());
 
-    return QApplication::exec();
+    platform->setCacheFolder (mCfgMgr.getCachePath().string());
+
+    std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
+
+    factory->setCurrentLanguage (sh::Language_GLSL); /// \todo make this configurable
+    factory->setWriteSourceCache (true);
+    factory->setReadSourceCache (true);
+    factory->setReadMicrocodeCache (true);
+    factory->setWriteMicrocodeCache (true);
+
+    factory->loadAllFiles();
+
+    sh::Factory::getInstance().setGlobalSetting ("fog", "true");
+
+    sh::Factory::getInstance().setGlobalSetting ("shadows", "false");
+    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", "false");
+
+    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
+
+    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
+
+    sh::Factory::getInstance ().setGlobalSetting ("num_lights", "8");
+
+    /// \todo add more configurable shiny settings
+
+    return factory;
 }

@@ -4,6 +4,7 @@
 #include <iterator>
 
 #include <OgreTextureManager.h>
+#include <OgreRenderWindow.h>
 
 #include "MyGUI_UString.h"
 #include "MyGUI_IPointer.h"
@@ -59,6 +60,7 @@
 #include "bookpage.hpp"
 #include "itemview.hpp"
 #include "fontloader.hpp"
+#include "videowidget.hpp"
 
 namespace MWGui
 {
@@ -104,6 +106,8 @@ namespace MWGui
       , mRecharge(NULL)
       , mRepair(NULL)
       , mCompanionWindow(NULL)
+      , mVideoBackground(NULL)
+      , mVideoWidget(NULL)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
@@ -155,6 +159,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
 
@@ -186,6 +191,13 @@ namespace MWGui
 
         // hide mygui's pointer
         MyGUI::PointerManager::getInstance().setVisible(false);
+
+        mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
+            MyGUI::Align::Default, "Overlay");
+        mVideoBackground->setImageTexture("black.png");
+        mVideoBackground->setVisible(false);
+
+        mVideoWidget = mVideoBackground->createWidgetReal<VideoWidget>("ImageBox", 0,0,1,1, MyGUI::Align::Default);
     }
 
     void WindowManager::initUI()
@@ -391,6 +403,7 @@ namespace MWGui
         mCompanionWindow->setVisible(false);
         mInventoryWindow->setTrading(false);
         mRecharge->setVisible(false);
+        mVideoBackground->setVisible(false);
 
         mHud->setVisible(mHudEnabled);
 
@@ -538,10 +551,6 @@ namespace MWGui
                 mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
 
                 setCursorVisible(false);
-                break;
-            case GM_Video:
-                setCursorVisible(false);
-                mHud->setVisible(false);
                 break;
             default:
                 // Unsupported mode, switch back to game
@@ -894,6 +903,7 @@ namespace MWGui
 
     void WindowManager::windowResized(int x, int y)
     {
+        sizeVideo(x, y);
         mGuiManager->windowResized();
         mLoadingScreen->onResChange (x,y);
         if (!mHud)
@@ -1401,4 +1411,57 @@ namespace MWGui
         mMap->readRecord(reader, type);
     }
 
+    void WindowManager::playVideo(const std::string &name, bool allowSkipping)
+    {
+        mVideoWidget->playVideo("video\\" + name, allowSkipping);
+
+        // Turn off all rendering except for the GUI
+        mRendering->getScene()->clearSpecialCaseRenderQueues();
+        // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work?
+        for(int i = 0;i < Ogre::RENDER_QUEUE_MAX;++i)
+        {
+            if(i > 0 && i < 96)
+                mRendering->getScene()->addSpecialCaseRenderQueue(i);
+        }
+        mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+
+        MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
+        sizeVideo(screenSize.width, screenSize.height);
+
+        setKeyFocusWidget(mVideoWidget);
+
+        mVideoBackground->setVisible(true);
+
+        bool cursorWasVisible = mCursorVisible;
+        setCursorVisible(false);
+
+        while (mVideoWidget->update())
+        {
+            MWBase::Environment::get().getInputManager()->update(0, true, false);
+
+            mRendering->getWindow()->update();
+        }
+
+        setCursorVisible(cursorWasVisible);
+
+        // Restore normal rendering
+        mRendering->getScene()->clearSpecialCaseRenderQueues();
+        mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+
+        mVideoBackground->setVisible(false);
+    }
+
+    void WindowManager::sizeVideo(int screenWidth, int screenHeight)
+    {
+        // Use black bars to correct aspect ratio
+        mVideoBackground->setSize(screenWidth, screenHeight);
+
+        double imageaspect = static_cast<double>(mVideoWidget->getVideoWidth())/mVideoWidget->getVideoHeight();
+
+        int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
+        int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
+
+        mVideoWidget->setCoord(leftPadding, topPadding,
+                               screenWidth - leftPadding*2, screenHeight - topPadding*2);
+    }
 }

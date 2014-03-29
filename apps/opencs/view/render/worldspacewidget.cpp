@@ -1,11 +1,20 @@
 
 #include "worldspacewidget.hpp"
 
+#include <OgreSceneNode.h>
+#include <OgreSceneManager.h>
+#include <OgreEntity.h>
+
 #include "../world/scenetoolmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (QWidget *parent)
 : SceneWidget (parent)
-{}
+{
+    Ogre::Entity* ent = getSceneManager()->createEntity("cube", Ogre::SceneManager::PT_CUBE);
+    ent->setMaterialName("BaseWhite");
+
+    getSceneManager()->getRootSceneNode()->attachObject(ent);
+}
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
 {

@@ -6,6 +6,8 @@
 
 namespace MWGui
 {
+    MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text);
+
     struct JournalBooks
     {
         typedef TypesetBook::Ptr Book;

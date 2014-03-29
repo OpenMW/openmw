@@ -15,7 +15,7 @@ add_component_dir (nifoverrides
     )
 
 add_component_dir (bsa
-    bsa_archive bsa_file
+    bsa_archive bsa_file resources
     )
 
 add_component_dir (nif
@@ -45,7 +45,7 @@ add_component_dir (esm
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate dialoguestate statstate
-    npcstats creaturestats
+    npcstats creaturestats weatherstate
     )
 
 add_component_dir (misc

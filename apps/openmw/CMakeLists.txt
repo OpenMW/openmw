@@ -33,7 +33,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
-    recharge
+    recharge mode videowidget
     )
 
 add_openmw_dir (mwdialogue
@@ -44,7 +44,7 @@ add_openmw_dir (mwscript
     locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions transformationextensions consoleextensions userextensions locals
+    animationextensions transformationextensions consoleextensions userextensions
     )
 
 add_openmw_dir (mwsound

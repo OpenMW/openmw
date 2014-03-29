@@ -47,7 +47,7 @@ namespace MWScript
                 bool allowSkipping = runtime[0].mInteger;
                 runtime.pop();
 
-                MWBase::Environment::get().getWorld ()->playVideo (name, allowSkipping);
+                MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
             }
         };
 

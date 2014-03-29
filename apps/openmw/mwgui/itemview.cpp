@@ -13,22 +13,18 @@
 
 #include "itemmodel.hpp"
 
-namespace
-{
-    std::string getCountString(const int count)
-    {
-        if (count == 1)
-            return "";
-        if (count > 9999)
-            return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
-        else
-            return boost::lexical_cast<std::string>(count);
-    }
-}
-
-
 namespace MWGui
 {
+
+std::string ItemView::getCountString(int count)
+{
+    if (count == 1)
+        return "";
+    if (count > 9999)
+        return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
+    else
+        return boost::lexical_cast<std::string>(count);
+}
 
 ItemView::ItemView()
     : mModel(NULL)

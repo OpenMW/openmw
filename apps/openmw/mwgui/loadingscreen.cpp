@@ -226,7 +226,7 @@ namespace MWGui
             }
             mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
 
-            MWBase::Environment::get().getInputManager()->update(0, true);
+            MWBase::Environment::get().getInputManager()->update(0, true, true);
 
             // First, swap buffers from last draw, then, queue an update of the
             // window contents, but don't swap buffers (which would have

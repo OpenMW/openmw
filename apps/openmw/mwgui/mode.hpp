@@ -47,9 +47,7 @@ namespace MWGui
       GM_Loading,
       GM_LoadingWallpaper,
 
-      GM_QuickKeysMenu,
-
-      GM_Video
+      GM_QuickKeysMenu
     };
 
   // Windows shown in inventory mode

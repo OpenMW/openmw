@@ -71,9 +71,9 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
             {
                 if (stringNeedsQuote(it->getId()))
                 {
-                    insertPlainText(QString::fromStdString ('"' + it->getId() + '"'));
+                    insertPlainText(QString::fromUtf8 (('"' + it->getId() + '"').c_str()));
                 } else {
-                    insertPlainText(QString::fromStdString (it->getId()));
+                    insertPlainText(QString::fromUtf8 (it->getId().c_str()));
                 }
             }
         }
@@ -82,7 +82,7 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
 
 bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
 {
-    const QString string(QString::fromStdString(id)); //<regex> is only for c++11, so let's use qregexp for now.
+    const QString string(QString::fromUtf8(id.c_str())); //<regex> is only for c++11, so let's use qregexp for now.
     //I'm not quite sure when do we need to put quotes. To be safe we will use quotes for anything other than…
     return !(string.contains(mWhiteListQoutes));
 }

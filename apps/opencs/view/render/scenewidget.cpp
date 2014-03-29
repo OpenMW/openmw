@@ -11,7 +11,10 @@
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
 
+#include "../world/scenetoolmode.hpp"
+
 #include "navigation.hpp"
+#include "lighting.hpp"
 
 namespace CSVRender
 {
@@ -19,11 +22,12 @@ namespace CSVRender
         : QWidget(parent)
         , mWindow(NULL)
         , mCamera(NULL)
-        , mSceneMgr(NULL), mNavigation (0), mUpdate (false)
+        , mSceneMgr(NULL), mNavigation (0), mLighting (0), mUpdate (false)
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
         , mKeyRollLeft (false), mKeyRollRight (false)
         , mFast (false), mDragging (false), mMod1 (false)
         , mFastFactor (4) /// \todo make this configurable
+        , mDefaultAmbient (0, 0, 0, 0), mHasDefaultAmbient (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
         setAttribute(Qt::WA_NoSystemBackground);
@@ -32,28 +36,17 @@ namespace CSVRender
 
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
-        // Throw in a random color just to make sure multiple scenes work
-        Ogre::Real r = Ogre::Math::RangeRandom(0, 1);
-        Ogre::Real g = Ogre::Math::RangeRandom(0, 1);
-        Ogre::Real b = Ogre::Math::RangeRandom(0, 1);
-        mSceneMgr->setAmbientLight(Ogre::ColourValue(r,g,b,1));
-
-        Ogre::Light* l = mSceneMgr->createLight();
-        l->setType (Ogre::Light::LT_DIRECTIONAL);
-        l->setDirection (Ogre::Vector3(-0.4, -0.7, 0.3));
-        l->setDiffuseColour (Ogre::ColourValue(0.7,0.7,0.7));
+        mSceneMgr->setAmbientLight (Ogre::ColourValue (0,0,0,1));
 
         mCamera = mSceneMgr->createCamera("foo");
 
-        Ogre::Entity* ent = mSceneMgr->createEntity("cube", Ogre::SceneManager::PT_CUBE);
-        ent->setMaterialName("BaseWhite");
+        mCamera->setPosition (300, 0, 0);
+        mCamera->lookAt (0, 0, 0);
+        mCamera->setNearClipDistance (0.1);
+        mCamera->setFarClipDistance (30000);
+        mCamera->roll (Ogre::Degree (90));
 
-        mSceneMgr->getRootSceneNode()->attachObject(ent);
-
-        mCamera->setPosition(300,300,300);
-        mCamera->lookAt(0,0,0);
-        mCamera->setNearClipDistance(0.1);
-        mCamera->setFarClipDistance(3000);
+        setLighting (&mLightingDay);
 
         QTimer *timer = new QTimer (this);
 
@@ -61,9 +54,27 @@ namespace CSVRender
         timer->start (20); /// \todo make this configurable
     }
 
-    void SceneWidget::setAmbient (const Ogre::ColourValue& colour)
+    CSVWorld::SceneToolMode *SceneWidget::makeLightingSelector (CSVWorld::SceneToolbar *parent)
     {
-        mSceneMgr->setAmbientLight (colour);
+        CSVWorld::SceneToolMode *tool = new CSVWorld::SceneToolMode (parent);
+
+        tool->addButton (":door.png", "day"); /// \todo replace icons
+        tool->addButton (":GMST.png", "night");
+        tool->addButton (":Info.png", "bright");
+
+        connect (tool, SIGNAL (modeChanged (const std::string&)),
+            this, SLOT (selectLightingMode (const std::string&)));
+
+        return tool;
+    }
+
+    void SceneWidget::setDefaultAmbient (const Ogre::ColourValue& colour)
+    {
+        mDefaultAmbient = colour;
+        mHasDefaultAmbient = true;
+
+        if (mLighting)
+            mLighting->setDefaultAmbient (colour);
     }
 
     void SceneWidget::updateOgreWindow()
@@ -116,6 +127,16 @@ namespace CSVRender
             if (mNavigation->activate (mCamera))
                 mUpdate = true;
         }
+    }
+
+    Ogre::SceneManager *SceneWidget::getSceneManager()
+    {
+        return mSceneMgr;
+    }
+
+    void SceneWidget::flagAsModified()
+    {
+        mUpdate = true;
     }
 
     void SceneWidget::paintEvent(QPaintEvent* e)
@@ -309,5 +330,24 @@ namespace CSVRender
     int SceneWidget::getFastFactor() const
     {
         return mFast ? mFastFactor : 1;
+    }
+
+    void SceneWidget::setLighting (Lighting *lighting)
+    {
+        if (mLighting)
+            mLighting->deactivate();
+
+        mLighting = lighting;
+        mLighting->activate (mSceneMgr, mHasDefaultAmbient ? &mDefaultAmbient : 0);
+    }
+
+    void SceneWidget::selectLightingMode (const std::string& mode)
+    {
+        if (mode=="day")
+            setLighting (&mLightingDay);
+        else if (mode=="night")
+            setLighting (&mLightingNight);
+        else if (mode=="bright")
+            setLighting (&mLightingBright);
     }
 }

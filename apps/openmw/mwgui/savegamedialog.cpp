@@ -86,7 +86,21 @@ namespace MWGui
             {
                 std::stringstream title;
                 title << it->getSignature().mPlayerName;
-                title << " (Level " << it->getSignature().mPlayerLevel << " " << it->getSignature().mPlayerClass << ")";
+
+                // For a custom class, we will not find it in the store (unless we loaded the savegame first).
+                // Fall back to name stored in savegame header in that case.
+                std::string className;
+                if (it->getSignature().mPlayerClassId.empty())
+                    className = it->getSignature().mPlayerClassName;
+                else
+                {
+                    // Find the localised name for this class from the store
+                    const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(
+                                it->getSignature().mPlayerClassId);
+                    className = class_->mName;
+                }
+
+                title << " (Level " << it->getSignature().mPlayerLevel << " " << className << ")";
 
                 mCharacterSelection->addItem (title.str());
 
@@ -169,7 +183,10 @@ namespace MWGui
         else
         {
             if (mCurrentCharacter && slot)
+            {
                 MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot);
+                MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
+            }
         }
 
         setVisible(false);
@@ -241,7 +258,13 @@ namespace MWGui
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 
-        text << asctime(timeinfo) << "\n";
+        // Use system/environment locale settings for datetime formatting
+        std::setlocale(LC_TIME, "");
+
+        const int size=1024;
+        char buffer[size];
+        if (std::strftime(buffer, size, "%x %X", timeinfo) > 0)
+            text << buffer << "\n";
         text << "Level " << slot->mProfile.mPlayerLevel << "\n";
         text << slot->mProfile.mPlayerCell << "\n";
         // text << "Time played: " << slot->mProfile.mTimePlayed << "\n";

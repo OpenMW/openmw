@@ -37,7 +37,6 @@ namespace CSMWorld
         }
     };
 
-    /// \note Shares ID with IdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct StringIdColumn : public Column<ESXRecordT>
     {
@@ -202,7 +201,7 @@ namespace CSMWorld
     struct DescriptionColumn : public Column<ESXRecordT>
     {
         DescriptionColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_LongString)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -834,15 +833,15 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
-    /// \note Shares ID with StringIdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct IdColumn : public Column<ESXRecordT>
     {
-        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String) {}
+        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_ReferenceableId,
+            ColumnBase::Display_Referenceable) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1114,7 +1113,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
@@ -1380,7 +1379,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct QuestDescriptionColumn : public Column<ESXRecordT>
     {
-        QuestDescriptionColumn() : Column<ESXRecordT> (Columns::ColumnId_QuestDescription, ColumnBase::Display_String) {}
+        QuestDescriptionColumn() : Column<ESXRecordT> (Columns::ColumnId_QuestDescription, ColumnBase::Display_LongString) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1560,7 +1559,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ResponseColumn : public Column<ESXRecordT>
     {
-        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_String) {}
+        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_LongString) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

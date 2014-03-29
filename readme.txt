@@ -8,7 +8,6 @@ License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
 Font Licenses:
-EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
 DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
 
 

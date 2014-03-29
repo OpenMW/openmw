@@ -37,13 +37,6 @@ namespace
         return sqrt(x * x + y * y + z * z);
     }
 
-    static float sgn(Ogre::Radian a)
-    {
-        if(a.valueRadians() > 0)
-            return 1.0;
-        return -1.0;
-    }
-
     int getClosestPoint(const ESM::Pathgrid* grid, float x, float y, float z)
     {
         if(!grid || grid->mPoints.empty())
