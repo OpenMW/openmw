@@ -66,6 +66,10 @@ namespace OEngine
 
             WindowSizeListener* mWindowListener;
 
+            int mWindowWidth;
+            int mWindowHeight;
+            bool mOutstandingResize;
+
         public:
             OgreRenderer()
             : mRoot(NULL)
@@ -77,6 +81,9 @@ namespace OEngine
             , mOgreInit(NULL)
             , mFader(NULL)
             , mWindowListener(NULL)
+            , mWindowWidth(0)
+            , mWindowHeight(0)
+            , mOutstandingResize(false)
             {
             }
 
@@ -133,7 +140,7 @@ namespace OEngine
             /// Viewport
             Ogre::Viewport *getViewport() { return mView; }
 
-            void setWindowListener(WindowSizeListener* listener) { mWindowListener = listener; }
+            void setWindowListener(WindowSizeListener* listener);
 
             void adjustViewport();
         };
