@@ -36,6 +36,7 @@ namespace MWGui
         virtual void open();
 
         // The receiver of the bribe
+        MWWorld::Ptr mReceiver;
         void setReceiver(MWWorld::Ptr receiver);
 
     private:
@@ -50,9 +51,6 @@ namespace MWGui
 
         void onCancel (MyGUI::Widget* sender);
         void onPersuade (MyGUI::Widget* sender);
-
-        // The receiver of the bribe
-        MWWorld::Ptr mReceiver;
     };
 
 
