@@ -9,6 +9,7 @@ Wizard::ConclusionPage::ConclusionPage(MainWizard *wizard) :
     mWizard(wizard)
 {
     setupUi(this);
+    setPixmap(QWizard::WatermarkPixmap, QPixmap(QLatin1String(":/images/intropage-background.png")));
 }
 
 void Wizard::ConclusionPage::initializePage()
