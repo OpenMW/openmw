@@ -76,7 +76,7 @@ namespace MWGui
         else /*if (sender == mBribe1000Button)*/
         {
             player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, 1000, player);
-            mReceiver.getClass().getContainerStore(mReceiver).add(MWWorld::ContainerStore::sGoldId, 10000, mReceiver);
+            mReceiver.getClass().getContainerStore(mReceiver).add(MWWorld::ContainerStore::sGoldId, 1000, mReceiver);
             type = MWBase::MechanicsManager::PT_Bribe1000;
         }
 
