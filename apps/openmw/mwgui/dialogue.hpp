@@ -35,6 +35,10 @@ namespace MWGui
 
         virtual void open();
 
+        // The receiver of the bribe
+        MWWorld::Ptr mReceiver;
+        void setReceiver(MWWorld::Ptr receiver);
+
     private:
         MyGUI::Button* mCancelButton;
         MyGUI::Button* mAdmireButton;
