@@ -127,14 +127,18 @@ namespace MWMechanics
                     mYCell = mCellY * ESM::Land::REAL_SIZE;
                 }
 
+                // convert npcPos to local (i.e. cell) co-ordinates
                 Ogre::Vector3 npcPos(actor.getRefData().getPosition().pos);
                 npcPos[0] = npcPos[0] - mXCell;
                 npcPos[1] = npcPos[1] - mYCell;
 
+                // populate mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+                // NOTE: mPoints and mAllowedNodes contain points in local co-ordinates
                 for(unsigned int counter = 0; counter < mPathgrid->mPoints.size(); counter++)
                 {
-                    Ogre::Vector3 nodePos(mPathgrid->mPoints[counter].mX, mPathgrid->mPoints[counter].mY,
-                        mPathgrid->mPoints[counter].mZ);
+                    Ogre::Vector3 nodePos(mPathgrid->mPoints[counter].mX,
+                                          mPathgrid->mPoints[counter].mY,
+                                          mPathgrid->mPoints[counter].mZ);
                     if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
                         mAllowedNodes.push_back(mPathgrid->mPoints[counter]);
                 }
@@ -145,8 +149,9 @@ namespace MWMechanics
                     unsigned int index = 0;
                     for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
                     {
-                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
-                            mAllowedNodes[counterThree].mZ);
+                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX,
+                                              mAllowedNodes[counterThree].mY,
+                                              mAllowedNodes[counterThree].mZ);
                         float tempDist = npcPos.squaredDistance(nodePos);
                         if(tempDist < closestNode)
                             index = counterThree;
@@ -277,16 +282,24 @@ namespace MWMechanics
                 dest.mY = destNodePos[1] + mYCell;
                 dest.mZ = destNodePos[2];
 
+                // actor position is already in world co-ordinates
                 ESM::Pathgrid::Point start;
                 start.mX = pos.pos[0];
                 start.mY = pos.pos[1];
                 start.mZ = pos.pos[2];
 
+                // don't take shortcuts for wandering
                 mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
                 if(mPathFinder.isPathConstructed())
                 {
-                    // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
+                    // buildPath inserts dest in case it is not a pathgraph point index
+                    // which is a duplicate for AiWander
+                    //if(mPathFinder.getPathSize() > 1)
+                        //mPathFinder.getPath().pop_back();
+
+                    // Remove this node as an option and add back the previously used node
+                    // (stops NPC from picking the same node):
                     ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
                     mAllowedNodes.push_back(mCurrentNode);
@@ -377,7 +390,10 @@ namespace MWMechanics
                 }
                 else
                 {
+                    // normal walk forward
                     actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+                    // turn towards the next point in mPath
+                    // TODO: possibly no need to check every frame, maybe every 30 should be ok?
                     zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
                 }
 
