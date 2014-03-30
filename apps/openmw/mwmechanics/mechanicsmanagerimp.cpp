@@ -843,7 +843,7 @@ namespace MWMechanics
 
             // TODO: An actor reacts differently based on different values of AI_Fight and AI_Flee. 
             // Actor has reported the crime, will the actor fight the offender?
-            if (creatureStats.getAiSetting(CreatureStats::AI_Fight).getModified > 0)
+            if (creatureStats.getAiSetting(CreatureStats::AI_Fight).getModified() > 0)
             {
                 creatureStats.getAiSequence().stack(AiCombat(offender));
                 creatureStats.setHostile(true);
