@@ -61,6 +61,7 @@
 #include "itemview.hpp"
 #include "fontloader.hpp"
 #include "videowidget.hpp"
+#include "backgroundimage.hpp"
 
 namespace MWGui
 {
@@ -160,6 +161,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
 
