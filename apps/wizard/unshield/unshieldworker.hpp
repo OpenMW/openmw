@@ -63,8 +63,7 @@ namespace Wizard
         bool extractCab(const QString &cabFile, const QString &destination);
         bool extractFile(Unshield *unshield, const QString &destination, const QString &prefix, int index, int counter);
 
-        Unshield* openCab(const QString &cabFile);
-        bool findInCab(const QString &fileName, Unshield *unshield);
+        bool findInCab(const QString &fileName, const QString &cabFile);
 
         QString findFile(const QString &fileName, const QString &path);
 

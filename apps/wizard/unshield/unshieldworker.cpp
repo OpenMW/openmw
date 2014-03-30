@@ -389,7 +389,7 @@ void Wizard::UnshieldWorker::extract()
 
     // Write the settings to the Morrowind config file
     if (!writeSettings())
-        return false;
+        return;
 
     // Remove the temporary directory
     removeDirectory(getPath() + QDir::separator() + QLatin1String("extract-temp"));
@@ -453,18 +453,11 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
 
             qDebug() << "current archive: " << file;
 
-            // Try to open the archive
-            Unshield *unshield = NULL;
-            unshield = openCab(file);
-
-            if (!unshield)
-                return false;
-
             if (component == Wizard::Component_Morrowind)
             {
-                bool morrowindFound = findInCab(QLatin1String("Morrowind.bsa"), unshield);
-                bool tribunalFound = findInCab(QLatin1String("Tribunal.bsa"), unshield);
-                bool bloodmoonFound = findInCab(QLatin1String("Bloodmoon.bsa"), unshield);
+                bool morrowindFound = findInCab(QLatin1String("Morrowind.bsa"), file);
+                bool tribunalFound = findInCab(QLatin1String("Tribunal.bsa"), file);
+                bool bloodmoonFound = findInCab(QLatin1String("Bloodmoon.bsa"), file);
 
                 if (morrowindFound) {
                     // Check if we have correct archive, other archives have Morrowind.bsa too
@@ -476,14 +469,12 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
                 }
             } else {
 
-                if (findInCab(name + QLatin1String(".bsa"), unshield)) {
+                if (findInCab(name + QLatin1String(".bsa"), file)) {
                     cabFile = file;
                     found = true;
                 }
             }
 
-            // Close the current archive
-            unshield_close(unshield);
         }
 
         if (!found) {
@@ -778,6 +769,7 @@ bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &d
 
     if (!unshield) {
         emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
+        unshield_close(unshield);
         return false;
     }
 
@@ -878,7 +870,7 @@ QStringList Wizard::UnshieldWorker::findDirectories(const QString &dirName, cons
     return findFiles(dirName, path, 0, true, true);
 }
 
-Unshield* Wizard::UnshieldWorker::openCab(const QString &cabFile)
+bool Wizard::UnshieldWorker::findInCab(const QString &fileName, const QString &cabFile)
 {
     QByteArray array(cabFile.toUtf8());
 
@@ -888,16 +880,8 @@ Unshield* Wizard::UnshieldWorker::openCab(const QString &cabFile)
     if (!unshield) {
         emit error(tr("Failed to open InstallShield Cabinet File."), tr("Opening %1 failed.").arg(cabFile));
         unshield_close(unshield);
-        return NULL;
-    }
-
-    return unshield;
-}
-
-bool Wizard::UnshieldWorker::findInCab(const QString &fileName, Unshield *unshield)
-{
-    if (!unshield)
         return false;
+    }
 
     for (int i=0; i<unshield_file_group_count(unshield); ++i)
     {
