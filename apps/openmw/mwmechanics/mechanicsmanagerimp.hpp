@@ -111,7 +111,7 @@ namespace MWMechanics
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
              * @return was the crime reported?
              */
-            virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+            virtual bool commitCrime (const MWWorld::Ptr& offender, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
             virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);

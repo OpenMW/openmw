@@ -3,6 +3,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -11,6 +12,8 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+
+#include "aicombat.hpp"
 
 #include <OgreSceneNode.h>
 
@@ -798,37 +801,55 @@ namespace MWMechanics
             return;
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
-
-    bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr& offender, const MWWorld::Ptr& victim, OffenseType type, int arg)
     {
-        if (ptr.getRefData().getHandle() != "player")
+        if (offender.getRefData().getHandle() != "player")
             return false;
 
-        bool reported=false;
-        for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
-        {
-            if (it->first != ptr &&
-                    MWBase::Environment::get().getWorld()->getLOS(ptr, it->first) &&
-                    awarenessCheck(ptr, it->first))
-            {
-                // NPCs will always curse you when they notice you steal their items, even if they don't report the crime
-                if (it->first == victim && type == OT_Theft)
-                {
-                    MWBase::Environment::get().getDialogueManager()->say(victim, "Thief");
-                }
+        MWWorld::Ptr ptr;
 
-                // Actor has witnessed a crime. Will he report it?
-                // (not sure, is > 0 correct?)
-                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0)
-                {
-                    // TODO: stats.setAlarmed(true) on NPCs within earshot
-                    // fAlarmRadius ?
-                    reported=true;
-                    break;
-                }
+        bool reported=false;
+        MWWorld::CellStore* cell = victim.getCell();
+
+        // TODO: implement and check the distance of actors to victim using fAlarmRadius
+        // get all NPCs in victims cell
+        for (MWWorld::CellRefList<ESM::NPC>::List::iterator it (cell->get<ESM::NPC>().mList.begin()); it != cell->get<ESM::NPC>().mList.end(); ++it)
+        {
+            MWWorld::Ptr ptr (&*it, cell);
+
+            // offender can't be ally to themselves
+            if (ptr == offender) 
+                continue;
+
+            CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+            
+            // curse at the thief
+            if (ptr == victim && type == OT_Theft)
+                MWBase::Environment::get().getDialogueManager()->say(victim, "Thief");
+
+            // TODO: Make guards persue unless other factors, such as bounty stops them
+            // If the actor is a guard
+
+            // TODO: An actor reacts differently based on different values of AI_Alarm. 
+            // Actor has witnessed a crime. Will he report it?
+            if (creatureStats.getAiSetting(CreatureStats::AI_Alarm).getModified() > 0)
+            {
+                creatureStats.setAlarmed(true);
+                reported=true; 
+            } 
+            else
+                continue;
+
+            // TODO: An actor reacts differently based on different values of AI_Fight and AI_Flee. 
+            // Actor has reported the crime, will the actor fight the offender?
+            if (creatureStats.getAiSetting(CreatureStats::AI_Fight).getModified > 0)
+            {
+                creatureStats.getAiSequence().stack(AiCombat(offender));
+                creatureStats.setHostile(true);
+                creatureStats.getAiSequence().execute(ptr, 0);
             }
         }
-
         if (reported)
             reportCrime(ptr, victim, type, arg);
         return reported;
