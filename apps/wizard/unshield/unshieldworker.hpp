@@ -42,11 +42,11 @@ namespace Wizard
 
         void setIniCodec(QTextCodec *codec);
 
-        void setupSettings();
+        bool setupSettings();
 
     private:
 
-        void writeSettings();
+        bool writeSettings();
 
         bool getInstallComponent(Component component);
 
@@ -114,7 +114,6 @@ namespace Wizard
         void requestFileDialog(Wizard::Component component);
 
         void textChanged(const QString &text);
-        void logTextChanged(const QString &text);
 
         void error(const QString &text, const QString &details);
         void progressChanged(int progress);

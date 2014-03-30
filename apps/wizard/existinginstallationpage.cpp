@@ -19,7 +19,6 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(MainWizard *wizard) :
     installationsList->addItem(mEmptyItem);
     mEmptyItem->setHidden(true);
 
-
     connect(installationsList, SIGNAL(currentTextChanged(QString)),
             this, SLOT(textChanged(QString)));
 

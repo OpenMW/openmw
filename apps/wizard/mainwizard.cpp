@@ -4,6 +4,8 @@
 
 #include <QDebug>
 
+#include <QTime>
+#include <QDateTime>
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QTextCodec>
@@ -40,9 +42,51 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 
     setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
 
+    setupLog();
     setupGameSettings();
     setupInstallations();
     setupPages();
+}
+
+void Wizard::MainWizard::setupLog()
+{
+    QString logPath(QString::fromUtf8(mCfgMgr.getLogPath().string().c_str()));
+    logPath.append(QLatin1String("wizard.log"));
+
+    QString message(tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
+                    <p>Please make sure you have the right permissions \
+                    and try again.</p></body></html>"));
+
+    QFile *file = new QFile(logPath);
+
+    if (!file->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error opening Wizard log file"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(message.arg(file->fileName()));
+        msgBox.exec();
+        return qApp->quit();
+    }
+
+    qDebug() << logPath;
+
+    mLog = new QTextStream(file);
+    mLog->setCodec(QTextCodec::codecForName("UTF-8"));
+
+    //addLogText(QLatin1String("test test 123 test"));
+}
+
+void Wizard::MainWizard::addLogText(const QString &text)
+{
+
+    qDebug() << "AddLogText called! " << text;
+    if (!text.isEmpty()) {
+        qDebug() << "logging " << text;
+        *mLog << text << endl;
+    }
+
+//    file.close();
 }
 
 void Wizard::MainWizard::setupGameSettings()

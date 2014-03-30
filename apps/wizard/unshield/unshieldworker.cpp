@@ -153,37 +153,39 @@ void Wizard::UnshieldWorker::setIniCodec(QTextCodec *codec)
     mIniCodec = codec;
 }
 
-void Wizard::UnshieldWorker::setupSettings()
+bool Wizard::UnshieldWorker::setupSettings()
 {
     // Create Morrowind.ini settings map
     if (getIniPath().isEmpty())
-        return;
+        return false;
 
     QFile file(getIniPath());
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         emit error(tr("Failed to open Morrowind configuration file!"),
                    tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
-        return;
+        return false;
     }
 
     QTextStream stream(&file);
     stream.setCodec(mIniCodec);
 
     mIniSettings.readFile(stream);
+
+    return true;
 }
 
-void Wizard::UnshieldWorker::writeSettings()
+bool Wizard::UnshieldWorker::writeSettings()
 {
     if (getIniPath().isEmpty())
-        return;
+        return false;
 
     QFile file(getIniPath());
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         emit error(tr("Failed to open Morrowind configuration file!"),
                    tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
-        return;
+        return false;
     }
 
     QTextStream stream(&file);
@@ -192,7 +194,10 @@ void Wizard::UnshieldWorker::writeSettings()
     if (!mIniSettings.writeFile(getIniPath(), stream)) {
          emit error(tr("Failed to write Morrowind configuration file!"),
                     tr("Writing to %1 failed: %2.").arg(getIniPath(), file.errorString()));
+         return false;
     }
+
+    return true;
 }
 
 bool Wizard::UnshieldWorker::removeDirectory(const QString &dirName)
@@ -383,7 +388,8 @@ void Wizard::UnshieldWorker::extract()
     }
 
     // Write the settings to the Morrowind config file
-    writeSettings();
+    if (!writeSettings())
+        return false;
 
     // Remove the temporary directory
     removeDirectory(getPath() + QDir::separator() + QLatin1String("extract-temp"));
@@ -626,7 +632,9 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
 
         // Setup Morrowind configuration
         setIniPath(getPath() + QDir::separator() + QLatin1String("Morrowind.ini"));
-        setupSettings();
+
+        if (!setupSettings())
+            return false;
     }
 
     if (component == Wizard::Component_Tribunal)

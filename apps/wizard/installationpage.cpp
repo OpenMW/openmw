@@ -80,6 +80,9 @@ void Wizard::InstallationPage::startInstallation()
     connect(mUnshield, SIGNAL(textChanged(QString)),
             logTextEdit, SLOT(appendPlainText(QString)),  Qt::QueuedConnection);
 
+    connect(mUnshield, SIGNAL(textChanged(QString)),
+            mWizard, SLOT(addLogText(QString)),  Qt::QueuedConnection);
+
     connect(mUnshield, SIGNAL(progressChanged(int)),
             installProgressBar, SLOT(setValue(int)),  Qt::QueuedConnection);
 
@@ -153,6 +156,8 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     if (path.isEmpty()) {
         logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
                                     <b>Error: The installation was aborted by the user</b></p>"));
+
+        mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
         mWizard->mError = true;
 
         emit completeChanged();
@@ -185,6 +190,10 @@ void Wizard::InstallationPage::installationError(const QString &text, const QStr
     logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"> \
                                <b>%1</b></p>").arg(details));
 
+    mWizard->addLogText(QLatin1String("Error: ") + text);
+    mWizard->addLogText(details);
+
+    mWizard->mError = true;
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("An error occurred"));
     msgBox.setIcon(QMessageBox::Critical);
@@ -196,7 +205,7 @@ void Wizard::InstallationPage::installationError(const QString &text, const QStr
     msgBox.setDetailedText(details);
     msgBox.exec();
 
-    mWizard->mError = true;
+
     emit completeChanged();
 }
 
