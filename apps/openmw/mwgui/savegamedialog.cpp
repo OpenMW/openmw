@@ -80,6 +80,8 @@ namespace MWGui
 
         mCharacterSelection->removeAllItems();
 
+        int selectedIndex = MyGUI::ITEM_NONE;
+
         for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it)
         {
             if (it->begin()!=it->end())
@@ -109,10 +111,12 @@ namespace MWGui
                     it->begin()->mPath.parent_path().filename().string())))
                 {
                     mCurrentCharacter = &*it;
-                    mCharacterSelection->setIndexSelected(mCharacterSelection->getItemCount()-1);
+                    selectedIndex = mCharacterSelection->getItemCount()-1;
                 }
             }
         }
+
+        mCharacterSelection->setIndexSelected(selectedIndex);
 
         fillSaveList();
 
