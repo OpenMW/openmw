@@ -11,9 +11,16 @@ namespace Launcher
     class SettingsPage : public QWidget, private Ui::SettingsPage
     {
         Q_OBJECT
+
     public:
         SettingsPage(QWidget *parent = 0);
 
+        void saveSettings();
+        bool loadSettings();
+
+    private slots:
+        void on_wizardButton_clicked();
+        void on_importerButton_clicked();
     };
 }
 

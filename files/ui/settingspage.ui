@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
-    <height>401</height>
+    <width>516</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,8 +22,11 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="languageLabel">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The language of the original Morrowind installation files (used for the character encoding)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
-         <string>Morrowind installation language:</string>
+         <string>Morrowind content language:</string>
         </property>
        </widget>
       </item>
@@ -105,7 +108,7 @@
       <item>
        <widget class="QCheckBox" name="addonsCheckBox">
         <property name="text">
-         <string>Import previously selected add-ons (creates a new Content List)</string>
+         <string>Import add-on and plugin selection (creates a new Content List)</string>
         </property>
         <property name="checked">
          <bool>true</bool>
