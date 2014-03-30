@@ -13,6 +13,10 @@
 #include "ui_mainwindow.h"
 
 class QListWidgetItem;
+class QStackedWidget;
+class QStringList;
+class QStringListModel;
+class QString;
 
 namespace Launcher
 {
@@ -20,6 +24,7 @@ namespace Launcher
     class GraphicsPage;
     class DataFilesPage;
     class UnshieldThread;
+    class SettingsPage;
 
 #ifndef WIN32
     bool expansions(Launcher::UnshieldThread& cd);
@@ -58,6 +63,8 @@ namespace Launcher
         PlayPage *mPlayPage;
         GraphicsPage *mGraphicsPage;
         DataFilesPage *mDataFilesPage;
+        SettingsPage *mSettingsPage;
+
 
         Files::ConfigurationManager mCfgMgr;
 

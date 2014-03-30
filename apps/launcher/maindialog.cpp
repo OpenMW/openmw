@@ -29,6 +29,7 @@
 #include "playpage.hpp"
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"
+#include "settingspage.hpp"
 
 using namespace Process;
 
@@ -102,26 +103,29 @@ void Launcher::MainDialog::createIcons()
     if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
 
-    // We create a fallback icon because the default fallback doesn't work
-    QIcon graphicsIcon = QIcon(":/icons/tango/video-display.png");
-
     QListWidgetItem *playButton = new QListWidgetItem(iconWidget);
     playButton->setIcon(QIcon(":/images/openmw.png"));
     playButton->setText(tr("Play"));
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *graphicsButton = new QListWidgetItem(iconWidget);
-    graphicsButton->setIcon(QIcon::fromTheme("video-display", graphicsIcon));
-    graphicsButton->setText(tr("Graphics"));
-    graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
-    graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
     QListWidgetItem *dataFilesButton = new QListWidgetItem(iconWidget);
     dataFilesButton->setIcon(QIcon(":/images/openmw-plugin.png"));
     dataFilesButton->setText(tr("Data Files"));
     dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    QListWidgetItem *graphicsButton = new QListWidgetItem(iconWidget);
+    graphicsButton->setIcon(QIcon::fromTheme("video-display"));
+    graphicsButton->setText(tr("Graphics"));
+    graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
+    graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    QListWidgetItem *settingsButton = new QListWidgetItem(iconWidget);
+    settingsButton->setIcon(QIcon::fromTheme("preferences-system"));
+    settingsButton->setText(tr("Settings"));
+    settingsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    settingsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     connect(iconWidget,
             SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
@@ -132,8 +136,9 @@ void Launcher::MainDialog::createIcons()
 void Launcher::MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
-    mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
+    mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
+    mSettingsPage = new SettingsPage(this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
     mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
@@ -141,8 +146,9 @@ void Launcher::MainDialog::createPages()
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);
-    pagesWidget->addWidget(mGraphicsPage);
     pagesWidget->addWidget(mDataFilesPage);
+    pagesWidget->addWidget(mGraphicsPage);
+    pagesWidget->addWidget(mSettingsPage);
 
     // Select the first page
     iconWidget->setCurrentItem(iconWidget->item(0), QItemSelectionModel::Select);

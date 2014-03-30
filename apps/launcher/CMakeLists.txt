@@ -5,6 +5,7 @@ set(LAUNCHER
     maindialog.cpp
     playpage.cpp
     textslotmsgbox.cpp
+    settingspage.cpp
 
     settings/graphicssettings.cpp
 
@@ -25,6 +26,7 @@ set(LAUNCHER_HEADER
     maindialog.hpp
     playpage.hpp
     textslotmsgbox.hpp
+    settingspage.hpp
 
     settings/graphicssettings.hpp
 
@@ -45,6 +47,7 @@ set(LAUNCHER_HEADER_MOC
     maindialog.hpp
     playpage.hpp
     textslotmsgbox.hpp
+    settingspage.hpp
 
     utils/textinputdialog.hpp
     utils/checkablemessagebox.hpp
@@ -64,6 +67,7 @@ set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
     ${CMAKE_SOURCE_DIR}/files/ui/playpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/settingspage.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
