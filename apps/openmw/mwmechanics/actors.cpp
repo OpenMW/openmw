@@ -196,9 +196,8 @@ namespace MWMechanics
                 {
                     disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
                 }
-                bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,player)
-                        && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr);
-                if(  ( (fight == 100 )
+
+                if(    (fight == 100 )
                     || (fight >= 95 && d <= 3000)
                     || (fight >= 90 && d <= 2000)
                     || (fight >= 80 && d <= 1000)
@@ -206,12 +205,17 @@ namespace MWMechanics
                     || (fight >= 70 && disp <= 35 && d <= 1000)
                     || (fight >= 60 && disp <= 30 && d <= 1000)
                     || (fight >= 50 && disp == 0)
-                    || (fight >= 40 && disp <= 10 && d <= 500) )
-                    && LOS
+                    || (fight >= 40 && disp <= 10 && d <= 500)
                     )
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()));
-                    creatureStats.setHostile(true);
+                    bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,player)
+                            && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr);
+
+                    if (LOS)
+                    {
+                        creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+                        creatureStats.setHostile(true);
+                    }
                 }
             }
 
