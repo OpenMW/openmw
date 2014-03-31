@@ -3,11 +3,11 @@
 
 #include <openengine/gui/layout.hpp>
 
-#include "imagebutton.hpp"
-
 namespace MWGui
 {
 
+    class ImageButton;
+    class BackgroundImage;
     class SaveGameDialog;
 
     class MainMenu : public OEngine::GUI::Layout
@@ -29,7 +29,7 @@ namespace MWGui
             MyGUI::Widget* mButtonBox;
             MyGUI::TextBox* mVersionText;
 
-            MyGUI::ImageBox* mBackground;
+            BackgroundImage* mBackground;
 
             std::map<std::string, MWGui::ImageButton*> mButtons;
 
