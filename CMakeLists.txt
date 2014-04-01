@@ -116,7 +116,7 @@ if (WIN32)
 endif()
 
 # We probably support older versions than this.
-cmake_minimum_required(VERSION 999.6)
+cmake_minimum_required(VERSION 2.6)
 
 # source directory: libs
 
