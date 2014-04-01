@@ -26,6 +26,8 @@ void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
         setNavigation (&mOrbit);
 }
 
+void CSVRender::WorldspaceWidget::useViewHint (const std::string& hint) {}
+
 void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 {
     setNavigation (&m1st);

@@ -38,9 +38,13 @@ namespace CSVWorld
 
             virtual void setStatusBar (bool show);
 
+            virtual void useHint (const std::string& hint);
+
         private slots:
 
             void closeRequest();
+
+            void cellIndexChanged (const std::pair<int, int>& min, const std::pair<int, int>& max);
     };
 }
 

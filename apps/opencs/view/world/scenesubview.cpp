@@ -1,6 +1,8 @@
 
 #include "scenesubview.hpp"
 
+#include <sstream>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -35,7 +37,14 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     SceneToolbar *toolbar = new SceneToolbar (48, this);
 
     if (id.getId()=="sys::default")
-        mScene = new CSVRender::PagedWorldspaceWidget (this);
+    {
+        CSVRender::PagedWorldspaceWidget *widget = new CSVRender::PagedWorldspaceWidget (this);
+        mScene = widget;
+        connect (widget,
+            SIGNAL (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)),
+            this,
+            SLOT (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)));
+    }
     else
         mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
@@ -83,7 +92,26 @@ void CSVWorld::SceneSubView::setStatusBar (bool show)
     mBottom->setStatusBar (show);
 }
 
+void CSVWorld::SceneSubView::useHint (const std::string& hint)
+{
+    mScene->useViewHint (hint);
+}
+
 void CSVWorld::SceneSubView::closeRequest()
 {
     deleteLater();
+}
+
+void CSVWorld::SceneSubView::cellIndexChanged (const std::pair<int, int>& min,
+    const std::pair<int, int>& max)
+{
+    std::ostringstream stream;
+    stream << "Scene: " << getUniversalId().getId() << " (" << min.first << ", " << min.second;
+
+    if (min!=max)
+        stream << " to " << max.first << ", " << max.second;
+
+    stream << ")";
+
+    setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
 }
