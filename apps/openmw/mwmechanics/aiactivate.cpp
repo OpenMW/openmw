@@ -10,8 +10,9 @@
 #include "steering.hpp"
 #include "movement.hpp"
 
-MWMechanics::AiActivate::AiActivate(const std::string &objectId)
-    : mObjectId(objectId)
+MWMechanics::AiActivate::AiActivate(const std::string &objectId, int arg)
+    : mObjectId(objectId),
+      mArg(arg)
 {
 }
 MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const
@@ -24,6 +25,10 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     ESM::Position pos = actor.getRefData().getPosition();
     Movement &movement = actor.getClass().getMovementSettings(actor);
     const ESM::Cell *cell = actor.getCell()->getCell();
+
+    // Make guard chase player
+    //if (mArg == 1)
+      //  actor.getClass().getNpcStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
     MWWorld::Ptr player = world->getPlayerPtr();
     if(cell->mData.mX != player.getCell()->getCell()->mData.mX)

@@ -168,6 +168,8 @@ namespace MWClass
             ///< Write additional state from \a ptr into \a state.
 
             virtual int getBaseGold(const MWWorld::Ptr& ptr) const;
+
+            virtual bool isClass(const MWWorld::Ptr& ptr, const std::string &className) const;
     };
 }
 

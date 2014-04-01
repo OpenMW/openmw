@@ -401,4 +401,9 @@ namespace MWWorld
     {
         throw std::runtime_error("class does not support base gold");
     }
+
+    bool Class::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
+    {
+        return false;
+    }
 }

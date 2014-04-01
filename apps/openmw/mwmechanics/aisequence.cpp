@@ -161,7 +161,7 @@ void MWMechanics::AiSequence::fill(const ESM::AIPackageList &list)
         else if (it->mType == ESM::AI_Activate)
         {
             ESM::AIActivate data = it->mActivate;
-            package = new MWMechanics::AiActivate(data.mName.toString());
+            package = new MWMechanics::AiActivate(data.mName.toString(), 0);
         }
         else //if (it->mType == ESM::AI_Follow)
         {

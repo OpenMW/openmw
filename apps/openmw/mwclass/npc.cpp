@@ -1297,6 +1297,11 @@ namespace MWClass
             return ref->mBase->mNpdt12.mGold;
     }
 
+    bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
+    {
+        return ptr.get<ESM::NPC>()->mBase->mClass == className;
+    }
+
     const ESM::GameSetting *Npc::fMinWalkSpeed;
     const ESM::GameSetting *Npc::fMaxWalkSpeed;
     const ESM::GameSetting *Npc::fEncumberedMoveEffect;
