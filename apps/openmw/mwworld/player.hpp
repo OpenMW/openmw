@@ -41,6 +41,8 @@ namespace MWWorld
         bool                    mAutoMove;
         int                     mForwardBackward;
         bool                    mTeleported;
+
+        std::vector<MWWorld::Ptr> mWitnesses;
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);
@@ -94,6 +96,10 @@ namespace MWWorld
         void write (ESM::ESMWriter& writer) const;
 
         bool readRecord (ESM::ESMReader& reader, int32_t type);
+
+        void addPlayerWitnesses(std::vector<MWWorld::Ptr> witnesses);
+        std::vector<MWWorld::Ptr> getPlayerWitnesses() const;
+        void resetPlayerWitnesses();
     };
 }
 #endif

@@ -901,7 +901,7 @@ namespace MWMechanics
             }
         }
         if (reported)
-            ptr.getClass().getCreatureStats(ptr).addPlayerWitnesses(neighbors);
+            MWBase::Environment::get().getWorld()->getPlayer().addPlayerWitnesses(neighbors);
         return reported;
     }
 

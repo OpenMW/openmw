@@ -2777,7 +2777,7 @@ namespace MWWorld
     void World::resetCrimes(const MWWorld::Ptr& ptr)
     {
         // Reset witnesses to the players crimes 
-        std::vector<MWWorld::Ptr> neighbors = ptr.getClass().getCreatureStats(ptr).getPlayerWitnesses();
+        std::vector<MWWorld::Ptr> neighbors = mPlayer->getPlayerWitnesses();
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             // Reset states
@@ -2790,7 +2790,7 @@ namespace MWWorld
                 it->getClass().getCreatureStats(*it).getAiSequence().stopPersue();
 
         }
-        ptr.getClass().getCreatureStats(ptr).resetPlayerWitnesses();
+        mPlayer->resetPlayerWitnesses();
     }
 
     void World::spawnRandomCreature(const std::string &creatureList)

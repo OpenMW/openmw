@@ -274,4 +274,17 @@ namespace MWWorld
 
         return false;
     }
+
+    void Player::addPlayerWitnesses(std::vector<MWWorld::Ptr> witnesses)
+    {
+        mWitnesses.insert(mWitnesses.end(), witnesses.begin(), witnesses.end());
+    }
+    std::vector<MWWorld::Ptr> Player::getPlayerWitnesses() const
+    {
+        return mWitnesses;
+    }
+    void Player::resetPlayerWitnesses()
+    {
+        mWitnesses.clear();
+    }
 }
