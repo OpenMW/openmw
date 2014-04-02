@@ -17,6 +17,7 @@ namespace MWMechanics
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false),
           mIsWerewolf(false),
+          mWitnesses(),
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
     {
@@ -495,5 +496,18 @@ namespace MWMechanics
     int CreatureStats::getGoldPool() const 
     {
         return mGoldPool;
+    }
+
+    void CreatureStats::addPlayerWitnesses(std::vector<MWWorld::Ptr> witnesses)
+    {
+        mWitnesses.insert(mWitnesses.end(), witnesses.begin(), witnesses.end());
+    }
+    std::vector<MWWorld::Ptr> CreatureStats::getPlayerWitnesses() const
+    {
+        return mWitnesses;
+    }
+    void CreatureStats::resetPlayerWitnesses()
+    {
+        mWitnesses.clear();
     }
 }

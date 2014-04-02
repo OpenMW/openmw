@@ -826,6 +826,11 @@ namespace MWMechanics
         else if (type == OT_Theft)
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
 
+        // what is the bounty cutoff? To high the guards will attack
+        float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
+                     float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
+                     esmStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
+
         // Innocent until proven guilty
         bool reported = false;
 
@@ -842,7 +847,7 @@ namespace MWMechanics
 
             CreatureStats& creatureStats = MWWorld::Class::get(*it).getCreatureStats(*it);
 
-            // Did the witness see the crime?
+            // Did a witness see the crime?
             if ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) )
             {
                 // Say something!
@@ -853,65 +858,51 @@ namespace MWMechanics
                 // Will the witness report the crime?
                 if (creatureStats.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
-                    creatureStats.setAlarmed(true); 
                     reported = true;
-                    reportCrime(ptr, victim, type, arg);
-
-                    // Is it a guard? Or will the witness fight?
-                    if (it->getClass().isClass(*it, "Guard"))
-                    {
-                        // TODO: Persue player, concider bounty?
-                        creatureStats.getAiSequence().stack(AiActivate(ptr.getClass().getId(ptr), 1));
-                        creatureStats.getAiSequence().execute(*it,0);
-                    }
-                    else if (creatureStats.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
-                    {
-                        creatureStats.getAiSequence().stack(AiCombat(ptr));
-                        creatureStats.setHostile(true);
-                        creatureStats.getAiSequence().execute(*it,0);
-                    }
-                    else if (type == OT_Assault)
-                    {
-                        creatureStats.getAiSequence().stack(AiCombat(ptr));
-                        creatureStats.setHostile(true);
-                        creatureStats.getAiSequence().execute(*it,0);
-                    }
+                    reportCrime(ptr, victim, type, arg); 
 
                     // Tell everyone else
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     { 
-                        if (it == it1 ||  // Don't tell the witness or the player
-                            ptr == *it1)
+                        if (*it1 == ptr) // Not the player
                             continue;
                         
-                        // Is it a guard? Or will the witness fight?
+                        // was the witness alarmed?
                         CreatureStats& creatureStats1 = MWWorld::Class::get(*it1).getCreatureStats(*it1);
+                        if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
+                            creatureStats1.setAlarmed(true);
+
+                        // was the witness a guard?
                         if (it1->getClass().isClass(*it1, "Guard"))
                         {
-                            // TODO: Persue player, concider bounty?
-                            creatureStats1.getAiSequence().stack(AiActivate(ptr.getClass().getId(ptr), 1));
-                            creatureStats1.getAiSequence().execute(*it1,0); 
-                            continue;
+                            // will the guard try to kill the player?
+                            if (ptr.getClass().getNpcStats(ptr).getBounty() >= cutoff)
+                            {
+                                creatureStats1.getAiSequence().stack(AiCombat(ptr));
+                                creatureStats1.setHostile(true);
+                                creatureStats1.getAiSequence().execute(*it,0);
+                            }
+                            else // will the guard persue the player?
+                            {
+                                creatureStats1.getAiSequence().stack(AiActivate(ptr.getClass().getId(ptr), 1));
+                                creatureStats1.getAiSequence().execute(*it,0);
+                            } 
                         }
-                        else if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
+                        // will the witness fight the player?
+                        else if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm || 
+                                    type == OT_Assault)
                         {
                             creatureStats1.getAiSequence().stack(AiCombat(ptr));
                             creatureStats1.setHostile(true);
                             creatureStats1.getAiSequence().execute(*it1,0);
                         } 
-                        else if (type == OT_Assault)
-                        {
-                            creatureStats.getAiSequence().stack(AiCombat(ptr));
-                            creatureStats.setHostile(true);
-                            creatureStats.getAiSequence().execute(*it,0);
-                        }
                     }
-
                     break; // Someone saw the crime and everyone has been told
                 }
             }
         }
-
+        if (reported)
+            ptr.getClass().getCreatureStats(ptr).addPlayerWitnesses(neighbors);
         return reported;
     }
 

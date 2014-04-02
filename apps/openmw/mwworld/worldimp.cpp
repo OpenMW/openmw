@@ -2762,10 +2762,26 @@ namespace MWWorld
                 message += "\n" + skillMsg;
             }
 
+            resetCrimes(player);
+
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
             MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
         }
+    }
+
+    void World::resetCrimes(const MWWorld::Ptr& ptr)
+    {
+        // Reset witnesses to the players crimes 
+        std::vector<MWWorld::Ptr> neighbors = ptr.getClass().getCreatureStats(ptr).getPlayerWitnesses();
+        for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        {
+            // This to reset for each witness: 
+            // TODO: More research is needed to complete this list
+            it->getClass().getCreatureStats(*it).setHostile(false);
+            it->getClass().getCreatureStats(*it).setAlarmed(false);
+        }
+        ptr.getClass().getCreatureStats(ptr).resetPlayerWitnesses();
     }
 
     void World::spawnRandomCreature(const std::string &creatureList)

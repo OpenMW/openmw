@@ -59,6 +59,8 @@ namespace MWMechanics
 
         int mGoldPool; // the pool of merchant gold not in inventory
 
+        std::vector<MWWorld::Ptr> mWitnesses; // the witnesses to players crimes
+
     protected:
         bool mIsWerewolf;
         AttributeValue mWerewolfAttributes[8];
@@ -233,6 +235,10 @@ namespace MWMechanics
 
         void setGoldPool(int pool);
         int getGoldPool() const;
+
+        void addPlayerWitnesses(std::vector<MWWorld::Ptr> witnesses);
+        std::vector<MWWorld::Ptr> getPlayerWitnesses() const;
+        void resetPlayerWitnesses();
     };
 }
 
