@@ -73,6 +73,15 @@ void MWMechanics::AiSequence::stopCombat()
     }
 }
 
+void MWMechanics::AiSequence::stopPersue()
+{
+    while (getTypeId() == AiPackage::TypeIdPersue)
+    {
+        delete *mPackages.begin();
+        mPackages.erase (mPackages.begin());
+    }
+}
+
 bool MWMechanics::AiSequence::isPackageDone() const
 {
     return mDone;
@@ -161,7 +170,7 @@ void MWMechanics::AiSequence::fill(const ESM::AIPackageList &list)
         else if (it->mType == ESM::AI_Activate)
         {
             ESM::AIActivate data = it->mActivate;
-            package = new MWMechanics::AiActivate(data.mName.toString(), 0);
+            package = new MWMechanics::AiActivate(data.mName.toString());
         }
         else //if (it->mType == ESM::AI_Follow)
         {

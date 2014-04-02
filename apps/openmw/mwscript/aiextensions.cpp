@@ -47,7 +47,7 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiActivate activatePackage(objectID, 0);
+                    MWMechanics::AiActivate activatePackage(objectID);
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(activatePackage);
                     std::cout << "AiActivate" << std::endl;
                 }

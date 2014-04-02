@@ -12,7 +12,7 @@ namespace MWMechanics
     class AiActivate : public AiPackage
     {
         public:
-            AiActivate(const std::string &objectId, int arg);
+            AiActivate(const std::string &objectId);
             virtual AiActivate *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
                     ///< \return Package completed?
@@ -20,7 +20,6 @@ namespace MWMechanics
 
         private:
             std::string mObjectId;
-            int mArg;
 
             PathFinder mPathFinder;
             int mCellX;

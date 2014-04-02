@@ -13,6 +13,7 @@
 #include "../mwworld/player.hpp"
 
 #include "aicombat.hpp"
+#include "aipersue.hpp"
 #include "aiactivate.hpp"
 
 #include <OgreSceneNode.h>
@@ -838,8 +839,6 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> neighbors;
         mActors.getObjectsInRange(Ogre::Vector3(ptr.getRefData().getPosition().pos), 
             esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
-        
-        // Did anyone see the crime?
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         { 
             if (*it == ptr) // Not the player
@@ -880,12 +879,12 @@ namespace MWMechanics
                             {
                                 creatureStats1.getAiSequence().stack(AiCombat(ptr));
                                 creatureStats1.setHostile(true);
-                                creatureStats1.getAiSequence().execute(*it,0);
+                                creatureStats1.getAiSequence().execute(*it1,0);
                             }
                             else // will the guard persue the player?
                             {
-                                creatureStats1.getAiSequence().stack(AiActivate(ptr.getClass().getId(ptr), 1));
-                                creatureStats1.getAiSequence().execute(*it,0);
+                                creatureStats1.getAiSequence().stack(AiPersue(ptr.getClass().getId(ptr)));
+                                creatureStats1.getAiSequence().execute(*it1,0);
                             } 
                         }
                         // will the witness fight the player?

@@ -9,11 +9,9 @@
 
 #include "steering.hpp"
 #include "movement.hpp"
-#include "creaturestats.hpp"
 
-MWMechanics::AiActivate::AiActivate(const std::string &objectId, int arg)
-    : mObjectId(objectId),
-      mArg(arg)
+MWMechanics::AiActivate::AiActivate(const std::string &objectId)
+    : mObjectId(objectId)
 {
 }
 MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const
@@ -26,9 +24,6 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     ESM::Position pos = actor.getRefData().getPosition();
     Movement &movement = actor.getClass().getMovementSettings(actor);
     const ESM::Cell *cell = actor.getCell()->getCell();
-
-    if (mArg == 1) // run to actor
-        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
     MWWorld::Ptr player = world->getPlayerPtr();
     if(cell->mData.mX != player.getCell()->getCell()->mData.mX)

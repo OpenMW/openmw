@@ -29,6 +29,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/actors.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -2762,6 +2763,9 @@ namespace MWWorld
                 message += "\n" + skillMsg;
             }
 
+            // sleep the player, this doesn't work
+            //player.getClass().calculateRestoration(player, days, true);
+
             resetCrimes(player);
 
             std::vector<std::string> buttons;
@@ -2776,10 +2780,15 @@ namespace MWWorld
         std::vector<MWWorld::Ptr> neighbors = ptr.getClass().getCreatureStats(ptr).getPlayerWitnesses();
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            // This to reset for each witness: 
+            // Reset states
             // TODO: More research is needed to complete this list
             it->getClass().getCreatureStats(*it).setHostile(false);
             it->getClass().getCreatureStats(*it).setAlarmed(false);
+
+            // Stop guard persue
+            if(it->getClass().isClass(*it, "Guard"))
+                it->getClass().getCreatureStats(*it).getAiSequence().stopPersue();
+
         }
         ptr.getClass().getCreatureStats(ptr).resetPlayerWitnesses();
     }
