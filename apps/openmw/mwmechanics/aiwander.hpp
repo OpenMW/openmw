@@ -58,7 +58,8 @@ namespace MWMechanics
             WalkState mWalkState;
 
             int mStuckCount;
-            int mEvadeCount;
+            float mStuckDuration;
+            float mEvadeDuration;
 
             bool mStoredAvailableNodes;
             bool mChooseAction;
