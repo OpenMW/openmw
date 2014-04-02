@@ -2763,8 +2763,7 @@ namespace MWWorld
                 message += "\n" + skillMsg;
             }
 
-            // sleep the player, this doesn't work
-            //player.getClass().calculateRestoration(player, days, true);
+            // TODO: Sleep the player 
 
             resetCrimes(player);
 
