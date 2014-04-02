@@ -18,9 +18,10 @@
 namespace MWMechanics
 {
     // NOTE: determined empirically but probably need further tweaking
-    static const int COUNT_BEFORE_STUCK = 20;
     static const int COUNT_BEFORE_RESET = 200;
-    static const int COUNT_EVADE = 7;
+    static const float DIST_SAME_SPOT = 1.8f;
+    static const float DURATION_SAME_SPOT = 1.0f;
+    static const float DURATION_TO_EVADE = 0.4f;
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
@@ -35,7 +36,8 @@ namespace MWMechanics
       , mPrevY(0)
       , mWalkState(State_Norm)
       , mStuckCount(0)
-      , mEvadeCount(0)
+      , mEvadeDuration(0)
+      , mStuckDuration(0)
       , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
@@ -325,15 +327,21 @@ namespace MWMechanics
             }
             else
             {
-                /*               1                    n
+                /*               f                    t
                  *  State_Norm <---> State_CheckStuck --> State_Evade
                  *   ^  ^   |          ^   |               ^   |  |
                  *   |  |   |          |   |               |   |  |
-                 *   |  +---+          +---+               +---+  | m
-                 *   |   any            < n                 < m   |
+                 *   |  +---+          +---+               +---+  | u
+                 *   |   any            < t                 < u   |
                  *   +--------------------------------------------+
+                 *
+                 * f = one frame
+                 * t = how long before considered stuck
+                 * u = how long to move sideways
                  */
-                bool samePosition = (abs(pos.pos[0] - mPrevX) < 1) && (abs(pos.pos[1] - mPrevY) < 1);
+                bool samePosition = (abs(pos.pos[0] - mPrevX) < DIST_SAME_SPOT) &&
+                                    (abs(pos.pos[1] - mPrevY) < DIST_SAME_SPOT);
+
                 switch(mWalkState)
                 {
                     case State_Norm:
@@ -349,30 +357,33 @@ namespace MWMechanics
                         if(!samePosition)
                         {
                             mWalkState = State_Norm;
-                            // to do this properly need yet another variable, simply don't clear for now
-                            //mStuckCount = 0;
+                            mStuckDuration = 0;
                             break;
                         }
                         else
                         {
-                            // consider stuck only if position unchanges consecutively
-                            if((mStuckCount++ % COUNT_BEFORE_STUCK) == 0)
+                            mStuckDuration += duration;
+                            // consider stuck only if position unchanges for a period
+                            if(mStuckDuration > DURATION_SAME_SPOT)
+                            {
                                 mWalkState = State_Evade;
-                                // NOTE: mStuckCount is purposely not cleared here
+                                mStuckDuration = 0;
+                                mStuckCount++;
+                            }
                             else
-                                break; // still in the same state, but counter got incremented
+                                break; // still in the same state, but duration added to timer
                         }
                     }
                         /* FALL THROUGH */
                     case State_Evade:
                     {
-                        if(mEvadeCount++ < COUNT_EVADE)
+                        mEvadeDuration += duration;
+                        if(mEvadeDuration < DURATION_TO_EVADE)
                             break;
                         else
                         {
                             mWalkState = State_Norm; // tried to evade, assume all is ok and start again
-                            // NOTE: mStuckCount is purposely not cleared here
-                            mEvadeCount = 0;
+                            mEvadeDuration = 0;
                         }
                     }
                     /* NO DEFAULT CASE */
