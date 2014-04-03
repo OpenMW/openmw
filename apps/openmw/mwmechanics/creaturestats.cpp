@@ -14,8 +14,8 @@ namespace MWMechanics
     CreatureStats::CreatureStats()
         : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
-          mAttacked (false), mHostile (false), mAssaulted(false),
-          mAttackingOrSpell(false), mCrimeId(-1),
+          mAttacked (false), mHostile (false),
+          mAttackingOrSpell(false),
           mIsWerewolf(false),
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
@@ -314,26 +314,6 @@ namespace MWMechanics
     void CreatureStats::setHostile (bool hostile)
     {
         mHostile = hostile;
-    }
-
-    bool CreatureStats::isAssaulted() const
-    {
-        return mAssaulted;
-    }
-    
-    void CreatureStats::setAssaulted (bool assaulted)
-    {
-        mAssaulted = assaulted;
-    }
-
-    int CreatureStats::getCrimeId() const
-    {
-        return mCrimeId;
-    }
-
-    void CreatureStats::setCrimeId (int id)
-    {
-        mCrimeId = id;
     }
 
     bool CreatureStats::getCreatureTargetted() const

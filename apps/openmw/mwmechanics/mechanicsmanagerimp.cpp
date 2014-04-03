@@ -839,9 +839,8 @@ namespace MWMechanics
 
             CreatureStats& creatureStats = MWWorld::Class::get(*it).getCreatureStats(*it);
 
-            // Was the crime seen or the victim assulted?
-            if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
-                type == OT_Assault)
+            // Was the crime seen?
+            if ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) 
             {
                 // Say something!
                 // TODO: Add more messages
@@ -862,16 +861,10 @@ namespace MWMechanics
                         // Will the witness be affected by the crime?
                         CreatureStats& creatureStats1 = MWWorld::Class::get(*it1).getCreatureStats(*it1);
                         if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
-                        {
                             creatureStats1.setAlarmed(true);
-                            creatureStats1.setCrimeId(player.getWitnessTotal());
-                            player.addWitness();
-                        } 
                     }
                     break; // Someone saw the crime and everyone has been told
                 }
-                else if (type == OT_Assault)    
-                    creatureStats.setAlarmed(true);
             }
         }
         if (reported)

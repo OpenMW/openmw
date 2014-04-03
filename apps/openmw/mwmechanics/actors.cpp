@@ -739,11 +739,12 @@ namespace MWMechanics
                 {
                     creatureStats.getAiSequence().stack(AiCombat(player));
                     creatureStats.setHostile(true);
+                    creatureStats.setAlarmed(true);
                 }
             }
 
             // if I was a witness to a crime
-            if (creatureStats.getCrimeId() != -1)
+            if (creatureStats.isAlarmed())
             {
                 if(player.getClass().getNpcStats(player).getBounty() == 0)
                 {
@@ -752,18 +753,22 @@ namespace MWMechanics
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stopPersue();
                     creatureStats.getAiSequence().stopCombat();
-                    creatureStats.setCrimeId(-1);
                 }
-                else if (creatureStats.isAlarmed())
+                else if (!creatureStats.isHostile())
                 {
-                    if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
+                    if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
-                    else if (!creatureStats.isHostile())
-                    {
+                    else
                         creatureStats.getAiSequence().stack(AiCombat(player));
                         creatureStats.setHostile(true);
-                    }
                 }
+            }
+
+            // if I didn't report a crime was I attacked?
+            else if (creatureStats.getAttacked() && !creatureStats.isHostile())
+            {
+                creatureStats.getAiSequence().stack(AiCombat(player));
+                creatureStats.setHostile(true);
             }
         }
     }
