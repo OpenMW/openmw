@@ -6,7 +6,7 @@
 #include "scenetool.hpp"
 
 CSVWorld::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
-: QWidget (parent), mButtonSize (buttonSize), mIconSize (buttonSize-8)
+: QWidget (parent), mButtonSize (buttonSize), mIconSize (buttonSize-6)
 {
     setFixedWidth (mButtonSize);
 
