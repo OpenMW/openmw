@@ -8,7 +8,7 @@
 #include "esmstore.hpp"
 #include "cellreflist.hpp"
 
-#include "../mwmechanics/pathfinding.hpp"
+#include "../mwmechanics/pathgrid.hpp"
 
 namespace ESM
 {

@@ -363,6 +363,7 @@ namespace MWWorld
             loadRefs (store, esm);
 
             mState = State_Loaded;
+            mPathgridGraph.load(mCell);
         }
     }
 
@@ -683,14 +684,6 @@ namespace MWWorld
 
     bool CellStore::isPointConnected(const int start, const int end) const
     {
-        if(!mPathgridGraph.isGraphConstructed())
-        {
-            // Ugh... there must be a better way...
-            MWMechanics::PathgridGraph *p = const_cast<MWMechanics::PathgridGraph *> (&mPathgridGraph);
-
-            if(!p->initPathgridGraph(mCell))
-                return false;
-        }
         return mPathgridGraph.isPointConnected(start, end);
 
     }
@@ -698,16 +691,6 @@ namespace MWWorld
     std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end,
                                                            const bool isOutside) const
     {
-        if(!mPathgridGraph.isGraphConstructed())
-        {
-            MWMechanics::PathgridGraph *p = const_cast<MWMechanics::PathgridGraph *> (&mPathgridGraph);
-
-            if(!p->initPathgridGraph(mCell))
-            {
-                std::list<ESM::Pathgrid::Point> path; // empty
-                return path;
-            }
-        }
         return mPathgridGraph.aStarSearch(start, end, isOutside);
     }
 }
