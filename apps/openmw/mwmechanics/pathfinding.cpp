@@ -225,9 +225,6 @@ namespace MWMechanics
         if(mCell != cell || !mPathgrid)
         {
             mCell = cell;
-
-            // Cache pathgrid as mPathgrid and update on cell changes. There
-            // might be a small gain in avoiding to search for it.
             mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell->getCell());
         }
 
@@ -236,13 +233,6 @@ namespace MWMechanics
         // physics take care of any blockages.
         if(!mPathgrid || mPathgrid->mPoints.empty())
         {
-//#if 0
-            std::cout << "no pathgrid " <<
-                         +"\"" +mCell->getCell()->mName+ "\""
-                         +", " +std::to_string(mCell->getCell()->mData.mX)
-                         +", " +std::to_string(mCell->getCell()->mData.mY)
-                         << std::endl;
-//#endif
             mPath.push_back(endPoint);
             mIsPathConstructed = true;
             return;
@@ -257,16 +247,6 @@ namespace MWMechanics
             yCell = mCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
         }
 
-
-
-
-
-
-
-
-
-
-
         // NOTE: It is possible that getClosestPoint returns a pathgrind point index
         //       that is unreachable in some situations. e.g. actor is standing
         //       outside an area enclosed by walls, but there is a pathgrid
@@ -280,14 +260,7 @@ namespace MWMechanics
             std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
                     Ogre::Vector3(endPoint.mX - xCell, endPoint.mY - yCell, endPoint.mZ),
                     startNode);
-//#if 0
-            if(!mPathgrid)
-                std::cout << "no pathgrid " <<
-                             +"\"" +mCell->getCell()->mName+ "\""
-                             +", " +std::to_string(mCell->getCell()->mData.mX)
-                             +", " +std::to_string(mCell->getCell()->mData.mY)
-                             << std::endl;
-//#endif
+
             // this shouldn't really happen, but just in case
             if(endNode.first != -1)
             {
@@ -309,33 +282,14 @@ namespace MWMechanics
                         mPath.push_back(endPoint);
                 }
                 else
-                {
                     mIsPathConstructed = false;
-                    std::cout << "empty path error " << std::endl;
-                }
-                    //mIsPathConstructed = false;
             }
             else
-            {
                 mIsPathConstructed = false;
-                std::cout << "second point error " << std::endl;
-            }
-                //mIsPathConstructed = false;
         }
         else
-        {
-            // FIXME: shouldn't return endpoint if first point error?
             mIsPathConstructed = false;
-            std::cout << "first point error " << std::endl;
-        }
 
-#if 0
-        if(!mIsPathConstructed)
-        {
-            mPath.push_back(endPoint);
-            mIsPathConstructed = true;
-        }
-#endif
         return;
     }
 
@@ -464,18 +418,13 @@ namespace MWMechanics
     bool PathgridGraph::initPathgridGraph(const ESM::Cell* cell)
     {
         if(!cell)
-        {
-            std::cout << "init error " << std::endl;
             return false;
-        }
+
         mCell = cell;
         mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
 
         if(!mPathgrid)
-        {
-            std::cout << "init error " << std::endl;
             return false;
-        }
 
         mGraph.resize(mPathgrid->mPoints.size());
         for(int i = 0; i < static_cast<int> (mPathgrid->mEdges.size()); i++)
@@ -493,13 +442,13 @@ namespace MWMechanics
         }
         buildConnectedPoints();
         mIsGraphConstructed = true;
-    //#if 0
+//#if 0
         std::cout << "loading pathgrid " <<
                      +"\""+ mPathgrid->mCell +"\""
                      +", "+ std::to_string(mPathgrid->mData.mX)
                      +", "+ std::to_string(mPathgrid->mData.mY)
                      << std::endl;
-    //#endif
+//#endif
         return true;
     }
 
@@ -580,11 +529,11 @@ namespace MWMechanics
             if(mSCCPoint[v].first == -1) // undefined (haven't visited)
                 recursiveStrongConnect(v);
         }
-    //#if 0
+//#if 0
         std::cout << "components: " << std::to_string(mSCCId)
                      +", "+ mPathgrid->mCell
                      << std::endl;
-    //#endif
+//#endif
     }
 
     bool PathgridGraph::isPointConnected(const int start, const int end) const
@@ -702,32 +651,10 @@ namespace MWMechanics
             xCell = mPathgrid->mData.mX * ESM::Land::REAL_SIZE;
             yCell = mPathgrid->mData.mY * ESM::Land::REAL_SIZE;
         }
-//#if 0
-            // for debugging only
-            int tmp = current;
-            if(tmp != goal)
-            {
-                std::cout << "aStarSearch: goal and result differ" << std::endl;
-                std::cout << "goal: " << std::to_string(goal)
-                             +", result: "+ std::to_string(tmp)
-                             << std::endl;
-            }
-            std::cout << "start: " << std::to_string(start)
-                         +", goal: "+ std::to_string(goal)
-                         +", result: "+ std::to_string(tmp)
-                         << std::endl;
-//#endif
 
         while(graphParent[current] != -1)
         {
             ESM::Pathgrid::Point pt = mPathgrid->mPoints[current];
-//#if 0
-            // for debugging only
-            std::cout << "  point: "+ std::to_string(current)
-                         +", X: "+ std::to_string(pt.mX)
-                         +", Y: "+ std::to_string(pt.mY)
-                         << std::endl;
-//#endif
             pt.mX += xCell;
             pt.mY += yCell;
             path.push_front(pt);
