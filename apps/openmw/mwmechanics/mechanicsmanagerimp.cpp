@@ -810,6 +810,7 @@ namespace MWMechanics
             return false;
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        MWWorld::Player player = MWBase::Environment::get().getWorld()->getPlayer();
 
         // What amount of alarm did this crime generate?
         int alarm;
@@ -858,13 +859,19 @@ namespace MWMechanics
                         if (*it1 == ptr) // Not the player
                             continue;
                         
-                        // was the witness alarmed?
+                        // Will the witness be affected by the crime?
                         CreatureStats& creatureStats1 = MWWorld::Class::get(*it1).getCreatureStats(*it1);
                         if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
+                        {
                             creatureStats1.setAlarmed(true);
+                            creatureStats1.setCrimeId(player.getWitnessTotal());
+                            player.addWitness();
+                        } 
                     }
                     break; // Someone saw the crime and everyone has been told
-                } 
+                }
+                else if (type == OT_Assault)    
+                    creatureStats.setAlarmed(true);
             }
         }
         if (reported)

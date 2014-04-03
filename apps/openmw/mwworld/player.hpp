@@ -41,6 +41,8 @@ namespace MWWorld
         bool                    mAutoMove;
         int                     mForwardBackward;
         bool                    mTeleported;
+
+        int                     mWitnessTotal;
         
     public:
 
@@ -64,6 +66,10 @@ namespace MWWorld
         MWWorld::Ptr getPlayer();
 
         void setBirthSign(const std::string &sign);
+
+        void addWitness();
+        
+        int getWitnessTotal() const;
 
         const std::string &getBirthSign() const;
 

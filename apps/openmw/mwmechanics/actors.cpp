@@ -719,9 +719,9 @@ namespace MWMechanics
     void Actors::updateCrimePersuit(const MWWorld::Ptr& ptr, float duration)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        int bounty = player.getClass().getNpcStats(player).getBounty();
+        CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
 
-        // TODO: Move me! I shouldn't be here...
+        /// \todo Move me! I shouldn't be here...
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
                      float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
@@ -729,30 +729,40 @@ namespace MWMechanics
 
         if (ptr != player)
         {
-            CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
-            // Alarmed or not, I will kill you because you've commited heinous against the empire
-            if ((!creatureStats.isAlarmed() || creatureStats.isAlarmed()) && 
-                ptr.getClass().isClass(ptr, "Guard") && bounty >= cutoff && !creatureStats.isHostile())
-                creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
-            else if (creatureStats.isAlarmed())
+            // If I'm a guard and I'm not hostile
+            if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
             {
-                MWBase::Environment::get().getDialogueManager()->say(ptr, "Thief");
-                if(bounty == 0)
+                // Attack on sight if bounty is greater than the cutoff
+                if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
+                    && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
+                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
+                {
+                    creatureStats.getAiSequence().stack(AiCombat(player));
+                    creatureStats.setHostile(true);
+                }
+            }
+
+            // if I was a witness to a crime
+            if (creatureStats.getCrimeId() != -1)
+            {
+                if(player.getClass().getNpcStats(player).getBounty() == 0)
                 {
                     creatureStats.setAlarmed(false);
                     creatureStats.setHostile(false);
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stopPersue();
                     creatureStats.getAiSequence().stopCombat();
-
+                    creatureStats.setCrimeId(-1);
                 }
-
-                if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
-                    creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
-                else if (!creatureStats.isHostile())
+                else if (creatureStats.isAlarmed())
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(player));
-                    creatureStats.setHostile(true);
+                    if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
+                        creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
+                    else if (!creatureStats.isHostile())
+                    {
+                        creatureStats.getAiSequence().stack(AiCombat(player));
+                        creatureStats.setHostile(true);
+                    }
                 }
             }
         }

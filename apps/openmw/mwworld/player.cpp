@@ -28,8 +28,9 @@ namespace MWWorld
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
         mAutoMove(false),
-        mForwardBackward (0),
+        mForwardBackward(0),
         mTeleported(false),
+        mWitnessTotal(0),
         mMarkedCell(NULL)
     {
         mPlayer.mBase = player;
@@ -63,6 +64,16 @@ namespace MWWorld
     const std::string& Player::getBirthSign() const
     {
         return mSign;
+    }
+
+    void Player::addWitness()
+    {
+        mWitnessTotal++;
+    }
+        
+    int Player::getWitnessTotal() const
+    {
+        return mWitnessTotal;
     }
 
     void Player::setDrawState (MWMechanics::DrawState_ state)

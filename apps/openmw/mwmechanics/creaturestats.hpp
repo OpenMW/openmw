@@ -40,6 +40,7 @@ namespace MWMechanics
         bool mAttacked;
         bool mHostile;
         bool mAssaulted;
+        int mCrimeId;
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mHitRecovery;
@@ -190,6 +191,10 @@ namespace MWMechanics
         bool isAssaulted() const;
 
         void setAssaulted (bool assaulted);
+
+        int getCrimeId() const;
+
+        void setCrimeId (int id);
 
         bool getCreatureTargetted() const;
 
