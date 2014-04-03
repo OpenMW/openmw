@@ -810,11 +810,8 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime &runtime)
             {
-                MWBase::World* world = MWBase::Environment::get().getWorld();
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 player.getClass().getNpcStats(player).setBounty(0);
-                world->confiscateStolenItems(player);
-                world->resetCrimes(player);
             }
         };
 
@@ -823,10 +820,8 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime &runtime)
             {
-                MWBase::World* world = MWBase::Environment::get().getWorld();
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 player.getClass().getNpcStats(player).setBounty(0);
-                world->resetCrimes(player);
             }
         };
 

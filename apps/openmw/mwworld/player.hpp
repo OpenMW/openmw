@@ -96,10 +96,6 @@ namespace MWWorld
         void write (ESM::ESMWriter& writer) const;
 
         bool readRecord (ESM::ESMReader& reader, int32_t type);
-
-        void addPlayerWitnesses(std::vector<MWWorld::Ptr> witnesses);
-        std::vector<MWWorld::Ptr> getPlayerWitnesses() const;
-        void resetPlayerWitnesses();
     };
 }
 #endif

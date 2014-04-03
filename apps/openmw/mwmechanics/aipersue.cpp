@@ -19,10 +19,8 @@ MWMechanics::AiPersue *MWMechanics::AiPersue::clone() const
 {
     return new AiPersue(*this);
 }
-bool MWMechanics::AiPersue::execute (const MWWorld::Ptr& actor,float duration)
+bool MWMechanics::AiPersue::execute (const MWWorld::Ptr& actor, float duration)
 {
-    //TODO: Guards should not dialague with player after crime reset
-
     MWBase::World *world = MWBase::Environment::get().getWorld();
     ESM::Position pos = actor.getRefData().getPosition();
     Movement &movement = actor.getClass().getMovementSettings(actor);

@@ -2765,31 +2765,10 @@ namespace MWWorld
 
             // TODO: Sleep the player 
 
-            resetCrimes(player);
-
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
             MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
         }
-    }
-
-    void World::resetCrimes(const MWWorld::Ptr& ptr)
-    {
-        // Reset witnesses to the players crimes 
-        std::vector<MWWorld::Ptr> neighbors = mPlayer->getPlayerWitnesses();
-        for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-        {
-            // Reset states
-            // TODO: More research is needed to complete this list
-            it->getClass().getCreatureStats(*it).setHostile(false);
-            it->getClass().getCreatureStats(*it).setAlarmed(false);
-
-            // Stop guard persue
-            if(it->getClass().isClass(*it, "Guard"))
-                it->getClass().getCreatureStats(*it).getAiSequence().stopPersue();
-
-        }
-        mPlayer->resetPlayerWitnesses();
     }
 
     void World::spawnRandomCreature(const std::string &creatureList)

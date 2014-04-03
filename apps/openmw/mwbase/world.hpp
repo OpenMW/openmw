@@ -513,8 +513,6 @@ namespace MWBase
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const MWWorld::Ptr& object, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
-    
-            virtual void resetCrimes(const MWWorld::Ptr& ptr) = 0;
     };
 }
 

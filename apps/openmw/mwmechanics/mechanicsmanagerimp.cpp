@@ -1,5 +1,6 @@
 
 #include "mechanicsmanagerimp.hpp"
+#include "npcstats.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -11,10 +12,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-
-#include "aicombat.hpp"
-#include "aipersue.hpp"
-#include "aiactivate.hpp"
 
 #include <OgreSceneNode.h>
 
@@ -827,11 +824,6 @@ namespace MWMechanics
         else if (type == OT_Theft)
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
 
-        // what is the bounty cutoff? To high the guards will attack
-        float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
-                     float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
-                     esmStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
-
         // Innocent until proven guilty
         bool reported = false;
 
@@ -846,8 +838,9 @@ namespace MWMechanics
 
             CreatureStats& creatureStats = MWWorld::Class::get(*it).getCreatureStats(*it);
 
-            // Did a witness see the crime?
-            if ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) )
+            // Was the crime seen or the victim assulted?
+            if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
+                type == OT_Assault)
             {
                 // Say something!
                 // TODO: Add more messages
@@ -858,7 +851,6 @@ namespace MWMechanics
                 if (creatureStats.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
                     reported = true;
-                    reportCrime(ptr, victim, type, arg); 
 
                     // Tell everyone else
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
@@ -870,38 +862,13 @@ namespace MWMechanics
                         CreatureStats& creatureStats1 = MWWorld::Class::get(*it1).getCreatureStats(*it1);
                         if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                             creatureStats1.setAlarmed(true);
-
-                        // was the witness a guard?
-                        if (it1->getClass().isClass(*it1, "Guard"))
-                        {
-                            // will the guard try to kill the player?
-                            if (ptr.getClass().getNpcStats(ptr).getBounty() >= cutoff)
-                            {
-                                creatureStats1.getAiSequence().stack(AiCombat(ptr));
-                                creatureStats1.setHostile(true);
-                                creatureStats1.getAiSequence().execute(*it1,0);
-                            }
-                            else // will the guard persue the player?
-                            {
-                                creatureStats1.getAiSequence().stack(AiPersue(ptr.getClass().getId(ptr)));
-                                creatureStats1.getAiSequence().execute(*it1,0);
-                            } 
-                        }
-                        // will the witness fight the player?
-                        else if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm || 
-                                    type == OT_Assault)
-                        {
-                            creatureStats1.getAiSequence().stack(AiCombat(ptr));
-                            creatureStats1.setHostile(true);
-                            creatureStats1.getAiSequence().execute(*it1,0);
-                        } 
                     }
                     break; // Someone saw the crime and everyone has been told
-                }
+                } 
             }
         }
-        if (reported)
-            MWBase::Environment::get().getWorld()->getPlayer().addPlayerWitnesses(neighbors);
+        if(reported)
+            reportCrime(ptr, victim, type, arg);
         return reported;
     }
 

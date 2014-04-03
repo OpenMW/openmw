@@ -29,6 +29,9 @@
 
 #include "aicombat.hpp"
 #include "aifollow.hpp"
+#include "aipersue.hpp"
+
+#include "../mwbase/dialoguemanager.hpp" //------------------------
 
 namespace
 {
@@ -175,14 +178,16 @@ namespace MWMechanics
         adjustMagicEffects (ptr);
         if (ptr.getClass().getCreatureStats(ptr).needToRecalcDynamicStats())
             calculateDynamicStats (ptr);
+        
         calculateCreatureStatModifiers (ptr, duration);
 
         // AI
         if(MWBase::Environment::get().getMechanicsManager()->isAIActive())
         {
-            CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
-            //engage combat or not?
+            CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+            //engage combat or not?
             if(ptr != player && !creatureStats.isHostile())
             {
                 ESM::Position playerpos = player.getRefData().getPosition();
@@ -214,7 +219,7 @@ namespace MWMechanics
                     creatureStats.setHostile(true);
                 }
             }
-
+            updateCrimePersuit(ptr, duration);
             creatureStats.getAiSequence().execute (ptr,duration);
         }
 
@@ -707,6 +712,48 @@ namespace MWMechanics
                 if(isPlayer)
                     MWBase::Environment::get().getSoundManager()->playSound("torch out",
                             1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
+            }
+        }
+    }
+
+    void Actors::updateCrimePersuit(const MWWorld::Ptr& ptr, float duration)
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        int bounty = player.getClass().getNpcStats(player).getBounty();
+
+        // TODO: Move me! I shouldn't be here...
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
+                     float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
+                     esmStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
+
+        if (ptr != player)
+        {
+            CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+            // Alarmed or not, I will kill you because you've commited heinous against the empire
+            if ((!creatureStats.isAlarmed() || creatureStats.isAlarmed()) && 
+                ptr.getClass().isClass(ptr, "Guard") && bounty >= cutoff && !creatureStats.isHostile())
+                creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
+            else if (creatureStats.isAlarmed())
+            {
+                MWBase::Environment::get().getDialogueManager()->say(ptr, "Thief");
+                if(bounty == 0)
+                {
+                    creatureStats.setAlarmed(false);
+                    creatureStats.setHostile(false);
+                    if (ptr.getClass().isClass(ptr, "Guard"))
+                        creatureStats.getAiSequence().stopPersue();
+                    creatureStats.getAiSequence().stopCombat();
+
+                }
+
+                if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
+                    creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
+                else if (!creatureStats.isHostile())
+                {
+                    creatureStats.getAiSequence().stack(AiCombat(player));
+                    creatureStats.setHostile(true);
+                }
             }
         }
     }
