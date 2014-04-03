@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_PATHFINDING_H
 
 #include <components/esm/loadpgrd.hpp>
+#include <components/esm/loadcell.hpp>
 #include <list>
 
 #include <OgreMath.h>
@@ -33,8 +34,6 @@ namespace MWMechanics
             }
 
             void clearPath();
-
-            void buildPathgridGraph(const ESM::Pathgrid* pathGrid);
 
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                            const MWWorld::CellStore* cell, bool allowShortcuts = true);
@@ -75,60 +74,73 @@ namespace MWMechanics
                 mPath.push_back(point);
             }
 
-            // While a public method is defined here, it is anticipated that
-            // mSCComp will only be used internally.
-            std::vector<int> getSCComp() const
-            {
-                return mSCComp;
-            }
-
         private:
 
-            struct Edge
-            {
-                int destination;
-                float cost;
-            };
-            struct Node
-            {
-                int label;
-                std::vector<Edge> edges;
-                int parent;//used in pathfinding
-            };
-
-            std::vector<float> mGScore;
-            std::vector<float> mFScore;
-
-            std::list<ESM::Pathgrid::Point> aStarSearch(const ESM::Pathgrid* pathGrid,int start,int goal,float xCell = 0, float yCell = 0);
-            void cleanUpAStar();
-
-            std::vector<Node> mGraph;
             bool mIsPathConstructed;
 
-
             std::list<ESM::Pathgrid::Point> mPath;
-            bool mIsGraphConstructed;
-            const MWWorld::CellStore* mCell;
 
-            // contains an integer indicating the groups of connected pathgrid points
-            // (all connected points will have the same value)
+            const ESM::Pathgrid *mPathgrid;
+            const MWWorld::CellStore* mCell;
+    };
+
+    class PathgridGraph
+    {
+        public:
+            PathgridGraph();
+
+            bool isGraphConstructed() const
+            {
+                return mIsGraphConstructed;
+            };
+
+            bool initPathgridGraph(const ESM::Cell *cell);
+
+            // returns true if end point is strongly connected (i.e. reachable
+            // from start point) both start and end are pathgrid point indexes
+            bool isPointConnected(const int start, const int end) const;
+
+            // isOutside is used whether to convert path to world co-ordinates
+            std::list<ESM::Pathgrid::Point> aStarSearch(const int start, const int end,
+                                                        const bool isOutside) const;
+        private:
+
+            const ESM::Cell *mCell;
+            const ESM::Pathgrid *mPathgrid;
+
+            struct ConnectedPoint // edge
+            {
+                int index; // pathgrid point index of neighbour
+                float cost;
+            };
+
+            struct Node // point
+            {
+                int componentId;
+                std::vector<ConnectedPoint> edges; // neighbours
+            };
+
+            // componentId is an integer indicating the groups of connected
+            // pathgrid points (all connected points will have the same value)
             //
             // In Seyda Neen there are 3:
             //
             //   52, 53 and 54 are one set (enclosed yard)
-            //   48, 49, 50, 51, 84, 85, 86, 87, 88, 89, 90 are another (ship & office)
+            //   48, 49, 50, 51, 84, 85, 86, 87, 88, 89, 90 (ship & office)
             //   all other pathgrid points are the third set
             //
-            std::vector<int> mSCComp;
-            // variables used to calculate mSCComp
+            std::vector<Node> mGraph;
+            bool mIsGraphConstructed;
+
+            // variables used to calculate connected components
             int mSCCId;
             int mSCCIndex;
-            std::list<int> mSCCStack;
+            std::vector<int> mSCCStack;
             typedef std::pair<int, int> VPair; // first is index, second is lowlink
             std::vector<VPair> mSCCPoint;
-            // methods used to calculate mSCComp
+            // methods used to calculate connected components
             void recursiveStrongConnect(int v);
-            void buildConnectedPoints(const ESM::Pathgrid* pathGrid);
+            void buildConnectedPoints();
     };
 }
 
