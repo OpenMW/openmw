@@ -442,13 +442,13 @@ namespace MWMechanics
         }
         buildConnectedPoints();
         mIsGraphConstructed = true;
-//#if 0
+#if 0
         std::cout << "loading pathgrid " <<
                      +"\""+ mPathgrid->mCell +"\""
                      +", "+ std::to_string(mPathgrid->mData.mX)
                      +", "+ std::to_string(mPathgrid->mData.mY)
                      << std::endl;
-//#endif
+#endif
         return true;
     }
 
@@ -529,11 +529,11 @@ namespace MWMechanics
             if(mSCCPoint[v].first == -1) // undefined (haven't visited)
                 recursiveStrongConnect(v);
         }
-//#if 0
+#if 0
         std::cout << "components: " << std::to_string(mSCCId)
                      +", "+ mPathgrid->mCell
                      << std::endl;
-//#endif
+#endif
     }
 
     bool PathgridGraph::isPointConnected(const int start, const int end) const
