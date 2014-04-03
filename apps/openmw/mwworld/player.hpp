@@ -41,8 +41,7 @@ namespace MWWorld
         bool                    mAutoMove;
         int                     mForwardBackward;
         bool                    mTeleported;
-
-        std::vector<MWWorld::Ptr> mWitnesses;
+        
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);

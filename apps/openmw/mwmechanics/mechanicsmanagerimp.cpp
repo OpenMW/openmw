@@ -867,7 +867,7 @@ namespace MWMechanics
                 } 
             }
         }
-        if(reported)
+        if (reported)
             reportCrime(ptr, victim, type, arg);
         return reported;
     }

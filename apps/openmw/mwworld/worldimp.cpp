@@ -29,7 +29,6 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
-#include "../mwmechanics/actors.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
