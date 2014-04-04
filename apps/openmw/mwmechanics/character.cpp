@@ -1018,6 +1018,11 @@ void CharacterController::update(float duration)
 
         vec.x *= mMovementSpeed;
         vec.y *= mMovementSpeed;
+        // FIXME: temporary fix for flying creatures, a proper fix needs a separate
+        //        implementation using something like the strategy pattern to handle
+        //        flying & swimming movements differently
+        if(flying)
+            vec.z *= mMovementSpeed;
 
         CharacterState movestate = CharState_None;
         CharacterState idlestate = CharState_SpecialIdle;
@@ -1084,7 +1089,8 @@ void CharacterController::update(float duration)
         fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss, fatigue.getCurrent() < 0);
         cls.getCreatureStats(mPtr).setFatigue(fatigue);
 
-        if(sneak || inwater || flying)
+        // FIXME: temporary fix for flying creatures
+        if(sneak || inwater)// || flying)
             vec.z = 0.0f;
 
         if (inwater || flying)
@@ -1119,7 +1125,8 @@ void CharacterController::update(float duration)
             vec.y *= mult;
             vec.z  = 0.0f;
         }
-        else if(vec.z > 0.0f && mJumpState == JumpState_None)
+        // FIXME: temporary fix for flying creatures
+        else if(!flying && (vec.z > 0.0f && mJumpState == JumpState_None))
         {
             // Started a jump.
             float z = cls.getJump(mPtr);
@@ -1181,7 +1188,8 @@ void CharacterController::update(float duration)
         {
            if(!(vec.z > 0.0f))
                 mJumpState = JumpState_None;
-            vec.z = 0.0f;
+           if(!flying) // FIXME: temporary fix for flying creatures
+               vec.z = 0.0f;
 
             if(std::abs(vec.x/2.0f) > std::abs(vec.y))
             {
