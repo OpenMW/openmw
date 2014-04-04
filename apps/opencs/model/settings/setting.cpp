@@ -287,3 +287,19 @@ void CSMSettings::Setting::setProperty (SettingProperty prop,
     if (prop < mLayout.size())
         mLayout.replace (prop, value);
 }
+
+QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting)
+{
+    stream<<setting.mLayout;
+    stream<<setting.mDefinitions;
+    stream<<setting.mDeclarations;
+    return stream;
+}
+
+QDataStream &operator >>(QDataStream& stream, CSMSettings::Setting& setting)
+{
+    stream>>setting.mLayout;
+    stream>>setting.mDefinitions;
+    stream>>setting.mDeclarations;
+    return stream;
+}
