@@ -27,7 +27,9 @@ namespace MWMechanics
             // from start point) both start and end are pathgrid point indexes
             bool isPointConnected(const int start, const int end) const;
 
-            // isOutside is used whether to convert path to world co-ordinates
+            // the input parameters are pathgrid point indexes
+            // the output list is in local (internal cells) or world (external
+            // cells) co-ordinates
             std::list<ESM::Pathgrid::Point> aStarSearch(const int start,
                                                         const int end) const;
         private:
