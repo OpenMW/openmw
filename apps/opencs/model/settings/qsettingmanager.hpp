@@ -4,6 +4,8 @@
 #include <QSettings>
 #include <QString>
 
+#include "./setting.hpp"
+
 namespace CSMSettings
 {
     class QSettingManager
@@ -15,14 +17,9 @@ namespace CSMSettings
         static QSettingManager* getSettingManager();
         QSettingManager(const QString& filePath);
 
-        //you should know what kind of data type you want to retrive from the qvariant
-        QVariant findSetting(const QString& key) const;
+        Setting findSetting(const QString& key) const;
 
-        template <typename T>
-        void storeSetting(const QString& key, const T& value)
-        {
-            mSettings.setValue(key, value);
-        }
+        void storeSetting(const QString& key, const Setting& setting);
     };
 }
 #endif // CSMSETTINGS_QSETTINGMANAGER_HPP
