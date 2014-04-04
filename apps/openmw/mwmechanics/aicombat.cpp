@@ -259,7 +259,25 @@ namespace MWMechanics
                 mRotate = true;
             }
 
-            mMovement.mPosition[1] = 1;
+            // FIXME: temporary solution for flying creatures
+            //        this method (i.e. execute) needs a general cleanup,
+            //        or even a rewrite, including changes to variable names
+            //        to those more commonly used (e.g. melee should refer to
+            //        fighting in very close distances) to make it easier
+            //        for maintainers to follow
+            if(actor.getClass().canFly(actor))
+            {
+                Ogre::Vector3 posHoriz(pos.pos[0], pos.pos[1], 0.f);
+                Ogre::Vector3 targetPosHoriz(targetPos.pos[0], targetPos.pos[1], 0.f);
+                // mimic vanilla behaviour - move horizontally until close, then move
+                // vertically
+                if(posHoriz.squaredDistance(targetPosHoriz) > 3600) // arbitrary number^2
+                    mMovement.mPosition[1] = 1;
+                else // if target is higher move up
+                    mMovement.mPosition[2] = ((targetPos.pos[2] - pos.pos[2]) > 0) ? 1 : -1;
+            }
+            else
+                mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
         }
 
