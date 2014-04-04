@@ -29,12 +29,12 @@ namespace MWMechanics
 
             // isOutside is used whether to convert path to world co-ordinates
             std::list<ESM::Pathgrid::Point> aStarSearch(const int start,
-                                                        const int end,
-                                                        const bool isOutside) const;
+                                                        const int end) const;
         private:
 
             const ESM::Cell *mCell;
             const ESM::Pathgrid *mPathgrid;
+            bool mIsExterior;
 
             struct ConnectedPoint // edge
             {

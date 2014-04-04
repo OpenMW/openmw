@@ -224,7 +224,7 @@ namespace MWMechanics
             // this shouldn't really happen, but just in case
             if(endNode.first != -1)
             {
-                mPath = mCell->aStarSearch(startNode, endNode.first, mCell->isExterior());
+                mPath = mCell->aStarSearch(startNode, endNode.first);
 
                 if(!mPath.empty())
                 {

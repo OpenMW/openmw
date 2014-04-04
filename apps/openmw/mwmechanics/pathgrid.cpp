@@ -55,6 +55,7 @@ namespace MWMechanics
         , mGraph(0)
         , mSCCId(0)
         , mSCCIndex(0)
+        , mIsExterior(0)
     {
     }
 
@@ -100,6 +101,7 @@ namespace MWMechanics
             return false;
 
         mCell = cell;
+        mIsExterior = cell->isExterior();
         mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
 
         if(!mPathgrid)
@@ -221,11 +223,11 @@ namespace MWMechanics
      *
      * Should be possible to make this MT safe.
      *
-     * Returns path (a list of pathgrid point indexes) which may be empty.
+     * Returns path which may be empty.  path contains pathgrid points in local
+     * cell co-ordinates (indoors) or world co-ordinates (external).
      *
      * Input params:
      *   start, goal - pathgrid point indexes (for this cell)
-     *   isExterior - used to determine whether to convert to world co-ordinates
      *
      * Variables:
      *   openset - point indexes to be traversed, lowest cost at the front
@@ -239,8 +241,7 @@ namespace MWMechanics
      *       co-ordinates).  Essentially trading speed w/ memory.
      */
     std::list<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const int start,
-                                                               const int goal,
-                                                               bool isExterior) const
+                                                               const int goal) const
     {
         std::list<ESM::Pathgrid::Point> path;
         if(!isPointConnected(start, goal))
@@ -316,7 +317,7 @@ namespace MWMechanics
         // reconstruct path to return, using world co-ordinates
         float xCell = 0;
         float yCell = 0;
-        if (isExterior)
+        if (mIsExterior)
         {
             xCell = mPathgrid->mData.mX * ESM::Land::REAL_SIZE;
             yCell = mPathgrid->mData.mY * ESM::Land::REAL_SIZE;

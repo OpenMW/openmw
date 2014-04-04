@@ -145,8 +145,7 @@ namespace MWWorld
 
             bool isPointConnected(const int start, const int end) const;
 
-            std::list<ESM::Pathgrid::Point> aStarSearch(const int start, const int end,
-                                                        const bool isOutside) const;
+            std::list<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
 
         private:
 

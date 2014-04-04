@@ -685,12 +685,10 @@ namespace MWWorld
     bool CellStore::isPointConnected(const int start, const int end) const
     {
         return mPathgridGraph.isPointConnected(start, end);
-
     }
 
-    std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end,
-                                                           const bool isOutside) const
+    std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end) const
     {
-        return mPathgridGraph.aStarSearch(start, end, isOutside);
+        return mPathgridGraph.aStarSearch(start, end);
     }
 }
