@@ -750,6 +750,7 @@ namespace MWMechanics
                 {
                     creatureStats.setAlarmed(false);
                     creatureStats.setHostile(false);
+                    creatureStats.setAttacked(false);
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stopPersue();
                     creatureStats.getAiSequence().stopCombat();
