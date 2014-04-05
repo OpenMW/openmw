@@ -30,7 +30,9 @@ namespace MWWorld
         mAutoMove(false),
         mForwardBackward(0),
         mTeleported(false),
-        mMarkedCell(NULL)
+        mMarkedCell(NULL),
+        mCurrentCrimeId(-1),
+        mPayedCrimeId(-1)
     {
         mPlayer.mBase = player;
         mPlayer.mRef.mRefID = "player";
@@ -273,5 +275,20 @@ namespace MWWorld
         }
 
         return false;
+    }
+
+    int Player::getNewCrimeId()
+    {
+        return mCurrentCrimeId++;
+    }
+
+    void Player::recordCrimeId()
+    {
+        mPayedCrimeId = mCurrentCrimeId;
+    }
+
+    int Player::getCrimeId() const
+    {
+        return mCurrentCrimeId;
     }
 }

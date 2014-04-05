@@ -828,42 +828,43 @@ namespace MWMechanics
         // Innocent until proven guilty
         bool reported = false;
 
-        // Find all the NPC's close enough, ie. within fAlarmRadius of the player
+        // Find all the NPCs within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
         mActors.getObjectsInRange(Ogre::Vector3(ptr.getRefData().getPosition().pos), 
-            esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
+                                    esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
+
+        // Find an actor who witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         { 
-            if (*it == ptr) // Not the player
-                continue;
-
-            CreatureStats& creatureStats = MWWorld::Class::get(*it).getCreatureStats(*it);
+            if (*it == ptr) continue; // not the player
 
             // Was the crime seen?
             if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
                 type == OT_Assault ) 
             {
-                // Say something!
                 // TODO: Add more messages
                 if (type == OT_Theft)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "Thief");
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+                else if (type == OT_Assault)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "attack");
 
                 // Will the witness report the crime?
-                if (creatureStats.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
+                if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
                     reported = true;
+                    int id = player.getNewCrimeId();
 
-                    // Tell everyone else
+                    // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     { 
-                        if (*it1 == ptr) // Not the player
-                            continue;
+                        if (*it1 == ptr) continue; // not the player
                         
-                        // Will the witness be affected by the crime?
-                        CreatureStats& creatureStats1 = MWWorld::Class::get(*it1).getCreatureStats(*it1);
-                        if (creatureStats1.getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm ||
-                            type == OT_Assault)
-                            creatureStats1.setAlarmed(true);
+                        // Will other witnesses paticipate in crime
+                        if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm  
+                            ||  type == OT_Assault )
+                        {
+                            it1->getClass().getNpcStats(*it1).setCrimeId(id);
+                        }
                     }
                     break; // Someone saw the crime and everyone has been told
                 }

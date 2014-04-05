@@ -29,6 +29,7 @@ MWMechanics::NpcStats::NpcStats()
 , mLevelProgress(0)
 , mDisposition(0)
 , mReputation(0)
+, mCrimeId(-1)
 , mWerewolfKills (0)
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
@@ -338,6 +339,16 @@ int MWMechanics::NpcStats::getReputation() const
 void MWMechanics::NpcStats::setReputation(int reputation)
 {
     mReputation = reputation;
+}
+
+int MWMechanics::NpcStats::getCrimeId() const
+{
+    return mCrimeId;
+}
+
+void MWMechanics::NpcStats::setCrimeId(int id)
+{
+    mCrimeId = id;
 }
 
 bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int rank) const

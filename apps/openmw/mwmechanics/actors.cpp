@@ -31,8 +31,6 @@
 #include "aifollow.hpp"
 #include "aipersue.hpp"
 
-#include "../mwbase/dialoguemanager.hpp" //------------------------
-
 namespace
 {
 
@@ -718,49 +716,58 @@ namespace MWMechanics
 
     void Actors::updateCrimePersuit(const MWWorld::Ptr& ptr, float duration)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
-
-        /// \todo Move me! I shouldn't be here...
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-        float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
-                     float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
-                     esmStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
-
-        if (ptr != player)
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (ptr != playerPtr)
         {
+            // get stats of witness
+            CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+            NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+            MWWorld::Player player = MWBase::Environment::get().getWorld()->getPlayer();
+
             // If I'm a guard and I'm not hostile
             if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
             {
+                /// \todo Move me! I shouldn't be here...
+                const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+                float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
+                            float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
+                            esmStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
                 // Attack on sight if bounty is greater than the cutoff
-                if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
-                    && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
-                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
+                if (   playerPtr.getClass().getNpcStats(playerPtr).getBounty() >= cutoff
+                    && MWBase::Environment::get().getWorld()->getLOS(ptr, playerPtr)
+                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(playerPtr, ptr))
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(player));
+                    creatureStats.getAiSequence().stack(AiCombat(playerPtr));
                     creatureStats.setHostile(true);
-                    creatureStats.setAlarmed(true);
+                    npcStats.setCrimeId(player.getNewCrimeId());
                 }
             }
 
             // if I was a witness to a crime
-            if (creatureStats.isAlarmed())
+            if (npcStats.getCrimeId() != -1)
             {
-                if(player.getClass().getNpcStats(player).getBounty() == 0)
+                // if you've payed for your crimes and I havent noticed
+                if(npcStats.getCrimeId() < player.getCrimeId() )
                 {
-                    creatureStats.setAlarmed(false);
-                    creatureStats.setHostile(false);
-                    creatureStats.setAttacked(false);
+                    // Calm witness down
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stopPersue();
                     creatureStats.getAiSequence().stopCombat();
+
+                    // Reset factors to attack
+                    // TODO: Not a complete list, disposition changes?
+                    creatureStats.setHostile(false);
+                    creatureStats.setAttacked(false);
+                    
+                    // Update witness crime id
+                    npcStats.setCrimeId(-1);
                 }
                 else if (!creatureStats.isHostile())
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
+                        creatureStats.getAiSequence().stack(AiPersue(playerPtr.getClass().getId(playerPtr)));
                     else
-                        creatureStats.getAiSequence().stack(AiCombat(player));
+                        creatureStats.getAiSequence().stack(AiCombat(playerPtr));
                         creatureStats.setHostile(true);
                 }
             }
@@ -768,7 +775,7 @@ namespace MWMechanics
             // if I didn't report a crime was I attacked?
             else if (creatureStats.getAttacked() && !creatureStats.isHostile())
             {
-                creatureStats.getAiSequence().stack(AiCombat(player));
+                creatureStats.getAiSequence().stack(AiCombat(playerPtr));
                 creatureStats.setHostile(true);
             }
         }
