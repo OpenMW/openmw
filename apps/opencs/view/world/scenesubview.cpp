@@ -35,7 +35,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout2->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    SceneToolbar *toolbar = new SceneToolbar (48, this);
+    SceneToolbar *toolbar = new SceneToolbar (48+6, this);
 
     SceneToolGrid *gridTool = 0;
 
