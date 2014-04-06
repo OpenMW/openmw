@@ -105,5 +105,9 @@ namespace CSMSettings
         void buildDefaultSetting();
     };
 }
+Q_DECLARE_METATYPE(CSMSettings::Setting)
+
+QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting);
+QDataStream &operator >>(QDataStream &stream, CSMSettings::Setting& setting);
 
 #endif // CSMSETTINGS_SETTING_HPP
