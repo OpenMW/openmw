@@ -812,7 +812,13 @@ namespace MWClass
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+        
+        // player got activated by another NPC
+        if(ptr.getRefData().getHandle() == "player")
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
+
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
@@ -1295,6 +1301,11 @@ namespace MWClass
             return ref->mBase->mNpdt52.mGold;
         else
             return ref->mBase->mNpdt12.mGold;
+    }
+
+    bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
+    {
+        return ptr.get<ESM::NPC>()->mBase->mClass == className;
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;
