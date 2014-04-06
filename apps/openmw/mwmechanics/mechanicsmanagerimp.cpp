@@ -810,7 +810,6 @@ namespace MWMechanics
             return false;
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-        MWWorld::Player player = MWBase::Environment::get().getWorld()->getPlayer();
 
         // What amount of alarm did this crime generate?
         int alarm;
@@ -842,22 +841,23 @@ namespace MWMechanics
             if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
                 type == OT_Assault ) 
             {
-                // TODO: Add more messages
-                if (type == OT_Theft)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
-                else if (type == OT_Assault)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "attack");
 
                 // Will the witness report the crime?
                 if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
                     reported = true;
-                    int id = player.getNewCrimeId();
+                    int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
 
                     // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     { 
                         if (*it1 == ptr) continue; // not the player
+
+                        // TODO: Add more messages
+                        if (type == OT_Theft)
+                            MWBase::Environment::get().getDialogueManager()->say(*it1, "thief");
+                        else if (type == OT_Assault)
+                            MWBase::Environment::get().getDialogueManager()->say(*it1, "attack");
                         
                         // Will other witnesses paticipate in crime
                         if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm  

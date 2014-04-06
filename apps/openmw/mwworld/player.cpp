@@ -279,7 +279,7 @@ namespace MWWorld
 
     int Player::getNewCrimeId()
     {
-        return mCurrentCrimeId++;
+        return ++mCurrentCrimeId;
     }
 
     void Player::recordCrimeId()
@@ -289,6 +289,6 @@ namespace MWWorld
 
     int Player::getCrimeId() const
     {
-        return mCurrentCrimeId;
+        return mPayedCrimeId;
     }
 }
