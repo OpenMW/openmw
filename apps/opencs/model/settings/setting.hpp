@@ -2,22 +2,24 @@
 #define CSMSETTINGS_SETTING_HPP
 
 #include <QStringList>
-
+#include <QMap>
 #include "../../view/settings/support.hpp"
 
 namespace CSMSettings
 {
     typedef QList <Setting *> SettingList;
 
-    //StringListPair contains master key and proxy values
-    typedef QList <StringListPair *> ProxyValueList;
-
     //StringPair contains page / setting names
-    typedef QPair <StringPair *, ProxyValueList *> ProxySettingPair;
+    //StringListPairs is a list of master / proxy value mappings, where:
+    //   StringListPair.first = master key
+    //   StringListPair.second = corresponding proxy value list
+
+    //QPair maps a list of master/proxy values to a specific setting
+    typedef QPair <StringPair, StringListPairs> ProxySettingPair;
 
     // A list of settings and their corresponding lists of proxy values
     // keyed to their respective master values
-    typedef QList <ProxySettingPair *> ProxyLists;
+    typedef QList <ProxySettingPair> ProxySettingPairs;
 
     struct Setting
     {
@@ -25,7 +27,13 @@ namespace CSMSettings
         QStringList mDefinitions;
         QStringList mDeclarations;
 
-        ProxyLists mProxyLists;
+        /*
+        * QStringList is the list of proxy values for one master value
+        * Inner list index corresponds to the master value index
+        * Outer list index corresponds to proxy setting / selector
+        */
+
+        ProxySettingPairs mProxyValueLists;
 
     public:
 
@@ -61,7 +69,7 @@ namespace CSMSettings
         void setPage (const QString &value);
         QString page() const;
 
-        const ProxyLists &proxyLists() const;
+        const ProxySettingPairs &proxyLists() const;
 
         void setSerializable (bool state);
         bool serializable() const;

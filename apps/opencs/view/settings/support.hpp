@@ -18,6 +18,7 @@ namespace CSMSettings
 
     typedef QPair <QString, QString> StringPair;
     typedef QPair <QString, QStringList> StringListPair;
+    typedef QList <StringListPair> StringListPairs;
 /*
     typedef QPair <QString, DefinitionPair>    DefinitionListItem;
     typedef QList <DefinitionListItem>              DefinitionList;

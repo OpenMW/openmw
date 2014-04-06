@@ -30,14 +30,11 @@ namespace CSVSettings
 
     public:
         explicit Page(const QString &pageName,
-                      CSMSettings::SettingList &settingList,
+                      CSMSettings::SettingList settingList,
                       SettingWindow *parent);
 
         void addView (CSMSettings::Setting *setting);
-
-        CSMSettings::Selector *selector (const QString &settingName);
-        void buildProxy (CSMSettings::Setting *setting,
-                         CSMSettings::Selector *selector);
+        View *findView (const QString &page, const QString &setting) const;
 
         QGroupBox *pageFrame() { return mBox; }
 
@@ -45,8 +42,8 @@ namespace CSVSettings
 
         void setupPage ();
         void setupViews (CSMSettings::SettingList &settingList);
-
         void buildFactories();
+        const CSMSettings::Setting *findSetting (const QString &settingName);
     };
 }
 #endif // CSVSETTINGS_PAGE_HPP

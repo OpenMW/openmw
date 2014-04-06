@@ -16,11 +16,14 @@ namespace CSVSettings
         explicit TextView (CSMSettings::Setting *setting,
                            Page *parent = 0);
 
-        void slotUpdateView (QStringList list);
+    protected:
+        void updateView() const;
 
     protected slots:
 
         void slotTextEdited (QString value);
+
+    private:
     };
 
     class TextViewFactory : public QObject, public IViewFactory

@@ -12,6 +12,7 @@ namespace CSVSettings
 {
     class ListView : public View
     {
+        Q_OBJECT
 
         QAbstractItemView *mAbstractItemView;
         QComboBox *mComboBox;
@@ -22,13 +23,21 @@ namespace CSVSettings
 
     protected:
 
-        void build (CSMSettings::Setting *setting);
-        void slotUpdateView (QStringList list);
+        void updateView () const;
         void showEvent ( QShowEvent * event );
+
+    private:
+
+        void buildModel(QWidget *widget);
+        void buildView (QWidget *widget);
+        QWidget *buildWidget();
 
     protected:
 
         void slotTextEdited (QString value);
+
+    private slots:
+        void slotIndexChanged (int idx) const;
     };
 
     class ListViewFactory : public QObject, public IViewFactory

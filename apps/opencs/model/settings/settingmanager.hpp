@@ -8,7 +8,6 @@
 
 #include "../../view/settings/support.hpp"
 #include "setting.hpp"
-#include "selector.hpp"
 
 namespace CSMSettings
 {
@@ -17,8 +16,6 @@ namespace CSMSettings
     typedef QMap <QString, DefinitionMap *> DefinitionPageMap;
 
     typedef QMap <QString, SettingList> SettingPageMap;
-    typedef QPair <QString, Selector *> SelectorPair;
-    typedef QMap <QString, QList <SelectorPair> > SelectorMap;
 
     class SettingManager : public QObject
     {
@@ -27,13 +24,9 @@ namespace CSMSettings
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
         SettingList mSettings;
-        SelectorMap mSelectors;
-
 
     public:
         explicit SettingManager(QObject *parent = 0);
-
-        Selector *selector(const QString &pageName, const QString &settingName);
 
         ///retrieve a setting object from a given page and setting name
         Setting *findSetting
@@ -56,11 +49,6 @@ namespace CSMSettings
 
         ///add definitions to the settings specified in the page map
         void addDefinitions (DefinitionPageMap &pageMap);
-
-        Selector* findSelector (const QString &pageName,
-                                const QString & settingName);
-
-        Selector *createSelector (CSMSettings::Setting *setting);
 
         ///read setting definitions from file
         DefinitionPageMap readFilestream(QTextStream *stream);

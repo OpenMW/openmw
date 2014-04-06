@@ -21,7 +21,8 @@ namespace CSVSettings
         explicit BooleanView (CSMSettings::Setting *setting,
                               Page *parent);
 
-        void slotUpdateView (const QStringList values);
+    protected:
+        void updateView () const;
 
     private slots:
         void slotToggled (bool state);

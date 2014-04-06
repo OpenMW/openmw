@@ -1,6 +1,5 @@
 #include "listview.hpp"
 #include "../../model/settings/setting.hpp"
-#include "../../model/settings/selector.hpp"
 #include "settingbox.hpp"
 
 #include <QListView>
@@ -13,9 +12,52 @@ CSVSettings::ListView::ListView(CSMSettings::Setting *setting,
                                 Page *parent)
     : mComboBox (0), mAbstractItemView (0), View(setting, parent)
 {
+    QWidget *widget = buildWidget();
+    buildView (widget);
+    buildModel (widget);
+}
+
+void CSVSettings::ListView::buildModel(QWidget *widget)
+{
+    if (mComboBox)
+    {
+        mComboBox->setModel (dataModel());
+        mComboBox->view()->setSelectionModel (selectionModel());
+    }
+    else
+    {
+        mAbstractItemView->setModel (dataModel());
+        mAbstractItemView->setSelectionModel (selectionModel());
+    }
+
+    connect (mComboBox, SIGNAL(currentIndexChanged(int)),
+             this, SLOT (slotIndexChanged(int)));
+}
+
+void CSVSettings::ListView::slotIndexChanged (int idx) const
+{
+    qDebug() << objectName() << "::ListView::slotIndexChanged() = " << idx;
+}
+
+void CSVSettings::ListView::buildView (QWidget *widget)
+{
+    if (setting()->widgetWidth() > 0)
+    {
+        QString widthToken;
+        widthToken.fill('P', setting()->widgetWidth());
+        QFontMetrics fm (QApplication::font());
+        widget->setFixedWidth (fm.width (widthToken));
+    }
+
+    viewFrame()->addWidget (widget, setting()->viewRow(),
+                            setting()->viewColumn());
+}
+
+QWidget *CSVSettings::ListView::buildWidget()
+{
     QWidget *widget = 0;
 
-    if (setting->isMultiLine())
+    if (setting()->isMultiLine())
     {
         mAbstractItemView = new QListView (this);
         widget = mAbstractItemView;
@@ -25,32 +67,23 @@ CSVSettings::ListView::ListView(CSMSettings::Setting *setting,
         mComboBox = new QComboBox (this);
         widget = mComboBox;
     }
-
-    if (setting->widgetWidth() > 0)
-    {
-        QString widthToken;
-        widthToken.fill('P', setting->widgetWidth());
-        QFontMetrics fm (QApplication::font());
-        widget->setFixedWidth (fm.width (widthToken));
-    }
-
-    viewFrame()->addWidget (widget, setting->viewRow(),
-                            setting->viewColumn());
+    return widget;
 }
 
 void CSVSettings::ListView::showEvent ( QShowEvent * event )
 {
-    if (!selector())
-        View::showEvent (event);
+    View::showEvent (event);
 
     if (mComboBox)
     {
-        mComboBox->setModel (selector()->model());
-        mComboBox->view()->setSelectionModel (selector()->selectionModel());
+        mComboBox->setModel (dataModel());
+        mComboBox->view()->setSelectionModel (selectionModel());
 
-         if (!selector()->selectedRows().isEmpty())
+        if (!selectionModel()->selection().isEmpty())
         {
-            mComboBox->setCurrentIndex (selector()->selectedRows().back());
+             mComboBox->setCurrentIndex (selectionModel()->
+                                                selectedIndexes().at(0).row());
+
         }
        else
             mComboBox->setCurrentIndex (-1);
@@ -59,23 +92,26 @@ void CSVSettings::ListView::showEvent ( QShowEvent * event )
     }
     else if (mAbstractItemView)
     {
-        mAbstractItemView->setModel (selector()->model());
-        mAbstractItemView->setSelectionModel (selector()->selectionModel());
+        mAbstractItemView->setModel (dataModel());
+        mAbstractItemView->setSelectionModel (selectionModel());
     }
 }
 
-void CSVSettings::ListView::slotUpdateView (QStringList list)
+void CSVSettings::ListView::updateView() const
 {
+    QStringList values = selectedValues();
+
     qDebug() << "list view update";
     int idx = -1;
 
     if (mComboBox)
     {
-        if (list.size() > 0)
-            idx =  (mComboBox->findText(list.at(0)));
+        if (values.size() > 0)
+            idx =  (mComboBox->findText(values.at(0)));
 
         mComboBox->setCurrentIndex (idx);
     }
+    View::updateView();
 }
 
 CSVSettings::ListView *CSVSettings::ListViewFactory::createView

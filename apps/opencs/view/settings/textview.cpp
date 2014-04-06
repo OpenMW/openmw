@@ -7,7 +7,6 @@
 #include "textview.hpp"
 #include "../../model/settings/setting.hpp"
 #include "settingbox.hpp"
-#include "../../model/settings/selector.hpp"
 
 #include <QDebug>
 CSVSettings::TextView::TextView(CSMSettings::Setting *setting,
@@ -37,17 +36,23 @@ CSVSettings::TextView::TextView(CSMSettings::Setting *setting,
 
 void CSVSettings::TextView::slotTextEdited (QString value)
 {
-    qDebug () << objectName() << "TextView::slotTextEdited() value = " << value;
-
     QStringList values = value.split (setting()->delimiter(),
                                       QString::SkipEmptyParts);
 
-    selector()->setData(values);
-    selector()->setViewSelection (values);
+    QStringList returnValues;
+
+    foreach (const QString &splitValue, values)
+        returnValues.append (splitValue.trimmed());
+
+    setSelectedValues (returnValues, false);
+
+    View::updateView();
 }
 
-void CSVSettings::TextView::slotUpdateView (const QStringList values)
+void CSVSettings::TextView::updateView() const
 {
+    QStringList values = selectedValues();
+
     if (values.size() == 0)
         return;
 
@@ -58,7 +63,10 @@ void CSVSettings::TextView::slotUpdateView (const QStringList values)
 
     valueString += values.back();
 
-    mTextWidget->setProperty ("text", valueString);
+    if ( !(mTextWidget->property("text").toString() == valueString))
+        mTextWidget->setProperty ("text", valueString);
+
+    View::updateView();
 }
 
 CSVSettings::TextView *CSVSettings::TextViewFactory::createView

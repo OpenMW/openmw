@@ -99,12 +99,8 @@ opencs_units_noqt (view/settings
 opencs_units (model/settings
     usersettings
     settingmanager
-    selector
-    )
-
-opencs_units (model/settings
     setting
-    settingfiltermodel
+    connector
     )
 
 opencs_units_noqt (model/filter

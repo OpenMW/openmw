@@ -51,15 +51,22 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     QString section = "Window Size";
     {
         Setting *width = new Setting
-                                    (Type_SingleText, "Width", section); //, "1024");
+                                    (Type_SingleText, "Width", section);
         Setting *height = new Setting
-                                    (Type_SingleText, "Height", section); //, "768");
+                                    (Type_SingleText, "Height", section);
 
         width->setWidgetWidth (5);
         height->setWidgetWidth (5);
 
+        width->setDefaultValues (QStringList() << "1024");
+        height->setDefaultValues (QStringList() << "768");
+
         addSetting (width);
         addSetting (height);
+
+        /*
+         *Create the proxy setting for predefined values
+         */
 
         QStringList predefinedValues;
 
@@ -69,21 +76,30 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
                             << "1440 x 900";
 
         Setting *preDefined = new Setting (Type_SingleList, "Pre-Defined",
-                                           section); //, "1024 x 768");
-
+                                           section);
         preDefined->setDeclaredValues (predefinedValues);
 
         //do not serialize since it's values depend entirely on width / height
         preDefined->setSerializable (false);
 
-        QStringList widthValues;
-        QStringList heightValues;
 
-        widthValues << "640" << "800" << "1024" << "1440";
-        heightValues << "480" << "600" << "768" << "900";
 
-    //    preDefined->addProxy (section, "Width", widthValues);
-    //    preDefined->addProxy (section, "Height", heightValues);
+        QMap <QString, QStringList> widthProxyMap;
+
+        widthProxyMap["640x480"] = QStringList() << "640";
+        widthProxyMap["800x600"] = QStringList() << "800";
+        widthProxyMap["1024x768"] = QStringList() << "1024";
+        widthProxyMap["1440x900"] = QStringList() << "1440";
+
+        QMap <QString, QStringList> heightProxyMap;
+
+        heightProxyMap["640x480"] = QStringList() << "640";
+        heightProxyMap["800x600"] = QStringList() << "800";
+        heightProxyMap["1024x768"] = QStringList() << "1024";
+        heightProxyMap["1440x900"] = QStringList() << "1440";
+
+        preDefined->addProxy (width, widthProxyMap);
+        preDefined->addProxy (height, heightProxyMap);
 
         addSetting (preDefined);
     }
@@ -177,10 +193,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         slaveMultiText->setDefaultValues(QStringList() << "One" << "Three" << "Five");
 
         //add these settings to the model
-        addSetting (masterBoolean);
+
         addSetting (slaveBoolean);
         addSetting (slaveSingleText);
         addSetting (slaveMultiText);
+        addSetting (masterBoolean);
     }
 }
 

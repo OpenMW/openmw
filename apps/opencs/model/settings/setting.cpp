@@ -45,67 +45,16 @@ void CSMSettings::Setting::addProxy (Setting *setting,
 {
     // proxyMap is keyed to master proxy declared values and contains
     // corresponding proxy values for each declared value for the passed setting
+    StringListPairs masterProxyValueList;
 
-    bool doNew = true;
-
-    foreach (const ProxySettingPair *settingPairItem, mProxyLists)
+    foreach (const QString &masterKey, mDeclarations)
     {
-        StringPair *proxyName = settingPairItem->first;
-
-        if (proxyName->first == setting->page() &&
-            proxyName->second == setting->name())
-        {
-            doNew = false;
-            //otherwise, take the existing proxy list and add the new data
-            foreach (const QString &key, proxyMap.keys())
-            {
-                bool success = false;
-
-                ProxyValueList *valueList = settingPairItem->second;
-
-                //iterate the existing keys and replace existing list, if found
-                for (int j = 0; j < valueList->size(); j++)
-                {
-                    const StringListPair *item = valueList->at(j);
-
-                    success = (item->first == key);
-
-                    if (success)
-                    {
-                        StringListPair *newItem =
-                                new StringListPair (key, proxyMap.value (key));
-
-                        valueList->replace(j, newItem);
-                        break;
-                    }
-                }
-
-                //if keyis not found, add to the list
-                if (!success)
-                    valueList->append
-                               (new StringListPair (key, proxyMap.value (key)));
-            }
-            break;
-        }
+        StringListPair masterProxyPair (masterKey, proxyMap.value (masterKey));
+        masterProxyValueList.append (masterProxyPair);
     }
 
-    if (doNew)
-    {
-        //if the setting is not found, push a new proxy setting
-        ProxyValueList *proxyValueList = new ProxyValueList();
-
-        StringPair *proxyNames  =
-                new StringPair(setting->page(), setting->name());
-
-        foreach (const QString &key, proxyMap.keys())
-            proxyValueList->append
-                                (new StringListPair(key, proxyMap.value(key)));
-
-        ProxySettingPair *proxyItem  =
-                        new ProxySettingPair(proxyNames, proxyValueList);
-
-        mProxyLists.append (proxyItem);
-    }
+    StringPair namePair (setting->page(), setting->name());
+    mProxyValueLists.append (ProxySettingPair (namePair, masterProxyValueList));
 }
 
 void CSMSettings::Setting::setDeclaredValues (QStringList list)
@@ -184,9 +133,9 @@ bool CSMSettings::Setting::isMultiValue() const
     return property (Property_IsMultiValue).toBool();
 }
 
-const CSMSettings::ProxyLists &CSMSettings::Setting::proxyLists() const
+const CSMSettings::ProxySettingPairs &CSMSettings::Setting::proxyLists() const
 {
-    return mProxyLists;
+    return mProxyValueLists;
 }
 
 void CSMSettings::Setting::setSerializable (bool state)

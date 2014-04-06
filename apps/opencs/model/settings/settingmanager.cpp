@@ -6,7 +6,6 @@
 
 #include "setting.hpp"
 #include "settingmanager.hpp"
-#include "settingfiltermodel.hpp"
 
 CSMSettings::SettingManager::SettingManager(QObject *parent) :
     QObject(parent)
@@ -110,7 +109,9 @@ bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream)
         displayFileErrorMessage(mReadWriteMessage, false);
         return false;
     }
-
+    //disabled after rolling selector class into view.  Need to
+    //iterate views to get setting definitions before writing to file
+/*
     foreach (const QString &page, mSelectors.keys())
     {
         QList <SelectorPair> list = mSelectors.value (page);
@@ -123,16 +124,16 @@ bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream)
         foreach (const SelectorPair &pair, list)
         {
             //skip settings that are proxy masters
-            if (pair.second->proxyIndex() == 0)
+            //if (pair.second->proxyIndex() == 0)
                 continue;
 
-            QStringList values = pair.second->selectionToStringList();
+            QStringList values = pair.second->selectionStringList();
 
             foreach (const QString &value, values)
                 *stream << pair.first << " = " << value << "\n";
         }
     }
-
+*/
     destroyStream (stream);
     return true;
 }
@@ -336,75 +337,4 @@ CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const
         pageMap[setting->page()].append (setting);
 
     return pageMap;
-}
-
-CSMSettings::Selector *CSMSettings::SettingManager::findSelector
-                        (const QString &pageName, const QString &settingName)
-{
-    if (!mSelectors.keys().contains(pageName))
-        return 0;
-
-    QList <SelectorPair> list = mSelectors[pageName];
-    foreach (const SelectorPair &pair, list)
-    {
-        if (pair.first == settingName)
-            return pair.second;
-    }
-
-    return 0;
-}
-
-CSMSettings::Selector * CSMSettings::SettingManager::createSelector
-                                                (CSMSettings::Setting *setting)
-{
-    qDebug() << "Creating selector for setting " << setting->name();
-
-    QStringList definitions = setting->definedValues();
-    Selector *selector = 0;
-
-    qDebug() << "defns: " << setting->definedValues();
-    qDebug() << "deflts" << setting->defaultValues();
-
-    //add default value if no definitions are found
-    if (definitions.size() == 0)
-    {
-        definitions.append (setting->defaultValues());
-        setting->setDefinedValues (definitions);
-    }
-
-    // use the declared values as the model and the definitions for selection,
-    // if there are declared values.  Otherwise, use the definitions as the
-    // model and select everything
-    if (setting->declaredValues().size() > 0)
-        selector = new Selector (setting->name(), setting->declaredValues());
-    else
-    {
-        selector = new Selector (setting->name(), definitions);
-        selector->setSelectAll();
-    }
-
-    selector->setViewSelection (definitions);
-
-    mSelectors[setting->page()].append( SelectorPair
-                                                (setting->name(), selector));
-
-    return selector;
-}
-
-
-
-CSMSettings::Selector *CSMSettings::SettingManager::selector
-                        (const QString &pageName, const QString &settingName)
-{
-    Selector *selector = findSelector (pageName, settingName);
-
-    if (selector)
-        return selector;
-
-    Setting *setting = findSetting (pageName, settingName);
-
-    if (!setting)
-        return 0;
-
-    return createSelector (setting);
 }

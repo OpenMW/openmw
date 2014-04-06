@@ -3,11 +3,15 @@
 
 #include <QWidget>
 #include <QMap>
+#include <QItemSelectionModel>
+#include <QAbstractItemModel>
+#include <QList>
 
 #include "support.hpp"
 
 class QGroupBox;
 class QStringList;
+class QStandardItem;
 
 namespace CSMSettings
 {
@@ -24,25 +28,53 @@ namespace CSVSettings
     {
         Q_OBJECT
 
-        SettingBox *mViewFrame;
-        CSMSettings::Selector *mSelector;
-        CSMSettings::Setting *mSetting;
         Page *mParentPage;
+        SettingBox *mViewFrame;
+
+        CSMSettings::Setting *mSetting;
+        QItemSelectionModel *mSelectionModel;
+        QAbstractItemModel *mDataModel;
+
+        bool mHasDeclaredValues;
 
     public:
 
         explicit View (CSMSettings::Setting *setting,
                        Page *parent);
 
-        SettingBox *viewFrame() const                    { return mViewFrame; }
-        CSMSettings::Selector *selector()               { return mSelector; }
         CSMSettings::Setting *setting() const              { return mSetting; }
+        QStringList selectedValues() const;
+        void setSelectedValues (const QStringList &values,
+                                bool doViewUpdate = true);
+
+        SettingBox *viewFrame() const                    { return mViewFrame; }
 
     protected:
-        void showEvent ( QShowEvent * event );
 
-    public slots:
-        virtual void slotUpdateView (QStringList values) = 0;
+        QAbstractItemModel *dataModel()             { return mDataModel; }
+        QItemSelectionModel *selectionModel()       { return mSelectionModel;}
+
+        void showEvent ( QShowEvent * event );
+        virtual void updateView() const;
+
+    private:
+        void buildView();
+        void buildModel();
+
+        void refresh() const;
+
+        void select (const QItemSelection &selection) const;
+
+        bool stringListsMatch (const QStringList &list1,
+                               const QStringList &list2) const;
+
+        QList <QStandardItem *> toStandardItemList(const QStringList &) const;
+
+        QString value (int row) const;
+
+    signals:
+        void viewUpdated() const;
+
     };
 
     class IViewFactory
