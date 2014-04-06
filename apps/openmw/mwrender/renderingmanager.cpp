@@ -364,9 +364,8 @@ void RenderingManager::update (float duration, bool paused)
 
     static const int i1stPersonSneakDelta = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
             .find("i1stPersonSneakDelta")->getInt();
-    if(isSneaking && !(isSwimming || isInAir))
+    if(!paused && isSneaking && !(isSwimming || isInAir))
         mCamera->setSneakOffset(i1stPersonSneakDelta);
-
 
     mOcclusionQuery->update(duration);
 
