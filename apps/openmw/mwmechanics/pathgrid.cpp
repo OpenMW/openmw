@@ -250,12 +250,9 @@ namespace MWMechanics
         }
 
         int graphSize = mGraph.size();
-        std::vector<float> gScore;
-        gScore.resize(graphSize, -1);
-        std::vector<float> fScore;
-        fScore.resize(graphSize, -1);
-        std::vector<int> graphParent;
-        graphParent.resize(graphSize, -1);
+        std::vector<float> gScore (graphSize, -1);
+        std::vector<float> fScore (graphSize, -1);
+        std::vector<int> graphParent (graphSize, -1);
 
         // gScore & fScore keep costs for each pathgrid point in mPoints
         gScore[start] = 0;
