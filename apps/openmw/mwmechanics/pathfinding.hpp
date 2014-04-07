@@ -34,8 +34,6 @@ namespace MWMechanics
 
             void clearPath();
 
-            void buildPathgridGraph(const ESM::Pathgrid* pathGrid);
-
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                            const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
@@ -75,60 +73,14 @@ namespace MWMechanics
                 mPath.push_back(point);
             }
 
-            // While a public method is defined here, it is anticipated that
-            // mSCComp will only be used internally.
-            std::vector<int> getSCComp() const
-            {
-                return mSCComp;
-            }
-
         private:
 
-            struct Edge
-            {
-                int destination;
-                float cost;
-            };
-            struct Node
-            {
-                int label;
-                std::vector<Edge> edges;
-                int parent;//used in pathfinding
-            };
-
-            std::vector<float> mGScore;
-            std::vector<float> mFScore;
-
-            std::list<ESM::Pathgrid::Point> aStarSearch(const ESM::Pathgrid* pathGrid,int start,int goal,float xCell = 0, float yCell = 0);
-            void cleanUpAStar();
-
-            std::vector<Node> mGraph;
             bool mIsPathConstructed;
 
-
             std::list<ESM::Pathgrid::Point> mPath;
-            bool mIsGraphConstructed;
-            const MWWorld::CellStore* mCell;
 
-            // contains an integer indicating the groups of connected pathgrid points
-            // (all connected points will have the same value)
-            //
-            // In Seyda Neen there are 3:
-            //
-            //   52, 53 and 54 are one set (enclosed yard)
-            //   48, 49, 50, 51, 84, 85, 86, 87, 88, 89, 90 are another (ship & office)
-            //   all other pathgrid points are the third set
-            //
-            std::vector<int> mSCComp;
-            // variables used to calculate mSCComp
-            int mSCCId;
-            int mSCCIndex;
-            std::list<int> mSCCStack;
-            typedef std::pair<int, int> VPair; // first is index, second is lowlink
-            std::vector<VPair> mSCCPoint;
-            // methods used to calculate mSCComp
-            void recursiveStrongConnect(int v);
-            void buildConnectedPoints(const ESM::Pathgrid* pathGrid);
+            const ESM::Pathgrid *mPathgrid;
+            const MWWorld::CellStore* mCell;
     };
 }
 
