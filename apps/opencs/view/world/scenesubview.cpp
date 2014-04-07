@@ -9,6 +9,8 @@
 
 #include "../../model/doc/document.hpp"
 
+#include "../../model/world/cellselection.hpp"
+
 #include "../filter/filterbox.hpp"
 
 #include "../render/pagedworldspacewidget.hpp"
@@ -40,10 +42,8 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     {
         CSVRender::PagedWorldspaceWidget *widget = new CSVRender::PagedWorldspaceWidget (this);
         mScene = widget;
-        connect (widget,
-            SIGNAL (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)),
-            this,
-            SLOT (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)));
+        connect (widget, SIGNAL (cellSelectionChanged (const CSMWorld::CellSelection&)),
+            this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
     }
     else
         mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
@@ -102,16 +102,28 @@ void CSVWorld::SceneSubView::closeRequest()
     deleteLater();
 }
 
-void CSVWorld::SceneSubView::cellIndexChanged (const std::pair<int, int>& min,
-    const std::pair<int, int>& max)
+void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection& selection)
 {
+    int size = selection.getSize();
+
     std::ostringstream stream;
-    stream << "Scene: " << getUniversalId().getId() << " (" << min.first << ", " << min.second;
+    stream << "Scene: " << getUniversalId().getId();
 
-    if (min!=max)
-        stream << " to " << max.first << ", " << max.second;
+    if (size==0)
+        stream << " (empty)";
+    else if (size==1)
+    {
+        stream << " (" << *selection.begin() << ")";
+    }
+    else
+    {
+        stream << " (" << selection.getCentre() << " and " << size-1 << " more ";
 
-    stream << ")";
+        if (size>1)
+            stream << "cells around it)";
+        else
+            stream << "cell around it)";
+    }
 
     setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
 }

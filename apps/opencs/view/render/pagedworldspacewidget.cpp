@@ -4,36 +4,37 @@
 #include <sstream>
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent)
-: WorldspaceWidget (parent), mMin (std::make_pair (0, 0)), mMax (std::make_pair (-1, -1))
+: WorldspaceWidget (parent)
 {}
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
 {
     if (!hint.empty())
     {
+        CSMWorld::CellSelection selection;
+
         if (hint[0]=='c')
         {
             char ignore1, ignore2, ignore3;
-            std::pair<int, int> cellIndex;
+            int x, y;
 
             std::istringstream stream (hint.c_str());
-            if (stream >> ignore1 >> ignore2 >> ignore3 >> cellIndex.first >> cellIndex.second)
+            if (stream >> ignore1 >> ignore2 >> ignore3 >> x >> y)
             {
-                setCellIndex (cellIndex, cellIndex);
+                selection.add (CSMWorld::CellCoordinates (x, y));
 
                 /// \todo adjust camera position
             }
         }
 
         /// \todo implement 'r' type hints
+
+        setCellSelection (selection);
     }
 }
 
-void CSVRender::PagedWorldspaceWidget::setCellIndex (const std::pair<int, int>& min,
-    const std::pair<int, int>& max)
+void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSelection& selection)
 {
-    mMin = min;
-    mMax = max;
-
-    emit cellIndexChanged (mMin, mMax);
+    mSelection = selection;
+    emit cellSelectionChanged (mSelection);
 }

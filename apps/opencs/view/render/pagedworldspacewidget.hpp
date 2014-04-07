@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_PAGEDWORLDSPACEWIDGET_H
 #define OPENCS_VIEW_PAGEDWORLDSPACEWIDGET_H
 
+#include "../../model/world/cellselection.hpp"
+
 #include "worldspacewidget.hpp"
 
 namespace CSVRender
@@ -9,8 +11,7 @@ namespace CSVRender
     {
             Q_OBJECT
 
-            std::pair<int, int> mMin;
-            std::pair<int, int> mMax;
+            CSMWorld::CellSelection mSelection;
 
         public:
 
@@ -21,11 +22,11 @@ namespace CSVRender
 
             virtual void useViewHint (const std::string& hint);
 
-            void setCellIndex (const std::pair<int, int>& min, const std::pair<int, int>& max);
+            void setCellSelection (const CSMWorld::CellSelection& selection);
 
         signals:
 
-            void cellIndexChanged (const std::pair<int, int>& min, const std::pair<int, int>& max);
+            void cellSelectionChanged (const CSMWorld::CellSelection& selection);
     };
 }
 

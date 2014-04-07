@@ -5,6 +5,11 @@
 
 class QModelIndex;
 
+namespace CSMWorld
+{
+    class CellSelection;
+}
+
 namespace CSMDoc
 {
     class Document;
@@ -44,7 +49,7 @@ namespace CSVWorld
 
             void closeRequest();
 
-            void cellIndexChanged (const std::pair<int, int>& min, const std::pair<int, int>& max);
+            void cellSelectionChanged (const CSMWorld::CellSelection& selection);
     };
 }
 
