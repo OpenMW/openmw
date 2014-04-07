@@ -18,7 +18,6 @@
 #include "creator.hpp"
 #include "scenetoolbar.hpp"
 #include "scenetoolmode.hpp"
-#include "scenetoolgrid.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id)
@@ -37,8 +36,6 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     SceneToolbar *toolbar = new SceneToolbar (48+6, this);
 
-    SceneToolGrid *gridTool = 0;
-
     if (id.getId()=="sys::default")
     {
         CSVRender::PagedWorldspaceWidget *widget = new CSVRender::PagedWorldspaceWidget (this);
@@ -46,13 +43,6 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         connect (widget,
             SIGNAL (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)),
             this,
-            SLOT (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)));
-
-        gridTool = new SceneToolGrid (toolbar);
-
-        connect (widget,
-            SIGNAL (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)),
-            gridTool,
             SLOT (cellIndexChanged (const std::pair<int, int>&, const std::pair<int, int>&)));
     }
     else
@@ -63,9 +53,6 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
-
-    if (gridTool)
-        toolbar->addTool (gridTool);
 
     layout2->addWidget (toolbar, 0);
 
