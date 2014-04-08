@@ -1,11 +1,15 @@
 
 #include "scenesubview.hpp"
 
+#include <sstream>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 
 #include "../../model/doc/document.hpp"
+
+#include "../../model/world/cellselection.hpp"
 
 #include "../filter/filterbox.hpp"
 
@@ -32,10 +36,15 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout2->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    SceneToolbar *toolbar = new SceneToolbar (48, this);
+    SceneToolbar *toolbar = new SceneToolbar (48+6, this);
 
     if (id.getId()=="sys::default")
-        mScene = new CSVRender::PagedWorldspaceWidget (this);
+    {
+        CSVRender::PagedWorldspaceWidget *widget = new CSVRender::PagedWorldspaceWidget (this);
+        mScene = widget;
+        connect (widget, SIGNAL (cellSelectionChanged (const CSMWorld::CellSelection&)),
+            this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
+    }
     else
         mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
@@ -83,7 +92,38 @@ void CSVWorld::SceneSubView::setStatusBar (bool show)
     mBottom->setStatusBar (show);
 }
 
+void CSVWorld::SceneSubView::useHint (const std::string& hint)
+{
+    mScene->useViewHint (hint);
+}
+
 void CSVWorld::SceneSubView::closeRequest()
 {
     deleteLater();
+}
+
+void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection& selection)
+{
+    int size = selection.getSize();
+
+    std::ostringstream stream;
+    stream << "Scene: " << getUniversalId().getId();
+
+    if (size==0)
+        stream << " (empty)";
+    else if (size==1)
+    {
+        stream << " (" << *selection.begin() << ")";
+    }
+    else
+    {
+        stream << " (" << selection.getCentre() << " and " << size-1 << " more ";
+
+        if (size>1)
+            stream << "cells around it)";
+        else
+            stream << "cell around it)";
+    }
+
+    setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
 }

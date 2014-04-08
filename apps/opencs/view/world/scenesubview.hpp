@@ -5,6 +5,11 @@
 
 class QModelIndex;
 
+namespace CSMWorld
+{
+    class CellSelection;
+}
+
 namespace CSMDoc
 {
     class Document;
@@ -38,9 +43,13 @@ namespace CSVWorld
 
             virtual void setStatusBar (bool show);
 
+            virtual void useHint (const std::string& hint);
+
         private slots:
 
             void closeRequest();
+
+            void cellSelectionChanged (const CSMWorld::CellSelection& selection);
     };
 }
 
