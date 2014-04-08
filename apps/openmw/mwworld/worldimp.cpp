@@ -2071,6 +2071,12 @@ namespace MWWorld
             {
                 contentLoader.load(col.getPath(*it), idx);
             }
+            else
+            {
+                std::stringstream msg;
+                msg << "Failed loading " << *it << ": the content file does not exist";
+                throw std::runtime_error(msg.str());
+            }
         }
     }
 
