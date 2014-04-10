@@ -1,29 +1,18 @@
 
 #include "regionmapsubview.hpp"
 
-#include <QTableView>
-#include <QHeaderView>
+#include "regionmap.hpp"
 
 CSVWorld::RegionMapSubView::RegionMapSubView (CSMWorld::UniversalId universalId,
     CSMDoc::Document& document)
 : CSVDoc::SubView (universalId)
 {
-    mTable = new QTableView (this);
+    mRegionMap = new RegionMap (document.getData().getTableModel (universalId), this);
 
-    mTable->verticalHeader()->hide();
-    mTable->horizontalHeader()->hide();
-
-    mTable->setSelectionMode (QAbstractItemView::ExtendedSelection);
-
-    mTable->setModel (document.getData().getTableModel (universalId));
-
-    mTable->resizeColumnsToContents();
-    mTable->resizeRowsToContents();
-
-    setWidget (mTable);
+    setWidget (mRegionMap);
 }
 
 void CSVWorld::RegionMapSubView::setEditLock (bool locked)
 {
-
+    mRegionMap->setEditLock (locked);
 }

@@ -3,7 +3,7 @@
 
 #include "../doc/subview.hpp"
 
-class QTableView;
+class QAction;
 
 namespace CSMDoc
 {
@@ -12,9 +12,13 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
+    class RegionMap;
+
     class RegionMapSubView : public CSVDoc::SubView
     {
-            QTableView *mTable;
+            Q_OBJECT
+
+            RegionMap *mRegionMap;
 
         public:
 

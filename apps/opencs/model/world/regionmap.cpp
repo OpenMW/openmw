@@ -406,6 +406,17 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
         return QString::fromUtf8 (stream.str().c_str());
     }
 
+    if (role==Role_Region)
+    {
+        CellIndex cellIndex = getIndex (index);
+
+        std::map<CellIndex, CellDescription>::const_iterator cell =
+            mMap.find (cellIndex);
+
+        if (cell!=mMap.end() && !cell->second.mRegion.empty())
+            return QString::fromUtf8 (Misc::StringUtils::lowerCase (cell->second.mRegion).c_str());
+    }
+
     return QVariant();
 }
 

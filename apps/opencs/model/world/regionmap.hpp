@@ -25,6 +25,11 @@ namespace CSMWorld
 
             typedef std::pair<int, int> CellIndex;
 
+            enum Role
+            {
+                Role_Region = Qt::UserRole
+            };
+
         private:
 
             struct CellDescription
