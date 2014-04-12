@@ -35,6 +35,7 @@ namespace MWMechanics
       , mPrevX(0)
       , mPrevY(0)
       , mWalkState(State_Norm)
+      , mDistSameSpot(0)
       , mStuckCount(0)
       , mEvadeDuration(0)
       , mStuckDuration(0)
@@ -71,7 +72,6 @@ namespace MWMechanics
         return new AiWander(*this);
     }
 
-    // TODO: duration is passed in but never used, check if it is needed
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
@@ -113,7 +113,9 @@ namespace MWMechanics
             mCellX = actor.getCell()->getCell()->mData.mX;
             mCellY = actor.getCell()->getCell()->mData.mY;
 
-            // TODO: If there is no path does this actor get stuck forever?
+            // If there is no path this actor doesn't go anywhere. See:
+            // https://forum.openmw.org/viewtopic.php?t=1556
+            // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
             if(!mPathgrid)
                 mDistance = 0;
             else if(mPathgrid->mPoints.empty())
@@ -166,7 +168,7 @@ namespace MWMechanics
             }
         }
 
-        // TODO: Does this actor stay in one spot forever while in AiWander?
+        // Actor becomes stationary - see above URL's for previous research
         if(mAllowedNodes.empty())
             mDistance = 0;
 
@@ -277,8 +279,10 @@ namespace MWMechanics
             {
                 assert(mAllowedNodes.size());
                 unsigned int randNode = (int)(rand() / ((double)RAND_MAX + 1) * mAllowedNodes.size());
+                // NOTE: destNodePos initially constructed with local (i.e. cell) co-ordinates
                 Ogre::Vector3 destNodePos(mAllowedNodes[randNode].mX, mAllowedNodes[randNode].mY, mAllowedNodes[randNode].mZ);
 
+                // convert dest to use world co-ordinates
                 ESM::Pathgrid::Point dest;
                 dest.mX = destNodePos[0] + mXCell;
                 dest.mY = destNodePos[1] + mYCell;
@@ -338,9 +342,15 @@ namespace MWMechanics
                  * f = one frame
                  * t = how long before considered stuck
                  * u = how long to move sideways
+                 *
+                 * DIST_SAME_SPOT is calibrated for movement speed of around 150.
+                 * A rat has walking speed of around 30, so we need to adjust for
+                 * that.
                  */
-                bool samePosition = (abs(pos.pos[0] - mPrevX) < DIST_SAME_SPOT) &&
-                                    (abs(pos.pos[1] - mPrevY) < DIST_SAME_SPOT);
+                if(!mDistSameSpot)
+                    mDistSameSpot = DIST_SAME_SPOT * (actor.getClass().getSpeed(actor) / 150);
+                bool samePosition = (abs(pos.pos[0] - mPrevX) < mDistSameSpot) &&
+                                    (abs(pos.pos[1] - mPrevY) < mDistSameSpot);
 
                 switch(mWalkState)
                 {
@@ -364,14 +374,14 @@ namespace MWMechanics
                         {
                             mStuckDuration += duration;
                             // consider stuck only if position unchanges for a period
-                            if(mStuckDuration > DURATION_SAME_SPOT)
+                            if(mStuckDuration < DURATION_SAME_SPOT)
+                                break; // still checking, note duration added to timer
+                            else
                             {
-                                mWalkState = State_Evade;
                                 mStuckDuration = 0;
                                 mStuckCount++;
+                                mWalkState = State_Evade;
                             }
-                            else
-                                break; // still in the same state, but duration added to timer
                         }
                     }
                         /* FALL THROUGH */
@@ -395,7 +405,7 @@ namespace MWMechanics
 
                     // diagonal should have same animation as walk forward
                     actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.01f;
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
                     // change the angle a bit, too
                     zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
                 }

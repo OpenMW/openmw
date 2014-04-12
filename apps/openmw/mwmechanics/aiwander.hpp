@@ -58,8 +58,9 @@ namespace MWMechanics
             WalkState mWalkState;
 
             int mStuckCount;
-            float mStuckDuration;
+            float mStuckDuration; // accumulate time here while in same spot
             float mEvadeDuration;
+            float mDistSameSpot; // take account of actor's speed
 
             bool mStoredAvailableNodes;
             bool mChooseAction;
