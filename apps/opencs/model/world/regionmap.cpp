@@ -38,6 +38,18 @@ QModelIndex CSMWorld::RegionMap::getIndex (const CellCoordinates& index) const
         index.getX()-mMin.getX());
 }
 
+CSMWorld::CellCoordinates CSMWorld::RegionMap::getIndex (const Cell& cell) const
+{
+    std::istringstream stream (cell.mId);
+
+    char ignore;
+    int x = 0;
+    int y = 0;
+    stream >> ignore >> x >> y;
+
+    return CellCoordinates (x, y);
+}
+
 void CSMWorld::RegionMap::buildRegions()
 {
     const IdCollection<ESM::Region>& regions = mData.getRegions();
@@ -70,7 +82,7 @@ void CSMWorld::RegionMap::buildMap()
         {
             CellDescription description (cell);
 
-            CellCoordinates index (cell2.mData.mX, cell2.mData.mY);
+            CellCoordinates index = getIndex (cell2);
 
             mMap.insert (std::make_pair (index, description));
         }
@@ -114,7 +126,7 @@ void CSMWorld::RegionMap::addCells (int start, int end)
 
         if (cell2.isExterior())
         {
-            CellCoordinates index (cell2.mData.mX, cell2.mData.mY);
+            CellCoordinates index = getIndex (cell2);
 
             CellDescription description (cell);
 
@@ -236,7 +248,7 @@ std::pair<CSMWorld::CellCoordinates, CSMWorld::CellCoordinates> CSMWorld::Region
 
         if (cell2.isExterior())
         {
-            CellCoordinates index (cell2.mData.mX, cell2.mData.mY);
+            CellCoordinates index = getIndex (cell2);
 
             if (min==max)
             {
@@ -476,11 +488,7 @@ void CSMWorld::RegionMap::cellsAboutToBeRemoved (const QModelIndex& parent, int 
         const Cell& cell2 = cell.get();
 
         if (cell2.isExterior())
-        {
-            CellCoordinates index (cell2.mData.mX, cell2.mData.mY);
-
-            removeCell (index);
-        }
+            removeCell (getIndex (cell2));
     }
 }
 

@@ -54,6 +54,8 @@ namespace CSMWorld
 
             QModelIndex getIndex (const CellCoordinates& index) const;
 
+            CellCoordinates getIndex (const Cell& cell) const;
+
             void buildRegions();
 
             void buildMap();
