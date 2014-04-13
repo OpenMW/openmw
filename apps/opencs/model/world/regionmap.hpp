@@ -26,7 +26,8 @@ namespace CSMWorld
 
             enum Role
             {
-                Role_Region = Qt::UserRole
+                Role_Region = Qt::UserRole,
+                Role_CellId = Qt::UserRole+1
             };
 
         private:
@@ -93,6 +94,8 @@ namespace CSMWorld
             virtual int columnCount (const QModelIndex& parent = QModelIndex()) const;
 
             virtual QVariant data (const QModelIndex& index, int role = Qt::DisplayRole) const;
+            ///< \note Calling this function with role==Role_CellId may return the ID of a cell
+            /// that does not exist.
 
             virtual Qt::ItemFlags flags (const QModelIndex& index) const;
 

@@ -384,15 +384,22 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
             return QString::fromUtf8 (Misc::StringUtils::lowerCase (cell->second.mRegion).c_str());
     }
 
+    if (role==Role_CellId)
+    {
+        CellCoordinates cellIndex = getIndex (index);
+
+        std::ostringstream stream;
+        stream << "#" << cellIndex.getX() << " " << cellIndex.getY();
+
+        return QString::fromUtf8 (stream.str().c_str());
+    }
+
     return QVariant();
 }
 
 Qt::ItemFlags CSMWorld::RegionMap::flags (const QModelIndex& index) const
 {
-    if (mMap.find (getIndex (index))!=mMap.end())
-        return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-
-    return 0;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 void CSMWorld::RegionMap::regionsAboutToBeRemoved (const QModelIndex& parent, int start, int end)
