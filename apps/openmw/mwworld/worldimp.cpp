@@ -1721,13 +1721,18 @@ namespace MWWorld
     // below the actor is detected and ignored. A value of 1.5 is used here, but
     // something larger may be more suitable.  This change should resolve Bug#1271.
     //
-    // FIXME: Collision detection each time may have a performance impact.
-    //        There might be better places to update PhysicActor::mOnGround.
+    // TODO: There might be better places to update PhysicActor::mOnGround.
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
         RefData &refdata = ptr.getRefData();
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if(physactor)
+
+        if(!physactor)
+            return false;
+
+        if(physactor->getOnGround())
+            return true;
+        else
         {
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             OEngine::Physic::ActorTracer tracer;
@@ -1737,12 +1742,13 @@ namespace MWWorld
                               pos - Ogre::Vector3(0, 0, 1.5f), // trace a small amount down
                               mPhysEngine);
             if(tracer.mFraction < 1.0f) // collision, must be close to something below
-                return true; // TODO: should update physactor
+            {
+                const_cast<OEngine::Physic::PhysicActor *> (physactor)->setOnGround(true);
+                return true;
+            }
             else
-                return physactor->getOnGround();
+                return false;
         }
-        else
-            return false;
     }
 
     bool World::vanityRotateCamera(float * rot)
