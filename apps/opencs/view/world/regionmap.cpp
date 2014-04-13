@@ -3,12 +3,19 @@
 
 #include <algorithm>
 #include <set>
+#include <sstream>
 
 #include <QHeaderView>
 #include <QContextMenuEvent>
 #include <QMenu>
 
+#include "../../model/doc/document.hpp"
+
 #include "../../model/world/regionmap.hpp"
+#include "../../model/world/universalid.hpp"
+#include "../../model/world/data.hpp"
+#include "../../model/world/idtable.hpp"
+#include "../../model/world/commands.hpp"
 
 void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -23,12 +30,28 @@ void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
     if (getMissingRegionCells().size()>0)
         menu.addAction (mSelectRegionsAction);
 
+    int selectedNonExistentCells = getSelectedCells (false, true).size();
+
+    if (selectedNonExistentCells>0)
+    {
+        if (selectedNonExistentCells==1)
+            mCreateCellsAction->setText ("Create one cell");
+        else
+        {
+            std::ostringstream stream;
+            stream << "Create " << selectedNonExistentCells << " cells";
+            mCreateCellsAction->setText (QString::fromUtf8 (stream.str().c_str()));
+        }
+
+        menu.addAction (mCreateCellsAction);
+    }
+
     menu.exec (event->globalPos());
 }
 
 QModelIndexList CSVWorld::RegionMap::getUnselectedCells() const
 {
-     const QAbstractItemModel *model = QTableView::model();
+    const QAbstractItemModel *model = QTableView::model();
 
     int rows = model->rowCount();
     int columns = model->columnCount();
@@ -52,6 +75,25 @@ QModelIndexList CSVWorld::RegionMap::getUnselectedCells() const
 
     std::set_difference (all.begin(), all.end(), selected.begin(), selected.end(),
         std::back_inserter (list));
+
+    return list;
+}
+
+QModelIndexList CSVWorld::RegionMap::getSelectedCells (bool existent, bool nonExistent) const
+{
+    const QAbstractItemModel *model = QTableView::model();
+
+    QModelIndexList selected = selectionModel()->selectedIndexes();
+
+    QModelIndexList list;
+
+    for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
+    {
+        bool exists = model->data (*iter, Qt::BackgroundRole)!=QBrush (Qt::DiagCrossPattern);
+
+        if ((exists && existent) || (!exists && nonExistent))
+             list.push_back (*iter);
+    }
 
     return list;
 }
@@ -89,15 +131,16 @@ QModelIndexList CSVWorld::RegionMap::getMissingRegionCells() const
     return list;
 }
 
-CSVWorld::RegionMap::RegionMap (QAbstractItemModel *model, QWidget *parent)
-: QTableView (parent)
+CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
+    CSMDoc::Document& document, QWidget *parent)
+: QTableView (parent), mEditLock (false), mDocument (document)
 {
     verticalHeader()->hide();
     horizontalHeader()->hide();
 
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
-    setModel (model);
+    setModel (document.getData().getTableModel (universalId));
 
     resizeColumnsToContents();
     resizeRowsToContents();
@@ -113,11 +156,15 @@ CSVWorld::RegionMap::RegionMap (QAbstractItemModel *model, QWidget *parent)
     mSelectRegionsAction = new QAction (tr ("Select Regions"), this);
     connect (mSelectRegionsAction, SIGNAL (triggered()), this, SLOT (selectRegions()));
     addAction (mSelectRegionsAction);
+
+    mCreateCellsAction = new QAction (tr ("Create Cells Action"), this);
+    connect (mCreateCellsAction, SIGNAL (triggered()), this, SLOT (createCells()));
+    addAction (mCreateCellsAction);
 }
 
 void CSVWorld::RegionMap::setEditLock (bool locked)
 {
-
+    mEditLock = locked;
 }
 
 void CSVWorld::RegionMap::selectAll()
@@ -139,4 +186,31 @@ void CSVWorld::RegionMap::selectRegions()
 
     for (QModelIndexList::const_iterator iter (unselected.begin()); iter!=unselected.end(); ++iter)
         selectionModel()->select (*iter, QItemSelectionModel::Select);
+}
+
+void CSVWorld::RegionMap::createCells()
+{
+    if (mEditLock)
+        return;
+
+    QModelIndexList selected = getSelectedCells (false, true);
+
+    QAbstractItemModel *regionModel = model();
+
+    CSMWorld::IdTable *cellsModel = &dynamic_cast<CSMWorld::IdTable&> (*
+        mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
+
+    if (selected.size()>1)
+        mDocument.getUndoStack().beginMacro (tr ("Create cells"));
+
+    for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
+    {
+        std::string cellId = regionModel->data (*iter, CSMWorld::RegionMap::Role_CellId).
+            toString().toUtf8().constData();
+
+        mDocument.getUndoStack().push (new CSMWorld::CreateCommand (*cellsModel, cellId));
+    }
+
+    if (selected.size()>1)
+        mDocument.getUndoStack().endMacro();
 }

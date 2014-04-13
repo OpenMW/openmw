@@ -7,7 +7,7 @@ CSVWorld::RegionMapSubView::RegionMapSubView (CSMWorld::UniversalId universalId,
     CSMDoc::Document& document)
 : CSVDoc::SubView (universalId)
 {
-    mRegionMap = new RegionMap (document.getData().getTableModel (universalId), this);
+    mRegionMap = new RegionMap (universalId, document, this);
 
     setWidget (mRegionMap);
 }
