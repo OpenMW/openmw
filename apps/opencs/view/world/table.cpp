@@ -358,6 +358,9 @@ void CSVWorld::Table::cloneRecord()
 
 void CSVWorld::Table::moveUpRecord()
 {
+    if (mEditLock)
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     if (selectedRows.size()==1)
@@ -387,6 +390,9 @@ void CSVWorld::Table::moveUpRecord()
 
 void CSVWorld::Table::moveDownRecord()
 {
+    if (mEditLock)
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     if (selectedRows.size()==1)

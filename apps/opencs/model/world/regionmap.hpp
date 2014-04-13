@@ -9,6 +9,7 @@
 
 #include "record.hpp"
 #include "cell.hpp"
+#include "cellcoordinates.hpp"
 
 namespace CSMWorld
 {
@@ -23,7 +24,11 @@ namespace CSMWorld
 
         public:
 
-            typedef std::pair<int, int> CellIndex;
+            enum Role
+            {
+                Role_Region = Qt::UserRole,
+                Role_CellId = Qt::UserRole+1
+            };
 
         private:
 
@@ -39,27 +44,29 @@ namespace CSMWorld
             };
 
             Data& mData;
-            std::map<CellIndex, CellDescription> mMap;
-            CellIndex mMin; ///< inclusive
-            CellIndex mMax; ///< exclusive
+            std::map<CellCoordinates, CellDescription> mMap;
+            CellCoordinates mMin; ///< inclusive
+            CellCoordinates mMax; ///< exclusive
             std::map<std::string, unsigned int> mColours; ///< region ID, colour (RGBA)
 
-            CellIndex getIndex (const QModelIndex& index) const;
+            CellCoordinates getIndex (const QModelIndex& index) const;
             ///< Translates a Qt model index into a cell index (which can contain negative components)
 
-            QModelIndex getIndex (const CellIndex& index) const;
+            QModelIndex getIndex (const CellCoordinates& index) const;
+
+            CellCoordinates getIndex (const Cell& cell) const;
 
             void buildRegions();
 
             void buildMap();
 
-            void addCell (const CellIndex& index, const CellDescription& description);
+            void addCell (const CellCoordinates& index, const CellDescription& description);
             ///< May be called on a cell that is already in the map (in which case an update is
             // performed)
 
             void addCells (int start, int end);
 
-            void removeCell (const CellIndex& index);
+            void removeCell (const CellCoordinates& index);
             ///< May be called on a cell that is not in the map (in which case the call is ignored)
 
             void addRegion (const std::string& region, unsigned int colour);
@@ -78,7 +85,7 @@ namespace CSMWorld
 
             void updateSize();
 
-            std::pair<CellIndex, CellIndex> getSize() const;
+            std::pair<CellCoordinates, CellCoordinates> getSize() const;
 
         public:
 
@@ -89,6 +96,8 @@ namespace CSMWorld
             virtual int columnCount (const QModelIndex& parent = QModelIndex()) const;
 
             virtual QVariant data (const QModelIndex& index, int role = Qt::DisplayRole) const;
+            ///< \note Calling this function with role==Role_CellId may return the ID of a cell
+            /// that does not exist.
 
             virtual Qt::ItemFlags flags (const QModelIndex& index) const;
 

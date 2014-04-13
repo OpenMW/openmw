@@ -15,21 +15,26 @@ CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
 
     layout->setContentsMargins (0, 0, 0, 0);
 
-    RecordFilterBox *recordFilterBox = new RecordFilterBox (data, this);
+    mRecordFilterBox = new RecordFilterBox (data, this);
 
-    layout->addWidget (recordFilterBox);
+    layout->addWidget (mRecordFilterBox);
 
     setLayout (layout);
 
-    connect (recordFilterBox,
+    connect (mRecordFilterBox,
         SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>)),
         this, SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
 
     connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)),
-            recordFilterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)));
+            mRecordFilterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)));
 
-    connect(this, SIGNAL(useFilterRequest(const std::string&)), recordFilterBox, SIGNAL(useFilterRequest(const std::string&)));
+    connect(this, SIGNAL(useFilterRequest(const std::string&)), mRecordFilterBox, SIGNAL(useFilterRequest(const std::string&)));
     setAcceptDrops(true);
+}
+
+void CSVFilter::FilterBox::setRecordFilter (const std::string& filter)
+{
+    mRecordFilterBox->setFilter (filter);
 }
 
 void CSVFilter::FilterBox::dropEvent (QDropEvent* event)

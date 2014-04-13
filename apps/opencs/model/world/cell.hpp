@@ -9,6 +9,9 @@
 namespace CSMWorld
 {
     /// \brief Wrapper for Cell record
+    ///
+    /// \attention The mData.mX and mData.mY fields of the ESM::Cell struct are not used.
+    /// Exterior cell coordinates are encoded in the cell ID.
     struct Cell : public ESM::Cell
     {
         std::string mId;
