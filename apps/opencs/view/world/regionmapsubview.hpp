@@ -25,6 +25,10 @@ namespace CSVWorld
             RegionMapSubView (CSMWorld::UniversalId universalId, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
+
+        private slots:
+
+            void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
     };
 }
 

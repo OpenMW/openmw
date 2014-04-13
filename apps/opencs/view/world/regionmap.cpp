@@ -36,7 +36,7 @@ void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
     if (selectedNonExistentCells>0)
     {
         if (selectedNonExistentCells==1)
-            mCreateCellsAction->setText ("Create one cell");
+            mCreateCellsAction->setText ("Create one Cell");
         else
         {
             std::ostringstream stream;
@@ -51,12 +51,15 @@ void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
     {
         if (!mRegionId.empty())
         {
-            mSetRegionAction->setText (QString::fromUtf8 (("Set region to " + mRegionId).c_str()));
+            mSetRegionAction->setText (QString::fromUtf8 (("Set Region to " + mRegionId).c_str()));
             menu.addAction (mSetRegionAction);
         }
 
         menu.addAction (mUnsetRegionAction);
     }
+
+    if (selectionModel()->selectedIndexes().size()>0)
+        menu.addAction (mViewAction);
 
     menu.exec (event->globalPos());
 }
@@ -210,6 +213,10 @@ CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     mUnsetRegionAction = new QAction (tr ("Unset Region"), this);
     connect (mUnsetRegionAction, SIGNAL (triggered()), this, SLOT (unsetRegion()));
     addAction (mUnsetRegionAction);
+
+    mViewAction = new QAction (tr ("View Cells"), this);
+    connect (mViewAction, SIGNAL (triggered()), this, SLOT (view()));
+    addAction (mViewAction);
 }
 
 void CSVWorld::RegionMap::setEditLock (bool locked)
@@ -245,8 +252,6 @@ void CSVWorld::RegionMap::createCells()
 
     QModelIndexList selected = getSelectedCells (false, true);
 
-    QAbstractItemModel *regionModel = model();
-
     CSMWorld::IdTable *cellsModel = &dynamic_cast<CSMWorld::IdTable&> (*
         mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
 
@@ -255,7 +260,7 @@ void CSVWorld::RegionMap::createCells()
 
     for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
     {
-        std::string cellId = regionModel->data (*iter, CSMWorld::RegionMap::Role_CellId).
+        std::string cellId = model()->data (*iter, CSMWorld::RegionMap::Role_CellId).
             toString().toUtf8().constData();
 
         mDocument.getUndoStack().push (new CSMWorld::CreateCommand (*cellsModel, cellId));
@@ -279,4 +284,30 @@ void CSVWorld::RegionMap::unsetRegion()
         return;
 
     setRegion ("");
+}
+
+void CSVWorld::RegionMap::view()
+{
+    std::ostringstream hint;
+    hint << "c:";
+
+    QModelIndexList selected = selectionModel()->selectedIndexes();
+
+    bool first = true;
+
+    for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
+    {
+        std::string cellId = model()->data (*iter, CSMWorld::RegionMap::Role_CellId).
+            toString().toUtf8().constData();
+
+        if (first)
+            first = false;
+        else
+            hint << "; ";
+
+        hint << cellId;
+    }
+
+    emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, "sys::default"),
+        hint.str());
 }
