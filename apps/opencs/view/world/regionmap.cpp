@@ -56,6 +56,8 @@ void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
         }
 
         menu.addAction (mUnsetRegionAction);
+
+        menu.addAction (mViewInTableAction);
     }
 
     if (selectionModel()->selectedIndexes().size()>0)
@@ -217,6 +219,10 @@ CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     mViewAction = new QAction (tr ("View Cells"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (view()));
     addAction (mViewAction);
+
+    mViewInTableAction = new QAction (tr ("View Cells in Table"), this);
+    connect (mViewInTableAction, SIGNAL (triggered()), this, SLOT (viewInTable()));
+    addAction (mViewInTableAction);
 }
 
 void CSVWorld::RegionMap::setEditLock (bool locked)
@@ -310,4 +316,31 @@ void CSVWorld::RegionMap::view()
 
     emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Scene, "sys::default"),
         hint.str());
+}
+
+void CSVWorld::RegionMap::viewInTable()
+{
+    std::ostringstream hint;
+    hint << "f:!or(";
+
+    QModelIndexList selected = getSelectedCells();
+
+    bool first = true;
+
+    for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
+    {
+        std::string cellId = model()->data (*iter, CSMWorld::RegionMap::Role_CellId).
+            toString().toUtf8().constData();
+
+        if (first)
+            first = false;
+        else
+            hint << ",";
+
+        hint << "string(ID,\"" << cellId << "\")";
+    }
+
+    hint << ")";
+
+    emit editRequest (CSMWorld::UniversalId::Type_Cells, hint.str());
 }

@@ -28,6 +28,7 @@ namespace CSVWorld
             QAction *mSetRegionAction;
             QAction *mUnsetRegionAction;
             QAction *mViewAction;
+            QAction *mViewInTableAction;
             bool mEditLock;
             CSMDoc::Document& mDocument;
             std::string mRegionId;
@@ -75,6 +76,8 @@ namespace CSVWorld
             void unsetRegion();
 
             void view();
+
+            void viewInTable();
     };
 }
 
