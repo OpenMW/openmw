@@ -17,6 +17,11 @@ namespace CSMDoc
     class Document;
 }
 
+namespace CSVFilter
+{
+    class FilterBox;
+}
+
 namespace CSVWorld
 {
     class Table;
@@ -29,6 +34,7 @@ namespace CSVWorld
 
             Table *mTable;
             TableBottomBox *mBottom;
+            CSVFilter::FilterBox *mFilterBox;
 
         public:
 
@@ -40,6 +46,8 @@ namespace CSVWorld
             virtual void updateEditorSetting (const QString& key, const QString& value);
 
             virtual void setStatusBar (bool show);
+
+            virtual void useHint (const std::string& hint);
 
         protected:
             bool eventFilter(QObject* object, QEvent *event);
