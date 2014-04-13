@@ -1090,14 +1090,7 @@ void CharacterController::update(float duration)
         if (inwater || flying)
             cls.getCreatureStats(mPtr).land();
 
-        if(!onground && !flying && !inwater
-            // FIXME: The check for vec.z is a hack, but onground is not a reliable
-            // indicator of whether the actor is on the ground (defaults to false, which
-            // means this code block will always execute at least once for most actors,
-            // and collisions can move z position slightly off zero). A very small value
-            // of 0.1 is used here, but something larger like 10 may be more suitable.
-            // Should resolve Bug#1271.
-                && (mJumpState == JumpState_Falling || vec.z > 0.1f))
+        if(!onground && !flying && !inwater)
         {
             // In the air (either getting up —ascending part of jump— or falling).
 

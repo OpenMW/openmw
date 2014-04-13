@@ -9,6 +9,7 @@
 
 #include <OgreSceneNode.h>
 
+#include <libs/openengine/bullet/trace.h>
 #include <libs/openengine/bullet/physic.hpp>
 
 #include <components/bsa/bsa_archive.hpp>
@@ -1711,11 +1712,37 @@ namespace MWWorld
         return pos.z < cell->getWaterLevel();
     }
 
+    // physactor->getOnGround() is not a reliable indicator of whether the actor
+    // is on the ground (defaults to false, which means code blocks such as
+    // CharacterController::update() may falsely detect "falling").
+    //
+    // Also, collisions can move z position slightly off zero, giving a false
+    // indication. In order to reduce false detection of jumping, small distance
+    // below the actor is detected and ignored. A value of 1.5 is used here, but
+    // something larger may be more suitable.  This change should resolve Bug#1271.
+    //
+    // FIXME: Collision detection each time may have a performance impact.
+    //        There might be better places to update PhysicActor::mOnGround.
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
         RefData &refdata = ptr.getRefData();
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        return physactor && physactor->getOnGround();
+        if(physactor)
+        {
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            OEngine::Physic::ActorTracer tracer;
+            // a small distance above collision object is considered "on ground"
+            tracer.findGround(physactor->getCollisionBody(),
+                              pos,
+                              pos - Ogre::Vector3(0, 0, 1.5f), // trace a small amount down
+                              mPhysEngine);
+            if(tracer.mFraction < 1.0f) // collision, must be close to something below
+                return true; // TODO: should update physactor
+            else
+                return physactor->getOnGround();
+        }
+        else
+            return false;
     }
 
     bool World::vanityRotateCamera(float * rot)
