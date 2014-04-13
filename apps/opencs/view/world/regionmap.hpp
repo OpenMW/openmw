@@ -25,8 +25,11 @@ namespace CSVWorld
             QAction *mClearSelectionAction;
             QAction *mSelectRegionsAction;
             QAction *mCreateCellsAction;
+            QAction *mSetRegionAction;
+            QAction *mUnsetRegionAction;
             bool mEditLock;
             CSMDoc::Document& mDocument;
+            std::string mRegionId;
 
         private:
 
@@ -41,6 +44,9 @@ namespace CSVWorld
 
             QModelIndexList getMissingRegionCells() const;
             ///< Unselected cells within all regions that have at least one selected cell.
+
+            void setRegion (const std::string& regionId);
+            ///< Set region Id of selected cells.
 
         public:
 
@@ -58,6 +64,10 @@ namespace CSVWorld
             void selectRegions();
 
             void createCells();
+
+            void setRegion();
+
+            void unsetRegion();
     };
 }
 

@@ -16,6 +16,7 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/world/columns.hpp"
 
 void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -44,6 +45,17 @@ void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
         }
 
         menu.addAction (mCreateCellsAction);
+    }
+
+    if (getSelectedCells().size()>0)
+    {
+        if (!mRegionId.empty())
+        {
+            mSetRegionAction->setText (QString::fromUtf8 (("Set region to " + mRegionId).c_str()));
+            menu.addAction (mSetRegionAction);
+        }
+
+        menu.addAction (mUnsetRegionAction);
     }
 
     menu.exec (event->globalPos());
@@ -131,6 +143,36 @@ QModelIndexList CSVWorld::RegionMap::getMissingRegionCells() const
     return list;
 }
 
+void CSVWorld::RegionMap::setRegion (const std::string& regionId)
+{
+    QModelIndexList selected = getSelectedCells();
+
+    QAbstractItemModel *regionModel = model();
+
+    CSMWorld::IdTable *cellsModel = &dynamic_cast<CSMWorld::IdTable&> (*
+        mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
+
+    QString regionId2 = QString::fromUtf8 (regionId.c_str());
+
+    if (selected.size()>1)
+        mDocument.getUndoStack().beginMacro (tr ("Set Region"));
+
+    for (QModelIndexList::const_iterator iter (selected.begin()); iter!=selected.end(); ++iter)
+    {
+        std::string cellId = regionModel->data (*iter, CSMWorld::RegionMap::Role_CellId).
+            toString().toUtf8().constData();
+
+        QModelIndex index = cellsModel->getModelIndex (cellId,
+            cellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Region));
+
+        mDocument.getUndoStack().push (
+            new CSMWorld::ModifyCommand (*cellsModel, index, regionId2));
+    }
+
+    if (selected.size()>1)
+        mDocument.getUndoStack().endMacro();
+}
+
 CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     CSMDoc::Document& document, QWidget *parent)
 : QTableView (parent), mEditLock (false), mDocument (document)
@@ -160,6 +202,14 @@ CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     mCreateCellsAction = new QAction (tr ("Create Cells Action"), this);
     connect (mCreateCellsAction, SIGNAL (triggered()), this, SLOT (createCells()));
     addAction (mCreateCellsAction);
+
+    mSetRegionAction = new QAction (tr ("Set Region"), this);
+    connect (mSetRegionAction, SIGNAL (triggered()), this, SLOT (setRegion()));
+    addAction (mSetRegionAction);
+
+    mUnsetRegionAction = new QAction (tr ("Unset Region"), this);
+    connect (mUnsetRegionAction, SIGNAL (triggered()), this, SLOT (unsetRegion()));
+    addAction (mUnsetRegionAction);
 }
 
 void CSVWorld::RegionMap::setEditLock (bool locked)
@@ -213,4 +263,20 @@ void CSVWorld::RegionMap::createCells()
 
     if (selected.size()>1)
         mDocument.getUndoStack().endMacro();
+}
+
+void CSVWorld::RegionMap::setRegion()
+{
+    if (mEditLock)
+        return;
+
+    setRegion (mRegionId);
+}
+
+void CSVWorld::RegionMap::unsetRegion()
+{
+    if (mEditLock)
+        return;
+
+    setRegion ("");
 }
