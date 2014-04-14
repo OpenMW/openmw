@@ -196,6 +196,9 @@ namespace MWWorld
         mPlayer.save (player.mObject);
         player.mCellId = mCellStore->getCell()->getCellId();
 
+        player.mCurrentCrimeId = mCurrentCrimeId;
+        player.mPayedCrimeId = mPayedCrimeId;
+
         player.mBirthsign = mSign;
 
         player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x;
@@ -240,6 +243,9 @@ namespace MWWorld
             if (!player.mBirthsign.empty() &&
                 !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
                 throw std::runtime_error ("invalid player state record (birthsign)");
+
+            mCurrentCrimeId = player.mCurrentCrimeId;
+            mPayedCrimeId = player.mPayedCrimeId;
 
             mSign = player.mBirthsign;
 

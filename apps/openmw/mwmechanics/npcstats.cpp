@@ -452,6 +452,8 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
         mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
     }
 
+    state.mCrimeId = mCrimeId;
+
     state.mBounty = mBounty;
 
     for (std::set<std::string>::const_iterator iter (mExpelled.begin());
@@ -504,6 +506,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
         mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
     }
 
+    mCrimeId = state.mCrimeId;
     mBounty = state.mBounty;
     mReputation = state.mReputation;
     mWerewolfKills = state.mWerewolfKills;
