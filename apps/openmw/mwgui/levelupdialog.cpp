@@ -131,7 +131,14 @@ namespace MWGui
         const ESM::Class *cls =
             world->getStore().get<ESM::Class>().find(playerData->mClass);
 
-        mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
+        // Vanilla uses thief.dds for custom classes.  A player with a custom class
+        // doesn't have mId set, see mwworld/esmstore.hpp where it is initialised as
+        // "$dynamic0".  This check should resolve bug #1260.
+        if(world->getStore().get<ESM::Class>().isDynamic(cls->mId))
+            mClassImage->setImageTexture ("textures\\levelup\\thief.dds");
+        else
+            mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
+
 
         int level = creatureStats.getLevel ()+1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + boost::lexical_cast<std::string>(level));
