@@ -259,7 +259,11 @@ namespace MWGui
         timeinfo = localtime(&time);
 
         // Use system/environment locale settings for datetime formatting
+#if defined(_WIN32) || defined(__WINDOWS__)
+        setlocale(LC_TIME, "");
+#else
         std::setlocale(LC_TIME, "");
+#endif
 
         const int size=1024;
         char buffer[size];
