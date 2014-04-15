@@ -16,11 +16,13 @@ void CSVSettings::SettingWindow::createPages()
 {
     CSMSettings::SettingPageMap pageMap = mModel->settingPageMap();
 
-    CSMSettings::SettingList connectedSettings;
+    QList <CSMSettings::Setting *> connectedSettings;
 
     foreach (const QString &pageName, pageMap.keys())
     {
-        CSMSettings::SettingList pageSettings = pageMap.value (pageName);
+        qDebug() << "SettingWindow::createPages() creating page " << pageName;
+        QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName);
+
         mPages.append (new Page (pageName, pageSettings, this));
 
         for (int i = 0; i < pageSettings.size(); i++)
@@ -37,38 +39,46 @@ void CSVSettings::SettingWindow::createPages()
 }
 
 void CSVSettings::SettingWindow::createConnections
-                                        (const CSMSettings::SettingList &list)
+                                    (const QList <CSMSettings::Setting *> &list)
 {
     foreach (const CSMSettings::Setting *setting, list)
     {
-        const CSMSettings::ProxySettingPairs &proxyLists = setting->proxyLists();
-
         View *masterView = findView (setting->page(), setting->name());
 
         CSMSettings::Connector *connector =
                                 new CSMSettings::Connector (masterView, this);
 
-        connect (masterView,    SIGNAL  (viewUpdated()),
-                 connector,     SLOT    (slotUpdateSlaves())
+        connect (masterView,
+                 SIGNAL (viewUpdated(const QString &, const QStringList &)),
+                 connector,
+                 SLOT (slotUpdateSlaves())
                  );
 
-        foreach (const CSMSettings::ProxySettingPair &pair, proxyLists)
-        {
-            CSMSettings::StringPair names = pair.first;
+        const CSMSettings::ProxyValueMap &proxyMap = setting->proxyLists();
 
-            View *slaveView = findView (names.first, names.second);
+        foreach (const QString &key, proxyMap.keys())
+        {
+            QStringList keyPair = key.split('.');
+
+            if (keyPair.size() != 2)
+                continue;
+
+            View *slaveView = findView (keyPair.at(0), keyPair.at(1));
 
             if (!slaveView)
             {
                 qWarning () << "Unable to create connection for view "
-                            << names.first << '.' << names.second;
+                            << key;
                 continue;
             }
 
-            connector->addSlaveView (slaveView, pair.second);
+            QList <QStringList> proxyList = proxyMap.value (key);
+            connector->addSlaveView (slaveView, proxyList);
 
-            connect (slaveView, SIGNAL  (viewUpdated()),
-                    connector,  SLOT    (slotUpdateMaster()));
+            connect (slaveView,
+                     SIGNAL (viewUpdated(const QString &, const QStringList &)),
+                    connector,
+                     SLOT (slotUpdateMaster()));
         }
     }
 }

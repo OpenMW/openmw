@@ -33,9 +33,10 @@ void CSVTools::ReportSubView::setEditLock (bool locked)
     // ignored. We don't change document state anyway.
 }
 
-void CSVTools::ReportSubView::updateEditorSetting (const QString& key, const QString& value)
+void CSVTools::ReportSubView::updateUserSetting
+                                (const QString& name, const QStringList &list)
 {
-    mIdTypeDelegate->updateEditorSetting (key, value);
+    mIdTypeDelegate->updateUserSetting (name, list);
 }
 
 void CSVTools::ReportSubView::show (const QModelIndex& index)

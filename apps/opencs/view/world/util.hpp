@@ -108,12 +108,14 @@ namespace CSVWorld
 
             bool isEditLocked() const;
 
-            virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
+            virtual bool updateUserSetting
+                                (const QString &name, const QStringList &list);
             ///< \return Does column require update?
 
         private slots:
 
-            virtual void slotUpdateEditorSetting (const QString &settingName, const QString &settingValue) {}
+            virtual void slotUpdateUserSetting
+                            (const QString &name, const QStringList &value) {}
     };
 }
 

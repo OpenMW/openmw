@@ -27,3 +27,7 @@ void CSVWorld::RegionMapSubView::setEditLock (bool locked)
 {
 
 }
+
+void CSVWorld::RegionMapSubView::updateUserSetting
+                                 (const QString &sname, const QStringList &list)
+{}

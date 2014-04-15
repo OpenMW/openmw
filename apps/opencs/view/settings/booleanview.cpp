@@ -9,7 +9,6 @@
 
 #include "booleanview.hpp"
 #include "../../model/settings/setting.hpp"
-#include "settingbox.hpp"
 
 #include <QDebug>
 
@@ -21,7 +20,7 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
     {
         QAbstractButton *button = 0;
 
-        if (setting->isMultiValue())
+        if (isMultiValue())
             button = new QCheckBox (value, this);
         else
             button = new QRadioButton (value, this);
@@ -29,7 +28,10 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
         connect (button, SIGNAL (clicked (bool)),
                 this, SLOT (slotToggled (bool)));
 
-        viewFrame()->addWidget (button);
+        button->setObjectName (value);
+
+        addWidget (button);
+
         mButtons[value] = button;
     }
 }
@@ -37,7 +39,7 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
 void CSVSettings::BooleanView::slotToggled (bool state)
 {
     //test only for true to avoid multiple selection updates with radiobuttons
-    if (!setting()->isMultiValue() && !state)
+    if (!isMultiValue() && !state)
         return;
 
     QStringList values;
@@ -52,8 +54,9 @@ void CSVSettings::BooleanView::slotToggled (bool state)
     View::updateView();
 }
 
-void CSVSettings::BooleanView::updateView() const
+void CSVSettings::BooleanView::updateView (bool signalUpdate) const
 {
+
     QStringList values = selectedValues();
 
     foreach (const QString &buttonName, mButtons.keys())
@@ -79,7 +82,7 @@ void CSVSettings::BooleanView::updateView() const
         if (switchExclusive)
             button->setAutoExclusive(true);
     }
-    View::updateView();
+    View::updateView (signalUpdate);
 }
 
 CSVSettings::BooleanView *CSVSettings::BooleanViewFactory::createView

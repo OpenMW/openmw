@@ -7,43 +7,43 @@
 
 namespace CSMSettings
 {
-    typedef QList <Setting *> SettingList;
-
-    //StringPair contains page / setting names
-    //StringListPairs is a list of master / proxy value mappings, where:
-    //   StringListPair.first = master key
-    //   StringListPair.second = corresponding proxy value list
-
-    //QPair maps a list of master/proxy values to a specific setting
-    typedef QPair <StringPair, StringListPairs> ProxySettingPair;
-
-    // A list of settings and their corresponding lists of proxy values
-    // keyed to their respective master values
-    typedef QList <ProxySettingPair> ProxySettingPairs;
+    //Maps setting id ("page.name") to a list of corresponding proxy values.
+    //Order of proxy value stringlists corresponds to order of master proxy's
+    //values in it's declared value list
+    typedef QMap <QString, QList <QStringList> > ProxyValueMap;
 
     struct Setting
     {
         QList <QStringList> mLayout;
         QStringList mDefinitions;
         QStringList mDeclarations;
+        QStringList mDefaults;
 
-        /*
-        * QStringList is the list of proxy values for one master value
-        * Inner list index corresponds to the master value index
-        * Outer list index corresponds to proxy setting / selector
-        */
+        bool mIsEditorSetting;
 
-        ProxySettingPairs mProxyValueLists;
+        //QString is the setting id in the form of "page.name"
+        //QList is  a list of stringlists of proxy values.
+        //Order is important!  Proxy stringlists are matched against
+        //master values by their position in the QList.
+        ProxyValueMap mProxies;
 
     public:
+
 
         explicit Setting();
 
         explicit Setting(SettingType typ, const QString &settingName,
-                         const QString &pageName);
+                         const QString &pageName,
+                         const QStringList &values = QStringList());
+
+        void addProxy (const Setting *setting, const QStringList &vals);
+        void addProxy (const Setting *setting, const QList <QStringList> &list);
 
         void setIsSerialized (bool state);
         bool isSerialized() const;
+
+        void setColumnSpan (int value);
+        int columnSpan() const;
 
         void setDeclaredValues (QStringList list);
         const QStringList &declaredValues() const;
@@ -51,11 +51,16 @@ namespace CSMSettings
         void setDefinedValues (QStringList list);
         const QStringList &definedValues() const;
 
+        void setDefaultValue (const QString &value);
+
         void setDefaultValues (const QStringList &values);
         QStringList defaultValues() const;
 
         void setDelimiter (const QString &value);
         QString delimiter() const;
+
+        void setEditorSetting (bool state);
+        bool isEditorSetting() const;
 
         void setIsMultiLine (bool state);
         bool isMultiLine() const;
@@ -69,13 +74,18 @@ namespace CSMSettings
         void setPage (const QString &value);
         QString page() const;
 
-        const ProxySettingPairs &proxyLists() const;
+        void setRowSpan (const int value);
+        int rowSpan() const;
+
+        const ProxyValueMap &proxyLists() const;
 
         void setSerializable (bool state);
         bool serializable() const;
 
         void setViewColumn (int value);
         int viewColumn() const;
+
+        void setViewLocation (int row = -1, int column = -1);
 
         void setViewRow (int value);
         int viewRow() const;
@@ -105,6 +115,7 @@ namespace CSMSettings
         void buildDefaultSetting();
     };
 }
+
 Q_DECLARE_METATYPE(CSMSettings::Setting)
 
 QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting);

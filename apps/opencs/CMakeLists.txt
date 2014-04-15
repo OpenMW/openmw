@@ -89,10 +89,11 @@ opencs_units (view/settings
     booleanview
     textview
     listview
+    resizeablestackedwidget
     )
 
 opencs_units_noqt (view/settings
-    settingbox
+    frame
     support
     )
 

@@ -1,83 +1,99 @@
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGroupBox>
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
 #include <QStandardItem>
+#include <QApplication>
 
 #include "view.hpp"
 #include "support.hpp"
 #include "../../model/settings/setting.hpp"
-#include "settingbox.hpp"
 #include "page.hpp"
 
 #include <QDebug>
+
 CSVSettings::View::View(CSMSettings::Setting *setting,
                         Page *parent)
 
-    : mSetting (setting), mDataModel(0), mParentPage (parent),
-      mHasDeclaredValues (!setting->declaredValues().isEmpty()),
-      QWidget(parent)
+    : mDataModel(0), mParentPage (parent),
+      mHasFixedValues (!setting->declaredValues().isEmpty()),
+      mIsMultiValue (setting->isMultiValue()),
+      mViewKey (setting->page() + '.' + setting->name()),
+      Frame(true, setting->name(), parent)
 {
     setObjectName (setting->name());
     buildView();
-    buildModel();
+    buildModel (setting);
 }
 
-void CSVSettings::View::buildModel()
+void CSVSettings::View::buildModel (const CSMSettings::Setting *setting)
 {
-    QStringList definitions = mSetting->definedValues();
+    QStringList values = setting->definedValues();
 
-    if (definitions.isEmpty())
-        definitions.append (mSetting->defaultValues());
+    if (values.isEmpty())
+        values.append (setting->defaultValues());
 
-    qDebug() << objectName() << "::View::buildModel() definitions: " << definitions;
-
-    if (mHasDeclaredValues)
-        mDataModel = new QStringListModel (mSetting->declaredValues(), this);
+    if (mHasFixedValues)
+        buildFixedValueModel (setting->declaredValues());
     else
-    {
-        QList <QStandardItem *> itemList;
-
-        foreach (const QString &value, definitions)
-            itemList.append (new QStandardItem(value));
-
-//        QSortFilterProxyModel *filter = new QSortFilterProxyModel (this);
-        QStandardItemModel *model = new QStandardItemModel (this);
-        model->appendColumn (itemList);
-
-  //      filter->setSourceModel (model);
-     /*   filter->setFilterRegExp ("*");
-        filter->setFilterKeyColumn (0);
-        filter->setFilterRole (Qt::DisplayRole);*/
-
-        mDataModel = model;
-    }
+        buildUpdatableValueModel (values);
 
     mSelectionModel = new QItemSelectionModel (mDataModel, this);
 
-    setSelectedValues (definitions, false);
+    setSelectedValues (values, false);
+}
+
+void CSVSettings::View::buildFixedValueModel (const QStringList &values)
+{
+    mDataModel = new QStringListModel (values, this);
+}
+
+void CSVSettings::View::buildUpdatableValueModel (const QStringList &values)
+{
+    QList <QStandardItem *> itemList;
+
+    foreach (const QString &value, values)
+        itemList.append (new QStandardItem(value));
+
+//        QSortFilterProxyModel *filter = new QSortFilterProxyModel (this);
+    QStandardItemModel *model = new QStandardItemModel (this);
+    model->appendColumn (itemList);
+
+//      filter->setSourceModel (model);
+ /*   filter->setFilterRegExp ("*");
+    filter->setFilterKeyColumn (0);
+    filter->setFilterRole (Qt::DisplayRole);*/
+    mDataModel = model;
 }
 
 void CSVSettings::View::buildView()
 {
-    mViewFrame = new SettingBox(true, mSetting->name(), this);
-    mViewFrame->setFlat (true);
-    mViewFrame->setHLayout();
+    setFlat (true);
+    setHLayout();
+}
+
+int CSVSettings::View::currentIndex () const
+{
+    if (selectedValues().isEmpty())
+        return -1;
+
+    QString currentValue = selectedValues().at(0);
+
+    for (int i = 0; i < mDataModel->rowCount(); i++)
+        if (value(i) == currentValue)
+            return i;
+
+    return -1;
 }
 
 void CSVSettings::View::refresh() const
 {
-    QItemSelection selection = mSelectionModel->selection();
-    qDebug() << objectName() << "::View::refresh() selection count " << selection.size();
-    select (selection);
+    select (mSelectionModel->selection());
+    updateView();
 }
 
 void CSVSettings::View::select (const QItemSelection &selection) const
 {
     mSelectionModel->clear();
     mSelectionModel->select(selection, QItemSelectionModel::Select);
-    updateView();
 }
 
 QStringList CSVSettings::View::selectedValues() const
@@ -90,15 +106,21 @@ QStringList CSVSettings::View::selectedValues() const
     return selValues;
 }
 
+void CSVSettings::View::setSelectedValue (const QString &value,
+                                           bool doViewUpdate, bool signalUpdate)
+{
+    setSelectedValues (QStringList() << value, doViewUpdate, signalUpdate);
+}
+
 void CSVSettings::View::setSelectedValues (const QStringList &list,
-                                           bool doViewUpdate)
+                                           bool doViewUpdate, bool signalUpdate)
 {
     QItemSelection selection;
 
     if (stringListsMatch (list, selectedValues()))
         return;
 
-    if (!mHasDeclaredValues)
+    if (!mHasFixedValues)
     {
         QStandardItemModel *model  =
                                 static_cast <QStandardItemModel *>(mDataModel);
@@ -119,20 +141,19 @@ void CSVSettings::View::setSelectedValues (const QStringList &list,
             if (list.contains(value(i)))
             {
                 QModelIndex idx = mDataModel->index(i, 0);
-                selection.append(QItemSelectionRange ((idx, idx)));
+                selection.append(QItemSelectionRange (idx, idx));
             }
         }
     }
     select (selection);
 
     if (doViewUpdate)
-        updateView();
+         updateView (signalUpdate);
 }
 
 void CSVSettings::View::showEvent ( QShowEvent * event )
 {
-    if (mSetting->proxyLists().isEmpty());
-        refresh();
+    refresh();
 }
 
 bool CSVSettings::View::stringListsMatch (
@@ -170,17 +191,24 @@ QList <QStandardItem *> CSVSettings::View::toStandardItemList
     return itemList;
 }
 
-void CSVSettings::View::updateView() const
+void CSVSettings::View::updateView (bool signalUpdate) const
 {
-    emit viewUpdated();
+    if (signalUpdate)
+        emit viewUpdated(objectName(), selectedValues());
 }
 
 QString CSVSettings::View::value (int row) const
 {
-    QString value = "";
-
     if (row > -1 && row < mDataModel->rowCount())
-        value = mDataModel->data (mDataModel->index(row, 0)).toString();
+        return mDataModel->data (mDataModel->index(row, 0)).toString();
 
-    return value;
+    return "";
+}
+
+int CSVSettings::View::widgetWidth(int characterCount) const
+{
+    QString widthToken = QString().fill ('P', characterCount);
+    QFontMetrics fm (QApplication::font());
+
+    return (fm.width (widthToken));
 }

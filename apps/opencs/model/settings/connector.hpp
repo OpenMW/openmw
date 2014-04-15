@@ -27,7 +27,7 @@ namespace CSMSettings {
 
         //list of proxy values for each master value.
         //value list order is indexed to the master value index.
-        QMap <QString, QList <QStringList> > mProxyMap;
+        QMap < QString, QList <QStringList> > mProxyListMap;
 
     public:
         explicit Connector(CSVSettings::View *master,
@@ -35,7 +35,7 @@ namespace CSMSettings {
 
         void setMasterView (CSVSettings::View *view);
         void addSlaveView (CSVSettings::View *view,
-                               const StringListPairs &masterProxyValues);
+                                     QList <QStringList> &masterProxyValues);
 
     private:
 
@@ -50,8 +50,6 @@ namespace CSMSettings {
 
         QList <QStringList> getSlaveViewValues() const;
         CSVSettings::View *slaveView (int index) const;
-
-    signals:
 
     public slots:
 

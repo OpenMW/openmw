@@ -76,9 +76,6 @@ namespace CSVDoc
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
 
             void onExitWarningHandler(int state, CSMDoc::Document* document);
-
-            /// connected to update signal in UserSettings
-            void slotUpdateEditorSetting (const QString &, const QString &);
     };
 
 }

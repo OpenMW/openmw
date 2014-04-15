@@ -15,7 +15,7 @@ namespace CSMSettings
     typedef QMap <QString, QStringList *> DefinitionMap;
     typedef QMap <QString, DefinitionMap *> DefinitionPageMap;
 
-    typedef QMap <QString, SettingList> SettingPageMap;
+    typedef QMap <QString, QList <Setting *> > SettingPageMap;
 
     class SettingManager : public QObject
     {
@@ -23,7 +23,7 @@ namespace CSMSettings
 
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
-        SettingList mSettings;
+        QList <Setting *> mSettings;
 
     public:
         explicit SettingManager(QObject *parent = 0);
@@ -33,19 +33,21 @@ namespace CSMSettings
                         (const QString &pageName, const QString &settingName);
 
         ///retrieve all settings for a specified page
-        SettingList findSettings (const QString &pageName);
+        QList <Setting *> findSettings (const QString &pageName);
 
         ///retrieve all settings named in the attached list.
         ///Setting names are specified in "PageName.SettingName" format.
-        SettingList findSettings (const QStringList &list);
+        QList <Setting *> findSettings (const QStringList &list);
 
         ///Retreive a map of the settings, keyed by page name
         SettingPageMap settingPageMap() const;
 
     protected:
 
-        ///add a new setting to the model
-        void addSetting (Setting *setting);
+        ///add a new setting to the model and return it
+        Setting *createSetting (CSMSettings::SettingType typ,
+                            const QString &page, const QString &name,
+                            const QStringList &values = QStringList());
 
         ///add definitions to the settings specified in the page map
         void addDefinitions (DefinitionPageMap &pageMap);
@@ -67,6 +69,8 @@ namespace CSMSettings
 
         void displayFileErrorMessage(const QString &message,
                                      bool isReadOnly) const;
+
+        void dumpModel();
 
     signals:
 

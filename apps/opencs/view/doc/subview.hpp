@@ -20,29 +20,33 @@ namespace CSVDoc
 {
     class SubView : public QDockWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMWorld::UniversalId mUniversalId;
+        CSMWorld::UniversalId mUniversalId;
 
-            // not implemented
-            SubView (const SubView&);
-            SubView& operator= (SubView&);
+        // not implemented
+        SubView (const SubView&);
+        SubView& operator= (SubView&);
 
-        public:
+    public:
 
-            SubView (const CSMWorld::UniversalId& id);
+        SubView (const CSMWorld::UniversalId& id);
 
-            CSMWorld::UniversalId getUniversalId() const;
+        CSMWorld::UniversalId getUniversalId() const;
 
-            virtual void setEditLock (bool locked) = 0;
-            virtual void updateEditorSetting (const QString &, const QString &);
+        virtual void setEditLock (bool locked) = 0;
 
-            virtual void setStatusBar (bool show);
-            ///< Default implementation: ignored
+        virtual void setStatusBar (bool show);
+        ///< Default implementation: ignored
 
-        signals:
+    signals:
 
-            void focusId (const CSMWorld::UniversalId& universalId);
+        void focusId (const CSMWorld::UniversalId& universalId);
+
+    public slots:
+        virtual void updateUserSetting
+                                    (const QString &, const QStringList &) = 0;
+
     };
 }
 

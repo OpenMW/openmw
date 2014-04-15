@@ -14,6 +14,7 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
+#include <QDebug>
 namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
                   struct ConfigurationManager;}
 
@@ -61,9 +62,14 @@ namespace CSMSettings {
 
     signals:
 
-        void signalUpdateEditorSetting (const QString &settingName,
-                                        const QString &settingValue);
+        void userSettingUpdated(const QString &, const QStringList &);
 
+    public slots:
+
+        void updateUserSetting(const QString &name, const QStringList &values)
+        {
+            qDebug() << "Received signal from " << name << " = " << values;
+        }
     };
 }
 #endif // USERSETTINGS_HPP

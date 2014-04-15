@@ -20,23 +20,41 @@ CSMSettings::SettingManager::SettingManager(QObject *parent) :
 
 }
 
-void CSMSettings::SettingManager::addSetting (Setting *setting)
+void CSMSettings::SettingManager::dumpModel()
 {
-    if (!setting)
-        return;
+    foreach (Setting *setting, mSettings)
+    {
+        if (setting->proxyLists().isEmpty())
+            continue;
 
+        qDebug () << "Proxylists for " << (setting->page() + '.' + setting->name());
+        int i = 0;
+        foreach (const QString &key, setting->proxyLists().keys())
+        {
+            qDebug() << key << " = " << setting->proxyLists().value(key);
+            qDebug() << "master key: " << setting->declaredValues().at(i++);
+        }
+    }
+}
+
+CSMSettings::Setting *CSMSettings::SettingManager::createSetting
+        (CSMSettings::SettingType typ, const QString &page, const QString &name,
+         const QStringList &values)
+{
     //get list of all settings for the current setting name
-    Setting *exSetting = findSetting (setting->page(), setting->name());
-
-    if (exSetting)
+    if (findSetting (page, name))
     {
         qWarning() << "Duplicate declaration encountered: "
-                   << setting->page() << '.' << setting->name();
-        return;
+                   << (name + '.' + page);
+        return 0;
     }
+
+    Setting *setting = new Setting (typ, name, page, values);
 
     //add declaration to the model
     mSettings.append (setting);
+
+    return setting;
 }
 
 CSMSettings::DefinitionPageMap
@@ -278,10 +296,10 @@ void CSMSettings::SettingManager::addDefinitions (DefinitionPageMap &pageMap)
     }
 }
 
-CSMSettings::SettingList CSMSettings::SettingManager::
-                                        findSettings(const QStringList &list)
+QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
+                                                    (const QStringList &list)
 {
-    SettingList settings;
+    QList <CSMSettings::Setting *> settings;
 
     foreach (const QString &value, list)
     {
@@ -316,10 +334,10 @@ CSMSettings::Setting *CSMSettings::SettingManager::findSetting
     return 0;
 }
 
-CSMSettings::SettingList CSMSettings::SettingManager::findSettings
+QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
                                                     (const QString &pageName)
 {
-    SettingList settings;
+    QList <CSMSettings::Setting *> settings;
 
     foreach (Setting *setting, mSettings)
     {
@@ -334,7 +352,10 @@ CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const
     SettingPageMap pageMap;
 
     foreach (Setting *setting, mSettings)
+    {
+        qDebug() << "SettingManager::settingPageMap() creating map for " << setting->page() + '.' + setting->name();
         pageMap[setting->page()].append (setting);
+    }
 
     return pageMap;
 }

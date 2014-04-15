@@ -50,10 +50,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
     {
-        Setting *width = new Setting
-                                    (Type_SingleText, "Width", section);
-        Setting *height = new Setting
-                                    (Type_SingleText, "Height", section);
+        Setting *width = createSetting (Type_SingleText, section, "Width");
+        Setting *height = createSetting (Type_SingleText, section, "Height");
 
         width->setWidgetWidth (5);
         height->setWidgetWidth (5);
@@ -61,84 +59,83 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         width->setDefaultValues (QStringList() << "1024");
         height->setDefaultValues (QStringList() << "768");
 
-        addSetting (width);
-        addSetting (height);
+        width->setEditorSetting (true);
+        height->setEditorSetting (true);
+
+        height->setViewLocation (2,2);
+        width->setViewLocation (2,1);
 
         /*
          *Create the proxy setting for predefined values
          */
+        Setting *preDefined = createSetting (Type_SingleList, section,
+                                             "Pre-Defined",
+                                            QStringList()
+                                                << "640 x 480"
+                                                << "800 x 600"
+                                                << "1024 x 768"
+                                                << "1440 x 900"
+                                            );
 
-        QStringList predefinedValues;
-
-        predefinedValues    << "640 x 480"
-                            << "800 x 600"
-                            << "1024 x 768"
-                            << "1440 x 900";
-
-        Setting *preDefined = new Setting (Type_SingleList, "Pre-Defined",
-                                           section);
-        preDefined->setDeclaredValues (predefinedValues);
+        preDefined->setViewLocation (1, 1);
+        preDefined->setWidgetWidth (10);
+        preDefined->setColumnSpan (2);
 
         //do not serialize since it's values depend entirely on width / height
         preDefined->setSerializable (false);
 
+        preDefined->addProxy (width,
+                             QStringList() << "640" << "800" << "1024" << "1440"
+                             );
 
-
-        QMap <QString, QStringList> widthProxyMap;
-
-        widthProxyMap["640x480"] = QStringList() << "640";
-        widthProxyMap["800x600"] = QStringList() << "800";
-        widthProxyMap["1024x768"] = QStringList() << "1024";
-        widthProxyMap["1440x900"] = QStringList() << "1440";
-
-        QMap <QString, QStringList> heightProxyMap;
-
-        heightProxyMap["640x480"] = QStringList() << "640";
-        heightProxyMap["800x600"] = QStringList() << "800";
-        heightProxyMap["1024x768"] = QStringList() << "1024";
-        heightProxyMap["1440x900"] = QStringList() << "1440";
-
-        preDefined->addProxy (width, widthProxyMap);
-        preDefined->addProxy (height, heightProxyMap);
-
-        addSetting (preDefined);
+        preDefined->addProxy (height,
+                             QStringList() << "480" << "600" << "768" << "900"
+                             );
     }
 
     section = "Display Format";
     {
         QString defaultValue = "Icon and Text";
 
-        Setting *rsd = new Setting (Type_SingleBool, "Record Status Display",
-                                                        section); //, defaultValue);
+        QStringList values = QStringList()
+                            << defaultValue << "Icon Only" << "Text Only";
 
-        Setting *ritd = new Setting (Type_SingleBool,
-                                     "Referenceable ID Type Display",
-                                                        section); //, defaultValue);
+        Setting *rsd = createSetting (Type_SingleBool,
+                                      section, "Record Status Display",
+                                      values);
 
-        QStringList values;
+        Setting *ritd = createSetting (Type_SingleBool,
+                                      section, "Referenceable ID Type Display",
+                                      values);
 
-        values << defaultValue << "Icon Only" << "Text Only";
-
-        rsd->setDeclaredValues (values);
-        ritd->setDeclaredValues (values);
-
-        addSetting (rsd);
-        addSetting (ritd);
+        rsd->setEditorSetting (true);
+        ritd->setEditorSetting (true);
     }
 
     section = "Proxy Selection Test";
     {
         //create three setting objects, specifying the basic widget type,
         //the setting view name, the page name, and the default value
-        Setting *masterBoolean = new Setting (Type_SingleBool, "Master Proxy",
-                                              section);
-        Setting *slaveBoolean = new Setting (Type_MultiBool, "Proxy Checkboxes",
-                                             section);
-        Setting *slaveSingleText = new Setting (Type_SingleText, "Proxy Textbox",
-                                          section);
+        Setting *masterBoolean = createSetting (Type_SingleBool, section,
+                                        "Master Proxy",
+                                        QStringList()
+                                            << "Profile One" << "Profile Two"
+                                            << "Profile Three" << "Profile Four"
+                                );
 
-        Setting *slaveMultiText = new Setting (Type_MultiText, "Proxy Textbox 2",
-                                               section);
+        Setting *slaveBoolean = createSetting (Type_MultiBool, section,
+                                        "Proxy Checkboxes",
+                                        QStringList() << "One" << "Two"
+                                             << "Three" << "Four" << "Five"
+                                );
+
+        Setting *slaveSingleText = createSetting (Type_SingleText, section,
+                                                  "Proxy TextBox 1"
+                                                );
+
+        Setting *slaveMultiText = createSetting (Type_SingleText, section,
+                                                 "ProxyTextBox 2"
+                                                 );
 
         // There are three types of values:
         //
@@ -156,48 +153,43 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         // proxy slave settings, but must match any declared values the proxy
         // slave has, if any.
 
-        masterBoolean->setDeclaredValues (QStringList()
-                                          << "Profile One" << "Profile Two"
-                                          << "Profile Three" << "Profile Four");
+        masterBoolean->addProxy (slaveBoolean, QList <QStringList>()
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three" << "Five")
+                                 << (QStringList() << "Two" << "Four")
+                                 );
 
-        slaveBoolean->setDeclaredValues (QStringList()
-                            << "One" << "Two" << "Three" << "Four" << "Five");
+        masterBoolean->addProxy (slaveSingleText, QList <QStringList>()
+                                 << (QStringList() << "Text A")
+                                 << (QStringList() << "Text B")
+                                 << (QStringList() << "Text A")
+                                 << (QStringList() << "Text C")
+                                 );
 
-        QMap <QString, QStringList> booleanProxyMap;
-        QMap <QString, QStringList> textProxyMap;
-
-        booleanProxyMap["Profile One"] = QStringList() << "One" << "Three";
-        booleanProxyMap["Profile Two"] = QStringList() << "One" << "Three";
-        booleanProxyMap["Profile Three"] =
-                                QStringList() << "One" << "Three" << "Five";
-
-        booleanProxyMap["Profile Four"] = QStringList() << "Two" << "Four";
-
-        textProxyMap["Profile One"] = QStringList() << "Text A";
-        textProxyMap["Profile Two"] = QStringList() << "Text B";
-        textProxyMap["Profile Three"] = QStringList() << "Text A";
-        textProxyMap["Profile Four"] = QStringList() << "Text C";
-
-        masterBoolean->addProxy (slaveBoolean, booleanProxyMap);
-        masterBoolean->addProxy (slaveSingleText, textProxyMap);
-        masterBoolean->addProxy (slaveMultiText, booleanProxyMap);
+        masterBoolean->addProxy (slaveMultiText, QList <QStringList>()
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three" << "Five")
+                                 << (QStringList() << "Two" << "Four")
+                                 );
 
         //settings with proxies are not serialized by default
-        //masterBoolean->setSerializable (false);
+        //other settings non-serialized for demo purposes
         slaveBoolean->setSerializable (false);
         slaveSingleText->setSerializable (false);
         slaveMultiText->setSerializable (false);
 
-        slaveBoolean->setDefaultValues (QStringList() << "One" << "Three" << "Five");
-        slaveSingleText->setDefaultValues (QStringList() << "Text A");
-        slaveMultiText->setDefaultValues(QStringList() << "One" << "Three" << "Five");
+        slaveBoolean->setDefaultValues (QStringList()
+                                        << "One" << "Three" << "Five");
 
-        //add these settings to the model
+        slaveSingleText->setDefaultValue ("Text A");
 
-        addSetting (slaveBoolean);
-        addSetting (slaveSingleText);
-        addSetting (slaveMultiText);
-        addSetting (masterBoolean);
+        slaveMultiText->setDefaultValues (QStringList()
+                                         << "One" << "Three" << "Five");
+
+        slaveSingleText->setWidgetWidth (24);
+        slaveMultiText->setWidgetWidth (24);
     }
 }
 
@@ -216,7 +208,6 @@ bool CSMSettings::UserSettings::loadSettingsFromFile
 
     DefinitionPageMap totalMap;
 
-    qDebug() << "loading settings";
     foreach (const QString &filepath, filepaths)
     {
         QTextStream *stream = openFilestream (filepath, true);
@@ -231,12 +222,10 @@ bool CSMSettings::UserSettings::loadSettingsFromFile
         mergeSettings (totalMap, pageMap, Merge_Overwrite);
     }
 
-    qDebug () << "definitions found:";
     foreach (DefinitionMap *sMap, totalMap)
         foreach (QStringList *stng, *sMap)
             qDebug() << *stng;
 
-    qDebug () << "adding definitions";
     addDefinitions (totalMap);
 
     return success;

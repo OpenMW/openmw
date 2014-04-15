@@ -1,5 +1,7 @@
 #include "connector.hpp"
 #include "../../view/settings/view.hpp"
+#include "../../view/settings/page.hpp"
+#include <QDebug>
 
 CSMSettings::Connector::Connector(CSVSettings::View *master,
                                             QObject *parent)
@@ -7,14 +9,11 @@ CSMSettings::Connector::Connector(CSVSettings::View *master,
 {}
 
 void CSMSettings::Connector::addSlaveView (CSVSettings::View *view,
-                                    const StringListPairs &masterProxyValues)
+                                        QList <QStringList> &masterProxyValues)
 {
     mSlaveViews.append (ViewIndexPair (mSlaveViews.size(), view));
 
-    //append the proxy values (pair.second) to the list for the associated
-    //master key (pair.first)
-    foreach (const StringListPair &masterProxyPair, masterProxyValues)
-        mProxyMap[masterProxyPair.first].append (masterProxyPair.second);
+    mProxyListMap[view->viewKey()].append (masterProxyValues);
 }
 
 QList <QStringList> CSMSettings::Connector::getSlaveViewValues() const
@@ -55,33 +54,52 @@ CSVSettings::View *CSMSettings::Connector::slaveView (int index) const
 
 void CSMSettings::Connector::slotUpdateMaster() const
 {
-    QString masterKey = "";
+    qDebug() << "Connector::slotUpdateMaster()";
 
-    //check this list against ecah of the options in the proxy value map
-    foreach (const QString &key, mProxyMap.keys())
+    //list of the current values for each slave.
+    QList <QStringList> slaveValues = getSlaveViewValues();
+
+    qDebug() << "Connector::slotUpdateMaster() slave values = " << slaveValues;
+
+    int masterColumn = -1;
+/*
+    //check this list against each of the options in the proxy value map
+    for (int i = 0; i < mSlaveViews.size(); i++)
     {
-        if (proxyListsMatch (getSlaveViewValues(), mProxyMap.value(key)))
-        {
-            masterKey = key;
-            break;
-        }
-    }
-    mMasterView->setSelectedValues(QStringList() << masterKey);
+        QString slaveValue = slaveValues.at(i);
+        QList <QStringList> proxyValues =
+                                mProxyListMap.value (slaveView(i)->viewKey());
+        qDebug() << "Connector::slotUpdateMaster() " << i << ": proxy values = " << proxyValues;
+
+        if (masterColumn == -1)
+            masterColumn = proxyValues.indexOf (slaveValue);
+        else
+            if (masterColumn != proxyValues.indexOf (slaveValue))
+                break;
+    }*/
+    mMasterView->setSelectedValue ("");
 }
 
 void CSMSettings::Connector::slotUpdateSlaves() const
 {
-    QStringList masterValues = mMasterView->selectedValues();
+    qDebug () << "Connector::slotUpdateSlaves() ";
 
-    if (masterValues.isEmpty())
+    int row = mMasterView->currentIndex();
+
+    if (row == -1)
         return;
-
-    QList <QStringList> proxyLists = mProxyMap.value(masterValues.at(0));
 
     //iterate the proxy lists for the chosen master index
     //and pass the list to each slave for updating
-    for (int i = 0; i < proxyLists.size(); i++)
-        slaveView(i)->setSelectedValues (proxyLists.at(i));
+    for (int i = 0; i < mSlaveViews.size(); i++)
+    {
+        QList <QStringList> proxyList =
+                                mProxyListMap.value(slaveView(i)->viewKey());
+
+        qDebug() << "Connector::slotUpdateSlaves() " << i << ':' << proxyList;
+
+        slaveView(i)->setSelectedValues (proxyList.at(row));
+    }
 }
 
 bool CSMSettings::Connector::stringListsMatch (

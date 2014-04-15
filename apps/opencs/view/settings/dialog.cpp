@@ -36,6 +36,16 @@ CSVSettings::Dialog::Dialog(QMainWindow *parent)
              SLOT (slotChangePage (QListWidgetItem*, QListWidgetItem*)));
 }
 
+void CSVSettings::Dialog::slotChangePage
+                                (QListWidgetItem *cur, QListWidgetItem *prev)
+{
+   mStackedWidget->changePage
+                    (mPageListWidget->row (cur), mPageListWidget->row (prev));
+
+   layout()->activate();
+   setFixedSize(minimumSizeHint());
+}
+
 void CSVSettings::Dialog::setupDialog()
 {
     //create central widget with it's layout and immediate children
@@ -75,16 +85,6 @@ void CSVSettings::Dialog::buildPages()
 
 void CSVSettings::Dialog::addDebugPage()
 {
-    QComboBox *cbox = new QComboBox();
-
-    QStringList vals;
-    vals << "1" << "2" << "3" << "4";
-
-    QStringListModel *model = new QStringListModel (vals);
-    cbox->setModel (model);
-
-    mStackedWidget->addWidget (cbox);
-    new QListWidgetItem ("test", mPageListWidget);
     /*
   QTreeView *tree = new QTreeView();
 
@@ -98,8 +98,7 @@ void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
 {
     mPageListWidget = new QListWidget (centralWidget);
     mPageListWidget->setMinimumWidth(50);
-    mPageListWidget->setSizePolicy
-                            (QSizePolicy::Fixed, QSizePolicy::Expanding);
+    mPageListWidget->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Expanding);
 
     mPageListWidget->setSelectionBehavior (QAbstractItemView::SelectItems);
 
@@ -108,8 +107,10 @@ void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
 
 void CSVSettings::Dialog::buildStackedWidget (QWidget *centralWidget)
 {
-    mStackedWidget = new QStackedWidget (centralWidget);
-    mStackedWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
+    mStackedWidget = new ResizeableStackedWidget (centralWidget);
+
+    connect (this, SIGNAL (pageChanged (int, int)),
+             mStackedWidget, SLOT (slotChangePage (int, int)));
 
     centralWidget->layout()->addWidget (mStackedWidget);
 }
@@ -122,26 +123,14 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
     CSMSettings::UserSettings::instance().saveSettings();
 }
 
-void CSVSettings::Dialog::slotChangePage(QListWidgetItem *current,
-                                         QListWidgetItem *previous)
-{
-    if (!current)
-        current = previous;
-
-    if (!(current == previous))
-        mStackedWidget->setCurrentIndex (mPageListWidget->row(current));
-}
-
 void CSVSettings::Dialog::show()
 {
-    if (pages().size()==0)
+    if (pages().isEmpty())
         buildPages();
 
-    QRect scr = QApplication::desktop()->screenGeometry();
-    QRect rect = geometry();
+    QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
 
-    move (scr.center().x()-rect.center().x(),
-          scr.center().y()-rect.center().y());
+    move (screenCenter - geometry().center());
 
     QWidget::show();
 }

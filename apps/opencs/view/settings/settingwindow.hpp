@@ -25,10 +25,7 @@ namespace CSVSettings {
 
     public:
         explicit SettingWindow(QWidget *parent = 0);
-/*
-        CSMSettings::Selector *selector(const QString &pageName,
-                                        const QString &settingName);
-*/
+
         View *findView (const QString &pageName, const QString &setting);
         void setModel (CSMSettings::SettingManager &model)  { mModel = &model; }
 
@@ -41,7 +38,7 @@ namespace CSVSettings {
         const PageList &pages() const     { return mPages; }
 
     private:
-        void createConnections (const CSMSettings::SettingList &list);
+        void createConnections (const QList <CSMSettings::Setting *> &list);
     };
 }
 

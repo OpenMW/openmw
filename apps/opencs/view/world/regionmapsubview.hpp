@@ -21,6 +21,9 @@ namespace CSVWorld
             RegionMapSubView (CSMWorld::UniversalId universalId, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
+
+            virtual void updateUserSetting
+                                (const QString& key, const QStringList &list);
     };
 }
 

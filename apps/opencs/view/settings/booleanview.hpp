@@ -22,7 +22,7 @@ namespace CSVSettings
                               Page *parent);
 
     protected:
-        void updateView () const;
+        void updateView (bool signalUpdate = true) const;
 
     private slots:
         void slotToggled (bool state);
