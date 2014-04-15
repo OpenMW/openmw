@@ -7,6 +7,8 @@
 #include <OgreRenderTarget.h>
 #include <OgreViewport.h>
 #include <OgreRoot.h>
+#include <OgreRenderTexture.h>
+#include <OgreSceneNode.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 

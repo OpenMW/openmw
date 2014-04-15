@@ -16,6 +16,7 @@
 #include "scenesubview.hpp"
 #include "dialoguecreator.hpp"
 #include "infocreator.hpp"
+#include "previewsubview.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -78,4 +79,62 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CreatorFactory<CSVFilter::FilterCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
+
+    //edit subviews
+    manager.add (CSMWorld::UniversalId::Type_Region,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Spell,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Referenceable,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<ReferenceableCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Birthsign,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Global,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Gmst,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Race,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Class,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Reference,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<ReferenceCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Cell,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<CellCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Filter,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Sound,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Faction,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Skill,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_JournalInfo,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<InfoCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_TopicInfo,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<InfoCreator> >(false));
+
+    manager.add (CSMWorld::UniversalId::Type_Topic,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, TopicCreatorFactory> (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Journal,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
+
+    //preview
+    manager.add (CSMWorld::UniversalId::Type_Preview, new CSVDoc::SubViewFactory<PreviewSubView>);
 }

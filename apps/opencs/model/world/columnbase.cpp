@@ -18,3 +18,8 @@ std::string CSMWorld::ColumnBase::getTitle() const
 {
     return Columns::getName (static_cast<Columns::ColumnId> (mColumnId));
 }
+
+int  CSMWorld::ColumnBase::getId() const
+{
+    return mColumnId;
+}

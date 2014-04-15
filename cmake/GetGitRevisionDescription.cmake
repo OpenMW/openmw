@@ -85,10 +85,6 @@ function(get_git_head_revision _refspecvar _hashvar)
 endfunction()
 
 function(git_describe _var)
-    if(NOT GIT_FOUND)
-        find_package(Git QUIET)
-    endif()
-
     #get_git_head_revision(refspec hash)
 
     if(NOT GIT_FOUND)
@@ -122,7 +118,6 @@ function(git_describe _var)
                     res
                     OUTPUT_VARIABLE
                     out
-                    ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if(NOT res EQUAL 0)
@@ -134,7 +129,8 @@ endfunction()
 
 function(get_git_tag_revision _var)
     if(NOT GIT_FOUND)
-        find_package(Git QUIET)
+        set(${_var} "GIT-NOTFOUND" PARENT_SCOPE)
+        return()
     endif()
 
     execute_process(COMMAND
@@ -147,7 +143,6 @@ function(get_git_tag_revision _var)
                     res
                     OUTPUT_VARIABLE
                     out
-                    ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(NOT res EQUAL 0)
         set(out "${out}-${res}-NOTFOUND")

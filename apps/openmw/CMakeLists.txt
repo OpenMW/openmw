@@ -15,7 +15,7 @@ add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
     characterpreview globalmap videoplayer ripplesimulation refraction
-    terrainstorage renderconst effectmanager
+    terrainstorage renderconst effectmanager weaponanimation
     )
 
 add_openmw_dir (mwinput
@@ -33,7 +33,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
-    recharge
+    recharge mode videowidget
     )
 
 add_openmw_dir (mwdialogue
@@ -44,7 +44,7 @@ add_openmw_dir (mwscript
     locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions transformationextensions consoleextensions userextensions locals
+    animationextensions transformationextensions consoleextensions userextensions
     )
 
 add_openmw_dir (mwsound
@@ -57,7 +57,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader actiontrap
+    contentloader esmloader omwloader actiontrap cellreflist
     )
 
 add_openmw_dir (mwclass
@@ -159,3 +159,10 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(openmw gcov)
 endif()
+
+if (MSVC)
+    # Debug version needs increased number of sections beyond 2^16
+    if (CMAKE_CL_64)
+        set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
+    endif (CMAKE_CL_64)
+endif (MSVC)

@@ -10,19 +10,29 @@
 #include <OgreSceneManager.h>
 #include <OgreControllerManager.h>
 #include <OgreStaticGeometry.h>
+#include <OgreSceneNode.h>
+#include <OgreTechnique.h>
+
+#include <components/esm/loadligh.hpp>
+#include <components/esm/loadweap.hpp>
+#include <components/esm/loadench.hpp>
+#include <components/esm/loadstat.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
+
+#include <extern/shiny/Main/Factory.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include <extern/shiny/Main/Factory.hpp>
-
 #include "../mwmechanics/character.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "renderconst.hpp"
 
@@ -53,7 +63,6 @@ void Animation::EffectAnimationTime::setValue(Ogre::Real)
 
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
-    , mCamera(NULL)
     , mInsert(node)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
@@ -286,6 +295,17 @@ void Animation::addAnimSource(const std::string &model)
             }
         }
 
+        if (grp == 0 && dstval->getNode()->getName() == "Bip01")
+        {
+            mNonAccumRoot = dstval->getNode();
+            mAccumRoot = mNonAccumRoot->getParent();
+            if(!mAccumRoot)
+            {
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                mNonAccumRoot = NULL;
+            }
+        }
+
         ctrls[i].setSource(mAnimationTimePtr[grp]);
         grpctrls[grp].push_back(ctrls[i]);
     }
@@ -335,7 +355,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
     ));
     objlist->mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
 
-    bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
+    bool interior = !(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior());
     bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
                      !interior : fallback->getFallbackBool("LightAttenuation_UseQuadratic");
 
@@ -696,6 +716,12 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         else
             mPtr.getClass().hit(mPtr);
     }
+    else if (evt.compare(off, len, "shoot attach") == 0)
+        attachArrow();
+    else if (evt.compare(off, len, "shoot release") == 0)
+        releaseArrow();
+    else if (evt.compare(off, len, "shoot follow attach") == 0)
+        attachArrow();
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
         MWBase::Environment::get().getWorld()->castSpell(mPtr);
@@ -870,6 +896,27 @@ bool Animation::getInfo(const std::string &groupname, float *complete, float *sp
     return true;
 }
 
+float Animation::getStartTime(const std::string &groupname) const
+{
+    AnimSourceList::const_iterator iter(mAnimSources.begin());
+    for(;iter != mAnimSources.end();iter++)
+    {
+        const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
+        NifOgre::TextKeyMap::const_iterator found = findGroupStart(keys, groupname);
+        if(found != keys.end())
+            return found->first;
+    }
+    return -1.f;
+}
+
+float Animation::getCurrentTime(const std::string &groupname) const
+{
+    AnimStateMap::const_iterator iter = mStates.find(groupname);
+    if(iter == mStates.end())
+        return -1.f;
+
+    return iter->second.mTime;
+}
 
 void Animation::disable(const std::string &groupname)
 {
@@ -1044,9 +1091,8 @@ bool Animation::allowSwitchViewMode() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mGroups == Group_UpperBody 
-                || (stateiter->first.size()==4 && stateiter->first.find("hit") != std::string::npos)
-                || (stateiter->first.find("knock") != std::string::npos) )
+        if(stateiter->second.mPriority > MWMechanics::Priority_Movement
+                && stateiter->second.mPriority < MWMechanics::Priority_Torch)
             return false;
     }
     return true;

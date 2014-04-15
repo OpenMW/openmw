@@ -10,6 +10,11 @@ namespace CSMDoc
     class Document;
 }
 
+namespace CSVRender
+{
+    class WorldspaceWidget;
+}
+
 namespace CSVWorld
 {
     class Table;
@@ -21,6 +26,7 @@ namespace CSVWorld
             Q_OBJECT
 
             TableBottomBox *mBottom;
+            CSVRender::WorldspaceWidget *mScene;
 
         public:
 
@@ -32,6 +38,10 @@ namespace CSVWorld
                                 (const QString& key, const QStringList &list);
 
             virtual void setStatusBar (bool show);
+
+        private slots:
+
+            void closeRequest();
     };
 }
 

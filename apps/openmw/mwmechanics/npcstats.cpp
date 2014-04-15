@@ -6,12 +6,15 @@
 #include <vector>
 #include <algorithm>
 
+#include <iomanip>
+
 #include <boost/format.hpp>
 
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
+#include <components/esm/npcstats.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -220,16 +223,18 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
 
+    std::vector <std::string> noButtons;
+
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), noButtons, MWGui::ShowInDialogueMode_Never);
 
     if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", noButtons, MWGui::ShowInDialogueMode_Never);
     }
 
     getSkill (skillIndex).setBase (base);
@@ -420,4 +425,90 @@ void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
 {
     assert(time>=0 && time<=20);
     mTimeToStartDrowning=time;
+}
+
+void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
+{
+    for (std::map<std::string, int>::const_iterator iter (mFactionRank.begin());
+        iter!=mFactionRank.end(); ++iter)
+        state.mFactions[iter->first].mRank = iter->second;
+
+    state.mDisposition = mDisposition;
+
+    for (int i=0; i<27; ++i)
+    {
+        mSkill[i].writeState (state.mSkills[i].mRegular);
+        mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
+    }
+
+    state.mBounty = mBounty;
+
+    for (std::set<std::string>::const_iterator iter (mExpelled.begin());
+        iter!=mExpelled.end(); ++iter)
+        state.mFactions[*iter].mExpelled = true;
+
+    for (std::map<std::string, int>::const_iterator iter (mFactionReputation.begin());
+        iter!=mFactionReputation.end(); ++iter)
+        state.mFactions[iter->first].mReputation = iter->second;
+
+    state.mReputation = mReputation;
+    state.mWerewolfKills = mWerewolfKills;
+    state.mProfit = mProfit;
+    state.mAttackStrength = mAttackStrength;
+    state.mLevelProgress = mLevelProgress;
+
+    for (int i=0; i<8; ++i)
+        state.mSkillIncrease[i] = mSkillIncreases[i];
+
+    std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
+
+    state.mTimeToStartDrowning = mTimeToStartDrowning;
+    state.mLastDrowningHit = mLastDrowningHit;
+    state.mLevelHealthBonus = mLevelHealthBonus;
+}
+
+void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
+{
+    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+    for (std::map<std::string, ESM::NpcStats::Faction>::const_iterator iter (state.mFactions.begin());
+        iter!=state.mFactions.end(); ++iter)
+        if (store.get<ESM::Faction>().search (iter->first))
+        {
+            if (iter->second.mExpelled)
+                mExpelled.insert (iter->first);
+
+            if (iter->second.mRank)
+                mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
+
+            if (iter->second.mReputation)
+                mFactionReputation.insert (std::make_pair (iter->first, iter->second.mReputation));
+        }
+
+    mDisposition = state.mDisposition;
+
+    for (int i=0; i<27; ++i)
+    {
+        mSkill[i].readState (state.mSkills[i].mRegular);
+        mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
+    }
+
+    mBounty = state.mBounty;
+    mReputation = state.mReputation;
+    mWerewolfKills = state.mWerewolfKills;
+    mProfit = state.mProfit;
+    mAttackStrength = state.mAttackStrength;
+    mLevelProgress = state.mLevelProgress;
+
+    for (int i=0; i<8; ++i)
+        mSkillIncreases[i] = state.mSkillIncrease[i];
+
+    for (std::vector<std::string>::const_iterator iter (state.mUsedIds.begin());
+        iter!=state.mUsedIds.end(); ++iter)
+        if (store.find (*iter))
+            mUsedIds.insert (*iter);
+
+    mTimeToStartDrowning = state.mTimeToStartDrowning;
+    mLastDrowningHit = state.mLastDrowningHit;
+    mLevelHealthBonus = state.mLevelHealthBonus;
 }

@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 #include "locals.hpp"
 
@@ -52,6 +52,10 @@ namespace MWScript
             ///< Records for variables that do not exist are dropped silently.
             ///
             /// \return Known type?
+
+            Locals& getLocals (const std::string& name);
+            ///< If the script \a name has not been added as a global script yet, it is added
+            /// automatically, but is not set to running state.
     };
 }
 

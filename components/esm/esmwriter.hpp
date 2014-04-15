@@ -17,7 +17,7 @@ class ESMWriter
         {
             std::string name;
             std::streampos position;
-            size_t size;
+            uint32_t size;
         };
 
     public:

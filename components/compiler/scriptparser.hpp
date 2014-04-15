@@ -12,7 +12,7 @@ namespace Compiler
     class Locals;
 
     // Script parser, to be used in dialogue scripts and as part of FileParser
-    
+
     class ScriptParser : public Parser
     {
             Output mOutput;
@@ -21,14 +21,14 @@ namespace Compiler
             bool mEnd;
 
         public:
-        
+
             /// \param end of script is marked by end keyword.
-            ScriptParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
+            ScriptParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
                 bool end = false);
-    
+
             void getCode (std::vector<Interpreter::Type_Code>& code) const;
             ///< store generated code in \æ code.
-    
+
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);
             ///< Handle a name token.
@@ -43,8 +43,8 @@ namespace Compiler
             /// \return fetch another token?
 
             virtual void parseEOF (Scanner& scanner);
-            ///< Handle EOF token.  
-            
+            ///< Handle EOF token.
+
             void reset();
             ///< Reset parser to clean state.
     };

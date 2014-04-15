@@ -1,6 +1,7 @@
 #include "engine.hpp"
 
 #include <stdexcept>
+#include <iomanip>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -11,7 +12,7 @@
 
 #include <components/compiler/extensions0.hpp>
 
-#include <components/bsa/bsa_archive.hpp>
+#include <components/bsa/resources.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
 #include <components/nif/niffile.hpp>
@@ -155,6 +156,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mWarningsMode (1)
   , mScriptContext (0)
   , mFSStrict (false)
   , mScriptConsoleMode (false)
@@ -188,50 +190,6 @@ OMW::Engine::~Engine()
     delete mScriptContext;
     delete mOgre;
     SDL_Quit();
-}
-
-// Load BSA files
-
-void OMW::Engine::loadBSA()
-{
-    // We use separate resource groups to handle location priority.
-    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
-
-    int i=0;
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-    {
-        // Last data dir has the highest priority
-        std::string groupName = "Data" + Ogre::StringConverter::toString(dataDirs.size()-i, 8, '0');
-        Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
-
-        std::string dataDirectory = iter->string();
-        std::cout << "Data dir " << dataDirectory << std::endl;
-        Bsa::addDir(dataDirectory, mFSStrict, groupName);
-        ++i;
-    }
-
-    i=0;
-    for (std::vector<std::string>::const_iterator archive = mArchives.begin(); archive != mArchives.end(); ++archive)
-    {
-        if (mFileCollections.doesExist(*archive))
-        {
-            // Last BSA has the highest priority
-            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(mArchives.size()-i, 8, '0');
-
-            Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
-
-            const std::string archivePath = mFileCollections.getPath(*archive).string();
-            std::cout << "Adding BSA archive " << archivePath << std::endl;
-            Bsa::addBSA(archivePath, groupName);
-            ++i;
-        }
-        else
-        {
-            std::stringstream message;
-            message << "Archive '" << *archive << "' not found";
-            throw std::runtime_error(message.str());
-        }
-    }
 }
 
 // add resources directory
@@ -381,10 +339,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
 
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
+                settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
+
     mOgre->createWindow("OpenMW", windowSettings);
 
-    loadBSA();
-
+    Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
@@ -399,10 +359,20 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding);
     mEnvironment.setWindowManager (window);
 
+    // Create sound system
+    mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
+
+    if (!mSkipMenu)
+    {
+        std::string logo = mFallbackMap["Movies_Company_Logo"];
+        if (!logo.empty())
+            window->playVideo(logo, 1);
+    }
+
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
-        mActivationDistanceOverride));
+        mActivationDistanceOverride, mCellName));
     MWBase::Environment::get().getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
@@ -416,15 +386,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     Compiler::registerExtensions (mExtensions);
 
-    // Create sound system
-    mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
-
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions (&mExtensions);
 
     mEnvironment.setScriptManager (new MWScript::ScriptManager (MWBase::Environment::get().getWorld()->getStore(),
-        mVerboseScripts, *mScriptContext));
+        mVerboseScripts, *mScriptContext, mWarningsMode));
 
     // Create game mechanics system
     MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
@@ -438,31 +405,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mechanics->buildPlayer();
     window->updatePlayer();
 
-    // load cell
-    ESM::Position pos;
-    MWBase::World *world = MWBase::Environment::get().getWorld();
-
-    if (!mCellName.empty())
-    {
-        if (world->findExteriorPosition(mCellName, pos)) {
-            world->changeToExteriorCell (pos);
-        }
-        else {
-            world->findInteriorPosition(mCellName, pos);
-            world->changeToInteriorCell (mCellName, pos);
-        }
-    }
-    else
-    {
-        pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
-        pos.rot[0] = pos.rot[1] = pos.pos[2] = 0;
-        world->changeToExteriorCell (pos);
-    }
-
-    Ogre::FrameEvent event;
-    event.timeSinceLastEvent = 0;
-    event.timeSinceLastFrame = 0;
-    frameRenderingQueued(event);
     mOgre->getRoot()->addFrameListener (this);
 
     // scripts
@@ -500,14 +442,26 @@ void OMW::Engine::go()
     // Play some good 'ol tunes
     MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
-    if (!mStartupScript.empty())
-        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
-
     // start in main menu
     if (!mSkipMenu)
+    {
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        try
+        {
+            // Is there an ini setting for this filename or something?
+            MWBase::Environment::get().getSoundManager()->streamMusic("Special/morrowind title.mp3");
+
+            std::string logo = mFallbackMap["Movies_Morrowind_Logo"];
+            if (!logo.empty())
+                MWBase::Environment::get().getWindowManager()->playVideo(logo, true);
+        }
+        catch (...) {}
+    }
     else
         MWBase::Environment::get().getStateManager()->newGame (true);
+
+    if (!mStartupScript.empty())
+        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
     while (!mEnvironment.get().getStateManager()->hasQuitRequest())
@@ -612,8 +566,12 @@ void OMW::Engine::setStartupScript (const std::string& path)
     mStartupScript = path;
 }
 
-
 void OMW::Engine::setActivationDistanceOverride (int distance)
 {
     mActivationDistanceOverride = distance;
+}
+
+void OMW::Engine::setWarningsMode (int mode)
+{
+    mWarningsMode = mode;
 }

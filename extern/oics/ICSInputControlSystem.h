@@ -102,19 +102,19 @@ namespace ICS
 		JoystickIDList& getJoystickIdList(){ return mJoystickIDList; };
 		
 		// MouseListener
-		bool mouseMoved(const SFO::MouseMotionEvent &evt);
-		bool mousePressed(const SDL_MouseButtonEvent &evt, Uint8);
-		bool mouseReleased(const SDL_MouseButtonEvent &evt, Uint8);
+        void mouseMoved(const SFO::MouseMotionEvent &evt);
+        void mousePressed(const SDL_MouseButtonEvent &evt, Uint8);
+        void mouseReleased(const SDL_MouseButtonEvent &evt, Uint8);
 		
 		// KeyListener
-		bool keyPressed(const SDL_KeyboardEvent &evt);
-		bool keyReleased(const SDL_KeyboardEvent &evt);
+        void keyPressed(const SDL_KeyboardEvent &evt);
+        void keyReleased(const SDL_KeyboardEvent &evt);
 		
 		// JoyStickListener
-		bool buttonPressed(const SDL_JoyButtonEvent &evt, int button);
-		bool buttonReleased(const SDL_JoyButtonEvent &evt, int button);
-		bool axisMoved(const SDL_JoyAxisEvent &evt, int axis);
-		bool povMoved(const SDL_JoyHatEvent &evt, int index);
+        void buttonPressed(const SDL_JoyButtonEvent &evt, int button);
+        void buttonReleased(const SDL_JoyButtonEvent &evt, int button);
+        void axisMoved(const SDL_JoyAxisEvent &evt, int axis);
+        void povMoved(const SDL_JoyHatEvent &evt, int index);
 		//TODO: does this have an SDL equivalent?
         //bool sliderMoved(const OIS::JoyStickEvent &evt, int index);
 

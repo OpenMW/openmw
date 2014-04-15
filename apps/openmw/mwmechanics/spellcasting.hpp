@@ -5,6 +5,16 @@
 
 #include <OgreVector3.h>
 
+#include <components/esm/loadskil.hpp>
+
+namespace ESM
+{
+    struct Spell;
+    struct Ingredient;
+    struct Potion;
+    struct EffectList;
+}
+
 namespace MWMechanics
 {
     class EffectKey;

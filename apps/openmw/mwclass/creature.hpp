@@ -3,6 +3,11 @@
 
 #include "../mwworld/class.hpp"
 
+namespace ESM
+{
+    struct GameSetting;
+}
+
 namespace MWClass
 {
     class Creature : public MWWorld::Class
@@ -119,7 +124,10 @@ namespace MWClass
                 return true;
             }
 
-            virtual bool isFlying (const MWWorld::Ptr &ptr) const;
+            virtual bool isBipedal (const MWWorld::Ptr &ptr) const;
+            virtual bool canFly (const MWWorld::Ptr &ptr) const;
+            virtual bool canSwim (const MWWorld::Ptr &ptr) const;
+            virtual bool canWalk (const MWWorld::Ptr &ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr &ptr, int skill) const;
 

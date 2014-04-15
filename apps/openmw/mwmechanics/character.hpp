@@ -90,9 +90,12 @@ enum CharacterState {
     CharState_Death4,
     CharState_Death5,
     CharState_SwimDeath,
+    CharState_DeathKnockDown,
+    CharState_DeathKnockOut,
 
     CharState_Hit,
     CharState_KnockDown,
+    CharState_KnockOut,
     CharState_Block
 };
 
@@ -105,7 +108,7 @@ enum WeaponType {
     WeapType_TwoWide,
     WeapType_BowAndArrow,
     WeapType_Crossbow,
-    WeapType_ThowWeapon,
+    WeapType_Thrown,
     WeapType_PickProbe,
 
     WeapType_Spell
@@ -144,6 +147,7 @@ class CharacterController
     CharacterState mMovementState;
     std::string mCurrentMovement;
     float mMovementSpeed;
+    float mMovementAnimVelocity;
 
     CharacterState mDeathState;
     std::string mCurrentDeath;

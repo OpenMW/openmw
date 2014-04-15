@@ -20,6 +20,8 @@ Artem Kotsynyak (greye)
 athile
 Britt Mathis (galdor557)
 BrotherBrick
+cc9cii
+Chris Boyce (slothlife)
 Chris Robinson (KittyCat)
 Cory F. Cohen (cfcohen)
 Cris Mihalache (Mirceam)
@@ -35,6 +37,7 @@ gugus/gus
 Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
+Jeffrey Haines (Jyby)
 Joel Graff (graffy)
 John Blomberg (fstp)
 Jordan Milne
@@ -81,12 +84,14 @@ Sandy Carter (bwrsandman) - Arch Linux
 
 
 Public Relations and Translations:
+Alex McKibben (WeirdSexy) - Podcaster
 Artem Kotsynyak (greye) - Russian News Writer
+Jim Clauwaert (Zedd) - Public Outreach
 Julien Voisin (jvoisin/ap0) - French News Writer
+Lukasz Gromanowski (lgro) - English News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
-sir_herrbatka - English/Polish News Writer
-Alex McKibben (WeirdSexy) - Podcaster
+sir_herrbatka - Polish News Writer
 
 
 Website:

@@ -4,6 +4,11 @@
 #include <OgreEntity.h>
 #include <OgreParticleSystem.h>
 #include <OgreSubEntity.h>
+#include <OgreSkeleton.h>
+#include <OgreSkeletonInstance.h>
+#include <OgreSceneNode.h>
+#include <OgreBone.h>
+#include <OgreTechnique.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 
@@ -126,6 +131,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
     mHeadAnimationTime = Ogre::SharedPtr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
+    mWeaponAnimationTime = Ogre::SharedPtr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -223,6 +229,8 @@ void NpcAnimation::updateNpcBase()
     for(size_t i = 0;i < ESM::PRT_Count;i++)
         removeIndividualPart((ESM::PartReferenceType)i);
     updateParts();
+
+    mWeaponAnimationTime->updateStartTime();
 }
 
 void NpcAnimation::updateParts()
@@ -498,15 +506,20 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-    if(mViewMode == VM_FirstPerson && mCamera)
+    if(mViewMode == VM_FirstPerson)
     {
-        float pitch = mCamera->getPitch();
+        float pitch = mPtr.getRefData().getPosition().rot[0];
         Ogre::Node *node = baseinst->getBone("Bip01 Neck");
-        node->pitch(Ogre::Radian(pitch*0.75f), Ogre::Node::TS_WORLD);
+        node->pitch(Ogre::Radian(-pitch), Ogre::Node::TS_WORLD);
 
         // This has to be done before this function ends;
         // updateSkeletonInstance, below, touches the hands.
         node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
+    }
+    else
+    {
+        // In third person mode we may still need pitch for ranged weapon targeting
+        pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
@@ -588,9 +601,6 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
     }
 
-    // TODO:
-    // type == ESM::PRT_Weapon should get an animation source based on the current offset
-    // of the weapon attack animation (from its beginning, or start marker?)
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
     for(;ctrl != mObjectParts[type]->mControllers.end();ctrl++)
     {
@@ -600,6 +610,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
 
             if (type == ESM::PRT_Head)
                 ctrl->setSource(mHeadAnimationTime);
+            else if (type == ESM::PRT_Weapon)
+                ctrl->setSource(mWeaponAnimationTime);
         }
     }
 
@@ -657,12 +669,25 @@ void NpcAnimation::showWeapons(bool showWeapon)
     {
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(weapon != inv.end()) // special case for weapons
+        if(weapon != inv.end())
         {
             Ogre::Vector3 glowColor = getEnchantmentColor(*weapon);
             std::string mesh = MWWorld::Class::get(*weapon).getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
+
+            // Crossbows start out with a bolt attached
+            if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
+                    weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+            {
+                MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+                if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
+                    attachArrow();
+                else
+                    mAmmunition.setNull();
+            }
+            else
+                mAmmunition.setNull();
         }
     }
     else
@@ -691,6 +716,26 @@ void NpcAnimation::showCarriedLeft(bool show)
     }
     else
         removeIndividualPart(ESM::PRT_Shield);
+}
+
+void NpcAnimation::configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot)
+{
+    Ogre::Vector3 glowColor = getEnchantmentColor(ptr);
+    setRenderProperties(object, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
+                        !ptr.getClass().getEnchantment(ptr).empty(), &glowColor);
+
+    std::for_each(object->mEntities.begin(), object->mEntities.end(), SetObjectGroup(slot));
+    std::for_each(object->mParticles.begin(), object->mParticles.end(), SetObjectGroup(slot));
+}
+
+void NpcAnimation::attachArrow()
+{
+    WeaponAnimation::attachArrow(mPtr);
+}
+
+void NpcAnimation::releaseArrow()
+{
+    WeaponAnimation::releaseArrow(mPtr);
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)

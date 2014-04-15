@@ -101,26 +101,26 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 
 void MWWorld::LocalScripts::addCell (CellStore *cell)
 {
-    listCellScripts (*this, cell->mActivators, cell);
-    listCellScripts (*this, cell->mPotions, cell);
-    listCellScripts (*this, cell->mAppas, cell);
-    listCellScripts (*this, cell->mArmors, cell);
-    listCellScripts (*this, cell->mBooks, cell);
-    listCellScripts (*this, cell->mClothes, cell);
-    listCellScripts (*this, cell->mContainers, cell);
-    listCellScriptsCont (*this, cell->mContainers, cell);
-    listCellScripts (*this, cell->mCreatures, cell);
-    listCellScriptsCont (*this, cell->mCreatures, cell);
-    listCellScripts (*this, cell->mDoors, cell);
-    listCellScripts (*this, cell->mIngreds, cell);
-    listCellScripts (*this, cell->mLights, cell);
-    listCellScripts (*this, cell->mLockpicks, cell);
-    listCellScripts (*this, cell->mMiscItems, cell);
-    listCellScripts (*this, cell->mNpcs, cell);
-    listCellScriptsCont (*this, cell->mNpcs, cell);
-    listCellScripts (*this, cell->mProbes, cell);
-    listCellScripts (*this, cell->mRepairs, cell);
-    listCellScripts (*this, cell->mWeapons, cell);
+    listCellScripts (*this, cell->get<ESM::Activator>(), cell);
+    listCellScripts (*this, cell->get<ESM::Potion>(), cell);
+    listCellScripts (*this, cell->get<ESM::Apparatus>(), cell);
+    listCellScripts (*this, cell->get<ESM::Armor>(), cell);
+    listCellScripts (*this, cell->get<ESM::Book>(), cell);
+    listCellScripts (*this, cell->get<ESM::Clothing>(), cell);
+    listCellScripts (*this, cell->get<ESM::Container>(), cell);
+    listCellScriptsCont (*this, cell->get<ESM::Container>(), cell);
+    listCellScripts (*this, cell->get<ESM::Creature>(), cell);
+    listCellScriptsCont (*this, cell->get<ESM::Creature>(), cell);
+    listCellScripts (*this, cell->get<ESM::Door>(), cell);
+    listCellScripts (*this, cell->get<ESM::Ingredient>(), cell);
+    listCellScripts (*this, cell->get<ESM::Light>(), cell);
+    listCellScripts (*this, cell->get<ESM::Lockpick>(), cell);
+    listCellScripts (*this, cell->get<ESM::Miscellaneous>(), cell);
+    listCellScripts (*this, cell->get<ESM::NPC>(), cell);
+    listCellScriptsCont (*this, cell->get<ESM::NPC>(), cell);
+    listCellScripts (*this, cell->get<ESM::Probe>(), cell);
+    listCellScripts (*this, cell->get<ESM::Repair>(), cell);
+    listCellScripts (*this, cell->get<ESM::Weapon>(), cell);
 }
 
 void MWWorld::LocalScripts::clear()

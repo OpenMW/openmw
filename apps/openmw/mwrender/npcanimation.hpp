@@ -5,6 +5,8 @@
 
 #include "../mwworld/inventorystore.hpp"
 
+#include "weaponanimation.hpp"
+
 namespace ESM
 {
     struct NPC;
@@ -25,7 +27,7 @@ public:
     { }
 };
 
-class NpcAnimation : public Animation, public MWWorld::InventoryStoreListener
+class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
     virtual void equipmentChanged() { updateParts(); }
@@ -71,6 +73,7 @@ private:
     Ogre::Vector3 mFirstPersonOffset;
 
     Ogre::SharedPtr<HeadAnimationTime> mHeadAnimationTime;
+    Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
 
@@ -105,10 +108,24 @@ public:
                  ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
+    virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
+
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
+    /// to indicate the facing orientation of the character.
+    virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool showa);
+
+    virtual void attachArrow();
+    virtual void releaseArrow();
+
+    // WeaponAnimation
+    virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }
+    virtual void showWeapon(bool show) { showWeapons(show); }
+    virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot);
 
     void setViewMode(ViewMode viewMode);
 

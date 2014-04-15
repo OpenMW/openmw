@@ -98,7 +98,7 @@ namespace CSMWorld
                 UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual void cloneRecord(const std::string& origin, 
+            virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const UniversalId::Type type);
 
@@ -198,7 +198,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin, 
+    void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin,
                                                           const std::string& destination,
                                                           const UniversalId::Type type)
     {
@@ -448,7 +448,8 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::setRecord (int index, const Record<ESXRecordT>& record)
     {
-        if (IdAccessorT().getId (mRecords.at (index).get())!=IdAccessorT().getId (record.get()))
+        if (Misc::StringUtils::lowerCase (IdAccessorT().getId (mRecords.at (index).get()))!=
+            Misc::StringUtils::lowerCase (IdAccessorT().getId (record.get())))
             throw std::runtime_error ("attempt to change the ID of a record");
 
         mRecords.at (index) = record;

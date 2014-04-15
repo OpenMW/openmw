@@ -76,9 +76,13 @@ namespace MWWorld
         }
     }
 
-    void RefData::write (ESM::ObjectState& objectState) const
+    void RefData::write (ESM::ObjectState& objectState, const std::string& scriptId) const
     {
-        objectState.mHasLocals = false;
+        objectState.mHasLocals = mHasLocals;
+
+        if (mHasLocals)
+            mLocals.write (objectState.mLocals, scriptId);
+
         objectState.mEnabled = mEnabled;
         objectState.mCount = mCount;
         objectState.mPosition = mPosition;

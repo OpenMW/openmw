@@ -95,7 +95,8 @@ namespace CSMWorld
                 Type_TopicInfo,
                 Type_JournalInfos,
                 Type_JournalInfo,
-                Type_Scene
+                Type_Scene,
+                Type_Preview
             };
 
             enum { NumberOfTypes = Type_Scene+1 };

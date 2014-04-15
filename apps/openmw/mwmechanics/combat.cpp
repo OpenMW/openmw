@@ -4,24 +4,44 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 
 namespace
 {
 
-Ogre::Radian signedAngle(Ogre::Vector3 v1, Ogre::Vector3 v2, Ogre::Vector3 n)
+Ogre::Radian signedAngle(Ogre::Vector3 v1, Ogre::Vector3 v2, Ogre::Vector3 normal)
 {
     return Ogre::Math::ATan2(
-                n.dotProduct( v1.crossProduct(v2) ),
+                normal.dotProduct( v1.crossProduct(v2) ),
                 v1.dotProduct(v2)
                 );
+}
+
+void applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const Ogre::Vector3& hitPosition)
+{
+    std::string enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
+    if (!enchantmentName.empty())
+    {
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                    enchantmentName);
+        if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+        {
+            MWMechanics::CastSpell cast(attacker, victim);
+            cast.mHitPosition = hitPosition;
+            cast.cast(object);
+        }
+    }
 }
 
 }
@@ -132,6 +152,96 @@ namespace MWMechanics
 
         if (damage == 0 && attacker.getRefData().getHandle() == "player")
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
+    }
+
+    void projectileHit(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, MWWorld::Ptr weapon, const MWWorld::Ptr &projectile,
+                       const Ogre::Vector3& hitPosition)
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+        MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
+
+        const MWWorld::Class &othercls = victim.getClass();
+        if(!othercls.isActor()) // Can't hit non-actors
+            return;
+        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+        if(otherstats.isDead()) // Can't hit dead actors
+            return;
+
+        if(attacker.getRefData().getHandle() == "player")
+            MWBase::Environment::get().getWindowManager()->setEnemy(victim);
+
+        int weapskill = ESM::Skill::Marksman;
+        if(!weapon.isEmpty())
+            weapskill = weapon.getClass().getEquipmentSkill(weapon);
+
+        float skillValue = attacker.getClass().getSkill(attacker,
+                                           weapon.getClass().getEquipmentSkill(weapon));
+
+        if((::rand()/(RAND_MAX+1.0)) > getHitChance(attacker, victim, skillValue)/100.0f)
+        {
+            victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
+            return;
+        }
+
+        float damage = 0.0f;
+
+        float fDamageStrengthBase = gmst.find("fDamageStrengthBase")->getFloat();
+        float fDamageStrengthMult = gmst.find("fDamageStrengthMult")->getFloat();
+
+        const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+        damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
+        if (weapon != projectile)
+        {
+            // Arrow/bolt damage
+            attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
+            damage += attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength());
+        }
+
+        damage *= fDamageStrengthBase +
+                (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1);
+
+        if(attacker.getRefData().getHandle() == "player")
+            attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
+
+        bool detected = MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
+        if(!detected)
+        {
+            damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+            MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+        }
+        if (victim.getClass().getCreatureStats(victim).getKnockedDown())
+            damage *= gmst.find("fCombatKODamageMult")->getFloat();
+
+        // Apply "On hit" effect of the weapon
+        applyEnchantment(attacker, victim, weapon, hitPosition);
+        if (weapon != projectile)
+            applyEnchantment(attacker, victim, projectile, hitPosition);
+
+        if (damage > 0)
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+
+        float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
+        if ((::rand()/(RAND_MAX+1.0)) < fProjectileThrownStoreChance/100.f)
+            victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
+
+        victim.getClass().onHit(victim, damage, true, projectile, attacker, true);
+    }
+
+    float getHitChance(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, int skillValue)
+    {
+        MWMechanics::CreatureStats &stats = attacker.getClass().getCreatureStats(attacker);
+        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
+        float hitchance = skillValue +
+                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        hitchance *= stats.getFatigueTerm();
+        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
+                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
+        hitchance -= victim.getClass().getCreatureStats(victim).getEvasion();
+        return hitchance;
     }
 
 }

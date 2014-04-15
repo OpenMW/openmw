@@ -13,6 +13,7 @@
 #include "../../model/world/idtable.hpp"
 
 #include "scripthighlighter.hpp"
+#include "scriptedit.hpp"
 
 CSVWorld::ScriptSubView::ChangeLock::ChangeLock (ScriptSubView& view) : mView (view)
 {
@@ -27,7 +28,7 @@ CSVWorld::ScriptSubView::ChangeLock::~ChangeLock()
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mDocument (document), mColumn (-1), mChangeLocked (0)
 {
-    setWidget (mEditor = new QTextEdit (this));
+    setWidget (mEditor = new ScriptEdit (this, mDocument));
 
     mEditor->setAcceptRichText (false);
     mEditor->setLineWrapMode (QTextEdit::NoWrap);

@@ -210,7 +210,7 @@ namespace MWMechanics
                     && LOS
                     )
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()));
+                    creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()));
                     creatureStats.setHostile(true);
                 }
             }
@@ -541,7 +541,7 @@ namespace MWMechanics
                         // TODO: Add AI to follow player and fight for him
                         // TODO: VFX_SummonStart, VFX_SummonEnd
                         creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
-                            MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
+                            MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos).getRefData().getHandle()));
                     }
                 }
                 else
@@ -776,24 +776,7 @@ namespace MWMechanics
     {
         if(!paused)
         {
-            // Note: we need to do this before any of the animations are updated.
-            // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
-            // so updating VFX immediately after that would just remove the particle effects instantly.
-            // There needs to be a magic effect update in between.
-            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-                iter->second->updateContinuousVfx();
-
-            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-            {
-                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
-                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
-                    iter->second->skipAnim();
-                iter->second->update(duration);
-            }
-        }
-
-        if (!paused)
-        {
+            // Reset data from previous frame
             for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 // Reset last hit object, which is only valid for one frame
@@ -802,6 +785,35 @@ namespace MWMechanics
                 iter->first.getClass().getCreatureStats(iter->first).setLastHitObject(std::string());
             }
 
+            // AI and magic effects update
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
+                {
+                    updateActor(iter->first, duration);
+                    if(iter->first.getTypeName() == typeid(ESM::NPC).name())
+                        updateNpc(iter->first, duration, paused);
+                }
+            }
+
+            // Looping magic VFX update
+            // Note: we need to do this before any of the animations are updated.
+            // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
+            // so updating VFX immediately after that would just remove the particle effects instantly.
+            // There needs to be a magic effect update in between.
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+                iter->second->updateContinuousVfx();
+
+            // Animation/movement update
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
+                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                    iter->second->skipAnim();
+                iter->second->update(duration);
+            }
+
+            // Kill dead actors
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
             {
                 const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
@@ -811,10 +823,6 @@ namespace MWMechanics
                 {
                     if(iter->second->isDead())
                         iter->second->resurrect();
-
-                    updateActor(iter->first, duration);
-                    if(iter->first.getTypeName() == typeid(ESM::NPC).name())
-                        updateNpc(iter->first, duration, paused);
 
                     if(!stats.isDead())
                         continue;

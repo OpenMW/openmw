@@ -100,7 +100,9 @@
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="8 148 212 152" align="Left Top Stretch">
-                <Widget type="Button" skin="" position="4 4 204 18" name="Attrib1Box" align="Left Top HStretch">
+            <!-- TODO: this should be a scroll view -->
+            <Widget type="Widget" skin="" position="4 4 204 144" align="Left Top Stretch">
+                <Widget type="Button" skin="" position="0 0 204 18" name="Attrib1Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeStrength}"/>
@@ -114,7 +116,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="" position="4 22 204 18" name="Attrib2Box" align="Left Top HStretch">
+                <Widget type="Button" skin="" position="0 18 204 18" name="Attrib2Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeIntelligence}"/>
@@ -128,7 +130,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="" position="4 40 204 18" name="Attrib3Box" align="Left Top HStretch">
+                <Widget type="Button" skin="" position="0 36 204 18" name="Attrib3Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeWillpower}"/>
@@ -142,7 +144,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="" position="4 58 204 18" name="Attrib4Box" align="Left Top HStretch">
+                <Widget type="Button" skin="" position="0 54 204 18" name="Attrib4Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeAgility}"/>
@@ -156,7 +158,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="" position="4 76 204 18" name="Attrib5Box" align="Left Top HStretch">
+                <Widget type="Button" skin="" position="0 72 204 18" name="Attrib5Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeSpeed}"/>
@@ -170,7 +172,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="" position="4 94 204 18" name="Attrib6Box" align="Left Top HStretch">
+                <Widget type="Button" skin="" position="0 90 204 18" name="Attrib6Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeEndurance}"/>
@@ -184,7 +186,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="" position="4 112 204 18" name="Attrib7Box" align="Left Top HStretch">
+                <Widget type="Button" skin="" position="0 108 204 18" name="Attrib7Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributePersonality}"/>
@@ -198,7 +200,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="" position="4 130 204 18" name="Attrib8Box" align="Left Top HStretch">
+                <Widget type="Button" skin="" position="0 126 204 18" name="Attrib8Box" align="Left Top HStretch">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeLuck}"/>
@@ -211,6 +213,7 @@
                         <Property key="NeedMouse" value="false"/>
                     </Widget>
                 </Widget>
+            </Widget>
             </Widget>
 
         </Widget>

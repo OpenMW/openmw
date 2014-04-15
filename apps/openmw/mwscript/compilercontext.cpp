@@ -3,6 +3,8 @@
 
 #include "../mwworld/esmstore.hpp"
 
+#include <components/esm/loaddial.hpp>
+
 #include <components/compiler/locals.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -28,16 +30,32 @@ namespace MWScript
         return MWBase::Environment::get().getWorld()->getGlobalVariableType (name);
     }
 
-    char CompilerContext::getMemberType (const std::string& name, const std::string& id) const
+    std::pair<char, bool> CompilerContext::getMemberType (const std::string& name,
+        const std::string& id) const
     {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr (id, false);
+        std::string script;
+        bool reference = false;
 
-        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+        if (const ESM::Script *scriptRecord =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (id))
+        {
+            script = scriptRecord->mId;
+        }
+        else
+        {
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr (id, false);
 
-        if (script.empty())
-            return ' ';
+            script = MWWorld::Class::get (ptr).getScript (ptr);
+            reference = true;
+        }
 
-        return MWBase::Environment::get().getScriptManager()->getLocals (script).getType (name);
+        char type = ' ';
+
+        if (!script.empty())
+            type = MWBase::Environment::get().getScriptManager()->getLocals (script).getType (
+                Misc::StringUtils::lowerCase (name));
+
+        return std::make_pair (type, reference);
     }
 
     bool CompilerContext::isId (const std::string& name) const
@@ -66,5 +84,15 @@ namespace MWScript
             store.get<ESM::Repair>().search (name) ||
             store.get<ESM::Static>().search (name) ||
             store.get<ESM::Weapon>().search (name);
+    }
+
+    bool CompilerContext::isJournalId (const std::string& name) const
+    {
+        const MWWorld::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Dialogue *topic = store.get<ESM::Dialogue>().search (name);
+
+        return topic && topic->mType==ESM::Dialogue::Journal;
     }
 }

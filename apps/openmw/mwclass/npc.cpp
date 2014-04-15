@@ -30,6 +30,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -38,7 +39,7 @@
 
 namespace
 {
-    struct CustomData : public MWWorld::CustomData
+    struct NpcCustomData : public MWWorld::CustomData
     {
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::Movement mMovement;
@@ -47,9 +48,9 @@ namespace
         virtual MWWorld::CustomData *clone() const;
     };
 
-    MWWorld::CustomData *CustomData::clone() const
+    MWWorld::CustomData *NpcCustomData::clone() const
     {
-        return new CustomData (*this);
+        return new NpcCustomData (*this);
     }
 
     void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
@@ -261,7 +262,7 @@ namespace MWClass
         }
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CustomData> data(new CustomData);
+            std::auto_ptr<NpcCustomData> data(new NpcCustomData);
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -356,6 +357,11 @@ namespace MWClass
             data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "",
                                        MWBase::Environment::get().getWorld()->getStore());
 
+            // Relates to NPC gold reset delay
+            data->mNpcStats.setTradeTime(MWWorld::TimeStamp(0.0, 0));
+
+            data->mNpcStats.setGoldPool(gold);
+
             // store
             ptr.getRefData().setCustomData (data.release());
 
@@ -364,6 +370,8 @@ namespace MWClass
             getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, gold, ptr);
 
             getInventoryStore(ptr).autoEquip(ptr);
+
+            
         }
     }
 
@@ -435,14 +443,14 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
 
     MWMechanics::NpcStats& Npc::getNpcStats (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
 
 
@@ -497,15 +505,7 @@ namespace MWClass
         if(!weapon.isEmpty())
             weapskill = get(weapon).getEquipmentSkill(weapon);
 
-        MWMechanics::NpcStats &stats = getNpcStats(ptr);
-        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-        float hitchance = stats.getSkill(weapskill).getModified() +
-                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
-                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
-        hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
-                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
-        hitchance -= otherstats.getEvasion();
+        float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
@@ -515,6 +515,7 @@ namespace MWClass
 
         bool healthdmg;
         float damage = 0.0f;
+        MWMechanics::NpcStats &stats = getNpcStats(ptr);
         if(!weapon.isEmpty())
         {
             const bool weaphashealth = get(weapon).hasItemHealth(weapon);
@@ -614,6 +615,8 @@ namespace MWClass
         if (healthdmg && damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
+        MWMechanics::diseaseContact(victim, ptr);
+
         othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
 
@@ -647,9 +650,6 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
-        if (!attacker.isEmpty())
-            MWMechanics::diseaseContact(ptr, attacker);
-
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
@@ -680,12 +680,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(object.isEmpty())
-            {
-                if(ishealth)
-                    damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
-            }
-            else if(ishealth)
+            if(ishealth)
             {
                 // Hit percentages:
                 // cuirass = 30%
@@ -831,7 +826,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore (const MWWorld::Ptr& ptr)
@@ -839,7 +834,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
     }
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
@@ -853,7 +848,7 @@ namespace MWClass
     float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
 
         const float normalizedEncumbrance = Npc::getEncumbrance(ptr) / Npc::getCapacity(ptr);
@@ -908,7 +903,7 @@ namespace MWClass
 
     float Npc::getJump(const MWWorld::Ptr &ptr) const
     {
-        const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
         const float encumbranceTerm = fJumpEncumbranceBase->getFloat() +
                                           fJumpEncumbranceMultiplier->getFloat() *
@@ -947,7 +942,7 @@ namespace MWClass
         if (fallHeight >= fallDistanceMin)
         {
             const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
-            const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+            const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
             const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).mMagnitude;
             const float fallAcroBase = gmst.find("fFallAcroBase")->getFloat();
             const float fallAcroMult = gmst.find("fFallAcroMult")->getFloat();
@@ -972,7 +967,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mMovement;
+        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
@@ -1252,7 +1247,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
-        return MWWorld::Ptr(&cell.mNpcs.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::NPC>().insert(*ref), &cell);
     }
 
     int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
@@ -1278,8 +1273,11 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore.
-            readState (state2.mInventory);
+        NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
+
+        customData.mInventoryStore.readState (state2.mInventory);
+        customData.mNpcStats.readState (state2.mNpcStats);
+        static_cast<MWMechanics::CreatureStats&> (customData.mNpcStats).readState (state2.mCreatureStats);
     }
 
     void Npc::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
@@ -1289,8 +1287,11 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore.
-            writeState (state2.mInventory);
+        NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
+
+        customData.mInventoryStore.writeState (state2.mInventory);
+        customData.mNpcStats.writeState (state2.mNpcStats);
+        static_cast<const MWMechanics::CreatureStats&> (customData.mNpcStats).writeState (state2.mCreatureStats);
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

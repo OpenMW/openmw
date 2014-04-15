@@ -1,10 +1,13 @@
 #include "characterpreview.hpp"
 
-
 #include <OgreSceneManager.h>
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreCamera.h>
+#include <OgreSceneNode.h>
+#include <OgreTextureManager.h>
+#include <OgreViewport.h>
+#include <OgreRenderTexture.h>
 
 #include <libs/openengine/ogre/selectionbuffer.hpp>
 
@@ -128,7 +131,7 @@ namespace MWRender
 
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
-        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 62, -200), Ogre::Vector3(0, 62, 0))
+        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
         , mSelectionBuffer(NULL)
     {
     }
@@ -161,13 +164,13 @@ namespace MWRender
                    type == ESM::Weapon::LongBladeOneHand ||
                    type == ESM::Weapon::BluntOneHand ||
                    type == ESM::Weapon::AxeOneHand ||
-                   type == ESM::Weapon::MarksmanThrown)
+                   type == ESM::Weapon::MarksmanThrown ||
+                   type == ESM::Weapon::MarksmanCrossbow ||
+                   type == ESM::Weapon::MarksmanBow)
                     groupname = "inventoryweapononehand";
                 else if(type == ESM::Weapon::LongBladeTwoHand ||
                         type == ESM::Weapon::BluntTwoClose ||
-                        type == ESM::Weapon::AxeTwoHand ||
-                        type == ESM::Weapon::MarksmanCrossbow ||
-                        type == ESM::Weapon::MarksmanBow)
+                        type == ESM::Weapon::AxeTwoHand)
                     groupname = "inventoryweapontwohand";
                 else if(type == ESM::Weapon::BluntTwoWide ||
                         type == ESM::Weapon::SpearTwoWide)

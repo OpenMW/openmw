@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+#include <stdint.h>
+
 #include <boost/thread.hpp>
 
 #include "openal_output.hpp"
@@ -172,6 +174,7 @@ class OpenAL_SoundStream : public Sound
     DecoderPtr mDecoder;
 
     volatile bool mIsFinished;
+    volatile bool mIsInitialBatchEnqueued;
 
     void updateAll(bool local);
 
@@ -264,7 +267,7 @@ private:
 
 OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, float basevol, float pitch, int flags)
   : Sound(Ogre::Vector3(0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags)
-  , mOutput(output), mSource(src), mSamplesQueued(0), mDecoder(decoder), mIsFinished(true)
+  , mOutput(output), mSource(src), mSamplesQueued(0), mDecoder(decoder), mIsFinished(true), mIsInitialBatchEnqueued(false)
 {
     throwALerror();
 
@@ -315,16 +318,8 @@ void OpenAL_SoundStream::play()
     alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
     mSamplesQueued = 0;
-
-    for(ALuint i = 0;i < sNumBuffers;i++)
-        alBufferData(mBuffers[i], mFormat, this, 0, mSampleRate);
-    throwALerror();
-
-    alSourceQueueBuffers(mSource, sNumBuffers, mBuffers);
-    alSourcePlay(mSource);
-    throwALerror();
-
     mIsFinished = false;
+    mIsInitialBatchEnqueued = false;
     mOutput.mStreamThread->add(this);
 }
 
@@ -332,6 +327,7 @@ void OpenAL_SoundStream::stop()
 {
     mOutput.mStreamThread->remove(this);
     mIsFinished = true;
+    mIsInitialBatchEnqueued = false;
 
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
@@ -444,6 +440,24 @@ bool OpenAL_SoundStream::process()
             } while(processed > 0);
             throwALerror();
         }
+        else if (!mIsInitialBatchEnqueued) { // nothing enqueued yet
+            std::vector<char> data(mBufferSize);
+
+            for(ALuint i = 0;i < sNumBuffers && !finished;i++)
+            {
+                size_t got = mDecoder->read(&data[0], data.size());
+                finished = (got < data.size());
+                if(got > 0)
+                {
+                    ALuint bufid = mBuffers[i];
+                    alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
+                    alSourceQueueBuffers(mSource, 1, &bufid);
+                    throwALerror();
+                    mSamplesQueued += getBufferSampleCount(bufid);
+                }
+            }
+            mIsInitialBatchEnqueued = true;
+        }
 
         if(state != AL_PLAYING && state != AL_PAUSED)
         {
@@ -461,6 +475,7 @@ bool OpenAL_SoundStream::process()
         std::cout<< "Error updating stream \""<<mDecoder->getName()<<"\"" <<std::endl;
         mSamplesQueued = 0;
         mIsFinished = true;
+        mIsInitialBatchEnqueued = false;
     }
     return !mIsFinished;
 }

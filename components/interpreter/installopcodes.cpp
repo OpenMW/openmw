@@ -40,12 +40,18 @@ namespace Interpreter
         interpreter.installSegment5 (42, new OpFetchGlobalShort);
         interpreter.installSegment5 (43, new OpFetchGlobalLong);
         interpreter.installSegment5 (44, new OpFetchGlobalFloat);
-        interpreter.installSegment5 (59, new OpStoreMemberShort);
-        interpreter.installSegment5 (60, new OpStoreMemberLong);
-        interpreter.installSegment5 (61, new OpStoreMemberFloat);
-        interpreter.installSegment5 (62, new OpFetchMemberShort);
-        interpreter.installSegment5 (63, new OpFetchMemberLong);
-        interpreter.installSegment5 (64, new OpFetchMemberFloat);
+        interpreter.installSegment5 (59, new OpStoreMemberShort (false));
+        interpreter.installSegment5 (60, new OpStoreMemberLong (false));
+        interpreter.installSegment5 (61, new OpStoreMemberFloat (false));
+        interpreter.installSegment5 (62, new OpFetchMemberShort (false));
+        interpreter.installSegment5 (63, new OpFetchMemberLong (false));
+        interpreter.installSegment5 (64, new OpFetchMemberFloat (false));
+        interpreter.installSegment5 (65, new OpStoreMemberShort (true));
+        interpreter.installSegment5 (66, new OpStoreMemberLong (true));
+        interpreter.installSegment5 (67, new OpStoreMemberFloat (true));
+        interpreter.installSegment5 (68, new OpFetchMemberShort (true));
+        interpreter.installSegment5 (69, new OpFetchMemberLong (true));
+        interpreter.installSegment5 (70, new OpFetchMemberFloat (true));
 
         // math
         interpreter.installSegment5 (9, new OpAddInt<Type_Integer>);

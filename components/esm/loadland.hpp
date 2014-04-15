@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_LAND_H
 #define OPENMW_ESM_LAND_H
 
-#include <libs/platform/stdint.h>
+#include <stdint.h>
 
 #include "esmcommon.hpp"
 

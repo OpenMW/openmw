@@ -39,6 +39,12 @@ namespace ESM
     struct Spell;
     struct NPC;
     struct CellId;
+    struct Armor;
+    struct Weapon;
+    struct Clothing;
+    struct Enchantment;
+    struct Book;
+    struct EffectList;
 }
 
 namespace MWRender
@@ -95,7 +101,8 @@ namespace MWBase
 
             virtual ~World() {}
 
-            virtual void startNewGame() = 0;
+            virtual void startNewGame (bool bypass) = 0;
+            ///< \param bypass Bypass regular game start.
 
             virtual void clear() = 0;
 
@@ -268,7 +275,7 @@ namespace MWBase
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
             virtual void
-            moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore &newCell, float x, float y, float z) = 0;
+            moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, float x, float y, float z) = 0;
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
@@ -276,7 +283,7 @@ namespace MWBase
 
             virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
-            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -413,8 +420,6 @@ namespace MWBase
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
 
             /// \todo this does not belong here
-            virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
-            virtual void stopVideo() = 0;
             virtual void frameStarted (float dt, bool paused) = 0;
             virtual void screenshot (Ogre::Image& image, int w, int h) = 0;
 
@@ -458,8 +463,10 @@ namespace MWBase
 
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
 
-            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
+            virtual void launchMagicBolt (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
+            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
+                                           const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed) = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
 

@@ -5,7 +5,7 @@ namespace Compiler
 {
     // constructor
 
-    ErrorHandler::ErrorHandler() : mWarnings (0), mErrors (0) {}
+    ErrorHandler::ErrorHandler() : mWarnings (0), mErrors (0), mWarningsMode (1) {}
 
     // destructor
 
@@ -36,8 +36,13 @@ namespace Compiler
 
     void ErrorHandler::warning (const std::string& message, const TokenLoc& loc)
     {
-        ++mWarnings;
-        report (message, loc, WarningMessage);
+        if (mWarningsMode==1)
+        {
+            ++mWarnings;
+            report (message, loc, WarningMessage);
+        }
+        else if (mWarningsMode==2)
+            error (message, loc);
     }
 
     // Generate an error message.
@@ -61,5 +66,10 @@ namespace Compiler
     void ErrorHandler::reset()
     {
         mErrors = mWarnings = 0;
+    }
+
+    void ErrorHandler::setWarningsMode (int mode)
+    {
+        mWarningsMode = mode;
     }
 }

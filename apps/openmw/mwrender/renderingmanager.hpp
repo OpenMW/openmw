@@ -46,7 +46,6 @@ namespace MWRender
     class LocalMap;
     class Water;
     class GlobalMap;
-    class VideoPlayer;
     class Animation;
     class EffectManager;
 
@@ -180,6 +179,10 @@ public:
     void removeWaterRippleEmitter (const MWWorld::Ptr& ptr);
     void updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
 
+    void updateTerrain ();
+    ///< update the terrain according to the player position. Usually done automatically, but should be done manually
+    /// before calling requestMap
+
     void requestMap (MWWorld::CellStore* cell);
     ///< request the local map for a cell
 
@@ -205,8 +208,6 @@ public:
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
 
-    void playVideo(const std::string& name, bool allowSkipping);
-    void stopVideo();
     void frameStarted(float dt, bool paused);
     void screenshot(Ogre::Image& image, int w, int h);
 
@@ -267,8 +268,6 @@ private:
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
-
-    VideoPlayer* mVideoPlayer;
 };
 
 }

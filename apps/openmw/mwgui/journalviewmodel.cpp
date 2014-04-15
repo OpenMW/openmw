@@ -206,9 +206,9 @@ struct JournalViewModelImpl : JournalViewModel
 
             const MWDialogue::Quest& quest = i->second;
             // Unfortunately Morrowind.esm has no quest names, since the quest book was added with tribunal.
-            if (quest.getName().empty())
-                visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (i->first));
-            else
+            // Note that even with Tribunal, some quests still don't have quest names. I'm assuming those are not supposed
+            // to appear in the quest book.
+            if (!quest.getName().empty())
                 visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (quest.getName()));
         }
     }

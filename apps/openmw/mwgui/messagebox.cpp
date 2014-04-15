@@ -245,11 +245,11 @@ namespace MWGui
             }
             mainWidgetSize.height = textSize.height + textButtonPadding + buttonHeight + buttonMainPadding;
 
-            MyGUI::IntCoord absCoord;
-            absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
-            absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
+            MyGUI::IntPoint absPos;
+            absPos.left = (gameWindowSize.width - mainWidgetSize.width)/2;
+            absPos.top = (gameWindowSize.height - mainWidgetSize.height)/2;
 
-            mMainWidget->setCoord(absCoord);
+            mMainWidget->setPosition(absPos);
             mMainWidget->setSize(mainWidgetSize);
 
             MyGUI::IntCoord messageWidgetCoord;

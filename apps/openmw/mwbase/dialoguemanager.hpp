@@ -3,6 +3,14 @@
 
 #include <string>
 
+#include <stdint.h>
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
+
 namespace MWWorld
 {
     class Ptr;
@@ -52,6 +60,12 @@ namespace MWBase
             virtual void persuade (int type) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
             virtual void applyDispositionChange (int delta) = 0;
+
+            virtual int countSavedGameRecords() const = 0;
+
+            virtual void write (ESM::ESMWriter& writer) const = 0;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
     };
 }
 

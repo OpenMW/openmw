@@ -15,12 +15,16 @@
 
 #include "../engine.hpp"
 
-#include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+
+#include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 
 using namespace ICS;
@@ -92,12 +96,12 @@ namespace MWInput
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
-        , mMouseLookEnabled(true)
+        , mMouseLookEnabled(false)
         , mMouseX(ogre.getWindow()->getWidth ()/2.f)
         , mMouseY(ogre.getWindow()->getHeight ()/2.f)
         , mMouseWheel(0)
         , mDragDrop(false)
-        , mGuiCursorEnabled(false)
+        , mGuiCursorEnabled(true)
         , mUserFile(userFile)
         , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
@@ -139,6 +143,13 @@ namespace MWInput
         mControlSwitch["vanitymode"]          = true;
     }
 
+    void InputManager::clear()
+    {
+        // Enable all controls
+        for (std::map<std::string, bool>::iterator it = mControlSwitch.begin(); it != mControlSwitch.end(); ++it)
+            it->second = true;
+    }
+
     InputManager::~InputManager()
     {
         mInputBinder->save (mUserFile);
@@ -168,7 +179,7 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running 
+                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running
                     && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
                         toggleMainMenu ();
                 break;
@@ -245,17 +256,20 @@ namespace MWInput
         }
     }
 
-    void InputManager::update(float dt, bool loading)
+    void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
-        mInputManager->capture(loading);
+        mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
         // update values of channels (as a result of pressed keys)
-        if (!loading)
+        if (!disableControls)
             mInputBinder->update(dt);
+
+        if (disableControls)
+            return;
 
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
@@ -277,12 +291,9 @@ namespace MWInput
             mInputManager->warpMouse(mMouseX, mMouseY);
         }
 
-        if (loading)
-            return;
-
         // Disable movement in Gui mode
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running) 
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
                 return;
 
 
@@ -451,7 +462,7 @@ namespace MWInput
         mInputBinder->adjustMouseRegion(width, height);
     }
 
-    bool InputManager::keyPressed( const SDL_KeyboardEvent &arg )
+    void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
         // Cut, copy & paste
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
@@ -497,7 +508,6 @@ namespace MWInput
 
         if (kc != OIS::KC_UNASSIGNED)
             MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-        return true;
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
@@ -508,23 +518,21 @@ namespace MWInput
             MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::None, *it);
     }
 
-    bool InputManager::keyReleased(const SDL_KeyboardEvent &arg )
+    void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
         mInputBinder->keyReleased (arg);
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
         MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
-
-        return true;
     }
 
-    bool InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
+    void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
         mInputBinder->mousePressed (arg, id);
 
         if (id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)
-            return true; // MyGUI has no use for these events
+            return; // MyGUI has no use for these events
 
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
@@ -535,20 +543,16 @@ namespace MWInput
                 MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
             }
         }
-
-        return true;
     }
 
-    bool InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
+    void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
         mInputBinder->mouseReleased (arg, id);
 
         MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-
-        return true;
     }
 
-    bool InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
+    void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
     {
         mInputBinder->mouseMoved (arg);
 
@@ -581,13 +585,13 @@ namespace MWInput
             float rot[3];
             rot[0] = -y;
             rot[1] = 0.0f;
-            rot[2] = x;
+            rot[2] = -x;
 
             // Only actually turn player when we're not in vanity mode
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
                 mPlayer->yaw(x);
-                mPlayer->pitch(-y);
+                mPlayer->pitch(y);
             }
 
             if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
@@ -596,8 +600,6 @@ namespace MWInput
                 MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
             }
         }
-
-        return true;
     }
 
     void InputManager::windowFocusChange(bool have_focus)
@@ -624,9 +626,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode () && MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_Video)
-            MWBase::Environment::get().getWorld ()->stopVideo ();
-        else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
+        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
         {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
@@ -644,6 +644,12 @@ namespace MWInput
 
         // Not allowed before the magic window is accessible
         if (!mControlSwitch["playermagic"])
+            return;
+
+        // Not allowed if no spell selected
+        MWWorld::InventoryStore& inventory = MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer());
+        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty() &&
+            inventory.getSelectedEnchantItem() == inventory.end())
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
@@ -748,7 +754,8 @@ namespace MWInput
 
     void InputManager::showQuickKeysMenu()
     {
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ())
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
+                && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
         else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
             MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);

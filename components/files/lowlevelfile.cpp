@@ -219,7 +219,7 @@ LowLevelFile::LowLevelFile ()
 
 LowLevelFile::~LowLevelFile ()
 {
-	if (mHandle == INVALID_HANDLE_VALUE)
+	if (mHandle != INVALID_HANDLE_VALUE)
 		CloseHandle (mHandle);
 }
 

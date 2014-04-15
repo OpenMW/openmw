@@ -3,12 +3,11 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.27.0
+Version: 0.29.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
 Font Licenses:
-EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
 DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
 
 
@@ -48,48 +47,209 @@ Allowed options:
   --version                             print version information and quit
   --data arg (=data)                    set data directories (later directories
                                         have higher priority)
-  --data-local arg                      set local data directory (highest 
+  --data-local arg                      set local data directory (highest
                                         priority)
   --fallback-archive arg (=fallback-archive)
-                                        set fallback BSA archives (later 
+                                        set fallback BSA archives (later
                                         archives have higher priority)
   --resources arg (=resources)          set resources directory
   --start arg (=Beshara)                set initial cell
-  --content arg                         content file(s): esm/esp, or 
+  --content arg                         content file(s): esm/esp, or
                                         omwgame/omwaddon
   --anim-verbose [=arg(=1)] (=0)        output animation indices files
   --no-sound [=arg(=1)] (=0)            disable all sounds
   --script-verbose [=arg(=1)] (=0)      verbose script output
   --script-all [=arg(=1)] (=0)          compile all scripts (excluding dialogue
                                         scripts) at startup
-  --script-console [=arg(=1)] (=0)      enable console-only script 
+  --script-console [=arg(=1)] (=0)      enable console-only script
                                         functionality
-  --script-run arg                      select a file containing a list of 
-                                        console commands that is executed on 
+  --script-run arg                      select a file containing a list of
+                                        console commands that is executed on
                                         startup
-  --new-game [=arg(=1)] (=0)            activate char gen/new game mechanics
-  --fs-strict [=arg(=1)] (=0)           strict file system handling (no case 
+   --script-warn [=arg(=1)] (=1)        handling of warnings when compiling
+                                        scripts
+                                        0 - ignore warning
+                                        1 - show warning but consider script as
+                                        correctly compiled anyway
+                                        2 - treat warnings as errors
+  --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
+  --fs-strict [=arg(=1)] (=0)           strict file system handling (no case
                                         folding)
-  --encoding arg (=win1252)             Character encoding used in OpenMW game 
+  --encoding arg (=win1252)             Character encoding used in OpenMW game
                                         messages:
-                                        
-                                        win1250 - Central and Eastern European 
-                                        such as Polish, Czech, Slovak, 
-                                        Hungarian, Slovene, Bosnian, Croatian, 
-                                        Serbian (Latin script), Romanian and 
+
+                                        win1250 - Central and Eastern European
+                                        such as Polish, Czech, Slovak,
+                                        Hungarian, Slovene, Bosnian, Croatian,
+                                        Serbian (Latin script), Romanian and
                                         Albanian languages
-                                        
-                                        win1251 - Cyrillic alphabet such as 
-                                        Russian, Bulgarian, Serbian Cyrillic 
+
+                                        win1251 - Cyrillic alphabet such as
+                                        Russian, Bulgarian, Serbian Cyrillic
                                         and other languages
-                                        
-                                        win1252 - Western European (Latin) 
+
+                                        win1252 - Western European (Latin)
                                         alphabet, used by default
   --fallback arg                        fallback values
   --no-grab                             Don't grab mouse cursor
   --activate-dist arg (=-1)             activation distance override
 
 CHANGELOG
+
+0.29.0
+
+Bug #556: Video soundtrack not played when music volume is set to zero
+Bug #829: OpenMW uses up all available vram, when playing for extended time
+Bug #848: Wrong amount of footsteps playing in 1st person
+Bug #888: Ascended Sleepers have movement issues
+Bug #892: Explicit references are allowed on all script functions
+Bug #999: Graphic Herbalism (mod): sometimes doesn't activate properly
+Bug #1009: Lake Fjalding AI related slowdown.
+Bug #1041: Music playback issues on OS X >= 10.9
+Bug #1043: No message box when advancing skill "Speechcraft" while in dialog window
+Bug #1060: Some message boxes are cut off at the bottom
+Bug #1062: Bittercup script does not work ('end' variable)
+Bug #1074: Inventory paperdoll obscures armour rating
+Bug #1077: Message after killing an essential NPC disappears too fast
+Bug #1078: "Clutterbane" shows empty charge bar
+Bug #1083: UndoWerewolf fails
+Bug #1088: Better Clothes Bloodmoon Plus 1.5 by Spirited Treasure pants are not rendered
+Bug #1090: Start scripts fail when going to a non-predefined cell
+Bug #1091: Crash: Assertion `!q.isNaN() && "Invalid orientation supplied as parameter"' failed.
+Bug #1093: Weapons of aggressive NPCs are invisible after you exit and re-enter interior
+Bug #1105: Magicka is depleted when using uncastable spells
+Bug #1106: Creatures should be able to run
+Bug #1107: TR cliffs have way too huge collision boxes in OpenMW
+Bug #1109: Cleaning True Light and Darkness with Tes3cmd makes Addamasartus , Zenarbael and Yasamsi flooded.
+Bug #1114: Bad output for desktop-file-validate on openmw.desktop (and opencs.desktop)
+Bug #1115: Memory leak when spying on Fargoth
+Bug #1137: Script execution fails (drenSlaveOwners script)
+Bug #1143: Mehra Milo quest (vivec informants) is broken
+Bug #1145: Issues with moving gold between inventory and containers
+Bug #1146: Issues with picking up stacks of gold
+Bug #1147: Dwemer Crossbows are held incorrectly
+Bug #1158: Armor rating should always stay below inventory mannequin
+Bug #1159: Quick keys can be set during character generation
+Bug #1160: Crash on equip lockpick when
+Bug #1167: Editor: Referenceables are not correctly loaded when dealing with more than one content file
+Bug #1184: Game Save: overwriting an existing save does not actually overwrites the file
+Feature #30: Loading/Saving (still missing a few parts)
+Feature #101: AI Package: Activate
+Feature #103: AI Package: Follow, FollowCell
+Feature #138: Editor: Drag & Drop
+Feature #428: Player death
+Feature #505: Editor: Record Cloning
+Feature #701: Levelled creatures
+Feature #708: Improved Local Variable handling
+Feature #709: Editor: Script verifier
+Feature #764: Missing journal backend features
+Feature #777: Creature weapons/shields
+Feature #789: Editor: Referenceable record verifier
+Feature #924: Load/Save GUI (still missing loading screen and progress bars)
+Feature #946: Knockdown
+Feature #947: Decrease fatigue when running, swimming and attacking
+Feature #956: Melee Combat: Blocking
+Feature #957: Area magic
+Feature #960: Combat/AI combat for creatures
+Feature #962: Combat-Related AI instructions
+Feature #1075: Damage/Restore skill/attribute magic effects
+Feature #1076: Soultrap magic effect
+Feature #1081: Disease contraction
+Feature #1086: Blood particles
+Feature #1092: Interrupt resting
+Feature #1101: Inventory equip scripts
+Feature #1116: Version/Build number in Launcher window
+Feature #1119: Resistance/weakness to normal weapons magic effect
+Feature #1123: Slow Fall magic effect
+Feature #1130: Auto-calculate spells
+Feature #1164: Editor: Case-insensitive sorting in tables
+
+0.28.0
+
+Bug #399: Inventory changes are not visible immediately
+Bug #417: Apply weather instantly when teleporting
+Bug #566: Global Map position marker not updated for interior cells
+Bug #712: Looting corpse delay
+Bug #716: Problem with the "Vurt's Ascadian Isles Mod" mod
+Bug #805: Two TR meshes appear black (v0.24RC)
+Bug #841: Third-person activation distance taken from camera rather than head
+Bug #845: NPCs hold torches during the day
+Bug #855: Vvardenfell Visages Volume I some hairs don´t appear since 0,24
+Bug #856: Maormer race by Mac Kom - The heads are way up
+Bug #864: Walk locks during loading in 3rd person
+Bug #871: active weapon/magic item icon is not immediately made blank if item is removed during dialog
+Bug #882: Hircine's Ring doesn't always work
+Bug #909: [Tamriel Rebuilt] crashes in Akamora
+Bug #922: Launcher writing merged openmw.cfg files
+Bug #943: Random magnitude should be calculated per effect
+Bug #948: Negative fatigue level should be allowed
+Bug #949: Particles in world space
+Bug #950: Hard crash on x64 Linux running --new-game (on startup)
+Bug #951: setMagicka and setFatigue have no effect
+Bug #954: Problem with equipping inventory items when using a keyboard shortcut
+Bug #955: Issues with equipping torches
+Bug #966: Shield is visible when casting spell
+Bug #967: Game crashes when equipping silver candlestick
+Bug #970: Segmentation fault when starting at Bal Isra
+Bug #977: Pressing down key in console doesn't go forward in history
+Bug #979: Tooltip disappears when changing inventory
+Bug #980: Barter: item category is remembered, but not shown
+Bug #981: Mod: replacing model has wrong position/orientation
+Bug #982: Launcher: Addon unchecking is not saved
+Bug #983: Fix controllers to affect objects attached to the base node
+Bug #985: Player can talk to NPCs who are in combat
+Bug #989: OpenMW crashes when trying to include mod with capital .ESP
+Bug #991: Merchants equip items with harmful constant effect enchantments
+Bug #994: Don't cap skills/attributes when set via console
+Bug #998: Setting the max health should also set the current health
+Bug #1005: Torches are visible when casting spells and during hand to hand combat.
+Bug #1006: Many NPCs have 0 skill
+Bug #1007: Console fills up with text
+Bug #1013: Player randomly loses health or dies
+Bug #1014: Persuasion window is not centered in maximized window
+Bug #1015: Player status window scroll state resets on status change
+Bug #1016: Notification window not big enough for all skill level ups
+Bug #1020: Saved window positions are not rescaled appropriately on resolution change
+Bug #1022: Messages stuck permanently on screen when they pile up
+Bug #1023: Journals doesn't open
+Bug #1026: Game loses track of torch usage.
+Bug #1028: Crash on pickup of jug in Unexplored Shipwreck, Upper level
+Bug #1029: Quick keys menu: Select compatible replacement when tool used up
+Bug #1042: TES3 header data wrong encoding
+Bug #1045: OS X: deployed OpenCS won't launch
+Bug #1046: All damaged weaponry is worth 1 gold
+Bug #1048: Links in "locked" dialogue are still clickable
+Bug #1052: Using color codes when naming your character actually changes the name's color
+Bug #1054: Spell effects not visible in front of water
+Bug #1055: Power-Spell animation starts even though you already casted it that day
+Bug #1059: Cure disease potion removes all effects from player, even your race bonus and race ability
+Bug #1063: Crash upon checking out game start ship area in Seyda Neen
+Bug #1064: openmw binaries link to unnecessary libraries
+Bug #1065: Landing from a high place in water still causes fall damage
+Bug #1072: Drawing weapon increases torch brightness
+Bug #1073: Merchants sell stacks of gold
+Feature #43: Visuals for Magic Effects
+Feature #51: Ranged Magic
+Feature #52: Touch Range Magic
+Feature #53: Self Range Magic
+Feature #54: Spell Casting
+Feature #70: Vampirism
+Feature #100: Combat AI
+Feature #171: Implement NIF record NiFlipController
+Feature #410: Window to restore enchanted item charge
+Feature #647: Enchanted item glow
+Feature #723: Invisibility/Chameleon magic effects
+Feature #737: Resist Magicka magic effect
+Feature #758: GetLOS
+Feature #926: Editor: Info-Record tables
+Feature #958: Material controllers
+Feature #959: Terrain bump, specular, & parallax mapping
+Feature #990: Request: unlock mouse when in any menu
+Feature #1018: Do not allow view mode switching while performing an action
+Feature #1027: Vertex morph animation (NiGeomMorpherController)
+Feature #1031: Handle NiBillboardNode
+Feature #1051: Implement NIF texture slot DarkTexture
+Task #873: Unify OGRE initialisation
 
 0.27.0
 

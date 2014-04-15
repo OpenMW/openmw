@@ -37,7 +37,6 @@ namespace CSMWorld
         }
     };
 
-    /// \note Shares ID with IdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct StringIdColumn : public Column<ESXRecordT>
     {
@@ -202,7 +201,7 @@ namespace CSMWorld
     struct DescriptionColumn : public Column<ESXRecordT>
     {
         DescriptionColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_LongString)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -373,7 +372,7 @@ namespace CSMWorld
         SkillsColumn (int index, bool typePrefix = false, bool major = false)
         : Column<ESXRecordT> ((typePrefix ? (
             major ? Columns::ColumnId_MajorSkill1 : Columns::ColumnId_MinorSkill1) :
-            Columns::ColumnId_Skill1) + index, ColumnBase::Display_String),
+            Columns::ColumnId_Skill1) + index, ColumnBase::Display_Skill),
             mIndex (index), mMajor (major)
         {}
 
@@ -598,7 +597,7 @@ namespace CSMWorld
     struct SoundFileColumn : public Column<ESXRecordT>
     {
         SoundFileColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_Sound)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -811,7 +810,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct CellColumn : public Column<ESXRecordT>
     {
-        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_String) {}
+        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -834,15 +833,15 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
-    /// \note Shares ID with StringIdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct IdColumn : public Column<ESXRecordT>
     {
-        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String) {}
+        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_ReferenceableId,
+            ColumnBase::Display_Referenceable) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -890,7 +889,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct OwnerColumn : public Column<ESXRecordT>
     {
-        OwnerColumn() : Column<ESXRecordT> (Columns::ColumnId_Owner, ColumnBase::Display_String) {}
+        OwnerColumn() : Column<ESXRecordT> (Columns::ColumnId_Owner, ColumnBase::Display_Npc) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -915,7 +914,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct SoulColumn : public Column<ESXRecordT>
     {
-        SoulColumn() : Column<ESXRecordT> (Columns::ColumnId_Soul, ColumnBase::Display_String) {}
+        SoulColumn() : Column<ESXRecordT> (Columns::ColumnId_Soul, ColumnBase::Display_Creature) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -940,7 +939,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct FactionColumn : public Column<ESXRecordT>
     {
-        FactionColumn() : Column<ESXRecordT> (Columns::ColumnId_Faction, ColumnBase::Display_String) {}
+        FactionColumn() : Column<ESXRecordT> (Columns::ColumnId_Faction, ColumnBase::Display_Faction) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1090,7 +1089,7 @@ namespace CSMWorld
     struct TeleportCellColumn : public Column<ESXRecordT>
     {
         TeleportCellColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_TeleportCell, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_TeleportCell, ColumnBase::Display_Cell)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -1114,7 +1113,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return false;
+            return true;
         }
     };
 
@@ -1146,7 +1145,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct KeyColumn : public Column<ESXRecordT>
     {
-        KeyColumn() : Column<ESXRecordT> (Columns::ColumnId_Key, ColumnBase::Display_String) {}
+        KeyColumn() : Column<ESXRecordT> (Columns::ColumnId_Key, ColumnBase::Display_Miscellaneous) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1380,7 +1379,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct QuestDescriptionColumn : public Column<ESXRecordT>
     {
-        QuestDescriptionColumn() : Column<ESXRecordT> (Columns::ColumnId_QuestDescription, ColumnBase::Display_String) {}
+        QuestDescriptionColumn() : Column<ESXRecordT> (Columns::ColumnId_QuestDescription, ColumnBase::Display_LongString) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1485,7 +1484,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct RaceColumn : public Column<ESXRecordT>
     {
-        RaceColumn() : Column<ESXRecordT> (Columns::ColumnId_Race, ColumnBase::Display_String) {}
+        RaceColumn() : Column<ESXRecordT> (Columns::ColumnId_Race, ColumnBase::Display_Race) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1510,7 +1509,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ClassColumn : public Column<ESXRecordT>
     {
-        ClassColumn() : Column<ESXRecordT> (Columns::ColumnId_Class, ColumnBase::Display_String) {}
+        ClassColumn() : Column<ESXRecordT> (Columns::ColumnId_Class, ColumnBase::Display_Class) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1535,7 +1534,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct PcFactionColumn : public Column<ESXRecordT>
     {
-        PcFactionColumn() : Column<ESXRecordT> (Columns::ColumnId_PcFaction, ColumnBase::Display_String) {}
+        PcFactionColumn() : Column<ESXRecordT> (Columns::ColumnId_PcFaction, ColumnBase::Display_Faction) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1560,7 +1559,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ResponseColumn : public Column<ESXRecordT>
     {
-        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_String) {}
+        ResponseColumn() : Column<ESXRecordT> (Columns::ColumnId_Response, ColumnBase::Display_LongString) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

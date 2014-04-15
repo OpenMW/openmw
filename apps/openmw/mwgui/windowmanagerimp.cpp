@@ -3,6 +3,9 @@
 #include <cassert>
 #include <iterator>
 
+#include <OgreTextureManager.h>
+#include <OgreRenderWindow.h>
+
 #include "MyGUI_UString.h"
 #include "MyGUI_IPointer.h"
 #include "MyGUI_ResourceImageSetPointer.h"
@@ -18,6 +21,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -56,6 +60,7 @@
 #include "bookpage.hpp"
 #include "itemview.hpp"
 #include "fontloader.hpp"
+#include "videowidget.hpp"
 
 namespace MWGui
 {
@@ -101,6 +106,8 @@ namespace MWGui
       , mRecharge(NULL)
       , mRepair(NULL)
       , mCompanionWindow(NULL)
+      , mVideoBackground(NULL)
+      , mVideoWidget(NULL)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
@@ -152,6 +159,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
 
@@ -183,6 +191,13 @@ namespace MWGui
 
         // hide mygui's pointer
         MyGUI::PointerManager::getInstance().setVisible(false);
+
+        mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
+            MyGUI::Align::Default, "Overlay");
+        mVideoBackground->setImageTexture("black.png");
+        mVideoBackground->setVisible(false);
+
+        mVideoWidget = mVideoBackground->createWidgetReal<VideoWidget>("ImageBox", 0,0,1,1, MyGUI::Align::Default);
     }
 
     void WindowManager::initUI()
@@ -388,6 +403,7 @@ namespace MWGui
         mCompanionWindow->setVisible(false);
         mInventoryWindow->setTrading(false);
         mRecharge->setVisible(false);
+        mVideoBackground->setVisible(false);
 
         mHud->setVisible(mHudEnabled);
 
@@ -536,10 +552,6 @@ namespace MWGui
 
                 setCursorVisible(false);
                 break;
-            case GM_Video:
-                setCursorVisible(false);
-                mHud->setVisible(false);
-                break;
             default:
                 // Unsupported mode, switch back to game
                 break;
@@ -648,19 +660,14 @@ namespace MWGui
         mGarbageDialogs.push_back(dialog);
     }
 
-    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, bool showInDialogueModeOnly)
+    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
     {
         if (buttons.empty()) {
             /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-            if (getMode() == GM_Dialogue) {
+            if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
                 mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-            } else {
-                if (showInDialogueModeOnly) {
-                    if (getMode() == GM_Dialogue)
-                        mMessageBoxManager->createMessageBox(message);
-                } else {
-                    mMessageBoxManager->createMessageBox(message);
-                }
+            } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
+                mMessageBoxManager->createMessageBox(message);
             }
         } else {
             mMessageBoxManager->createInteractiveMessageBox(message, buttons);
@@ -744,22 +751,22 @@ namespace MWGui
         mMap->setCellName( name );
         mHud->setCellName( name );
 
-        if (cell->mCell->isExterior())
+        if (cell->getCell()->isExterior())
         {
-            if (!cell->mCell->mName.empty())
-                mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
+            if (!cell->getCell()->mName.empty())
+                mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->getCell()->getGridX (), cell->getCell()->getGridY ());
 
-            mMap->cellExplored(cell->mCell->getGridX(), cell->mCell->getGridY());
+            mMap->cellExplored (cell->getCell()->getGridX(), cell->getCell()->getGridY());
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
-            mMap->setActiveCell( cell->mCell->getGridX(), cell->mCell->getGridY() );
-            mHud->setActiveCell( cell->mCell->getGridX(), cell->mCell->getGridY() );
+            mMap->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
+            mHud->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
         }
         else
         {
-            mMap->setCellPrefix( cell->mCell->mName );
-            mHud->setCellPrefix( cell->mCell->mName );
+            mMap->setCellPrefix (cell->getCell()->mName );
+            mHud->setCellPrefix (cell->getCell()->mName );
 
             Ogre::Vector3 worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
@@ -896,6 +903,7 @@ namespace MWGui
 
     void WindowManager::windowResized(int x, int y)
     {
+        sizeVideo(x, y);
         mGuiManager->windowResized();
         mLoadingScreen->onResChange (x,y);
         if (!mHud)
@@ -1035,6 +1043,11 @@ namespace MWGui
     {
         mSelectedSpell = "";
         mHud->unsetSelectedSpell();
+
+        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+        if (player->getDrawState() == MWMechanics::DrawState_Spell)
+            player->setDrawState(MWMechanics::DrawState_Nothing);
+
         mSpellWindow->setTitle("#{sNone}");
     }
 
@@ -1398,4 +1411,57 @@ namespace MWGui
         mMap->readRecord(reader, type);
     }
 
+    void WindowManager::playVideo(const std::string &name, bool allowSkipping)
+    {
+        mVideoWidget->playVideo("video\\" + name, allowSkipping);
+
+        // Turn off all rendering except for the GUI
+        mRendering->getScene()->clearSpecialCaseRenderQueues();
+        // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work?
+        for(int i = 0;i < Ogre::RENDER_QUEUE_MAX;++i)
+        {
+            if(i > 0 && i < 96)
+                mRendering->getScene()->addSpecialCaseRenderQueue(i);
+        }
+        mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+
+        MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
+        sizeVideo(screenSize.width, screenSize.height);
+
+        setKeyFocusWidget(mVideoWidget);
+
+        mVideoBackground->setVisible(true);
+
+        bool cursorWasVisible = mCursorVisible;
+        setCursorVisible(false);
+
+        while (mVideoWidget->update())
+        {
+            MWBase::Environment::get().getInputManager()->update(0, true, false);
+
+            mRendering->getWindow()->update();
+        }
+
+        setCursorVisible(cursorWasVisible);
+
+        // Restore normal rendering
+        mRendering->getScene()->clearSpecialCaseRenderQueues();
+        mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+
+        mVideoBackground->setVisible(false);
+    }
+
+    void WindowManager::sizeVideo(int screenWidth, int screenHeight)
+    {
+        // Use black bars to correct aspect ratio
+        mVideoBackground->setSize(screenWidth, screenHeight);
+
+        double imageaspect = static_cast<double>(mVideoWidget->getVideoWidth())/mVideoWidget->getVideoHeight();
+
+        int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
+        int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
+
+        mVideoWidget->setCoord(leftPadding, topPadding,
+                               screenWidth - leftPadding*2, screenHeight - topPadding*2);
+    }
 }

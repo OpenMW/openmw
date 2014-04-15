@@ -6,6 +6,7 @@
 #include <OgreResourceGroupManager.h>
 #include <OgreRectangle2D.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 
 
 using namespace Ogre;

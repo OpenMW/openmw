@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <components/esm/creaturestats.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -178,9 +180,6 @@ namespace MWMechanics
             throw std::runtime_error("dynamic stat index is out of range");
 
         mDynamic[index] = value;
-
-        if (index == 2 && value.getCurrent() < 0)
-            setKnockedDown(true);
 
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
@@ -460,4 +459,41 @@ namespace MWMechanics
         mAttackStrength = value;
     }
 
+    void CreatureStats::writeState (ESM::CreatureStats& state) const
+    {
+        for (int i=0; i<8; ++i)
+            mAttributes[i].writeState (state.mAttributes[i]);
+
+        for (int i=0; i<3; ++i)
+            mDynamic[i].writeState (state.mDynamic[i]);
+    }
+
+    void CreatureStats::readState (const ESM::CreatureStats& state)
+    {
+        for (int i=0; i<8; ++i)
+            mAttributes[i].readState (state.mAttributes[i]);
+
+        for (int i=0; i<3; ++i)
+            mDynamic[i].readState (state.mDynamic[i]);
+    }
+
+    // Relates to NPC gold reset delay
+    void CreatureStats::setTradeTime(MWWorld::TimeStamp tradeTime) 
+    {
+        mTradeTime = tradeTime;
+    }
+
+    MWWorld::TimeStamp CreatureStats::getTradeTime() const
+    {
+        return mTradeTime;
+    }
+
+    void CreatureStats::setGoldPool(int pool) 
+    {
+        mGoldPool = pool;
+    }
+    int CreatureStats::getGoldPool() const 
+    {
+        return mGoldPool;
+    }
 }

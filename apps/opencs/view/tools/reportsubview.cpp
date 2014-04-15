@@ -41,5 +41,5 @@ void CSVTools::ReportSubView::updateUserSetting
 
 void CSVTools::ReportSubView::show (const QModelIndex& index)
 {
-    focusId (mModel->getUniversalId (index.row()));
+    focusId (mModel->getUniversalId (index.row()), "");
 }

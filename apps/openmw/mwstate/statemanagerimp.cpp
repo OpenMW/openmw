@@ -20,9 +20,12 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -38,6 +41,7 @@ void MWState::StateManager::cleanup (bool force)
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().clear();
         MWBase::Environment::get().getWorld()->clear();
         MWBase::Environment::get().getWindowManager()->clear();
+        MWBase::Environment::get().getInputManager()->clear();
 
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
@@ -122,11 +126,10 @@ void MWState::StateManager::newGame (bool bypass)
 {
     cleanup();
 
+    MWBase::Environment::get().getWorld()->startNewGame (bypass);
+
     if (!bypass)
-    {
-        MWBase::Environment::get().getWorld()->startNewGame();
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
-    }
     else
         MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
 
@@ -147,13 +150,18 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
     MWBase::World& world = *MWBase::Environment::get().getWorld();
 
-    MWWorld::Ptr player = world.getPlayer().getPlayer();
+    MWWorld::Ptr player = world.getPlayerPtr();
 
     profile.mContentFiles = world.getContentFiles();
 
     profile.mPlayerName = player.getClass().getName (player);
     profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
-    profile.mPlayerClass = player.get<ESM::NPC>()->mBase->mClass;
+
+    std::string classId = player.get<ESM::NPC>()->mBase->mClass;
+    if (world.getStore().get<ESM::Class>().isDynamic(classId))
+        profile.mPlayerClassName = world.getStore().get<ESM::Class>().find(classId)->mName;
+    else
+        profile.mPlayerClassId = classId;
 
     profile.mPlayerCell = world.getCellName();
 
@@ -176,7 +184,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     else
         slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
 
-    std::ofstream stream (slot->mPath.string().c_str());
+    std::ofstream stream (slot->mPath.string().c_str(), std::ios::binary);
 
     ESM::ESMWriter writer;
 
@@ -193,7 +201,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         +MWBase::Environment::get().getJournal()->countSavedGameRecords()
         +MWBase::Environment::get().getWorld()->countSavedGameRecords()
         +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
-                + 1 // global map
+        +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
+        +1 // global map
         );
 
     writer.save (stream);
@@ -203,6 +212,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     writer.endRecord (ESM::REC_SAVE);
 
     MWBase::Environment::get().getJournal()->write (writer);
+    MWBase::Environment::get().getDialogueManager()->write (writer);
     MWBase::Environment::get().getWorld()->write (writer);
     MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer);
     MWBase::Environment::get().getWindowManager()->write(writer);
@@ -245,6 +255,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                     MWBase::Environment::get().getJournal()->readRecord (reader, n.val);
                     break;
 
+                case ESM::REC_DIAS:
+
+                    MWBase::Environment::get().getDialogueManager()->readRecord (reader, n.val);
+                    break;
+
                 case ESM::REC_ALCH:
                 case ESM::REC_ARMO:
                 case ESM::REC_BOOK:
@@ -257,6 +272,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_GLOB:
                 case ESM::REC_PLAY:
                 case ESM::REC_CSTA:
+                case ESM::REC_WTHR:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -292,9 +308,16 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         MWBase::Environment::get().getWindowManager()->updatePlayer();
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
 
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        
+        //Update the weapon icon in the hud with whatever the player is currently holding.
+        MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator item = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        
+        if (item != invStore.end())
+            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*item);
 
-        ESM::CellId cellId = ptr.getCell()->mCell->getCellId();
+        ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
     }

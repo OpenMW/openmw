@@ -75,10 +75,9 @@ namespace MWRender
 
                     if (land)
                     {
-                        if (!land->isDataLoaded(ESM::Land::DATA_VHGT))
-                        {
-                            land->loadData(ESM::Land::DATA_VHGT);
-                        }
+                        int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
+                        if (!land->isDataLoaded(mask))
+                            land->loadData(mask);
                     }
 
                     for (int cellY=0; cellY<cellSize; ++cellY)
@@ -291,7 +290,7 @@ namespace MWRender
                     unsigned int imageY = (yLength - (y + 1)) * cellImageSizeSrc;
 
                     assert(imageX < image.getWidth());
-                    assert(imageY < image.getWidth());
+                    assert(imageY < image.getHeight());
 
                     if (image.getColourAt(imageX, imageY, 0).a > 0)
                         exploredCells.push_back(std::make_pair(x+bounds.mMinX,y+bounds.mMinY));

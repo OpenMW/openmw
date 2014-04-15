@@ -169,7 +169,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Lockpick> *ref =
             ptr.get<ESM::Lockpick>();
 
-        return MWWorld::Ptr(&cell.mLockpicks.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.get<ESM::Lockpick>().insert(*ref), &cell);
     }
 
     bool Lockpick::canSell (const MWWorld::Ptr& item, int npcServices) const

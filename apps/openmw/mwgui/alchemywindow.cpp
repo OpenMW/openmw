@@ -26,16 +26,6 @@ namespace
         return path;
     }
 
-    std::string getCountString(const int count)
-    {
-        if (count == 1)
-            return "";
-        if (count > 9999)
-            return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
-        else
-            return boost::lexical_cast<std::string>(count);
-    }
-
 }
 
 namespace MWGui
@@ -226,7 +216,7 @@ namespace MWGui
             text->setNeedMouseFocus(false);
             text->setTextShadow(true);
             text->setTextShadowColour(MyGUI::Colour(0,0,0));
-            text->setCaption(getCountString(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount()));
+            text->setCaption(ItemView::getCountString(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount()));
         }
 
         mItemView->update();
