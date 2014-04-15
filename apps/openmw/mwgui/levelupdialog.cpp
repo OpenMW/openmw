@@ -134,11 +134,19 @@ namespace MWGui
         // Vanilla uses thief.dds for custom classes.  A player with a custom class
         // doesn't have mId set, see mwworld/esmstore.hpp where it is initialised as
         // "$dynamic0".  This check should resolve bug #1260.
+        // Choosing Stealth specialization and Speed/Agility as attributes.
         if(world->getStore().get<ESM::Class>().isDynamic(cls->mId))
-            mClassImage->setImageTexture ("textures\\levelup\\thief.dds");
+        {
+            MWWorld::SharedIterator<ESM::Class> it = world->getStore().get<ESM::Class>().begin();
+            for(; it != world->getStore().get<ESM::Class>().end(); it++)
+            {
+                if(it->mData.mIsPlayable && it->mData.mSpecialization == 2 && it->mData.mAttribute[0] == 4 && it->mData.mAttribute[1] == 3)
+                    break;
+            }
+            mClassImage->setImageTexture ("textures\\levelup\\" + it->mId + ".dds");
+        }
         else
             mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
-
 
         int level = creatureStats.getLevel ()+1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + boost::lexical_cast<std::string>(level));
