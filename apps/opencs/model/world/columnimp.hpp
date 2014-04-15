@@ -785,7 +785,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct RegionColumn : public Column<ESXRecordT>
     {
-        RegionColumn() : Column<ESXRecordT> (Columns::ColumnId_Region, ColumnBase::Display_String) {}
+        RegionColumn() : Column<ESXRecordT> (Columns::ColumnId_Region, ColumnBase::Display_Region) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
