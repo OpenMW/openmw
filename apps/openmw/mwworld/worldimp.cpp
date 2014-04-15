@@ -2791,6 +2791,8 @@ namespace MWWorld
                 message += "\n" + skillMsg;
             }
 
+            // TODO: Sleep the player 
+
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
             MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);

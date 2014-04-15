@@ -67,6 +67,9 @@ void ESM::NpcStats::load (ESMReader &esm)
 
     mLevelHealthBonus = 0;
     esm.getHNOT (mLevelHealthBonus, "LVLH");
+
+    mCrimeId = -1;
+    esm.getHNOT (mCrimeId, "CRID");
 }
 
 void ESM::NpcStats::save (ESMWriter &esm) const
@@ -130,4 +133,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
 
     if (mLevelHealthBonus)
         esm.writeHNT ("LVLH", mLevelHealthBonus);
+
+    if (mCrimeId != -1)
+        esm.writeHNT ("CRID", mCrimeId);
 }
