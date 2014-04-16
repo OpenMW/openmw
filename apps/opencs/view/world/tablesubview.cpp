@@ -69,11 +69,6 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     connect(mFilterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)),
         this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)));
-
-    connect(this, SIGNAL(useFilterRequest(const std::string&)), mFilterBox, SIGNAL(useFilterRequest(const std::string&)));
-
-    connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)),
-            mFilterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
@@ -122,7 +117,7 @@ void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::Univers
 
         filterSource.push_back(pair);
     }
-    emit createFilterRequest(filterSource, action);
+    mFilterBox->createFilterRequest(filterSource, action);
 }
 
 bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
@@ -134,7 +129,7 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
         bool handled = data->holdsType(CSMWorld::UniversalId::Type_Filter);
         if (handled)
         {
-            emit useFilterRequest(data->returnMatching(CSMWorld::UniversalId::Type_Filter).getId());
+            mFilterBox->setRecordFilter(data->returnMatching(CSMWorld::UniversalId::Type_Filter).getId());
         }
         return handled;
     }
