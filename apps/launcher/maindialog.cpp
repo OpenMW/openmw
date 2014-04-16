@@ -137,7 +137,7 @@ void Launcher::MainDialog::createPages()
     mPlayPage = new PlayPage(this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
-    mSettingsPage = new SettingsPage(mGameSettings, mLauncherSettings, this);
+    mSettingsPage = new SettingsPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
     mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
@@ -161,150 +161,103 @@ void Launcher::MainDialog::createPages()
 
 bool Launcher::MainDialog::showFirstRunDialog()
 {
-    QStringList iniPaths;
-
-    foreach (const QString &path, mGameSettings.getDataDirs()) {
-        QDir dir(path);
-        dir.setPath(dir.canonicalPath()); // Resolve symlinks
-
-        if (dir.exists(QString("Morrowind.ini")))
-            iniPaths.append(dir.absoluteFilePath(QString("Morrowind.ini")));
-        else
-        {
-            if (!dir.cdUp())
-                continue; // Cannot move from Data Files
-
-            if (dir.exists(QString("Morrowind.ini")))
-                iniPaths.append(dir.absoluteFilePath(QString("Morrowind.ini")));
-        }
-    }
-
-    // Ask the user where the Morrowind.ini is
-    if (iniPaths.empty()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error detecting Morrowind configuration"));
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Cancel);
-        msgBox.setText(QObject::tr("<br><b>Could not find Morrowind.ini</b><br><br> \
-                                   OpenMW needs to import settings from this file.<br><br> \
-                                   Press \"Browse...\" to specify the location manually.<br>"));
-
-        QAbstractButton *dirSelectButton =
-                msgBox.addButton(QObject::tr("B&rowse..."), QMessageBox::ActionRole);
-
-        msgBox.exec();
-
-        QString iniFile;
-        if (msgBox.clickedButton() == dirSelectButton) {
-            iniFile = QFileDialog::getOpenFileName(
-                        NULL,
-                        QObject::tr("Select configuration file"),
-                        QDir::currentPath(),
-                        QString(tr("Morrowind configuration file (*.ini)")));
-        }
-
-        if (iniFile.isEmpty())
-            return false; // Cancel was clicked;
-
-        QFileInfo info(iniFile);
-        iniPaths.clear();
-        iniPaths.append(info.absoluteFilePath());
-    }
-
-    CheckableMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("Morrowind installation detected"));
-
-    QIcon icon = QApplication::style()->standardIcon(QStyle::SP_MessageBoxQuestion);
-    int size = QApplication::style()->pixelMetric(QStyle::PM_MessageBoxIconSize);
-    msgBox.setIconPixmap(icon.pixmap(size, size));
-
-    QAbstractButton *importerButton =
-            msgBox.addButton(tr("Import"), QDialogButtonBox::AcceptRole); // ActionRole doesn't work?!
-    QAbstractButton *skipButton =
-            msgBox.addButton(tr("Skip"), QDialogButtonBox::RejectRole);
-
-    Q_UNUSED(skipButton); // Surpress compiler unused warning
-
-    msgBox.setStandardButtons(QDialogButtonBox::NoButton);
-    msgBox.setText(tr("<br><b>An existing Morrowind configuration was detected</b><br> \
-                      <br>Would you like to import settings from Morrowind.ini?<br> \
-                      <br><b>Warning: In most cases OpenMW needs these settings to run properly</b><br>"));
-    msgBox.setCheckBoxText(tr("Include selected masters and plugins (creates a new profile)"));
-    msgBox.exec();
 
 
-    if (msgBox.clickedButton() == importerButton) {
 
-        if (iniPaths.count() > 1) {
-            // Multiple Morrowind.ini files found
-            bool ok;
-            QString path = QInputDialog::getItem(this, tr("Multiple configurations found"),
-                                                     tr("<br><b>There are multiple Morrowind.ini files found.</b><br><br> \
-                                                        Please select the one you wish to import from:"), iniPaths, 0, false, &ok);
-            if (ok && !path.isEmpty()) {
-                iniPaths.clear();
-                iniPaths.append(path);
-            } else {
-                // Cancel was clicked
-                return false;
-            }
-        }
+//    CheckableMessageBox msgBox(this);
+//    msgBox.setWindowTitle(tr("Morrowind installation detected"));
 
-        // Create the file if it doesn't already exist, else the importer will fail
-        QString path = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + QString("openmw.cfg");
-        QFile file(path);
+//    QIcon icon = QApplication::style()->standardIcon(QStyle::SP_MessageBoxQuestion);
+//    int size = QApplication::style()->pixelMetric(QStyle::PM_MessageBoxIconSize);
+//    msgBox.setIconPixmap(icon.pixmap(size, size));
 
-        if (!file.exists()) {
-            if (!file.open(QIODevice::ReadWrite)) {
-                // File cannot be created
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                                  Please make sure you have the right permissions \
-                                  and try again.<br>").arg(file.fileName()));
-                msgBox.exec();
-                return false;
-            }
+//    QAbstractButton *importerButton =
+//            msgBox.addButton(tr("Import"), QDialogButtonBox::AcceptRole); // ActionRole doesn't work?!
+//    QAbstractButton *skipButton =
+//            msgBox.addButton(tr("Skip"), QDialogButtonBox::RejectRole);
 
-            file.close();
-        }
+//    Q_UNUSED(skipButton); // Surpress compiler unused warning
 
-        // Construct the arguments to run the importer
-        QStringList arguments;
+//    msgBox.setStandardButtons(QDialogButtonBox::NoButton);
+//    msgBox.setText(tr("<br><b>An existing Morrowind configuration was detected</b><br> \
+//                      <br>Would you like to import settings from Morrowind.ini?<br> \
+//                      <br><b>Warning: In most cases OpenMW needs these settings to run properly</b><br>"));
+//    msgBox.setCheckBoxText(tr("Include selected masters and plugins (creates a new profile)"));
+//    msgBox.exec();
 
-        if (msgBox.isChecked())
-            arguments.append(QString("--game-files"));
 
-        arguments.append(QString("--encoding"));
-        arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
-        arguments.append(QString("--ini"));
-        arguments.append(iniPaths.first());
-        arguments.append(QString("--cfg"));
-        arguments.append(path);
+//    if (msgBox.clickedButton() == importerButton) {
 
-        ProcessInvoker invoker(this);
+//        if (iniPaths.count() > 1) {
+//            // Multiple Morrowind.ini files found
+//            bool ok;
+//            QString path = QInputDialog::getItem(this, tr("Multiple configurations found"),
+//                                                     tr("<br><b>There are multiple Morrowind.ini files found.</b><br><br> \
+//                                                        Please select the one you wish to import from:"), iniPaths, 0, false, &ok);
+//            if (ok && !path.isEmpty()) {
+//                iniPaths.clear();
+//                iniPaths.append(path);
+//            } else {
+//                // Cancel was clicked
+//                return false;
+//            }
+//        }
 
-        if (!invoker.startProcess(QLatin1String("mwiniimport"), arguments, false))
-            return false;
+//        // Create the file if it doesn't already exist, else the importer will fail
+//        QString path = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + QString("openmw.cfg");
+//        QFile file(path);
 
-        // Re-read the game settings
-        if (!setupGameSettings())
-            return false;
+//        if (!file.exists()) {
+//            if (!file.open(QIODevice::ReadWrite)) {
+//                // File cannot be created
+//                QMessageBox msgBox;
+//                msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+//                msgBox.setIcon(QMessageBox::Critical);
+//                msgBox.setStandardButtons(QMessageBox::Ok);
+//                msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+//                                  Please make sure you have the right permissions \
+//                                  and try again.<br>").arg(file.fileName()));
+//                msgBox.exec();
+//                return false;
+//            }
 
-        // Add a new profile
-        if (msgBox.isChecked()) {
-            mLauncherSettings.setValue(QString("Profiles/currentprofile"), QString("Imported"));
-            mLauncherSettings.remove(QString("Profiles/Imported/content"));
+//            file.close();
+//        }
 
-            QStringList contents = mGameSettings.values(QString("content"));
-            foreach (const QString &content, contents) {
-                mLauncherSettings.setMultiValue(QString("Profiles/Imported/content"), content);
-            }
-        }
+//        // Construct the arguments to run the importer
+//        QStringList arguments;
 
-    }
+//        if (msgBox.isChecked())
+//            arguments.append(QString("--game-files"));
+
+//        arguments.append(QString("--encoding"));
+//        arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
+//        arguments.append(QString("--ini"));
+//        arguments.append(iniPaths.first());
+//        arguments.append(QString("--cfg"));
+//        arguments.append(path);
+
+//        ProcessInvoker invoker(this);
+
+//        if (!invoker.startProcess(QLatin1String("mwiniimport"), arguments, false))
+//            return false;
+
+//        // Re-read the game settings
+//        if (!setupGameSettings())
+//            return false;
+
+//        // Add a new profile
+//        if (msgBox.isChecked()) {
+//            mLauncherSettings.setValue(QString("Profiles/currentprofile"), QString("Imported"));
+//            mLauncherSettings.remove(QString("Profiles/Imported/content"));
+
+//            QStringList contents = mGameSettings.values(QString("content"));
+//            foreach (const QString &content, contents) {
+//                mLauncherSettings.setMultiValue(QString("Profiles/Imported/content"), content);
+//            }
+//        }
+
+//    }
 
     return true;
 }
@@ -349,8 +302,11 @@ bool Launcher::MainDialog::reloadSettings()
     if (!setupGraphicsSettings())
         return false;
 
-//    if (!mSettingsPage->loadSettings())
-//        return false;
+    if (!mSettingsPage->loadSettings())
+        return false;
+
+    if (!mDataFilesPage->loadSettings())
+        return false;
 
     if (!mGraphicsPage->loadSettings())
         return false;
@@ -371,17 +327,17 @@ void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem 
     DataFilesPage *previousPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(previousIndex));
     DataFilesPage *currentPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(currentIndex));
 
-    //special call to update/save data files page list view when it's displayed/hidden.
-    if (previousPage)
-    {
-        if (previousPage->objectName() == "DataFilesPage")
-            previousPage->saveSettings();
-    }
-    else if (currentPage)
-    {
-        if (currentPage->objectName() == "DataFilesPage")
-            currentPage->loadSettings();
-    }
+//    //special call to update/save data files page list view when it's displayed/hidden.
+//    if (previousPage)
+//    {
+//        if (previousPage->objectName() == "DataFilesPage")
+//            previousPage->saveSettings();
+//    }
+//    else if (currentPage)
+//    {
+//        if (currentPage->objectName() == "DataFilesPage")
+//            currentPage->loadSettings();
+//    }
 }
 
 bool Launcher::MainDialog::setupLauncherSettings()
@@ -729,8 +685,9 @@ bool Launcher::MainDialog::writeSettings()
 {
     // Now write all config files
     saveSettings();
-    mGraphicsPage->saveSettings();
     mDataFilesPage->saveSettings();
+    mGraphicsPage->saveSettings();
+    mSettingsPage->saveSettings();
 
     QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
     QDir dir(userPath);

@@ -14,7 +14,7 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
     mButtonBox = new QDialogButtonBox(this);
     mButtonBox->addButton(QDialogButtonBox::Ok);
     mButtonBox->addButton(QDialogButtonBox::Cancel);
-//    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
+    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 
     QLabel *label = new QLabel(this);
     label->setText(text);

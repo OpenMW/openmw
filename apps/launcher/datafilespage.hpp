@@ -39,7 +39,9 @@ namespace Launcher
 
         //void writeConfig(QString profile = QString());
         void saveSettings(const QString &profile = "");
-        void loadSettings();
+        bool loadSettings();
+
+        void setupDataFiles();
 
     signals:
         void signalProfileChanged (int index);
@@ -70,7 +72,6 @@ namespace Launcher
         void setPluginsCheckstates(Qt::CheckState state);
 
         void buildView();
-        void setupDataFiles();
         void setupConfig();
         void readConfig();
         void setProfile (int index, bool savePrevious);

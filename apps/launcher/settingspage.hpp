@@ -10,6 +10,7 @@
 
 #include "maindialog.hpp"
 
+namespace Files { struct ConfigurationManager; }
 namespace Config { class GameSettings;
                    class LauncherSettings; }
 
@@ -22,13 +23,14 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        SettingsPage( Config::GameSettings &gameSettings,
+        SettingsPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
                       Config::LauncherSettings &launcherSettings, MainDialog *parent = 0);
 
         void saveSettings();
         bool loadSettings();
 
     private slots:
+
         void on_wizardButton_clicked();
         void on_importerButton_clicked();
         void on_browseButton_clicked();
@@ -42,8 +44,11 @@ namespace Launcher
         void updateOkButton(const QString &text);
 
     private:
+
         Process::ProcessInvoker *mWizardInvoker;
         Process::ProcessInvoker *mImporterInvoker;
+
+        Files::ConfigurationManager &mCfgMgr;
 
         Config::GameSettings &mGameSettings;
         Config::LauncherSettings &mLauncherSettings;

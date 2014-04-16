@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QDir>
 
+#include <components/files/configurationmanager.hpp>
+
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
@@ -12,12 +14,14 @@
 
 using namespace Process;
 
-Launcher::SettingsPage::SettingsPage(Config::GameSettings &gameSettings,
-                                     Config::LauncherSettings &launcherSettings, MainDialog *parent) :
-    mGameSettings(gameSettings),
-    mLauncherSettings(launcherSettings),
-    QWidget(parent),
-    mMain(parent)
+Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
+                                     Config::GameSettings &gameSettings,
+                                     Config::LauncherSettings &launcherSettings, MainDialog *parent)
+    : mCfgMgr(cfg)
+    , mGameSettings(gameSettings)
+    , mLauncherSettings(launcherSettings)
+    , QWidget(parent)
+    , mMain(parent)
 {
     setupUi(this);
 
@@ -77,17 +81,60 @@ Launcher::SettingsPage::SettingsPage(Config::GameSettings &gameSettings,
     } else {
         importerButton->setEnabled(false);
     }
+
+    loadSettings();
 }
 
 void Launcher::SettingsPage::on_wizardButton_clicked()
 {
+    saveSettings();
+
     if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false))
         return;
 }
 
 void Launcher::SettingsPage::on_importerButton_clicked()
 {
-    if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), false))
+    saveSettings();
+
+    // Create the file if it doesn't already exist, else the importer will fail
+    QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    path.append(QLatin1String("openmw.cfg"));
+    QFile file(path);
+
+    if (!file.exists()) {
+        if (!file.open(QIODevice::ReadWrite)) {
+            // File cannot be created
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p> \
+                              <p>Please make sure you have the right permissions \
+                              and try again.</p></body></html>").arg(file.fileName()));
+            msgBox.exec();
+            return;
+        }
+
+        file.close();
+    }
+
+    // Construct the arguments to run the importer
+    QStringList arguments;
+
+    if (addonsCheckBox->isChecked())
+        arguments.append(QString("--game-files"));
+
+    arguments.append(QString("--encoding"));
+    arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
+    arguments.append(QString("--ini"));
+    arguments.append(settingsComboBox->currentText());
+    arguments.append(QString("--cfg"));
+    arguments.append(path);
+
+    qDebug() << "arguments " << arguments;
+
+    if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
         return;
 }
 
@@ -129,7 +176,6 @@ void Launcher::SettingsPage::wizardFinished(int exitCode, QProcess::ExitStatus e
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return;
 
-    mMain->writeSettings();
     mMain->reloadSettings();
     wizardButton->setEnabled(true);
 }
@@ -146,6 +192,9 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return;
 
+    // Re-read the settings in their current state
+    mMain->reloadSettings();
+
     // Import selected data files from openmw.cfg
     if (addonsCheckBox->isChecked())
     {
@@ -153,6 +202,8 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
         {
             const QString profile(mProfileDialog->lineEdit()->text());
             const QStringList files(mGameSettings.values(QLatin1String("content")));
+
+            qDebug() << "Profile " << profile << files;
 
             // Doesn't quite work right now
             mLauncherSettings.setValue(QLatin1String("Profiles/currentprofile"), profile);
@@ -165,7 +216,6 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
         }
     }
 
-    mMain->writeSettings();
     mMain->reloadSettings();
     importerButton->setEnabled(true);
 }
@@ -183,4 +233,31 @@ void Launcher::SettingsPage::updateOkButton(const QString &text)
     (profiles.contains(text))
             ? mProfileDialog->setOkButtonEnabled(false)
             : mProfileDialog->setOkButtonEnabled(true);
+}
+
+void Launcher::SettingsPage::saveSettings()
+{
+    QString language(languageComboBox->currentText());
+
+    mLauncherSettings.setValue(QLatin1String("Settings/language"), language);
+
+    if (language == QLatin1String("Polish")) {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1250"));
+    } else if (language == QLatin1String("Russian")) {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
+    }  else {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
+    }
+}
+
+bool Launcher::SettingsPage::loadSettings()
+{
+    QString language(mLauncherSettings.value(QLatin1String("Settings/language")));
+
+    int index = languageComboBox->findText(language);
+
+    if (index != -1)
+        languageComboBox->setCurrentIndex(index);
+
+    return true;
 }
