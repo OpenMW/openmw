@@ -11,7 +11,7 @@ namespace ESM
 void Ingredient::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
     esm.getHNT(mData, "IRDT", 56);
     mScript = esm.getHNOString("SCRI");
     mIcon = esm.getHNOString("ITEX");
@@ -42,7 +42,7 @@ void Ingredient::load(ESMReader &esm)
 void Ingredient::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
     esm.writeHNT("IRDT", mData, 56);
     esm.writeHNOCString("SCRI", mScript);
     esm.writeHNOCString("ITEX", mIcon);

@@ -33,7 +33,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
-    recharge mode videowidget
+    recharge mode videowidget backgroundimage
     )
 
 add_openmw_dir (mwdialogue
@@ -67,8 +67,8 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
-    drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
-    aiescort aiactivate aicombat repair enchanting pathfinding security spellsuccess spellcasting
+    drawstate spells activespells npcstats aipackage aisequence aipersue alchemy aiwander aitravel aifollow
+    aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
     disease pickpocket levelledlist combat steering
     )
 

@@ -194,10 +194,3 @@ std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::
 
     return ss.str();
 }
-
-void CSVFilter::EditWidget::useFilterRequest (const std::string& idOfFilter)
-{
-    clear();
-    insert(QString::fromUtf8(idOfFilter.c_str()));
-}
-

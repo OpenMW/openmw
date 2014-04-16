@@ -38,8 +38,10 @@ namespace MWMechanics
             float mY;
             float mZ;
 
+            // Cell location
             int mCellX;
             int mCellY;
+            // Cell location multiplied by ESM::Land::REAL_SIZE
             float mXCell;
             float mYCell;
 
@@ -56,7 +58,8 @@ namespace MWMechanics
             WalkState mWalkState;
 
             int mStuckCount;
-            int mEvadeCount;
+            float mStuckDuration;
+            float mEvadeDuration;
 
             bool mStoredAvailableNodes;
             bool mChooseAction;

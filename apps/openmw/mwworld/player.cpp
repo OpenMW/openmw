@@ -28,9 +28,11 @@ namespace MWWorld
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
         mAutoMove(false),
-        mForwardBackward (0),
+        mForwardBackward(0),
         mTeleported(false),
-        mMarkedCell(NULL)
+        mMarkedCell(NULL),
+        mCurrentCrimeId(-1),
+        mPayedCrimeId(-1)
     {
         mPlayer.mBase = player;
         mPlayer.mRef.mRefID = "player";
@@ -194,6 +196,9 @@ namespace MWWorld
         mPlayer.save (player.mObject);
         player.mCellId = mCellStore->getCell()->getCellId();
 
+        player.mCurrentCrimeId = mCurrentCrimeId;
+        player.mPayedCrimeId = mPayedCrimeId;
+
         player.mBirthsign = mSign;
 
         player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x;
@@ -239,6 +244,9 @@ namespace MWWorld
                 !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
                 throw std::runtime_error ("invalid player state record (birthsign)");
 
+            mCurrentCrimeId = player.mCurrentCrimeId;
+            mPayedCrimeId = player.mPayedCrimeId;
+
             mSign = player.mBirthsign;
 
             mLastKnownExteriorPosition.x = player.mLastKnownExteriorPosition[0];
@@ -273,5 +281,20 @@ namespace MWWorld
         }
 
         return false;
+    }
+
+    int Player::getNewCrimeId()
+    {
+        return ++mCurrentCrimeId;
+    }
+
+    void Player::recordCrimeId()
+    {
+        mPayedCrimeId = mCurrentCrimeId;
+    }
+
+    int Player::getCrimeId() const
+    {
+        return mPayedCrimeId;
     }
 }

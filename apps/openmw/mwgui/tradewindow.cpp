@@ -360,7 +360,8 @@ namespace MWGui
         if (mCurrentBalance != 0)
         {
             addOrRemoveGold(mCurrentBalance, player);
-            addOrRemoveGold(-mCurrentBalance, mPtr);
+            mPtr.getClass().getCreatureStats(mPtr).setGoldPool(
+                        mPtr.getClass().getCreatureStats(mPtr).getGoldPool() - mCurrentBalance );
         }
 
         updateTradeTime();
@@ -470,28 +471,20 @@ namespace MWGui
 
     int TradeWindow::getMerchantGold()
     {
-        int merchantGold = 0;
-        MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
-        for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
-                merchantGold += it->getRefData().getCount();
-        }
+        int merchantGold = mPtr.getClass().getCreatureStats(mPtr).getGoldPool();
         return merchantGold;
     }
 
     // Relates to NPC gold reset delay
     void TradeWindow::checkTradeTime() 
     {
-        MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
-        const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
+        MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
         double delay = boost::lexical_cast<double>(MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getInt());
 
         // if time stamp longer than gold reset delay, reset gold.
         if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getTradeTime() + delay)
         {
-            addOrRemoveGold(-store.count(MWWorld::ContainerStore::sGoldId), mPtr);
-            addOrRemoveGold(+sellerStats.getGoldPool(), mPtr);
+            sellerStats.setGoldPool(mPtr.getClass().getBaseGold(mPtr));
         }
     }
 

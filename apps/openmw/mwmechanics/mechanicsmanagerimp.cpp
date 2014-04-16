@@ -1,5 +1,6 @@
 
 #include "mechanicsmanagerimp.hpp"
+#include "npcstats.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -802,34 +803,74 @@ namespace MWMechanics
 
     bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
-        if (ptr.getRefData().getHandle() != "player")
+        // NOTE: int arg can be from itemTaken() so DON'T modify it, since it is
+        //  passed to reportCrime later on in this function.
+
+        // Only player can commit crime and no victimless crimes
+        if (ptr.getRefData().getHandle() != "player" || victim.isEmpty())
             return false;
 
-        bool reported=false;
-        for (Actors::PtrControllerMap::const_iterator it = mActors.begin(); it != mActors.end(); ++it)
-        {
-            if (it->first != ptr &&
-                    MWBase::Environment::get().getWorld()->getLOS(ptr, it->first) &&
-                    awarenessCheck(ptr, it->first))
-            {
-                // NPCs will always curse you when they notice you steal their items, even if they don't report the crime
-                if (it->first == victim && type == OT_Theft)
-                {
-                    MWBase::Environment::get().getDialogueManager()->say(victim, "Thief");
-                }
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-                // Actor has witnessed a crime. Will he report it?
-                // (not sure, is > 0 correct?)
-                if (it->first.getClass().getCreatureStats(it->first).getAiSetting(CreatureStats::AI_Alarm).getModified() > 0)
+        // What amount of alarm did this crime generate?
+        int alarm;
+        if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmTresspass")->getInt();
+        else if (type == OT_Pickpocket)
+            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmPickPocket")->getInt();
+        else if (type == OT_Assault)
+            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmAttack")->getInt();
+        else if (type == OT_Murder)
+            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmKilling")->getInt();
+        else if (type == OT_Theft)
+            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
+
+        // Innocent until proven guilty
+        bool reported = false;
+
+        // Find all the NPCs within the alarm radius
+        std::vector<MWWorld::Ptr> neighbors;
+        mActors.getObjectsInRange(Ogre::Vector3(ptr.getRefData().getPosition().pos), 
+                                    esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
+
+        // Find an actor who witnessed the crime
+        for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        { 
+            if (*it == ptr) continue; // not the player
+
+            // Was the crime seen?
+            if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
+                type == OT_Assault ) 
+            {
+
+                // Will the witness report the crime?
+                if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
-                    // TODO: stats.setAlarmed(true) on NPCs within earshot
-                    // fAlarmRadius ?
-                    reported=true;
-                    break;
+                    reported = true;
+                    int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
+
+                    // Tell everyone, including yourself
+                    for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
+                    { 
+                        if (*it1 == ptr) continue; // not the player
+
+                        // TODO: Add more messages
+                        if (type == OT_Theft)
+                            MWBase::Environment::get().getDialogueManager()->say(*it1, "thief");
+                        else if (type == OT_Assault)
+                            MWBase::Environment::get().getDialogueManager()->say(*it1, "attack");
+                        
+                        // Will other witnesses paticipate in crime
+                        if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm  
+                            ||  type == OT_Assault )
+                        {
+                            it1->getClass().getNpcStats(*it1).setCrimeId(id);
+                        }
+                    }
+                    break; // Someone saw the crime and everyone has been told
                 }
             }
         }
-
         if (reported)
             reportCrime(ptr, victim, type, arg);
         return reported;
@@ -838,6 +879,7 @@ namespace MWMechanics
     void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        
         // Bounty for each type of crime
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
             arg = store.find("iCrimeTresspass")->getInt();
@@ -850,31 +892,9 @@ namespace MWMechanics
         else if (type == OT_Theft)
             arg *= store.find("fCrimeStealing")->getFloat();
 
-        // TODO: In some cases (type == Assault), if no NPCs are within earshot, the report will have no effect.
-        // however other crime types seem to be always produce a bounty.
-
         MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
                                                   + arg);
-
-        if (!victim.isEmpty())
-        {
-            int fight = 0;
-            // Increase in fight rating for each type of crime
-            if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
-                fight = store.find("iFightTrespass")->getFloat();
-            else if (type == OT_Pickpocket)
-                fight = store.find("iFightPickpocket")->getInt();
-            else if (type == OT_Assault)
-                fight = store.find("iFightAttack")->getInt();
-            else if (type == OT_Murder)
-                fight = store.find("iFightKilling")->getInt();
-            else if (type == OT_Theft)
-                fight = store.find("fFightStealing")->getFloat();
-            // Not sure if this should be permanent?
-            fight = victim.getClass().getCreatureStats(victim).getAiSetting(CreatureStats::AI_Fight).getBase() + fight;
-            victim.getClass().getCreatureStats(victim).setAiSetting(CreatureStats::AI_Fight, fight);
-        }
 
         // If committing a crime against a faction member, expell from the faction
         if (!victim.isEmpty() && victim.getClass().isNpc())
@@ -887,8 +907,6 @@ namespace MWMechanics
                 ptr.getClass().getNpcStats(ptr).expell(factionID);
             }
         }
-
-        // TODO: make any guards in the area try to arrest the player
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)

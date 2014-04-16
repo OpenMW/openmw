@@ -33,6 +33,9 @@ namespace CSVRender
 
             void selectDefaultNavigationMode();
 
+            virtual void useViewHint (const std::string& hint);
+            ///< Default-implementation: ignored.
+
         private slots:
 
             void selectNavigationMode (const std::string& mode);

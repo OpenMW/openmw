@@ -385,16 +385,21 @@ public:
             if(time <= keys.front().mTime)
                 return keys.front().mValue;
 
-            Nif::QuaternionKeyList::VecType::const_iterator iter(keys.begin()+1);
-            for(;iter != keys.end();iter++)
+            const Nif::QuaternionKey* keyArray = keys.data();
+            size_t size = keys.size();
+
+            for (size_t i = 1; i < size; ++i)
             {
-                if(iter->mTime < time)
+                const Nif::QuaternionKey* aKey = &keyArray[i];
+
+                if(aKey->mTime < time)
                     continue;
 
-                Nif::QuaternionKeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue);
+                const Nif::QuaternionKey* aLastKey = &keyArray[i-1];
+                float a = (time - aLastKey->mTime) / (aKey->mTime - aLastKey->mTime);
+                return Ogre::Quaternion::nlerp(a, aLastKey->mValue, aKey->mValue);
             }
+
             return keys.back().mValue;
         }
 
