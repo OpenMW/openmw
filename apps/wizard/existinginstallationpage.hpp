@@ -2,7 +2,6 @@
 #define EXISTINGINSTALLATIONPAGE_HPP
 
 #include <QWizardPage>
-#include <QListWidgetItem>
 
 #include "ui_existinginstallationpage.h"
 
@@ -27,11 +26,7 @@ namespace Wizard
 
     private:
         MainWizard *mWizard;
-        QListWidgetItem *mEmptyItem;
 
-
-    protected:
-        void initializePage();
     };
 
 }

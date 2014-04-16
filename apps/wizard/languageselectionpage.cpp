@@ -27,5 +27,18 @@ void Wizard::LanguageSelectionPage::initializePage()
 
 int Wizard::LanguageSelectionPage::nextId() const
 {
-    return MainWizard::Page_ComponentSelection;
+    // Check if we have to install something
+    QString path(field(QLatin1String("installation.path")).toString());
+
+    if (path.isEmpty())
+        return MainWizard::Page_ComponentSelection;
+
+    if (mWizard->mInstallations[path]->hasMorrowind == true &&
+            mWizard->mInstallations[path]->hasTribunal == true &&
+            mWizard->mInstallations[path]->hasBloodmoon == true)
+    {
+        return MainWizard::Page_Import;
+    } else {
+        return MainWizard::Page_ComponentSelection;
+    }
 }

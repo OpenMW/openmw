@@ -14,36 +14,30 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(MainWizard *wizard) :
 {
     setupUi(this);
 
-    mEmptyItem = new QListWidgetItem(tr("No existing installations detected"));
-    mEmptyItem->setFlags(Qt::NoItemFlags);
-    installationsList->addItem(mEmptyItem);
-    mEmptyItem->setHidden(true);
+    QListWidgetItem *emptyItem = new QListWidgetItem(tr("No existing installations detected"));
+    emptyItem->setFlags(Qt::NoItemFlags);
+    installationsList->addItem(emptyItem);
 
-    connect(installationsList, SIGNAL(currentTextChanged(QString)),
-            this, SLOT(textChanged(QString)));
-
-    connect(installationsList,SIGNAL(itemSelectionChanged()),
-            this, SIGNAL(completeChanged()));
-}
-
-void Wizard::ExistingInstallationPage::initializePage()
-{
+    // Add the available installation paths
     QStringList paths(mWizard->mInstallations.keys());
 
+    // Hide the default item if there are installations to choose from
     if (paths.isEmpty()) {
-        mEmptyItem->setHidden(false);
-        return;
+        installationsList->item(0)->setHidden(false);
+    } else {
+        installationsList->item(0)->setHidden(true);
     }
-
-    // Make to clear list before adding items
-    // to prevent duplicates when going back and forth between pages
-    installationsList->clear();
 
     foreach (const QString &path, paths) {
         QListWidgetItem *item = new QListWidgetItem(path);
         installationsList->addItem(item);
     }
 
+    connect(installationsList, SIGNAL(currentTextChanged(QString)),
+            this, SLOT(textChanged(QString)));
+
+    connect(installationsList,SIGNAL(itemSelectionChanged()),
+            this, SIGNAL(completeChanged()));
 }
 
 bool Wizard::ExistingInstallationPage::validatePage()
@@ -119,7 +113,7 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         mWizard->addInstallation(path);
 
         // Hide the default item
-        mEmptyItem->setHidden(true);
+        installationsList->item(0)->setHidden(true);
 
         QListWidgetItem *item = new QListWidgetItem(path);
         installationsList->addItem(item);
@@ -149,17 +143,5 @@ bool Wizard::ExistingInstallationPage::isComplete() const
 
 int Wizard::ExistingInstallationPage::nextId() const
 {
-    QString path(field(QLatin1String("installation.path")).toString());
-
-    if (path.isEmpty())
-        return MainWizard::Page_LanguageSelection;
-
-    if (mWizard->mInstallations[path]->hasMorrowind == true &&
-            mWizard->mInstallations[path]->hasTribunal == true &&
-            mWizard->mInstallations[path]->hasBloodmoon == true)
-    {
-        return MainWizard::Page_Import;
-    } else {
-        return MainWizard::Page_LanguageSelection;
-    }
+    return MainWizard::Page_LanguageSelection;
 }

@@ -44,6 +44,7 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
 
     setupLog();
     setupGameSettings();
+    setupLauncherSettings();
     setupInstallations();
     setupPages();
 }
@@ -149,6 +150,40 @@ void Wizard::MainWizard::setupGameSettings()
     }
 }
 
+void Wizard::MainWizard::setupLauncherSettings()
+{
+    QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
+    path.append(QLatin1String("launcher.cfg"));
+
+    QString message(tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
+                    <p>Please make sure you have the right permissions \
+                    and try again.</p></body></html>"));
+
+
+    QFile file(path);
+
+    qDebug() << "Loading config file:" << qPrintable(path);
+
+    if (file.exists()) {
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(message.arg(file.fileName()));
+            msgBox.exec();
+            return qApp->quit();
+        }
+        QTextStream stream(&file);
+        stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+        mLauncherSettings.readFile(stream);
+    }
+
+    file.close();
+
+}
+
 void Wizard::MainWizard::setupInstallations()
 {
     // Check if the paths actually contain a Morrowind installation
@@ -211,8 +246,10 @@ void Wizard::MainWizard::runSettingsImporter()
     arguments.append(QLatin1String("--cfg"));
     arguments.append(userPath + QLatin1String("openmw.cfg"));
 
-//    if (!ProcessInvoker::startProcess(QLatin1String("mwiniimport"), arguments, false))
-//        return qApp->quit();;
+    ProcessInvoker invoker(this);
+
+    if (!invoker.startProcess(QLatin1String("mwiniimport"), arguments, false))
+        return qApp->quit();;
 
     // Re-read the game settings
     setupGameSettings();
@@ -285,6 +322,19 @@ void Wizard::MainWizard::reject()
 
 void Wizard::MainWizard::writeSettings()
 {
+    // Write the encoding and language settings
+    QString language(field(QLatin1String("installation.language")).toString());
+    mLauncherSettings.setValue(QLatin1String("Settings/language"), language);
+
+    if (language == QLatin1String("Polish")) {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1250"));
+    } else if (language == QLatin1String("Russian")) {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
+    }  else {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
+    }
+
+    // Write the installation path so that openmw can find them
     QString path(field(QLatin1String("installation.path")).toString());
 
     // Make sure the installation path is the last data= entry
@@ -328,6 +378,28 @@ void Wizard::MainWizard::writeSettings()
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
     mGameSettings.writeFile(stream);
+    file.close();
+
+    // Launcher settings
+    file.setFileName(userPath + QLatin1String("launcher.cfg"));
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+        // File cannot be opened or created
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
+                          <p>Please make sure you have the right permissions \
+                          and try again.</p></body></html>").arg(file.fileName()));
+        msgBox.exec();
+        return qApp->quit();
+    }
+
+    stream.setDevice(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+    mLauncherSettings.writeFile(stream);
     file.close();
 }
 

@@ -6,6 +6,7 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/config/gamesettings.hpp>
+#include <components/config/launchersettings.hpp>
 
 namespace Wizard
 {
@@ -53,12 +54,14 @@ namespace Wizard
 
         void setupLog();
         void setupGameSettings();
+        void setupLauncherSettings();
         void setupInstallations();
         void setupPages();
 
         void writeSettings();
 
         Config::GameSettings mGameSettings;
+        Config::LauncherSettings mLauncherSettings;
 
         QTextStream *mLog;
 
