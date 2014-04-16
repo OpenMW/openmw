@@ -31,6 +31,7 @@ namespace Launcher
     private slots:
         void on_wizardButton_clicked();
         void on_importerButton_clicked();
+        void on_browseButton_clicked();
 
         void wizardStarted();
         void wizardFinished(int exitCode, QProcess::ExitStatus exitStatus);

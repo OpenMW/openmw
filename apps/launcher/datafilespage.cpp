@@ -42,7 +42,7 @@ void Launcher::DataFilesPage::loadSettings()
 
     QString profileName = ui.profilesComboBox->currentText();
 
-    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName, Qt::MatchExactly);
+    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/content"), Qt::MatchExactly);
 
     QStringList filepaths;
 
@@ -75,7 +75,7 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
     mLauncherSettings.setValue(QString("Profiles/currentprofile"), ui.profilesComboBox->currentText());
 
     foreach(const ContentSelectorModel::EsmFile *item, items) {
-        mLauncherSettings.setMultiValue(QString("Profiles/") + profileName, item->fileName());
+        mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/content"), item->fileName());
         mGameSettings.setMultiValue(QString("content"), item->fileName());
     }
 
@@ -192,21 +192,21 @@ void Launcher::DataFilesPage::setupDataFiles()
     if (!mDataLocal.isEmpty())
         mSelector->addFiles(mDataLocal);
 
-    QStringList profiles;
+    QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
     QString currentProfile = mLauncherSettings.getSettings().value("Profiles/currentprofile");
 
-    foreach (QString key, mLauncherSettings.getSettings().keys())
-    {
-        if (key.contains("Profiles/"))
-        {
-            QString profile = key.mid (9);
-            if (profile != "currentprofile")
-            {
-                if (!profiles.contains(profile))
-                    profiles << profile;
-            }
-        }
-    }
+//    foreach (QString key, mLauncherSettings.getSettings().keys())
+//    {
+//        if (key.contains("Profiles/"))
+//        {
+//            QString profile = key.mid (9);
+//            if (profile != "currentprofile")
+//            {
+//                if (!profiles.contains(profile))
+//                    profiles << profile;
+//            }
+//        }
+//    }
 
     foreach (const QString &item, profiles)
         addProfile (item, false);

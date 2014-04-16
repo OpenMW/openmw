@@ -72,7 +72,7 @@ bool Wizard::ExistingInstallationPage::validatePage()
         QString iniFile;
         if (msgBox.clickedButton() == browseButton) {
             iniFile = QFileDialog::getOpenFileName(
-                        NULL,
+                        this,
                         QObject::tr("Select configuration file"),
                         QDir::currentPath(),
                         QString(tr("Morrowind configuration file (*.ini)")));
@@ -99,6 +99,9 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
                 QString(tr("Morrowind master file (*.esm)")),
                 NULL,
                 QFileDialog::DontResolveSymlinks);
+
+    if (selectedFile.isEmpty())
+        return;
 
     QFileInfo info(selectedFile);
 
