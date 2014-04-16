@@ -41,14 +41,20 @@ QStringList Config::LauncherSettings::subKeys(const QString &key)
     QMap<QString, QString> settings = SettingsBase::getSettings();
     QStringList keys = settings.uniqueKeys();
 
+    qDebug() << keys;
+
     QRegExp keyRe("(.+)/");
 
     QStringList result;
 
     foreach (const QString &currentKey, keys) {
-        if (keyRe.indexIn(currentKey) != -1) {
+
+        if (keyRe.indexIn(currentKey) != -1)
+        {
             QString prefixedKey = keyRe.cap(1);
-            if(prefixedKey.startsWith(key)) {
+
+            if(prefixedKey.startsWith(key))
+            {
                 QString subKey = prefixedKey.remove(key);
                 if (!subKey.isEmpty())
                     result.append(subKey);

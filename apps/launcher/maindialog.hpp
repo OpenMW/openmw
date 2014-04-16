@@ -39,6 +39,9 @@ namespace Launcher
         bool setup();
         bool showFirstRunDialog();
 
+        bool reloadSettings();
+        bool writeSettings();
+
     public slots:
         void changePage(QListWidgetItem *current, QListWidgetItem *previous);
         void play();
@@ -53,7 +56,6 @@ namespace Launcher
 
         void loadSettings();
         void saveSettings();
-        bool writeSettings();
 
         inline bool startProgram(const QString &name, bool detached = false) { return startProgram(name, QStringList(), detached); }
         bool startProgram(const QString &name, const QStringList &arguments, bool detached = false);

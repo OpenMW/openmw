@@ -3,6 +3,7 @@
 
 #include <QStringList>
 #include <QString>
+#include <QProcess>
 
 namespace Process
 {
@@ -10,13 +11,32 @@ namespace Process
     {
         Q_OBJECT
 
-        ProcessInvoker();
-        ~ProcessInvoker();
-
     public:
 
-        inline static bool startProcess(const QString &name, bool detached = false) { return startProcess(name, QStringList(), detached); }
-        bool static startProcess(const QString &name, const QStringList &arguments, bool detached = false);
+        ProcessInvoker(QWidget *parent = 0);
+        ~ProcessInvoker();
+
+//        void setProcessName(const QString &name);
+//        void setProcessArguments(const QStringList &arguments);
+
+        QProcess* getProcess();
+//        QString getProcessName();
+//        QStringList getProcessArguments();
+
+//        inline bool startProcess(bool detached = false) { return startProcess(mName, mArguments, detached); }
+        inline bool startProcess(const QString &name, bool detached = false) { return startProcess(name, QStringList(), detached); }
+        bool startProcess(const QString &name, const QStringList &arguments, bool detached = false);
+
+    private:
+        QProcess *mProcess;
+
+        QString mName;
+        QStringList mArguments;
+
+    private slots:
+        void processError(QProcess::ProcessError error);
+        void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
+
     };
 }
 

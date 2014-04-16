@@ -211,8 +211,8 @@ void Wizard::MainWizard::runSettingsImporter()
     arguments.append(QLatin1String("--cfg"));
     arguments.append(userPath + QLatin1String("openmw.cfg"));
 
-    if (!ProcessInvoker::startProcess(QLatin1String("mwiniimport"), arguments, false))
-        return qApp->quit();;
+//    if (!ProcessInvoker::startProcess(QLatin1String("mwiniimport"), arguments, false))
+//        return qApp->quit();;
 
     // Re-read the game settings
     setupGameSettings();

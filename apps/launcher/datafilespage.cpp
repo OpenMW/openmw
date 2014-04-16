@@ -1,5 +1,7 @@
 #include "datafilespage.hpp"
 
+#include <QDebug>
+
 #include <QPushButton>
 #include <QMessageBox>
 #include <QCheckBox>
@@ -221,7 +223,7 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
     if (newDialog.exec() != QDialog::Accepted)
         return;
 
-    QString profile = newDialog.getText();
+    QString profile = newDialog.lineEdit()->text();
 
     if (profile.isEmpty())
             return;

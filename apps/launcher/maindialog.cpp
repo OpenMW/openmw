@@ -12,7 +12,6 @@
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QTextCodec>
-#include <QProcess>
 #include <QFile>
 #include <QDir>
 
@@ -138,7 +137,7 @@ void Launcher::MainDialog::createPages()
     mPlayPage = new PlayPage(this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
-    mSettingsPage = new SettingsPage(this);
+    mSettingsPage = new SettingsPage(mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
     mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
@@ -285,7 +284,9 @@ bool Launcher::MainDialog::showFirstRunDialog()
         arguments.append(QString("--cfg"));
         arguments.append(path);
 
-        if (!ProcessInvoker::startProcess(QLatin1String("mwiniimport"), arguments, false))
+        ProcessInvoker invoker(this);
+
+        if (!invoker.startProcess(QLatin1String("mwiniimport"), arguments, false))
             return false;
 
         // Re-read the game settings
@@ -334,6 +335,26 @@ bool Launcher::MainDialog::setup()
         return false;
 
     loadSettings();
+    return true;
+}
+
+bool Launcher::MainDialog::reloadSettings()
+{
+    if (!setupLauncherSettings())
+        return false;
+
+    if (!setupGameSettings())
+        return false;
+
+    if (!setupGraphicsSettings())
+        return false;
+
+//    if (!mSettingsPage->loadSettings())
+//        return false;
+
+    if (!mGraphicsPage->loadSettings())
+        return false;
+
     return true;
 }
 
@@ -799,6 +820,7 @@ bool Launcher::MainDialog::writeSettings()
 
 void Launcher::MainDialog::closeEvent(QCloseEvent *event)
 {
+    qDebug() << "close event!";
     writeSettings();
     event->accept();
 }
@@ -822,6 +844,8 @@ void Launcher::MainDialog::play()
     }
 
     // Launch the game detached
-    if (ProcessInvoker::startProcess(QLatin1String("openmw"), true))
+    ProcessInvoker invoker(this);
+
+    if (invoker.startProcess(QLatin1String("openmw"), true))
         qApp->quit();
 }
