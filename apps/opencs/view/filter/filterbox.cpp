@@ -25,10 +25,6 @@ CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
         SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>)),
         this, SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
 
-    connect(this, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)),
-            mRecordFilterBox, SIGNAL(createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >&, Qt::DropAction)));
-
-    connect(this, SIGNAL(useFilterRequest(const std::string&)), mRecordFilterBox, SIGNAL(useFilterRequest(const std::string&)));
     setAcceptDrops(true);
 }
 
@@ -52,4 +48,10 @@ void CSVFilter::FilterBox::dragEnterEvent (QDragEnterEvent* event)
 void CSVFilter::FilterBox::dragMoveEvent (QDragMoveEvent* event)
 {
     event->accept();
+}
+
+void CSVFilter::FilterBox::createFilterRequest (std::vector< std::pair< std::string, std::vector< std::string > > >& filterSource,
+                                                Qt::DropAction action)
+{
+    mRecordFilterBox->createFilterRequest(filterSource, action);
 }

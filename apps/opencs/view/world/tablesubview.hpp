@@ -55,9 +55,6 @@ namespace CSVWorld
         signals:
             void cloneRequest(const std::string&,
                               const CSMWorld::UniversalId::Type);
-            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
-                                     Qt::DropAction action);
-            void useFilterRequest(const std::string& idOfFilter);
 
         private slots:
 
