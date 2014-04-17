@@ -1,6 +1,7 @@
 #ifndef MAINWIZARD_HPP
 #define MAINWIZARD_HPP
 
+#include <QProcess>
 #include <QWizard>
 #include <QMap>
 
@@ -41,7 +42,7 @@ namespace Wizard
         void addInstallation(const QString &path);
         void runSettingsImporter();
 
-        QMap<QString, Installation*> mInstallations;
+        QMap<QString, Installation> mInstallations;
 
         Files::ConfigurationManager mCfgMgr;
 
@@ -66,6 +67,10 @@ namespace Wizard
         QTextStream *mLog;
 
     private slots:
+
+        void importerStarted();
+        void importerFinished(int exitCode, QProcess::ExitStatus exitStatus);
+
         void accept();
         void reject();
 

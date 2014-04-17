@@ -246,23 +246,29 @@ void Wizard::MainWizard::runSettingsImporter()
     arguments.append(QLatin1String("--cfg"));
     arguments.append(userPath + QLatin1String("openmw.cfg"));
 
-    ProcessInvoker invoker(this);
+    ProcessInvoker *invoker = new ProcessInvoker(this);
 
-    if (!invoker.startProcess(QLatin1String("mwiniimport"), arguments, false))
+    if (!invoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
         return qApp->quit();;
 
+    connect(invoker->getProcess(), SIGNAL(started()),
+            this, SLOT(importerStarted()));
+
+    connect(invoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
+            this, SLOT(importerFinished(int,QProcess::ExitStatus)));
+
     // Re-read the game settings
-    setupGameSettings();
+    // setupGameSettings();
 }
 
 void Wizard::MainWizard::addInstallation(const QString &path)
 {
     qDebug() << "add installation in: " << path;
-    Installation* install = new Installation();
+    Installation install;// = new Installation();
 
-    install->hasMorrowind = findFiles(QLatin1String("Morrowind"), path);
-    install->hasTribunal = findFiles(QLatin1String("Tribunal"), path);
-    install->hasBloodmoon = findFiles(QLatin1String("Bloodmoon"), path);
+    install.hasMorrowind = findFiles(QLatin1String("Morrowind"), path);
+    install.hasTribunal = findFiles(QLatin1String("Tribunal"), path);
+    install.hasBloodmoon = findFiles(QLatin1String("Bloodmoon"), path);
 
     // Try to autodetect the Morrowind.ini location
     QDir dir(path);
@@ -276,7 +282,7 @@ void Wizard::MainWizard::addInstallation(const QString &path)
     }
 
     if (file.exists())
-        install->iniPath = file.fileName();
+        install.iniPath = file.fileName();
 
     mInstallations.insert(QDir::toNativeSeparators(path), install);
 
@@ -299,6 +305,21 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_Import, new ImportPage(this));
     setPage(Page_Conclusion, new ConclusionPage(this));
     setStartId(Page_Intro);
+}
+
+void Wizard::MainWizard::importerStarted()
+{
+    qDebug() << "importer started!";
+}
+
+void Wizard::MainWizard::importerFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    qDebug() << "importer finished!";
+    if (exitCode != 0 || exitStatus == QProcess::CrashExit)
+        return;
+
+    // Re-read the settings
+    setupGameSettings();
 }
 
 void Wizard::MainWizard::accept()

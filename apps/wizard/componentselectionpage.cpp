@@ -74,7 +74,7 @@ void Wizard::ComponentSelectionPage::initializePage()
         componentsList->addItem(bloodmoonItem);
     } else {
 
-        if (mWizard->mInstallations[path]->hasMorrowind) {
+        if (mWizard->mInstallations[path].hasMorrowind) {
             morrowindItem->setText(tr("Morrowind\t\t(installed)"));
             morrowindItem->setFlags(morrowindItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
             morrowindItem->setData(Qt::CheckStateRole, Qt::Unchecked);
@@ -85,7 +85,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
         componentsList->addItem(morrowindItem);
 
-        if (mWizard->mInstallations[path]->hasTribunal) {
+        if (mWizard->mInstallations[path].hasTribunal) {
             tribunalItem->setText(tr("Tribunal\t\t(installed)"));
             tribunalItem->setFlags(tribunalItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
             tribunalItem->setData(Qt::CheckStateRole, Qt::Unchecked);
@@ -96,7 +96,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
         componentsList->addItem(tribunalItem);
 
-        if (mWizard->mInstallations[path]->hasBloodmoon) {
+        if (mWizard->mInstallations[path].hasBloodmoon) {
             bloodmoonItem->setText(tr("Bloodmoon\t\t(installed)"));
             bloodmoonItem->setFlags(bloodmoonItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
             bloodmoonItem->setData(Qt::CheckStateRole, Qt::Unchecked);
@@ -114,12 +114,12 @@ bool Wizard::ComponentSelectionPage::validatePage()
     QStringList components(field(QLatin1String("installation.components")).toStringList());
     QString path(field(QLatin1String("installation.path")).toString());
 
-    qDebug() << components << path << mWizard->mInstallations[path];
+//    qDebug() << components << path << mWizard->mInstallations[path];
 
     if (field(QLatin1String("installation.new")).toBool() == false) {
         if (components.contains(QLatin1String("Tribunal")) && !components.contains(QLatin1String("Bloodmoon")))
         {
-            if (mWizard->mInstallations[path]->hasBloodmoon)
+            if (mWizard->mInstallations[path].hasBloodmoon)
             {
                 QMessageBox msgBox;
                 msgBox.setWindowTitle(tr("About to install Tribunal after Bloodmoon"));
@@ -136,7 +136,7 @@ bool Wizard::ComponentSelectionPage::validatePage()
 
                 if (msgBox.clickedButton() == reinstallButton) {
                     // Force reinstallation
-                    mWizard->mInstallations[path]->hasBloodmoon = false;
+                    mWizard->mInstallations[path].hasBloodmoon = false;
                     QList<QListWidgetItem*> items = componentsList->findItems(QLatin1String("Bloodmoon"), Qt::MatchStartsWith);
 
                     foreach (QListWidgetItem *item, items) {

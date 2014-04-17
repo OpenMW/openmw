@@ -36,11 +36,11 @@ void Wizard::InstallationPage::initializePage()
         installProgressBar->setMaximum((components.count() * 100));
     } else {
         if (components.contains(QLatin1String("Tribunal"))
-                && !mWizard->mInstallations[path]->hasTribunal)
+                && !mWizard->mInstallations[path].hasTribunal)
             installProgressBar->setMaximum(100);
 
         if (components.contains(QLatin1String("Bloodmoon"))
-                && !mWizard->mInstallations[path]->hasBloodmoon)
+                && !mWizard->mInstallations[path].hasBloodmoon)
             installProgressBar->setMaximum(installProgressBar->maximum() + 100);
     }
 
@@ -104,15 +104,15 @@ void Wizard::InstallationPage::startInstallation()
         mUnshield->setInstallComponent(Wizard::Component_Morrowind, false);
 
         if (components.contains(QLatin1String("Tribunal"))
-                && !mWizard->mInstallations[path]->hasTribunal)
+                && !mWizard->mInstallations[path].hasTribunal)
             mUnshield->setInstallComponent(Wizard::Component_Tribunal, true);
 
         if (components.contains(QLatin1String("Bloodmoon"))
-                && !mWizard->mInstallations[path]->hasBloodmoon)
+                && !mWizard->mInstallations[path].hasBloodmoon)
             mUnshield->setInstallComponent(Wizard::Component_Bloodmoon, true);
 
         // Set the location of the Morrowind.ini to update
-        mUnshield->setIniPath(mWizard->mInstallations[path]->iniPath);
+        mUnshield->setIniPath(mWizard->mInstallations[path].iniPath);
         mUnshield->setupSettings();
     }
 

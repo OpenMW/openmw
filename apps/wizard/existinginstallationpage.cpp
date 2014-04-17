@@ -47,7 +47,7 @@ bool Wizard::ExistingInstallationPage::validatePage()
     // Or failed to be detected due to the target being a symlink
 
     QString path(field(QLatin1String("installation.path")).toString());
-    QFile file(mWizard->mInstallations[path]->iniPath);
+    QFile file(mWizard->mInstallations[path].iniPath);
 
     if (!file.exists()) {
         QMessageBox msgBox;
@@ -78,7 +78,7 @@ bool Wizard::ExistingInstallationPage::validatePage()
 
         // A proper Morrowind.ini was selected, set it
         QFileInfo info(iniFile);
-        mWizard->mInstallations[path]->iniPath = info.absoluteFilePath();
+        mWizard->mInstallations[path].iniPath = info.absoluteFilePath();
     }
 
     return true;
