@@ -222,7 +222,7 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
 
 void Launcher::SettingsPage::updateOkButton(const QString &text)
 {
-    // We do this here because we need the profiles combobox text
+    // We do this here because we need to access the profiles
     if (text.isEmpty()) {
          mProfileDialog->setOkButtonEnabled(false);
          return;

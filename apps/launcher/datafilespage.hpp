@@ -55,12 +55,14 @@ namespace Launcher
         void slotProfileRenamed(const QString &previous, const QString &current);
         void slotProfileDeleted(const QString &item);
 
+        void updateOkButton(const QString &text);
+
         void on_newProfileAction_triggered();
         void on_deleteProfileAction_triggered();
 
     private:
 
-        QMenu *mContextMenu;
+        TextInputDialog *mProfileDialog;
 
         Files::ConfigurationManager &mCfgMgr;
 

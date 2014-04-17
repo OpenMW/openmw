@@ -30,6 +30,11 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     setObjectName ("DataFilesPage");
     mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
 
+    mProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
+
+    connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
+            this, SLOT(updateOkButton(QString)));
+
     buildView();
     setupDataFiles();
 }
@@ -212,15 +217,13 @@ void Launcher::DataFilesPage::slotProfileChanged(int index)
 
 void Launcher::DataFilesPage::on_newProfileAction_triggered()
 {
-    TextInputDialog newDialog (tr("New Profile"), tr("Profile name:"), this);
-
-    if (newDialog.exec() != QDialog::Accepted)
+    if (!mProfileDialog->exec() == QDialog::Accepted)
         return;
 
-    QString profile = newDialog.lineEdit()->text();
+    QString profile = mProfileDialog->lineEdit()->text();
 
     if (profile.isEmpty())
-            return;
+        return;
 
     saveSettings();
 
@@ -269,6 +272,19 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
     loadSettings();
 
     checkForDefaultProfile();
+}
+
+void Launcher::DataFilesPage::updateOkButton(const QString &text)
+{
+    // We do this here because we need the profiles combobox text
+    if (text.isEmpty()) {
+         mProfileDialog->setOkButtonEnabled(false);
+         return;
+    }
+
+    (ui.profilesComboBox->findText(text) == -1)
+            ? mProfileDialog->setOkButtonEnabled(true)
+            : mProfileDialog->setOkButtonEnabled(false);
 }
 
 void Launcher::DataFilesPage::checkForDefaultProfile()
