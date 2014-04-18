@@ -763,6 +763,7 @@ namespace MWMechanics
                     // TODO: Not a complete list, disposition changes?
                     creatureStats.setHostile(false);
                     creatureStats.setAttacked(false);
+                    creatureStats.setAlarmed(false);
                     
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
