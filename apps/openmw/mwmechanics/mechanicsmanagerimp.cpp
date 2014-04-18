@@ -866,6 +866,9 @@ namespace MWMechanics
                         {
                             it1->getClass().getNpcStats(*it1).setCrimeId(id);
                         }
+
+                        // Mark as Alarmed for dialogue
+                        it1->getClass().getCreatureStats(*it1).setAlarmed(true);
                     }
                     break; // Someone saw the crime and everyone has been told
                 }
