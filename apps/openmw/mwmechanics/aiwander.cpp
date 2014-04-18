@@ -112,11 +112,13 @@ namespace MWMechanics
      * allowed set.  The issue is when the door opens the allowed set is not
      * re-calculated.  Normally this would not be an issue since hostile actors will
      * enter combat (i.e. no longer wandering)
-     *
-     * FIXME: Sometimes allowed nodes that shouldn't be deleted are deleted.
      */
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
+        MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
+        if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
+            return true; // Don't bother with dead actors
+
         bool cellChange = mCell && (actor.getCell() != mCell);
         if(!mCell || cellChange)
         {
@@ -125,7 +127,6 @@ namespace MWMechanics
         }
         const ESM::Cell *cell = mCell->getCell();
 
-        MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         cStats.setDrawState(DrawState_Nothing);
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -188,45 +189,56 @@ namespace MWMechanics
                     mYCell = mCellY * ESM::Land::REAL_SIZE;
                 }
 
-                // convert actorPos to local (i.e. cell) co-ordinates
-                Ogre::Vector3 actorPos(pos.pos);
-                actorPos[0] = actorPos[0] - mXCell;
-                actorPos[1] = actorPos[1] - mYCell;
+                // FIXME: There might be a bug here.  The allowed node points are
+                // based on the actor's current position rather than the actor's
+                // spawn point.  As a result the allowed nodes for wander can change
+                // between saves, for example.
+                //
+                // convert npcPos to local (i.e. cell) co-ordinates
+                Ogre::Vector3 npcPos(pos.pos);
+                npcPos[0] = npcPos[0] - mXCell;
+                npcPos[1] = npcPos[1] - mYCell;
 
-                // mAllowedNodes for this actor with pathgrid point indexes
-                // based on mDistance
+                // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
                 // NOTE: mPoints and mAllowedNodes are in local co-ordinates
-                float closestNodeDist = -1;
-                unsigned int closestIndex = 0;
-                unsigned int indexAllowedNodes = 0;
                 for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
                 {
-                    float sqrDist = actorPos.squaredDistance(Ogre::Vector3(
-                                                             pathgrid->mPoints[counter].mX,
-                                                             pathgrid->mPoints[counter].mY,
-                                                             pathgrid->mPoints[counter].mZ));
-                    if(sqrDist <= (mDistance * mDistance))
-                    {
+                    Ogre::Vector3 nodePos(pathgrid->mPoints[counter].mX, pathgrid->mPoints[counter].mY,
+                        pathgrid->mPoints[counter].mZ);
+                    if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
                         mAllowedNodes.push_back(pathgrid->mPoints[counter]);
-                        // keep track of the closest node
-                        if(closestNodeDist == -1 || sqrDist < closestNodeDist)
-                        {
-                            closestNodeDist = sqrDist;
-                            closestIndex = indexAllowedNodes;
-                        }
-                        indexAllowedNodes++;
-                    }
                 }
                 if(!mAllowedNodes.empty())
                 {
-                    // Start with the closest node and remove it from the allowed set
-                    // so that it does not get selected again.  The removed node will
-                    // later be put in the back of the queue, unless it gets removed
-                    // due to inaccessibility (e.g. a closed door)
-                    mCurrentNode = mAllowedNodes[closestIndex];
-                    mAllowedNodes.erase(mAllowedNodes.begin() + closestIndex);
-                    // set only if successful in finding allowed nodes
-                    mStoredAvailableNodes = true;
+                    Ogre::Vector3 firstNodePos(mAllowedNodes[0].mX, mAllowedNodes[0].mY, mAllowedNodes[0].mZ);
+                    float closestNode = npcPos.squaredDistance(firstNodePos);
+                    unsigned int index = 0;
+                    for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
+                    {
+                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
+                            mAllowedNodes[counterThree].mZ);
+                        float tempDist = npcPos.squaredDistance(nodePos);
+                        if(tempDist < closestNode)
+                            index = counterThree;
+                    }
+#if 0
+                    if(actor.getClass().getName(actor) == "Rat")
+                    {
+                        std::cout << "rat allowed "<< std::to_string(mAllowedNodes.size())
+                            +" mDist "+std::to_string(mDistance)
+                            +" pos "+std::to_string(static_cast<int>(npcPos[0]))
+                            +", "+std::to_string(static_cast<int>(npcPos[1]))
+                            <<std::endl;
+                        for(int i=0; i<mAllowedNodes.size(); i++)
+                            std::cout <<"rat "+std::to_string(mAllowedNodes[i].mX)
+                                +", "+std::to_string(mAllowedNodes[i].mY)<<std::endl;
+                    }
+#endif
+                    mCurrentNode = mAllowedNodes[index];
+
+                    mAllowedNodes.erase(mAllowedNodes.begin() + index);
+
+                    mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
                 }
             }
         }
@@ -398,10 +410,14 @@ namespace MWMechanics
                     if(mTrimCurrentNode && mAllowedNodes.size() > 1)
                     {
                         mTrimCurrentNode = false;
-#if 0
+//#if 0
                         std::cout << "deleted "<< std::to_string(mCurrentNode.mX)
                             +", "+std::to_string(mCurrentNode.mY) << std::endl;
-#endif
+//#endif
+//#if 0
+                        std::cout << "allowed size "<<
+                            std::to_string(mAllowedNodes.size()) << std::endl;
+//#endif
                     }
                     else
                         mAllowedNodes.push_back(mCurrentNode);
@@ -412,7 +428,15 @@ namespace MWMechanics
                 }
                 // Choose a different node and delete this one from possible nodes because it is uncreachable:
                 else
+                {
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
+//#if 0
+                    //std::cout << "actor \""<< actor.getClass().getName(actor) << "\"" << std::endl;
+                    if(actor.getClass().getName(actor) == "Rat")
+                        std::cout << "erase no path "<< std::to_string(mAllowedNodes[randNode].mX)
+                            +", "+std::to_string(mAllowedNodes[randNode].mY) << std::endl;
+//#endif
+                }
             }
         }
 
@@ -477,9 +501,6 @@ namespace MWMechanics
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
                                     const PathFinder& pathfinder)
     {
-//#if 0
-        std::cout << "allowed size "<< std::to_string(nodes.size()) << std::endl;
-//#endif
         // TODO: how to add these back in once the door opens?
         std::list<ESM::Pathgrid::Point> paths = pathfinder.getPath();
         while(paths.size() >= 2)

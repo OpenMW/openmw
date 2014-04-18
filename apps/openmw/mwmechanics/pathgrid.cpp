@@ -206,6 +206,20 @@ namespace MWMechanics
             if(mSCCPoint[v].first == -1) // undefined (haven't visited)
                 recursiveStrongConnect(v);
         }
+//#if 0
+        // for debugging only
+        if(mCell->mName == "Gnisis, Arvs-Drelen")
+        for(unsigned int v = 0; v < mPathgrid->mPoints.size(); v++)
+        {
+            std::cout << "SCC \"X:" <<
+                          std::to_string(mPathgrid->mPoints[v].mX)
+                          +", Y:"+std::to_string(mPathgrid->mPoints[v].mY)
+                          +", Num:"+std::to_string(mSCCId)
+                          +", Point:"+std::to_string(v)
+                          +", Group:"+std::to_string(mGraph[v].componentId)
+                          <<"\""<<std::endl;
+        }
+//#endif
     }
 
     bool PathgridGraph::isPointConnected(const int start, const int end) const
