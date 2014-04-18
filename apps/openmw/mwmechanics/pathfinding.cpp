@@ -100,8 +100,11 @@ namespace
                 }
             }
         }
-        if(start == closestReachableIndex)
-            closestReachableIndex = -1; // couldn't find anyting other than start
+        // AiWander has logic that depends on whether a path was created, deleting
+        // allowed nodes if not.  Hence a path needs to be created even if the start
+        // and the end points are the same.
+        //if(start == closestReachableIndex)
+            //closestReachableIndex = -1; // couldn't find anyting other than start
 
         return std::pair<int, bool>
             (closestReachableIndex, closestReachableIndex == closestIndex);
@@ -224,6 +227,18 @@ namespace MWMechanics
             // this shouldn't really happen, but just in case
             if(endNode.first != -1)
             {
+                // AiWander has logic that depends on whether a path was created,
+                // deleting allowed nodes if not.  Hence a path needs to be created
+                // even if the start and the end points are the same.
+                // NOTE: aStarSearch will return an empty path if the start and end
+                //       nodes are the same
+                if(startNode == endNode.first)
+                {
+                    mPath.push_back(endPoint);
+                    mIsPathConstructed = true;
+                    return;
+                }
+
                 mPath = mCell->aStarSearch(startNode, endNode.first);
 
                 if(!mPath.empty())
