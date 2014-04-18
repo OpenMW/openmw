@@ -471,7 +471,7 @@ namespace MWMechanics
         while(paths.size() >= 2)
         {
             ESM::Pathgrid::Point pt = paths.back();
-            for(int j = 0; j < nodes.size(); j++)
+            for(unsigned int j = 0; j < nodes.size(); j++)
             {
                 // FIXME: doesn't hadle a door with the same X/Y
                 //        co-ordinates but with a different Z
