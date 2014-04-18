@@ -44,16 +44,7 @@ namespace MWMechanics
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
             if(pos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr &&
                ref.mData.getLocalRotation().rot[2] == (closed ? 0 : 1))
-            {
-//#if 0
-                std::cout << "\""+actor.getClass().getName(actor)+"\" "
-                    <<"next to door "+ref.mRef.mRefID
-                    //+", enabled? "+std::to_string(ref.mData.isEnabled())
-                    +", dist "+std::to_string(sqrt(pos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos))))
-                    << std::endl;
-//#endif
                 return true; // found, stop searching
-            }
         }
         return false; // none found
     }
@@ -158,12 +149,6 @@ namespace MWMechanics
                     return true;
                 else
                 {
-//#if 0
-                    std::cout << "evade \""+actor.getClass().getName(actor)+"\" "
-                        //<<"dist spot "+std::to_string(mDistSameSpot)
-                        //+", speed "+std::to_string(cls.getSpeed(actor))
-                        << std::endl;
-//#endif
                     // tried to evade, assume all is ok and start again
                     mWalkState = State_Norm;
                     mEvadeDuration = 0;

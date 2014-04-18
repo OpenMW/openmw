@@ -47,7 +47,6 @@ namespace MWMechanics
 
         mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
         mPlayedIdle = 0;
-        //mPathgrid = NULL;
         mIdleChanceMultiplier =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
 
@@ -104,14 +103,15 @@ namespace MWMechanics
      * TODO: non-time critical operations should be run once every 250ms or so.
      *
      * TODO: It would be great if door opening/closing can be detected and pathgrid
-     * links dynamically updated.  Currently (0.29.0) AiWander allows destination
-     * beyond closed doors which sometimes makes the actors stuck at the door and
-     * impossible for the player to open the door.
+     * links dynamically updated.  Currently (0.29.0) AiWander allows choosing a
+     * destination beyond closed doors which sometimes makes the actors stuck at the
+     * door and impossible for the player to open the door.
      *
      * For now detect being stuck at the door and simply delete the nodes from the
      * allowed set.  The issue is when the door opens the allowed set is not
-     * re-calculated.  Normally this would not be an issue since hostile actors will
-     * enter combat (i.e. no longer wandering)
+     * re-calculated.  However this would not be an issue in most cases since hostile
+     * actors will enter combat (i.e. no longer wandering) and different pathfinding
+     * will kick in.
      */
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
@@ -473,8 +473,8 @@ namespace MWMechanics
             ESM::Pathgrid::Point pt = paths.back();
             for(int j = 0; j < nodes.size(); j++)
             {
-                // NOTE: doesn't hadle a door with the same X/Y
-                //       coordinates but with a different Z
+                // FIXME: doesn't hadle a door with the same X/Y
+                //        co-ordinates but with a different Z
                 if(nodes[j].mX == pt.mX && nodes[j].mY == pt.mY)
                 {
                     nodes.erase(nodes.begin() + j);

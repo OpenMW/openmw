@@ -65,13 +65,10 @@ namespace MWMechanics
                                   const PathFinder& pathfinder);
 
             PathFinder mPathFinder;
-            //const ESM::Pathgrid *mPathgrid;
 
             ObstacleCheck mObstacleCheck;
             float mDoorCheckDuration;
             int mStuckCount;
-
-            //float mReaction;
     };
 }
 

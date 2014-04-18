@@ -231,7 +231,7 @@ namespace MWMechanics
                 // deleting allowed nodes if not.  Hence a path needs to be created
                 // even if the start and the end points are the same.
                 // NOTE: aStarSearch will return an empty path if the start and end
-                // nodes are the same
+                //       nodes are the same
                 if(startNode == endNode.first)
                 {
                     mPath.push_back(endPoint);
