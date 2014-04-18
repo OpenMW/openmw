@@ -83,8 +83,7 @@ namespace MWMechanics
      *
      * New high level states.  Not exactly as per vanilla (e.g. door stuff)
      * but the differences are required because our physics does not work like
-     * vanilla and therefore have to compensate/work around. Note also many of
-     * the actions now have reaction times.
+     * vanilla and therefore have to compensate/work around.
      *
      *                         [select node,     [if stuck evade
      *                          build path]       or remove nodes if near door]
@@ -467,6 +466,10 @@ namespace MWMechanics
                                     const PathFinder& pathfinder)
     {
         // TODO: how to add these back in once the door opens?
+        // Idea: keep a list of detected closed doors (see aicombat.cpp)
+        // Every now and then check whether one of the doors is opened. (maybe
+        // at the end of playing idle?) If the door is opened then re-calculate
+        // allowed nodes starting from the spawn point.
         std::list<ESM::Pathgrid::Point> paths = pathfinder.getPath();
         while(paths.size() >= 2)
         {

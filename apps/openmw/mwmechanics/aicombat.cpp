@@ -35,6 +35,9 @@ namespace
 
 namespace MWMechanics
 {
+    static const float DOOR_CHECK_INTERVAL = 1.5f;
+    // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
+
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
         mTarget(actor),
         mTimerAttack(0),
@@ -44,12 +47,104 @@ namespace MWMechanics
         mReadyToAttack(false),
         mStrike(false),
         mCombatMove(false),
+        mBackOffDoor(false),
         mRotate(false),
         mMovement(),
+        mDoorIter(actor.getCell()->get<ESM::Door>().mList.end()),
+        mDoors(actor.getCell()->get<ESM::Door>().mList),
+        mDoorCheckDuration(0),
         mTargetAngle(0)
     {
     }
 
+    /*
+     * The 'pursuit' part of AiCombat now has some memory to allow backtracking.
+     * The intention is to allow actors to detect being 'stuck' somewhere, whether
+     * in a river or facing a door, to go back to a known 'good' position.
+     *
+     * Each actor goes through these states of movement once alerted and an AiCombat
+     * package is queued (FIXME: below is a DRAFT proposal only):
+     *
+     * - Maybe remember the starting position so that the actor can return if
+     *   lose sight of the target? Last Known Target Location Tracking - keep track
+     *   of target positions every sec, paired with actor's location at the time
+     *
+     * - Get to the target if far away (need path finding), how close depends on
+     *   the current best (selected?) weapon. As the actor moves, some breadcrumb
+     *   is left (e.g. every second store a position in a FIFO) so that the actor
+     *   can back track if necessary.
+     *
+     * - If the actor gets stuck (need a way of detecting this) then decide what
+     *   to do next.  For example, if next to a door then maybe back track one or
+     *   two positions and check LOS of the target every x frames (reaction time?).
+     *   Or maybe back track then look for a new path.
+     *
+     * - Once in weapon range, may need a strategy to get to the target for a
+     *   strike (maybe there are others nearby attacking the same target).
+     *
+     *
+     * Current AiCombat movement states (as of 0.29.0), ignoring the details of the
+     * attack states such as CombatMove, Strike and ReadyToAttack:
+     *
+     *    +-----(within strike range)----->attack--(beyond strike range)-->follow
+     *    |                                  | ^                            | |
+     *    |                                  | |                            | |
+     *  pursue<----(beyond follow range)-----+ +----(within strike range)---+ |
+     *    ^                                                                   |
+     *    |                                                                   |
+     *    +--------------------------(beyond follow range)--------------------+
+     *
+     *
+     * Below diagram is high level only, FIXME: code detail may be different:
+     *
+     *    +-----------(same)-------------->attack---------(same)---------->follow
+     *    |                                  |^^                            | |
+     *    |                                  |||                            | |
+     *    |        +--(same)-----------------+|+----------(same)------------+ |
+     *    |        |                          | in range                      |
+     *    |        |          too far         |                               |
+     *    |        |    +---------------got hit or LOS<---+                   |
+     *    |   <----+    |                                 |                   |
+     *  pursue<---------+                  door           |                   |
+     *    ^^  <--> maybe stuck, check --------------> back up and wait        |
+     *    ||             |   ^    |                     |   ^      |          |
+     *    ||             |   |    | stuck               |   |      | waited   |
+     *    ||             +---+    |                     +---+      | too long |
+     *    ||  backtrack           |                                |          |
+     *    |+----------------------+           go back? <-----------+          |
+     *    |                                                                   |
+     *    +----------------------------(same)---------------------------------+
+     *
+     * FIXME:
+     *
+     * The new scheme is way too complicated, should really be implemented as a
+     * proper state machine.
+     *
+     * TODO:
+     *
+     * Use the Observer Pattern to co-ordinate attacks, provide intelligence on
+     * whether the target was hit, etc.
+     *
+     * TODO:
+     *
+     * Auto-generate large cubes or squares as a poor-man's navmesh?  Many
+     * external cells do not have any pathgrids, and certainly none for flying
+     * or swimming.
+     *
+     *
+     * Called from: (check Doxygen as this comment could be out of date)
+     *
+     * OMW::Engine::go()                       |
+     * Ogre::Root::renderOneFrame()            |
+     * Ogre::Root::...                         | ... detail omitted
+     * Ogre::Root::fireFrameRenderingQueued()  |
+     * OMW::Engine::frameRenderingQueued()     | virtual Ogre::FrameListener
+     * MWMechanics::MechanicsManager::update() |
+     * MWMechanics::Actors::update()           |
+     * MWMechanics::Actors::updateActor()      |
+     * MWMechanics::AiSequence::execute()      | from priority queue mPackages
+     * MWMechanics::AiCombat::execute()        | virtual MWMechanics::AiPackage
+     */
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
@@ -168,6 +263,43 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
 
+        /*
+         * Some notes on meanings of variables:
+         *
+         * rangeMelee:
+         *
+         *  - Distance where attack using the actor's weapon is possible
+         *  - longer for ranged weapons (obviously?) vs. melee weapons
+         *  - Once within this distance mFollowTarget is triggered
+         *    (TODO: check whether the follow logic still works for ranged
+         *    weapons, since rangeCloseup is set to zero)
+         *  - TODO: The variable name is confusing.  It was ok when AiCombat only
+         *    had melee weapons but now that ranged weapons are supported that is
+         *    no longer the case.  It should really be renamed to something
+         *    like rangeStrike - alternatively, keep this name for melee
+         *    weapons and use a different variable for tracking ranged weapon
+         *    distance (rangeRanged maybe?)
+         *
+         * rangeCloseup:
+         *
+         *  - Applies to melee weapons or hand to hand only (or creatures without
+         *    weapons)
+         *  - Distance a little further away from the actor's weapon strike
+         *    i.e. rangeCloseup > rangeMelee for melee weapons
+         *    (the variable names make this simple concept counter-intuitive,
+         *    something like rangeMelee > rangeStrike may be better)
+         *  - Once the target gets beyond this distance mFollowTarget is cleared
+         *    and a path to the target needs to be found
+         *  - TODO: Possibly rename this variable to rangeMelee or even rangeFollow
+         *
+         * mFollowTarget:
+         *
+         *  - Once triggered, the actor follows the target with LOS shortcut
+         *    (the shortcut really only applies to cells where pathgrids are
+         *    available, since the default path without pathgrids is direct to
+         *    target even if LOS is not achieved)
+         *
+         */
         float rangeMelee;
         float rangeCloseUp;
         bool distantCombat = false;
@@ -189,6 +321,7 @@ namespace MWMechanics
         Ogre::Vector3 vDir = vDest - vStart;
         float distBetween = vDir.length();
 
+        // (within strike dist) || (not quite strike dist while following)
         if(distBetween < rangeMelee || (distBetween <= rangeCloseUp && mFollowTarget) )
         {
             //Melee and Close-up combat
@@ -198,12 +331,13 @@ namespace MWMechanics
             mRotate = true;
 
             //bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
+            // (not quite strike dist while following)
             if (mFollowTarget && distBetween > rangeMelee)
             {
                 //Close-up combat: just run up on target
                 mMovement.mPosition[1] = 1;
             }
-            else
+            else // (within strike dist)
             {
                 //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
@@ -240,7 +374,7 @@ namespace MWMechanics
         }
         else
         {
-            //target is at far distance: build path to target OR follow target (if previously actor had reached it once)
+            //target is at far distance: build path to target
             mFollowTarget = false;
 
             buildNewPath(actor); //may fail to build a path, check before use
@@ -261,6 +395,55 @@ namespace MWMechanics
 
             mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
+
+            // remember that this section gets updated every tReaction, which is
+            // currently hard coded at 250ms or 1/4 second
+            if(mObstacleCheck.check(actor, tReaction)) // true if evasive action needed
+            {
+                std::cout<<"found obstacle"<<std::endl;
+                // first check if we're walking into a door
+                bool foundClosedDoor = false;
+                MWWorld::CellStore *cell = actor.getCell();
+                if(!cell->getCell()->isExterior())
+                {
+                    // Check all the doors in this cell
+                    mDoors = cell->get<ESM::Door>().mList; // update list member
+                    mDoorIter = mDoors.begin();
+                    Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
+                    for (; mDoorIter != mDoors.end(); ++mDoorIter)
+                    {
+                        MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
+                        if(actorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < 1.3*1.3*MIN_DIST_TO_DOOR_SQUARED &&
+                           ref.mData.getLocalRotation().rot[2] == 0)
+                        {
+                            std::cout<<"closed door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
+                            foundClosedDoor = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(foundClosedDoor)
+                {
+                    mBackOffDoor = true;
+                    mObstacleCheck.clear();
+                    if(mFollowTarget) // FIXME: probably not needed
+                    {
+                        std::cout<<"follow door"<<std::endl;
+                        mFollowTarget = false;
+                    }
+                }
+                else // probably walking into another NPC
+                {
+                    // TODO: diagonal should have same animation as walk forward
+                    //       but doesn't seem to do that?
+                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+                    // change the angle a bit, too
+                    if(mPathFinder.isPathConstructed())
+                        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                }
+            }
         }
 
         if(distBetween > rangeMelee)
@@ -290,6 +473,28 @@ namespace MWMechanics
                         mStrike = true;
                     }
                 }
+            }
+        }
+
+        MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
+        Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
+        if(mBackOffDoor &&
+           actorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < 1.5*1.5*MIN_DIST_TO_DOOR_SQUARED)
+        {
+            mMovement.mPosition[1] = -0.2; // back off, but slowly
+            if(mDoorIter != mDoors.end() && ref.mData.getLocalRotation().rot[2] >= 1) // open
+            {
+                mDoorIter = mDoors.end();
+                mBackOffDoor = false;
+                std::cout<<"open door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
+            }
+        }
+        else
+        {
+            if(mReadyToAttack && !mBackOffDoor)
+            {
+                std::cout<<"ready to attack, move forward"<<std::endl;
+                mMovement.mPosition[1] = 1;  // FIXME: oscillates?
             }
         }
 

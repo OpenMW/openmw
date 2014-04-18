@@ -6,6 +6,9 @@
 #include "pathfinding.hpp"
 
 #include "movement.hpp"
+#include "obstacle.hpp"
+
+#include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
 
@@ -40,13 +43,20 @@ namespace MWMechanics
             // used every frame when mRotate is true
             float mTargetAngle;
 
+            // AiCombat states
             bool mReadyToAttack, mStrike;
             bool mFollowTarget;
             bool mCombatMove;
+            bool mBackOffDoor;
             bool mRotate;
 
             MWMechanics::Movement mMovement;
             MWWorld::Ptr mTarget;
+
+            ObstacleCheck mObstacleCheck;
+            float mDoorCheckDuration;
+            MWWorld::CellRefList<ESM::Door>::List::iterator mDoorIter;
+            MWWorld::CellRefList<ESM::Door>::List& mDoors;
 
             void buildNewPath(const MWWorld::Ptr& actor);
     };
