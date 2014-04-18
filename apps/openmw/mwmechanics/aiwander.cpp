@@ -221,21 +221,7 @@ namespace MWMechanics
                         if(tempDist < closestNode)
                             index = counterThree;
                     }
-#if 0
-                    if(actor.getClass().getName(actor) == "Rat")
-                    {
-                        std::cout << "rat allowed "<< std::to_string(mAllowedNodes.size())
-                            +" mDist "+std::to_string(mDistance)
-                            +" pos "+std::to_string(static_cast<int>(npcPos[0]))
-                            +", "+std::to_string(static_cast<int>(npcPos[1]))
-                            <<std::endl;
-                        for(int i=0; i<mAllowedNodes.size(); i++)
-                            std::cout <<"rat "+std::to_string(mAllowedNodes[i].mX)
-                                +", "+std::to_string(mAllowedNodes[i].mY)<<std::endl;
-                    }
-#endif
                     mCurrentNode = mAllowedNodes[index];
-
                     mAllowedNodes.erase(mAllowedNodes.begin() + index);
 
                     mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
@@ -310,9 +296,6 @@ namespace MWMechanics
                 mIdleNow = false;
                 mMoveNow = true;
                 mTrimCurrentNode = false; // just in case
-//#if 0
-                std::cout << "idle door \""+actor.getClass().getName(actor)+"\" "<< std::endl;
-//#endif
             }
         }
 
@@ -408,17 +391,7 @@ namespace MWMechanics
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
                     // check if mCurrentNode was taken out of mAllowedNodes
                     if(mTrimCurrentNode && mAllowedNodes.size() > 1)
-                    {
                         mTrimCurrentNode = false;
-//#if 0
-                        std::cout << "deleted "<< std::to_string(mCurrentNode.mX)
-                            +", "+std::to_string(mCurrentNode.mY) << std::endl;
-//#endif
-//#if 0
-                        std::cout << "allowed size "<<
-                            std::to_string(mAllowedNodes.size()) << std::endl;
-//#endif
-                    }
                     else
                         mAllowedNodes.push_back(mCurrentNode);
                     mCurrentNode = temp;
@@ -428,15 +401,7 @@ namespace MWMechanics
                 }
                 // Choose a different node and delete this one from possible nodes because it is uncreachable:
                 else
-                {
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
-//#if 0
-                    //std::cout << "actor \""<< actor.getClass().getName(actor) << "\"" << std::endl;
-                    if(actor.getClass().getName(actor) == "Rat")
-                        std::cout << "erase no path "<< std::to_string(mAllowedNodes[randNode].mX)
-                            +", "+std::to_string(mAllowedNodes[randNode].mY) << std::endl;
-//#endif
-                }
             }
         }
 
@@ -506,11 +471,6 @@ namespace MWMechanics
         while(paths.size() >= 2)
         {
             ESM::Pathgrid::Point pt = paths.back();
-#if 0
-            std::cout << "looking for "<<
-                "pt "+std::to_string(pt.mX)+", "+std::to_string(pt.mY)
-                <<std::endl;
-#endif
             for(int j = 0; j < nodes.size(); j++)
             {
                 // NOTE: doesn't hadle a door with the same X/Y
@@ -518,11 +478,6 @@ namespace MWMechanics
                 if(nodes[j].mX == pt.mX && nodes[j].mY == pt.mY)
                 {
                     nodes.erase(nodes.begin() + j);
-//#if 0
-                    std::cout << "deleted "<<
-                        "pt "+std::to_string(pt.mX)+", "+std::to_string(pt.mY)
-                        <<std::endl;
-//#endif
                     break;
                 }
             }

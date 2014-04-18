@@ -258,32 +258,9 @@ namespace MWMechanics
                 }
                 else
                     mIsPathConstructed = false;
-#if 0
-                {
-                    mIsPathConstructed = false;
-                    std::cout << "no path "<<
-                        std::to_string(startPoint.mX-xCell)
-                        +", "+std::to_string(startPoint.mY-yCell)
-                        +", "+std::to_string(startNode)
-                        +", "+std::to_string(endPoint.mX-xCell)
-                        +", "+std::to_string(endPoint.mY-yCell)
-                        +", "+std::to_string(endNode.first)<<std::endl;
-                }
-#endif
             }
             else
                 mIsPathConstructed = false;
-#if 0
-            {
-                mIsPathConstructed = false;
-                std::cout << "no end "<<
-                    std::to_string(startPoint.mX-xCell)
-                    +", "+std::to_string(startPoint.mY-yCell)
-                    +", "+std::to_string(startNode)
-                    +", "+std::to_string(endPoint.mX-xCell)
-                    +", "+std::to_string(endPoint.mY-yCell)<<std::endl;
-            }
-#endif
         }
         else
             mIsPathConstructed = false;
