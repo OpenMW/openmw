@@ -1,4 +1,5 @@
 #ifndef OPENMW_MECHANICS_OBSTACLE_H
+#define OPENMW_MECHANICS_OBSTACLE_H
 
 namespace MWWorld
 {
