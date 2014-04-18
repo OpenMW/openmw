@@ -19,7 +19,8 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        InstallationPage(MainWizard *wizard);
+        InstallationPage(QWidget *parent);
+        ~InstallationPage();
 
         int nextId() const;
          virtual bool isComplete() const;

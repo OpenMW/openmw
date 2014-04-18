@@ -36,8 +36,8 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
 
     languageComboBox->addItems(languages);
 
-    mWizardInvoker = new ProcessInvoker(this);
-    mImporterInvoker = new ProcessInvoker(this);
+    mWizardInvoker = new ProcessInvoker();
+    mImporterInvoker = new ProcessInvoker();
 
     connect(mWizardInvoker->getProcess(), SIGNAL(started()),
             this, SLOT(wizardStarted()));
@@ -83,6 +83,12 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     }
 
     loadSettings();
+}
+
+Launcher::SettingsPage::~SettingsPage()
+{
+    delete mWizardInvoker;
+    delete mImporterInvoker;
 }
 
 void Launcher::SettingsPage::on_wizardButton_clicked()

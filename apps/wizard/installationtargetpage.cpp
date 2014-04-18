@@ -6,11 +6,12 @@
 
 #include "mainwizard.hpp"
 
-Wizard::InstallationTargetPage::InstallationTargetPage(MainWizard *wizard, const Files::ConfigurationManager &cfg) :
-    QWizardPage(wizard),
-    mWizard(wizard),
+Wizard::InstallationTargetPage::InstallationTargetPage(QWidget *parent, const Files::ConfigurationManager &cfg) :
+    QWizardPage(parent),
     mCfgMgr(cfg)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
 
     registerField(QLatin1String("installation.path*"), targetLineEdit);

@@ -1,7 +1,6 @@
 #include "maindialog.hpp"
 
 #include <components/version/version.hpp>
-#include <components/process/processinvoker.hpp>
 
 #include <QLabel>
 #include <QDate>
@@ -35,26 +34,9 @@ using namespace Process;
 Launcher::MainDialog::MainDialog(QWidget *parent)
     : mGameSettings(mCfgMgr), QMainWindow (parent)
 {
-    // Install the stylesheet font
-    QFile file;
-    QFontDatabase fontDatabase;
-
-    const QStringList fonts = fontDatabase.families();
-
-    // Check if the font is installed
-    if (!fonts.contains("EB Garamond")) {
-
-        QString font = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        file.setFileName(font);
-
-        if (!file.exists()) {
-            font = QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        }
-
-        fontDatabase.addApplicationFont(font);
-    }
-
     setupUi(this);
+
+    mGameInvoker = new ProcessInvoker();
 
     iconWidget->setViewMode(QListView::IconMode);
     iconWidget->setWrapping(false);
@@ -94,7 +76,31 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
                                                                                         QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
     }
 
+    // Install the stylesheet font
+    QFile file;
+    QFontDatabase fontDatabase;
+
+    const QStringList fonts = fontDatabase.families();
+
+    // Check if the font is installed
+    if (!fonts.contains("EB Garamond")) {
+
+        QString font = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+        file.setFileName(font);
+
+        if (!file.exists()) {
+            font = QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+        }
+
+        fontDatabase.addApplicationFont(font);
+    }
+
     createIcons();
+}
+
+Launcher::MainDialog::~MainDialog()
+{
+    delete mGameInvoker;
 }
 
 void Launcher::MainDialog::createIcons()
@@ -801,8 +807,7 @@ void Launcher::MainDialog::play()
     }
 
     // Launch the game detached
-    ProcessInvoker invoker(this);
 
-    if (invoker.startProcess(QLatin1String("openmw"), true))
+    if (mGameInvoker->startProcess(QLatin1String("openmw"), true))
         qApp->quit();
 }

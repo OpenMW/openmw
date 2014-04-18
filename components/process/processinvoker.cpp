@@ -8,9 +8,16 @@
 #include <QDir>
 #include <QDebug>
 
-Process::ProcessInvoker::ProcessInvoker(QWidget *parent)
+Process::ProcessInvoker::ProcessInvoker()
 {
     mProcess = new QProcess(this);
+
+    connect(mProcess, SIGNAL(error(QProcess::ProcessError)),
+            this, SLOT(processError(QProcess::ProcessError)));
+
+    connect(mProcess, SIGNAL(finished(int,QProcess::ExitStatus)),
+            this, SLOT(processFinished(int,QProcess::ExitStatus)));
+
 
     mName = QString();
     mArguments = QStringList();
@@ -48,13 +55,6 @@ QProcess* Process::ProcessInvoker::getProcess()
 bool Process::ProcessInvoker::startProcess(const QString &name, const QStringList &arguments, bool detached)
 {
 //    mProcess = new QProcess(this);
-
-    connect(mProcess, SIGNAL(error(QProcess::ProcessError)),
-            this, SLOT(processError(QProcess::ProcessError)));
-
-    connect(mProcess, SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(processFinished(int,QProcess::ExitStatus)));
-
     mName = name;
     mArguments = arguments;
 

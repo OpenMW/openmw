@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>510</width>
-    <height>324</height>
+    <width>508</width>
+    <height>322</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,6 +44,9 @@
     <widget class="QCheckBox" name="addonsCheckBox">
      <property name="text">
       <string>Import add-on and plugin selection</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

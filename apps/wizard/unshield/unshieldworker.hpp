@@ -30,6 +30,8 @@ namespace Wizard
         UnshieldWorker(QObject *parent = 0);
         ~UnshieldWorker();
 
+        void stopWorker();
+
         void setInstallComponent(Wizard::Component component, bool install);
 
         void setDiskPath(const QString &path);
@@ -91,6 +93,8 @@ namespace Wizard
         bool mMorrowindDone;
         bool mTribunalDone;
         bool mBloodmoonDone;
+
+        bool mStopped;
 
         QString mPath;
         QString mIniPath;

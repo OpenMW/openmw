@@ -9,48 +9,14 @@
 #include "mainwizard.hpp"
 #include "inisettings.hpp"
 
-Wizard::InstallationPage::InstallationPage(MainWizard *wizard) :
-    QWizardPage(wizard),
-    mWizard(wizard)
+Wizard::InstallationPage::InstallationPage(QWidget *parent) :
+    QWizardPage(parent)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
 
     mFinished = false;
-}
-
-void Wizard::InstallationPage::initializePage()
-{
-    QString path(field(QLatin1String("installation.path")).toString());
-    QStringList components(field(QLatin1String("installation.components")).toStringList());
-
-    logTextEdit->appendPlainText(QString("Installing to %1").arg(path));
-    logTextEdit->appendPlainText(QString("Installing %1.").arg(components.join(", ")));
-
-    installProgressBar->setMinimum(0);
-
-    // Set the progressbar maximum to a multiple of 100
-    // That way installing all three components would yield 300%
-    // When one component is done the bar will be filled by 33%
-
-    if (field(QLatin1String("installation.new")).toBool() == true) {
-        installProgressBar->setMaximum((components.count() * 100));
-    } else {
-        if (components.contains(QLatin1String("Tribunal"))
-                && !mWizard->mInstallations[path].hasTribunal)
-            installProgressBar->setMaximum(100);
-
-        if (components.contains(QLatin1String("Bloodmoon"))
-                && !mWizard->mInstallations[path].hasBloodmoon)
-            installProgressBar->setMaximum(installProgressBar->maximum() + 100);
-    }
-
-    startInstallation();
-}
-
-void Wizard::InstallationPage::startInstallation()
-{
-    QStringList components(field(QLatin1String("installation.components")).toStringList());
-    QString path(field(QLatin1String("installation.path")).toString());
 
     mThread = new QThread();
     mUnshield = new UnshieldWorker();
@@ -88,6 +54,54 @@ void Wizard::InstallationPage::startInstallation()
 
     connect(mUnshield, SIGNAL(requestFileDialog(Wizard::Component)),
             this, SLOT(showFileDialog(Wizard::Component)), Qt::QueuedConnection);
+}
+
+Wizard::InstallationPage::~InstallationPage()
+{
+    qDebug() << "stop!";
+
+    if (mThread->isRunning()) {
+        mUnshield->stopWorker();
+        mThread->wait();
+    }
+
+    delete mUnshield;
+    delete mThread;
+}
+
+void Wizard::InstallationPage::initializePage()
+{
+    QString path(field(QLatin1String("installation.path")).toString());
+    QStringList components(field(QLatin1String("installation.components")).toStringList());
+
+    logTextEdit->appendPlainText(QString("Installing to %1").arg(path));
+    logTextEdit->appendPlainText(QString("Installing %1.").arg(components.join(", ")));
+
+    installProgressBar->setMinimum(0);
+
+    // Set the progressbar maximum to a multiple of 100
+    // That way installing all three components would yield 300%
+    // When one component is done the bar will be filled by 33%
+
+    if (field(QLatin1String("installation.new")).toBool() == true) {
+        installProgressBar->setMaximum((components.count() * 100));
+    } else {
+        if (components.contains(QLatin1String("Tribunal"))
+                && !mWizard->mInstallations[path].hasTribunal)
+            installProgressBar->setMaximum(100);
+
+        if (components.contains(QLatin1String("Bloodmoon"))
+                && !mWizard->mInstallations[path].hasBloodmoon)
+            installProgressBar->setMaximum(installProgressBar->maximum() + 100);
+    }
+
+    startInstallation();
+}
+
+void Wizard::InstallationPage::startInstallation()
+{
+    QStringList components(field(QLatin1String("installation.components")).toStringList());
+    QString path(field(QLatin1String("installation.path")).toString());
 
     if (field(QLatin1String("installation.new")).toBool() == true)
     {

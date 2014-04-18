@@ -4,10 +4,11 @@
 
 #include <QDebug>
 
-Wizard::LanguageSelectionPage::LanguageSelectionPage(MainWizard *wizard) :
-    QWizardPage(wizard),
-    mWizard(wizard)
+Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget *parent) :
+    QWizardPage(parent)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
 
     registerField(QLatin1String("installation.language"), languageComboBox);

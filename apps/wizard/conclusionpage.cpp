@@ -4,10 +4,11 @@
 
 #include "mainwizard.hpp"
 
-Wizard::ConclusionPage::ConclusionPage(MainWizard *wizard) :
-    QWizardPage(wizard),
-    mWizard(wizard)
+Wizard::ConclusionPage::ConclusionPage(QWidget *parent) :
+    QWizardPage(parent)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
     setPixmap(QWizard::WatermarkPixmap, QPixmap(QLatin1String(":/images/intropage-background.png")));
 }

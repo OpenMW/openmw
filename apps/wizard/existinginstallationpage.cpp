@@ -8,15 +8,26 @@
 
 #include "mainwizard.hpp"
 
-Wizard::ExistingInstallationPage::ExistingInstallationPage(MainWizard *wizard) :
-    QWizardPage(wizard),
-    mWizard(wizard)
+Wizard::ExistingInstallationPage::ExistingInstallationPage(QWidget *parent) :
+    QWizardPage(parent)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
 
+}
+
+void Wizard::ExistingInstallationPage::initializePage()
+{
     QListWidgetItem *emptyItem = new QListWidgetItem(tr("No existing installations detected"));
     emptyItem->setFlags(Qt::NoItemFlags);
     installationsList->addItem(emptyItem);
+
+    // Test
+    if (mWizard->mInstallations.isEmpty()) {
+        qDebug() << "crashy crash";
+        return;
+    }
 
     // Add the available installation paths
     QStringList paths(mWizard->mInstallations.keys());

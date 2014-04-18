@@ -13,7 +13,7 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        ComponentSelectionPage(MainWizard *wizard);
+        ComponentSelectionPage(QWidget *parent);
 
         int nextId() const;
         virtual bool validatePage();

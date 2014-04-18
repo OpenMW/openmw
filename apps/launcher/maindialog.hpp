@@ -5,6 +5,9 @@
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
+
+#include <components/process/processinvoker.hpp>
+
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
@@ -36,6 +39,8 @@ namespace Launcher
 
     public:
         explicit MainDialog(QWidget *parent = 0);
+        ~MainDialog();
+
         bool setup();
         bool showFirstRunDialog();
 
@@ -67,6 +72,7 @@ namespace Launcher
         DataFilesPage *mDataFilesPage;
         SettingsPage *mSettingsPage;
 
+        Process::ProcessInvoker *mGameInvoker;
 
         Files::ConfigurationManager mCfgMgr;
 

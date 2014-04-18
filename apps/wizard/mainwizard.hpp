@@ -5,6 +5,8 @@
 #include <QWizard>
 #include <QMap>
 
+#include <components/process/processinvoker.hpp>
+
 #include <components/files/configurationmanager.hpp>
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
@@ -37,6 +39,7 @@ namespace Wizard
         };
 
         MainWizard(QWidget *parent = 0);
+        ~MainWizard();
 
         bool findFiles(const QString &name, const QString &path);
         void addInstallation(const QString &path);
@@ -45,6 +48,8 @@ namespace Wizard
         QMap<QString, Installation> mInstallations;
 
         Files::ConfigurationManager mCfgMgr;
+
+        Process::ProcessInvoker *mImporterInvoker;
 
         bool mError;
 
@@ -64,7 +69,7 @@ namespace Wizard
         Config::GameSettings mGameSettings;
         Config::LauncherSettings mLauncherSettings;
 
-        QTextStream *mLog;
+        QString mLogError;
 
     private slots:
 

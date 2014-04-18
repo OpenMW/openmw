@@ -13,7 +13,7 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        ImportPage(MainWizard *wizard);
+        ImportPage(QWidget *parent);
 
         int nextId() const;
 

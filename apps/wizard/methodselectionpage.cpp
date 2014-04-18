@@ -2,10 +2,11 @@
 #include <QDebug>
 #include "mainwizard.hpp"
 
-Wizard::MethodSelectionPage::MethodSelectionPage(MainWizard *wizard) :
-    QWizardPage(wizard),
-    mWizard(wizard)
+Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
+    QWizardPage(parent)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
 
     registerField(QLatin1String("installation.new"), newLocationRadioButton);

@@ -2,10 +2,11 @@
 
 #include "mainwizard.hpp"
 
-Wizard::ImportPage::ImportPage(MainWizard *wizard) :
-    QWizardPage(wizard),
-    mWizard(wizard)
+Wizard::ImportPage::ImportPage(QWidget *parent) :
+    QWizardPage(parent)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
 
     registerField(QLatin1String("installation.import-settings"), importCheckBox);

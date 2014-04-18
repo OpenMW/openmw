@@ -7,10 +7,11 @@
 
 #include "mainwizard.hpp"
 
-Wizard::ComponentSelectionPage::ComponentSelectionPage(MainWizard *wizard) :
-    QWizardPage(wizard),
-    mWizard(wizard)
+Wizard::ComponentSelectionPage::ComponentSelectionPage(QWidget *parent) :
+    QWizardPage(parent)
 {
+    mWizard = qobject_cast<MainWizard*>(parent);
+
     setupUi(this);
 
     setCommitPage(true);

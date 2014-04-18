@@ -13,7 +13,7 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        ExistingInstallationPage(MainWizard *wizard);
+        ExistingInstallationPage(QWidget *parent);
 
         int nextId() const;
         virtual bool isComplete() const;
@@ -26,6 +26,9 @@ namespace Wizard
 
     private:
         MainWizard *mWizard;
+
+    protected:
+        void initializePage();
 
     };
 

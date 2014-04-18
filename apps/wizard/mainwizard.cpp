@@ -1,7 +1,5 @@
 #include "mainwizard.hpp"
 
-#include <components/process/processinvoker.hpp>
-
 #include <QDebug>
 
 #include <QTime>
@@ -25,7 +23,9 @@ using namespace Process;
 
 Wizard::MainWizard::MainWizard(QWidget *parent) :
     mGameSettings(mCfgMgr),
-    QWizard(parent)
+    QWizard(parent),
+    mError(false),
+    mInstallations()
 {
 #ifndef Q_OS_MAC
     setWizardStyle(QWizard::ModernStyle);
@@ -37,10 +37,25 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setWindowIcon(QIcon(QLatin1String(":/images/openmw-wizard.png")));
     setMinimumWidth(550);
 
+    // This prevents initializePage() being called multiple times
+    setOption(QWizard::IndependentPages);
+
     // Set the property for comboboxes to the text instead of index
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
 
     setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
+
+    mImporterInvoker = new ProcessInvoker();
+
+    connect(mImporterInvoker->getProcess(), SIGNAL(started()),
+            this, SLOT(importerStarted()));
+
+    connect(mImporterInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
+            this, SLOT(importerFinished(int,QProcess::ExitStatus)));
+
+    mLogError = tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
+                   <p>Please make sure you have the right permissions \
+                   and try again.</p></body></html>");
 
     setupLog();
     setupGameSettings();
@@ -49,43 +64,57 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setupPages();
 }
 
+Wizard::MainWizard::~MainWizard()
+{
+    delete mImporterInvoker;
+}
+
 void Wizard::MainWizard::setupLog()
 {
     QString logPath(QString::fromUtf8(mCfgMgr.getLogPath().string().c_str()));
     logPath.append(QLatin1String("wizard.log"));
 
-    QString message(tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
-                    <p>Please make sure you have the right permissions \
-                    and try again.</p></body></html>"));
+    QFile file(logPath);
 
-    QFile *file = new QFile(logPath);
-
-    if (!file->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error opening Wizard log file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(message.arg(file->fileName()));
+        msgBox.setText(mLogError.arg(file.fileName()));
         msgBox.exec();
         return qApp->quit();
     }
 
+    addLogText(QString("Started OpenMW Wizard on %1").arg(QDateTime::currentDateTime().toString()));
+
     qDebug() << logPath;
-
-    mLog = new QTextStream(file);
-    mLog->setCodec(QTextCodec::codecForName("UTF-8"));
-
-    //addLogText(QLatin1String("test test 123 test"));
 }
 
 void Wizard::MainWizard::addLogText(const QString &text)
 {
+    QString logPath(QString::fromUtf8(mCfgMgr.getLogPath().string().c_str()));
+    logPath.append(QLatin1String("wizard.log"));
 
-    qDebug() << "AddLogText called! " << text;
-    if (!text.isEmpty()) {
-        qDebug() << "logging " << text;
-        *mLog << text << endl;
+    QFile file(logPath);
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error opening Wizard log file"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(mLogError.arg(file.fileName()));
+        msgBox.exec();
+        return qApp->quit();
     }
+
+    if (!file.isSequential())
+        file.seek(file.size());
+
+    QTextStream out(&file);
+
+    if (!text.isEmpty())
+        out << text << endl;
 
 //    file.close();
 }
@@ -246,16 +275,8 @@ void Wizard::MainWizard::runSettingsImporter()
     arguments.append(QLatin1String("--cfg"));
     arguments.append(userPath + QLatin1String("openmw.cfg"));
 
-    ProcessInvoker *invoker = new ProcessInvoker(this);
-
-    if (!invoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
-        return qApp->quit();;
-
-    connect(invoker->getProcess(), SIGNAL(started()),
-            this, SLOT(importerStarted()));
-
-    connect(invoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(importerFinished(int,QProcess::ExitStatus)));
+    if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
+        return qApp->quit();
 
     // Re-read the game settings
     // setupGameSettings();
@@ -305,6 +326,7 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_Import, new ImportPage(this));
     setPage(Page_Conclusion, new ConclusionPage(this));
     setStartId(Page_Intro);
+
 }
 
 void Wizard::MainWizard::importerStarted()

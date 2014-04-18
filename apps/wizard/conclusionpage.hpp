@@ -13,7 +13,7 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        ConclusionPage(MainWizard *wizard);
+        ConclusionPage(QWidget *parent);
 
         int nextId() const;
 

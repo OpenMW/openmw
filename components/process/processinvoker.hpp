@@ -13,7 +13,7 @@ namespace Process
 
     public:
 
-        ProcessInvoker(QWidget *parent = 0);
+        ProcessInvoker();
         ~ProcessInvoker();
 
 //        void setProcessName(const QString &name);

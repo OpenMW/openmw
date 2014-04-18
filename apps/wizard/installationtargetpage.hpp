@@ -18,7 +18,7 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        InstallationTargetPage(MainWizard *wizard, const Files::ConfigurationManager &cfg);
+        InstallationTargetPage(QWidget *parent, const Files::ConfigurationManager &cfg);
 
         int nextId() const;
         virtual bool validatePage();

@@ -35,11 +35,20 @@ Wizard::UnshieldWorker::UnshieldWorker(QObject *parent) :
     mTribunalDone = false;
     mBloodmoonDone = false;
 
+    mStopped = false;
+
     qRegisterMetaType<Wizard::Component>("Wizard::Component");
 }
 
 Wizard::UnshieldWorker::~UnshieldWorker()
 {
+}
+
+void Wizard::UnshieldWorker::stopWorker()
+{
+    mMutex.lock();
+    mStopped = true;
+    mMutex.unlock();
 }
 
 void Wizard::UnshieldWorker::setInstallComponent(Wizard::Component component, bool install)
@@ -781,6 +790,13 @@ bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &d
 
         for (size_t j=group->first_file; j<=group->last_file; ++j)
         {
+            if (mStopped) {
+                qDebug() << "We're asked to stop!";
+
+                unshield_close(unshield);
+                return true;
+            }
+
             if (unshield_file_is_valid(unshield, j)) {
                 success = extractFile(unshield, destination, group->name, j, counter);
 
@@ -789,6 +805,8 @@ bool Wizard::UnshieldWorker::extractCab(const QString &cabFile, const QString &d
 
                     emit error(tr("Failed to extract %1.").arg(name),
                                tr("Complete path: %1").arg(destination + QDir::separator() + name));
+
+                    unshield_close(unshield);
                     return false;
                 }
 
@@ -892,11 +910,14 @@ bool Wizard::UnshieldWorker::findInCab(const QString &fileName, const QString &c
 
             if (unshield_file_is_valid(unshield, j)) {
                 QString current(QString::fromUtf8(unshield_file_name(unshield, j)));
-                if (current.toLower() == fileName.toLower())
+                if (current.toLower() == fileName.toLower()) {
+                    unshield_close(unshield);
                     return true; // File is found!
+                }
             }
         }
     }
 
+    unshield_close(unshield);
     return false;
 }

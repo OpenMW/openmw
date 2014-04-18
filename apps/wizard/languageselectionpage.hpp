@@ -13,7 +13,7 @@ namespace Wizard
     {
         Q_OBJECT
     public:
-        LanguageSelectionPage(MainWizard *wizard);
+        LanguageSelectionPage(QWidget *parent);
 
         int nextId() const;
 
