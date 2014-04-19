@@ -34,8 +34,6 @@ namespace MWMechanics
 
             void clearPath();
 
-            void buildPathgridGraph(const ESM::Pathgrid* pathGrid);
-
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                            const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
@@ -64,9 +62,10 @@ namespace MWMechanics
                 return mPath;
             }
 
-            //When first point of newly created path is the nearest to actor point, then
-            //the cituation can occure when this point is undesirable (if the 2nd point of new path == the 1st point of old path)
-            //This functions deletes that point.
+            // When first point of newly created path is the nearest to actor point,
+            // then a situation can occure when this point is undesirable
+            // (if the 2nd point of new path == the 1st point of old path)
+            // This functions deletes that point.
             void syncStart(const std::list<ESM::Pathgrid::Point> &path);
 
             void addPointToPath(ESM::Pathgrid::Point &point)
@@ -76,30 +75,11 @@ namespace MWMechanics
 
         private:
 
-            struct Edge
-            {
-                int destination;
-                float cost;
-            };
-            struct Node
-            {
-                int label;
-                std::vector<Edge> edges;
-                int parent;//used in pathfinding
-            };
-
-            std::vector<float> mGScore;
-            std::vector<float> mFScore;
-
-            std::list<ESM::Pathgrid::Point> aStarSearch(const ESM::Pathgrid* pathGrid,int start,int goal,float xCell = 0, float yCell = 0);
-            void cleanUpAStar();
-
-            std::vector<Node> mGraph;
             bool mIsPathConstructed;
 
-
             std::list<ESM::Pathgrid::Point> mPath;
-            bool mIsGraphConstructed;
+
+            const ESM::Pathgrid *mPathgrid;
             const MWWorld::CellStore* mCell;
     };
 }

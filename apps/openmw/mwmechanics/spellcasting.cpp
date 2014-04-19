@@ -714,7 +714,7 @@ namespace MWMechanics
             effect.mDuration = 1;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
         {
-            if (!magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
                 magnitude = int((0.05 * y) / (0.1 * magicEffect->mData.mBaseCost));
             else
                 magnitude = int(y / (0.1 * magicEffect->mData.mBaseCost));

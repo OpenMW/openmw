@@ -11,7 +11,7 @@ namespace ESM
 void Probe::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
 
     esm.getHNT(mData, "PBDT", 16);
 
@@ -22,7 +22,7 @@ void Probe::load(ESMReader &esm)
 void Probe::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
 
     esm.writeHNT("PBDT", mData, 16);
     esm.writeHNOString("SCRI", mScript);

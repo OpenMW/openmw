@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "pathfinding.hpp"
+#include "obstacle.hpp"
 
 #include "../mwworld/timestamp.hpp"
 
@@ -26,7 +27,7 @@ namespace MWMechanics
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
 
-            int mDistance;
+            int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
             int mTimeOfDay;
             std::vector<int> mIdle;
@@ -34,31 +35,18 @@ namespace MWMechanics
 
             bool mSaidGreeting;
 
-            float mX;
-            float mY;
-            float mZ;
-
+            // Cached current cell location
             int mCellX;
             int mCellY;
+            // Cell location multiplied by ESM::Land::REAL_SIZE
             float mXCell;
             float mYCell;
 
-            // for checking if we're stuck (but don't check Z axis)
-            float mPrevX;
-            float mPrevY;
+            const MWWorld::CellStore* mCell; // for detecting cell change
 
-            enum WalkState
-            {
-                State_Norm,
-                State_CheckStuck,
-                State_Evade
-            };
-            WalkState mWalkState;
-
-            int mStuckCount;
-            int mEvadeCount;
-
+            // if false triggers calculating allowed nodes based on mDistance
             bool mStoredAvailableNodes;
+            // AiWander states
             bool mChooseAction;
             bool mIdleNow;
             bool mMoveNow;
@@ -69,12 +57,18 @@ namespace MWMechanics
 
             MWWorld::TimeStamp mStartTime;
 
+            // allowed pathgrid nodes based on mDistance from the spawn point
             std::vector<ESM::Pathgrid::Point> mAllowedNodes;
             ESM::Pathgrid::Point mCurrentNode;
+            bool mTrimCurrentNode;
+            void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
+                                  const PathFinder& pathfinder);
 
             PathFinder mPathFinder;
-            const ESM::Pathgrid *mPathgrid;
 
+            ObstacleCheck mObstacleCheck;
+            float mDoorCheckDuration;
+            int mStuckCount;
     };
 }
 

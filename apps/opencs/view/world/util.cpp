@@ -108,7 +108,11 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
 {
     NastyTableModelHack hack (*model);
     QStyledItemDelegate::setModelData (editor, &hack, index);
-    mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, hack.getData()));
+
+    QVariant new_ = hack.getData();
+
+    if (model->data (index)!=new_)
+        mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, new_));
 }
 
 CSVWorld::CommandDelegate::CommandDelegate (QUndoStack& undoStack, QObject *parent)

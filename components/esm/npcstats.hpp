@@ -45,6 +45,7 @@ namespace ESM
         float mTimeToStartDrowning;
         float mLastDrowningHit;
         float mLevelHealthBonus;
+        int mCrimeId;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

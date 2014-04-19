@@ -24,7 +24,7 @@ opencs_units (model/world
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection
     )
 
 opencs_hdrs_noqt (model/world
@@ -59,7 +59,7 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit dialoguesubview previewsubview
+    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap
     )
 
 opencs_units (view/render

@@ -3,7 +3,7 @@
 
 #include "../doc/subview.hpp"
 
-class QTableView;
+class QAction;
 
 namespace CSMDoc
 {
@@ -12,9 +12,13 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
+    class RegionMap;
+
     class RegionMapSubView : public CSVDoc::SubView
     {
-            QTableView *mTable;
+            Q_OBJECT
+
+            RegionMap *mRegionMap;
 
         public:
 
@@ -24,6 +28,9 @@ namespace CSVWorld
 
             virtual void updateUserSetting
                                 (const QString& key, const QStringList &list);
+        private slots:
+
+            void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
     };
 }
 

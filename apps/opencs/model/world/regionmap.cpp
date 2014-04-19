@@ -1,6 +1,7 @@
 
 #include "regionmap.hpp"
 
+#include <cmath>
 #include <algorithm>
 
 #include <QBrush>
@@ -25,17 +26,28 @@ CSMWorld::RegionMap::CellDescription::CellDescription (const Record<Cell>& cell)
     mName = cell2.mName;
 }
 
-CSMWorld::RegionMap::CellIndex CSMWorld::RegionMap::getIndex (const QModelIndex& index) const
+CSMWorld::CellCoordinates CSMWorld::RegionMap::getIndex (const QModelIndex& index) const
 {
-    return CellIndex (index.column()+mMin.first,
-        (mMax.second-mMin.second - index.row()-1)+mMin.second);
+    return mMin.move (index.column(), mMax.getY()-mMin.getY() - index.row()-1);
 }
 
-QModelIndex CSMWorld::RegionMap::getIndex (const CellIndex& index) const
+QModelIndex CSMWorld::RegionMap::getIndex (const CellCoordinates& index) const
 {
     // I hate you, Qt API naming scheme!
-    return QAbstractTableModel::index (mMax.second-mMin.second - (index.second-mMin.second)-1,
-        index.first-mMin.first);
+    return QAbstractTableModel::index (mMax.getY()-mMin.getY() - (index.getY()-mMin.getY())-1,
+        index.getX()-mMin.getX());
+}
+
+CSMWorld::CellCoordinates CSMWorld::RegionMap::getIndex (const Cell& cell) const
+{
+    std::istringstream stream (cell.mId);
+
+    char ignore;
+    int x = 0;
+    int y = 0;
+    stream >> ignore >> x >> y;
+
+    return CellCoordinates (x, y);
 }
 
 void CSMWorld::RegionMap::buildRegions()
@@ -70,21 +82,21 @@ void CSMWorld::RegionMap::buildMap()
         {
             CellDescription description (cell);
 
-            CellIndex index (cell2.mData.mX, cell2.mData.mY);
+            CellCoordinates index = getIndex (cell2);
 
             mMap.insert (std::make_pair (index, description));
         }
     }
 
-    std::pair<CellIndex, CellIndex> mapSize = getSize();
+    std::pair<CellCoordinates, CellCoordinates> mapSize = getSize();
 
     mMin = mapSize.first;
     mMax = mapSize.second;
 }
 
-void CSMWorld::RegionMap::addCell (const CellIndex& index, const CellDescription& description)
+void CSMWorld::RegionMap::addCell (const CellCoordinates& index, const CellDescription& description)
 {
-    std::map<CellIndex, CellDescription>::iterator cell = mMap.find (index);
+    std::map<CellCoordinates, CellDescription>::iterator cell = mMap.find (index);
 
     if (cell!=mMap.end())
     {
@@ -114,7 +126,7 @@ void CSMWorld::RegionMap::addCells (int start, int end)
 
         if (cell2.isExterior())
         {
-            CellIndex index (cell2.mData.mX, cell2.mData.mY);
+            CellCoordinates index = getIndex (cell2);
 
             CellDescription description (cell);
 
@@ -123,9 +135,9 @@ void CSMWorld::RegionMap::addCells (int start, int end)
     }
 }
 
-void CSMWorld::RegionMap::removeCell (const CellIndex& index)
+void CSMWorld::RegionMap::removeCell (const CellCoordinates& index)
 {
-    std::map<CellIndex, CellDescription>::iterator cell = mMap.find (index);
+    std::map<CellCoordinates, CellDescription>::iterator cell = mMap.find (index);
 
     if (cell!=mMap.end())
     {
@@ -160,7 +172,7 @@ void CSMWorld::RegionMap::updateRegions (const std::vector<std::string>& regions
     std::for_each (regions2.begin(), regions2.end(), &Misc::StringUtils::lowerCase);
     std::sort (regions2.begin(), regions2.end());
 
-    for (std::map<CellIndex, CellDescription>::const_iterator iter (mMap.begin());
+    for (std::map<CellCoordinates, CellDescription>::const_iterator iter (mMap.begin());
          iter!=mMap.end(); ++iter)
     {
         if (!iter->second.mRegion.empty() &&
@@ -176,90 +188,57 @@ void CSMWorld::RegionMap::updateRegions (const std::vector<std::string>& regions
 
 void CSMWorld::RegionMap::updateSize()
 {
-    std::pair<CellIndex, CellIndex> size = getSize();
+    std::pair<CellCoordinates, CellCoordinates> size = getSize();
 
+    if (int diff = size.first.getX() - mMin.getX())
     {
-        int diff = size.first.first - mMin.first;
-
-        if (diff<0)
-        {
-            beginInsertColumns (QModelIndex(), 0, -diff-1);
-            mMin.first = size.first.first;
-            endInsertColumns();
-        }
-        else if (diff>0)
-        {
-            beginRemoveColumns (QModelIndex(), 0, diff-1);
-            mMin.first = size.first.first;
-            endRemoveColumns();
-        }
+        beginInsertColumns (QModelIndex(), 0, std::abs (diff)-1);
+        mMin = CellCoordinates (size.first.getX(), mMin.getY());
+        endInsertColumns();
     }
 
+    if (int diff = size.first.getY() - mMin.getY())
     {
-        int diff = size.first.second - mMin.second;
-
-        if (diff<0)
-        {
-            beginInsertRows (QModelIndex(), 0, -diff-1);
-            mMin.second = size.first.second;
-            endInsertRows();
-        }
-        else if (diff>0)
-        {
-            beginRemoveRows (QModelIndex(), 0, diff-1);
-            mMin.second = size.first.second;
-            endRemoveRows();
-        }
+        beginInsertRows (QModelIndex(), 0, std::abs (diff)-1);
+        mMin = CellCoordinates (mMin.getX(), size.first.getY());
+        endInsertRows();
     }
 
+    if (int diff = size.second.getX() - mMax.getX())
     {
-        int diff = size.second.first - mMax.first;
+        int columns = columnCount();
 
         if (diff>0)
-        {
-            int columns = columnCount();
             beginInsertColumns (QModelIndex(), columns, columns+diff-1);
-            mMax.first = size.second.first;
-            endInsertColumns();
-        }
-        else if (diff<0)
-        {
-            int columns = columnCount();
+        else
             beginRemoveColumns (QModelIndex(), columns+diff, columns-1);
-            mMax.first = size.second.first;
-            endRemoveColumns();
-        }
+
+        mMax = CellCoordinates (size.second.getX(), mMax.getY());
+        endInsertColumns();
     }
 
+    if (int diff = size.second.getY() - mMax.getY())
     {
-        int diff = size.second.second - mMax.second;
+        int rows = rowCount();
 
         if (diff>0)
-        {
-            int rows = rowCount();
             beginInsertRows (QModelIndex(), rows, rows+diff-1);
-            mMax.second = size.second.second;
-            endInsertRows();
-        }
-        else if (diff<0)
-        {
-            int rows = rowCount();
+        else
             beginRemoveRows (QModelIndex(), rows+diff, rows-1);
-            mMax.second = size.second.second;
-            endRemoveRows();
-        }
+
+        mMax = CellCoordinates (mMax.getX(), size.second.getY());
+        endInsertRows();
     }
 }
 
-std::pair<CSMWorld::RegionMap::CellIndex, CSMWorld::RegionMap::CellIndex> CSMWorld::RegionMap::getSize()
-    const
+std::pair<CSMWorld::CellCoordinates, CSMWorld::CellCoordinates> CSMWorld::RegionMap::getSize() const
 {
     const IdCollection<Cell>& cells = mData.getCells();
 
     int size = cells.getSize();
 
-    CellIndex min (0, 0);
-    CellIndex max (0, 0);
+    CellCoordinates min (0, 0);
+    CellCoordinates max (0, 0);
 
     for (int i=0; i<size; ++i)
     {
@@ -269,24 +248,24 @@ std::pair<CSMWorld::RegionMap::CellIndex, CSMWorld::RegionMap::CellIndex> CSMWor
 
         if (cell2.isExterior())
         {
-            CellIndex index (cell2.mData.mX, cell2.mData.mY);
+            CellCoordinates index = getIndex (cell2);
 
             if (min==max)
             {
                 min = index;
-                max = std::make_pair (min.first+1, min.second+1);
+                max = min.move (1, 1);
             }
             else
             {
-                if (index.first<min.first)
-                    min.first = index.first;
-                else if (index.first>=max.first)
-                    max.first = index.first + 1;
+                if (index.getX()<min.getX())
+                    min = CellCoordinates (index.getX(), min.getY());
+                else if (index.getX()>=max.getX())
+                    max = CellCoordinates (index.getX()+1, max.getY());
 
-                if (index.second<min.second)
-                    min.second = index.second;
-                else if (index.second>=max.second)
-                    max.second = index.second + 1;
+                if (index.getY()<min.getY())
+                    min = CellCoordinates (min.getX(), index.getY());
+                else if (index.getY()>=max.getY())
+                    max = CellCoordinates (max.getX(), index.getY() + 1);
             }
         }
     }
@@ -323,7 +302,7 @@ int CSMWorld::RegionMap::rowCount (const QModelIndex& parent) const
     if (parent.isValid())
         return 0;
 
-    return mMax.second-mMin.second;
+    return mMax.getY()-mMin.getY();
 }
 
 int CSMWorld::RegionMap::columnCount (const QModelIndex& parent) const
@@ -331,7 +310,7 @@ int CSMWorld::RegionMap::columnCount (const QModelIndex& parent) const
     if (parent.isValid())
         return 0;
 
-    return mMax.first-mMin.first;
+    return mMax.getX()-mMin.getX();
 }
 
 QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
@@ -343,7 +322,7 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
     {
         /// \todo GUI class in non-GUI code. Needs to be addressed eventually.
 
-        std::map<CellIndex, CellDescription>::const_iterator cell =
+        std::map<CellCoordinates, CellDescription>::const_iterator cell =
             mMap.find (getIndex (index));
 
         if (cell!=mMap.end())
@@ -370,13 +349,13 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
 
     if (role==Qt::ToolTipRole)
     {
-        CellIndex cellIndex = getIndex (index);
+        CellCoordinates cellIndex = getIndex (index);
 
         std::ostringstream stream;
 
-        stream << cellIndex.first << ", " << cellIndex.second;
+        stream << cellIndex;
 
-        std::map<CellIndex, CellDescription>::const_iterator cell =
+        std::map<CellCoordinates, CellDescription>::const_iterator cell =
             mMap.find (cellIndex);
 
         if (cell!=mMap.end())
@@ -406,15 +385,33 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
         return QString::fromUtf8 (stream.str().c_str());
     }
 
+    if (role==Role_Region)
+    {
+        CellCoordinates cellIndex = getIndex (index);
+
+        std::map<CellCoordinates, CellDescription>::const_iterator cell =
+            mMap.find (cellIndex);
+
+        if (cell!=mMap.end() && !cell->second.mRegion.empty())
+            return QString::fromUtf8 (Misc::StringUtils::lowerCase (cell->second.mRegion).c_str());
+    }
+
+    if (role==Role_CellId)
+    {
+        CellCoordinates cellIndex = getIndex (index);
+
+        std::ostringstream stream;
+        stream << "#" << cellIndex.getX() << " " << cellIndex.getY();
+
+        return QString::fromUtf8 (stream.str().c_str());
+    }
+
     return QVariant();
 }
 
 Qt::ItemFlags CSMWorld::RegionMap::flags (const QModelIndex& index) const
 {
-    if (mMap.find (getIndex (index))!=mMap.end())
-        return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-
-    return 0;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 void CSMWorld::RegionMap::regionsAboutToBeRemoved (const QModelIndex& parent, int start, int end)
@@ -491,11 +488,7 @@ void CSMWorld::RegionMap::cellsAboutToBeRemoved (const QModelIndex& parent, int 
         const Cell& cell2 = cell.get();
 
         if (cell2.isExterior())
-        {
-            CellIndex index (cell2.mData.mX, cell2.mData.mY);
-
-            removeCell (index);
-        }
+            removeCell (getIndex (cell2));
     }
 }
 

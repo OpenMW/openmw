@@ -37,6 +37,7 @@ namespace MWMechanics
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
             int mReputation;
+            int mCrimeId;
             int mWerewolfKills;
             int mProfit;
             float mAttackStrength;
@@ -63,12 +64,13 @@ namespace MWMechanics
             void modifyProfit(int diff);
 
             int getBaseDisposition() const;
-
             void setBaseDisposition(int disposition);
 
             int getReputation() const;
-
             void setReputation(int reputation);
+
+            int getCrimeId() const;
+            void setCrimeId(int id);
 
             const SkillValue& getSkill (int index) const;
             SkillValue& getSkill (int index);

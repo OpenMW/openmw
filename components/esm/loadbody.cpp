@@ -12,13 +12,13 @@ namespace ESM
 void BodyPart::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");
-    mRace = esm.getHNString("FNAM");
+    mRace = esm.getHNOString("FNAM");
     esm.getHNT(mData, "BYDT", 4);
 }
 void BodyPart::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
-    esm.writeHNCString("FNAM", mRace);
+    esm.writeHNOCString("FNAM", mRace);
     esm.writeHNT("BYDT", mData, 4);
 }
 
