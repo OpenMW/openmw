@@ -1,18 +1,11 @@
 #include <QTextEdit>
 #include <QLineEdit>
-#include <QGroupBox>
-#include <QLayout>
-#include <QApplication>
 
 #include "textview.hpp"
 #include "../../model/settings/setting.hpp"
-#include "settingbox.hpp"
-#include "../../model/settings/selector.hpp"
 
-#include <QDebug>
-CSVSettings::TextView::TextView(CSMSettings::Setting *setting,
-                                Page *parent)
-    : View (setting, parent)
+CSVSettings::TextView::TextView(CSMSettings::Setting *setting, Page *parent)
+    : mDelimiter (setting->delimiter()), View (setting, parent)
 
 {
     if (setting->isMultiLine())
@@ -21,44 +14,54 @@ CSVSettings::TextView::TextView(CSMSettings::Setting *setting,
         mTextWidget = new QLineEdit ("", this);
 
     if (setting->widgetWidth() > 0)
-    {
-        QString widthToken;
-        widthToken.fill('P', setting->widgetWidth());
-        QFontMetrics fm (QApplication::font());
-        mTextWidget->setFixedWidth (fm.width (widthToken));
-    }
+        mTextWidget->setFixedWidth (widgetWidth (setting->widgetWidth()));
 
     connect (mTextWidget, SIGNAL (textEdited (QString)),
            this, SLOT (slotTextEdited (QString)));
 
-    viewFrame()->addWidget (mTextWidget,
-                            setting->viewRow(), setting->viewColumn());
+    addWidget (mTextWidget, setting->viewRow(), setting->viewColumn());
+}
+
+bool CSVSettings::TextView::isEquivalent
+                                (const QString &lhs, const QString &rhs) const
+{
+    return (lhs.trimmed() == rhs.trimmed());
+}
+
+void CSVSettings::TextView::setWidgetText (const QString &value) const
+{
+    mTextWidget->setProperty ("text", value);
 }
 
 void CSVSettings::TextView::slotTextEdited (QString value)
 {
-    qDebug () << objectName() << "TextView::slotTextEdited() value = " << value;
+    QStringList values = value.split (mDelimiter, QString::SkipEmptyParts);
 
-    QStringList values = value.split (setting()->delimiter(),
-                                      QString::SkipEmptyParts);
+    QStringList returnValues;
 
-    selector()->setData(values);
-    selector()->setViewSelection (values);
+    foreach (const QString &splitValue, values)
+        returnValues.append (splitValue.trimmed());
+
+    setSelectedValues (returnValues, false);
+
+    View::updateView();
 }
 
-void CSVSettings::TextView::slotUpdateView (const QStringList values)
+void CSVSettings::TextView::updateView(bool signalUpdate) const
 {
-    if (values.size() == 0)
+    QString values = selectedValues().join (mDelimiter);
+
+    if (isEquivalent (widgetText(), values))
         return;
 
-    QString valueString;
+    setWidgetText (values);
 
-    for (int i = 0; i < values.size() - 1; i++)
-        valueString += (values.at(i) + setting()->delimiter());
+    View::updateView (signalUpdate);
+}
 
-    valueString += values.back();
-
-    mTextWidget->setProperty ("text", valueString);
+QString CSVSettings::TextView::widgetText() const
+{
+    return mTextWidget->property("text").toString();
 }
 
 CSVSettings::TextView *CSVSettings::TextViewFactory::createView

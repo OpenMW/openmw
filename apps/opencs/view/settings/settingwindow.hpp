@@ -5,13 +5,16 @@
 #include <QList>
 
 #include "support.hpp"
-#include "../../model/settings/settingmanager.hpp"
 
-namespace CSMSettings { class Selector; }
+namespace CSMSettings {
+    class Setting;
+    class SettingManager;
+}
 
 namespace CSVSettings {
 
     class Page;
+    class View;
 
     typedef QList <Page *> PageList;
 
@@ -25,9 +28,7 @@ namespace CSVSettings {
     public:
         explicit SettingWindow(QWidget *parent = 0);
 
-        CSMSettings::Selector *selector(const QString &pageName,
-                                        const QString &settingName);
-
+        View *findView (const QString &pageName, const QString &setting);
         void setModel (CSMSettings::SettingManager &model)  { mModel = &model; }
 
     protected:
@@ -37,6 +38,11 @@ namespace CSVSettings {
         void createPages();
 
         const PageList &pages() const     { return mPages; }
+
+        void saveSettings();
+
+    private:
+        void createConnections (const QList <CSMSettings::Setting *> &list);
     };
 }
 

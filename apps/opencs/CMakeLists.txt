@@ -94,22 +94,19 @@ opencs_units (view/settings
     booleanview
     textview
     listview
+    resizeablestackedwidget
     )
 
 opencs_units_noqt (view/settings
-    settingbox
+    frame
     support
     )
 
 opencs_units (model/settings
     usersettings
     settingmanager
-    selector
-    )
-
-opencs_units (model/settings
     setting
-    settingfiltermodel
+    connector
     )
 
 opencs_units_noqt (model/filter

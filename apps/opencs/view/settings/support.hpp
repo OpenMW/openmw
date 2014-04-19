@@ -10,21 +10,14 @@
 //Typedefs
 namespace CSMSettings
 {
-    class Setting;
-
     // Definition / Declaration model typedefs
     // "Pair" = Setting name and specific data
     // "ListItem" = Page name and associated setting pair
 
     typedef QPair <QString, QString> StringPair;
     typedef QPair <QString, QStringList> StringListPair;
-/*
-    typedef QPair <QString, DefinitionPair>    DefinitionListItem;
-    typedef QList <DefinitionListItem>              DefinitionList;
+    typedef QList <StringListPair> StringListPairs;
 
-    typedef QPair <QString, Setting *> DeclarationPair;
-    typedef QPair <QString, DeclarationPair> DeclarationListItem;
-    typedef QList <DeclarationListItem> DeclarationList;*/
 }
 
 //Enums
@@ -34,18 +27,22 @@ namespace CSMSettings
     {
         Property_Name = 0,
         Property_Page = 1,
-        Property_DefaultValues = 2,
-        Property_ViewType = 3,
-        Property_IsMultiValue = 4,
-        Property_IsMultiLine = 5,
-        Property_WidgetWidth = 6,
-        Property_ViewRow = 7,
-        Property_ViewColumn = 8,
-        Property_Delimiter = 9,
-        Property_DeclaredValues = 10,
-        Property_DefinedValues = 11,
-        Property_Proxies = 12,
-        Property_Serializable = 13
+        Property_ViewType = 2,
+        Property_IsMultiValue = 3,
+        Property_IsMultiLine = 4,
+        Property_WidgetWidth = 5,
+        Property_ViewRow = 6,
+        Property_ViewColumn = 7,
+        Property_Delimiter = 8,
+        Property_Serializable = 9,
+        Property_ColumnSpan = 10,
+        Property_RowSpan = 11,
+
+        //Stringlists should always be the last items
+        Property_DefaultValues = 12,
+        Property_DeclaredValues = 13,
+        Property_DefinedValues = 14,
+        Property_Proxies = 15
     };
 
     enum SettingType
@@ -99,16 +96,16 @@ namespace CSMSettings
 
     const QString sPropertyNames[] =
     {
-        "name", "page", "default", "view_type", "is_multi_value",
+        "name", "page", "view_type", "is_multi_value",
         "is_multi_line", "widget_width", "view_row", "view_column", "delimiter",
-        "declarations", "definitions", "proxies", "is_serializable"
+        "is_serializable","column_span", "row_span",
+        "defaults", "declarations", "definitions", "proxies"
     };
 
     const QString sPropertyDefaults[] =
     {
         "",         //name
         "",         //page
-        "",         //default
         "0",        //view type
         "false",    //multivalue
         "false",    //multiline
@@ -116,7 +113,13 @@ namespace CSMSettings
         "-1",       //view row
         "-1",       //view column
         ",",        //delimiter
-        "true"      //serialized
+        "true",     //serialized
+        "1",        //column span
+        "1",        //row span
+        "",         //default values
+        "",         //declared values
+        "",         //defined values
+        ""          //proxy values
     };
 }
 

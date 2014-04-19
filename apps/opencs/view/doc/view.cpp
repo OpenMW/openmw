@@ -12,7 +12,7 @@
 #include "../../model/doc/document.hpp"
 #include "../world/subviews.hpp"
 #include "../tools/subviews.hpp"
-//#include "../settings/dialog.hpp"
+#include "../../model/settings/usersettings.hpp"
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
@@ -234,13 +234,14 @@ void CSVDoc::View::updateActions()
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
-{/*
-    QString width = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Width"));
-    QString height = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Height"));
-*/
-    //resize (width.toInt(), height.toInt());
+{
+    QString width = CSMSettings::UserSettings::instance().settingValue
+                                                    ("Window Size", "Width");
+    QString height = CSMSettings::UserSettings::instance().settingValue
+                                                    ("Window Size", "Height");
 
-    resize (640, 480);
+    resize (width.toInt(), height.toInt());
+
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
     setCentralWidget (&mSubViewWindow);
@@ -337,7 +338,10 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
 
-    //CSMSettings::UserSettings::instance().updateSettings("Display Format");
+    connect (&CSMSettings::UserSettings::instance(),
+             SIGNAL (userSettingUpdated (const QString &, const QStringList &)),
+             view,
+             SLOT (updateUserSetting (const QString &, const QStringList &)));
 
     view->show();
 }
@@ -485,24 +489,19 @@ void CSVDoc::View::resizeViewHeight (int height)
         resize (geometry().width(), height);
 }
 
-void CSVDoc::View::updateEditorSetting (const QString &settingName, const QString &settingValue)
-{/*
-    if ( (settingName == "Record Status Display") || (settingName == "Referenceable ID Type Display") )
-    {
-        foreach (QObject *view, mSubViewWindow.children())
-        {
-         // not all mSubviewWindow children are CSVDoc::Subview objects
-         CSVDoc::SubView *subview = dynamic_cast<CSVDoc::SubView *>(view);
+void CSVDoc::View::updateUserSetting
+                                (const QString &name, const QStringList &list)
+{
+    if (list.isEmpty())
+        return;
 
-         if (subview)
-             subview->updateEditorSetting (settingName, settingValue);
-        }
-    }
-    else if (settingName == "Width")
-            resizeViewWidth (settingValue.toInt());
+    int value = list.at(0).toInt();
 
-    else if (settingName == "Height")
-            resizeViewHeight (settingValue.toInt());*/
+    if (name == "Width")
+        resizeViewWidth (value);
+
+    else if (name == "Height")
+        resizeViewHeight (value);
 }
 
 void CSVDoc::View::toggleShowStatusBar (bool show)

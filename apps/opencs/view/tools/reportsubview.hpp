@@ -39,7 +39,7 @@ namespace CSVTools
 
             virtual void setEditLock (bool locked);
 
-            virtual void updateEditorSetting (const QString&, const QString&);
+            virtual void updateUserSetting (const QString&, const QStringList&);
 
         private slots:
 

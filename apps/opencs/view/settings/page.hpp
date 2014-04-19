@@ -1,51 +1,53 @@
 #ifndef CSVSETTINGS_PAGE_HPP
 #define CSVSETTINGS_PAGE_HPP
 
+#include <QSizePolicy>
 #include <QWidget>
+#include <QMap>
+#include <QList>
+
+#include "frame.hpp"
 
 #include "support.hpp"
-#include "settingbox.hpp"
-#include "../../model/settings/setting.hpp"
 
-class QGroupBox;
+namespace CSMSettings { class Setting; }
 
-namespace CSMSettings { class Selector; }
 namespace CSVSettings
 {
     class View;
-    class SettingBox;
     class IViewFactory;
     class SettingWindow;
 
-    class Page : public QWidget
+    class Page : public Frame
     {
         Q_OBJECT
 
         QList<View *> mViews;
-        CSMSettings::SettingList mSettingList;
-
         SettingWindow *mParent;
-        SettingBox *mBox;
         static QMap <ViewType, IViewFactory *> mViewFactories;
+        bool mIsEditorPage;
 
     public:
         explicit Page(const QString &pageName,
-                      CSMSettings::SettingList &settingList,
+                      QList <CSMSettings::Setting *> settingList,
                       SettingWindow *parent);
 
+        ///Creates a new view based on the passed setting and adds it to
+        ///the page.
         void addView (CSMSettings::Setting *setting);
 
-        CSMSettings::Selector *selector (const QString &settingName);
-        void buildProxy (CSMSettings::Setting *setting,
-                         CSMSettings::Selector *selector);
+        ///Iterates the views created for this page based on the passed setting
+        ///and returns it.
+        View *findView (const QString &page, const QString &setting) const;
 
-        QGroupBox *pageFrame() { return mBox; }
+        const QList <View *> &views () const              { return mViews; }
 
     private:
 
-        void setupPage ();
-        void setupViews (CSMSettings::SettingList &settingList);
+        ///Creates views based on the passed setting list
+        void setupViews (QList <CSMSettings::Setting *> &settingList);
 
+        ///Creates factory objects for view construction
         void buildFactories();
     };
 }

@@ -51,7 +51,9 @@ namespace CSMSettings {
         void loadSettings (const QString &fileName);
 
         /// Writes settings to the user's config file path
-        void saveSettings ();
+        void saveSettings (const QMap <QString, QStringList > &settingMap);
+
+        QString settingValue (const QString &section, const QString &name);
 
     private:
 
@@ -61,9 +63,7 @@ namespace CSMSettings {
 
     signals:
 
-        void signalUpdateEditorSetting (const QString &settingName,
-                                        const QString &settingValue);
-
+        void userSettingUpdated(const QString &, const QStringList &);
     };
 }
 #endif // USERSETTINGS_HPP

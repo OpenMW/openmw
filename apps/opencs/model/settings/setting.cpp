@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include "setting.hpp"
 #include "../../view/settings/support.hpp"
 
@@ -9,7 +7,8 @@ CSMSettings::Setting::Setting()
 }
 
 CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
-                             const QString &pageName)
+                             const QString &pageName, const QStringList &values)
+    : mIsEditorSetting (false)
 {
     buildDefaultSetting();
 
@@ -24,12 +23,7 @@ CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
     setProperty (Property_ViewType, QVariant (vType / 2).toString());
     setProperty (Property_Page, pageName);
     setProperty (Property_Name, settingName);
-}
-
-void CSMSettings::Setting::dumpSettingValues()
-{
-    for (int i = 0; i < mLayout.size(); i++)
-        qDebug() << sPropertyNames[i] << ':' << mLayout[i];
+    setProperty (Property_DeclaredValues, values);
 }
 
 void CSMSettings::Setting::buildDefaultSetting()
@@ -37,111 +31,75 @@ void CSMSettings::Setting::buildDefaultSetting()
     int arrLen = sizeof(sPropertyDefaults) / sizeof (*sPropertyDefaults);
 
     for (int i = 0; i < arrLen; i++)
-        mLayout.append(QStringList() << sPropertyDefaults[i]);
-}
-
-void CSMSettings::Setting::addProxy (Setting *setting,
-                                     QMap <QString, QStringList> &proxyMap)
-{
-    // proxyMap is keyed to master proxy declared values and contains
-    // corresponding proxy values for each declared value for the passed setting
-
-    bool doNew = true;
-
-    foreach (const ProxySettingPair *settingPairItem, mProxyLists)
     {
-        StringPair *proxyName = settingPairItem->first;
+        QStringList propertyList;
 
-        if (proxyName->first == setting->page() &&
-            proxyName->second == setting->name())
-        {
-            doNew = false;
-            //otherwise, take the existing proxy list and add the new data
-            foreach (const QString &key, proxyMap.keys())
-            {
-                bool success = false;
+        if (i <Property_DefaultValues)
+            propertyList.append (sPropertyDefaults[i]);
 
-                ProxyValueList *valueList = settingPairItem->second;
-
-                //iterate the existing keys and replace existing list, if found
-                for (int j = 0; j < valueList->size(); j++)
-                {
-                    const StringListPair *item = valueList->at(j);
-
-                    success = (item->first == key);
-
-                    if (success)
-                    {
-                        StringListPair *newItem =
-                                new StringListPair (key, proxyMap.value (key));
-
-                        valueList->replace(j, newItem);
-                        break;
-                    }
-                }
-
-                //if keyis not found, add to the list
-                if (!success)
-                    valueList->append
-                               (new StringListPair (key, proxyMap.value (key)));
-            }
-            break;
-        }
-    }
-
-    if (doNew)
-    {
-        //if the setting is not found, push a new proxy setting
-        ProxyValueList *proxyValueList = new ProxyValueList();
-
-        StringPair *proxyNames  =
-                new StringPair(setting->page(), setting->name());
-
-        foreach (const QString &key, proxyMap.keys())
-            proxyValueList->append
-                                (new StringListPair(key, proxyMap.value(key)));
-
-        ProxySettingPair *proxyItem  =
-                        new ProxySettingPair(proxyNames, proxyValueList);
-
-        mProxyLists.append (proxyItem);
+        mProperties.append (propertyList);
     }
 }
 
-void CSMSettings::Setting::setDeclaredValues (QStringList list)
+void CSMSettings::Setting::addProxy (const Setting *setting,
+                                     const QStringList &vals)
 {
-    mDeclarations = list;
+    if (serializable())
+        setSerializable (false);
+
+    QList <QStringList> list;
+
+    foreach  (const QString &val, vals)
+        list << (QStringList() << val);
+
+    mProxies [setting->page() + '.' + setting->name()] = list;
 }
 
-const QStringList &CSMSettings::Setting::declaredValues() const
+void CSMSettings::Setting::addProxy (const Setting *setting,
+                                     const QList <QStringList> &list)
 {
-    return mDeclarations;
+    if (serializable())
+        setProperty (Property_Serializable, false);
+
+    mProxies [setting->page() + '.' + setting->name()] = list;
+}
+
+void CSMSettings::Setting::setColumnSpan (int value)
+{
+    setProperty (Property_ColumnSpan, value);
+}
+
+int CSMSettings::Setting::columnSpan() const
+{
+    return property (Property_ColumnSpan).at(0).toInt();
+}
+
+QStringList CSMSettings::Setting::declaredValues() const
+{
+    return property (Property_DeclaredValues);
 }
 
 void CSMSettings::Setting::setDefinedValues (QStringList list)
 {
-    mDefinitions = list;
+    setProperty (Property_DefinedValues, list);
 }
 
-const QStringList &CSMSettings::Setting::definedValues() const
+QStringList CSMSettings::Setting::definedValues() const
 {
-    return mDefinitions;
+    return property (Property_DefinedValues);
 }
 
-QVariant CSMSettings::Setting::property (SettingProperty prop) const
+QStringList CSMSettings::Setting::property (SettingProperty prop) const
 {
-    if (prop >= mLayout.size())
-        return QVariant();
+    if (prop >= mProperties.size())
+        return QStringList();
 
-    QStringList propValues = mLayout.at(prop);
+    return mProperties.at(prop);
+}
 
-    if (propValues.isEmpty())
-        return QVariant();
-
-    if (propValues.size() == 1)
-        return propValues.at(0);
-
-    return propValues;
+void CSMSettings::Setting::setDefaultValue (const QString &value)
+{
+    setDefaultValues (QStringList() << value);
 }
 
 void CSMSettings::Setting::setDefaultValues (const QStringList &values)
@@ -151,7 +109,7 @@ void CSMSettings::Setting::setDefaultValues (const QStringList &values)
 
 QStringList CSMSettings::Setting::defaultValues() const
 {
-    return property (Property_DefaultValues).toStringList();
+    return property (Property_DefaultValues);
 }
 
 void CSMSettings::Setting::setDelimiter (const QString &value)
@@ -161,9 +119,18 @@ void CSMSettings::Setting::setDelimiter (const QString &value)
 
 QString CSMSettings::Setting::delimiter() const
 {
-    return property (Property_Delimiter).toString();
+    return property (Property_Delimiter).at(0);
 }
 
+void CSMSettings::Setting::setEditorSetting(bool state)
+{
+    mIsEditorSetting = true;
+}
+
+bool CSMSettings::Setting::isEditorSetting() const
+{
+    return mIsEditorSetting;
+}
 void CSMSettings::Setting::setIsMultiLine (bool state)
 {
     setProperty (Property_IsMultiLine, state);
@@ -171,7 +138,7 @@ void CSMSettings::Setting::setIsMultiLine (bool state)
 
 bool CSMSettings::Setting::isMultiLine() const
 {
-    return property (Property_IsMultiLine).toBool();
+    return (property (Property_IsMultiLine).at(0) == "true");
 }
 
 void CSMSettings::Setting::setIsMultiValue (bool state)
@@ -181,12 +148,12 @@ void CSMSettings::Setting::setIsMultiValue (bool state)
 
 bool CSMSettings::Setting::isMultiValue() const
 {
-    return property (Property_IsMultiValue).toBool();
+    return (property (Property_IsMultiValue).at(0) == "true");
 }
 
-const CSMSettings::ProxyLists &CSMSettings::Setting::proxyLists() const
+const CSMSettings::ProxyValueMap &CSMSettings::Setting::proxyLists() const
 {
-    return mProxyLists;
+    return mProxies;
 }
 
 void CSMSettings::Setting::setSerializable (bool state)
@@ -196,7 +163,7 @@ void CSMSettings::Setting::setSerializable (bool state)
 
 bool CSMSettings::Setting::serializable() const
 {
-    return property (Property_Serializable).toBool();
+    return (property (Property_Serializable).at(0) == "true");
 }
 
 void CSMSettings::Setting::setName (const QString &value)
@@ -206,7 +173,7 @@ void CSMSettings::Setting::setName (const QString &value)
 
 QString CSMSettings::Setting::name() const
 {
-    return property (Property_Name).toString();
+    return property (Property_Name).at(0);
 }
 
 void CSMSettings::Setting::setPage (const QString &value)
@@ -216,7 +183,17 @@ void CSMSettings::Setting::setPage (const QString &value)
 
 QString CSMSettings::Setting::page() const
 {
-    return property (Property_Page).toString();
+    return property (Property_Page).at(0);
+}
+
+void CSMSettings::Setting::setRowSpan (const int value)
+{
+    setProperty (Property_RowSpan, value);
+}
+
+int CSMSettings::Setting::rowSpan () const
+{
+    return property (Property_RowSpan).at(0).toInt();
 }
 
 void CSMSettings::Setting::setViewType (int vType)
@@ -227,7 +204,7 @@ void CSMSettings::Setting::setViewType (int vType)
 CSVSettings::ViewType CSMSettings::Setting::viewType() const
 {
     return static_cast <CSVSettings::ViewType>
-                                        (property(Property_ViewType).toInt());
+                                    (property(Property_ViewType).at(0).toInt());
 }
 
 void CSMSettings::Setting::setViewColumn (int value)
@@ -237,7 +214,13 @@ void CSMSettings::Setting::setViewColumn (int value)
 
 int CSMSettings::Setting::viewColumn() const
 {
-    return property (Property_ViewColumn).toInt();
+    return property (Property_ViewColumn).at(0).toInt();
+}
+
+void CSMSettings::Setting::setViewLocation (int row, int column)
+{
+    setViewRow (row);
+    setViewColumn (column);
 }
 
 void CSMSettings::Setting::setViewRow (int value)
@@ -247,7 +230,7 @@ void CSMSettings::Setting::setViewRow (int value)
 
 int CSMSettings::Setting::viewRow() const
 {
-    return property (Property_ViewRow).toInt();
+    return property (Property_ViewRow).at(0).toInt();
 }
 
 void CSMSettings::Setting::setWidgetWidth (int value)
@@ -257,22 +240,16 @@ void CSMSettings::Setting::setWidgetWidth (int value)
 
 int CSMSettings::Setting::widgetWidth() const
 {
-    return property (Property_WidgetWidth).toInt();
+    return property (Property_WidgetWidth).at(0).toInt();
 }
 void CSMSettings::Setting::setProperty (SettingProperty prop, bool value)
 {
-    setProperty (prop, QVariant (value).toStringList());
+    setProperty (prop, QStringList() << QVariant (value).toString());
 }
 
 void CSMSettings::Setting::setProperty (SettingProperty prop, int value)
 {
-    setProperty (prop, QVariant (value).toStringList());
-}
-
-void CSMSettings::Setting::setProperty (SettingProperty prop,
-                                                        const QVariant &value)
-{
-    setProperty (prop, value.toStringList());
+    setProperty (prop, QStringList() << QVariant (value).toString());
 }
 
 void CSMSettings::Setting::setProperty (SettingProperty prop,
@@ -284,6 +261,21 @@ void CSMSettings::Setting::setProperty (SettingProperty prop,
 void CSMSettings::Setting::setProperty (SettingProperty prop,
                                                     const QStringList &value)
 {
-    if (prop < mLayout.size())
-        mLayout.replace (prop, value);
+    if (prop < mProperties.size())
+        mProperties.replace (prop, value);
+}
+
+QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting)
+{
+    stream << setting.properties();
+
+    stream << setting.proxies();
+    return stream;
+}
+
+QDataStream &operator >>(QDataStream& stream, CSMSettings::Setting& setting)
+{
+  //  stream >> setting.properties();
+  //  stream >> setting.proxies();
+    return stream;
 }

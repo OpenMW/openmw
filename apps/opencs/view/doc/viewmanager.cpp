@@ -15,7 +15,8 @@
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
-//#include "../settings/dialog.hpp"
+
+#include "../../model/settings/usersettings.hpp"
 
 #include "view.hpp"
 
@@ -118,6 +119,11 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
     connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
+
+    connect (&CSMSettings::UserSettings::instance(),
+             SIGNAL (userSettingUpdated(const QString &, const QStringList &)),
+             view,
+             SLOT (updateUserSetting (const QString &, const QStringList &)));
 
     updateIndices();
 
@@ -312,10 +318,4 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
     if (notifySaveOnClose (view))
         QApplication::instance()->exit();
-}
-
-void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
-{/*
-    foreach (CSVDoc::View *view, mViews)
-        view->updateEditorSetting (settingName, settingValue);*/
 }

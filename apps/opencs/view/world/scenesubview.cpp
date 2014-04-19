@@ -81,11 +81,9 @@ void CSVWorld::SceneSubView::setEditLock (bool locked)
 
 }
 
-void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
-{
-
-
-}
+void CSVWorld::SceneSubView::updateUserSetting
+                                 (const QString &sname, const QStringList &list)
+{}
 
 void CSVWorld::SceneSubView::setStatusBar (bool show)
 {

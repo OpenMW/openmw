@@ -9,10 +9,6 @@
 
 #include "booleanview.hpp"
 #include "../../model/settings/setting.hpp"
-#include "../../model/settings/selector.hpp"
-#include "settingbox.hpp"
-
-#include <QDebug>
 
 CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
                                        Page *parent)
@@ -22,7 +18,7 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
     {
         QAbstractButton *button = 0;
 
-        if (setting->isMultiValue())
+        if (isMultiValue())
             button = new QCheckBox (value, this);
         else
             button = new QRadioButton (value, this);
@@ -30,7 +26,10 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
         connect (button, SIGNAL (clicked (bool)),
                 this, SLOT (slotToggled (bool)));
 
-        viewFrame()->addWidget (button);
+        button->setObjectName (value);
+
+        addWidget (button);
+
         mButtons[value] = button;
     }
 }
@@ -38,7 +37,7 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
 void CSVSettings::BooleanView::slotToggled (bool state)
 {
     //test only for true to avoid multiple selection updates with radiobuttons
-    if (!setting()->isMultiValue() && !state)
+    if (!isMultiValue() && !state)
         return;
 
     QStringList values;
@@ -48,17 +47,18 @@ void CSVSettings::BooleanView::slotToggled (bool state)
         if (mButtons.value(key)->isChecked())
             values.append (key);
     }
-    qDebug () << "slotToggled::values = " << values;
-    selector()->setViewSelection (values);
+    setSelectedValues (values, false);
+
+    View::updateView();
 }
 
-void CSVSettings::BooleanView::slotUpdateView (const QStringList values)
+void CSVSettings::BooleanView::updateView (bool signalUpdate) const
 {
-qDebug() << objectName() << "boolean view update" << values;
+
+    QStringList values = selectedValues();
 
     foreach (const QString &buttonName, mButtons.keys())
     {
-
         QAbstractButton *button = mButtons[buttonName];
 
         //if the value is not found in the list, the widget is checked false
@@ -68,8 +68,6 @@ qDebug() << objectName() << "boolean view update" << values;
         if (button->isChecked() == buttonValue)
             continue;
 
-qDebug() << objectName() << buttonName <<  " = " << buttonValue;
-
         //disable autoexclusive if it's enabled and we're setting
         //the button value to false
         bool switchExclusive = (!buttonValue && button->autoExclusive());
@@ -77,14 +75,12 @@ qDebug() << objectName() << buttonName <<  " = " << buttonValue;
         if (switchExclusive)
             button->setAutoExclusive (false);
 
-qDebug () << objectName() << buttonName << " setting check state";
-
         button->setChecked (buttonValue);
 
         if (switchExclusive)
             button->setAutoExclusive(true);
     }
-qDebug() << objectName() << "::boleanView::slotUpdateView() complete";
+    View::updateView (signalUpdate);
 }
 
 CSVSettings::BooleanView *CSVSettings::BooleanViewFactory::createView

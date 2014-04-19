@@ -20,8 +20,16 @@ void CSVWorld::RegionMapSubView::setEditLock (bool locked)
     mRegionMap->setEditLock (locked);
 }
 
+<<<<<<< HEAD
+}
+
+void CSVWorld::RegionMapSubView::updateUserSetting
+                                 (const QString &sname, const QStringList &list)
+{}
+=======
 void CSVWorld::RegionMapSubView::editRequest (const CSMWorld::UniversalId& id,
     const std::string& hint)
 {
     focusId (id, hint);
 }
+>>>>>>> 7eb6a2e52d659ab5ce60cfcfd1bf72ba8b1e2962

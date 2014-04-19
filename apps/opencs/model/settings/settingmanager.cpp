@@ -6,7 +6,6 @@
 
 #include "setting.hpp"
 #include "settingmanager.hpp"
-#include "settingfiltermodel.hpp"
 
 CSMSettings::SettingManager::SettingManager(QObject *parent) :
     QObject(parent)
@@ -21,23 +20,33 @@ CSMSettings::SettingManager::SettingManager(QObject *parent) :
 
 }
 
-void CSMSettings::SettingManager::addSetting (Setting *setting)
+void CSMSettings::SettingManager::dumpModel()
 {
-    if (!setting)
-        return;
+    foreach (Setting *setting, mSettings)
+    {
+        if (setting->proxyLists().isEmpty())
+            continue;
+    }
+}
 
+CSMSettings::Setting *CSMSettings::SettingManager::createSetting
+        (CSMSettings::SettingType typ, const QString &page, const QString &name,
+         const QStringList &values)
+{
     //get list of all settings for the current setting name
-    Setting *exSetting = findSetting (setting->page(), setting->name());
-
-    if (exSetting)
+    if (findSetting (page, name))
     {
         qWarning() << "Duplicate declaration encountered: "
-                   << setting->page() << '.' << setting->name();
-        return;
+                   << (name + '.' + page);
+        return 0;
     }
+
+    Setting *setting = new Setting (typ, name, page, values);
 
     //add declaration to the model
     mSettings.append (setting);
+
+    return setting;
 }
 
 CSMSettings::DefinitionPageMap
@@ -103,33 +112,53 @@ CSMSettings::DefinitionPageMap
     return pageMap;
 }
 
-bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream)
+bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream,
+                         const QMap <QString, QStringList > &settingListMap)
 {
     if (!stream)
     {
         displayFileErrorMessage(mReadWriteMessage, false);
         return false;
     }
+    //disabled after rolling selector class into view.  Need to
+    //iterate views to get setting definitions before writing to file
 
-    foreach (const QString &page, mSelectors.keys())
+    QStringList sectionKeys;
+
+    foreach (const QString &key, settingListMap.keys())
     {
-        QList <SelectorPair> list = mSelectors.value (page);
+        QStringList names = key.split('.');
+        QString section = names.at(0);
 
-        if (list.size() == 0)
-            continue;
+        if (!sectionKeys.contains(section))
+            if (!settingListMap.value(key).isEmpty())
+                sectionKeys.append (section);
+    }
 
-        *stream << "[" << page << "]" << "\n";
-
-        foreach (const SelectorPair &pair, list)
+    foreach (const QString &section, sectionKeys)
+    {
+        *stream << '[' << section << "]\n";
+        foreach (const QString &key, settingListMap.keys())
         {
-            //skip settings that are proxy masters
-            if (pair.second->proxyIndex() == 0)
+            QStringList names = key.split('.');
+
+            if (names.at(0) != section)
                 continue;
 
-            QStringList values = pair.second->selectionToStringList();
+            QStringList list = settingListMap.value(key);
 
-            foreach (const QString &value, values)
-                *stream << pair.first << " = " << value << "\n";
+            if (list.isEmpty())
+                continue;
+
+            QString name = names.at(1);
+
+            foreach (const QString value, list)
+            {
+                if (value.isEmpty())
+                    continue;
+
+                *stream << name << " = " << value << '\n';
+            }
         }
     }
 
@@ -277,10 +306,10 @@ void CSMSettings::SettingManager::addDefinitions (DefinitionPageMap &pageMap)
     }
 }
 
-CSMSettings::SettingList CSMSettings::SettingManager::
-                                        findSettings(const QStringList &list)
+QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
+                                                    (const QStringList &list)
 {
-    SettingList settings;
+    QList <CSMSettings::Setting *> settings;
 
     foreach (const QString &value, list)
     {
@@ -315,10 +344,10 @@ CSMSettings::Setting *CSMSettings::SettingManager::findSetting
     return 0;
 }
 
-CSMSettings::SettingList CSMSettings::SettingManager::findSettings
+QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
                                                     (const QString &pageName)
 {
-    SettingList settings;
+    QList <CSMSettings::Setting *> settings;
 
     foreach (Setting *setting, mSettings)
     {
@@ -336,75 +365,4 @@ CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const
         pageMap[setting->page()].append (setting);
 
     return pageMap;
-}
-
-CSMSettings::Selector *CSMSettings::SettingManager::findSelector
-                        (const QString &pageName, const QString &settingName)
-{
-    if (!mSelectors.keys().contains(pageName))
-        return 0;
-
-    QList <SelectorPair> list = mSelectors[pageName];
-    foreach (const SelectorPair &pair, list)
-    {
-        if (pair.first == settingName)
-            return pair.second;
-    }
-
-    return 0;
-}
-
-CSMSettings::Selector * CSMSettings::SettingManager::createSelector
-                                                (CSMSettings::Setting *setting)
-{
-    qDebug() << "Creating selector for setting " << setting->name();
-
-    QStringList definitions = setting->definedValues();
-    Selector *selector = 0;
-
-    qDebug() << "defns: " << setting->definedValues();
-    qDebug() << "deflts" << setting->defaultValues();
-
-    //add default value if no definitions are found
-    if (definitions.size() == 0)
-    {
-        definitions.append (setting->defaultValues());
-        setting->setDefinedValues (definitions);
-    }
-
-    // use the declared values as the model and the definitions for selection,
-    // if there are declared values.  Otherwise, use the definitions as the
-    // model and select everything
-    if (setting->declaredValues().size() > 0)
-        selector = new Selector (setting->name(), setting->declaredValues());
-    else
-    {
-        selector = new Selector (setting->name(), definitions);
-        selector->setSelectAll();
-    }
-
-    selector->setViewSelection (definitions);
-
-    mSelectors[setting->page()].append( SelectorPair
-                                                (setting->name(), selector));
-
-    return selector;
-}
-
-
-
-CSMSettings::Selector *CSMSettings::SettingManager::selector
-                        (const QString &pageName, const QString &settingName)
-{
-    Selector *selector = findSelector (pageName, settingName);
-
-    if (selector)
-        return selector;
-
-    Setting *setting = findSetting (pageName, settingName);
-
-    if (!setting)
-        return 0;
-
-    return createSelector (setting);
 }

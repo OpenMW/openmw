@@ -1,81 +1,101 @@
 #include "listview.hpp"
 #include "../../model/settings/setting.hpp"
-#include "../../model/settings/selector.hpp"
-#include "settingbox.hpp"
 
 #include <QListView>
 #include <QComboBox>
-#include <QApplication>
-#include <QDebug>
 #include <QStringListModel>
 
 CSVSettings::ListView::ListView(CSMSettings::Setting *setting,
                                 Page *parent)
     : mComboBox (0), mAbstractItemView (0), View(setting, parent)
 {
+    QWidget *widget =
+                    buildWidget(setting->isMultiLine(), setting->widgetWidth());
+
+    addWidget (widget, setting->viewRow(), setting->viewColumn());
+
+    if (mComboBox)
+        buildComboBoxModel();
+
+    else if (mAbstractItemView)
+        buildAbstractItemViewModel();
+}
+
+void CSVSettings::ListView::buildComboBoxModel()
+{
+    mComboBox->setModel (dataModel());
+    mComboBox->setModelColumn (0);
+    mComboBox->view()->setSelectionModel (selectionModel());
+
+    int curIdx = -1;
+
+    if (!selectionModel()->selection().isEmpty())
+        curIdx = selectionModel()->selectedIndexes().at(0).row();
+
+     mComboBox->setCurrentIndex (curIdx);
+
+     connect (mComboBox, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(emitItemViewUpdate(int)));
+}
+
+void CSVSettings::ListView::buildAbstractItemViewModel()
+{
+    mAbstractItemView->setModel (dataModel());
+    mAbstractItemView->setSelectionModel (selectionModel());
+
+    //connection needs to go here for list view update to signal to
+    //the outside
+}
+
+void CSVSettings::ListView::emitItemViewUpdate (int idx)
+{
+    emit viewUpdated (objectName(), selectedValues());
+}
+
+QWidget *CSVSettings::ListView::buildWidget(bool isMultiLine, int width)
+{
     QWidget *widget = 0;
 
-    if (setting->isMultiLine())
+    if (isMultiLine)
     {
         mAbstractItemView = new QListView (this);
         widget = mAbstractItemView;
+
+        if (width > 0)
+            widget->setFixedWidth (widgetWidth (width));
     }
     else
     {
         mComboBox = new QComboBox (this);
         widget = mComboBox;
+
+        if (width > 0)
+            mComboBox->setMinimumContentsLength (width);
     }
 
-    if (setting->widgetWidth() > 0)
-    {
-        QString widthToken;
-        widthToken.fill('P', setting->widgetWidth());
-        QFontMetrics fm (QApplication::font());
-        widget->setFixedWidth (fm.width (widthToken));
-    }
-
-    viewFrame()->addWidget (widget, setting->viewRow(),
-                            setting->viewColumn());
+    return widget;
 }
 
 void CSVSettings::ListView::showEvent ( QShowEvent * event )
 {
-    if (!selector())
-        View::showEvent (event);
-
-    if (mComboBox)
-    {
-        mComboBox->setModel (selector()->model());
-        mComboBox->view()->setSelectionModel (selector()->selectionModel());
-
-         if (!selector()->selectedRows().isEmpty())
-        {
-            mComboBox->setCurrentIndex (selector()->selectedRows().back());
-        }
-       else
-            mComboBox->setCurrentIndex (-1);
-
-        mComboBox->setModelColumn (0);
-    }
-    else if (mAbstractItemView)
-    {
-        mAbstractItemView->setModel (selector()->model());
-        mAbstractItemView->setSelectionModel (selector()->selectionModel());
-    }
+    View::showEvent (event);
 }
 
-void CSVSettings::ListView::slotUpdateView (QStringList list)
+void CSVSettings::ListView::updateView (bool signalUpdate) const
 {
-    qDebug() << "list view update";
-    int idx = -1;
+    QStringList values = selectedValues();
 
     if (mComboBox)
     {
-        if (list.size() > 0)
-            idx =  (mComboBox->findText(list.at(0)));
+        int idx = -1;
+
+        if (values.size() > 0)
+            idx =  (mComboBox->findText(values.at(0)));
 
         mComboBox->setCurrentIndex (idx);
     }
+
+    View::updateView (signalUpdate);
 }
 
 CSVSettings::ListView *CSVSettings::ListViewFactory::createView

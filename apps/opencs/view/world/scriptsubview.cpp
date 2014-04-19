@@ -127,3 +127,7 @@ void CSVWorld::ScriptSubView::updateHighlighting()
 
     mHighlighter->rehighlight();
 }
+
+void CSVWorld::ScriptSubView::updateUserSetting
+                                 (const QString &name, const QStringList &list)
+{}
