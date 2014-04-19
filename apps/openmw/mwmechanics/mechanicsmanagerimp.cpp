@@ -806,8 +806,8 @@ namespace MWMechanics
         // NOTE: int arg can be from itemTaken() so DON'T modify it, since it is
         //  passed to reportCrime later on in this function.
 
-        // Only player can commit crime and no victimless crimes
-        if (ptr.getRefData().getHandle() != "player" || victim.isEmpty())
+        // Only player can commit crime
+        if (ptr.getRefData().getHandle() != "player")
             return false;
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
@@ -824,6 +824,8 @@ namespace MWMechanics
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmKilling")->getInt();
         else if (type == OT_Theft)
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
+        else
+            return false;
 
         // Innocent until proven guilty
         bool reported = false;
