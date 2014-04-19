@@ -3,22 +3,18 @@
 
 #include <QListWidgetItem>
 
-#include <QDebug>
-
 CSVSettings::ResizeableStackedWidget::ResizeableStackedWidget(QWidget *parent) :
     QStackedWidget(parent)
 {}
 
 void CSVSettings::ResizeableStackedWidget::addWidget(QWidget* pWidget)
 {
-    qDebug() << "ResizeableStackedWidget::addWidget " << pWidget->objectName();
    QStackedWidget::addWidget(pWidget);
 }
 
 void CSVSettings::ResizeableStackedWidget::changePage
                                                     (int current, int previous)
 {
-    qDebug () << "previous = " << previous << "; current = " << current;
     if (current == previous)
         return;
 

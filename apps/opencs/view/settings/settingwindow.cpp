@@ -2,6 +2,7 @@
 
 #include "../../model/settings/setting.hpp"
 #include "../../model/settings/connector.hpp"
+#include "../../model/settings/usersettings.hpp"
 #include "settingwindow.hpp"
 #include "page.hpp"
 #include "view.hpp"
@@ -20,7 +21,6 @@ void CSVSettings::SettingWindow::createPages()
 
     foreach (const QString &pageName, pageMap.keys())
     {
-        qDebug() << "SettingWindow::createPages() creating page " << pageName;
         QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName);
 
         mPages.append (new Page (pageName, pageSettings, this));
@@ -92,6 +92,21 @@ CSVSettings::View *CSVSettings::SettingWindow::findView
             return page->findView (pageName, setting);
     }
     return 0;
+}
+
+void CSVSettings::SettingWindow::saveSettings()
+{
+    QMap <QString, QStringList> settingMap;
+
+    foreach (const Page *page, mPages)
+    {
+        foreach (const View *view, page->views())
+        {
+            if (view->serializable())
+                settingMap[view->viewKey()] = view->selectedValues();
+        }
+    }
+    CSMSettings::UserSettings::instance().saveSettings (settingMap);
 }
 
 void CSVSettings::SettingWindow::closeEvent (QCloseEvent *event)

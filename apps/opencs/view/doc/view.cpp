@@ -234,13 +234,14 @@ void CSVDoc::View::updateActions()
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
-{/*
-    QString width = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Width"));
-    QString height = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Height"));
-*/
-    //resize (width.toInt(), height.toInt());
+{
+    QString width = CSMSettings::UserSettings::instance().settingValue
+                                                    ("Window Size", "Width");
+    QString height = CSMSettings::UserSettings::instance().settingValue
+                                                    ("Window Size", "Height");
 
-    resize (640, 480);
+    resize (width.toInt(), height.toInt());
+
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
     setCentralWidget (&mSubViewWindow);

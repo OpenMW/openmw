@@ -10,8 +10,6 @@
 
 #include "page.hpp"
 
-#include <QDebug>
-
 #include <QApplication>
 
 #include <QSplitter>
@@ -109,9 +107,6 @@ void CSVSettings::Dialog::buildStackedWidget (QWidget *centralWidget)
 {
     mStackedWidget = new ResizeableStackedWidget (centralWidget);
 
-    connect (this, SIGNAL (pageChanged (int, int)),
-             mStackedWidget, SLOT (slotChangePage (int, int)));
-
     centralWidget->layout()->addWidget (mStackedWidget);
 }
 
@@ -120,7 +115,8 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
     //SettingWindow::closeEvent() must be called first to ensure
     //model is updated
     SettingWindow::closeEvent (event);
-    CSMSettings::UserSettings::instance().saveSettings();
+
+    saveSettings();
 }
 
 void CSVSettings::Dialog::show()

@@ -44,6 +44,8 @@ namespace CSVSettings
 
         QString mViewKey;
 
+        bool mSerializable;
+
     public:
 
         explicit View (CSMSettings::Setting *setting, Page *parent);
@@ -53,6 +55,13 @@ namespace CSVSettings
 
         ///Returns the index / row of the passed value, -1 if not found.
         int currentIndex () const;
+
+        ///Returns the number of rows in the view's data model
+        int rowCount() const;
+
+        ///Returns bool indicating the data in this view should / should not
+        ///be serialized to a config file
+        bool serializable() const                     { return mSerializable; }
 
         ///Returns a pointer to the view's owning parent page
         const Page *parentPage() const                  { return mParentPage; }

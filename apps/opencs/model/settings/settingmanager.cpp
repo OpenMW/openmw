@@ -26,14 +26,6 @@ void CSMSettings::SettingManager::dumpModel()
     {
         if (setting->proxyLists().isEmpty())
             continue;
-
-        qDebug () << "Proxylists for " << (setting->page() + '.' + setting->name());
-        int i = 0;
-        foreach (const QString &key, setting->proxyLists().keys())
-        {
-            qDebug() << key << " = " << setting->proxyLists().value(key);
-            qDebug() << "master key: " << setting->declaredValues().at(i++);
-        }
     }
 }
 
@@ -120,7 +112,8 @@ CSMSettings::DefinitionPageMap
     return pageMap;
 }
 
-bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream)
+bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream,
+                         const QMap <QString, QStringList > &settingListMap)
 {
     if (!stream)
     {
@@ -129,29 +122,46 @@ bool CSMSettings::SettingManager::writeFilestream(QTextStream *stream)
     }
     //disabled after rolling selector class into view.  Need to
     //iterate views to get setting definitions before writing to file
-/*
-    foreach (const QString &page, mSelectors.keys())
+
+    QStringList sectionKeys;
+
+    foreach (const QString &key, settingListMap.keys())
     {
-        QList <SelectorPair> list = mSelectors.value (page);
+        QStringList names = key.split('.');
+        QString section = names.at(0);
 
-        if (list.size() == 0)
-            continue;
+        if (!sectionKeys.contains(section))
+            if (!settingListMap.value(key).isEmpty())
+                sectionKeys.append (section);
+    }
 
-        *stream << "[" << page << "]" << "\n";
-
-        foreach (const SelectorPair &pair, list)
+    foreach (const QString &section, sectionKeys)
+    {
+        *stream << '[' << section << "]\n";
+        foreach (const QString &key, settingListMap.keys())
         {
-            //skip settings that are proxy masters
-            //if (pair.second->proxyIndex() == 0)
+            QStringList names = key.split('.');
+
+            if (names.at(0) != section)
                 continue;
 
-            QStringList values = pair.second->selectionStringList();
+            QStringList list = settingListMap.value(key);
 
-            foreach (const QString &value, values)
-                *stream << pair.first << " = " << value << "\n";
+            if (list.isEmpty())
+                continue;
+
+            QString name = names.at(1);
+
+            foreach (const QString value, list)
+            {
+                if (value.isEmpty())
+                    continue;
+
+                *stream << name << " = " << value << '\n';
+            }
         }
     }
-*/
+
     destroyStream (stream);
     return true;
 }
@@ -352,10 +362,7 @@ CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const
     SettingPageMap pageMap;
 
     foreach (Setting *setting, mSettings)
-    {
-        qDebug() << "SettingManager::settingPageMap() creating map for " << setting->page() + '.' + setting->name();
         pageMap[setting->page()].append (setting);
-    }
 
     return pageMap;
 }

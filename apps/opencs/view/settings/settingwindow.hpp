@@ -5,9 +5,11 @@
 #include <QList>
 
 #include "support.hpp"
-#include "../../model/settings/settingmanager.hpp"
 
-namespace CSMSettings { class Selector; }
+namespace CSMSettings {
+    class Setting;
+    class SettingManager;
+}
 
 namespace CSVSettings {
 
@@ -36,6 +38,8 @@ namespace CSVSettings {
         void createPages();
 
         const PageList &pages() const     { return mPages; }
+
+        void saveSettings();
 
     private:
         void createConnections (const QList <CSMSettings::Setting *> &list);

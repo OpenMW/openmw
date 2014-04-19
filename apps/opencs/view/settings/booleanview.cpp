@@ -10,8 +10,6 @@
 #include "booleanview.hpp"
 #include "../../model/settings/setting.hpp"
 
-#include <QDebug>
-
 CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
                                        Page *parent)
     : View (setting, parent)

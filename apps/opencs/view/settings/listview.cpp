@@ -3,7 +3,6 @@
 
 #include <QListView>
 #include <QComboBox>
-#include <QDebug>
 #include <QStringListModel>
 
 CSVSettings::ListView::ListView(CSMSettings::Setting *setting,

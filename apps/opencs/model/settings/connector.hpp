@@ -14,8 +14,6 @@ namespace CSVSettings {
 
 namespace CSMSettings {
 
-    typedef QPair <int, CSVSettings::View *> ViewIndexPair;
-
     class Connector : public QObject
     {
         Q_OBJECT
@@ -23,7 +21,7 @@ namespace CSMSettings {
         CSVSettings::View *mMasterView;
 
         //map using the view pointer as a key to it's index value
-        QList < ViewIndexPair > mSlaveViews;
+        QList <CSVSettings::View *> mSlaveViews;
 
         //list of proxy values for each master value.
         //value list order is indexed to the master value index.
@@ -45,11 +43,7 @@ namespace CSMSettings {
         bool stringListsMatch (const QStringList &list1,
                                const QStringList &list2) const;
 
-        void updateMaster(const CSVSettings::View *view) const;
-        void updateSlaves() const;
-
         QList <QStringList> getSlaveViewValues() const;
-        CSVSettings::View *slaveView (int index) const;
 
     public slots:
 

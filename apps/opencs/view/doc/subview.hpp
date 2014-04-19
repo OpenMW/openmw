@@ -42,8 +42,7 @@ namespace CSVDoc
         ///< Default implementation: ignored
 
     public slots:
-        virtual void updateUserSetting
-                                    (const QString &, const QStringList &) = 0;
+        virtual void updateUserSetting (const QString &, const QStringList &) {}
 
         virtual void useHint (const std::string& hint);
         ///< Default implementation: ignored

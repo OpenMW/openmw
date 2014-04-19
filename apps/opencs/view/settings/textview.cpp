@@ -4,7 +4,6 @@
 #include "textview.hpp"
 #include "../../model/settings/setting.hpp"
 
-#include <QDebug>
 CSVSettings::TextView::TextView(CSMSettings::Setting *setting, Page *parent)
     : mDelimiter (setting->delimiter()), View (setting, parent)
 

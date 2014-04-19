@@ -8,7 +8,6 @@
 #include "../../model/settings/connector.hpp"
 #include "settingwindow.hpp"
 
-#include <QDebug>
 QMap <CSVSettings::ViewType, CSVSettings::IViewFactory *>
                                             CSVSettings::Page::mViewFactories;
 

@@ -17,9 +17,6 @@
 #include "setting.hpp"
 #include "../../view/settings/support.hpp"
 
-#include <QDebug>
-
-
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -80,9 +77,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         preDefined->setViewLocation (1, 1);
         preDefined->setWidgetWidth (10);
         preDefined->setColumnSpan (2);
-
-        //do not serialize since it's values depend entirely on width / height
-        preDefined->setSerializable (false);
 
         preDefined->addProxy (width,
                              QStringList() << "640" << "800" << "1024" << "1440"
@@ -222,10 +216,6 @@ bool CSMSettings::UserSettings::loadSettingsFromFile
         mergeSettings (totalMap, pageMap, Merge_Overwrite);
     }
 
-    foreach (DefinitionMap *sMap, totalMap)
-        foreach (QStringList *stng, *sMap)
-            qDebug() << *stng;
-
     addDefinitions (totalMap);
 
     return success;
@@ -246,7 +236,6 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     filepaths << QString::fromStdString
                             (mCfgMgr.getUserConfigPath().string()) + fileName;
 
-    qDebug () << "load settings";
     bool success = loadSettingsFromFile (filepaths);
 
     if (!success)
@@ -265,9 +254,35 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     mUserFilePath = filepaths.at (2);
 }
 
-void CSMSettings::UserSettings::saveSettings ()
+void CSMSettings::UserSettings::saveSettings
+                                (const QMap <QString, QStringList> &settingMap)
 {
-   writeFilestream (openFilestream (mUserFilePath, false));
+    for (int i = 0; i < settings().size(); i++)
+    {
+        Setting* setting = settings().at(i);
+
+        QString key = setting->page() + '.' + setting->name();
+
+        if (!settingMap.keys().contains(key))
+            continue;
+
+        setting->setDefinedValues (settingMap.value(key));
+    }
+
+   writeFilestream (openFilestream (mUserFilePath, false), settingMap);
+}
+
+QString CSMSettings::UserSettings::settingValue (const QString &section,
+                                                 const QString &name)
+{
+    Setting *setting = findSetting(section, name);
+
+    if (setting)
+    {
+        if (!setting->definedValues().isEmpty())
+            return setting->definedValues().at(0);
+    }
+    return "";
 }
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()

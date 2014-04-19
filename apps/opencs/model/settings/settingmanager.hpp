@@ -56,7 +56,8 @@ namespace CSMSettings
         DefinitionPageMap readFilestream(QTextStream *stream);
 
         ///write setting definitions to file
-        bool writeFilestream (QTextStream *stream);
+        bool writeFilestream (QTextStream *stream,
+                              const QMap <QString, QStringList > &settingMap);
 
         ///merge PageMaps of settings when loading from multiple files
         void mergeSettings (DefinitionPageMap &destMap, DefinitionPageMap &srcMap,
@@ -70,6 +71,7 @@ namespace CSMSettings
         void displayFileErrorMessage(const QString &message,
                                      bool isReadOnly) const;
 
+        QList <Setting *> settings() const           { return mSettings; }
         void dumpModel();
 
     signals:

@@ -12,11 +12,9 @@ namespace CSMSettings
     //values in it's declared value list
     typedef QMap <QString, QList <QStringList> > ProxyValueMap;
 
-    struct Setting
+    class Setting
     {
-        QList <QStringList> mLayout;
-        QStringList mDefinitions;
-        QStringList mDeclarations;
+        QList <QStringList> mProperties;
         QStringList mDefaults;
 
         bool mIsEditorSetting;
@@ -39,17 +37,17 @@ namespace CSMSettings
         void addProxy (const Setting *setting, const QStringList &vals);
         void addProxy (const Setting *setting, const QList <QStringList> &list);
 
-        void setIsSerialized (bool state);
-        bool isSerialized() const;
+        const QList <QStringList> &properties() const   { return mProperties; }
+        const ProxyValueMap &proxies() const            { return mProxies; }
 
         void setColumnSpan (int value);
         int columnSpan() const;
 
         void setDeclaredValues (QStringList list);
-        const QStringList &declaredValues() const;
+        QStringList declaredValues() const;
 
         void setDefinedValues (QStringList list);
-        const QStringList &definedValues() const;
+        QStringList definedValues() const;
 
         void setDefaultValue (const QString &value);
 
@@ -97,19 +95,16 @@ namespace CSMSettings
         int widgetWidth() const;
 
         ///returns the specified property value
-        QVariant property (SettingProperty prop) const;
+        QStringList property (SettingProperty prop) const;
 
         ///boilerplate code to convert setting values of common types
         void setProperty (SettingProperty prop, bool value);
         void setProperty (SettingProperty prop, int value);
-        void setProperty (SettingProperty prop, const QVariant &value);
         void setProperty (SettingProperty prop, const QString &value);
         void setProperty (SettingProperty prop, const QStringList &value);
 
         void addProxy (Setting* setting,
                        QMap <QString, QStringList> &proxyMap);
-
-        void dumpSettingValues();
 
     protected:
         void buildDefaultSetting();

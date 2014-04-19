@@ -116,6 +116,10 @@ namespace CSMSettings
         "true",     //serialized
         "1",        //column span
         "1",        //row span
+        "",         //default values
+        "",         //declared values
+        "",         //defined values
+        ""          //proxy values
     };
 }
 

@@ -40,6 +40,8 @@ namespace CSVSettings
         ///and returns it.
         View *findView (const QString &page, const QString &setting) const;
 
+        const QList <View *> &views () const              { return mViews; }
+
     private:
 
         ///Creates views based on the passed setting list

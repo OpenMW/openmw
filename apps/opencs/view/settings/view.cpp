@@ -8,8 +8,6 @@
 #include "../../model/settings/setting.hpp"
 #include "page.hpp"
 
-#include <QDebug>
-
 CSVSettings::View::View(CSMSettings::Setting *setting,
                         Page *parent)
 
@@ -17,6 +15,7 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
       mHasFixedValues (!setting->declaredValues().isEmpty()),
       mIsMultiValue (setting->isMultiValue()),
       mViewKey (setting->page() + '.' + setting->name()),
+      mSerializable (setting->serializable()),
       Frame(true, setting->name(), parent)
 {
     setObjectName (setting->name());
@@ -88,6 +87,11 @@ void CSVSettings::View::refresh() const
 {
     select (mSelectionModel->selection());
     updateView();
+}
+
+int CSVSettings::View::rowCount() const
+{
+    return mDataModel->rowCount();
 }
 
 void CSVSettings::View::select (const QItemSelection &selection) const

@@ -14,7 +14,6 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
-#include <QDebug>
 namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
                   struct ConfigurationManager;}
 
@@ -52,7 +51,9 @@ namespace CSMSettings {
         void loadSettings (const QString &fileName);
 
         /// Writes settings to the user's config file path
-        void saveSettings ();
+        void saveSettings (const QMap <QString, QStringList > &settingMap);
+
+        QString settingValue (const QString &section, const QString &name);
 
     private:
 
@@ -63,13 +64,6 @@ namespace CSMSettings {
     signals:
 
         void userSettingUpdated(const QString &, const QStringList &);
-
-    public slots:
-
-        void updateUserSetting(const QString &name, const QStringList &values)
-        {
-            qDebug() << "Received signal from " << name << " = " << values;
-        }
     };
 }
 #endif // USERSETTINGS_HPP
