@@ -805,8 +805,8 @@ namespace MWMechanics
         // NOTE: int arg can be from itemTaken() so DON'T modify it, since it is
         //  passed to reportCrime later on in this function.
 
-        // Only player can commit crime and no victimless crimes
-        if (ptr.getRefData().getHandle() != "player" || victim.isEmpty())
+        // Only player can commit crime
+        if (ptr.getRefData().getHandle() != "player")
             return false;
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();

@@ -1305,7 +1305,7 @@ namespace MWClass
 
     bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
     {
-        return ptr.get<ESM::NPC>()->mBase->mClass == className;
+        return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;
