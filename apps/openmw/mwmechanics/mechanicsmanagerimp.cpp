@@ -823,6 +823,8 @@ namespace MWMechanics
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmKilling")->getInt();
         else if (type == OT_Theft)
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
+        else
+            return false;
 
         // Innocent until proven guilty
         bool reported = false;
