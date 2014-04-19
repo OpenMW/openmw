@@ -42,6 +42,8 @@ namespace MWMechanics
 
             void updateEquippedLight (const MWWorld::Ptr& ptr, float duration);
 
+            void updateCrimePersuit (const MWWorld::Ptr& ptr, float duration);
+
         public:
 
             Actors();

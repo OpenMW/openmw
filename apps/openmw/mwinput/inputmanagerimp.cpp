@@ -96,12 +96,12 @@ namespace MWInput
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
-        , mMouseLookEnabled(true)
+        , mMouseLookEnabled(false)
         , mMouseX(ogre.getWindow()->getWidth ()/2.f)
         , mMouseY(ogre.getWindow()->getHeight ()/2.f)
         , mMouseWheel(0)
         , mDragDrop(false)
-        , mGuiCursorEnabled(false)
+        , mGuiCursorEnabled(true)
         , mUserFile(userFile)
         , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
@@ -256,17 +256,20 @@ namespace MWInput
         }
     }
 
-    void InputManager::update(float dt, bool loading)
+    void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
-        mInputManager->capture(loading);
+        mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
         // update values of channels (as a result of pressed keys)
-        if (!loading)
+        if (!disableControls)
             mInputBinder->update(dt);
+
+        if (disableControls)
+            return;
 
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
@@ -287,9 +290,6 @@ namespace MWInput
         {
             mInputManager->warpMouse(mMouseX, mMouseY);
         }
-
-        if (loading)
-            return;
 
         // Disable movement in Gui mode
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
@@ -626,9 +626,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode () && MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_Video)
-            MWBase::Environment::get().getWorld ()->stopVideo ();
-        else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
+        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
         {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);

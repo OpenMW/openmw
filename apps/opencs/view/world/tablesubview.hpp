@@ -17,6 +17,11 @@ namespace CSMDoc
     class Document;
 }
 
+namespace CSVFilter
+{
+    class FilterBox;
+}
+
 namespace CSVWorld
 {
     class Table;
@@ -29,6 +34,7 @@ namespace CSVWorld
 
             Table *mTable;
             TableBottomBox *mBottom;
+            CSVFilter::FilterBox *mFilterBox;
 
         public:
 
@@ -41,15 +47,14 @@ namespace CSVWorld
 
             virtual void setStatusBar (bool show);
 
+            virtual void useHint (const std::string& hint);
+
         protected:
             bool eventFilter(QObject* object, QEvent *event);
 
         signals:
             void cloneRequest(const std::string&,
                               const CSMWorld::UniversalId::Type);
-            void createFilterRequest(std::vector<std::pair<std::string, std::vector<std::string> > >& filterSource,
-                                     Qt::DropAction action);
-            void useFilterRequest(const std::string& idOfFilter);
 
         private slots:
 

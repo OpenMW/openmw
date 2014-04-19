@@ -28,7 +28,7 @@ namespace ESM
 
 void Faction::load(ESMReader &esm)
 {
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
 
     // Read rank names. These are optional.
     int i = 0;
@@ -52,7 +52,7 @@ void Faction::load(ESMReader &esm)
 }
 void Faction::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
 
     for (int i = 0; i < 10; i++)
     {

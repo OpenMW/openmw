@@ -11,7 +11,7 @@ namespace ESM
 void Lockpick::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
 
     esm.getHNT(mData, "LKDT", 16);
 
@@ -22,7 +22,7 @@ void Lockpick::load(ESMReader &esm)
 void Lockpick::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
 
     esm.writeHNT("LKDT", mData, 16);
     esm.writeHNOString("SCRI", mScript);

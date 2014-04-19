@@ -123,18 +123,19 @@ namespace MWClass
             else
                 data->mContainerStore = new MWWorld::ContainerStore();
 
+            // Relates to NPC gold reset delay
+            data->mCreatureStats.setTradeTime(MWWorld::TimeStamp(0.0, 0));
+
+            data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
+
             // store
-            ptr.getRefData().setCustomData (data.release());
+            ptr.getRefData().setCustomData(data.release());
 
             getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "",
                                        MWBase::Environment::get().getWorld()->getStore());
 
-            // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
-            // (except for gold you gave him)
-            getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, ref->mBase->mData.mGold, ptr);
-
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
-                getInventoryStore(ptr).autoEquip(ptr);
+                getInventoryStore(ptr).autoEquip(ptr);   
         }
     }
 
@@ -804,6 +805,11 @@ namespace MWClass
 
         customData.mContainerStore->writeState (state2.mInventory);
         customData.mCreatureStats.writeState (state2.mCreatureStats);
+    }
+
+    int Creature::getBaseGold(const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Creature>()->mBase->mData.mGold;
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;

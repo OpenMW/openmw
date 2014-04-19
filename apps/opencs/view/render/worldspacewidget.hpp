@@ -28,10 +28,13 @@ namespace CSVRender
             WorldspaceWidget (QWidget *parent = 0);
 
             CSVWorld::SceneToolMode *makeNavigationSelector (CSVWorld::SceneToolbar *parent);
-            ///< \important The created tool is not added to the toolbar (via addTool). Doing that
+            ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
             /// is the responsibility of the calling function.
 
             void selectDefaultNavigationMode();
+
+            virtual void useViewHint (const std::string& hint);
+            ///< Default-implementation: ignored.
 
         private slots:
 

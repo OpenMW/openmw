@@ -15,7 +15,7 @@ void CSVRender::UnpagedWorldspaceWidget::update()
 
     Ogre::ColourValue colour;
     colour.setAsABGR (record.get().mAmbi.mAmbient);
-    setAmbient (colour);
+    setDefaultAmbient (colour);
 
     /// \todo deal with mSunlight and mFog/mForDensity
 }
