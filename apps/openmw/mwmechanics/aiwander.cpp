@@ -34,6 +34,9 @@ namespace MWMechanics
       , mGreetDistanceMultiplier(0)
       , mGreetDistanceReset(0)
       , mChance(0)
+      , mRotate(false)
+      , mTargetAngle(0)
+      , mOriginalAngle(0)
       , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
@@ -202,6 +205,12 @@ namespace MWMechanics
                 mChooseAction = true;
             }
 //#endif
+        }
+
+        if (mRotate)
+        {
+            if (zTurn(actor, Ogre::Degree(mTargetAngle)))
+                mRotate = false;
         }
 
         mReaction += duration;
@@ -385,11 +394,28 @@ namespace MWMechanics
                     mWalking = false;
                     mObstacleCheck.clear();
                 }
-                Ogre::Vector3 dir = playerPos - actorPos;
-                float length = dir.length();
 
-                // FIXME: horrible hack, and does not turn smoothly
-                zTurn(actor, Ogre::Degree(Ogre::Radian(Ogre::Math::ACos(dir.y / length) * ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees()));
+                if(!mRotate)
+                {
+                    Ogre::Vector3 dir = playerPos - actorPos;
+                    float length = dir.length();
+
+                    // FIXME: horrible hack
+                    float faceAngle = Ogre::Radian(Ogre::Math::ACos(dir.y / length) *
+                            ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees();
+                    // an attempt at reducing the turning animation glitch
+                    // TODO: doesn't seem to work very well
+                    if(abs(faceAngle) > 10)
+                    {
+                        mTargetAngle = faceAngle;
+                        mRotate = true;
+                    }
+                }
+            }
+            else if(!mDistance) // FIXME: stationary actors go back to their normal position
+            {
+                //mTargetAngle = mOriginalAngle;
+                //mRotate = true;
             }
 
             if (!mSaidGreeting)
