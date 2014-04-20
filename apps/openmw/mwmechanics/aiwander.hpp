@@ -76,7 +76,6 @@ namespace MWMechanics
             // the z rotation angle (degrees) we want to reach
             // used every frame when mRotate is true
             float mTargetAngle;
-            float mOriginalAngle;
             bool mRotate;
             float mReaction; // update some actions infrequently
     };

@@ -36,7 +36,6 @@ namespace MWMechanics
       , mChance(0)
       , mRotate(false)
       , mTargetAngle(0)
-      , mOriginalAngle(0)
       , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
@@ -433,7 +432,7 @@ namespace MWMechanics
             }
 
             // Check if idle animation finished
-            if(!checkIdle(actor, mPlayedIdle) && !mRotate)
+            if(!checkIdle(actor, mPlayedIdle))
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;
