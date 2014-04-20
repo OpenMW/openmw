@@ -26,11 +26,6 @@ namespace CSMWorld
             ///< Load a sequence of references.
 
             std::string getNewId();
-            
-            void cloneRecord(const std::string& origin, 
-                             const std::string& destination,
-                             const CSMWorld::UniversalId::Type type,
-                             const CSMWorld::UniversalId::ArgumentType argumentType);
     };
 }
 
