@@ -209,7 +209,10 @@ namespace MWMechanics
 
         if (mRotate)
         {
-            if (zTurn(actor, Ogre::Degree(mTargetAngle)))
+            // Reduce the turning animation glitch by using a *HUGE* value of
+            // epsilon...  TODO: a proper fix might be in either the physics or the
+            // animation subsystem
+            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(12)))
                 mRotate = false;
         }
 
@@ -220,7 +223,7 @@ namespace MWMechanics
             return false;
         }
 
-        // NOTE: everything below get updated every mReaction
+        // NOTE: everything below get updated every 0.25 seconds
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
@@ -404,18 +407,12 @@ namespace MWMechanics
                     float faceAngle = Ogre::Radian(Ogre::Math::ACos(dir.y / length) *
                             ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees();
                     // an attempt at reducing the turning animation glitch
-                    // TODO: doesn't seem to work very well
                     if(abs(faceAngle) > 10)
                     {
                         mTargetAngle = faceAngle;
                         mRotate = true;
                     }
                 }
-            }
-            else if(!mDistance) // FIXME: stationary actors go back to their normal position
-            {
-                //mTargetAngle = mOriginalAngle;
-                //mRotate = true;
             }
 
             if (!mSaidGreeting)
@@ -436,7 +433,7 @@ namespace MWMechanics
             }
 
             // Check if idle animation finished
-            if(!checkIdle(actor, mPlayedIdle))
+            if(!checkIdle(actor, mPlayedIdle) && !mRotate)
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;

@@ -12,7 +12,8 @@ namespace MWMechanics
 
 /// configure rotation settings for an actor to reach this target angle (eventually)
 /// @return have we reached the target angle?
-bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle);
+bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle,
+                                      Ogre::Degree epsilon = Ogre::Degree(0.5));
 
 }
 
