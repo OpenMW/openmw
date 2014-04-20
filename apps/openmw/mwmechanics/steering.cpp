@@ -31,8 +31,7 @@ bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle)
     if (absDiff < epsilon)
         return true;
 
-    // Max. speed of 10 radian per sec
-    Ogre::Radian limit = Ogre::Radian(10) * MWBase::Environment::get().getFrameDuration();
+    Ogre::Radian limit = MAX_VEL_ANGULAR * MWBase::Environment::get().getFrameDuration();
     if (absDiff > limit)
         diff = Ogre::Math::Sign(diff) * limit;
 
