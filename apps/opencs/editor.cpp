@@ -115,6 +115,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         QApplication::exit (1);
     }
 
+    //load the settings into the userSettings instance.
+    mSettings.setModel (CSMSettings::UserSettings::instance());
+
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
