@@ -30,6 +30,8 @@ namespace MWMechanics
             // the input parameters are pathgrid point indexes
             // the output list is in local (internal cells) or world (external
             // cells) co-ordinates
+            //
+            // NOTE: if start equals end an empty path is returned
             std::list<ESM::Pathgrid::Point> aStarSearch(const int start,
                                                         const int end) const;
         private:

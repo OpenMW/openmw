@@ -8,7 +8,7 @@
 #include "esmstore.hpp"
 #include "cellreflist.hpp"
 
-#include "../mwmechanics/pathgrid.hpp"
+#include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
 namespace ESM
 {

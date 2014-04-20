@@ -197,11 +197,11 @@ namespace MWMechanics
         // both of these are set to zero in the constructor
         //mSCCId = 0; // how many strongly connected components in this cell
         //mSCCIndex = 0;
-        int pointsSize = mPathgrid->mPoints.size();
+        int pointsSize = static_cast<int> (mPathgrid->mPoints.size());
         mSCCPoint.resize(pointsSize, std::pair<int, int> (-1, -1));
         mSCCStack.reserve(pointsSize);
 
-        for(int v = 0; v < static_cast<int> (pointsSize); v++)
+        for(int v = 0; v < pointsSize; v++)
         {
             if(mSCCPoint[v].first == -1) // undefined (haven't visited)
                 recursiveStrongConnect(v);
@@ -249,7 +249,7 @@ namespace MWMechanics
             return path; // there is no path, return an empty path
         }
 
-        int graphSize = mGraph.size();
+        int graphSize = static_cast<int> (mGraph.size());
         std::vector<float> gScore (graphSize, -1);
         std::vector<float> fScore (graphSize, -1);
         std::vector<int> graphParent (graphSize, -1);

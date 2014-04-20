@@ -34,6 +34,9 @@ namespace MWMechanics
             bool mRepeat;
 
             bool mSaidGreeting;
+            int mGreetDistanceMultiplier;
+            float mGreetDistanceReset;
+            float mChance;
 
             // Cached current cell location
             int mCellX;
@@ -69,6 +72,12 @@ namespace MWMechanics
             ObstacleCheck mObstacleCheck;
             float mDoorCheckDuration;
             int mStuckCount;
+
+            // the z rotation angle (degrees) we want to reach
+            // used every frame when mRotate is true
+            float mTargetAngle;
+            bool mRotate;
+            float mReaction; // update some actions infrequently
     };
 }
 
