@@ -34,6 +34,9 @@ namespace MWMechanics
             bool mRepeat;
 
             bool mSaidGreeting;
+            int mGreetDistanceMultiplier;
+            float mGreetDistanceReset;
+            float mChance;
 
             // Cached current cell location
             int mCellX;
@@ -69,6 +72,8 @@ namespace MWMechanics
             ObstacleCheck mObstacleCheck;
             float mDoorCheckDuration;
             int mStuckCount;
+
+            float mReaction; // update some actions infrequently
     };
 }
 
