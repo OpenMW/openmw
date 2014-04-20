@@ -204,9 +204,6 @@ namespace MWMechanics
 //#endif
         }
 
-
-            zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
-
         mReaction += duration;
         if(mReaction > 0.25f) // FIXME: hard coded constant
         {
@@ -375,32 +372,40 @@ namespace MWMechanics
             helloDistance *= mGreetDistanceMultiplier;
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            float playerDist = Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(
-                        Ogre::Vector3(actor.getRefData().getPosition().pos));
+            Ogre::Vector3 playerPos(player.getRefData().getPosition().pos);
+            Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
+            float playerDistSqr = playerPos.squaredDistance(actorPos);
 
-            if(mWalking && playerDist <= helloDistance*helloDistance)
+            if(playerDistSqr <= helloDistance*helloDistance)
             {
-                stopWalking(actor);
-                mMoveNow = false;
-                mWalking = false;
-                mObstacleCheck.clear();
+                if(mWalking)
+                {
+                    stopWalking(actor);
+                    mMoveNow = false;
+                    mWalking = false;
+                    mObstacleCheck.clear();
+                }
+                Ogre::Vector3 dir = playerPos - actorPos;
+                float length = dir.length();
+
+                // FIXME: horrible hack, and does not turn smoothly
+                zTurn(actor, Ogre::Degree(Ogre::Radian(Ogre::Math::ACos(dir.y / length) * ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees()));
             }
 
             if (!mSaidGreeting)
             {
                 // TODO: check if actor is aware / has line of sight
-                if (playerDist <= helloDistance*helloDistance
+                if (playerDistSqr <= helloDistance*helloDistance
                         // Only play a greeting if the player is not moving
                         && Ogre::Vector3(player.getClass().getMovementSettings(player).mPosition).squaredLength() == 0)
                 {
                     mSaidGreeting = true;
                     MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                    // TODO: turn to face player and interrupt the idle animation?
                 }
             }
             else
             {
-                if (playerDist >= mGreetDistanceReset*mGreetDistanceReset * mGreetDistanceMultiplier*mGreetDistanceMultiplier)
+                if (playerDistSqr >= mGreetDistanceReset*mGreetDistanceReset * mGreetDistanceMultiplier*mGreetDistanceMultiplier)
                     mSaidGreeting = false;
             }
 
