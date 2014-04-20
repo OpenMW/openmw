@@ -153,7 +153,7 @@ namespace MWMechanics
             if(mDistance &&            // actor is not intended to be stationary
                mIdleNow &&             // but is in idle
                !mWalking &&            // FIXME: some actors are idle while walking
-               proximityToDoor(actor)) // NOTE: checks interior cells only
+               proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6*1.6)) // NOTE: checks interior cells only
             {
                 mIdleNow = false;
                 mMoveNow = true;
