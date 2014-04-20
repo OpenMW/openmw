@@ -105,7 +105,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         rsd->setEditorSetting (true);
         ritd->setEditorSetting (true);
     }
-
+/*
     section = "Proxy Selection Test";
     {
         //create three setting objects, specifying the basic widget type,
@@ -184,7 +184,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         slaveSingleText->setWidgetWidth (24);
         slaveMultiText->setWidgetWidth (24);
-    }
+    }*/
 }
 
 CSMSettings::UserSettings::~UserSettings()
