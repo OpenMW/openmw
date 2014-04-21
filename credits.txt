@@ -70,6 +70,7 @@ Sebastian Wick (swick)
 Sergey Shambir
 sir_herrbatka
 Sylvain Thesnieres (Garvek)
+Thomas Luppi (Digmaster)
 Tom Mason (wheybags)
 Torben Leif Carrington (TorbenC)
 
