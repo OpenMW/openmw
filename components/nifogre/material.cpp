@@ -67,6 +67,10 @@ std::string NIFMaterialLoader::findTextureName(const std::string &filename)
     std::string texname = filename;
     Misc::StringUtils::toLower(texname);
 
+    // Apparently, leading separators are allowed
+    while (texname.size() && (texname[0] == '/' || texname[0] == '\\'))
+        texname.erase(0, 1);
+
     if(texname.compare(0, sizeof(path)-1, path) != 0 &&
        texname.compare(0, sizeof(path2)-1, path2) != 0)
         texname = path + texname;
