@@ -6,6 +6,8 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include <QObject>
+
 namespace Files
 {
     class ConfigurationManager;
@@ -15,8 +17,10 @@ namespace CSMDoc
 {
     class Document;
 
-    class DocumentManager
+    class DocumentManager : public QObject
     {
+            Q_OBJECT
+
             std::vector<Document *> mDocuments;
             const Files::ConfigurationManager& mConfiguration;
 
@@ -29,20 +33,23 @@ namespace CSMDoc
 
             ~DocumentManager();
 
-            Document *addDocument (const std::vector< boost::filesystem::path >& files,
-                                   const boost::filesystem::path& savePath,
-                                   bool new_);
-            ///< The ownership of the returned document is not transferred to the caller.
-            ///
-            /// \param new_ Do not load the last content file in \a files and instead create in an
+            void addDocument (const std::vector< boost::filesystem::path >& files,
+                const boost::filesystem::path& savePath, bool new_);
+            ///< \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
 
             bool removeDocument (Document *document);
             ///< \return last document removed?
+
 	    void setResourceDir (const boost::filesystem::path& parResDir);
-	    
-    private:
+
+        private:
+
 	    boost::filesystem::path mResDir;
+
+        signals:
+
+            void documentAdded (CSMDoc::Document *document);
     };
 }
 

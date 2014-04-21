@@ -27,14 +27,14 @@ CSMDoc::DocumentManager::~DocumentManager()
         delete *iter;
 }
 
-CSMDoc::Document *CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
+void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
     Document *document = new Document (mConfiguration, files, savePath, mResDir, new_);
 
     mDocuments.push_back (document);
 
-    return document;
+    emit documentAdded (document);
 }
 
 bool CSMDoc::DocumentManager::removeDocument (Document *document)

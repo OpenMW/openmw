@@ -85,6 +85,8 @@ namespace CS
 
             void showSettings();
 
+            void documentAdded (CSMDoc::Document *document);
+
         private:
 
             QString mIpcServerName;
