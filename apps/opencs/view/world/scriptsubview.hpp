@@ -55,6 +55,9 @@ namespace CSVWorld
 
             virtual void setEditLock (bool locked);
 
+            virtual void updateUserSetting
+                                        (const QString &, const QStringList &);
+
         public slots:
 
             void idListChanged();

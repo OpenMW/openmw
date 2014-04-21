@@ -12,6 +12,7 @@
 #include "tablebottombox.hpp"
 #include "creator.hpp"
 
+#include <QDebug>
 CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     const CreatorFactoryBase& creatorFactory, bool sorting)
 : SubView (id)
@@ -82,9 +83,17 @@ void CSVWorld::TableSubView::editRequest (const CSMWorld::UniversalId& id, const
     focusId (id, hint);
 }
 
-void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
+void CSVWorld::TableSubView::updateUserSetting
+                                (const QString &name, const QStringList &list)
 {
-    mTable->updateEditorSetting(settingName, settingValue);
+    if (list.isEmpty())
+        return;
+
+    qDebug() << "CSVWorld::TableSubView::updateUserSetting() "
+            << "Received update for user setting "
+            << name << " = " << list.at(0);
+
+    mTable->updateUserSetting(name, list);
 }
 
 void CSVWorld::TableSubView::setStatusBar (bool show)

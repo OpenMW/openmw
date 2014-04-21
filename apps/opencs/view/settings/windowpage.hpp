@@ -19,13 +19,6 @@ namespace CSVSettings {
         WindowPage(QWidget *parent = 0);
 
         void setupUi();
-        void initializeWidgets (const CSMSettings::SettingMap &settings);
-
-        ///
-        GroupBlockDef *buildCustomWindowSize();
-        GroupBlockDef *buildDefinedWindowSize();
-        GroupBlockDef *buildWindowSizeToggle();
-        CustomBlockDef *buildWindowSize (GroupBlockDef *, GroupBlockDef *, GroupBlockDef *);
 
     signals:
         void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);

@@ -103,9 +103,6 @@ namespace CSVDoc
 
             Operations *getOperations() const;
 
-            /// Function called by view manager when user preferences are updated
-            void updateEditorSetting (const QString &, const QString &);
-
         signals:
 
             void newGameRequest();
@@ -125,6 +122,8 @@ namespace CSVDoc
             /// in a script).
 
             void abortOperation (int type);
+
+            void updateUserSetting (const QString &, const QStringList &);
 
         private slots:
 

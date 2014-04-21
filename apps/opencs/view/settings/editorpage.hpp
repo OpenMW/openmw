@@ -13,7 +13,7 @@ namespace CSVSettings
     public:
         explicit EditorPage(QWidget *parent = 0);
 
-        void initializeWidgets (const CSMSettings::SettingMap &settings);
+        void initializeWidgets (const CSMSettings::DefinitionMap &settings);
         void setupUi();
 
     private:

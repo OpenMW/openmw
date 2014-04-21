@@ -20,34 +20,36 @@ namespace CSVDoc
 {
     class SubView : public QDockWidget
     {
-            Q_OBJECT
+        Q_OBJECT
 
-            CSMWorld::UniversalId mUniversalId;
+        CSMWorld::UniversalId mUniversalId;
 
-            // not implemented
-            SubView (const SubView&);
-            SubView& operator= (SubView&);
-        protected:
-            void setUniversalId(const CSMWorld::UniversalId& id);
+        // not implemented
+        SubView (const SubView&);
+        SubView& operator= (SubView&);
+    protected:
+        void setUniversalId(const CSMWorld::UniversalId& id);
 
-        public:
+    public:
 
-            SubView (const CSMWorld::UniversalId& id);
+        SubView (const CSMWorld::UniversalId& id);
 
-            CSMWorld::UniversalId getUniversalId() const;
+        CSMWorld::UniversalId getUniversalId() const;
 
-            virtual void setEditLock (bool locked) = 0;
-            virtual void updateEditorSetting (const QString &, const QString &);
+        virtual void setEditLock (bool locked) = 0;
 
-            virtual void setStatusBar (bool show);
-            ///< Default implementation: ignored
+        virtual void setStatusBar (bool show);
+        ///< Default implementation: ignored
 
-            virtual void useHint (const std::string& hint);
-            ///< Default implementation: ignored
+    public slots:
+        virtual void updateUserSetting (const QString &, const QStringList &) {}
 
-        signals:
+        virtual void useHint (const std::string& hint);
+        ///< Default implementation: ignored
 
-            void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
+    signals:
+
+        void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
     };
 }
 

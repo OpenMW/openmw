@@ -56,7 +56,6 @@ opencs_hdrs_noqt (view/doc
     subviewfactoryimp
     )
 
-
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
@@ -88,34 +87,26 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
-    abstractblock
-    proxyblock
-    abstractwidget
-    usersettingsdialog
-    datadisplayformatpage
-    windowpage
+    settingwindow
+    dialog
+    page
+    view
+    booleanview
+    textview
+    listview
+    resizeablestackedwidget
     )
 
 opencs_units_noqt (view/settings
-    abstractpage
-    blankpage
-    groupblock
-    customblock
-    groupbox
-    itemblock
-    settingwidget
-    toggleblock
+    frame
     support
     )
 
 opencs_units (model/settings
     usersettings
-    settingcontainer
-    )
-
-opencs_units_noqt (model/settings
-    support
-    settingsitem
+    settingmanager
+    setting
+    connector
     )
 
 opencs_units_noqt (model/filter

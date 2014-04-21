@@ -58,8 +58,6 @@ namespace Launcher
 
     private:
 
-        QMenu *mContextMenu;
-
         Files::ConfigurationManager &mCfgMgr;
 
         GameSettings &mGameSettings;

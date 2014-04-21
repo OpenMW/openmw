@@ -26,6 +26,8 @@ namespace CSVWorld
 
             virtual void setEditLock (bool locked);
 
+            virtual void updateUserSetting
+                                (const QString& key, const QStringList &list);
         private slots:
 
             void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);

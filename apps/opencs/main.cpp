@@ -7,6 +7,8 @@
 #include <QApplication>
 #include <QIcon>
 
+#include <QDebug>
+
 #include <extern/shiny/Main/Factory.hpp>
 
 #include <components/ogreinit/ogreinit.hpp>
@@ -73,8 +75,8 @@ int main(int argc, char *argv[])
 
     if(!editor.makeIPCServer())
     {
-        editor.connectToIPCServer();
-       // return 0;
+    	editor.connectToIPCServer();
+  //      return 0;
     }
 
     shinyFactory = editor.setupGraphics();

@@ -9,13 +9,13 @@
 # include "OgreCgPlugin.h"
 #endif
 #ifdef ENABLE_PLUGIN_OctreeSceneManager
-# include "OgreOctreePlugin.h"
+//# include "OgreOctreePlugin.h"
 #endif
 #ifdef ENABLE_PLUGIN_ParticleFX
-# include "OgreParticleFXPlugin.h"
+//# include "OgreParticleFXPlugin.h"
 #endif
 #ifdef ENABLE_PLUGIN_GL
-# include "OgreGLPlugin.h"
+//# include "OgreGLPlugin.h"
 #endif
 #ifdef ENABLE_PLUGIN_Direct3D9
 # include "OgreD3D9Plugin.h"
@@ -57,13 +57,13 @@ namespace OgreInit
         Ogre::CgPlugin* mCgPlugin;
         #endif
         #ifdef ENABLE_PLUGIN_OctreeSceneManager
-        Ogre::OctreePlugin* mOctreePlugin;
+        //Ogre::OctreePlugin* mOctreePlugin;
         #endif
         #ifdef ENABLE_PLUGIN_ParticleFX
-        Ogre::ParticleFXPlugin* mParticleFXPlugin;
+        //Ogre::ParticleFXPlugin* mParticleFXPlugin;
         #endif
         #ifdef ENABLE_PLUGIN_GL
-        Ogre::GLPlugin* mGLPlugin;
+        //Ogre::GLPlugin* mGLPlugin;
         #endif
         #ifdef ENABLE_PLUGIN_Direct3D9
         Ogre::D3D9Plugin* mD3D9Plugin;

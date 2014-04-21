@@ -78,7 +78,8 @@ namespace CSVWorld
 
             CSMWorld::UniversalId getUniversalId (int row) const;
 
-            void updateEditorSetting (const QString &settingName, const QString &settingValue);
+            void updateUserSetting
+                                (const QString &name, const QStringList &list);
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 

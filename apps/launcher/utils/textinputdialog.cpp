@@ -83,5 +83,4 @@ Launcher::TextInputDialog::DialogLineEdit::DialogLineEdit (QWidget *parent) :
     QSize msz = minimumSizeHint();
     setMinimumSize(qMax(msz.width(), mClearButton->sizeHint().height() + frameWidth * 2 + 2),
                    qMax(msz.height(), mClearButton->sizeHint().height() + frameWidth * 2 + 2));
-
 }

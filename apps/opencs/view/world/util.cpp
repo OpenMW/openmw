@@ -196,8 +196,8 @@ bool CSVWorld::CommandDelegate::isEditLocked() const
     return mEditLock;
 }
 
-bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
-    const QString &settingValue)
+bool CSVWorld::CommandDelegate::updateUserSetting
+                                (const QString &name, const QStringList &list)
 {
     return false;
 }

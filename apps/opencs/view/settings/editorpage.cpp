@@ -43,7 +43,7 @@ void CSVSettings::EditorPage::setupUi()
 
 }
 
-void CSVSettings::EditorPage::initializeWidgets (const CSMSettings::SettingMap &settings)
+void CSVSettings::EditorPage::initializeWidgets (const CSMSettings::DefinitionMap &settings)
 {
     //iterate each item in each blocks in this section
     //validate the corresponding setting against the defined valuelist if any.
