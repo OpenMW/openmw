@@ -38,7 +38,7 @@ namespace
         return Ogre::Radian( Ogre::Math::ACos(dir.y / len) * sgn(Ogre::Math::ASin(dir.x / len)) ).valueDegrees();
     }
 
-	const float PATHFIND_Z_REACH = 50.0f;
+    const float PATHFIND_Z_REACH = 50.0f;
     // distance at which actor pays more attention to decide whether to shortcut or stick to pathgrid
     const float PATHFIND_CAUTION_DIST = 500.0f;
     // distance after which actor (failed previously to shortcut) will try again
@@ -113,6 +113,7 @@ namespace MWMechanics
         {
             zTurn(actor, Ogre::Degree(mTargetAngle));
         }
+
 
 
         mTimerAttack -= duration;
@@ -229,6 +230,17 @@ namespace MWMechanics
 
         mLastPos = pos;
 
+        // check if can move along z-axis
+        bool canMoveByZ;
+        if(canMoveByZ = ((actor.getClass().isNpc() || actor.getClass().canSwim(actor)) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+            || (actor.getClass().canFly(actor) && MWBase::Environment::get().getWorld()->isFlying(actor)))
+        {
+            float zToTarget = vTargetPos.z - pos.pos[2];
+
+            mMovement.mPosition[1] = sqrt(distToTarget*distToTarget - zToTarget*zToTarget); // XY-plane vec length
+            mMovement.mPosition[2] = zToTarget;
+        }
+
         if(distToTarget < rangeMelee || (distToTarget <= rangeCloseUp && mFollowTarget && !isStuck) )
         {
             //Melee and Close-up combat
@@ -238,12 +250,13 @@ namespace MWMechanics
             if (mFollowTarget && distToTarget > rangeMelee)
             {
                 //Close-up combat: just run up on target
-                mMovement.mPosition[1] = 1;
+                if(!canMoveByZ) mMovement.mPosition[1] = 1;
             }
             else
             {
                 //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
+                if(canMoveByZ) mMovement.mPosition[2] = 0;
 
                 // When attacking with a weapon, choose between slash, thrust or chop
                 if (actor.getClass().hasInventoryStore(actor))
@@ -295,15 +308,16 @@ namespace MWMechanics
 				preferShortcut = checkWayIsClear(vActorPos, vTargetPos, distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
             }
 
-			if(preferShortcut)
-			{
+            if(canMoveByZ) preferShortcut = true;
+
+            if(preferShortcut)
+            {
                 mTargetAngle = getZAngleToDir(vDirToTarget, distToTarget);
                 mForceNoShortcut = false;
                 mShortcutFailPos.pos[0] = mShortcutFailPos.pos[1] = mShortcutFailPos.pos[2] = 0;
-                if(mPathFinder.isPathConstructed())
-                    mPathFinder.clearPath();
-			}
-			else // if shortcut failed stick to path grid
+                mPathFinder.clearPath();
+            }
+            else // if shortcut failed stick to path grid
             {
                 if(!isStuck && mShortcutFailPos.pos[0] == 0.0f && mShortcutFailPos.pos[1] == 0.0f && mShortcutFailPos.pos[2] == 0.0f)
                 {
@@ -344,7 +358,7 @@ namespace MWMechanics
                 }
             }
 
-            mMovement.mPosition[1] = 1;
+            if(!canMoveByZ) mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
         }
 
