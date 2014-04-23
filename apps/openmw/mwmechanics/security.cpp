@@ -29,7 +29,7 @@ namespace MWMechanics
     void Security::pickLock(const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
                             std::string& resultMessage, std::string& resultSound)
     {
-        if (lock.getCellRef().mLockLevel <= 0)
+        if (!lock.getCellRef().mLocked)
             return;
 
         int lockStrength = lock.getCellRef().mLockLevel;

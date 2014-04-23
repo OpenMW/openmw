@@ -137,6 +137,11 @@ namespace MWWorld
         throw std::runtime_error ("class does not support locking");
     }
 
+    void Class::setLockLevel (const Ptr& ptr, int lockLevel) const
+    {
+        throw std::runtime_error ("class does not support setting lock level");
+    }
+
     void Class::unlock (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support unlocking");
@@ -397,7 +402,7 @@ namespace MWWorld
 
     void Class::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const {}
 
-    int Class::getBaseGold(const MWWorld::Ptr& ptr) const 
+    int Class::getBaseGold(const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error("class does not support base gold");
     }

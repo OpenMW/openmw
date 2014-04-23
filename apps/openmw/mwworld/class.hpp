@@ -165,6 +165,8 @@ namespace MWWorld
             virtual void lock (const Ptr& ptr, int lockLevel) const;
             ///< Lock object (default implementation: throw an exception)
 
+            virtual void setLockLevel(const Ptr& ptr, int lockLevel) const;
+
             virtual void unlock (const Ptr& ptr) const;
             ///< Unlock object (default implementation: throw an exception)
 

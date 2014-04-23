@@ -76,6 +76,7 @@ namespace MWWorld
                 cellRef.mEnchantmentCharge = -1;
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
+                cellRef.mLocked = false;
                 cellRef.mReferenceBlocked = 0;
                 mPtr.getRefData().setCount(count);
             }

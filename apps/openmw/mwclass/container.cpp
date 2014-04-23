@@ -111,7 +111,7 @@ namespace MWClass
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
-        bool needKey = ptr.getCellRef().mLockLevel>0;
+        bool needKey = ptr.getCellRef().mLocked;
         bool hasKey = false;
         std::string keyName;
 
@@ -132,7 +132,7 @@ namespace MWClass
         if (needKey && hasKey)
         {
             MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
-            ptr.getCellRef().mLockLevel = 0;
+            unlock(ptr);
             // using a key disarms the trap
             ptr.getCellRef().mTrap = "";
         }
@@ -209,7 +209,7 @@ namespace MWClass
         info.caption = ref->mBase->mName;
 
         std::string text;
-        if (ref->mRef.mLockLevel > 0)
+        if (ref->mRef.mLocked)
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
         if (ref->mRef.mTrap != "")
             text += "\n#{sTrapped}";
@@ -240,15 +240,22 @@ namespace MWClass
 
     void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
-        if (lockLevel<0)
-            lockLevel = 0;
-
-        ptr.getCellRef().mLockLevel = lockLevel;
+        ptr.getCellRef().mLocked = true;
+        if(lockLevel>=0) //Lock level setting left as most of the code relies on this
+            ptr.getCellRef().mLockLevel = lockLevel;
     }
 
     void Container::unlock (const MWWorld::Ptr& ptr) const
     {
-        ptr.getCellRef().mLockLevel = 0;
+        ptr.getCellRef().mLocked= false;
+    }
+
+    void Container::changeLockLevel(const MWWorld::Ptr& ptr, int lockLevel, bool doLock) {
+        if (lockLevel<0)
+            lockLevel = 0;
+
+        ptr.getCellRef().mLockLevel = lockLevel;
+        if(doLock) lock(ptr);
     }
 
     MWWorld::Ptr

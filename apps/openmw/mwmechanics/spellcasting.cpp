@@ -420,6 +420,7 @@ namespace MWMechanics
         {
             if (effectId == ESM::MagicEffect::Lock)
             {
+                target.getCellRef().mLocked = true;
                 if (target.getCellRef().mLockLevel < magnitude)
                     target.getCellRef().mLockLevel = magnitude;
             }
@@ -427,12 +428,12 @@ namespace MWMechanics
             {
                 if (target.getCellRef().mLockLevel <= magnitude)
                 {
-                    if (target.getCellRef().mLockLevel > 0)
+                    if (target.getCellRef().mLocked)
                     {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
                         MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
                     }
-                    target.getCellRef().mLockLevel = 0;
+                    target.getCellRef().mLocked=false;
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);

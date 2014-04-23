@@ -76,7 +76,7 @@ namespace MWClass
 
         MWWorld::ContainerStore &invStore = get(actor).getContainerStore(actor);
 
-        bool needKey = ptr.getCellRef().mLockLevel>0;
+        bool needKey = ptr.getCellRef().mLocked;
         bool hasKey = false;
         std::string keyName;
 
@@ -98,7 +98,7 @@ namespace MWClass
         {
             if(actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
-            ptr.getCellRef().mLockLevel = 0;
+            unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap
             ptr.getCellRef().mTrap = "";
         }
@@ -158,15 +158,22 @@ namespace MWClass
 
     void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
+        ptr.getCellRef().mLocked = true;
+        if(lockLevel>=0) //Lock level setting left as most of the code relies on this
+            ptr.getCellRef().mLockLevel = lockLevel;
+    }
+
+    void Door::changeLockLevel(const MWWorld::Ptr& ptr, int lockLevel, bool doLock) const{
         if (lockLevel<0)
             lockLevel = 0;
 
         ptr.getCellRef().mLockLevel = lockLevel;
+        if(doLock) lock(ptr);             //A change in lock level almost always nesesitates a lock
     }
 
     void Door::unlock (const MWWorld::Ptr& ptr) const
     {
-        ptr.getCellRef().mLockLevel = 0;
+        ptr.getCellRef().mLocked = false;
     }
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
@@ -208,7 +215,7 @@ namespace MWClass
             text += "\n" + getDestination(*ref);
         }
 
-        if (ref->mRef.mLockLevel > 0)
+        if (ref->mRef.mLocked == true)
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
         if (ref->mRef.mTrap != "")
             text += "\n#{sTrapped}";

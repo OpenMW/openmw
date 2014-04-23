@@ -36,11 +36,14 @@ namespace MWClass
             static std::string getDestination (const MWWorld::LiveCellRef<ESM::Door>& door);
             ///< @return destination cell name or token
 
-            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel) const;
+            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel = -999) const;
             ///< Lock object
 
             virtual void unlock (const MWWorld::Ptr& ptr) const;
             ///< Unlock object
+
+            ///Change the lock level
+            virtual void changeLockLevel(const MWWorld::Ptr& ptr, int lockLevel, bool lock=true) const;
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
@@ -48,6 +51,7 @@ namespace MWClass
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+        private:
     };
 }
 
