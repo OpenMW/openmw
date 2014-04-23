@@ -2724,7 +2724,7 @@ namespace MWWorld
                 }
             }
         }
-        closestChest.getCellRef().mLocked = true;
+        closestChest.getCellRef().mLockLevel = abs(closestChest.getCellRef().mLockLevel);
     }
 
     void World::goToJail()
