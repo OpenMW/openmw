@@ -54,8 +54,15 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     else
         mTeleport = false;
 
-    mLockLevel = -1;
+    mLockLevel = -999; //Set to impossible value to indicate no lock
+    mLocked = false;
     esm.getHNOT (mLockLevel, "FLTV");
+    if(mLockLevel < 0 && mLockLevel != -999) //Unlocked lock, save lock level properly
+        mLockLevel*=-1;
+    else if(mLockLevel != -999){
+        mLocked = true;
+    }
+
     mKey = esm.getHNOString ("KNAM");
     mTrap = esm.getHNOString ("TNAM");
 
@@ -113,8 +120,12 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
         esm.writeHNOCString("DNAM", mDestCell);
     }
 
-    if (mLockLevel != -1 && !inInventory)
-        esm.writeHNT("FLTV", mLockLevel);
+    if (mLockLevel != -999 && !inInventory) {
+        if(mLocked)
+            esm.writeHNT("FLTV", mLockLevel);
+        else //If it's not locked we simply flip  the locklevel to indicate it's locked
+            esm.writeHNT("FLTV", -mLockLevel);
+    }
 
     if (!inInventory)
         esm.writeHNOCString ("KNAM", mKey);
@@ -151,6 +162,7 @@ void ESM::CellRef::blank()
     mGoldValue = 0;
     mDestCell.clear();
     mLockLevel = 0;
+    mLocked = false;
     mKey.clear();
     mTrap.clear();
     mReferenceBlocked = 0;

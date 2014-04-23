@@ -71,6 +71,7 @@ namespace ESM
 
             // Lock level for doors and containers
             int mLockLevel;
+            bool mLocked; //Door locked/unlocked
             std::string mKey, mTrap; // Key and trap ID names, if any
 
             // This corresponds to the "Reference Blocked" checkbox in the construction set,

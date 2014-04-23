@@ -132,6 +132,10 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer lockLevel = ptr.getCellRef().mLockLevel;
+                    if(lockLevel<0) { //no lock level was ever set, set to 100 as default
+                        ptr.getCellRef().mLockLevel = 100;
+                        lockLevel = 100;
+                    }
 
                     if (arg0==1)
                     {
