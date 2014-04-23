@@ -2724,6 +2724,7 @@ namespace MWWorld
                 }
             }
         }
+        closestChest.getCellRef().mLocked = true;
     }
 
     void World::goToJail()
@@ -2791,7 +2792,7 @@ namespace MWWorld
                 message += "\n" + skillMsg;
             }
 
-            // TODO: Sleep the player 
+            // TODO: Sleep the player
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
