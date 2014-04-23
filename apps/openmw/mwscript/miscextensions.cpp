@@ -131,7 +131,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer lockLevel = 100;
+                    Interpreter::Type_Integer lockLevel = ptr.getCellRef().mLockLevel;
+                    if(lockLevel==0) { //no lock level was ever set, set to 100 as default
+                        lockLevel = 100;
+                    }
 
                     if (arg0==1)
                     {
@@ -283,7 +286,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     // We are ignoring the DontSaveObject statement for now. Probably not worth
-                    /// bothering with. The incompatibility we are creating should be marginal at most.
+                    // bothering with. The incompatibility we are creating should be marginal at most.
                 }
         };
 
@@ -320,7 +323,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (ptr.getCellRef ().mLockLevel > 0);
+                    runtime.push (ptr.getCellRef().mLockLevel > 0);
                 }
         };
 

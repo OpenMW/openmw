@@ -2695,6 +2695,7 @@ namespace MWWorld
         MWWorld::Ptr closestChest;
         float closestDistance = FLT_MAX;
 
+        //Find closest stolen_goods chest
         std::vector<MWWorld::Ptr> chests;
         mCells.getInteriorPtrs("stolen_goods", chests);
 
@@ -2712,17 +2713,18 @@ namespace MWWorld
             }
         }
 
-        if (!closestChest.isEmpty())
+        if (!closestChest.isEmpty()) //Found a close chest
         {
             ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-            for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it) //Move all stolen stuff into chest
             {
-                if (!it->getCellRef().mOwner.empty() && it->getCellRef().mOwner != "player")
+                if (!it->getCellRef().mOwner.empty() && it->getCellRef().mOwner != "player") //Not owned by no one/player?
                 {
                     closestChest.getClass().getContainerStore(closestChest).add(*it, it->getRefData().getCount(), closestChest);
                     store.remove(*it, it->getRefData().getCount(), ptr);
                 }
             }
+            closestChest.getCellRef().mLockLevel = abs(closestChest.getCellRef().mLockLevel);
         }
     }
 
@@ -2791,7 +2793,7 @@ namespace MWWorld
                 message += "\n" + skillMsg;
             }
 
-            // TODO: Sleep the player 
+            // TODO: Sleep the player
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
