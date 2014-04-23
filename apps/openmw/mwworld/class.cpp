@@ -137,11 +137,6 @@ namespace MWWorld
         throw std::runtime_error ("class does not support locking");
     }
 
-    void Class::setLockLevel (const Ptr& ptr, int lockLevel) const
-    {
-        throw std::runtime_error ("class does not support setting lock level");
-    }
-
     void Class::unlock (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support unlocking");

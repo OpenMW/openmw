@@ -211,6 +211,8 @@ namespace MWClass
         std::string text;
         if (ref->mRef.mLockLevel > 0)
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
+        else if (ref->mRef.mLockLevel < 0)
+            text += "\n#{sUnlocked}";
         if (ref->mRef.mTrap != "")
             text += "\n#{sTrapped}";
 
@@ -240,9 +242,10 @@ namespace MWClass
 
     void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
-        ptr.getCellRef().mLockLevel = abs(ptr.getCellRef().mLockLevel); //Makes lockLevel positive
-        if(lockLevel>=0) //Lock level setting left as most of the code relies on this
-            ptr.getCellRef().mLockLevel = lockLevel;
+        if(lockLevel!=0)
+            ptr.getCellRef().mLockLevel = abs(lockLevel); //Changes lock to locklevel, in positive
+        else
+            ptr.getCellRef().mLockLevel = abs(ptr.getCellRef().mLockLevel); //No locklevel given, just flip the oriional one
     }
 
     void Container::unlock (const MWWorld::Ptr& ptr) const
@@ -250,13 +253,6 @@ namespace MWClass
         ptr.getCellRef().mLockLevel = -abs(ptr.getCellRef().mLockLevel); //Makes lockLevel negative
     }
 
-    void Container::changeLockLevel(const MWWorld::Ptr& ptr, int lockLevel, bool doLock) {
-        if (lockLevel<0)
-            lockLevel = 0;
-
-        ptr.getCellRef().mLockLevel = lockLevel;
-        if(doLock) lock(ptr);
-    }
 
     MWWorld::Ptr
     Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const

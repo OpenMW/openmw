@@ -158,22 +158,15 @@ namespace MWClass
 
     void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
-        ptr.getCellRef().mLockLevel = abs(ptr.getCellRef().mLockLevel); //Makes lockLevel positive;
-        if(lockLevel>=0) //Lock level setting left as most of the code relies on this
-            ptr.getCellRef().mLockLevel = abs(lockLevel);
-    }
-
-    void Door::changeLockLevel(const MWWorld::Ptr& ptr, int lockLevel, bool doLock) const{
-        if (lockLevel<0)
-            lockLevel = 0;
-
-        ptr.getCellRef().mLockLevel = lockLevel;
-        if(doLock) lock(ptr);             //A change in lock level almost always nesesitates a lock
+        if(lockLevel!=0)
+            ptr.getCellRef().mLockLevel = abs(lockLevel); //Changes lock to locklevel, in positive
+        else
+            ptr.getCellRef().mLockLevel = abs(ptr.getCellRef().mLockLevel); //No locklevel given, just flip the origional one
     }
 
     void Door::unlock (const MWWorld::Ptr& ptr) const
     {
-        ptr.getCellRef().mLockLevel = -abs(ptr.getCellRef().mLockLevel); //Makes lockLevel positive
+        ptr.getCellRef().mLockLevel = -abs(ptr.getCellRef().mLockLevel); //Makes lockLevel negative
     }
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
@@ -217,6 +210,8 @@ namespace MWClass
 
         if (ref->mRef.mLockLevel > 0)
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
+        else if (ref->mRef.mLockLevel < 0)
+            text += "\n#{sUnlocked}";
         if (ref->mRef.mTrap != "")
             text += "\n#{sTrapped}";
 
