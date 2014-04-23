@@ -289,6 +289,10 @@ namespace MWGui
 
     void WindowManager::setNewGame(bool newgame)
     {
+        // This method will always be called after loading a savegame or starting a new game
+        // Reset enemy, it could be a dangling pointer from a previous game
+        mHud->resetEnemy();
+
         if (newgame)
         {
             disallowAll();
