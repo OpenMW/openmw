@@ -646,14 +646,7 @@ namespace MWInput
     }
 
     void InputManager::quickLoad() {
-        if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) {
-            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
-            if(mCurrentCharacter) { //Ensure a current character exists
-                const MWState::Slot* slot = &*mCurrentCharacter->begin(); //Get newest save
-                if(slot) //Don't even try loading it if there's no prior save.
-                    MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot); //load newest save. That was easy!
-            }
-        }
+        MWBase::Environment::get().getStateManager()->quickLoad();
     }
 
     void InputManager::quickSave() {
