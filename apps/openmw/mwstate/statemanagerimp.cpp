@@ -223,19 +223,23 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         slot->mPath.parent_path().filename().string());
 }
 
-void MWState::StateManager::quickSave(std::string name) {
-    if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
-        const MWState::Slot* slot = NULL;
-        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
+void MWState::StateManager::quickSave (std::string name)
+{
+    if (mState!=State_Running ||
+        MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")!=-1) // char gen
+        return;
 
-        //Find quicksave slot
-        for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
-        {
-            if (it->mProfile.mDescription == name)
-                slot = &*it;
-        }
-        MWBase::Environment::get().getStateManager()->saveGame(name, slot);
+    const Slot* slot = NULL;
+    Character* mCurrentCharacter = getCurrentCharacter(true); //Get current character
+
+    //Find quicksave slot
+    for (Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+    {
+        if (it->mProfile.mDescription == name)
+            slot = &*it;
     }
+
+    saveGame(name, slot);
 }
 
 void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
@@ -343,15 +347,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     }
 }
 
-void MWState::StateManager::quickLoad() {
-    if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) {
-        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
-        if(mCurrentCharacter) { //Ensure a current character exists
-            const MWState::Slot* slot = &*mCurrentCharacter->begin(); //Get newest save
-            if(slot) //Don't even try loading it if there's no prior save.
-                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot); //load newest save. That was easy!
-        }
-    }
+void MWState::StateManager::quickLoad()
+{
+    if (Character* mCurrentCharacter = getCurrentCharacter (false))
+        if (const MWState::Slot* slot = &*mCurrentCharacter->begin()) //Get newest save
+            loadGame (mCurrentCharacter, slot);
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
