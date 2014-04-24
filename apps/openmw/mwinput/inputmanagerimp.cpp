@@ -668,8 +668,6 @@ namespace MWInput
             //If no quicksave works create a new slot with Signature
             if(slot == NULL) {
                 slot = mCurrentCharacter->createSlot(mCurrentCharacter->getSignature());
-                if(slot==NULL)
-                std::cout << "Couldn't work out" << std::endl;
             }
             //MWBase::Environment::get().getWindowManager()->messageBox("#{sQuick_save}"); //No message on quicksave?
             MWBase::Environment::get().getStateManager()->saveGame("Quicksave", slot);
