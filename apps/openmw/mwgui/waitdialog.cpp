@@ -121,6 +121,8 @@ namespace MWGui
         MWBase::World* world = MWBase::Environment::get().getWorld();
         world->getFader ()->fadeOut(0.2);
         setVisible(false);
+        if(Settings::Manager::getBool("autosave","Saves")) //autosaves
+            autosave();
         mProgressBar.setVisible (true);
 
         mWaiting = true;
@@ -238,8 +240,6 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }
-        if(Settings::Manager::getBool("autosave","Saves"))
-            autosave();
     }
 
     void WaitDialog::autosave() {
