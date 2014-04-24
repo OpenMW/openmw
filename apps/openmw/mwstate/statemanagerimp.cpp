@@ -227,16 +227,14 @@ void MWState::StateManager::quickSave(std::string name) {
     if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
         const MWState::Slot* slot = NULL;
         MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
-        if (mCurrentCharacter) //Ensure one exists
+
+        //Find quicksave slot
+        for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
         {
-            //Find quicksave slot
-            for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
-            {
-                if (it->mProfile.mDescription == name)
-                    slot = &*it;
-            }
-            MWBase::Environment::get().getStateManager()->saveGame(name, slot);
+            if (it->mProfile.mDescription == name)
+                slot = &*it;
         }
+        MWBase::Environment::get().getStateManager()->saveGame(name, slot);
     }
 }
 
