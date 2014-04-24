@@ -2219,67 +2219,31 @@ void CSMDoc::Document::createBase()
     }
 }
 
-CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, const boost::filesystem::path& resDir, bool new_)
-    : mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
-      mProjectPath ((configuration.getUserDataPath() / "projects") /
-                    (savePath.filename().string() + ".project")),
-      mSaving (*this, mProjectPath)
+CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
+    const std::vector< boost::filesystem::path >& files,
+    const boost::filesystem::path& savePath, const boost::filesystem::path& resDir)
+: mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
+  mProjectPath ((configuration.getUserDataPath() / "projects") /
+  (savePath.filename().string() + ".project")),
+  mSaving (*this, mProjectPath)
 {
-    if (files.empty())
+    if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
-    if (new_ && files.size()==1)
-        createBase();
-    else
-    {
-        std::vector<boost::filesystem::path>::const_iterator end = files.end();
-
-        if (new_)
-            --end;
-
-        load (files.begin(), end, !new_);
-    }
-
-    if (new_)
-    {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-    }
-
-    bool filtersFound = false;
-
-    if (boost::filesystem::exists (mProjectPath))
-    {
-        filtersFound = true;
-    }
-    else
+    if (!boost::filesystem::exists (mProjectPath))
     {
         boost::filesystem::path locCustomFiltersPath (configuration.getUserDataPath());
         locCustomFiltersPath /= "defaultfilters";
 
-        if (boost::filesystem::exists(locCustomFiltersPath))
+        if (boost::filesystem::exists (locCustomFiltersPath))
         {
             boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
-            filtersFound = true;
         }
         else
         {
-            boost::filesystem::path filters(mResDir);
-            filters /= "defaultfilters";
-
-            if (boost::filesystem::exists(filters))
-            {
-                boost::filesystem::copy_file(filters, mProjectPath);
-                filtersFound = true;
-            }
+            boost::filesystem::copy_file (mResDir / "defaultfilters", mProjectPath);
         }
     }
-
-    if (filtersFound)
-        getData().loadFile (mProjectPath, false, true);
-
-    addOptionalGmsts();
-    addOptionalGlobals();
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
@@ -2289,11 +2253,37 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
     connect (&mSaving, SIGNAL (reportMessage (const QString&, int)),
-             this, SLOT (reportMessage (const QString&, int)));
+        this, SLOT (reportMessage (const QString&, int)));
 }
 
 CSMDoc::Document::~Document()
 {
+}
+
+void CSMDoc::Document::setupData (bool new_)
+{
+    if (new_ && mContentFiles.size()==1)
+        createBase();
+    else
+    {
+        std::vector<boost::filesystem::path>::const_iterator end = mContentFiles.end();
+
+        if (new_)
+            --end;
+
+        load (mContentFiles.begin(), end, !new_);
+    }
+
+    if (new_)
+    {
+        mData.setDescription ("");
+        mData.setAuthor ("");
+    }
+
+    getData().loadFile (mProjectPath, false, true);
+
+    addOptionalGmsts();
+    addOptionalGlobals();
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()

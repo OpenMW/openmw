@@ -72,11 +72,12 @@ namespace CSMDoc
         public:
 
             Document (const Files::ConfigurationManager& configuration,
-                      const std::vector< boost::filesystem::path >& files,
-                      const boost::filesystem::path& savePath,
-                      const boost::filesystem::path& resDir, bool new_);
+                const std::vector< boost::filesystem::path >& files,
+                const boost::filesystem::path& savePath, const boost::filesystem::path& resDir);
 
             ~Document();
+
+            void setupData (bool new_);
 
             QUndoStack& getUndoStack();
 

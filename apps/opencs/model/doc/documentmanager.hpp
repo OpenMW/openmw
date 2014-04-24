@@ -7,6 +7,9 @@
 #include <boost/filesystem/path.hpp>
 
 #include <QObject>
+#include <QThread>
+
+#include "loader.hpp"
 
 namespace Files
 {
@@ -23,6 +26,8 @@ namespace CSMDoc
 
             std::vector<Document *> mDocuments;
             const Files::ConfigurationManager& mConfiguration;
+            QThread mLoaderThread;
+            Loader mLoader;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
@@ -47,9 +52,20 @@ namespace CSMDoc
 
 	    boost::filesystem::path mResDir;
 
+        private slots:
+
+            void documentLoaded (Document *document);
+            ///< The ownership of \a document is not transferred.
+
+            void documentNotLoaded (Document *document, const std::string& error);
+            ///< Document load has been interrupted either because of a call to abortLoading
+            /// or a problem during loading). In the former case error will be an empty string.
+
         signals:
 
             void documentAdded (CSMDoc::Document *document);
+
+            void loadRequest (Document *document, bool _new);
     };
 }
 
