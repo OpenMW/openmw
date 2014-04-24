@@ -26,7 +26,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwstate/character.hpp"
 
 using namespace ICS;
 
