@@ -183,6 +183,8 @@ namespace MWInput
         void toggleWalking();
         void toggleAutoMove();
         void rest();
+        void quickLoad();
+        void quickSave();
 
         void quickKey (int index);
         void showQuickKeysMenu();

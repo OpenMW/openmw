@@ -26,6 +26,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwstate/character.hpp"
 
 using namespace ICS;
 
@@ -251,6 +252,12 @@ namespace MWInput
                 break;
             case A_ToggleHUD:
                 MWBase::Environment::get().getWindowManager()->toggleHud();
+                break;
+            case A_QuickSave:
+                quickSave();
+                break;
+            case A_QuickLoad:
+                quickLoad();
                 break;
             }
         }
@@ -638,6 +645,36 @@ namespace MWInput
         }
     }
 
+    void InputManager::quickLoad() {
+        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
+        if(mCurrentCharacter) { //Ensure a current character exists
+            const MWState::Slot* slot = &*mCurrentCharacter->begin(); //Get newest save
+            if(slot) //Don't even try loading it if there's no prior save.
+                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot); //load newest save. That was easy!
+        }
+    }
+
+    void InputManager::quickSave() {
+        const MWState::Slot* slot = NULL;
+        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
+        if (mCurrentCharacter) //Ensure one exists, otherwise do nothing
+        {
+            //Find quicksave slot
+            for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+            {
+                if (it->mProfile.mDescription == "Quicksave")
+                    slot = &*it;
+            }
+            //If no quicksave works create a new slot with Signature
+            if(slot == NULL) {
+                slot = mCurrentCharacter->createSlot(mCurrentCharacter->getSignature());
+                if(slot==NULL)
+                std::cout << "Couldn't work out" << std::endl;
+            }
+            //MWBase::Environment::get().getWindowManager()->messageBox("#{sQuick_save}"); //No message on quicksave?
+            MWBase::Environment::get().getStateManager()->saveGame("Quicksave", slot);
+        }
+    }
     void InputManager::toggleSpell()
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
@@ -842,6 +879,8 @@ namespace MWInput
         defaultKeyBindings[A_Screenshot] = SDL_GetKeyFromScancode(SDL_SCANCODE_F12);
         defaultKeyBindings[A_ToggleHUD] = SDL_GetKeyFromScancode(SDL_SCANCODE_F11);
         defaultKeyBindings[A_AlwaysRun] = SDL_GetKeyFromScancode(SDL_SCANCODE_Y);
+        defaultKeyBindings[A_QuickSave] = SDL_GetKeyFromScancode(SDL_SCANCODE_F5);
+        defaultKeyBindings[A_QuickLoad] = SDL_GetKeyFromScancode(SDL_SCANCODE_F9);
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
@@ -918,6 +957,8 @@ namespace MWInput
         descriptions[A_QuickKey9] = "sQuick9Cmd";
         descriptions[A_QuickKey10] = "sQuick10Cmd";
         descriptions[A_AlwaysRun] = "sAlways_Run";
+        descriptions[A_QuickSave] = "sQuickSaveCmd";
+        descriptions[A_QuickLoad] = "sQuickLoadCmd";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -961,6 +1002,8 @@ namespace MWInput
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
         ret.push_back(A_Console);
+        ret.push_back(A_QuickSave);
+        ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
