@@ -49,7 +49,7 @@ void CSVSettings::ListView::buildAbstractItemViewModel()
 
 void CSVSettings::ListView::emitItemViewUpdate (int idx)
 {
-    emit viewUpdated (objectName(), selectedValues());
+    updateView();
 }
 
 QWidget *CSVSettings::ListView::buildWidget(bool isMultiLine, int width)

@@ -58,10 +58,6 @@ namespace CSMSettings {
     private:
 
         void buildSettingModelDefaults();
-
-    signals:
-
-        void userSettingUpdated(const QString &, const QStringList &);
     };
 }
 #endif // USERSETTINGS_HPP

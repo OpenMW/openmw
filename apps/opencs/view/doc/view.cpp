@@ -492,18 +492,7 @@ void CSVDoc::View::resizeViewHeight (int height)
 
 void CSVDoc::View::updateUserSetting
                                 (const QString &name, const QStringList &list)
-{
-    if (list.isEmpty())
-        return;
-
-    int value = list.at(0).toInt();
-
-    if (name == "Width")
-        resizeViewWidth (value);
-
-    else if (name == "Height")
-        resizeViewHeight (value);
-}
+{}
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
 {

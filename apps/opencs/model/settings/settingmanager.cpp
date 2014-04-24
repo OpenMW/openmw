@@ -328,3 +328,15 @@ CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const
 
     return pageMap;
 }
+
+void CSMSettings::SettingManager::updateUserSetting(const QString &settingKey,
+                                                    const QStringList &list)
+{
+    QStringList names = settingKey.split('.');
+
+    Setting *setting = findSetting (names.at(0), names.at(1));
+
+    setting->setDefinedValues (list);
+
+    emit userSettingUpdated (names.at(1), list);
+}

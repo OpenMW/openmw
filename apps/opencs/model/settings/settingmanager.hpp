@@ -75,8 +75,11 @@ namespace CSMSettings
 
     signals:
 
+        void userSettingUpdated (const QString &, const QStringList &);
+
     public slots:
 
+        void updateUserSetting (const QString &, const QStringList &);
     };
 }
 #endif // CSMSETTINGS_SETTINGMANAGER_HPP

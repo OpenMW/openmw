@@ -456,12 +456,14 @@ void CSVWorld::Table::updateUserSetting
 
     for (int i=0; i<columns; ++i)
         if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
-            if (dynamic_cast<CommandDelegate&>
-                                    (*delegate).updateUserSetting (name, list))
+        {
+            dynamic_cast<CommandDelegate&>
+                                    (*delegate).updateUserSetting (name, list);
             {
                 emit dataChanged (mModel->index (0, i),
                                   mModel->index (mModel->rowCount()-1, i));
             }
+        }
 }
 
 void CSVWorld::Table::tableSizeUpdate()

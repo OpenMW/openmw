@@ -151,6 +151,11 @@ void CSVSettings::View::setSelectedValues (const QStringList &list,
     }
     select (selection);
 
+    //push changes to model side
+
+
+    //update the view if the selection was set from the model side, not by the
+    //user
     if (doViewUpdate)
          updateView (signalUpdate);
 }
@@ -198,7 +203,7 @@ QList <QStandardItem *> CSVSettings::View::toStandardItemList
 void CSVSettings::View::updateView (bool signalUpdate) const
 {
     if (signalUpdate)
-        emit viewUpdated(objectName(), selectedValues());
+        emit viewUpdated(viewKey(), selectedValues());
 }
 
 QString CSVSettings::View::value (int row) const

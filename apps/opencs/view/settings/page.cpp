@@ -52,7 +52,7 @@ void CSVSettings::Page::addView (CSMSettings::Setting *setting)
     if (setting->isEditorSetting()) {
         connect (view, SIGNAL (viewUpdated(const QString&, const QStringList&)),
                  &CSMSettings::UserSettings::instance(),
-                 SIGNAL (userSettingUpdated (const QString &, const QStringList &)));
+                 SLOT (updateUserSetting (const QString &, const QStringList &)));
     }
 }
 
