@@ -122,7 +122,7 @@ namespace MWGui
         world->getFader ()->fadeOut(0.2);
         setVisible(false);
         if(Settings::Manager::getBool("autosave","Saves")) //autosaves
-            autosave();
+            MWBase::Environment::get().getStateManager()->quickSave("Autosave");
         mProgressBar.setVisible (true);
 
         mWaiting = true;
@@ -242,22 +242,6 @@ namespace MWGui
         }
     }
 
-    void WaitDialog::autosave() {
-        if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
-            const MWState::Slot* slot = NULL;
-            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
-            if (mCurrentCharacter) //Ensure one exists
-            {
-                //Find quicksave slot
-                for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
-                {
-                    if (it->mProfile.mDescription == "Autosave")
-                        slot = &*it;
-                }
-                MWBase::Environment::get().getStateManager()->saveGame("Autosave", slot);
-            }
-        }
-    }
 
     void WaitDialog::wakeUp ()
     {
