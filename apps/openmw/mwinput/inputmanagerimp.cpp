@@ -659,7 +659,7 @@ namespace MWInput
     void InputManager::quickSave() {
         if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
             const MWState::Slot* slot = NULL;
-            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
+            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
             if (mCurrentCharacter) //Ensure one exists
             {
                 //Find quicksave slot
