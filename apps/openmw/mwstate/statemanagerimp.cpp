@@ -223,6 +223,23 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         slot->mPath.parent_path().filename().string());
 }
 
+void MWState::StateManager::quickSave(std::string name) {
+    if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
+        const MWState::Slot* slot = NULL;
+        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
+        if (mCurrentCharacter) //Ensure one exists
+        {
+            //Find quicksave slot
+            for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+            {
+                if (it->mProfile.mDescription == name)
+                    slot = &*it;
+            }
+            MWBase::Environment::get().getStateManager()->saveGame(name, slot);
+        }
+    }
+}
+
 void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
 {
     try
@@ -309,11 +326,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
 
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        
+
         //Update the weapon icon in the hud with whatever the player is currently holding.
         MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator item = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        
+
         if (item != invStore.end())
             MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*item);
 
@@ -325,6 +342,17 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     {
         std::cerr << "failed to load saved game: " << e.what() << std::endl;
         cleanup (true);
+    }
+}
+
+void MWState::StateManager::quickLoad() {
+    if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) {
+        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
+        if(mCurrentCharacter) { //Ensure a current character exists
+            const MWState::Slot* slot = &*mCurrentCharacter->begin(); //Get newest save
+            if(slot) //Don't even try loading it if there's no prior save.
+                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot); //load newest save. That was easy!
+        }
     }
 }
 

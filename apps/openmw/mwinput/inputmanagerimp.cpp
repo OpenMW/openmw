@@ -26,6 +26,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwstate/character.hpp"
 
 using namespace ICS;
 
@@ -251,6 +252,12 @@ namespace MWInput
                 break;
             case A_ToggleHUD:
                 MWBase::Environment::get().getWindowManager()->toggleHud();
+                break;
+            case A_QuickSave:
+                quickSave();
+                break;
+            case A_QuickLoad:
+                quickLoad();
                 break;
             }
         }
@@ -638,6 +645,13 @@ namespace MWInput
         }
     }
 
+    void InputManager::quickLoad() {
+        MWBase::Environment::get().getStateManager()->quickLoad();
+    }
+
+    void InputManager::quickSave() {
+        MWBase::Environment::get().getStateManager()->quickSave();
+    }
     void InputManager::toggleSpell()
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
@@ -842,6 +856,8 @@ namespace MWInput
         defaultKeyBindings[A_Screenshot] = SDL_GetKeyFromScancode(SDL_SCANCODE_F12);
         defaultKeyBindings[A_ToggleHUD] = SDL_GetKeyFromScancode(SDL_SCANCODE_F11);
         defaultKeyBindings[A_AlwaysRun] = SDL_GetKeyFromScancode(SDL_SCANCODE_Y);
+        defaultKeyBindings[A_QuickSave] = SDL_GetKeyFromScancode(SDL_SCANCODE_F5);
+        defaultKeyBindings[A_QuickLoad] = SDL_GetKeyFromScancode(SDL_SCANCODE_F9);
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
@@ -918,6 +934,8 @@ namespace MWInput
         descriptions[A_QuickKey9] = "sQuick9Cmd";
         descriptions[A_QuickKey10] = "sQuick10Cmd";
         descriptions[A_AlwaysRun] = "sAlways_Run";
+        descriptions[A_QuickSave] = "sQuickSaveCmd";
+        descriptions[A_QuickLoad] = "sQuickLoadCmd";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -961,6 +979,8 @@ namespace MWInput
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
         ret.push_back(A_Console);
+        ret.push_back(A_QuickSave);
+        ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
