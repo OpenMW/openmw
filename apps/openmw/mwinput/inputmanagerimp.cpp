@@ -659,7 +659,7 @@ namespace MWInput
     void InputManager::quickSave() {
         if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
             const MWState::Slot* slot = NULL;
-            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
+            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
             if (mCurrentCharacter) //Ensure one exists
             {
                 //Find quicksave slot
@@ -667,10 +667,6 @@ namespace MWInput
                 {
                     if (it->mProfile.mDescription == "Quicksave")
                         slot = &*it;
-                }
-                //If no quicksave works create a new slot with Signature
-                if(slot == NULL) {
-                    slot = mCurrentCharacter->createSlot(mCurrentCharacter->getSignature());
                 }
                 //MWBase::Environment::get().getWindowManager()->messageBox("#{sQuick_save}"); //No message on quicksave?
                 MWBase::Environment::get().getStateManager()->saveGame("Quicksave", slot);

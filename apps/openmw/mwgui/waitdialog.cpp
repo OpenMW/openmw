@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -15,6 +16,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwstate/charactermanager.hpp"
 
 namespace MWGui
 {
@@ -235,6 +237,25 @@ namespace MWGui
         if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
+        }
+        if(Settings::Manager::getBool("autosave","Saves"))
+            autosave();
+    }
+
+    void WaitDialog::autosave() {
+        if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
+            const MWState::Slot* slot = NULL;
+            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
+            if (mCurrentCharacter) //Ensure one exists
+            {
+                //Find quicksave slot
+                for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+                {
+                    if (it->mProfile.mDescription == "Autosave")
+                        slot = &*it;
+                }
+                MWBase::Environment::get().getStateManager()->saveGame("Autosave", slot);
+            }
         }
     }
 
