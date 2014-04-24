@@ -646,31 +646,35 @@ namespace MWInput
     }
 
     void InputManager::quickLoad() {
-        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
-        if(mCurrentCharacter) { //Ensure a current character exists
-            const MWState::Slot* slot = &*mCurrentCharacter->begin(); //Get newest save
-            if(slot) //Don't even try loading it if there's no prior save.
-                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot); //load newest save. That was easy!
+        if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) {
+            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
+            if(mCurrentCharacter) { //Ensure a current character exists
+                const MWState::Slot* slot = &*mCurrentCharacter->begin(); //Get newest save
+                if(slot) //Don't even try loading it if there's no prior save.
+                    MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot); //load newest save. That was easy!
+            }
         }
     }
 
     void InputManager::quickSave() {
-        const MWState::Slot* slot = NULL;
-        MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(false); //Get current character
-        if (mCurrentCharacter) //Ensure one exists, otherwise do nothing
-        {
-            //Find quicksave slot
-            for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+        if(MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1) { //ensure you're not in character creation
+            const MWState::Slot* slot = NULL;
+            MWState::Character* mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter(true); //Get current character
+            if (mCurrentCharacter) //Ensure one exists
             {
-                if (it->mProfile.mDescription == "Quicksave")
-                    slot = &*it;
+                //Find quicksave slot
+                for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+                {
+                    if (it->mProfile.mDescription == "Quicksave")
+                        slot = &*it;
+                }
+                //If no quicksave works create a new slot with Signature
+                if(slot == NULL) {
+                    slot = mCurrentCharacter->createSlot(mCurrentCharacter->getSignature());
+                }
+                //MWBase::Environment::get().getWindowManager()->messageBox("#{sQuick_save}"); //No message on quicksave?
+                MWBase::Environment::get().getStateManager()->saveGame("Quicksave", slot);
             }
-            //If no quicksave works create a new slot with Signature
-            if(slot == NULL) {
-                slot = mCurrentCharacter->createSlot(mCurrentCharacter->getSignature());
-            }
-            //MWBase::Environment::get().getWindowManager()->messageBox("#{sQuick_save}"); //No message on quicksave?
-            MWBase::Environment::get().getStateManager()->saveGame("Quicksave", slot);
         }
     }
     void InputManager::toggleSpell()
