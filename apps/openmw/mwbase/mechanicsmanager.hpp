@@ -160,6 +160,7 @@ namespace MWBase
             virtual bool isAIActive() = 0;
 
             virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
+            virtual void getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects) = 0;
 
             ///return the list of actors which are following the given actor
             /**ie AiFollow is active and the target is the actor**/
