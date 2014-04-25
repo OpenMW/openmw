@@ -235,9 +235,12 @@ void MWState::StateManager::quickSave(std::string name) {
                 if (it->mProfile.mDescription == name)
                     slot = &*it;
             }
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage4}"); //Saving...
             MWBase::Environment::get().getStateManager()->saveGame(name, slot);
         }
     }
+    else
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sSaveGameDenied}"); //You can not save your game right now
 }
 
 void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
@@ -351,6 +354,7 @@ void MWState::StateManager::quickLoad() {
         if(mCurrentCharacter) { //Ensure a current character exists
             const MWState::Slot* slot = &*mCurrentCharacter->begin(); //Get newest save
             if(slot) //Don't even try loading it if there's no prior save.
+                //MWBase::Environment::get().getWindowManager()->messageBox("#{sLoadingMessage14}"); //it overlaps
                 MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot); //load newest save. That was easy!
         }
     }

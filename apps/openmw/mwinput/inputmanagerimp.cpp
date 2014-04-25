@@ -19,6 +19,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -693,8 +694,12 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
             return;
 
-        /// \todo check if resting is currently allowed (enemies nearby?)
-        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest);
+        if(mPlayer->isInCombat()) {//Check if in combat
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}"); //Nope,
+            return;
+        }
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest); //Open rest GUI
+
     }
 
     void InputManager::screenshot()

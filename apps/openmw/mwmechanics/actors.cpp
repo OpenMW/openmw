@@ -176,7 +176,7 @@ namespace MWMechanics
         adjustMagicEffects (ptr);
         if (ptr.getClass().getCreatureStats(ptr).needToRecalcDynamicStats())
             calculateDynamicStats (ptr);
-        
+
         calculateCreatureStatModifiers (ptr, duration);
 
         // AI
@@ -764,7 +764,7 @@ namespace MWMechanics
                     creatureStats.setHostile(false);
                     creatureStats.setAttacked(false);
                     creatureStats.setAlarmed(false);
-                    
+
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
                 }
@@ -1034,6 +1034,28 @@ namespace MWMechanics
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
                 if(package->getFollowedActor() == actor.getCellRef().mRefID)
                     list.push_front(iter->first);
+            }
+        }
+        return list;
+    }
+
+    std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
+        std::list<MWWorld::Ptr> list;
+        std::vector<MWWorld::Ptr> neighbors;
+        Ogre::Vector3 position = Ogre::Vector3(actor.getRefData().getPosition().pos);
+        getObjectsInRange(position,
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat(),
+            neighbors); //only care about those within the alarm disance
+        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();iter++)
+        {
+            const MWWorld::Class &cls = MWWorld::Class::get(*iter);
+            CreatureStats &stats = cls.getCreatureStats(*iter);
+
+            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
+            {
+                MWMechanics::AiCombat* package = static_cast<MWMechanics::AiCombat*>(stats.getAiSequence().getActivePackage());
+                if(package->getTargetId() == actor.getCellRef().mRefID)
+                    list.push_front(*iter);
             }
         }
         return list;
