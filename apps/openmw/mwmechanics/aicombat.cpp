@@ -38,6 +38,13 @@ namespace
         return Ogre::Radian( Ogre::Math::ACos(dir.y / len) * sgn(Ogre::Math::ASin(dir.x / len)) ).valueDegrees();
     }
 
+    float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
+    {
+        float len = (dirLen >= 0.0f)? dirLen : dir.length();
+        return Ogre::Radian(-Ogre::Math::ASin(dir.z / len)).valueDegrees();
+    }
+
+
     const float PATHFIND_Z_REACH = 50.0f;
     // distance at which actor pays more attention to decide whether to shortcut or stick to pathgrid
     const float PATHFIND_CAUTION_DIST = 500.0f;
@@ -79,7 +86,6 @@ namespace MWMechanics
         mStrike(false),
         mCombatMove(false),
         mMovement(),
-        mTargetAngle(0),
         mForceNoShortcut(false),
         mShortcutFailPos()
     {
@@ -108,13 +114,18 @@ namespace MWMechanics
         }
         
         actor.getClass().getMovementSettings(actor) = mMovement;
+        actor.getClass().getMovementSettings(actor).mRotation[0] = 0;
+        actor.getClass().getMovementSettings(actor).mRotation[2] = 0;
 
-        if(actor.getRefData().getPosition().rot[2] != mTargetAngle)
+        if(mMovement.mRotation[2] != 0)
         {
-            zTurn(actor, Ogre::Degree(mTargetAngle));
+            if(zTurn(actor, Ogre::Degree(mMovement.mRotation[2]))) mMovement.mRotation[2] = 0;
         }
-
-
+        
+        if(mMovement.mRotation[0] != 0)
+        {
+            if(smoothTurn(actor, Ogre::Degree(mMovement.mRotation[0]), 0)) mMovement.mRotation[0] = 0;
+        }
 
         mTimerAttack -= duration;
         actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mStrike);
@@ -225,7 +236,7 @@ namespace MWMechanics
 
         bool isStuck = false;
         float speed = 0.0f;
-		if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = cls.getSpeed(actor)) / 10.0f) 
+        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = cls.getSpeed(actor)) / 10.0f) 
             isStuck = true;
 
         mLastPos = pos;
@@ -235,31 +246,28 @@ namespace MWMechanics
         if(canMoveByZ = ((actor.getClass().isNpc() || actor.getClass().canSwim(actor)) && MWBase::Environment::get().getWorld()->isSwimming(actor))
             || (actor.getClass().canFly(actor) && MWBase::Environment::get().getWorld()->isFlying(actor)))
         {
-            float zToTarget = vTargetPos.z - pos.pos[2];
-
-            mMovement.mPosition[1] = sqrt(distToTarget*distToTarget - zToTarget*zToTarget); // XY-plane vec length
-            mMovement.mPosition[2] = zToTarget;
+            // determine vertical angle to target
+            mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
         }
 
         if(distToTarget < rangeMelee || (distToTarget <= rangeCloseUp && mFollowTarget && !isStuck) )
         {
             //Melee and Close-up combat
             vDirToTarget.z = 0;
-            mTargetAngle = getZAngleToDir(vDirToTarget, distToTarget);
+            mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
 
             if (mFollowTarget && distToTarget > rangeMelee)
             {
                 //Close-up combat: just run up on target
-                if(!canMoveByZ) mMovement.mPosition[1] = 1;
+                mMovement.mPosition[1] = 1;
             }
             else
             {
                 //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
-                if(canMoveByZ) mMovement.mPosition[2] = 0;
 
                 // When attacking with a weapon, choose between slash, thrust or chop
-                if (actor.getClass().hasInventoryStore(actor))
+                if (mStrike && actor.getClass().hasInventoryStore(actor))
                     chooseBestAttack(weapon, mMovement);
 
                 if(mMovement.mPosition[0] || mMovement.mPosition[1])
@@ -304,15 +312,15 @@ namespace MWMechanics
                 if(speed == 0.0f) speed = cls.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
                 float maxAvoidDist = tReaction * speed + speed / MAX_VEL_ANGULAR.valueRadians() * 2;
-                //if(actor.getRefData().getPosition().rot[2] != mTargetAngle)
 				preferShortcut = checkWayIsClear(vActorPos, vTargetPos, distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
             }
 
+            // don't use pathgrid when actor can move in 3 dimensions
             if(canMoveByZ) preferShortcut = true;
 
             if(preferShortcut)
             {
-                mTargetAngle = getZAngleToDir(vDirToTarget, distToTarget);
+                mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
                 mForceNoShortcut = false;
                 mShortcutFailPos.pos[0] = mShortcutFailPos.pos[1] = mShortcutFailPos.pos[2] = 0;
                 mPathFinder.clearPath();
@@ -338,12 +346,12 @@ namespace MWMechanics
                     // get point just before target
                     std::list<ESM::Pathgrid::Point>::iterator pntIter = --mPathFinder.getPath().end();
                     --pntIter;
-				    Ogre::Vector3 vBeforeTarget = Ogre::Vector3(pntIter->mX, pntIter->mY, pntIter->mZ);
+                    Ogre::Vector3 vBeforeTarget = Ogre::Vector3(pntIter->mX, pntIter->mY, pntIter->mZ);
 
                     // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
                     if(distToTarget <= (vTargetPos - vBeforeTarget).length())
                     {
-                        mTargetAngle = getZAngleToDir(vDirToTarget, distToTarget);
+                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
                         preferShortcut = true;
                     }
                 }
@@ -352,13 +360,13 @@ namespace MWMechanics
                 if(!preferShortcut)
                 {
                     if(!mPathFinder.getPath().empty())
-                        mTargetAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+                        mMovement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
                     else 
-                        mTargetAngle = getZAngleToDir(vDirToTarget, distToTarget);
+                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
                 }
             }
 
-            if(!canMoveByZ) mMovement.mPosition[1] = 1;
+            mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
         }
 
@@ -391,8 +399,6 @@ namespace MWMechanics
                 }
             }
         }
-
-        actor.getClass().getMovementSettings(actor) = mMovement;
 
         return false;
     }

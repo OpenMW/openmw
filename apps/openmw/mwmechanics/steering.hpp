@@ -17,6 +17,8 @@ const Ogre::Radian MAX_VEL_ANGULAR(10);
 /// @return have we reached the target angle?
 bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle);
 
+bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis);
+
 }
 
 #endif

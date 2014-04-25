@@ -36,10 +36,6 @@ namespace MWMechanics
             // when mCombatMove is true
             float mTimerCombatMove;
 
-            // the z rotation angle (degrees) we want to reach
-            // used every frame when mRotate is true
-            float mTargetAngle;
-
             bool mReadyToAttack, mStrike;
             bool mFollowTarget;
             bool mCombatMove;
