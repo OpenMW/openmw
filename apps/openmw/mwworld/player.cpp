@@ -134,14 +134,16 @@ namespace MWWorld
 
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
 
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+
         // Find all the actors who might be able to see the player
         std::vector<MWWorld::Ptr> neighbors;
-        MWBase::Environment::get().getMechanicsManager()->getActors().getObjectsInRange( Ogre::Vector3(ptr.getRefData().getPosition().pos), 
+        MWBase::Environment::get().getMechanicsManager()->getActorsInRange( Ogre::Vector3(ptr.getRefData().getPosition().pos), 
                                     esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt(), neighbors);
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-            if ( MechanicsManager::awarenessCheck(ptr, *it) ) 
+            if ( MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, *it) ) 
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
-        if (!neighbors)
+        if (!neighbors.size())
             MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
     }
 

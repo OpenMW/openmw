@@ -985,13 +985,13 @@ namespace MWMechanics
         mObjects.getObjectsInRange(position, radius, objects);
     }
 
+    void MechanicsManager::getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    {
+        mActors.getObjectsInRange(position, radius, objects);
+    }
+
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
     {
         return mActors.getActorsFollowing(actor);
-    }
-
-    MWMechanics::Actors& MechanicsManager::getActors()
-    {
-        return *mActors;
     }
 }
