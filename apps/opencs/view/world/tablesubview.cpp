@@ -82,9 +82,10 @@ void CSVWorld::TableSubView::editRequest (const CSMWorld::UniversalId& id, const
     focusId (id, hint);
 }
 
-void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
+void CSVWorld::TableSubView::updateUserSetting
+                                (const QString &name, const QStringList &list)
 {
-    mTable->updateEditorSetting(settingName, settingValue);
+    mTable->updateUserSetting(name, list);
 }
 
 void CSVWorld::TableSubView::setStatusBar (bool show)
