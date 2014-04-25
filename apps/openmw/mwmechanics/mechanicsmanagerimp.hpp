@@ -134,6 +134,7 @@ namespace MWMechanics
             virtual void updateMagicEffects (const MWWorld::Ptr& ptr);
 
             virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects);
+            virtual void getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects);
 
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
