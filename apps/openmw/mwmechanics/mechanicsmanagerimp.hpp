@@ -137,6 +137,8 @@ namespace MWMechanics
 
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
+            virtual MWMechanics::Actors& getActors();
+
             virtual void toggleAI();
             virtual bool isAIActive();
 

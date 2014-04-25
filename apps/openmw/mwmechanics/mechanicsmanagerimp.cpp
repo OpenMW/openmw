@@ -989,4 +989,9 @@ namespace MWMechanics
     {
         return mActors.getActorsFollowing(actor);
     }
+
+    MWMechanics::Actors& MechanicsManager::getActors()
+    {
+        return *mActors;
+    }
 }

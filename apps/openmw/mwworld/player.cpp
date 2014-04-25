@@ -9,6 +9,8 @@
 #include <components/esm/defs.hpp>
 #include <components/esm/loadbsgn.hpp>
 
+#include "../mwworld/esmstore.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -16,6 +18,8 @@
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actors.hpp"
+#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "class.hpp"
 #include "ptr.hpp"
@@ -130,8 +134,15 @@ namespace MWWorld
 
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
 
-        // TODO show sneak indicator only when the player is not detected by any actor
-        MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
+        // Find all the actors who might be able to see the player
+        std::vector<MWWorld::Ptr> neighbors;
+        MWBase::Environment::get().getMechanicsManager()->getActors().getObjectsInRange( Ogre::Vector3(ptr.getRefData().getPosition().pos), 
+                                    esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt(), neighbors);
+        for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+            if ( MechanicsManager::awarenessCheck(ptr, *it) ) 
+                MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
+        if (!neighbors)
+            MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
     }
 
     void Player::yaw(float yaw)
