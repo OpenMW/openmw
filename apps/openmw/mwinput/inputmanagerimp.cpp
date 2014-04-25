@@ -484,7 +484,7 @@ namespace MWInput
 
                     if (text)
                     {
-                        edit->addText(MyGUI::UString(text));
+                        edit->insertText(MyGUI::UString(text), edit->getTextCursor());
                         SDL_free(text);
                     }
                 }
