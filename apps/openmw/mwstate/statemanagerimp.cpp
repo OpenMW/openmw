@@ -227,7 +227,11 @@ void MWState::StateManager::quickSave (std::string name)
 {
     if (mState!=State_Running ||
         MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")!=-1) // char gen
+    {
+        //You can not save your game right now
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sSaveGameDenied}");
         return;
+    }
 
     const Slot* slot = NULL;
     Character* mCurrentCharacter = getCurrentCharacter(true); //Get current character
@@ -238,6 +242,8 @@ void MWState::StateManager::quickSave (std::string name)
         if (it->mProfile.mDescription == name)
             slot = &*it;
     }
+
+    MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage4}");
 
     saveGame(name, slot);
 }
@@ -351,7 +357,10 @@ void MWState::StateManager::quickLoad()
 {
     if (Character* mCurrentCharacter = getCurrentCharacter (false))
         if (const MWState::Slot* slot = &*mCurrentCharacter->begin()) //Get newest save
+        {
+                //MWBase::Environment::get().getWindowManager()->messageBox("#{sLoadingMessage14}"); //it overlaps
             loadGame (mCurrentCharacter, slot);
+        }
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
