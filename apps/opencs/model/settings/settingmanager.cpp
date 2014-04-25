@@ -338,5 +338,5 @@ void CSMSettings::SettingManager::updateUserSetting(const QString &settingKey,
 
     setting->setDefinedValues (list);
 
-    emit userSettingUpdated (names.at(1), list);
+    emit userSettingUpdated (settingKey, list);
 }

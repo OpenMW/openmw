@@ -53,7 +53,7 @@ namespace CSMSettings {
         /// Writes settings to the user's config file path
         void saveSettings (const QMap <QString, QStringList > &settingMap);
 
-        QString settingValue (const QString &section, const QString &name);
+        QString settingValue (const QString &settingKey);
 
     private:
 

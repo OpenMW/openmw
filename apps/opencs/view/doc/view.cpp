@@ -236,10 +236,10 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
       mViewTotal (totalViews)
 {
     QString width = CSMSettings::UserSettings::instance().settingValue
-                                    (QString("Window Size"), QString("Width"));
+                                    ("Window Size.Width");
 
     QString height = CSMSettings::UserSettings::instance().settingValue
-                                    (QString("Window Size"), QString("Height"));
+                                    ("Window Size.Height");
 
     resize (width.toInt(), height.toInt());
 

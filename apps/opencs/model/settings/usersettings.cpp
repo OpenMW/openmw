@@ -260,13 +260,16 @@ void CSMSettings::UserSettings::saveSettings
    writeFilestream (openFilestream (mUserFilePath, false), settingMap);
 }
 
-QString CSMSettings::UserSettings::settingValue (const QString &section,
-                                                 const QString &name)
+QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
-    Setting *setting = findSetting(section, name);
+    QStringList names = settingKey.split('.');
+    qDebug () << "looking for " << names.at(0) << ',' << names.at(1);
+
+    Setting *setting = findSetting(names.at(0), names.at(1));
 
     if (setting)
     {
+        qDebug() << "setting found";
         if (!setting->definedValues().isEmpty())
             return setting->definedValues().at(0);
     }
