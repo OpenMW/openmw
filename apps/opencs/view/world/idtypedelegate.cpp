@@ -4,29 +4,10 @@
 
 CSVWorld::IdTypeDelegate::IdTypeDelegate
     (const ValueList &values, const IconList &icons, QUndoStack& undoStack, QObject *parent)
-    : DataDisplayDelegate (values, icons, undoStack, parent)
+    : DataDisplayDelegate (values, icons, undoStack,
+                           "Display Format.Referenceable ID Type Display",
+                           parent)
 {}
-
-bool CSVWorld::IdTypeDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
-{
-    /// \todo make the setting key a member variable, that is initialised from a constructor argument
-    if (settingName == "Referenceable ID Type Display")
-    {
-        if (settingValue == "Icon and Text")
-            mDisplayMode = Mode_IconAndText;
-
-        else if (settingValue == "Icon Only")
-            mDisplayMode = Mode_IconOnly;
-
-        else if (settingValue == "Text Only")
-            mDisplayMode = Mode_TextOnly;
-
-        return true;
-    }
-
-    return false;
-}
-
 
 CSVWorld::IdTypeDelegateFactory::IdTypeDelegateFactory()
 {
