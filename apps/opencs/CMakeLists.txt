@@ -95,6 +95,7 @@ opencs_units (view/settings
     booleanview
     textview
     listview
+    rangeview
     resizeablestackedwidget
     )
 
