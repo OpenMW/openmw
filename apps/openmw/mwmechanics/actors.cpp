@@ -176,7 +176,7 @@ namespace MWMechanics
         adjustMagicEffects (ptr);
         if (ptr.getClass().getCreatureStats(ptr).needToRecalcDynamicStats())
             calculateDynamicStats (ptr);
-        
+
         calculateCreatureStatModifiers (ptr, duration);
 
         // AI
@@ -199,9 +199,8 @@ namespace MWMechanics
                 {
                     disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
                 }
-                bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,player)
-                        && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr);
-                if(  ( (fight == 100 )
+
+                if(    (fight == 100 )
                     || (fight >= 95 && d <= 3000)
                     || (fight >= 90 && d <= 2000)
                     || (fight >= 80 && d <= 1000)
@@ -209,12 +208,17 @@ namespace MWMechanics
                     || (fight >= 70 && disp <= 35 && d <= 1000)
                     || (fight >= 60 && disp <= 30 && d <= 1000)
                     || (fight >= 50 && disp == 0)
-                    || (fight >= 40 && disp <= 10 && d <= 500) )
-                    && LOS
+                    || (fight >= 40 && disp <= 10 && d <= 500)
                     )
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()));
-                    creatureStats.setHostile(true);
+                    bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,player)
+                            && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr);
+
+                    if (LOS)
+                    {
+                        creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+                        creatureStats.setHostile(true);
+                    }
                 }
             }
             updateCrimePersuit(ptr, duration);
@@ -542,6 +546,8 @@ namespace MWMechanics
                         ref.getPtr().getCellRef().mPos = ipos;
 
                         // TODO: Add AI to follow player and fight for him
+                        AiFollow package(ptr.getRefData().getHandle());
+                        MWWorld::Class::get (ref.getPtr()).getCreatureStats (ref.getPtr()).getAiSequence().stack(package);
                         // TODO: VFX_SummonStart, VFX_SummonEnd
                         creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
                             MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos).getRefData().getHandle()));
@@ -757,7 +763,8 @@ namespace MWMechanics
                     // TODO: Not a complete list, disposition changes?
                     creatureStats.setHostile(false);
                     creatureStats.setAttacked(false);
-                    
+                    creatureStats.setAlarmed(false);
+
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
                 }
@@ -1027,6 +1034,28 @@ namespace MWMechanics
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
                 if(package->getFollowedActor() == actor.getCellRef().mRefID)
                     list.push_front(iter->first);
+            }
+        }
+        return list;
+    }
+
+    std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
+        std::list<MWWorld::Ptr> list;
+        std::vector<MWWorld::Ptr> neighbors;
+        Ogre::Vector3 position = Ogre::Vector3(actor.getRefData().getPosition().pos);
+        getObjectsInRange(position,
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat(),
+            neighbors); //only care about those within the alarm disance
+        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();iter++)
+        {
+            const MWWorld::Class &cls = MWWorld::Class::get(*iter);
+            CreatureStats &stats = cls.getCreatureStats(*iter);
+
+            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
+            {
+                MWMechanics::AiCombat* package = static_cast<MWMechanics::AiCombat*>(stats.getAiSequence().getActivePackage());
+                if(package->getTargetId() == actor.getCellRef().mRefID)
+                    list.push_front(*iter);
             }
         }
         return list;

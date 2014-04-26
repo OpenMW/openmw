@@ -363,6 +363,7 @@ namespace MWWorld
             loadRefs (store, esm);
 
             mState = State_Loaded;
+            mPathgridGraph.load(mCell);
         }
     }
 
@@ -679,5 +680,15 @@ namespace MWWorld
     bool operator!= (const CellStore& left, const CellStore& right)
     {
         return !(left==right);
+    }
+
+    bool CellStore::isPointConnected(const int start, const int end) const
+    {
+        return mPathgridGraph.isPointConnected(start, end);
+    }
+
+    std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end) const
+    {
+        return mPathgridGraph.aStarSearch(start, end);
     }
 }

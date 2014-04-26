@@ -15,6 +15,7 @@ namespace CSVWorld
 
             QVBoxLayout *mLayout;
             int mButtonSize;
+            int mIconSize;
 
         public:
 
@@ -23,6 +24,8 @@ namespace CSVWorld
             void addTool (SceneTool *tool);
 
             int getButtonSize() const;
+
+            int getIconSize() const;
     };
 }
 

@@ -18,6 +18,7 @@ namespace MyGUI
     class Widget;
     class Window;
     class UString;
+    class ImageBox;
 }
 
 namespace Compiler
@@ -80,6 +81,7 @@ namespace MWGui
   class SoulgemDialog;
   class Recharge;
   class CompanionWindow;
+  class VideoWidget;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -97,6 +99,10 @@ namespace MWGui
     void renderWorldMap();
 
     virtual Loading::Listener* getLoadingScreen();
+
+    /// @note This method will block until the video finishes playing
+    /// (and will continually update the window while doing so)
+    virtual void playVideo(const std::string& name, bool allowSkipping);
 
     /**
      * Should be called each frame to update windows/gui elements.
@@ -332,6 +338,8 @@ namespace MWGui
     Repair* mRepair;
     Recharge* mRecharge;
     CompanionWindow* mCompanionWindow;
+    MyGUI::ImageBox* mVideoBackground;
+    VideoWidget* mVideoWidget;
 
     Translation::Storage& mTranslationDataStorage;
     Cursor* mSoftwareCursor;
@@ -390,6 +398,8 @@ namespace MWGui
 
     void onCursorChange(const std::string& name);
     void onKeyFocusChanged(MyGUI::Widget* widget);
+
+    void sizeVideo(int screenWidth, int screenHeight);
   };
 }
 

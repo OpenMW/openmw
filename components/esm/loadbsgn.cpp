@@ -10,7 +10,7 @@ namespace ESM
 
 void BirthSign::load(ESMReader &esm)
 {
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
     mTexture = esm.getHNOString("TNAM");
     mDescription = esm.getHNOString("DESC");
 
@@ -19,7 +19,7 @@ void BirthSign::load(ESMReader &esm)
 
 void BirthSign::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
     esm.writeHNOCString("TNAM", mTexture);
     esm.writeHNOCString("DESC", mDescription);
 

@@ -414,6 +414,16 @@ void CharacterController::playRandomDeath(float startpoint)
         mDeathState = CharState_SwimDeath;
         mCurrentDeath = "swimdeath";
     }
+    else if (mHitState == CharState_KnockDown)
+    {
+        mDeathState = CharState_DeathKnockDown;
+        mCurrentDeath = "deathknockdown";
+    }
+    else if (mHitState == CharState_KnockOut)
+    {
+        mDeathState = CharState_DeathKnockOut;
+        mCurrentDeath = "deathknockout";
+    }
     else
     {
         int selected=0;

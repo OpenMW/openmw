@@ -96,6 +96,10 @@ namespace MWBase
              */
             virtual void update() = 0;
 
+            /// @note This method will block until the video finishes playing
+            /// (and will continually update the window while doing so)
+            virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
+
             virtual void setNewGame(bool newgame) = 0;
 
             virtual void pushGuiMode (MWGui::GuiMode mode) = 0;

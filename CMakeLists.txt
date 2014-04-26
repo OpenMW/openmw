@@ -132,6 +132,7 @@ set(OENGINE_OGRE
 
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp
+  ${LIBDIR}/openengine/gui/layout.hpp
 )
 
 set(OENGINE_BULLET

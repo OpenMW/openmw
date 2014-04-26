@@ -308,11 +308,17 @@ namespace MWWorld
                     break;
                 }
 
+                Ogre::Vector3 oldPosition = newPosition;
                 // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
-                // NOTE: May need to stop slaughterfish step out  of the water.
-                // NOTE: stepMove may modify newPosition
-                if((canWalk || isBipedal || isNpc) && stepMove(colobj, newPosition, velocity, remainingTime, engine))
-                    isOnGround = !(newPosition.z < waterlevel || isFlying); // Only on the ground if there's gravity
+                // NOTE: stepMove modifies newPosition if successful
+                if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
+                {
+                    // don't let slaughterfish move out of water after stepMove
+                    if(ptr.getClass().canSwim(ptr) && newPosition.z > (waterlevel - halfExtents.z * 0.5))
+                        newPosition = oldPosition;
+                    else // Only on the ground if there's gravity
+                        isOnGround = !(newPosition.z < waterlevel || isFlying);
+                }
                 else
                 {
                     // Can't move this way, try to find another spot along the plane

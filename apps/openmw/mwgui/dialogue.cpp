@@ -56,29 +56,16 @@ namespace MWGui
 
     void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWBase::MechanicsManager::PersuasionType type;
         if (sender == mAdmireButton) type = MWBase::MechanicsManager::PT_Admire;
         else if (sender == mIntimidateButton) type = MWBase::MechanicsManager::PT_Intimidate;
         else if (sender == mTauntButton) type = MWBase::MechanicsManager::PT_Taunt;
         else if (sender == mBribe10Button)
-        {
-            player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, 10, player);
-            mReceiver.getClass().getContainerStore(mReceiver).add(MWWorld::ContainerStore::sGoldId, 10, mReceiver);
             type = MWBase::MechanicsManager::PT_Bribe10;
-        }
         else if (sender == mBribe100Button)
-        {
-            player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, 100, player);
-            mReceiver.getClass().getContainerStore(mReceiver).add(MWWorld::ContainerStore::sGoldId, 100, mReceiver);
             type = MWBase::MechanicsManager::PT_Bribe100;
-        }
         else /*if (sender == mBribe1000Button)*/
-        {
-            player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, 1000, player);
-            mReceiver.getClass().getContainerStore(mReceiver).add(MWWorld::ContainerStore::sGoldId, 1000, mReceiver);
             type = MWBase::MechanicsManager::PT_Bribe1000;
-        }
 
         MWBase::Environment::get().getDialogueManager()->persuade(type);
 
@@ -98,12 +85,6 @@ namespace MWGui
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
-    }
-
-    // The receiver of the bribe
-    void PersuasionDialog::setReceiver(MWWorld::Ptr receiver) 
-    {
-        mReceiver = receiver;
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -380,7 +361,6 @@ namespace MWGui
         mPtr = actor;
         mTopicsList->setEnabled(true);
         setTitle(npcName);
-        mPersuasionDialog.setReceiver(mPtr);
 
         mTopicsList->clear();
 

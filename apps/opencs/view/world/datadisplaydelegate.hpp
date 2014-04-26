@@ -35,10 +35,14 @@ namespace CSVWorld
         int mIconLeftOffset;
         int mTextLeftOffset;
 
+        QString mSettingKey;
+
     public:
         explicit DataDisplayDelegate (const ValueList & values,
                                       const IconList & icons,
-                                      QUndoStack& undoStack, QObject *parent);
+                                      QUndoStack& undoStack,
+                                      const QString &settingKey,
+                                      QObject *parent);
 
         ~DataDisplayDelegate();
 
@@ -53,7 +57,13 @@ namespace CSVWorld
         /// offset the horizontal position of the text from the right edge of the icon.  Default is 8 pixels.
         void setTextLeftOffset (int offset);
 
+        ///update the display mode for the delegate
+        void updateUserSetting (const QString &name, const QStringList &list);
+
     private:
+
+        /// update the display mode based on a passed string
+        void updateDisplayMode (const QString &);
 
         /// custom paint function for painting the icon.  Mode_IconAndText and Mode_Icon only.
         void paintIcon (QPainter *painter, const QStyleOptionViewItem &option, int i) const;

@@ -26,7 +26,13 @@ namespace ESM
         std::vector<std::string> mContentFiles;
         std::string mPlayerName;
         int mPlayerLevel;
-        std::string mPlayerClass; // this is the ID and not the name of the class
+
+        // ID of class
+        std::string mPlayerClassId;
+        // Name of the class. When using a custom class, the ID is not really meaningful prior
+        // to loading the savegame, so the name is stored separately.
+        std::string mPlayerClassName;
+
         std::string mPlayerCell;
         TimeStamp mInGameTime;
         double mTimePlayed;

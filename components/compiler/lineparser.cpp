@@ -86,7 +86,7 @@ namespace Compiler
     {
         if (mState==PotentialEndState)
         {
-            getErrorHandler().warning ("stay string argument (ignoring it)", loc);
+            getErrorHandler().warning ("stray string argument (ignoring it)", loc);
             mState = EndState;
             return true;
         }
@@ -377,19 +377,19 @@ namespace Compiler
 
                 case Scanner::K_else:
 
-                    getErrorHandler().warning ("stay else (ignoring it)", loc);
+                    getErrorHandler().warning ("stray else (ignoring it)", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_endif:
 
-                    getErrorHandler().warning ("stay endif (ignoring it)", loc);
+                    getErrorHandler().warning ("stray endif (ignoring it)", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_begin:
 
-                    getErrorHandler().warning ("stay begin (ignoring it)", loc);
+                    getErrorHandler().warning ("stray begin (ignoring it)", loc);
                     mState = EndState;
                     return true;
             }

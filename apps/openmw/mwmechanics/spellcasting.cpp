@@ -420,19 +420,20 @@ namespace MWMechanics
         {
             if (effectId == ESM::MagicEffect::Lock)
             {
-                if (target.getCellRef().mLockLevel < magnitude)
+                if (target.getCellRef().mLockLevel < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
                     target.getCellRef().mLockLevel = magnitude;
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
                 if (target.getCellRef().mLockLevel <= magnitude)
                 {
+                    //Door not already unlocked
                     if (target.getCellRef().mLockLevel > 0)
                     {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
                         MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
                     }
-                    target.getCellRef().mLockLevel = 0;
+                    target.getCellRef().mLockLevel = -abs(target.getCellRef().mLockLevel); //unlocks the door
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
@@ -714,7 +715,7 @@ namespace MWMechanics
             effect.mDuration = 1;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
         {
-            if (!magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
                 magnitude = int((0.05 * y) / (0.1 * magicEffect->mData.mBaseCost));
             else
                 magnitude = int(y / (0.1 * magicEffect->mData.mBaseCost));

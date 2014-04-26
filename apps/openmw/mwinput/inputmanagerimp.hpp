@@ -68,7 +68,7 @@ namespace MWInput
         /// Clear all savegame-specific data
         virtual void clear();
 
-        virtual void update(float dt, bool loading);
+        virtual void update(float dt, bool disableControls, bool disableEvents=false);
 
         void setPlayer (MWWorld::Player* player) { mPlayer = player; }
 
@@ -183,6 +183,8 @@ namespace MWInput
         void toggleWalking();
         void toggleAutoMove();
         void rest();
+        void quickLoad();
+        void quickSave();
 
         void quickKey (int index);
         void showQuickKeysMenu();

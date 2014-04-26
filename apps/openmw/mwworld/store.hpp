@@ -157,6 +157,14 @@ namespace MWWorld
             return 0;
         }
 
+        /**
+         * Does the record with this ID come from the dynamic store?
+         */
+        bool isDynamic(const std::string &id) const {
+            typename Dynamic::const_iterator dit = mDynamic.find(id);
+            return (dit != mDynamic.end());
+        }
+
         /** Returns a random record that starts with the named ID, or NULL if not found. */
         const T *searchRandom(const std::string &id) const
         {

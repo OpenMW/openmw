@@ -15,6 +15,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -185,6 +186,10 @@ namespace MWWorld
     void Player::setTeleported(bool teleported)
     {
         mTeleported = teleported;
+    }
+
+    bool Player::isInCombat() {
+        return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
     }
 
     void Player::markPosition(CellStore *markedCell, ESM::Position markedPosition)

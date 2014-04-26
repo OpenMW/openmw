@@ -10,7 +10,7 @@
 namespace MWMechanics
 {
 
-bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle)
+bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, Ogre::Degree epsilon)
 {
     Ogre::Radian currentAngle (actor.getRefData().getPosition().rot[2]);
     Ogre::Radian diff (targetAngle - currentAngle);
@@ -27,7 +27,6 @@ bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle)
 
     // The turning animation actually moves you slightly, so the angle will be wrong again.
     // Use epsilon to prevent jerkiness.
-    const Ogre::Degree epsilon (0.5);
     if (absDiff < epsilon)
         return true;
 

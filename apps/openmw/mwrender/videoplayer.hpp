@@ -1,27 +1,22 @@
 #ifndef VIDEOPLAYER_H
 #define VIDEOPLAYER_H
 
-#include <OgreMaterial.h>
-
-namespace Ogre
-{
-    class SceneManager;
-    class SceneNode;
-    class Rectangle2D;
-    class RenderWindow;
-}
+#include <string>
 
 namespace MWRender
 {
     struct VideoState;
 
+    /**
+     * @brief Plays a video on an Ogre texture.
+     */
     class VideoPlayer
     {
     public:
-        VideoPlayer(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* window);
+        VideoPlayer();
         ~VideoPlayer();
 
-        void playVideo (const std::string& resourceName, bool allowSkipping);
+        void playVideo (const std::string& resourceName);
 
         void update();
 
@@ -30,21 +25,13 @@ namespace MWRender
 
         bool isPlaying();
 
-        void setResolution (int w, int h) { mWidth = w; mHeight = h; }
+        std::string getTextureName();
+        int getVideoWidth();
+        int getVideoHeight();
 
 
     private:
         VideoState* mState;
-
-        bool mAllowSkipping;
-
-        Ogre::SceneManager* mSceneMgr;
-        Ogre::MaterialPtr mVideoMaterial;
-        Ogre::Rectangle2D* mRectangle;
-        Ogre::Rectangle2D* mBackgroundRectangle;
-        Ogre::SceneNode* mNode;
-        Ogre::SceneNode* mBackgroundNode;
-        Ogre::RenderWindow* mWindow;
 
         int mWidth;
         int mHeight;

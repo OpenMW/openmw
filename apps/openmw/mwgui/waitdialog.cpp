@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -15,6 +16,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwstate/charactermanager.hpp"
 
 namespace MWGui
 {
@@ -119,6 +121,8 @@ namespace MWGui
         MWBase::World* world = MWBase::Environment::get().getWorld();
         world->getFader ()->fadeOut(0.2);
         setVisible(false);
+        if(Settings::Manager::getBool("autosave","Saves") && mSleeping) //autosaves when enabled and sleeping (Not resting, apparently)
+            MWBase::Environment::get().getStateManager()->quickSave("Autosave");
         mProgressBar.setVisible (true);
 
         mWaiting = true;
@@ -237,6 +241,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }
     }
+
 
     void WaitDialog::wakeUp ()
     {

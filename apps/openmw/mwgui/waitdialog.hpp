@@ -34,6 +34,7 @@ namespace MWGui
 
         bool getSleeping() { return mWaiting && mSleeping; }
         void wakeUp();
+        void autosave();
 
     protected:
         MyGUI::TextBox* mDateTimeText;

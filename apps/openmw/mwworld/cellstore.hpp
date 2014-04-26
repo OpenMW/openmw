@@ -8,6 +8,8 @@
 #include "esmstore.hpp"
 #include "cellreflist.hpp"
 
+#include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
+
 namespace ESM
 {
     struct CellState;
@@ -141,6 +143,10 @@ namespace MWWorld
                 throw std::runtime_error ("Storage for this type not exist in cells");
             }
 
+            bool isPointConnected(const int start, const int end) const;
+
+            std::list<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
+
         private:
 
             template<class Functor, class List>
@@ -166,6 +172,8 @@ namespace MWWorld
             ///< Make case-adjustments to \a ref and insert it into the respective container.
             ///
             /// Invalid \a ref objects are silently dropped.
+
+            MWMechanics::PathgridGraph mPathgridGraph;
     };
 
     template<>

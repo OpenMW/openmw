@@ -120,7 +120,7 @@ namespace MWMechanics
             /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
             virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item);
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
-            /// @return was it illegal, and someone saw you doing it?
+            /// @return was it illegal, and someone saw you doing it? Also returns fail when enemies are nearby
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed);
 
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
@@ -138,7 +138,9 @@ namespace MWMechanics
 
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
-            virtual void toggleAI();
+            virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
+
+            virtual bool toggleAI();
             virtual bool isAIActive();
 
             virtual void playerLoaded();

@@ -11,7 +11,7 @@ namespace ESM
 void Repair::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
 
     esm.getHNT(mData, "RIDT", 16);
 
@@ -22,7 +22,7 @@ void Repair::load(ESMReader &esm)
 void Repair::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
 
     esm.writeHNT("RIDT", mData, 16);
     esm.writeHNOString("SCRI", mScript);

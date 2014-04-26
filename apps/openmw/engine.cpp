@@ -59,9 +59,6 @@ void OMW::Engine::executeLocalScripts()
         MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
         MWBase::Environment::get().getScriptManager()->run (script.first, interpreterContext);
-
-        if (MWBase::Environment::get().getWorld()->hasCellChanged())
-            break;
     }
 
     localScripts.setIgnore (MWWorld::Ptr());
@@ -101,15 +98,10 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             // global scripts
             MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
-            bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
-
             // local scripts
-            executeLocalScripts(); // This does not handle the case where a global script causes a
-                                    // cell change, followed by a cell change in a local script during
-                                    // the same frame.
+            executeLocalScripts();
 
-            if (changed) // keep change flag for another frame, if cell changed happened in local script
-                MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+            MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
             if (!paused)
                 MWBase::Environment::get().getWorld()->advanceTime(
@@ -339,6 +331,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
 
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
+                settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
+
     mOgre->createWindow("OpenMW", windowSettings);
 
     Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
@@ -356,6 +351,16 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding);
     mEnvironment.setWindowManager (window);
 
+    // Create sound system
+    mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
+
+    if (!mSkipMenu)
+    {
+        std::string logo = mFallbackMap["Movies_Company_Logo"];
+        if (!logo.empty())
+            window->playVideo(logo, 1);
+    }
+
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
@@ -372,9 +377,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
       mTranslationDataStorage.loadTranslationData(mFileCollections, mContentFiles[i]);
 
     Compiler::registerExtensions (mExtensions);
-
-    // Create sound system
-    mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
@@ -434,7 +436,19 @@ void OMW::Engine::go()
 
     // start in main menu
     if (!mSkipMenu)
+    {
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        try
+        {
+            // Is there an ini setting for this filename or something?
+            MWBase::Environment::get().getSoundManager()->streamMusic("Special/morrowind title.mp3");
+
+            std::string logo = mFallbackMap["Movies_Morrowind_Logo"];
+            if (!logo.empty())
+                MWBase::Environment::get().getWindowManager()->playVideo(logo, true);
+        }
+        catch (...) {}
+    }
     else
         MWBase::Environment::get().getStateManager()->newGame (true);
 

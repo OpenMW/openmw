@@ -18,16 +18,21 @@ namespace NifOgre
             if(time <= keys.front().mTime)
                 return keys.front().mValue;
 
-            Nif::FloatKeyList::VecType::const_iterator iter(keys.begin()+1);
-            for(;iter != keys.end();iter++)
+            const Nif::FloatKey* keyArray = keys.data();
+            size_t size = keys.size();
+
+            for (size_t i = 1; i < size; ++i)
             {
-                if(iter->mTime < time)
+                const Nif::FloatKey* aKey = &keyArray[i];
+
+                if(aKey->mTime < time)
                     continue;
 
-                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return last->mValue + ((iter->mValue - last->mValue)*a);
+                const Nif::FloatKey* aLastKey = &keyArray[i-1];
+                float a = (time - aLastKey->mTime) / (aKey->mTime - aLastKey->mTime);
+                return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
             }
+
             return keys.back().mValue;
         }
 
@@ -36,16 +41,21 @@ namespace NifOgre
             if(time <= keys.front().mTime)
                 return keys.front().mValue;
 
-            Nif::Vector3KeyList::VecType::const_iterator iter(keys.begin()+1);
-            for(;iter != keys.end();iter++)
+            const Nif::Vector3Key* keyArray = keys.data();
+            size_t size = keys.size();
+
+            for (size_t i = 1; i < size; ++i)
             {
-                if(iter->mTime < time)
+                const Nif::Vector3Key* aKey = &keyArray[i];
+
+                if(aKey->mTime < time)
                     continue;
 
-                Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return last->mValue + ((iter->mValue - last->mValue)*a);
+                const Nif::Vector3Key* aLastKey = &keyArray[i-1];
+                float a = (time - aLastKey->mTime) / (aKey->mTime - aLastKey->mTime);
+                return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
             }
+
             return keys.back().mValue;
         }
     };

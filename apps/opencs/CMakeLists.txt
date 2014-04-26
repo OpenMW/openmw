@@ -24,7 +24,7 @@ opencs_units (model/world
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection
     )
 
 opencs_hdrs_noqt (model/world
@@ -60,7 +60,7 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit dialoguesubview previewsubview
+    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap
     )
 
 opencs_units (view/render
@@ -88,34 +88,29 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
-    abstractblock
-    proxyblock
-    abstractwidget
-    usersettingsdialog
-    datadisplayformatpage
-    windowpage
+    settingwindow
+    dialog
+    page
+    view
+    booleanview
+    textview
+    listview
+    resizeablestackedwidget
     )
 
 opencs_units_noqt (view/settings
-    abstractpage
-    blankpage
-    groupblock
-    customblock
-    groupbox
-    itemblock
-    settingwidget
-    toggleblock
-    support
+    frame
     )
 
 opencs_units (model/settings
     usersettings
-    settingcontainer
+    settingmanager
+    setting
+    connector
     )
 
-opencs_units_noqt (model/settings
+opencs_hdrs_noqt (model/settings
     support
-    settingsitem
     )
 
 opencs_units_noqt (model/filter

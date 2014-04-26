@@ -10,7 +10,7 @@ namespace ESM
 
 void Sound::load(ESMReader &esm)
 {
-    mSound = esm.getHNString("FNAM");
+    mSound = esm.getHNOString("FNAM");
     esm.getHNT(mData, "DATA", 3);
     /*
      cout << "vol=" << (int)data.volume
@@ -21,7 +21,7 @@ void Sound::load(ESMReader &esm)
 }
 void Sound::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("FNAM", mSound);
+    esm.writeHNOCString("FNAM", mSound);
     esm.writeHNT("DATA", mData, 3);
 }
 

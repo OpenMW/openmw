@@ -17,10 +17,8 @@
 
 namespace MWMechanics
 {
-    // NOTE: determined empirically but probably need further tweaking
-    static const int COUNT_BEFORE_STUCK = 20;
-    static const int COUNT_BEFORE_RESET = 200;
-    static const int COUNT_EVADE = 7;
+    static const int COUNT_BEFORE_RESET = 200; // TODO: maybe no longer needed
+    static const float DOOR_CHECK_INTERVAL = 1.5f;
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
@@ -28,14 +26,16 @@ namespace MWMechanics
       , mCellY(std::numeric_limits<int>::max())
       , mXCell(0)
       , mYCell(0)
-      , mX(0)
-      , mY(0)
-      , mZ(0)
-      , mPrevX(0)
-      , mPrevY(0)
-      , mWalkState(State_Norm)
-      , mStuckCount(0)
-      , mEvadeCount(0)
+      , mCell(NULL)
+      , mStuckCount(0) // TODO: maybe no longer needed
+      , mDoorCheckDuration(0)
+      , mTrimCurrentNode(false)
+      , mReaction(0)
+      , mGreetDistanceMultiplier(0)
+      , mGreetDistanceReset(0)
+      , mChance(0)
+      , mRotate(false)
+      , mTargetAngle(0)
       , mSaidGreeting(false)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
@@ -53,9 +53,15 @@ namespace MWMechanics
 
         mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
         mPlayedIdle = 0;
-        mPathgrid = NULL;
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         mIdleChanceMultiplier =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
+            store.get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
+
+        mGreetDistanceMultiplier =
+            store.get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
+        mGreetDistanceReset =
+            store.get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
+        mChance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
         mStoredAvailableNodes = false;
         mChooseAction = true;
@@ -69,10 +75,155 @@ namespace MWMechanics
         return new AiWander(*this);
     }
 
+    /*
+     * AiWander high level states (0.29.0). Not entirely accurate in some cases
+     * e.g. non-NPC actors do not greet and some creatures may be moving even in
+     * the IdleNow state.
+     *
+     *                          [select node,
+     *                           build path]
+     *                 +---------->MoveNow----------->Walking
+     *                 |                                 |
+     * [allowed        |                                 |
+     *  nodes]         |        [hello if near]          |
+     *  start--->ChooseAction----->IdleNow               |
+     *                ^ ^           |                    |
+     *                | |           |                    |
+     *                | +-----------+                    |
+     *                |                                  |
+     *                +----------------------------------+
+     *
+     *
+     * New high level states.  Not exactly as per vanilla (e.g. door stuff)
+     * but the differences are required because our physics does not work like
+     * vanilla and therefore have to compensate/work around.
+     *
+     *                         [select node,     [if stuck evade
+     *                          build path]       or remove nodes if near door]
+     *                 +---------->MoveNow<---------->Walking
+     *                 |              ^                | |
+     *                 |              |(near door)     | |
+     * [allowed        |              |                | |
+     *  nodes]         |        [hello if near]        | |
+     *  start--->ChooseAction----->IdleNow             | |
+     *                ^ ^           |  ^               | |
+     *                | |           |  | (stuck near   | |
+     *                | +-----------+  +---------------+ |
+     *                |                    player)       |
+     *                +----------------------------------+
+     *
+     * NOTE: non-time critical operations are run once every 250ms or so.
+     *
+     * TODO: It would be great if door opening/closing can be detected and pathgrid
+     * links dynamically updated.  Currently (0.29.0) AiWander allows choosing a
+     * destination beyond closed doors which sometimes makes the actors stuck at the
+     * door and impossible for the player to open the door.
+     *
+     * For now detect being stuck at the door and simply delete the nodes from the
+     * allowed set.  The issue is when the door opens the allowed set is not
+     * re-calculated.  However this would not be an issue in most cases since hostile
+     * actors will enter combat (i.e. no longer wandering) and different pathfinding
+     * will kick in.
+     */
     bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
-        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
+        MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
+        if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
+            return true; // Don't bother with dead actors
+
+        bool cellChange = mCell && (actor.getCell() != mCell);
+        if(!mCell || cellChange)
+        {
+            mCell = actor.getCell();
+            mStoredAvailableNodes = false; // prob. not needed since mDistance = 0
+        }
+        const ESM::Cell *cell = mCell->getCell();
+
+        cStats.setDrawState(DrawState_Nothing);
+        cStats.setMovementFlag(CreatureStats::Flag_Run, false);
+
+        ESM::Position pos = actor.getRefData().getPosition();
+
+        // Check if an idle actor is  too close to a door - if so start walking
+        mDoorCheckDuration += duration;
+        if(mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
+        {
+            mDoorCheckDuration = 0;    // restart timer
+            if(mDistance &&            // actor is not intended to be stationary
+               mIdleNow &&             // but is in idle
+               !mWalking &&            // FIXME: some actors are idle while walking
+               proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6*1.6)) // NOTE: checks interior cells only
+            {
+                mIdleNow = false;
+                mMoveNow = true;
+                mTrimCurrentNode = false; // just in case
+            }
+        }
+
+        if(mWalking) // have not yet reached the destination
+        {
+            // turn towards the next point in mPath
+            zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+
+            // Returns true if evasive action needs to be taken
+            if(mObstacleCheck.check(actor, duration))
+            {
+                // first check if we're walking into a door
+                if(proximityToDoor(actor)) // NOTE: checks interior cells only
+                {
+                    // remove allowed points then select another random destination
+                    mTrimCurrentNode = true;
+                    trimAllowedNodes(mAllowedNodes, mPathFinder);
+                    mObstacleCheck.clear();
+                    mPathFinder.clearPath();
+                    mWalking = false;
+                    mMoveNow = true;
+                }
+                else // probably walking into another NPC
+                {
+                    // TODO: diagonal should have same animation as walk forward
+                    //       but doesn't seem to do that?
+                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+                    // change the angle a bit, too
+                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                }
+                mStuckCount++;  // TODO: maybe no longer needed
+            }
+//#if 0
+            // TODO: maybe no longer needed
+            if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
+            {
+                //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
+                mObstacleCheck.clear();
+
+                stopWalking(actor);
+                mMoveNow = false;
+                mWalking = false;
+                mChooseAction = true;
+            }
+//#endif
+        }
+
+        if (mRotate)
+        {
+            // Reduce the turning animation glitch by using a *HUGE* value of
+            // epsilon...  TODO: a proper fix might be in either the physics or the
+            // animation subsystem
+            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(12)))
+                mRotate = false;
+        }
+
+        mReaction += duration;
+        if(mReaction > 0.25f) // FIXME: hard coded constant
+        {
+            mReaction = 0;
+            return false;
+        }
+
+        // NOTE: everything below get updated every 0.25 seconds
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {
@@ -100,41 +251,55 @@ namespace MWMechanics
             }
         }
 
-        ESM::Position pos = actor.getRefData().getPosition();
-
+        // Initialization to discover & store allowed node points for this actor.
         if(!mStoredAvailableNodes)
         {
-            mStoredAvailableNodes = true;
-            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
+            // infrequently used, therefore no benefit in caching it as a member
+            const ESM::Pathgrid *
+                pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
 
-            mCellX = actor.getCell()->getCell()->mData.mX;
-            mCellY = actor.getCell()->getCell()->mData.mY;
+            // cache the current cell location
+            mCellX = cell->mData.mX;
+            mCellY = cell->mData.mY;
 
-            if(!mPathgrid)
+            // If there is no path this actor doesn't go anywhere. See:
+            // https://forum.openmw.org/viewtopic.php?t=1556
+            // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
+            if(!pathgrid || pathgrid->mPoints.empty())
                 mDistance = 0;
-            else if(mPathgrid->mPoints.empty())
-                mDistance = 0;
 
+            // A distance value passed into the constructor indicates how far the
+            // actor can  wander from the spawn position.  AiWander assumes that
+            // pathgrid points are available, and uses them to randomly select wander
+            // destinations within the allowed set of pathgrid points (nodes).
             if(mDistance)
             {
                 mXCell = 0;
                 mYCell = 0;
-                if(actor.getCell()->getCell()->isExterior())
+                if(cell->isExterior())
                 {
                     mXCell = mCellX * ESM::Land::REAL_SIZE;
                     mYCell = mCellY * ESM::Land::REAL_SIZE;
                 }
 
-                Ogre::Vector3 npcPos(actor.getRefData().getPosition().pos);
+                // FIXME: There might be a bug here.  The allowed node points are
+                // based on the actor's current position rather than the actor's
+                // spawn point.  As a result the allowed nodes for wander can change
+                // between saves, for example.
+                //
+                // convert npcPos to local (i.e. cell) co-ordinates
+                Ogre::Vector3 npcPos(pos.pos);
                 npcPos[0] = npcPos[0] - mXCell;
                 npcPos[1] = npcPos[1] - mYCell;
 
-                for(unsigned int counter = 0; counter < mPathgrid->mPoints.size(); counter++)
+                // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+                // NOTE: mPoints and mAllowedNodes are in local co-ordinates
+                for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
                 {
-                    Ogre::Vector3 nodePos(mPathgrid->mPoints[counter].mX, mPathgrid->mPoints[counter].mY,
-                        mPathgrid->mPoints[counter].mZ);
+                    Ogre::Vector3 nodePos(pathgrid->mPoints[counter].mX, pathgrid->mPoints[counter].mY,
+                        pathgrid->mPoints[counter].mZ);
                     if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
-                        mAllowedNodes.push_back(mPathgrid->mPoints[counter]);
+                        mAllowedNodes.push_back(pathgrid->mPoints[counter]);
                 }
                 if(!mAllowedNodes.empty())
                 {
@@ -151,15 +316,18 @@ namespace MWMechanics
                     }
                     mCurrentNode = mAllowedNodes[index];
                     mAllowedNodes.erase(mAllowedNodes.begin() + index);
+
+                    mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
                 }
             }
         }
 
+        // Actor becomes stationary - see above URL's for previous research
         if(mAllowedNodes.empty())
             mDistance = 0;
 
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-        if(mDistance && (mCellX != actor.getCell()->getCell()->mData.mX || mCellY != actor.getCell()->getCell()->mData.mY))
+        if(mDistance && cellChange)
             mDistance = 0;
 
         if(mChooseAction)
@@ -193,51 +361,73 @@ namespace MWMechanics
                 mIdleNow = true;
 
                 // Play idle voiced dialogue entries randomly
-                int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+                int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
                 if (hello > 0)
                 {
-                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                    float chance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                     // Don't bother if the player is out of hearing range
-                    if (roll < chance && Ogre::Vector3(player.getRefData().getPosition().pos).distance(Ogre::Vector3(actor.getRefData().getPosition().pos)) < 1500)
+                    if (roll < mChance && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500)
                         MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
                 }
             }
         }
 
-        if(mIdleNow)
+        // Allow interrupting a walking actor to trigger a greeting
+        if(mIdleNow || (mWalking && !mObstacleCheck.isNormalState()))
         {
             // Play a random voice greeting if the player gets too close
-            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-
-            int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+            int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
             float helloDistance = hello;
-            int iGreetDistanceMultiplier = store.get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
-            helloDistance *= iGreetDistanceMultiplier;
+            helloDistance *= mGreetDistanceMultiplier;
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            float playerDist = Ogre::Vector3(player.getRefData().getPosition().pos).distance(
-                        Ogre::Vector3(actor.getRefData().getPosition().pos));
+            Ogre::Vector3 playerPos(player.getRefData().getPosition().pos);
+            Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
+            float playerDistSqr = playerPos.squaredDistance(actorPos);
+
+            if(playerDistSqr <= helloDistance*helloDistance)
+            {
+                if(mWalking)
+                {
+                    stopWalking(actor);
+                    mMoveNow = false;
+                    mWalking = false;
+                    mObstacleCheck.clear();
+                }
+
+                if(!mRotate)
+                {
+                    Ogre::Vector3 dir = playerPos - actorPos;
+                    float length = dir.length();
+
+                    // FIXME: horrible hack
+                    float faceAngle = Ogre::Radian(Ogre::Math::ACos(dir.y / length) *
+                            ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees();
+                    // an attempt at reducing the turning animation glitch
+                    if(abs(faceAngle) > 10)
+                    {
+                        mTargetAngle = faceAngle;
+                        mRotate = true;
+                    }
+                }
+            }
 
             if (!mSaidGreeting)
             {
                 // TODO: check if actor is aware / has line of sight
-                if (playerDist <= helloDistance
+                if (playerDistSqr <= helloDistance*helloDistance
                         // Only play a greeting if the player is not moving
                         && Ogre::Vector3(player.getClass().getMovementSettings(player).mPosition).squaredLength() == 0)
                 {
                     mSaidGreeting = true;
                     MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                    // TODO: turn to face player and interrupt the idle animation?
                 }
             }
             else
             {
-                float fGreetDistanceReset = store.get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
-                if (playerDist >= fGreetDistanceReset * iGreetDistanceMultiplier)
+                if (playerDistSqr >= mGreetDistanceReset*mGreetDistanceReset * mGreetDistanceMultiplier*mGreetDistanceMultiplier)
                     mSaidGreeting = false;
             }
 
@@ -252,30 +442,48 @@ namespace MWMechanics
 
         if(mMoveNow && mDistance)
         {
+            // Construct a new path if there isn't one
             if(!mPathFinder.isPathConstructed())
             {
                 assert(mAllowedNodes.size());
                 unsigned int randNode = (int)(rand() / ((double)RAND_MAX + 1) * mAllowedNodes.size());
-                Ogre::Vector3 destNodePos(mAllowedNodes[randNode].mX, mAllowedNodes[randNode].mY, mAllowedNodes[randNode].mZ);
+                // NOTE: initially constructed with local (i.e. cell) co-ordinates
+                Ogre::Vector3 destNodePos(mAllowedNodes[randNode].mX,
+                                          mAllowedNodes[randNode].mY,
+                                          mAllowedNodes[randNode].mZ);
 
+                // convert dest to use world co-ordinates
                 ESM::Pathgrid::Point dest;
                 dest.mX = destNodePos[0] + mXCell;
                 dest.mY = destNodePos[1] + mYCell;
                 dest.mZ = destNodePos[2];
 
+                // actor position is already in world co-ordinates
                 ESM::Pathgrid::Point start;
                 start.mX = pos.pos[0];
                 start.mY = pos.pos[1];
                 start.mZ = pos.pos[2];
 
+                // don't take shortcuts for wandering
                 mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
                 if(mPathFinder.isPathConstructed())
                 {
+                    // buildPath inserts dest in case it is not a pathgraph point
+                    // index which is a duplicate for AiWander.  However below code
+                    // does not work since getPath() returns a copy of path not a
+                    // reference
+                    //if(mPathFinder.getPathSize() > 1)
+                        //mPathFinder.getPath().pop_back();
+
                     // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
                     ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
-                    mAllowedNodes.push_back(mCurrentNode);
+                    // check if mCurrentNode was taken out of mAllowedNodes
+                    if(mTrimCurrentNode && mAllowedNodes.size() > 1)
+                        mTrimCurrentNode = false;
+                    else
+                        mAllowedNodes.push_back(mCurrentNode);
                     mCurrentNode = temp;
 
                     mMoveNow = false;
@@ -287,106 +495,43 @@ namespace MWMechanics
             }
         }
 
-        if(mWalking)
+        // Are we there yet?
+        if(mWalking &&
+           mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
         {
-            if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
-            {
-                stopWalking(actor);
-                mMoveNow = false;
-                mWalking = false;
-                mChooseAction = true;
-            }
-            else
-            {
-                /*               1                    n
-                 *  State_Norm <---> State_CheckStuck --> State_Evade
-                 *   ^  ^   |          ^   |               ^   |  |
-                 *   |  |   |          |   |               |   |  |
-                 *   |  +---+          +---+               +---+  | m
-                 *   |   any            < n                 < m   |
-                 *   +--------------------------------------------+
-                 */
-                bool samePosition = (abs(pos.pos[0] - mPrevX) < 1) && (abs(pos.pos[1] - mPrevY) < 1);
-                switch(mWalkState)
-                {
-                    case State_Norm:
-                    {
-                        if(!samePosition)
-                            break;
-                        else
-                            mWalkState = State_CheckStuck;
-                    }
-                        /* FALL THROUGH */
-                    case State_CheckStuck:
-                    {
-                        if(!samePosition)
-                        {
-                            mWalkState = State_Norm;
-                            // to do this properly need yet another variable, simply don't clear for now
-                            //mStuckCount = 0;
-                            break;
-                        }
-                        else
-                        {
-                            // consider stuck only if position unchanges consecutively
-                            if((mStuckCount++ % COUNT_BEFORE_STUCK) == 0)
-                                mWalkState = State_Evade;
-                                // NOTE: mStuckCount is purposely not cleared here
-                            else
-                                break; // still in the same state, but counter got incremented
-                        }
-                    }
-                        /* FALL THROUGH */
-                    case State_Evade:
-                    {
-                        if(mEvadeCount++ < COUNT_EVADE)
-                            break;
-                        else
-                        {
-                            mWalkState = State_Norm; // tried to evade, assume all is ok and start again
-                            // NOTE: mStuckCount is purposely not cleared here
-                            mEvadeCount = 0;
-                        }
-                    }
-                    /* NO DEFAULT CASE */
-                }
-
-                if(mWalkState == State_Evade)
-                {
-                    //std::cout << "Stuck \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
-
-                    // diagonal should have same animation as walk forward
-                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.01f;
-                    // change the angle a bit, too
-                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
-                }
-                else
-                {
-                    actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
-                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
-                }
-
-                if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
-                {
-                    //std::cout << "Reset \""<<actor.getClass().getName(actor)<<"\"" << std::endl; 
-                    mWalkState = State_Norm;
-                    mStuckCount = 0;
-
-                    stopWalking(actor);
-                    mMoveNow = false;
-                    mWalking = false;
-                    mChooseAction = true;
-                }
-
-                // update position
-                ESM::Position updatedPos = actor.getRefData().getPosition();
-                mPrevX = updatedPos.pos[0];
-                mPrevY = updatedPos.pos[1];
-            }
+            stopWalking(actor);
+            mMoveNow = false;
+            mWalking = false;
+            mChooseAction = true;
         }
 
-        return false;
+        return false; // AiWander package not yet completed
+    }
+
+    void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
+                                    const PathFinder& pathfinder)
+    {
+        // TODO: how to add these back in once the door opens?
+        // Idea: keep a list of detected closed doors (see aicombat.cpp)
+        // Every now and then check whether one of the doors is opened. (maybe
+        // at the end of playing idle?) If the door is opened then re-calculate
+        // allowed nodes starting from the spawn point.
+        std::list<ESM::Pathgrid::Point> paths = pathfinder.getPath();
+        while(paths.size() >= 2)
+        {
+            ESM::Pathgrid::Point pt = paths.back();
+            for(unsigned int j = 0; j < nodes.size(); j++)
+            {
+                // FIXME: doesn't hadle a door with the same X/Y
+                //        co-ordinates but with a different Z
+                if(nodes[j].mX == pt.mX && nodes[j].mY == pt.mY)
+                {
+                    nodes.erase(nodes.begin() + j);
+                    break;
+                }
+            }
+            paths.pop_back();
+        }
     }
 
     int AiWander::getTypeId() const

@@ -20,6 +20,7 @@ namespace CSVWorld
             QHBoxLayout *mLayout;
             std::map<QPushButton *, std::string> mButtons; // widget, id
             int mButtonSize;
+            int mIconSize;
 
         public:
 
