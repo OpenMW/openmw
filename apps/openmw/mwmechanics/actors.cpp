@@ -845,36 +845,46 @@ namespace MWMechanics
     {
         if(!paused)
         {
-            // Update actors from previous frame
+            // Reset data from previous frame
             for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 // Reset last hit object, which is only valid for one frame
                 // Note, the new hit object for this frame may be set by CharacterController::update -> Animation::runAnimation
                 // (below)
                 iter->first.getClass().getCreatureStats(iter->first).setLastHitObject(std::string());
+            }
 
-                // AI and magic effects update
+            // AI and magic effects update
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     updateActor(iter->first, duration);
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
                         updateNpc(iter->first, duration, paused);
                 }
+            }
 
-                // Looping magic VFX update
-                // Note: we need to do this before any of the animations are updated.
-                // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
-                // so updating VFX immediately after that would just remove the particle effects instantly.
-                // There needs to be a magic effect update in between.
+            // Looping magic VFX update
+            // Note: we need to do this before any of the animations are updated.
+            // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
+            // so updating VFX immediately after that would just remove the particle effects instantly.
+            // There needs to be a magic effect update in between.
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
                 iter->second->updateContinuousVfx();
 
-                // Animation/movement update
+            // Animation/movement update
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
                 if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
                             ESM::MagicEffect::Paralyze).mMagnitude > 0)
                     iter->second->skipAnim();
                 iter->second->update(duration);
+            }
 
-                // Kill dead actors
+            // Kill dead actors
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
+            {
                 const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
                 CreatureStats &stats = cls.getCreatureStats(iter->first);
 
@@ -902,8 +912,13 @@ namespace MWMechanics
                     continue;
                 }
 
-                MWMechanics::ActiveSpells& spells = iter->first.getClass().getCreatureStats(iter->first).getActiveSpells();
-                spells.purge(iter->first.getRefData().getHandle());
+                // Make sure spell effects with CasterLinked flag are removed
+                // TODO: would be nice not to do this all the time...
+                for(PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
+                {
+                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
+                    spells.purge(iter->first.getRefData().getHandle());
+                }
 
                 // FIXME: see http://bugs.openmw.org/issues/869
                 MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
