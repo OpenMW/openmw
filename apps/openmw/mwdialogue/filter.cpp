@@ -111,8 +111,14 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 
     // check cell
     if (!info.mCell.empty())
-        if (!Misc::StringUtils::ciEqual(player.getCell()->getCell()->mName, info.mCell))
+    {
+        // supports partial matches, just like getPcCell
+        const std::string& playerCell = player.getCell()->getCell()->mName;
+        bool match = playerCell.length()>=info.mCell.length() &&
+            Misc::StringUtils::ciEqual(playerCell.substr (0, info.mCell.length()), info.mCell);
+        if (!match)
             return false;
+    }
 
     return true;
 }
