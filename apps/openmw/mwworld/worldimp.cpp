@@ -2056,7 +2056,6 @@ namespace MWWorld
         {
             // Update the GUI only when called on the player
             MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-            windowManager->unsetSelectedWeapon();
 
             if (werewolf)
             {

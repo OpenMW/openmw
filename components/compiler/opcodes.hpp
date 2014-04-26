@@ -330,6 +330,10 @@ namespace Compiler
         const int opcodePCRaiseRank = 0x2000b;
         const int opcodePCLowerRank = 0x2000c;
         const int opcodePCJoinFaction = 0x2000d;
+        const int opcodePCRaiseRankExplicit = 0x20029;
+        const int opcodePCLowerRankExplicit = 0x2002a;
+        const int opcodePCJoinFactionExplicit = 0x2002b;
+
         const int opcodeGetPCRank = 0x2000e;
         const int opcodeGetPCRankExplicit = 0x2000f;
         const int opcodeModDisposition = 0x200014d;

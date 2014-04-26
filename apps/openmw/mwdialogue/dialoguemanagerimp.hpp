@@ -68,9 +68,6 @@ namespace MWDialogue
 
             virtual void goodbye();
 
-            virtual MWWorld::Ptr getActor() const;
-            ///< Return the actor the player is currently talking to.
-
             virtual bool checkServiceRefused ();
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic) const;

@@ -25,6 +25,9 @@ namespace ESM
 
         std::vector<char> mImageData;
 
+        typedef std::pair<int, int> CellId;
+        std::vector<CellId> mMarkers;
+
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
     };
