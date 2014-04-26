@@ -59,9 +59,6 @@ void OMW::Engine::executeLocalScripts()
         MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
         MWBase::Environment::get().getScriptManager()->run (script.first, interpreterContext);
-
-        if (MWBase::Environment::get().getWorld()->hasCellChanged())
-            break;
     }
 
     localScripts.setIgnore (MWWorld::Ptr());
@@ -101,15 +98,10 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             // global scripts
             MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
-            bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
-
             // local scripts
-            executeLocalScripts(); // This does not handle the case where a global script causes a
-                                    // cell change, followed by a cell change in a local script during
-                                    // the same frame.
+            executeLocalScripts();
 
-            if (changed) // keep change flag for another frame, if cell changed happened in local script
-                MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+            MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
             if (!paused)
                 MWBase::Environment::get().getWorld()->advanceTime(
