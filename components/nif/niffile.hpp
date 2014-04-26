@@ -199,6 +199,11 @@ struct KeyListT {
                 key.mContinuity = nif->getFloat();
             }
         }
+        else if (mInterpolationType == 0)
+        {
+            if (count != 0)
+                nif->file->fail("Interpolation type 0 doesn't work with keys");
+        }
         else
             nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
     }
