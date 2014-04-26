@@ -45,9 +45,6 @@ namespace MWBase
 
             virtual void goodbye() = 0;
 
-            virtual MWWorld::Ptr getActor() const = 0;
-            ///< Return the actor the player is currently talking to.
-
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic) const = 0;
 
             //calbacks for the GUI
