@@ -1029,7 +1029,7 @@ namespace MWMechanics
             const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
             CreatureStats &stats = cls.getCreatureStats(iter->first);
 
-            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
+            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow && !stats.isDead())
             {
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
                 if(package->getFollowedActor() == actor.getCellRef().mRefID)
@@ -1051,7 +1051,7 @@ namespace MWMechanics
             const MWWorld::Class &cls = MWWorld::Class::get(*iter);
             CreatureStats &stats = cls.getCreatureStats(*iter);
 
-            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
+            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat && !stats.isDead())
             {
                 MWMechanics::AiCombat* package = static_cast<MWMechanics::AiCombat*>(stats.getAiSequence().getActivePackage());
                 if(package->getTargetId() == actor.getCellRef().mRefID)
