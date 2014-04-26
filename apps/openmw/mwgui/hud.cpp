@@ -52,7 +52,7 @@ namespace MWGui
         , mWeaponVisible(true)
         , mSpellVisible(true)
         , mWorldMouseOver(false)
-        , mEnemyHealthTimer(0)
+        , mEnemyHealthTimer(-1)
         , mIsDrowning(false)
         , mWeaponSpellTimer(0.f)
         , mDrowningFlashTheta(0.f)
@@ -637,6 +637,12 @@ namespace MWGui
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
         mEnemyHealth->setVisible(true);
         updateEnemyHealthBar();
+    }
+
+    void HUD::resetEnemy()
+    {
+        mEnemy = MWWorld::Ptr();
+        mEnemyHealthTimer = -1;
     }
 
 }

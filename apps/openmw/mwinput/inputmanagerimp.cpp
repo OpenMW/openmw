@@ -114,6 +114,7 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
         , mAlwaysRunActive(false)
+        , mControlsDisabled(false)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -265,18 +266,19 @@ namespace MWInput
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
+        mControlsDisabled = disableControls;
+
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
         mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
-        // update values of channels (as a result of pressed keys)
-        if (!disableControls)
-            mInputBinder->update(dt);
-
-        if (disableControls)
+        if (mControlsDisabled)
             return;
+
+        // update values of channels (as a result of pressed keys)
+        mInputBinder->update(dt);
 
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
@@ -484,7 +486,7 @@ namespace MWInput
 
                     if (text)
                     {
-                        edit->addText(MyGUI::UString(text));
+                        edit->insertText(MyGUI::UString(text), edit->getTextCursor());
                         SDL_free(text);
                     }
                 }
@@ -509,7 +511,8 @@ namespace MWInput
             }
         }
 
-        mInputBinder->keyPressed (arg);
+        if (!mControlsDisabled)
+            mInputBinder->keyPressed (arg);
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 

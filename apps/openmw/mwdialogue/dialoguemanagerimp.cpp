@@ -468,11 +468,6 @@ namespace MWDialogue
         mIsInChoice = true;
     }
 
-    MWWorld::Ptr DialogueManager::getActor() const
-    {
-        return mActor;
-    }
-
     void DialogueManager::goodbye()
     {
         mIsInChoice = true;

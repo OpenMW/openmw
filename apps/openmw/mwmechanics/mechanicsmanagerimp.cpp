@@ -325,6 +325,19 @@ namespace MWMechanics
                 winMgr->updateSkillArea();
 
             winMgr->setValue("level", stats.getLevel());
+
+            // Update the equipped weapon icon
+            MWWorld::InventoryStore& inv = mWatched.getClass().getInventoryStore(mWatched);
+            MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weapon == inv.end())
+                winMgr->unsetSelectedWeapon();
+            else
+                winMgr->setSelectedWeapon(*weapon);
+
+            // Update the selected spell icon
+            MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
+            if (enchantItem != inv.end())
+                winMgr->setSelectedEnchantItem(*enchantItem);
         }
 
         if (mUpdatePlayer)

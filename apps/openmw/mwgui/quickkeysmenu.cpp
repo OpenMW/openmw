@@ -325,7 +325,6 @@ namespace MWGui
             }
 
             store.setSelectedEnchantItem(it);
-            MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item);
         }
     }
 
