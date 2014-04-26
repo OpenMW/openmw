@@ -39,6 +39,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     connect (&mDocumentManager, SIGNAL (documentAdded (CSMDoc::Document *)),
         this, SLOT (documentAdded (CSMDoc::Document *)));
+    connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
+        this, SLOT (lastDocumentDeleted()));
 
     connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
@@ -290,4 +292,9 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 void CS::Editor::documentAdded (CSMDoc::Document *document)
 {
     mViewManager.addView (document);
+}
+
+void CS::Editor::lastDocumentDeleted()
+{
+    exit (0);
 }

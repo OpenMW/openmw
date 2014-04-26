@@ -43,8 +43,8 @@ namespace CSMDoc
             ///< \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
 
-            bool removeDocument (Document *document);
-            ///< \return last document removed?
+            void removeDocument (Document *document);
+            ///< Emits the lastDocumentDeleted signal, if applicable.
 
 	    void setResourceDir (const boost::filesystem::path& parResDir);
 
@@ -66,6 +66,8 @@ namespace CSMDoc
             void documentAdded (CSMDoc::Document *document);
 
             void loadRequest (Document *document, bool _new);
+
+            void lastDocumentDeleted();
     };
 }
 

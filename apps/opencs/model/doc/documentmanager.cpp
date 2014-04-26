@@ -53,17 +53,18 @@ void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::
     mLoader.hasThingsToDo().wakeAll();
 }
 
-bool CSMDoc::DocumentManager::removeDocument (Document *document)
+void CSMDoc::DocumentManager::removeDocument (Document *document)
 {
     std::vector<Document *>::iterator iter = std::find (mDocuments.begin(), mDocuments.end(), document);
 
     if (iter==mDocuments.end())
-            throw std::runtime_error ("removing invalid document");
+        throw std::runtime_error ("removing invalid document");
 
     mDocuments.erase (iter);
     delete document;
 
-    return mDocuments.empty();
+    if (mDocuments.empty())
+        emit lastDocumentDeleted();
 }
 
 void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& parResDir)
@@ -80,5 +81,4 @@ void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::
 {
     removeDocument (document);
     /// \todo report error
-    /// \todo handle removeDocument returning true
 }
