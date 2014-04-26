@@ -175,23 +175,23 @@ namespace MWMechanics
             mStrike = false;
         }
 
-        const MWWorld::Class &cls = actor.getClass();
+        const MWWorld::Class &actorCls = actor.getClass();
         const ESM::Weapon *weapon = NULL;
         MWMechanics::WeaponType weaptype;
         float weapRange, weapSpeed = 1.0f;
 
-        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+        actorCls.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         // Get weapon characteristics
-        if (actor.getClass().hasInventoryStore(actor))
+        if (actorCls.hasInventoryStore(actor))
         {
-            MWMechanics::DrawState_ state = actor.getClass().getCreatureStats(actor).getDrawState();
+            MWMechanics::DrawState_ state = actorCls.getCreatureStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                actor.getClass().getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
+                actorCls.getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
 
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot =
-                MWMechanics::getActiveWeapon(cls.getCreatureStats(actor), cls.getInventoryStore(actor), &weaptype);
+                MWMechanics::getActiveWeapon(actorCls.getCreatureStats(actor), actorCls.getInventoryStore(actor), &weaptype);
 
             if (weaptype == WeapType_HandToHand)
             {
@@ -216,7 +216,7 @@ namespace MWMechanics
         float rangeMelee;
         float rangeCloseUp;
         bool distantCombat = false;
-        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_Thrown)
+        if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
         {
             rangeMelee = 1000; // TODO: should depend on archer skill
             rangeCloseUp = 0; // not needed in ranged combat
@@ -236,15 +236,15 @@ namespace MWMechanics
 
         bool isStuck = false;
         float speed = 0.0f;
-        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = cls.getSpeed(actor)) / 10.0f) 
+        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) / 10.0f) 
             isStuck = true;
 
         mLastPos = pos;
 
         // check if can move along z-axis
         bool canMoveByZ;
-        if(canMoveByZ = ((actor.getClass().isNpc() || actor.getClass().canSwim(actor)) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-            || (actor.getClass().canFly(actor) && MWBase::Environment::get().getWorld()->isFlying(actor)))
+        if(canMoveByZ = ((actorCls.isNpc() || actorCls.canSwim(actor)) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+            || (actorCls.canFly(actor) && MWBase::Environment::get().getWorld()->isFlying(actor)))
         {
             // determine vertical angle to target
             mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
@@ -266,16 +266,15 @@ namespace MWMechanics
                 //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
 
-                // When attacking with a weapon, choose between slash, thrust or chop
-                if (mStrike && actor.getClass().hasInventoryStore(actor))
-                    chooseBestAttack(weapon, mMovement);
+                // set slash/thrust/chop attack
+                if (mStrike) chooseBestAttack(weapon, mMovement);
 
                 if(mMovement.mPosition[0] || mMovement.mPosition[1])
                 {
                     mTimerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
                     mCombatMove = true;
                 }
-                else if(actor.getClass().isNpc() && (!distantCombat || (distantCombat && rangeMelee/5)))
+                else if(actorCls.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeMelee/2)))
                 {
                     //apply sideway movement (kind of dodging) with some probability
                     if(static_cast<float>(rand())/RAND_MAX < 0.25)
@@ -309,7 +308,7 @@ namespace MWMechanics
                 || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
                 && (inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget)))
             {
-                if(speed == 0.0f) speed = cls.getSpeed(actor);
+                if(speed == 0.0f) speed = actorCls.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
                 float maxAvoidDist = tReaction * speed + speed / MAX_VEL_ANGULAR.valueRadians() * 2;
 				preferShortcut = checkWayIsClear(vActorPos, vTargetPos, distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
@@ -370,15 +369,15 @@ namespace MWMechanics
             mReadyToAttack = false;
         }
 
-        if(distToTarget > rangeMelee)
+        if(distToTarget > rangeMelee && !distantCombat)
         {
             //special run attack; it shouldn't affect melee combat tactics
-            if(actor.getClass().getMovementSettings(actor).mPosition[1] == 1)
+            if(actorCls.getMovementSettings(actor).mPosition[1] == 1)
             {
                 //check if actor can overcome the distance = distToTarget - attackerWeapRange
                 //less than in time of playing weapon anim from 'start' to 'hit' tags (t_swing)
                 //then start attacking
-                float speed1 = cls.getSpeed(actor);
+                float speed1 = actorCls.getSpeed(actor);
                 float speed2 = mTarget.getClass().getSpeed(mTarget);
                 if(mTarget.getClass().getMovementSettings(mTarget).mPosition[0] == 0
                         && mTarget.getClass().getMovementSettings(mTarget).mPosition[1] == 0)

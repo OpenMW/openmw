@@ -41,31 +41,7 @@ bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis)
 
 bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle)
 {
-    Ogre::Radian currentAngle (actor.getRefData().getPosition().rot[2]);
-    Ogre::Radian diff (targetAngle - currentAngle);
-    if (diff >= Ogre::Degree(180))
-    {
-        // Turning the other way would be a better idea
-        diff = diff-Ogre::Degree(360);
-    }
-    else if (diff <= Ogre::Degree(-180))
-    {
-        diff = Ogre::Degree(360)-diff;
-    }
-    Ogre::Radian absDiff = Ogre::Math::Abs(diff);
-
-    // The turning animation actually moves you slightly, so the angle will be wrong again.
-    // Use epsilon to prevent jerkiness.
-    const Ogre::Degree epsilon (0.5);
-    if (absDiff < epsilon)
-        return true;
-
-    Ogre::Radian limit = MAX_VEL_ANGULAR * MWBase::Environment::get().getFrameDuration();
-    if (absDiff > limit)
-        diff = Ogre::Math::Sign(diff) * limit;
-
-    actor.getClass().getMovementSettings(actor).mRotation[2] = diff.valueRadians();
-    return false;
+    return smoothTurn(actor, targetAngle, 2);
 }
 
 }
