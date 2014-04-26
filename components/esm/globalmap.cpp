@@ -14,6 +14,15 @@ void ESM::GlobalMap::load (ESMReader &esm)
     esm.getSubHeader();
     mImageData.resize(esm.getSubSize());
     esm.getExact(&mImageData[0], mImageData.size());
+
+    while (esm.isNextSub("MRK_"))
+    {
+        esm.getSubHeader();
+        CellId cell;
+        esm.getT(cell.first);
+        esm.getT(cell.second);
+        mMarkers.push_back(cell);
+    }
 }
 
 void ESM::GlobalMap::save (ESMWriter &esm) const
@@ -23,4 +32,12 @@ void ESM::GlobalMap::save (ESMWriter &esm) const
     esm.startSubRecord("DATA");
     esm.write(&mImageData[0], mImageData.size());
     esm.endRecord("DATA");
+
+    for (std::vector<CellId>::const_iterator it = mMarkers.begin(); it != mMarkers.end(); ++it)
+    {
+        esm.startSubRecord("MRK_");
+        esm.writeT(it->first);
+        esm.writeT(it->second);
+        esm.endRecord("MRK_");
+    }
 }

@@ -187,7 +187,7 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        SDL_ShowCursor(false);
+        //SDL_ShowCursor(false);
 
         mCursorManager->setEnabled(true);
 
