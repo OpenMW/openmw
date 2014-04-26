@@ -845,7 +845,7 @@ namespace MWMechanics
     {
         if(!paused)
         {
-            // Reset data from previous frame
+            // Update actors from previous frame
             for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 // Reset last hit object, which is only valid for one frame
@@ -902,7 +902,7 @@ namespace MWMechanics
                     continue;
                 }
 
-                MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
+                MWMechanics::ActiveSpells& spells = iter->first.getClass().getCreatureStats(iter->first).getActiveSpells();
                 spells.purge(iter->first.getRefData().getHandle());
 
                 // FIXME: see http://bugs.openmw.org/issues/869
