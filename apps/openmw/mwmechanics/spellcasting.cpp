@@ -575,7 +575,6 @@ namespace MWMechanics
         {
             if (mCaster.getRefData().getHandle() == "player")
             {
-                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
             }
         }
