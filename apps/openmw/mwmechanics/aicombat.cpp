@@ -341,8 +341,8 @@ namespace MWMechanics
 
         // check if can move along z-axis
         bool canMoveByZ;
-        if(canMoveByZ = ((actorCls.isNpc() || actorCls.canSwim(actor)) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-            || (actorCls.canFly(actor) && MWBase::Environment::get().getWorld()->isFlying(actor)))
+        if(canMoveByZ = (actorCls.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+            || MWBase::Environment::get().getWorld()->isFlying(actor))
         {
             // determine vertical angle to target
             mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);

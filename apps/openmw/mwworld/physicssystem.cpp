@@ -313,8 +313,9 @@ namespace MWWorld
                 // NOTE: stepMove modifies newPosition if successful
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
                 {
-                    // don't let slaughterfish move out of water after stepMove
-                    if(ptr.getClass().canSwim(ptr) && newPosition.z > (waterlevel - halfExtents.z * 0.5))
+                    // don't let pure water creatures move out of water after stepMove
+                    if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
+                            && newPosition.z > (waterlevel - halfExtents.z * 0.5))
                         newPosition = oldPosition;
                     else // Only on the ground if there's gravity
                         isOnGround = !(newPosition.z < waterlevel || isFlying);
