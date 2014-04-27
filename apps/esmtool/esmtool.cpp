@@ -333,7 +333,7 @@ int load(Arguments& info)
 
             // Is the user interested in this record type?
             bool interested = true;
-            if (info.types.size() > 0)
+            if (!info.types.empty())
             {
                 std::vector<std::string>::iterator match;
                 match = std::find(info.types.begin(), info.types.end(),

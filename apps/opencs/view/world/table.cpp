@@ -298,7 +298,7 @@ void CSVWorld::Table::revertRecord()
     {
         std::vector<std::string> revertableIds = listRevertableSelectedIds();
 
-        if (revertableIds.size()>0)
+        if (!revertableIds.empty())
         {
             if (revertableIds.size()>1)
                 mDocument.getUndoStack().beginMacro (tr ("Revert multiple records"));
@@ -318,7 +318,7 @@ void CSVWorld::Table::deleteRecord()
     {
         std::vector<std::string> deletableIds = listDeletableSelectedIds();
 
-        if (deletableIds.size()>0)
+        if (!deletableIds.empty())
         {
             if (deletableIds.size()>1)
                 mDocument.getUndoStack().beginMacro (tr ("Delete multiple records"));
