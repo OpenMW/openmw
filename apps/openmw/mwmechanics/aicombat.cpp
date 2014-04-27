@@ -76,6 +76,7 @@ namespace
 
 namespace MWMechanics
 {
+    static const float MAX_ATTACK_DURATION = 0.35f;
     static const float DOOR_CHECK_INTERVAL = 1.5f; // same as AiWander
     // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
 
@@ -86,7 +87,7 @@ namespace MWMechanics
         mTimerCombatMove(0),
         mFollowTarget(false),
         mReadyToAttack(false),
-        mStrike(false),
+        mAttack(false),
         mCombatMove(false),
         mMovement(),
         mForceNoShortcut(false),
@@ -182,7 +183,7 @@ namespace MWMechanics
         }
 
         mTimerAttack -= duration;
-        actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mStrike);
+        actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mAttack);
 
         float tReaction = 0.25f;
         if(mTimerReact < tReaction)
@@ -203,16 +204,16 @@ namespace MWMechanics
 
         //actual attacking logic
         //TODO: Some skills affect period of strikes.For berserk-like style period ~ 0.25f
-        float attackPeriod = 1.0f;
+        float attacksPeriod = 1.0f;
         if(mReadyToAttack)
         {
-            if(mTimerAttack <= -attackPeriod)
+            if(mTimerAttack <= -attacksPeriod)
             {
                 //TODO: should depend on time between 'start' to 'min attack'
                 //for better controlling of NPCs' attack strength.
                 //Also it seems that this time is different for slash/thrust/chop
-                mTimerAttack = 0.35f * static_cast<float>(rand())/RAND_MAX;
-                mStrike = true;
+                mTimerAttack = MAX_ATTACK_DURATION * static_cast<float>(rand())/RAND_MAX;
+                mAttack = true;
 
                 //say a provoking combat phrase
                 if (actor.getClass().isNpc())
@@ -227,12 +228,12 @@ namespace MWMechanics
                 }
             }
             else if (mTimerAttack <= 0)
-                mStrike = false;
+                mAttack = false;
         }
         else
         {
-            mTimerAttack = -attackPeriod;
-            mStrike = false;
+            mTimerAttack = -attacksPeriod;
+            mAttack = false;
         }
 
         const MWWorld::Class &actorCls = actor.getClass();
@@ -277,31 +278,23 @@ namespace MWMechanics
         /*
          * Some notes on meanings of variables:
          *
-         * rangeMelee:
+         * rangeAttack:
          *
-         *  - Distance where attack using the actor's weapon is possible
-         *  - longer for ranged weapons (obviously?) vs. melee weapons
+         *  - Distance where attack using the actor's weapon is possible:
+         *    longer for ranged weapons (obviously?) vs. melee weapons
+         *  - Determined by weapon's reach parameter; hardcoded value 
+         *    for ranged weapon and for creatures
          *  - Once within this distance mFollowTarget is triggered
-         *    (TODO: check whether the follow logic still works for ranged
-         *    weapons, since rangeCloseup is set to zero)
-         *  - TODO: The variable name is confusing.  It was ok when AiCombat only
-         *    had melee weapons but now that ranged weapons are supported that is
-         *    no longer the case.  It should really be renamed to something
-         *    like rangeStrike - alternatively, keep this name for melee
-         *    weapons and use a different variable for tracking ranged weapon
-         *    distance (rangeRanged maybe?)
          *
-         * rangeCloseup:
+         * rangeFollow:
          *
          *  - Applies to melee weapons or hand to hand only (or creatures without
          *    weapons)
-         *  - Distance a little further away from the actor's weapon strike
-         *    i.e. rangeCloseup > rangeMelee for melee weapons
-         *    (the variable names make this simple concept counter-intuitive,
-         *    something like rangeMelee > rangeStrike may be better)
+         *  - Distance a little further away than the actor's weapon reach
+         *    i.e. rangeFollow > rangeAttack for melee weapons
+         *  - Hardcoded value (0 for ranged weapons)
          *  - Once the target gets beyond this distance mFollowTarget is cleared
          *    and a path to the target needs to be found
-         *  - TODO: Possibly rename this variable to rangeMelee or even rangeFollow
          *
          * mFollowTarget:
          *
@@ -311,19 +304,19 @@ namespace MWMechanics
          *    target even if LOS is not achieved)
          */
 
-        float rangeMelee;
-        float rangeCloseUp;
+        float rangeAttack;
+        float rangeFollow;
         bool distantCombat = false;
         if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
         {
-            rangeMelee = 1000; // TODO: should depend on archer skill
-            rangeCloseUp = 0; // not needed in ranged combat
+            rangeAttack = 1000; // TODO: should depend on archer skill
+            rangeFollow = 0; // not needed in ranged combat
             distantCombat = true;
         }
         else
         {
-            rangeMelee = weapRange;
-            rangeCloseUp = 300;
+            rangeAttack = weapRange;
+            rangeFollow = 300;
         }
         
         ESM::Position pos = actor.getRefData().getPosition();
@@ -339,42 +332,42 @@ namespace MWMechanics
 
         mLastPos = pos;
 
-        // check if can move along z-axis
-        bool canMoveByZ;
-        if(canMoveByZ = (actorCls.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-            || MWBase::Environment::get().getWorld()->isFlying(actor))
+        // check if actor can move along z-axis
+        bool canMoveByZ = (actorCls.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+            || MWBase::Environment::get().getWorld()->isFlying(actor);
+        if(canMoveByZ)
         {
             // determine vertical angle to target
             mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
         }
 
         // (within strike dist) || (not quite strike dist while following)
-        if(distToTarget < rangeMelee || (distToTarget <= rangeCloseUp && mFollowTarget && !isStuck) )
+        if(distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck) )
         {
             //Melee and Close-up combat
             vDirToTarget.z = 0;
             mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
 
             // (not quite strike dist while following)
-            if (mFollowTarget && distToTarget > rangeMelee)
+            if (mFollowTarget && distToTarget > rangeAttack)
             {
                 //Close-up combat: just run up on target
                 mMovement.mPosition[1] = 1;
             }
             else // (within strike dist)
             {
-                //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
 
                 // set slash/thrust/chop attack
-                if (mStrike && !distantCombat) chooseBestAttack(weapon, mMovement);
+                if (mAttack && !distantCombat) chooseBestAttack(weapon, mMovement);
 
                 if(mMovement.mPosition[0] || mMovement.mPosition[1])
                 {
                     mTimerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
                     mCombatMove = true;
                 }
-                else if(actorCls.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeMelee/2)))
+                // only NPCs are smart enough to use dodge movements
+                else if(actorCls.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
                 {
                     //apply sideway movement (kind of dodging) with some probability
                     if(static_cast<float>(rand())/RAND_MAX < 0.25)
@@ -385,7 +378,7 @@ namespace MWMechanics
                     }
                 }
 
-                if(distantCombat && distToTarget < rangeMelee/4)
+                if(distantCombat && distToTarget < rangeAttack/4)
                 {
                     mMovement.mPosition[1] = -1;
                 }
@@ -469,7 +462,7 @@ namespace MWMechanics
             mReadyToAttack = false;
         }
 
-        if(distToTarget > rangeMelee && !distantCombat)
+        if(distToTarget > rangeAttack && !distantCombat)
         {
             //special run attack; it shouldn't affect melee combat tactics
             if(actorCls.getMovementSettings(actor).mPosition[1] == 1)
@@ -486,14 +479,14 @@ namespace MWMechanics
                 float s1 = distToTarget - weapRange;
                 float t = s1/speed1;
                 float s2 = speed2 * t;
-                float t_swing = 0.17f/weapSpeed;//instead of 0.17 should be the time of playing weapon anim from 'start' to 'hit' tags
+                float t_swing = (MAX_ATTACK_DURATION/2) / weapSpeed;//instead of 0.17 should be the time of playing weapon anim from 'start' to 'hit' tags
                 if (t + s2/speed1 <= t_swing)
                 {
                     mReadyToAttack = true;
-                    if(mTimerAttack <= -attackPeriod)
+                    if(mTimerAttack <= -attacksPeriod)
                     {
-                        mTimerAttack = 0.3f*static_cast<float>(rand())/RAND_MAX;
-                        mStrike = true;
+                        mTimerAttack = MAX_ATTACK_DURATION * static_cast<float>(rand())/RAND_MAX;
+                        mAttack = true;
                     }
                 }
             }
@@ -503,7 +496,7 @@ namespace MWMechanics
         //       coded at 250ms or 1/4 second
         //
         // TODO: Add a parameter to vary DURATION_SAME_SPOT?
-        if((distToTarget > rangeMelee || mFollowTarget) &&
+        if((distToTarget > rangeAttack || mFollowTarget) &&
             mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
         {
             // first check if we're walking into a door

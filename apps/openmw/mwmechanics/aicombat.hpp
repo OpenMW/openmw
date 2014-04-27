@@ -40,7 +40,7 @@ namespace MWMechanics
             float mTimerCombatMove;
 
             // AiCombat states
-            bool mReadyToAttack, mStrike;
+            bool mReadyToAttack, mAttack;
             bool mFollowTarget;
             bool mCombatMove;
             bool mBackOffDoor;
