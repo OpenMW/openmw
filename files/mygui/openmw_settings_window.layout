@@ -3,10 +3,10 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 400 426" name="_Main">
 
-        <Property key="MinSize" value="400 496"/>
-        <Property key="MaxSize" value="400 496"/>
+        <Property key="MinSize" value="400 446"/>
+        <Property key="MaxSize" value="400 446"/>
 
-        <Widget type="TabControl" skin="TabControl" position="8 8 368 410" align="Left Top" name="SettingsTab">
+        <Widget type="TabControl" skin="TabControl" position="8 8 368 360" align="Left Top" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
 
             <Widget type="TabItem" skin="" position="4 28 360 312">
