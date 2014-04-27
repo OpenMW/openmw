@@ -141,17 +141,17 @@ namespace MWWorld
 
             // Find all the actors who might be able to see the player
             std::vector<MWWorld::Ptr> neighbors;
-            MWBase::Environment::get().getMechanicsManager()->getActorsInRange( Ogre::Vector3(ptr.getRefData().getPosition().pos), 
+            MWBase::Environment::get().getMechanicsManager()->getActorsInRange( Ogre::Vector3(ptr.getRefData().getPosition().pos),
                                         esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt(), neighbors);
             for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
             {
                 if ( MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, *it) )
-                { 
+                {
                     MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
                     break;
                 }
             }
-            if (neighbors.size() == 0)
+            if (neighbors.empty())
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
         }
     }

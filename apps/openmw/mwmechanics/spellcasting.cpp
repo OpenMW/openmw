@@ -401,10 +401,10 @@ namespace MWMechanics
         if (!exploded)
             MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, mTarget, effects, caster, mId, mSourceName);
 
-        if (reflectedEffects.mList.size())
+        if (!reflectedEffects.mList.empty())
             inflict(caster, target, reflectedEffects, range, true);
 
-        if (appliedLastingEffects.size())
+        if (!appliedLastingEffects.empty())
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, caster.getRefData().getHandle());
 

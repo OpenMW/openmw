@@ -433,7 +433,6 @@ namespace MWWorld
             while(mCell->getNextRef(esm[index], ref, deleted))
             {
                 // Don't load reference if it was moved to a different cell.
-                std::string lowerCase = Misc::StringUtils::lowerCase(ref.mRefID);
                 ESM::MovedCellRefTracker::const_iterator iter =
                     std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
                 if (iter != mCell->mMovedRefs.end()) {

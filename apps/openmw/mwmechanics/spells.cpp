@@ -129,7 +129,7 @@ namespace MWMechanics
             if (spell->mData.mType == ESM::Spell::ST_Disease)
                 mSpells.erase(iter++);
             else
-                iter++;
+                ++iter;
         }
     }
 
@@ -143,7 +143,7 @@ namespace MWMechanics
             if (spell->mData.mType == ESM::Spell::ST_Blight)
                 mSpells.erase(iter++);
             else
-                iter++;
+                ++iter;
         }
     }
 
@@ -157,7 +157,7 @@ namespace MWMechanics
             if (Misc::StringUtils::ciEqual(spell->mId, "corprus"))
                 mSpells.erase(iter++);
             else
-                iter++;
+                ++iter;
         }
     }
 
@@ -171,7 +171,7 @@ namespace MWMechanics
             if (spell->mData.mType == ESM::Spell::ST_Curse)
                 mSpells.erase(iter++);
             else
-                iter++;
+                ++iter;
         }
     }
 
