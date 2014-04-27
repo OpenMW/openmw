@@ -3,7 +3,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwworld/player.hpp"
 
@@ -24,7 +23,12 @@ namespace MWWorld
 
     void ActionRead::executeImp (const MWWorld::Ptr& actor) {
 
-        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) { //Ensure we're not in combat
+        //Ensure we're not in combat
+        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()
+                // Reading in combat is still allowed if the scroll/book is not in the player inventory yet
+                // (since otherwise, there would be no way to pick it up)
+                && getTarget().getContainerStore() == &actor.getClass().getContainerStore(actor)
+                ) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage4}");
             return;
         }
