@@ -12,15 +12,14 @@ CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
 {
     buildDefaultSetting();
 
-    int vType = static_cast <int> (typ);
+    int settingType = static_cast <int> (typ);
 
-    if ((vType % 2) == 0)
-        setProperty (Property_IsMultiValue,
-                                QVariant(true).toString());
-    else
-        vType--;
+    //even-numbered setting types are multi-valued
+    if ((settingType % 2) == 0)
+        setProperty (Property_IsMultiValue, QVariant(true).toString());
 
-    setProperty (Property_ViewType, QVariant (vType / 2).toString());
+    //view type is related to setting type by an order of magnitude
+    setProperty (Property_ViewType, QVariant (settingType / 10).toString());
     setProperty (Property_Page, pageName);
     setProperty (Property_Name, settingName);
     setProperty (Property_DeclaredValues, values);
@@ -267,9 +266,9 @@ void CSMSettings::Setting::setProperty (SettingProperty prop,
 
 QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting)
 {
-    stream << setting.properties();
+ //   stream << setting.properties();
 
-    stream << setting.proxies();
+ //   stream << setting.proxies();
     return stream;
 }
 
