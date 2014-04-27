@@ -844,6 +844,8 @@ namespace MWMechanics
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
 <<<<<<< HEAD
+            if (   *it == ptr 
+                && it->getClass().isNpc()) continue; // not the player and is an NPC
 =======
             if (*it == ptr) continue; // not the player
 >>>>>>> parent of 54d9615... NPCs detect crime exclusively
@@ -862,7 +864,8 @@ namespace MWMechanics
                     // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     {
-                        if (*it1 == ptr) continue; // not the player
+                        if (   *it == ptr 
+                            && it->getClass().isNpc()) continue; // not the player and is an NPC
 
                         // TODO: Add more messages
                         if (type == OT_Theft)
