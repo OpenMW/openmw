@@ -390,8 +390,13 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
             TexturePtr tex = TextureManager::getSingleton().getByName(texName+"_fog");
             if (!tex.isNull())
             {
+                std::map <std::string, std::vector<Ogre::uint32> >::iterator anIter;
+
                 // get its buffer
-                if (mBuffers.find(texName) == mBuffers.end()) return;
+                anIter = mBuffers.find(texName);
+                if (anIter == mBuffers.end()) return;
+
+                std::vector<Ogre::uint32>& aBuffer = (*anIter).second;
                 int i=0;
                 for (int texV = 0; texV<sFogOfWarResolution; ++texV)
                 {
@@ -399,17 +404,17 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
                     {
                         float sqrDist = Math::Sqr((texU + mx*(sFogOfWarResolution-1)) - u*(sFogOfWarResolution-1))
                                 + Math::Sqr((texV + my*(sFogOfWarResolution-1)) - v*(sFogOfWarResolution-1));
-                        uint32 clr = mBuffers[texName][i];
+                        uint32 clr = aBuffer[i];
                         uint8 alpha = (clr >> 24);
                         alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                        mBuffers[texName][i] = (uint32) (alpha << 24);
+                        aBuffer[i] = (uint32) (alpha << 24);
 
                         ++i;
                     }
                 }
 
                 // copy to the texture
-                memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &mBuffers[texName][0], sFogOfWarResolution*sFogOfWarResolution*4);
+                memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &aBuffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
                 tex->getBuffer()->unlock();
             }
         }

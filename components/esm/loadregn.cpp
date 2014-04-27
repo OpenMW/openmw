@@ -10,7 +10,7 @@ namespace ESM
 
 void Region::load(ESMReader &esm)
 {
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
 
     if (esm.getVer() == VER_12)
         esm.getHNExact(&mData, sizeof(mData) - 2, "WEAT");
@@ -32,7 +32,7 @@ void Region::load(ESMReader &esm)
 }
 void Region::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
 
     if (esm.getVersion() == VER_12)
         esm.writeHNT("WEAT", mData, sizeof(mData) - 2);

@@ -61,6 +61,7 @@
 #include "itemview.hpp"
 #include "fontloader.hpp"
 #include "videowidget.hpp"
+#include "backgroundimage.hpp"
 
 namespace MWGui
 {
@@ -160,6 +161,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
 
@@ -185,7 +187,7 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        SDL_ShowCursor(false);
+        //SDL_ShowCursor(false);
 
         mCursorManager->setEnabled(true);
 
@@ -287,6 +289,10 @@ namespace MWGui
 
     void WindowManager::setNewGame(bool newgame)
     {
+        // This method will always be called after loading a savegame or starting a new game
+        // Reset enemy, it could be a dangling pointer from a previous game
+        mHud->resetEnemy();
+
         if (newgame)
         {
             disallowAll();

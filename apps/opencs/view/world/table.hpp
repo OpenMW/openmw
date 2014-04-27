@@ -78,8 +78,6 @@ namespace CSVWorld
 
             CSMWorld::UniversalId getUniversalId (int row) const;
 
-            void updateEditorSetting (const QString &settingName, const QString &settingValue);
-
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 
         signals:
@@ -123,6 +121,8 @@ namespace CSVWorld
             void requestFocus (const std::string& id);
 
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
+
+            void updateUserSetting (const QString &name, const QStringList &list);
     };
 }
 

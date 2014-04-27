@@ -41,7 +41,7 @@ const char *Class::sGmstSpecializationIds[3] = {
 
 void Class::load(ESMReader &esm)
 {
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
     esm.getHNT(mData, "CLDT", 60);
 
     if (mData.mIsPlayable > 1)
@@ -51,7 +51,7 @@ void Class::load(ESMReader &esm)
 }
 void Class::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
     esm.writeHNT("CLDT", mData, 60);
     esm.writeHNOString("DESC", mDescription);
 }

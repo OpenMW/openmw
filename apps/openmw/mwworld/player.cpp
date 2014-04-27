@@ -9,13 +9,18 @@
 #include <components/esm/defs.hpp>
 #include <components/esm/loadbsgn.hpp>
 
+#include "../mwworld/esmstore.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actors.hpp"
+#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "class.hpp"
 #include "ptr.hpp"
@@ -28,9 +33,11 @@ namespace MWWorld
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
         mAutoMove(false),
-        mForwardBackward (0),
+        mForwardBackward(0),
         mTeleported(false),
-        mMarkedCell(NULL)
+        mMarkedCell(NULL),
+        mCurrentCrimeId(-1),
+        mPayedCrimeId(-1)
     {
         mPlayer.mBase = player;
         mPlayer.mRef.mRefID = "player";
@@ -128,8 +135,25 @@ namespace MWWorld
 
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
 
-        // TODO show sneak indicator only when the player is not detected by any actor
-        MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
+        if (sneak == true)
+        {
+            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+
+            // Find all the actors who might be able to see the player
+            std::vector<MWWorld::Ptr> neighbors;
+            MWBase::Environment::get().getMechanicsManager()->getActorsInRange( Ogre::Vector3(ptr.getRefData().getPosition().pos), 
+                                        esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt(), neighbors);
+            for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+            {
+                if ( MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, *it) )
+                { 
+                    MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+                    break;
+                }
+            }
+            if (neighbors.size() == 0)
+                MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
+        }
     }
 
     void Player::yaw(float yaw)
@@ -164,6 +188,10 @@ namespace MWWorld
         mTeleported = teleported;
     }
 
+    bool Player::isInCombat() {
+        return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
+    }
+
     void Player::markPosition(CellStore *markedCell, ESM::Position markedPosition)
     {
         mMarkedCell = markedCell;
@@ -193,6 +221,9 @@ namespace MWWorld
 
         mPlayer.save (player.mObject);
         player.mCellId = mCellStore->getCell()->getCellId();
+
+        player.mCurrentCrimeId = mCurrentCrimeId;
+        player.mPayedCrimeId = mPayedCrimeId;
 
         player.mBirthsign = mSign;
 
@@ -239,6 +270,9 @@ namespace MWWorld
                 !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
                 throw std::runtime_error ("invalid player state record (birthsign)");
 
+            mCurrentCrimeId = player.mCurrentCrimeId;
+            mPayedCrimeId = player.mPayedCrimeId;
+
             mSign = player.mBirthsign;
 
             mLastKnownExteriorPosition.x = player.mLastKnownExteriorPosition[0];
@@ -273,5 +307,20 @@ namespace MWWorld
         }
 
         return false;
+    }
+
+    int Player::getNewCrimeId()
+    {
+        return ++mCurrentCrimeId;
+    }
+
+    void Player::recordCrimeId()
+    {
+        mPayedCrimeId = mCurrentCrimeId;
+    }
+
+    int Player::getCrimeId() const
+    {
+        return mPayedCrimeId;
     }
 }

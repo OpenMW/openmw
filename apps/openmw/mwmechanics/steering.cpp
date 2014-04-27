@@ -10,7 +10,7 @@
 namespace MWMechanics
 {
 
-bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis)
+bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis, Ogre::Degree epsilon)
 {
     Ogre::Radian currentAngle (actor.getRefData().getPosition().rot[axis]);
     Ogre::Radian diff (targetAngle - currentAngle);
@@ -27,7 +27,6 @@ bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis)
 
     // The turning animation actually moves you slightly, so the angle will be wrong again.
     // Use epsilon to prevent jerkiness.
-    const Ogre::Degree epsilon (0.5);
     if (absDiff < epsilon)
         return true;
 
@@ -39,9 +38,9 @@ bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis)
     return false;
 }
 
-bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle)
+bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, Ogre::Degree epsilon)
 {
-    return smoothTurn(actor, targetAngle, 2);
+    return smoothTurn(actor, targetAngle, 2, epsilon);
 }
 
 }

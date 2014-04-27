@@ -25,6 +25,11 @@ void ESM::Player::load (ESMReader &esm)
     esm.getHNOT (mAutoMove, "AMOV");
 
     mBirthsign = esm.getHNString ("SIGN");
+
+    mCurrentCrimeId = -1;
+    esm.getHNOT (mCurrentCrimeId, "CURD");
+    mPayedCrimeId = -1;
+    esm.getHNOT (mPayedCrimeId, "PAYD");
 }
 
 void ESM::Player::save (ESMWriter &esm) const
@@ -45,4 +50,7 @@ void ESM::Player::save (ESMWriter &esm) const
         esm.writeHNT ("AMOV", mAutoMove);
 
     esm.writeHNString ("SIGN", mBirthsign);
+
+    esm.writeHNT ("CURD", mCurrentCrimeId);
+    esm.writeHNT ("PAYD", mPayedCrimeId);
 }

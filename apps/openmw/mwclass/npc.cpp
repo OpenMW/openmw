@@ -365,13 +365,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData (data.release());
 
-            // TODO: this is not quite correct, in vanilla the merchant's gold pool is not available in his inventory.
-            // (except for gold you gave him)
-            getContainerStore(ptr).add(MWWorld::ContainerStore::sGoldId, gold, ptr);
-
-            getInventoryStore(ptr).autoEquip(ptr);
-
-            
+            getInventoryStore(ptr).autoEquip(ptr); 
         }
     }
 
@@ -818,7 +812,13 @@ namespace MWClass
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+        
+        // player got activated by another NPC
+        if(ptr.getRefData().getHandle() == "player")
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
+
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
@@ -1292,6 +1292,20 @@ namespace MWClass
         customData.mInventoryStore.writeState (state2.mInventory);
         customData.mNpcStats.writeState (state2.mNpcStats);
         static_cast<const MWMechanics::CreatureStats&> (customData.mNpcStats).writeState (state2.mCreatureStats);
+    }
+
+    int Npc::getBaseGold(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+            return ref->mBase->mNpdt52.mGold;
+        else
+            return ref->mBase->mNpdt12.mGold;
+    }
+
+    bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
+    {
+        return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

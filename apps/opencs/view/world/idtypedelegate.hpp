@@ -12,9 +12,6 @@ namespace CSVWorld
     {
         public:
             IdTypeDelegate (const ValueList &mValues, const IconList &icons, QUndoStack& undoStack, QObject *parent);
-
-            virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
-
     };
 
     class IdTypeDelegateFactory : public DataDisplayDelegateFactory

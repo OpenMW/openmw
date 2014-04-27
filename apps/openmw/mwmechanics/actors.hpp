@@ -42,6 +42,8 @@ namespace MWMechanics
 
             void updateEquippedLight (const MWWorld::Ptr& ptr, float duration);
 
+            void updateCrimePersuit (const MWWorld::Ptr& ptr, float duration);
+
         public:
 
             Actors();
@@ -96,8 +98,13 @@ namespace MWMechanics
 
             void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
 
+            ///Returns the list of actors which are following the given actor
+            /**ie AiFollow is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
-            ///<return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
+
+            ///Returns the list of actors which are fighting the given actor
+            /**ie AiCombat is active and the target is the actor **/
+            std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
 
     private:
         PtrControllerMap mActors;

@@ -10,6 +10,8 @@
 
 namespace MWGui
 {
+    class BackgroundImage;
+
     class LoadingScreen : public WindowBase, public Loading::Listener
     {
     public:
@@ -24,6 +26,8 @@ namespace MWGui
         virtual void setProgressRange (size_t range);
         virtual void setProgress (size_t value);
         virtual void increaseProgress (size_t increase);
+
+        virtual void setVisible(bool visible);
 
         virtual void removeWallpaper();
 
@@ -51,10 +55,7 @@ namespace MWGui
 
         MyGUI::TextBox* mLoadingText;
         MyGUI::ScrollBar* mProgressBar;
-        MyGUI::ImageBox* mBackgroundImage;
-
-        Ogre::Rectangle2D* mRectangle;
-        Ogre::MaterialPtr mBackgroundMaterial;
+        BackgroundImage* mBackgroundImage;
 
         Ogre::StringVector mResources;
 

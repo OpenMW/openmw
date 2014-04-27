@@ -34,8 +34,6 @@ namespace MWMechanics
 
             void clearPath();
 
-            void buildPathgridGraph(const ESM::Pathgrid* pathGrid);
-
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                            const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
@@ -81,30 +79,11 @@ namespace MWMechanics
 
         private:
 
-            struct Edge
-            {
-                int destination;
-                float cost;
-            };
-            struct Node
-            {
-                int label;
-                std::vector<Edge> edges;
-                int parent;//used in pathfinding
-            };
-
-            std::vector<float> mGScore;
-            std::vector<float> mFScore;
-
-            std::list<ESM::Pathgrid::Point> aStarSearch(const ESM::Pathgrid* pathGrid,int start,int goal,float xCell = 0, float yCell = 0);
-            void cleanUpAStar();
-
-            std::vector<Node> mGraph;
             bool mIsPathConstructed;
 
-
             std::list<ESM::Pathgrid::Point> mPath;
-            bool mIsGraphConstructed;
+
+            const ESM::Pathgrid *mPathgrid;
             const MWWorld::CellStore* mCell;
     };
 }

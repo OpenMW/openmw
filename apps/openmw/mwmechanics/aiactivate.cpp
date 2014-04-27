@@ -49,7 +49,9 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
         }
     }
 
-    MWWorld::Ptr target = world->getPtr(mObjectId,false);
+    MWWorld::Ptr target = world->searchPtr(mObjectId,false);
+    if(target == MWWorld::Ptr()) return true;
+
     ESM::Position targetPos = target.getRefData().getPosition();
 
     bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;

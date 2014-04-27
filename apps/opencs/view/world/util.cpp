@@ -108,7 +108,11 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
 {
     NastyTableModelHack hack (*model);
     QStyledItemDelegate::setModelData (editor, &hack, index);
-    mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, hack.getData()));
+
+    QVariant new_ = hack.getData();
+
+    if (model->data (index)!=new_)
+        mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, new_));
 }
 
 CSVWorld::CommandDelegate::CommandDelegate (QUndoStack& undoStack, QObject *parent)
@@ -190,12 +194,6 @@ void CSVWorld::CommandDelegate::setEditLock (bool locked)
 bool CSVWorld::CommandDelegate::isEditLocked() const
 {
     return mEditLock;
-}
-
-bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
-    const QString &settingValue)
-{
-    return false;
 }
 
 void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const

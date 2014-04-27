@@ -80,6 +80,8 @@ namespace MWGui
 
         mCharacterSelection->removeAllItems();
 
+        int selectedIndex = MyGUI::ITEM_NONE;
+
         for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it)
         {
             if (it->begin()!=it->end())
@@ -109,10 +111,12 @@ namespace MWGui
                     it->begin()->mPath.parent_path().filename().string())))
                 {
                     mCurrentCharacter = &*it;
-                    mCharacterSelection->setIndexSelected(mCharacterSelection->getItemCount()-1);
+                    selectedIndex = mCharacterSelection->getItemCount()-1;
                 }
             }
         }
+
+        mCharacterSelection->setIndexSelected(selectedIndex);
 
         fillSaveList();
 
@@ -259,11 +263,7 @@ namespace MWGui
         timeinfo = localtime(&time);
 
         // Use system/environment locale settings for datetime formatting
-#if defined(_WIN32) || defined(__WINDOWS__)
         setlocale(LC_TIME, "");
-#else
-        std::setlocale(LC_TIME, "");
-#endif
 
         const int size=1024;
         char buffer[size];

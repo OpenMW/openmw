@@ -41,6 +41,10 @@ namespace MWWorld
         bool                    mAutoMove;
         int                     mForwardBackward;
         bool                    mTeleported;
+
+        int                     mCurrentCrimeId;    // the id assigned witnesses
+        int                     mPayedCrimeId;      // the last id payed off (0 bounty)
+
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);
@@ -63,15 +67,12 @@ namespace MWWorld
         MWWorld::Ptr getPlayer();
 
         void setBirthSign(const std::string &sign);
-
         const std::string &getBirthSign() const;
 
         void setDrawState (MWMechanics::DrawState_ state);
-
-        bool getAutoMove() const;
-
         MWMechanics::DrawState_ getDrawState(); /// \todo constness
 
+        bool getAutoMove() const;
         void setAutoMove (bool enable);
 
         void setLeftRight (int value);
@@ -89,11 +90,18 @@ namespace MWWorld
         bool wasTeleported() const;
         void setTeleported(bool teleported);
 
+        ///Checks all actors to see if anyone has an aipackage against you
+        bool isInCombat();
+
         void clear();
 
         void write (ESM::ESMWriter& writer) const;
 
         bool readRecord (ESM::ESMReader& reader, int32_t type);
+
+        int getNewCrimeId();  // get new id for witnesses
+        void recordCrimeId(); // record the payed crime id when bounty is 0
+        int getCrimeId() const;     // get the last payed crime id
     };
 }
 #endif

@@ -740,10 +740,6 @@ bool CharacterController::updateWeaponState()
                     MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
                 if(!resultSound.empty())
                     MWBase::Environment::get().getSoundManager()->playSound(resultSound, 1.0f, 1.0f);
-
-                // Set again, just to update the charge bar
-                if(item.getRefData().getCount())
-                    MWBase::Environment::get().getWindowManager()->setSelectedWeapon(item);
             }
             else if (ammunition)
             {

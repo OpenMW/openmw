@@ -20,14 +20,14 @@ namespace ESM
 
 void Race::load(ESMReader &esm)
 {
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
     esm.getHNT(mData, "RADT", 140);
     mPowers.load(esm);
     mDescription = esm.getHNOString("DESC");
 }
 void Race::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
     esm.writeHNT("RADT", mData, 140);
     mPowers.save(esm);
     esm.writeHNOString("DESC", mDescription);

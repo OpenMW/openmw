@@ -49,7 +49,7 @@ add_component_dir (esm
     )
 
 add_component_dir (misc
-    slice_array stringops
+    utf8stream stringops
     )
 
 add_component_dir (files

@@ -157,6 +157,21 @@ void OgreRenderer::setFov(float fov)
 
 void OgreRenderer::windowResized(int x, int y)
 {
-    if (mWindowListener)
+    if (mWindowListener) {
         mWindowListener->windowResized(x,y);
+    }
+    else {
+        mWindowWidth = x;
+        mWindowHeight = y;
+        mOutstandingResize = true;
+    }
+}
+
+void OgreRenderer::setWindowListener(WindowSizeListener* listener)
+{
+    mWindowListener = listener;
+    if (mOutstandingResize) {
+        windowResized(mWindowWidth, mWindowHeight);
+        mOutstandingResize = false;
+    }
 }

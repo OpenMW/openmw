@@ -14,6 +14,8 @@
 
 #include "../mwrender/globalmap.hpp"
 
+#include "../components/esm/globalmap.hpp"
+
 #include "widgets.hpp"
 
 namespace MWGui
@@ -436,7 +438,6 @@ namespace MWGui
                     worldY * mGlobalMapRender->getHeight()+6,
                     12, 12);
 
-
         static int _counter=0;
         MyGUI::Button* markerWidget = mGlobalMapOverlay->createWidget<MyGUI::Button>("ButtonImage",
             widgetCoord, MyGUI::Align::Default, "Door" + boost::lexical_cast<std::string>(_counter));
@@ -452,6 +453,11 @@ namespace MWGui
         markerWidget->setUserString("ToolTipType", "Layout");
         markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
         markerWidget->setUserString("Caption_TextOneLine", name);
+
+        CellId cell;
+        cell.first = x;
+        cell.second = y;
+        mMarkers.push_back(cell);
     }
 
     void MapWindow::cellExplored(int x, int y)
@@ -580,6 +586,7 @@ namespace MWGui
 
     void MapWindow::clear()
     {
+        mMarkers.clear();
         mGlobalMapRender->clear();
 
         while (mEventBoxGlobal->getChildCount())
@@ -590,19 +597,31 @@ namespace MWGui
 
     void MapWindow::write(ESM::ESMWriter &writer)
     {
-        mGlobalMapRender->write(writer);
+        ESM::GlobalMap map;
+        mGlobalMapRender->write(map);
+
+        map.mMarkers = mMarkers;
+
+        writer.startRecord(ESM::REC_GMAP);
+        map.save(writer);
+        writer.endRecord(ESM::REC_GMAP);
     }
 
     void MapWindow::readRecord(ESM::ESMReader &reader, int32_t type)
     {
-        std::vector<std::pair<int, int> > exploredCells;
-        mGlobalMapRender->readRecord(reader, type, exploredCells);
-
-        for (std::vector<std::pair<int, int> >::iterator it = exploredCells.begin(); it != exploredCells.end(); ++it)
+        if (type == ESM::REC_GMAP)
         {
-            const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(it->first, it->second);
-            if (cell && !cell->mName.empty())
-                addVisitedLocation(cell->mName, it->first, it->second);
+            ESM::GlobalMap map;
+            map.load(reader);
+
+            mGlobalMapRender->read(map);
+
+            for (std::vector<ESM::GlobalMap::CellId>::iterator it = map.mMarkers.begin(); it != map.mMarkers.end(); ++it)
+            {
+                const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(it->first, it->second);
+                if (cell && !cell->mName.empty())
+                    addVisitedLocation(cell->mName, it->first, it->second);
+            }
         }
     }
 }

@@ -332,6 +332,10 @@ namespace MWWorld
             ///< If there is no class for this pointer, an exception is thrown.
 
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
+
+            virtual int getBaseGold(const MWWorld::Ptr& ptr) const;
+
+            virtual bool isClass(const MWWorld::Ptr& ptr, const std::string &className) const;
     };
 }
 

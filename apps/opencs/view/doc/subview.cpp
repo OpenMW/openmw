@@ -12,13 +12,12 @@ CSMWorld::UniversalId CSVDoc::SubView::getUniversalId() const
     return mUniversalId;
 }
 
-void CSVDoc::SubView::updateEditorSetting (const QString &settingName, const QString &settingValue)
-{
-}
-
 void CSVDoc::SubView::setStatusBar (bool show) {}
 
 void CSVDoc::SubView::useHint (const std::string& hint) {}
+
+void CSVDoc::SubView::updateUserSetting (const QString &, const QStringList &)
+{}
 
 void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
 {

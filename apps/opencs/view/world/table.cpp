@@ -358,6 +358,9 @@ void CSVWorld::Table::cloneRecord()
 
 void CSVWorld::Table::moveUpRecord()
 {
+    if (mEditLock)
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     if (selectedRows.size()==1)
@@ -387,6 +390,9 @@ void CSVWorld::Table::moveUpRecord()
 
 void CSVWorld::Table::moveDownRecord()
 {
+    if (mEditLock)
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     if (selectedRows.size()==1)
@@ -443,15 +449,21 @@ void CSVWorld::Table::previewRecord()
     }
 }
 
-void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QString &settingValue)
+void CSVWorld::Table::updateUserSetting
+                                (const QString &name, const QStringList &list)
 {
     int columns = mModel->columnCount();
 
     for (int i=0; i<columns; ++i)
         if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
-            if (dynamic_cast<CommandDelegate&> (*delegate).
-                updateEditorSetting (settingName, settingValue))
-                emit dataChanged (mModel->index (0, i), mModel->index (mModel->rowCount()-1, i));
+        {
+            dynamic_cast<CommandDelegate&>
+                                    (*delegate).updateUserSetting (name, list);
+            {
+                emit dataChanged (mModel->index (0, i),
+                                  mModel->index (mModel->rowCount()-1, i));
+            }
+        }
 }
 
 void CSVWorld::Table::tableSizeUpdate()

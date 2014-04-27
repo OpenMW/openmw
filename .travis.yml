@@ -41,4 +41,4 @@ notifications:
       - "chat.freenode.net#openmw"
     on_success: change
     on_failure: always
-
+    use_notice: true

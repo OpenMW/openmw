@@ -8,7 +8,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -150,10 +149,6 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
     fireEquipmentChangedEvent();
     updateMagicEffects(actor);
-
-    // Update HUD icon for player weapon
-    if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-        MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*getSlot(slot));
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
@@ -494,7 +489,6 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
             && *mSelectedEnchantItem == item && actor.getRefData().getHandle() == "player")
     {
         mSelectedEnchantItem = end();
-        MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
     }
 
     updateRechargingItems();
@@ -532,18 +526,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             if (script != "")
                 (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
 
-            // Update HUD icon when removing player weapon or selected enchanted item.
-            // We have to check for both as the weapon could also be the enchanted item.
-            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-            {
-                // weapon
-                MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
-            }
             if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
             {
-                // enchanted item
                 mSelectedEnchantItem = end();
-                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
             }
         }
 

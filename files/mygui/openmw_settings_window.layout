@@ -3,10 +3,10 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 400 426" name="_Main">
 
-        <Property key="MinSize" value="400 426"/>
-        <Property key="MaxSize" value="400 426"/>
+        <Property key="MinSize" value="400 496"/>
+        <Property key="MaxSize" value="400 496"/>
 
-        <Widget type="TabControl" skin="TabControl" position="8 8 368 340" align="Left Top" name="SettingsTab">
+        <Widget type="TabControl" skin="TabControl" position="8 8 368 410" align="Left Top" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
 
             <Widget type="TabItem" skin="" position="4 28 360 312">
@@ -95,6 +95,18 @@
                         <Property key="Caption" value="Grab cursor"/>
                     </Widget>
                 </Widget>
+
+		<Widget type="HBox" skin="" position="4 290 260 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="AutosaveButton">
+                        <UserString key="SettingCategory" value="Saves"/>
+                        <UserString key="SettingName" value="autosave"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                        <Property key="Caption" value="#{sQuick_Save}"/>
+                    </Widget>
+                </Widget>
+
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sAudio}  "/>

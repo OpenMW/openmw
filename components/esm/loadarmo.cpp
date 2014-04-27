@@ -34,7 +34,7 @@ unsigned int Armor::sRecordId = REC_ARMO;
 void Armor::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");
-    mName = esm.getHNString("FNAM");
+    mName = esm.getHNOString("FNAM");
     mScript = esm.getHNOString("SCRI");
     esm.getHNT(mData, "AODT", 24);
     mIcon = esm.getHNOString("ITEX");
@@ -45,7 +45,7 @@ void Armor::load(ESMReader &esm)
 void Armor::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
-    esm.writeHNCString("FNAM", mName);
+    esm.writeHNOCString("FNAM", mName);
     esm.writeHNOCString("SCRI", mScript);
     esm.writeHNT("AODT", mData, 24);
     esm.writeHNOCString("ITEX", mIcon);

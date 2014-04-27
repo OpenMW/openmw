@@ -29,6 +29,7 @@ MWMechanics::NpcStats::NpcStats()
 , mLevelProgress(0)
 , mDisposition(0)
 , mReputation(0)
+, mCrimeId(-1)
 , mWerewolfKills (0)
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
@@ -340,6 +341,16 @@ void MWMechanics::NpcStats::setReputation(int reputation)
     mReputation = reputation;
 }
 
+int MWMechanics::NpcStats::getCrimeId() const
+{
+    return mCrimeId;
+}
+
+void MWMechanics::NpcStats::setCrimeId(int id)
+{
+    mCrimeId = id;
+}
+
 bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int rank) const
 {
     if (rank<0 || rank>=10)
@@ -441,6 +452,8 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
         mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
     }
 
+    state.mCrimeId = mCrimeId;
+
     state.mBounty = mBounty;
 
     for (std::set<std::string>::const_iterator iter (mExpelled.begin());
@@ -478,7 +491,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
             if (iter->second.mExpelled)
                 mExpelled.insert (iter->first);
 
-            if (iter->second.mRank)
+            if (iter->second.mRank >= 0)
                 mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
 
             if (iter->second.mReputation)
@@ -493,6 +506,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
         mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
     }
 
+    mCrimeId = state.mCrimeId;
     mBounty = state.mBounty;
     mReputation = state.mReputation;
     mWerewolfKills = state.mWerewolfKills;

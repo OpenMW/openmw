@@ -468,11 +468,6 @@ namespace MWDialogue
         mIsInChoice = true;
     }
 
-    MWWorld::Ptr DialogueManager::getActor() const
-    {
-        return mActor;
-    }
-
     void DialogueManager::goodbye()
     {
         mIsInChoice = true;
@@ -500,7 +495,24 @@ namespace MWDialogue
             mTemporaryDispositionChange = 100 - curDisp;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
+        player.getClass().skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
+
+        if (success)
+        {
+            int gold=0;
+            if (type == MWBase::MechanicsManager::PT_Bribe10)
+                gold = 10;
+            else if (type == MWBase::MechanicsManager::PT_Bribe100)
+                gold = 100;
+            else if (type == MWBase::MechanicsManager::PT_Bribe1000)
+                gold = 1000;
+
+            if (gold)
+            {
+                player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, gold, player);
+                mActor.getClass().getContainerStore(mActor).add(MWWorld::ContainerStore::sGoldId, gold, mActor);
+            }
+        }
 
         std::string text;
 

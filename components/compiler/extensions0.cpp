@@ -409,9 +409,9 @@ namespace Compiler
                 opcodeResurrectExplicit);
             extensions.registerFunction ("getspell", 'l', "c", opcodeGetSpell, opcodeGetSpellExplicit);
 
-            extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
-            extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
-            extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
+            extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank, opcodePCRaiseRankExplicit);
+            extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank, opcodePCLowerRankExplicit);
+            extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction, opcodePCJoinFactionExplicit);
             extensions.registerInstruction ("moddisposition","l",opcodeModDisposition,
                 opcodeModDispositionExplicit);
             extensions.registerInstruction ("setdisposition","l",opcodeSetDisposition,

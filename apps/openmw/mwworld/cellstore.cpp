@@ -52,7 +52,7 @@ namespace
                 iter!=collection.mList.end(); ++iter)
             {
                 if (iter->mData.getCount()==0 && iter->mRef.mRefNum.mContentFile==-1)
-                    continue; // deleted file that did not came from a content file -> ignore
+                    continue; // deleted reference that did not come from a content file -> ignore
 
                 RecordType state;
                 iter->save (state);
@@ -72,13 +72,17 @@ namespace
         RecordType state;
         state.load (reader);
 
-        std::map<int, int>::const_iterator iter =
-            contentFileMap.find (state.mRef.mRefNum.mContentFile);
+        // If the reference came from a content file, make sure this content file is loaded
+        if (state.mRef.mRefNum.mContentFile != -1)
+        {
+            std::map<int, int>::const_iterator iter =
+                contentFileMap.find (state.mRef.mRefNum.mContentFile);
 
-        if (iter==contentFileMap.end())
-            return; // content file has been removed -> skip
+            if (iter==contentFileMap.end())
+                return; // content file has been removed -> skip
 
-        state.mRef.mRefNum.mContentFile = iter->second;
+            state.mRef.mRefNum.mContentFile = iter->second;
+        }
 
         if (!MWWorld::LiveCellRef<T>::checkState (state))
             return; // not valid anymore with current content files -> skip
@@ -363,6 +367,7 @@ namespace MWWorld
             loadRefs (store, esm);
 
             mState = State_Loaded;
+            mPathgridGraph.load(mCell);
         }
     }
 
@@ -679,5 +684,15 @@ namespace MWWorld
     bool operator!= (const CellStore& left, const CellStore& right)
     {
         return !(left==right);
+    }
+
+    bool CellStore::isPointConnected(const int start, const int end) const
+    {
+        return mPathgridGraph.isPointConnected(start, end);
+    }
+
+    std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end) const
+    {
+        return mPathgridGraph.aStarSearch(start, end);
     }
 }
