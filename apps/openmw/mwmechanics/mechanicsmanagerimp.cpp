@@ -298,13 +298,15 @@ namespace MWMechanics
 
             if(stats.getTimeToStartDrowning() != mWatchedStats.getTimeToStartDrowning())
             {
+                const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("fHoldBreathTime")->getFloat();
                 mWatchedStats.setTimeToStartDrowning(stats.getTimeToStartDrowning());
-                if(stats.getTimeToStartDrowning() >= 20.0f)
+                if(stats.getTimeToStartDrowning() >= fHoldBreathTime)
                     winMgr->setDrowningBarVisibility(false);
                 else
                 {
                     winMgr->setDrowningBarVisibility(true);
-                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning());
+                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning(), fHoldBreathTime);
                 }
             }
 

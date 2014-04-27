@@ -203,9 +203,9 @@ namespace MWGui
         }
     }
 
-    void HUD::setDrowningTimeLeft(float time)
+    void HUD::setDrowningTimeLeft(float time, float maxTime)
     {
-        size_t progress = time/20.0*200.0;
+        size_t progress = time/maxTime*200.0;
         mDrowning->setProgressPosition(progress);
 
         bool isDrowning = (progress == 0);

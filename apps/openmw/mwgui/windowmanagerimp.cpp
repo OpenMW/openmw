@@ -625,9 +625,9 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
     }
 
-    void WindowManager::setDrowningTimeLeft (float time)
+    void WindowManager::setDrowningTimeLeft (float time, float maxTime)
     {
-        mHud->setDrowningTimeLeft(time);
+        mHud->setDrowningTimeLeft(time, maxTime);
     }
 
     void WindowManager::setPlayerClass (const ESM::Class &class_)
