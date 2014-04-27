@@ -106,7 +106,7 @@ ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
     uint32 startIndex = 0;
     for(ESM::Pathgrid::PointList::const_iterator it = pathgrid->mPoints.begin();
         it != pathgrid->mPoints.end();
-        it++, startIndex += 6)
+        ++it, startIndex += 6)
     {
         Vector3 pointPos(it->mX, it->mY, it->mZ);
 

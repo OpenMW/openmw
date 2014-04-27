@@ -671,7 +671,7 @@ namespace MWWorld
     void PhysicsSystem::queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &movement)
     {
         PtrVelocityList::iterator iter = mMovementQueue.begin();
-        for(;iter != mMovementQueue.end();iter++)
+        for(;iter != mMovementQueue.end();++iter)
         {
             if(iter->first == ptr)
             {
@@ -692,7 +692,7 @@ namespace MWWorld
         {
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             PtrVelocityList::iterator iter = mMovementQueue.begin();
-            for(;iter != mMovementQueue.end();iter++)
+            for(;iter != mMovementQueue.end();++iter)
             {
                 float waterlevel = -std::numeric_limits<float>::max();
                 const ESM::Cell *cell = iter->first.getCell()->getCell();
