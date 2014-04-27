@@ -14,16 +14,18 @@ CSVSettings::SettingWindow::SettingWindow(QWidget *parent)
 
 void CSVSettings::SettingWindow::createPages()
 {
+    qDebug () << "getting page map";
     CSMSettings::SettingPageMap pageMap = mModel->settingPageMap();
 
     QList <CSMSettings::Setting *> connectedSettings;
-
+    qDebug () << "iterating map";
     foreach (const QString &pageName, pageMap.keys())
-    {
+    {        
+        qDebug() << "iterating page: " << pageName;
         QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName);
-
+        qDebug () << "appending page: " << pageName << "; settings =  " << pageSettings.size();
         mPages.append (new Page (pageName, pageSettings, this));
-
+        qDebug() << "iterating page " << pageName << " settings";
         for (int i = 0; i < pageSettings.size(); i++)
         {
             CSMSettings::Setting *setting = pageSettings.at(i);
@@ -32,7 +34,7 @@ void CSVSettings::SettingWindow::createPages()
                 connectedSettings.append (setting);
         }
     }
-
+    qDebug() << "making connections";
     if (!connectedSettings.isEmpty())
         createConnections(connectedSettings);
 }

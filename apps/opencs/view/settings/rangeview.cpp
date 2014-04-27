@@ -10,6 +10,9 @@
 #include "rangeview.hpp"
 #include "../../model/settings/setting.hpp"
 
+
+#include <QDebug>
+
 CSVSettings::RangeView::RangeView (CSMSettings::Setting *setting,
                                        Page *parent)
     : View (setting, parent)
@@ -87,5 +90,6 @@ CSVSettings::RangeView *CSVSettings::RangeViewFactory::createView
                                         (CSMSettings::Setting *setting,
                                          Page *parent)
 {
+    qDebug() << "adding a new range view";
     return new RangeView (setting, parent);
 }

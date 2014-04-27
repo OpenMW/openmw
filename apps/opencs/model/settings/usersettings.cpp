@@ -47,8 +47,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
     {
-        Setting *width = createSetting (Type_SingleText, section, "Width");
-        Setting *height = createSetting (Type_SingleText, section, "Height");
+        Setting *width = createSetting (Type_LineEdit, section, "Width");
+        Setting *height = createSetting (Type_LineEdit, section, "Height");
 
         width->setWidgetWidth (5);
         height->setWidgetWidth (5);
@@ -65,7 +65,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         /*
          *Create the proxy setting for predefined values
          */
-        Setting *preDefined = createSetting (Type_SingleList, section,
+        Setting *preDefined = createSetting (Type_ComboBox, section,
                                              "Pre-Defined",
                                             QStringList()
                                                 << "640 x 480"
@@ -94,11 +94,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         QStringList values = QStringList()
                             << defaultValue << "Icon Only" << "Text Only";
 
-        Setting *rsd = createSetting (Type_SingleBool,
+        Setting *rsd = createSetting (Type_RadioButton,
                                       section, "Record Status Display",
                                       values);
 
-        Setting *ritd = createSetting (Type_SingleBool,
+        Setting *ritd = createSetting (Type_RadioButton,
                                       section, "Referenceable ID Type Display",
                                       values);
 
@@ -110,24 +110,24 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     {
         //create three setting objects, specifying the basic widget type,
         //the setting view name, the page name, and the default value
-        Setting *masterBoolean = createSetting (Type_SingleBool, section,
+        Setting *masterBoolean = createSetting (Type_RadioButton, section,
                                         "Master Proxy",
                                         QStringList()
                                             << "Profile One" << "Profile Two"
                                             << "Profile Three" << "Profile Four"
                                 );
 
-        Setting *slaveBoolean = createSetting (Type_MultiBool, section,
+        Setting *slaveBoolean = createSetting (Type_CheckBox, section,
                                         "Proxy Checkboxes",
                                         QStringList() << "One" << "Two"
                                              << "Three" << "Four" << "Five"
                                 );
 
-        Setting *slaveSingleText = createSetting (Type_SingleText, section,
+        Setting *slaveSingleText = createSetting (Type_LineEdit, section,
                                                   "Proxy TextBox 1"
                                                 );
 
-        Setting *slaveMultiText = createSetting (Type_SingleText, section,
+        Setting *slaveMultiText = createSetting (Type_LineEdit, section,
                                                  "ProxyTextBox 2"
                                                  );
 
