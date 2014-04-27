@@ -199,15 +199,24 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().mPos.pos[1] = 0;
     item.getCellRef().mPos.pos[2] = 0;
 
+    Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+
     if (setOwner && actorPtr.getClass().isActor())
-        item.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
+    {
+        if (actorPtr == player)
+        {
+            // No point in setting owner to the player - NPCs will not respect this anyway
+            // Additionally, setting it to "player" would make those items not stack with items that don't have an owner
+            item.getCellRef().mOwner = "";
+        }
+        else
+            item.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
+    }
 
     std::string script = MWWorld::Class::get(item).getScript(item);
     if(script != "")
     {
         CellStore *cell;
-
-        Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
