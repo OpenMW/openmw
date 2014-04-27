@@ -844,7 +844,7 @@ namespace MWMechanics
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             if (   *it == ptr 
-                && it->getClass().isNpc()) continue; // not the player and is an NPC
+                && !it->getClass().isNpc()) continue; // not the player and is an NPC
 
             // Was the crime seen?
             if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
@@ -861,7 +861,7 @@ namespace MWMechanics
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     {
                         if (   *it == ptr 
-                            && it->getClass().isNpc()) continue; // not the player and is an NPC
+                            && !it->getClass().isNpc()) continue; // not the player and is an NPC
 
                         // TODO: Add more messages
                         if (type == OT_Theft)
