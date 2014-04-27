@@ -90,6 +90,5 @@ CSVSettings::RangeView *CSVSettings::RangeViewFactory::createView
                                         (CSMSettings::Setting *setting,
                                          Page *parent)
 {
-    qDebug() << "adding a new range view";
     return new RangeView (setting, parent);
 }
