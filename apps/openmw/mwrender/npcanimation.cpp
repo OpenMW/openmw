@@ -68,7 +68,8 @@ namespace MWRender
 
 float HeadAnimationTime::getValue() const
 {
-    // TODO: Handle eye blinking (time is in the text keys)
+    // TODO use time from text keys (Talk Start/Stop, Blink Start/Stop)
+    // TODO: Handle eye blinking
     if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
         return 0;
     else

@@ -3,6 +3,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -19,8 +22,13 @@ namespace MWWorld
     {
     }
 
-    void ActionRead::executeImp (const MWWorld::Ptr& actor)
-    {
+    void ActionRead::executeImp (const MWWorld::Ptr& actor) {
+
+        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) { //Ensure we're not in combat
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage4}");
+            return;
+        }
+
         LiveCellRef<ESM::Book> *ref = getTarget().get<ESM::Book>();
 
         if (ref->mBase->mData.mIsScroll)

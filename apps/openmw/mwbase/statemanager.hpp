@@ -65,6 +65,14 @@ namespace MWBase
             ///
             /// \note \a slot must belong to \a character.
 
+            ///Simple saver, writes over the file if already existing
+            /** Used for quick save and autosave **/
+            virtual void quickSave(std::string = "Quicksave")=0;
+
+            ///Simple loader, loads the last saved file
+            /** Used for quickload **/
+            virtual void quickLoad()=0;
+
             virtual MWState::Character *getCurrentCharacter (bool create = true) = 0;
             ///< \param create Create a new character, if there is no current character.
 

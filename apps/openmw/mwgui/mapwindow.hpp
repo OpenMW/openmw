@@ -55,6 +55,9 @@ namespace MWGui
         bool mChanged;
         bool mFogOfWar;
 
+        typedef std::pair<int, int> CellId;
+        std::vector<CellId> mMarkers;
+
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 

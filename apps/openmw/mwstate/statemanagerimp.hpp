@@ -49,6 +49,15 @@ namespace MWState
             ///
             /// \note Slot must belong to the current character.
 
+            ///Saves a file, using supplied filename, overwritting if needed
+            /** This is mostly used for quicksaving and autosaving, for they use the same name over and over again
+                \param name Name of save, defaults to "Quicksave"**/
+            virtual void quickSave(std::string name = "Quicksave");
+
+            ///Loads the last saved file
+            /** Used for quickload **/
+            virtual void quickLoad();
+
             virtual void loadGame (const Character *character, const Slot *slot);
             ///< Load a saved game file from \a slot.
             ///

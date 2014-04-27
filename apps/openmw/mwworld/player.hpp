@@ -44,7 +44,7 @@ namespace MWWorld
 
         int                     mCurrentCrimeId;    // the id assigned witnesses
         int                     mPayedCrimeId;      // the last id payed off (0 bounty)
-        
+
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);
@@ -89,6 +89,9 @@ namespace MWWorld
 
         bool wasTeleported() const;
         void setTeleported(bool teleported);
+
+        ///Checks all actors to see if anyone has an aipackage against you
+        bool isInCombat();
 
         void clear();
 

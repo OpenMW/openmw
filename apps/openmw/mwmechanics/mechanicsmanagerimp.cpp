@@ -325,6 +325,19 @@ namespace MWMechanics
                 winMgr->updateSkillArea();
 
             winMgr->setValue("level", stats.getLevel());
+
+            // Update the equipped weapon icon
+            MWWorld::InventoryStore& inv = mWatched.getClass().getInventoryStore(mWatched);
+            MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weapon == inv.end())
+                winMgr->unsetSelectedWeapon();
+            else
+                winMgr->setSelectedWeapon(*weapon);
+
+            // Update the selected spell icon
+            MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
+            if (enchantItem != inv.end())
+                winMgr->setSelectedEnchantItem(*enchantItem);
         }
 
         if (mUpdatePlayer)
@@ -772,6 +785,11 @@ namespace MWMechanics
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
     {
+        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
+            return true;
+        }
+
         MWWorld::Ptr victim;
         if (isAllowedToUse(ptr, bed, victim))
             return false;
@@ -832,17 +850,17 @@ namespace MWMechanics
 
         // Find all the NPCs within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
-        mActors.getObjectsInRange(Ogre::Vector3(ptr.getRefData().getPosition().pos), 
+        mActors.getObjectsInRange(Ogre::Vector3(ptr.getRefData().getPosition().pos),
                                     esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
 
         // Find an actor who witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-        { 
+        {
             if (*it == ptr) continue; // not the player
 
             // Was the crime seen?
             if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
-                type == OT_Assault ) 
+                type == OT_Assault )
             {
 
                 // Will the witness report the crime?
@@ -853,7 +871,7 @@ namespace MWMechanics
 
                     // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
-                    { 
+                    {
                         if (*it1 == ptr) continue; // not the player
 
                         // TODO: Add more messages
@@ -861,9 +879,9 @@ namespace MWMechanics
                             MWBase::Environment::get().getDialogueManager()->say(*it1, "thief");
                         else if (type == OT_Assault)
                             MWBase::Environment::get().getDialogueManager()->say(*it1, "attack");
-                        
+
                         // Will other witnesses paticipate in crime
-                        if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm  
+                        if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm
                             ||  type == OT_Assault )
                         {
                             it1->getClass().getNpcStats(*it1).setCrimeId(id);
@@ -884,7 +902,7 @@ namespace MWMechanics
     void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        
+
         // Bounty for each type of crime
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
             arg = store.find("iCrimeTresspass")->getInt();
@@ -989,8 +1007,17 @@ namespace MWMechanics
         mObjects.getObjectsInRange(position, radius, objects);
     }
 
+    void MechanicsManager::getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    {
+        mActors.getObjectsInRange(position, radius, objects);
+    }
+
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
     {
         return mActors.getActorsFollowing(actor);
+    }
+
+    std::list<MWWorld::Ptr> MechanicsManager::getActorsFighting(const MWWorld::Ptr& actor) {
+        return mActors.getActorsFighting(actor);
     }
 }
