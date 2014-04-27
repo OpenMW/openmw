@@ -843,7 +843,10 @@ namespace MWMechanics
         // Find an actor who witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
+<<<<<<< HEAD
+=======
             if (*it == ptr) continue; // not the player
+>>>>>>> parent of 54d9615... NPCs detect crime exclusively
 
             // Was the crime seen?
             if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
