@@ -204,11 +204,6 @@ namespace MWMechanics
                     || (fight >= 95 && d <= 3000)
                     || (fight >= 90 && d <= 2000)
                     || (fight >= 80 && d <= 1000)
-                    || (fight >= 80 && disp <= 40)
-                    || (fight >= 70 && disp <= 35 && d <= 1000)
-                    || (fight >= 60 && disp <= 30 && d <= 1000)
-                    || (fight >= 50 && disp == 0)
-                    || (fight >= 40 && disp <= 10 && d <= 500)
                     )
                 {
                     bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,player)
