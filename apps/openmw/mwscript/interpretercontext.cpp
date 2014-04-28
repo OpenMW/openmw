@@ -302,15 +302,23 @@ namespace MWScript
         std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
 
         std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.begin();
+        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        int rank = -1;
+        if (it != ranks.end())
+            rank = it->second;
+
+        // If you are not in the faction, PcRank returns the first rank, for whatever reason.
+        // This is used by the dialogue when joining the Thieves Guild in Balmora.
+        if (rank == -1)
+            rank = 0;
 
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
-        if(it->second < 0 || it->second > 9) // there are only 10 ranks
+        if(rank < 0 || rank > 9) // there are only 10 ranks
             return "";
 
-        return faction->mRanks[it->second];
+        return faction->mRanks[rank];
     }
 
     std::string InterpreterContext::getPCNextRank() const
@@ -320,25 +328,25 @@ namespace MWScript
 
         std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
 
+        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        int rank = -1;
+        if (it != ranks.end())
+            rank = it->second;
+
+        ++rank; // Next rank
+
+        // if we are already at max rank, there is no next rank
+        if (rank > 9)
+            rank = 9;
+
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
-        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        if(rank < 0 || rank > 9)
+            return "";
 
-        if (!ranks.empty())
-        {
-            std::map<std::string, int>::const_iterator it = ranks.begin();
-
-            if(it->second < -1 || it->second > 9)
-                return "";
-
-            if(it->second <= 8) // If player is at max rank, there is no next rank
-                return faction->mRanks[it->second + 1];
-            else
-                return faction->mRanks[it->second];
-        }
-        else
-            return faction->mRanks[0];
+        return faction->mRanks[rank];
     }
 
     int InterpreterContext::getPCBounty() const
@@ -370,10 +378,14 @@ namespace MWScript
 
     float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
     {
-        // TODO handle exterior cells (when ref and ref2 are located in different cells)
-        const MWWorld::Ptr ref2 = getReference (id, false);
+        const MWWorld::Ptr ref2 = getReference (id, false, false);
+        // If either actor is in a non-active cell, return a large value (just like vanilla)
+        if (ref2.isEmpty())
+            return std::numeric_limits<float>().max();
 
-        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr (name, true);
+        const MWWorld::Ptr ref = getReference (name, false, false);
+        if (ref.isEmpty())
+            return std::numeric_limits<float>().max();
 
         double diff[3];
 
