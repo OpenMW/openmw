@@ -13,25 +13,19 @@
             <Property key="MultiLine" value="true"/>
         </Widget>
 
-         <Widget type="HBox" position="0 89 138 24" align="Left Bottom">
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
+        <Widget type="VBox" position="0 89 292 24" align="Right Bottom">
+            <Widget type="HBox">
+                <Property key="Spacing" value="8"/>
+
+                <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Right Bottom">
+                    <Property key="Caption" value="#{sYes}"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Bottom">
+                    <Property key="Caption" value="#{sNo}"/>
+                </Widget>
             </Widget>
 
-            <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
-                <Property key="Caption" value="#{sYes}"/>
-            </Widget>
+            <Widget type="Widget"/>
         </Widget>
-
-        <Widget type="HBox" position="146 89 138 24" align="Left Bottom">
-            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
-                <Property key="Caption" value="#{sNo}"/>
-            </Widget>
-
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
-        </Widget>
-
     </Widget>
 </MyGUI>
