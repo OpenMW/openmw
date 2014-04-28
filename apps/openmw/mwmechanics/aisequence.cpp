@@ -38,7 +38,7 @@ MWMechanics::AiSequence& MWMechanics::AiSequence::operator= (const AiSequence& s
         copy (sequence);
         mDone = sequence.mDone;
     }
-    
+
     return *this;
 }
 
@@ -51,7 +51,7 @@ int MWMechanics::AiSequence::getTypeId() const
 {
     if (mPackages.empty())
         return -1;
-        
+
     return mPackages.front()->getTypeId();
 }
 
@@ -102,7 +102,7 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
             }
             else
             {
-                mDone = false;    
+                mDone = false;
             }
         }
     }
@@ -118,7 +118,7 @@ void MWMechanics::AiSequence::clear()
 
 void MWMechanics::AiSequence::stack (const AiPackage& package)
 {
-    for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); it++)
+    for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
     {
         if(mPackages.front()->getPriority() <= package.getPriority())
         {
