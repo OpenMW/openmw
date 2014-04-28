@@ -302,15 +302,18 @@ namespace MWScript
         std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
 
         std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.begin();
+        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        int rank = -1;
+        if (it != ranks.end())
+            rank = it->second;
 
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
-        if(it->second < 0 || it->second > 9) // there are only 10 ranks
+        if(rank < 0 || rank > 9) // there are only 10 ranks
             return "";
 
-        return faction->mRanks[it->second];
+        return faction->mRanks[rank];
     }
 
     std::string InterpreterContext::getPCNextRank() const
@@ -320,25 +323,25 @@ namespace MWScript
 
         std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
 
+        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        int rank = -1;
+        if (it != ranks.end())
+            rank = it->second;
+
+        ++rank; // Next rank
+
+        // if we are already at max rank, there is no next rank
+        if (rank > 9)
+            rank = 9;
+
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
-        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        if(rank < 0 || rank > 9)
+            return "";
 
-        if (!ranks.empty())
-        {
-            std::map<std::string, int>::const_iterator it = ranks.begin();
-
-            if(it->second < -1 || it->second > 9)
-                return "";
-
-            if(it->second <= 8) // If player is at max rank, there is no next rank
-                return faction->mRanks[it->second + 1];
-            else
-                return faction->mRanks[it->second];
-        }
-        else
-            return faction->mRanks[0];
+        return faction->mRanks[rank];
     }
 
     int InterpreterContext::getPCBounty() const
