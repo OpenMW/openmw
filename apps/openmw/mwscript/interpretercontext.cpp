@@ -307,6 +307,11 @@ namespace MWScript
         if (it != ranks.end())
             rank = it->second;
 
+        // If you are not in the faction, PcRank returns the first rank, for whatever reason.
+        // This is used by the dialogue when joining the Thieves Guild in Balmora.
+        if (rank == -1)
+            rank = 0;
+
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
