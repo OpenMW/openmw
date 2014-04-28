@@ -268,19 +268,20 @@ namespace MWWorld
     int World::countSavedGameRecords() const
     {
         return
-            mStore.countSavedGameRecords()
+            mCells.countSavedGameRecords()
+            +mStore.countSavedGameRecords()
             +mGlobalVariables.countSavedGameRecords()
             +1 // player record
-            +mCells.countSavedGameRecords();
+            +1; // weather record
     }
 
-    void World::write (ESM::ESMWriter& writer) const
+    void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        mStore.write (writer);
-        mGlobalVariables.write (writer);
-        mCells.write (writer);
-        mPlayer->write (writer);
-        mWeatherManager->write (writer);
+        mCells.write (writer, progress);
+        mStore.write (writer, progress);
+        mGlobalVariables.write (writer, progress);
+        mPlayer->write (writer, progress);
+        mWeatherManager->write (writer, progress);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,

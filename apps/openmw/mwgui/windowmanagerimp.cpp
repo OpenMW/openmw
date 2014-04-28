@@ -625,9 +625,9 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
     }
 
-    void WindowManager::setDrowningTimeLeft (float time)
+    void WindowManager::setDrowningTimeLeft (float time, float maxTime)
     {
-        mHud->setDrowningTimeLeft(time);
+        mHud->setDrowningTimeLeft(time, maxTime);
     }
 
     void WindowManager::setPlayerClass (const ESM::Class &class_)
@@ -1407,9 +1407,9 @@ namespace MWGui
         mMap->clear();
     }
 
-    void WindowManager::write(ESM::ESMWriter &writer)
+    void WindowManager::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
-        mMap->write(writer);
+        mMap->write(writer, progress);
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)

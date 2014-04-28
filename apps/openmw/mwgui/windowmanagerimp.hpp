@@ -166,8 +166,9 @@ namespace MWGui
     virtual void setValue (const std::string& id, int value);
 
     /// Set time left for the player to start drowning (update the drowning bar)
-    /// @param time value from [0,20]
-    virtual void setDrowningTimeLeft (float time);
+    /// @param time time left to start drowning
+    /// @param maxTime how long we can be underwater (in total) until drowning starts
+    virtual void setDrowningTimeLeft (float time, float maxTime);
 
     virtual void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
     virtual void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
@@ -290,7 +291,7 @@ namespace MWGui
     /// Clear all savegame-specific data
     virtual void clear();
 
-    virtual void write (ESM::ESMWriter& writer);
+    virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress);
     virtual void readRecord (ESM::ESMReader& reader, int32_t type);
 
   private:

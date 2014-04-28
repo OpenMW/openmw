@@ -194,21 +194,11 @@ namespace MWMechanics
                     +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
                     +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
                 float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified();
-                float disp = 100; //creatures don't have disposition, so set it to 100 by default
-                if(ptr.getTypeName() == typeid(ESM::NPC).name())
-                {
-                    disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
-                }
 
                 if(    (fight == 100 )
                     || (fight >= 95 && d <= 3000)
                     || (fight >= 90 && d <= 2000)
                     || (fight >= 80 && d <= 1000)
-                    || (fight >= 80 && disp <= 40)
-                    || (fight >= 70 && disp <= 35 && d <= 1000)
-                    || (fight >= 60 && disp <= 30 && d <= 1000)
-                    || (fight >= 50 && disp == 0)
-                    || (fight >= 40 && disp <= 10 && d <= 500)
                     )
                 {
                     bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,player)
@@ -1039,8 +1029,7 @@ namespace MWMechanics
         {
             const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
             CreatureStats &stats = cls.getCreatureStats(iter->first);
-
-            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow && !stats.isDead())
+            if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
             {
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
                 if(package->getFollowedActor() == actor.getCellRef().mRefID)
@@ -1061,8 +1050,7 @@ namespace MWMechanics
         {
             const MWWorld::Class &cls = MWWorld::Class::get(*iter);
             CreatureStats &stats = cls.getCreatureStats(*iter);
-
-            if(stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat && !stats.isDead())
+            if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
             {
                 MWMechanics::AiCombat* package = static_cast<MWMechanics::AiCombat*>(stats.getAiSequence().getActivePackage());
                 if(package->getTargetId() == actor.getCellRef().mRefID)
