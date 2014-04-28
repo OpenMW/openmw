@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 300 130" name="_Main">
         <Property key="Visible" value="false"/>
 
-        <Widget type="EditBox" skin="MW_TextEditClient" position="8 8 274 400" name="Message" align="Left Top Stretch">
+        <Widget type="EditBox" skin="MW_TextEditClient" position="16 8 268 130" name="Message" align="Center Top">
             <Property key="FontName" value="Default"/>
             <Property key="TextAlign" value="Top HCenter"/>
             <Property key="TextColour" value="0.75 0.6 0.35"/>
@@ -13,13 +13,25 @@
             <Property key="MultiLine" value="true"/>
         </Widget>
 
-        <Widget type="Widget" position="0 89 274 24" align="Center Bottom">
-            <Widget type="Button" skin="MW_Button" name="OkButton" position="77 0 60 24">
+         <Widget type="HBox" position="0 89 138 24" align="Left Bottom">
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
                 <Property key="Caption" value="#{sYes}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Button" name="CancelButton" position="147 0 60 24">
+        </Widget>
+
+        <Widget type="HBox" position="146 89 138 24" align="Left Bottom">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
                 <Property key="Caption" value="#{sNo}"/>
             </Widget>
+
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
         </Widget>
+
     </Widget>
 </MyGUI>
