@@ -196,26 +196,35 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.addMaster (*iter, 0); // not using the size information anyway -> use value of 0
 
     writer.setFormat (ESM::Header::CurrentFormat);
-    writer.setRecordCount (
-        1 // saved game header
-        +MWBase::Environment::get().getJournal()->countSavedGameRecords()
-        +MWBase::Environment::get().getWorld()->countSavedGameRecords()
-        +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
-        +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
-        +1 // global map
-        );
+    int recordCount =         1 // saved game header
+            +MWBase::Environment::get().getJournal()->countSavedGameRecords()
+            +MWBase::Environment::get().getWorld()->countSavedGameRecords()
+            +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
+            +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
+           +1; // global map
+    writer.setRecordCount (recordCount);
 
     writer.save (stream);
+
+    Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+    listener.setProgressRange(recordCount);
+    listener.setLabel("#{sNotifyMessage4}");
+
+    Loading::ScopedLoad load(&listener);
 
     writer.startRecord (ESM::REC_SAVE);
     slot->mProfile.save (writer);
     writer.endRecord (ESM::REC_SAVE);
+    listener.increaseProgress();
 
-    MWBase::Environment::get().getJournal()->write (writer);
-    MWBase::Environment::get().getDialogueManager()->write (writer);
-    MWBase::Environment::get().getWorld()->write (writer);
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer);
-    MWBase::Environment::get().getWindowManager()->write(writer);
+    MWBase::Environment::get().getJournal()->write (writer, listener);
+    MWBase::Environment::get().getDialogueManager()->write (writer, listener);
+    MWBase::Environment::get().getWorld()->write (writer, listener);
+    MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer, listener);
+    MWBase::Environment::get().getWindowManager()->write(writer, listener);
+
+    // Ensure we have written the number of records that was estimated
+    assert (writer.getRecordCount() == recordCount+1); // 1 extra for TES3 record
 
     writer.close();
 
@@ -260,6 +269,15 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         reader.open (slot->mPath.string());
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
+
+        Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+
+        // FIXME: +1 is actually not needed, but older savegames had an off-by-one error with the record count
+        // So we leave this in for now so that these old savegames still work
+        listener.setProgressRange(reader.getRecordCount()+1);
+        listener.setLabel("#{sLoadingMessage14}");
+
+        Loading::ScopedLoad load(&listener);
 
         while (reader.hasMoreRecs())
         {
@@ -318,6 +336,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                     /// \todo log error
                     reader.skipRecord();
             }
+            listener.increaseProgress();
         }
 
         mCharacterManager.setCurrentCharacter(character);

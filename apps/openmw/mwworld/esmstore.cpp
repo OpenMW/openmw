@@ -153,17 +153,17 @@ void ESMStore::setUp()
             +mWeapons.getDynamicSize();
     }
 
-    void ESMStore::write (ESM::ESMWriter& writer) const
+    void ESMStore::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        mPotions.write (writer);
-        mArmors.write (writer);
-        mBooks.write (writer);
-        mClasses.write (writer);
-        mClothes.write (writer);
-        mEnchants.write (writer);
-        mSpells.write (writer);
-        mWeapons.write (writer);
-        mNpcs.write (writer);
+        mPotions.write (writer, progress);
+        mArmors.write (writer, progress);
+        mBooks.write (writer, progress);
+        mClasses.write (writer, progress);
+        mClothes.write (writer, progress);
+        mEnchants.write (writer, progress);
+        mSpells.write (writer, progress);
+        mWeapons.write (writer, progress);
+        mNpcs.write (writer, progress);
     }
 
     bool ESMStore::readRecord (ESM::ESMReader& reader, int32_t type)

@@ -215,7 +215,7 @@ namespace MWWorld
         mTeleported = false;
     }
 
-    void Player::write (ESM::ESMWriter& writer) const
+    void Player::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         ESM::Player player;
 
@@ -245,6 +245,8 @@ namespace MWWorld
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
         writer.endRecord (ESM::REC_PLAY);
+
+        progress.increaseProgress();
     }
 
     bool Player::readRecord (ESM::ESMReader& reader, int32_t type)

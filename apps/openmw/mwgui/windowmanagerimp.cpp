@@ -1407,9 +1407,9 @@ namespace MWGui
         mMap->clear();
     }
 
-    void WindowManager::write(ESM::ESMWriter &writer)
+    void WindowManager::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
-        mMap->write(writer);
+        mMap->write(writer, progress);
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
