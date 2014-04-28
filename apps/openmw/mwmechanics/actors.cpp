@@ -194,11 +194,6 @@ namespace MWMechanics
                     +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
                     +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
                 float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified();
-                float disp = 100; //creatures don't have disposition, so set it to 100 by default
-                if(ptr.getTypeName() == typeid(ESM::NPC).name())
-                {
-                    disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
-                }
 
                 if(    (fight == 100 )
                     || (fight >= 95 && d <= 3000)
