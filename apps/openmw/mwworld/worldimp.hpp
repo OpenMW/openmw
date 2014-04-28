@@ -194,7 +194,7 @@ namespace MWWorld
 
             virtual int countSavedGameRecords() const;
 
-            virtual void write (ESM::ESMWriter& writer) const;
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap);

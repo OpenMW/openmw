@@ -609,7 +609,7 @@ namespace MWDialogue
         return 1; // known topics
     }
 
-    void DialogueManager::write (ESM::ESMWriter& writer) const
+    void DialogueManager::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         ESM::DialogueState state;
 
@@ -621,6 +621,7 @@ namespace MWDialogue
         writer.startRecord (ESM::REC_DIAS);
         state.save (writer);
         writer.endRecord (ESM::REC_DIAS);
+        progress.increaseProgress();
     }
 
     void DialogueManager::readRecord (ESM::ESMReader& reader, int32_t type)

@@ -108,7 +108,7 @@ namespace MWGui
         /// Clear all savegame-specific data
         void clear();
 
-        void write (ESM::ESMWriter& writer);
+        void write (ESM::ESMWriter& writer, Loading::Listener& progress);
         void readRecord (ESM::ESMReader& reader, int32_t type);
 
     private:
