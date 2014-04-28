@@ -378,10 +378,14 @@ namespace MWScript
 
     float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
     {
-        // TODO handle exterior cells (when ref and ref2 are located in different cells)
-        const MWWorld::Ptr ref2 = getReference (id, false);
+        const MWWorld::Ptr ref2 = getReference (id, false, false);
+        // If either actor is in a non-active cell, return a large value (just like vanilla)
+        if (ref2.isEmpty())
+            return std::numeric_limits<float>().max();
 
-        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr (name, true);
+        const MWWorld::Ptr ref = getReference (name, false, false);
+        if (ref.isEmpty())
+            return std::numeric_limits<float>().max();
 
         double diff[3];
 
