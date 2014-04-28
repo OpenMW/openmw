@@ -28,7 +28,7 @@ namespace MWGui
     {
         getWidget(mVersionText, "VersionText");
         std::stringstream sstream;
-        sstream << "OpenMW version: " << OPENMW_VERSION;
+        sstream << "OpenMW Version: " << OPENMW_VERSION;
 
         // adding info about git hash if available
         std::string rev = OPENMW_VERSION_COMMITHASH;
@@ -36,7 +36,7 @@ namespace MWGui
         if (!rev.empty() && !tag.empty())
         {
                 rev = rev.substr(0,10);
-                sstream << "\nrevision: " <<  rev;
+                sstream << "\nRevision: " <<  rev;
         }
         
         std::string output = sstream.str();
