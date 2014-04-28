@@ -374,6 +374,11 @@ void MWState::StateManager::quickLoad()
         }
 }
 
+void MWState::StateManager::deleteGame(const MWState::Character *character, const MWState::Slot *slot)
+{
+    mCharacterManager.deleteSlot(character, slot);
+}
+
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
     return mCharacterManager.getCurrentCharacter (create);
