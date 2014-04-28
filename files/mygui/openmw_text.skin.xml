@@ -152,7 +152,7 @@
 
     <Skin name="MW_ChargeBar_Blue" size="204 18">
         <Child type="ProgressBar" skin="MW_Progress_Blue" offset="0 0 204 18" align="Right Top Stretch" name="Bar"/>
-        <Child type="TextBox" skin="SandTextC" offset="0 0 204 18" align="Right Top Stretch" name="BarText"/>
+        <Child type="TextBox" skin="SandTextC" offset="0 2 204 18" align="Right Top Stretch" name="BarText"/>
     </Skin>
 
     <Skin name="MW_DynamicStat_Red" size="204 18">

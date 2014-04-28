@@ -10,7 +10,7 @@ namespace MWGui
     {
     }
 
-    void CompanionItemModel::copyItem (const ItemStack& item, size_t count)
+    void CompanionItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner=false)
     {
         if (mActor.getClass().isNpc())
         {
@@ -18,7 +18,7 @@ namespace MWGui
             stats.modifyProfit(MWWorld::Class::get(item.mBase).getValue(item.mBase) * count);
         }
 
-        InventoryItemModel::copyItem(item, count);
+        InventoryItemModel::copyItem(item, count, setNewOwner);
     }
 
     void CompanionItemModel::removeItem (const ItemStack& item, size_t count)

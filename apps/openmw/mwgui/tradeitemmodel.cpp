@@ -120,14 +120,11 @@ namespace MWGui
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            // reset owner before copying
+            // reset owner while copying, but only for items bought by the player
+            bool setNewOwner = (mMerchant.isEmpty());
             const ItemStack& item = sourceModel->getItem(i);
-            std::string owner = item.mBase.getCellRef().mOwner;
-            if (mMerchant.isEmpty()) // only for items bought by player
-                item.mBase.getCellRef().mOwner = "";
             // copy the borrowed items to our model
-            copyItem(item, it->mCount);
-            item.mBase.getCellRef().mOwner = owner;
+            copyItem(item, it->mCount, setNewOwner);
             // then remove them from the source model
             sourceModel->removeItem(item, it->mCount);
         }
