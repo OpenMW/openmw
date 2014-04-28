@@ -595,7 +595,7 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mGlobalMapOverlay->getChildAt(0));
     }
 
-    void MapWindow::write(ESM::ESMWriter &writer)
+    void MapWindow::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
         ESM::GlobalMap map;
         mGlobalMapRender->write(map);
@@ -605,6 +605,7 @@ namespace MWGui
         writer.startRecord(ESM::REC_GMAP);
         map.save(writer);
         writer.endRecord(ESM::REC_GMAP);
+        progress.increaseProgress();
     }
 
     void MapWindow::readRecord(ESM::ESMReader &reader, int32_t type)

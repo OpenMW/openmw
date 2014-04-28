@@ -28,7 +28,7 @@ namespace ESM
             int type;           // 0=esp, 1=esm, 32=ess (unused)
             NAME32 author;      // Author's name
             NAME256 desc;       // File description
-            int records;        // Number of records? Not used.
+            int records;        // Number of records
         };
 
         // Defines another files (esm or esp) that this file depends upon.
