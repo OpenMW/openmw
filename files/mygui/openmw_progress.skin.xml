@@ -45,6 +45,7 @@
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Top HCenter"/>
         <Property key="TextColour" value="0.75 0.6 0.35"/>
+        <Property key="TextShadow" value="true"/>
 
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
     </Skin>
