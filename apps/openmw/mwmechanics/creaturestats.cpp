@@ -17,7 +17,7 @@ namespace MWMechanics
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mHitRecovery(false), mBlock(false),
+          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
     {
         for (int i=0; i<4; ++i)
@@ -387,11 +387,30 @@ namespace MWMechanics
     void CreatureStats::setKnockedDown(bool value)
     {
         mKnockdown = value;
+        if(!value) //Resets the "OverOneFrame" flag
+            setKnockedDownOverOneFrame(false);
     }
 
     bool CreatureStats::getKnockedDown() const
     {
         return mKnockdown;
+    }
+
+    void CreatureStats::setKnockedDownOneFrame(bool value)
+    {
+        mKnockdownOneFrame = value;
+    }
+
+    bool CreatureStats::getKnockedDownOneFrame() const
+    {
+        return mKnockdownOneFrame;
+    }
+
+    void CreatureStats::setKnockedDownOverOneFrame(bool value) {
+        mKnockdownOverOneFrame = value;
+    }
+    bool CreatureStats::getKnockedDownOverOneFrame() const {
+        return mKnockdownOverOneFrame;
     }
 
     void CreatureStats::setHitRecovery(bool value)
@@ -479,7 +498,7 @@ namespace MWMechanics
     }
 
     // Relates to NPC gold reset delay
-    void CreatureStats::setTradeTime(MWWorld::TimeStamp tradeTime) 
+    void CreatureStats::setTradeTime(MWWorld::TimeStamp tradeTime)
     {
         mTradeTime = tradeTime;
     }
@@ -489,11 +508,11 @@ namespace MWMechanics
         return mTradeTime;
     }
 
-    void CreatureStats::setGoldPool(int pool) 
+    void CreatureStats::setGoldPool(int pool)
     {
         mGoldPool = pool;
     }
-    int CreatureStats::getGoldPool() const 
+    int CreatureStats::getGoldPool() const
     {
         return mGoldPool;
     }
