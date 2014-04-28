@@ -90,7 +90,7 @@ namespace MWWorld
         bool wasTeleported() const;
         void setTeleported(bool teleported);
 
-        ///Checks all actors to see if anyone has an aipackage against you
+        ///Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();
 
         void clear();
