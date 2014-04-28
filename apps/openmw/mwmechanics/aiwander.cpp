@@ -1,6 +1,7 @@
 #include "aiwander.hpp"
 
 #include <OgreVector3.h>
+#include <OgreSceneNode.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -211,7 +212,7 @@ namespace MWMechanics
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(12)))
+            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(5)))
                 mRotate = false;
         }
 
@@ -333,18 +334,7 @@ namespace MWMechanics
         if(mChooseAction)
         {
             mPlayedIdle = 0;
-            unsigned short idleRoll = 0;
-
-            for(unsigned int counter = 0; counter < mIdle.size(); counter++)
-            {
-                unsigned short idleChance = mIdleChanceMultiplier * mIdle[counter];
-                unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mIdleChanceMultiplier));
-                if(randSelect < idleChance && randSelect > idleRoll)
-                {
-                    mPlayedIdle = counter+2;
-                    idleRoll = randSelect;
-                }
-            }
+            getRandomIdle(); // NOTE: sets mPlayedIdle with a random selection
 
             if(!mPlayedIdle && mDistance)
             {
@@ -395,6 +385,8 @@ namespace MWMechanics
                     mMoveNow = false;
                     mWalking = false;
                     mObstacleCheck.clear();
+                    mIdleNow = true;
+                    getRandomIdle();
                 }
 
                 if(!mRotate)
@@ -402,11 +394,11 @@ namespace MWMechanics
                     Ogre::Vector3 dir = playerPos - actorPos;
                     float length = dir.length();
 
-                    // FIXME: horrible hack
                     float faceAngle = Ogre::Radian(Ogre::Math::ACos(dir.y / length) *
                             ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees();
+                    float actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll().valueDegrees();
                     // an attempt at reducing the turning animation glitch
-                    if(abs(faceAngle) > 10)
+                    if(abs(abs(faceAngle) - abs(actorAngle)) >= 5) // TODO: is there a better way?
                     {
                         mTargetAngle = faceAngle;
                         mRotate = true;
@@ -432,7 +424,8 @@ namespace MWMechanics
             }
 
             // Check if idle animation finished
-            if(!checkIdle(actor, mPlayedIdle))
+            // FIXME: don't stay forever
+            if(!checkIdle(actor, mPlayedIdle) && playerDistSqr > helloDistance*helloDistance)
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;
@@ -585,6 +578,22 @@ namespace MWMechanics
             return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle9");
         else
             return false;
+    }
+
+    void AiWander::getRandomIdle()
+    {
+        unsigned short idleRoll = 0;
+
+        for(unsigned int counter = 0; counter < mIdle.size(); counter++)
+        {
+            unsigned short idleChance = mIdleChanceMultiplier * mIdle[counter];
+            unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mIdleChanceMultiplier));
+            if(randSelect < idleChance && randSelect > idleRoll)
+            {
+                mPlayedIdle = counter+2;
+                idleRoll = randSelect;
+            }
+        }
     }
 }
 
