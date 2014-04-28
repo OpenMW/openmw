@@ -34,13 +34,13 @@ namespace
 
     float getZAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
     {
-        float len = (dirLen >= 0.0f)? dirLen : dir.length();
+        float len = (dirLen > 0.0f)? dirLen : dir.length();
         return Ogre::Radian( Ogre::Math::ACos(dir.y / len) * sgn(Ogre::Math::ASin(dir.x / len)) ).valueDegrees();
     }
 
     float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
     {
-        float len = (dirLen >= 0.0f)? dirLen : dir.length();
+        float len = (dirLen > 0.0f)? dirLen : dir.length();
         return Ogre::Radian(-Ogre::Math::ASin(dir.z / len)).valueDegrees();
     }
 
@@ -323,7 +323,6 @@ namespace MWMechanics
         Ogre::Vector3 vActorPos(pos.pos); 
         Ogre::Vector3 vTargetPos(mTarget.getRefData().getPosition().pos);
         Ogre::Vector3 vDirToTarget = vTargetPos - vActorPos;
-        float distToTarget = vDirToTarget.length();
 
         bool isStuck = false;
         float speed = 0.0f;
@@ -335,17 +334,19 @@ namespace MWMechanics
         // check if actor can move along z-axis
         bool canMoveByZ = (actorCls.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
             || MWBase::Environment::get().getWorld()->isFlying(actor);
-        if(canMoveByZ)
-        {
-            // determine vertical angle to target
-            mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
-        }
+
+        // determine vertical angle to target
+        // if actor can move along z-axis it will control movement dir
+        // if can't - it will control correct aiming
+        mMovement.mRotation[0] = getXAngleToDir(vDirToTarget);
+
+        vDirToTarget.z = 0;
+        float distToTarget = vDirToTarget.length();
 
         // (within strike dist) || (not quite strike dist while following)
         if(distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck) )
         {
             //Melee and Close-up combat
-            vDirToTarget.z = 0;
             mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
 
             // (not quite strike dist while following)
