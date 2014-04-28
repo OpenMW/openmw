@@ -156,8 +156,9 @@ namespace MWBase
             virtual void setValue (const std::string& id, int value) = 0;
 
             /// Set time left for the player to start drowning (update the drowning bar)
-            /// @param time value from [0,20]
-            virtual void setDrowningTimeLeft (float time) =0;
+            /// @param time time left to start drowning
+            /// @param maxTime how long we can be underwater (in total) until drowning starts
+            virtual void setDrowningTimeLeft (float time, float maxTime) = 0;
 
             virtual void setPlayerClass (const ESM::Class &class_) = 0;
             ///< set current class of player
