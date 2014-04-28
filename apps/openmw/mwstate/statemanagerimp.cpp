@@ -224,7 +224,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     MWBase::Environment::get().getWindowManager()->write(writer, listener);
 
     // Ensure we have written the number of records that was estimated
-    assert (writer.getRecordCount() == recordCount+1); // 1 extra for TES3 record
+    if (writer.getRecordCount() != recordCount+1) // 1 extra for TES3 record
+        std::cerr << "Warning: number of written savegame records does not match. Estimated: " << recordCount+1 << ", written: " << writer.getRecordCount() << std::endl;
 
     writer.close();
 
@@ -272,9 +273,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 
-        // FIXME: +1 is actually not needed, but older savegames had an off-by-one error with the record count
-        // So we leave this in for now so that these old savegames still work
-        listener.setProgressRange(reader.getRecordCount()+1);
+        listener.setProgressRange(reader.getRecordCount());
         listener.setLabel("#{sLoadingMessage14}");
 
         Loading::ScopedLoad load(&listener);
