@@ -27,8 +27,8 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
         this, SLOT (documentLoaded (Document *)));
     connect (&mLoader, SIGNAL (documentNotLoaded (Document *, const std::string&)),
         this, SLOT (documentNotLoaded (Document *, const std::string&)));
-    connect (this, SIGNAL (loadRequest (Document *, bool)),
-        &mLoader, SLOT (loadDocument (Document *, bool)));
+    connect (this, SIGNAL (loadRequest (CSMDoc::Document *, bool)),
+        &mLoader, SLOT (loadDocument (CSMDoc::Document *, bool)));
 }
 
 CSMDoc::DocumentManager::~DocumentManager()
@@ -75,10 +75,11 @@ void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& par
 void CSMDoc::DocumentManager::documentLoaded (Document *document)
 {
     emit documentAdded (document);
+    emit loadingStopped (document, true, "");
 }
 
 void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::string& error)
 {
+//    emit loadingStopped (document, false, error);
     removeDocument (document);
-    /// \todo report error
 }

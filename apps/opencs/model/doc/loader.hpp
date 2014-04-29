@@ -31,7 +31,7 @@ namespace CSMDoc
 
         public slots:
 
-            void loadDocument (Document *document, bool new_);
+            void loadDocument (CSMDoc::Document *document, bool new_);
             ///< The ownership of \a document is not transferred.
             /// \param new_ Do not load the last content file in the files list specified in
             /// \a document and instead create it in an appropriate way.

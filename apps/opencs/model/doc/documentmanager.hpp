@@ -65,9 +65,12 @@ namespace CSMDoc
 
             void documentAdded (CSMDoc::Document *document);
 
-            void loadRequest (Document *document, bool _new);
+            void loadRequest (CSMDoc::Document *document, bool _new);
 
             void lastDocumentDeleted();
+
+            void loadingStopped (CSMDoc::Document *document, bool completed,
+                const std::string& error);
     };
 }
 

@@ -46,7 +46,7 @@ void CSMDoc::Loader::load()
     }
 }
 
-void CSMDoc::Loader::loadDocument (Document *document, bool new_)
+void CSMDoc::Loader::loadDocument (CSMDoc::Document *document, bool new_)
 {
     mDocuments.push_back (std::make_pair (document, new_));
 }
