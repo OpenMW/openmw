@@ -1,8 +1,9 @@
-#ifndef CSV_WORLD_REGIONMAP_H
-#define CSV_WORLD_REGIONMAP_H
+#ifndef CSV_WORLD_DRAGRECORDTABLE_H
+#define CSV_WORLD_DRAGRECORDTABLE_H
 
 #include <QTableView>
 
+class QWidget;
 class QAction;
 
 namespace CSMDoc
@@ -23,7 +24,7 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
 
         public:
-            DragRecordTable(CSMDoc::Document& document);
+            DragRecordTable(CSMDoc::Document& document, QWidget* parent = NULL);
 
             virtual std::vector<CSMWorld::UniversalId> getDragedRecords() const = 0;
 
@@ -33,4 +34,4 @@ namespace CSVWorld
 }
 
 #endif
- 
+

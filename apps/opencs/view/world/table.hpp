@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 
-#include <QTableView>
 #include <QtGui/qevent.h>
 
 #include "../../model/filter/node.hpp"
@@ -25,7 +24,6 @@ namespace CSMWorld
     class UniversalId;
     class IdTableProxyModel;
     class IdTable;
-    class TableMimeData;
 }
 
 namespace CSVWorld

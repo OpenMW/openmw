@@ -181,7 +181,7 @@ void CSVWorld::RegionMap::setRegion (const std::string& regionId)
 
 CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     CSMDoc::Document& document, QWidget *parent)
-: QTableView (parent), mEditLock (false), mDocument (document)
+: mEditLock (false), DragRecordTable(document, parent)
 {
     verticalHeader()->hide();
     horizontalHeader()->hide();
@@ -348,4 +348,19 @@ void CSVWorld::RegionMap::viewInTable()
 
 void CSVWorld::RegionMap::mouseMoveEvent (QMouseEvent* event)
 {
+    startDrag(*this);
+}
+
+std::vector< CSMWorld::UniversalId > CSVWorld::RegionMap::getDragedRecords() const
+{
+    QModelIndexList selected = getSelectedCells();
+    std::vector<CSMWorld::UniversalId> ids;
+    foreach (QModelIndex it, selected)
+    {
+        ids.push_back(
+            CSMWorld::UniversalId
+                (CSMWorld::UniversalId::Type_Cell,
+                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData()));
+    }
+    return ids;
 }
