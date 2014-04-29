@@ -510,6 +510,8 @@ namespace MWWorld
             virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc);
             ///< get Line of Sight (morrowind stupid implementation)
 
+            virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist);
+
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
             virtual int canRest();

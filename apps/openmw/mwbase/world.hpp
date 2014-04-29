@@ -407,6 +407,8 @@ namespace MWBase
             virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
+            virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
+
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
             virtual int canRest() = 0;

@@ -1010,6 +1010,7 @@ void CharacterController::update(float duration)
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
+
         mMovementSpeed = cls.getSpeed(mPtr);
 
         vec.x *= mMovementSpeed;
@@ -1175,7 +1176,7 @@ void CharacterController::update(float duration)
         }
         else
         {
-           if(!(vec.z > 0.0f))
+            if(!(vec.z > 0.0f))
                 mJumpState = JumpState_None;
             vec.z = 0.0f;
 
