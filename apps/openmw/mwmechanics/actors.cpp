@@ -206,7 +206,7 @@ namespace MWMechanics
 
                     if (LOS)
                     {
-                        creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+                        creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()), ptr);
                         creatureStats.setHostile(true);
                     }
                 }
@@ -537,7 +537,7 @@ namespace MWMechanics
 
                         // TODO: Add AI to follow player and fight for him
                         AiFollow package(ptr.getRefData().getHandle());
-                        MWWorld::Class::get (ref.getPtr()).getCreatureStats (ref.getPtr()).getAiSequence().stack(package);
+                        MWWorld::Class::get (ref.getPtr()).getCreatureStats (ref.getPtr()).getAiSequence().stack(package, ptr);
                         // TODO: VFX_SummonStart, VFX_SummonEnd
                         creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
                             MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos).getRefData().getHandle()));
@@ -732,7 +732,7 @@ namespace MWMechanics
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(player));
+                    creatureStats.getAiSequence().stack(AiCombat(player), ptr);
                     creatureStats.setHostile(true);
                     npcStats.setCrimeId( MWBase::Environment::get().getWorld()->getPlayer().getCrimeId() );
                 }
@@ -761,9 +761,9 @@ namespace MWMechanics
                 else if (!creatureStats.isHostile())
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)));
+                        creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)), ptr);
                     else
-                        creatureStats.getAiSequence().stack(AiCombat(player));
+                        creatureStats.getAiSequence().stack(AiCombat(player), ptr);
                         creatureStats.setHostile(true);
                 }
             }
@@ -771,7 +771,7 @@ namespace MWMechanics
             // if I didn't report a crime was I attacked?
             else if (creatureStats.getAttacked() && !creatureStats.isHostile())
             {
-                creatureStats.getAiSequence().stack(AiCombat(player));
+                creatureStats.getAiSequence().stack(AiCombat(player), ptr);
                 creatureStats.setHostile(true);
             }
         }

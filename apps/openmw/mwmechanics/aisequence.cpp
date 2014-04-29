@@ -116,8 +116,18 @@ void MWMechanics::AiSequence::clear()
     mPackages.clear();
 }
 
-void MWMechanics::AiSequence::stack (const AiPackage& package)
+void MWMechanics::AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
+    if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPersue)
+    {
+        // Notify AiWander of our current position so we can return to it after combat finished
+        for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
+        {
+            if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
+                static_cast<AiWander*>(*iter)->setReturnPosition(Ogre::Vector3(actor.getRefData().getPosition().pos));
+        }
+    }
+
     for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); it++)
     {
         if(mPackages.front()->getPriority() <= package.getPriority())
