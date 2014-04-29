@@ -248,6 +248,8 @@ namespace MWMechanics
         bool matchesActorId (int id) const;
         ///< Check if \a id matches the actor ID of *this (if the actor does not have an ID
         /// assigned this function will return false).
+
+        static void cleanup();
     };
 }
 

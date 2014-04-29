@@ -532,4 +532,9 @@ namespace MWMechanics
     {
         return mActorId!=-1 && id==mActorId;
     }
+
+    void CreatureStats::cleanup()
+    {
+        sActorId = 0;
+    }
 }

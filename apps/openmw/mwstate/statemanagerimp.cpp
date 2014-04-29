@@ -28,6 +28,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -46,6 +47,8 @@ void MWState::StateManager::cleanup (bool force)
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
         mTimePlayed = 0;
+
+        MWMechanics::CreatureStats::cleanup();
     }
 }
 
