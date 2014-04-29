@@ -35,7 +35,6 @@ namespace CSVWorld
             QAction *mUnsetRegionAction;
             QAction *mViewAction;
             QAction *mViewInTableAction;
-            bool mEditLock;
             std::string mRegionId;
 
         private:
@@ -61,8 +60,6 @@ namespace CSVWorld
 
             RegionMap (const CSMWorld::UniversalId& universalId, CSMDoc::Document& document,
                 QWidget *parent = 0);
-
-            void setEditLock (bool locked);
 
             virtual std::vector<CSMWorld::UniversalId> getDragedRecords() const;
 

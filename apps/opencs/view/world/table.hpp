@@ -47,7 +47,6 @@ namespace CSVWorld
             QAction *mPreviewAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
-            bool mEditLock;
             int mRecordStatusDisplay;
 
         private:
@@ -73,7 +72,7 @@ namespace CSVWorld
             ///< \param createAndDelete Allow creation and deletion of records.
             /// \param sorting Allow changing order of rows in the view via column headers.
 
-            void setEditLock (bool locked);
+            virtual void setEditLock (bool locked);
 
             CSMWorld::UniversalId getUniversalId (int row) const;
 

@@ -22,11 +22,14 @@ namespace CSVWorld
     {
         protected:
             CSMDoc::Document& mDocument;
+            bool mEditLock;
 
         public:
             DragRecordTable(CSMDoc::Document& document, QWidget* parent = NULL);
 
             virtual std::vector<CSMWorld::UniversalId> getDragedRecords() const = 0;
+
+            virtual void setEditLock(bool locked);
 
         protected:
             void startDrag(const DragRecordTable& table);

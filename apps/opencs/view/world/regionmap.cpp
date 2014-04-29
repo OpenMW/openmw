@@ -181,7 +181,7 @@ void CSVWorld::RegionMap::setRegion (const std::string& regionId)
 
 CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     CSMDoc::Document& document, QWidget *parent)
-: mEditLock (false), DragRecordTable(document, parent)
+:  DragRecordTable(document, parent)
 {
     verticalHeader()->hide();
     horizontalHeader()->hide();
@@ -224,11 +224,6 @@ CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     mViewInTableAction = new QAction (tr ("View Cells in Table"), this);
     connect (mViewInTableAction, SIGNAL (triggered()), this, SLOT (viewInTable()));
     addAction (mViewInTableAction);
-}
-
-void CSVWorld::RegionMap::setEditLock (bool locked)
-{
-    mEditLock = locked;
 }
 
 void CSVWorld::RegionMap::selectAll()

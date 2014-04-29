@@ -188,7 +188,7 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
-: mCreateAction (0), mCloneAction(0), mEditLock (false), mRecordStatusDisplay (0),
+: mCreateAction (0), mCloneAction(0), mRecordStatusDisplay (0),
   DragRecordTable(document)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*mDocument.getData().getTableModel (id));
@@ -282,7 +282,7 @@ void CSVWorld::Table::setEditLock (bool locked)
     for (std::vector<CommandDelegate *>::iterator iter (mDelegates.begin()); iter!=mDelegates.end(); ++iter)
         (*iter)->setEditLock (locked);
 
-    mEditLock = locked;
+    DragRecordTable::setEditLock(locked);
 }
 
 CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
