@@ -62,7 +62,7 @@ namespace MWMechanics
             void clear();
             ///< Remove all packages.
 
-            void stack (const AiPackage& package);
+            void stack (const AiPackage& package, const MWWorld::Ptr& actor);
             ///< Add \a package to the front of the sequence (suspends current package)
             
             void queue (const AiPackage& package);
