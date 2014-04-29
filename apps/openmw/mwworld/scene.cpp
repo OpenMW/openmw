@@ -497,6 +497,16 @@ namespace MWWorld
         return false;
     }
 
+    Ptr Scene::searchPtrViaHandle (const std::string& handle)
+    {
+        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
+            iter!=mActiveCells.end(); ++iter)
+            if (Ptr ptr = (*iter)->searchViaHandle (handle))
+                return ptr;
+
+        return Ptr();
+    }
+
     Ptr Scene::searchPtrViaActorId (int actorId)
     {
         for (CellStoreCollection::const_iterator iter (mActiveCells.begin());

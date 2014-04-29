@@ -103,6 +103,8 @@ namespace MWWorld
 
             bool isCellActive(const CellStore &cell);
 
+            Ptr searchPtrViaHandle (const std::string& handle);
+
             Ptr searchPtrViaActorId (int actorId);
     };
 }

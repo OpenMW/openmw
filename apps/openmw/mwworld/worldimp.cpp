@@ -536,17 +536,8 @@ namespace MWWorld
     {
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
-        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-            iter!=mWorldScene->getActiveCells().end(); ++iter)
-        {
-            CellStore* cellstore = *iter;
-            Ptr ptr = cellstore->searchViaHandle (handle);
 
-            if (!ptr.isEmpty())
-                return ptr;
-        }
-
-        return MWWorld::Ptr();
+        return mWorldScene->searchPtrViaHandle (handle);
     }
 
     Ptr World::searchPtrViaActorId (int actorId)
