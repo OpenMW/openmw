@@ -11,7 +11,7 @@ mDocument(document)
     mObjectsFormats << QString::fromUtf8 (("tabledata/" + id.getTypeName()).c_str());
 }
 
-CSMWorld::TableMimeData::TableMimeData (std::vector< CSMWorld::UniversalId >& id, const CSMDoc::Document& document) :
+CSMWorld::TableMimeData::TableMimeData (const std::vector< CSMWorld::UniversalId >& id, const CSMDoc::Document& document) :
     mUniversalId (id), mDocument(document)
 {
     for (std::vector<UniversalId>::iterator it (mUniversalId.begin()); it != mUniversalId.end(); ++it)

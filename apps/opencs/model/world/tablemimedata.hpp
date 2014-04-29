@@ -33,7 +33,7 @@ namespace CSMWorld
         public:
             TableMimeData(UniversalId id, const CSMDoc::Document& document);
 
-            TableMimeData(std::vector<UniversalId>& id, const CSMDoc::Document& document);
+            TableMimeData(const std::vector<UniversalId>& id, const CSMDoc::Document& document);
 
             ~TableMimeData();
 

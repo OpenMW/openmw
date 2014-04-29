@@ -9,6 +9,7 @@
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
+#include "dragrecordtable.hpp"
 
 class QUndoStack;
 class QAction;
@@ -24,6 +25,7 @@ namespace CSMWorld
     class UniversalId;
     class IdTableProxyModel;
     class IdTable;
+    class TableMimeData;
 }
 
 namespace CSVWorld
@@ -31,7 +33,7 @@ namespace CSVWorld
     class CommandDelegate;
 
     ///< Table widget
-    class Table : public QTableView
+    class Table : public DragRecordTable
     {
             Q_OBJECT
 
@@ -49,7 +51,6 @@ namespace CSVWorld
             CSMWorld::IdTable *mModel;
             bool mEditLock;
             int mRecordStatusDisplay;
-            CSMDoc::Document& mDocument;
 
         private:
 
@@ -81,6 +82,8 @@ namespace CSVWorld
             void updateEditorSetting (const QString &settingName, const QString &settingValue);
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
+
+            virtual std::vector<CSMWorld::UniversalId> getDragedRecords() const;
 
         signals:
 

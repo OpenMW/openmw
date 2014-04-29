@@ -50,6 +50,8 @@ namespace CSVWorld
             void setRegion (const std::string& regionId);
             ///< Set region Id of selected cells.
 
+            void mouseMoveEvent(QMouseEvent *event);
+
         public:
 
             RegionMap (const CSMWorld::UniversalId& universalId, CSMDoc::Document& document,

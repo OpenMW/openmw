@@ -17,6 +17,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -343,4 +344,8 @@ void CSVWorld::RegionMap::viewInTable()
     hint << ")";
 
     emit editRequest (CSMWorld::UniversalId::Type_Cells, hint.str());
+}
+
+void CSVWorld::RegionMap::mouseMoveEvent (QMouseEvent* event)
+{
 }
