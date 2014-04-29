@@ -353,13 +353,21 @@ void CSVWorld::RegionMap::mouseMoveEvent (QMouseEvent* event)
 
 std::vector< CSMWorld::UniversalId > CSVWorld::RegionMap::getDragedRecords() const
 {
-    QModelIndexList selected = getSelectedCells();
+    QModelIndexList selected(getSelectedCells(true, false));
     std::vector<CSMWorld::UniversalId> ids;
     foreach (QModelIndex it, selected)
     {
         ids.push_back(
-            CSMWorld::UniversalId
-                (CSMWorld::UniversalId::Type_Cell,
+            CSMWorld::UniversalId(
+                CSMWorld::UniversalId::Type_Cell,
+                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData()));
+    }
+    selected = getSelectedCells(false, true);
+    foreach (QModelIndex it, selected)
+    {
+        ids.push_back(
+            CSMWorld::UniversalId(
+                CSMWorld::UniversalId::Type_Cell_Missing,
                 model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData()));
     }
     return ids;

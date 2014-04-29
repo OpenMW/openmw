@@ -33,7 +33,7 @@ std::string CSMWorld::TableMimeData::getIcon() const
 {
     if (mUniversalId.empty())
     {
-        throw ("TableMimeData holds no UniversalId");
+        return "";
     }
 
     std::string tmpIcon;
@@ -360,6 +360,8 @@ CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::Col
         case CSMWorld::ColumnBase::Display_Script:
             return CSMWorld::UniversalId::Type_Script;
 
+        case CSMWorld::ColumnBase::Display_Cell_Missing:
+            return CSMWorld::UniversalId::Type_Cell_Missing; //this one actually never happens, since there is no display_Cell_missing column anywhere.
 
         default:
             return CSMWorld::UniversalId::Type_None;
@@ -373,6 +375,10 @@ CSMWorld::ColumnBase::Display CSMWorld::TableMimeData::convertEnums (CSMWorld::U
     {
         case CSMWorld::UniversalId::Type_Race:
             return CSMWorld::ColumnBase::Display_Race;
+
+
+        case CSMWorld::UniversalId::Type_Cell_Missing:
+            return CSMWorld::ColumnBase::Display_Cell_Missing;
 
 
         case CSMWorld::UniversalId::Type_Skill:

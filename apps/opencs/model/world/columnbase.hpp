@@ -27,6 +27,7 @@ namespace CSMWorld
         enum Display
         {
             Display_None, //Do not use
+            Display_Cell_Missing, //Do not used, actually. It is here to simplify dragging non-existed cells handling
             Display_String,
             Display_LongString,
 
