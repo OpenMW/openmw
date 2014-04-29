@@ -390,5 +390,15 @@ op 0x200023e: GetPcInJail
 op 0x200023f: GetPcTraveling
 op 0x2000240: onKnockout
 op 0x2000241: onKnockoutExplicit
+----MWSE Functions----
+op 0x2050001: xHypot
+op 0x2050002: xDegRad
+op 0x2050003: xRadDeg
+op 0x2050004: xCos
+op 0x2050005: xSin
+op 0x2050006: xTan
+op 0x2050007: xArcCos
+op 0x2050008: xArcSin
+op 0x2050009: xArcTan
 
 opcodes 0x2000242-0x3ffffff unused
