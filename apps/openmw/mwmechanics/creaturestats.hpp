@@ -24,6 +24,7 @@ namespace MWMechanics
     ///
     class CreatureStats
     {
+        static int sActorId;
         DrawState_ mDrawState;
         AttributeValue mAttributes[8];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
@@ -60,6 +61,7 @@ namespace MWMechanics
         MWWorld::TimeStamp mTradeTime; // Relates to NPC gold reset delay
 
         int mGoldPool; // the pool of merchant gold not in inventory
+        int mActorId;
 
     protected:
         bool mIsWerewolf;
@@ -239,6 +241,13 @@ namespace MWMechanics
 
         void setGoldPool(int pool);
         int getGoldPool() const;
+
+        int getActorId();
+        ///< Will generate an actor ID, if the actor does not have one yet.
+
+        bool matchesActorId (int id) const;
+        ///< Check if \a id matches the actor ID of *this (if the actor does not have an ID
+        /// assigned this function will return false).
     };
 }
 

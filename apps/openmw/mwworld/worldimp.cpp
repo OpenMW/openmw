@@ -549,6 +549,11 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
+    Ptr World::searchPtrViaActorId (int actorId)
+    {
+        return mWorldScene->searchPtrViaActorId (actorId);
+    }
+
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
         if( reference.getTypeName()==typeid (ESM::Container).name() ||
@@ -1909,7 +1914,7 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
-    
+
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())

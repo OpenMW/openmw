@@ -200,6 +200,9 @@ namespace MWBase
             virtual MWWorld::Ptr searchPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
 
+            virtual MWWorld::Ptr searchPtrViaActorId (int actorId) = 0;
+            ///< Search is limited to the active cells.
+
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
