@@ -3,8 +3,6 @@
 #include "opcodes.hpp"
 #include "extensions.hpp"
 
-#include <iostream>
-
 namespace Compiler
 {
     void registerExtensions (Extensions& extensions, bool consoleOnly)
@@ -21,7 +19,6 @@ namespace Compiler
         Sound::registerExtensions (extensions);
         Stats::registerExtensions (extensions);
         Transformation::registerExtensions (extensions);
-        std::cout << "TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST" << std::endl;
         ScriptExtender::Math::registerExtensions(extensions);
 
         if (consoleOnly)
