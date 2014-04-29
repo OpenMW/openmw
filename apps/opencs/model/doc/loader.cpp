@@ -31,13 +31,12 @@ void CSMDoc::Loader::load()
     std::vector<std::pair<Document *, bool> >::iterator iter = mDocuments.begin();
 
     Document *document = iter->first;
-    bool new_ = iter->second;
 
     mDocuments.erase (iter);
 
     try
     {
-        document->setupData (new_);
+        document->setupData();
         emit documentLoaded (document);
     }
     catch (const std::exception& e)
@@ -46,9 +45,9 @@ void CSMDoc::Loader::load()
     }
 }
 
-void CSMDoc::Loader::loadDocument (CSMDoc::Document *document, bool new_)
+void CSMDoc::Loader::loadDocument (CSMDoc::Document *document)
 {
-    mDocuments.push_back (std::make_pair (document, new_));
+    mDocuments.push_back (std::make_pair (document, false));
 }
 
 void CSMDoc::Loader::abortLoading (Document *document)

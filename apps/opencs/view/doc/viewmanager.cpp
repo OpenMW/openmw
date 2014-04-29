@@ -87,8 +87,8 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
         this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
 
-    connect (&mDocumentManager, SIGNAL (loadRequest (CSMDoc::Document *, bool)),
-        &mLoader, SLOT (add (CSMDoc::Document *, bool)));
+    connect (&mDocumentManager, SIGNAL (loadRequest (CSMDoc::Document *)),
+        &mLoader, SLOT (add (CSMDoc::Document *)));
 
     connect (
         &mDocumentManager, SIGNAL (loadingStopped (CSMDoc::Document *, bool, const std::string&)),

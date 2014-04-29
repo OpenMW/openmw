@@ -22,7 +22,7 @@ CSVDoc::Loader::~Loader()
         delete iter->second;
 }
 
-void CSVDoc::Loader::add (CSMDoc::Document *document, bool new_)
+void CSVDoc::Loader::add (CSMDoc::Document *document)
 {
     mDocuments.insert (std::make_pair (document, new LoadingDocument (document)));
 }

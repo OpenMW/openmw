@@ -27,8 +27,8 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
         this, SLOT (documentLoaded (Document *)));
     connect (&mLoader, SIGNAL (documentNotLoaded (Document *, const std::string&)),
         this, SLOT (documentNotLoaded (Document *, const std::string&)));
-    connect (this, SIGNAL (loadRequest (CSMDoc::Document *, bool)),
-        &mLoader, SLOT (loadDocument (CSMDoc::Document *, bool)));
+    connect (this, SIGNAL (loadRequest (CSMDoc::Document *)),
+        &mLoader, SLOT (loadDocument (CSMDoc::Document *)));
 }
 
 CSMDoc::DocumentManager::~DocumentManager()
@@ -44,11 +44,11 @@ CSMDoc::DocumentManager::~DocumentManager()
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mConfiguration, files, savePath, mResDir);
+    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir);
 
     mDocuments.push_back (document);
 
-    emit loadRequest (document, new_);
+    emit loadRequest (document);
 
     mLoader.hasThingsToDo().wakeAll();
 }

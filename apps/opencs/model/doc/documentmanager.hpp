@@ -65,7 +65,7 @@ namespace CSMDoc
 
             void documentAdded (CSMDoc::Document *document);
 
-            void loadRequest (CSMDoc::Document *document, bool _new);
+            void loadRequest (CSMDoc::Document *document);
 
             void lastDocumentDeleted();
 

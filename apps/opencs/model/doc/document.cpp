@@ -2220,9 +2220,9 @@ void CSMDoc::Document::createBase()
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
-    const std::vector< boost::filesystem::path >& files,
+    const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir)
-: mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
+: mSavePath (savePath), mContentFiles (files), mNew (new_), mTools (mData), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSaving (*this, mProjectPath)
@@ -2260,21 +2260,21 @@ CSMDoc::Document::~Document()
 {
 }
 
-void CSMDoc::Document::setupData (bool new_)
+void CSMDoc::Document::setupData()
 {
-    if (new_ && mContentFiles.size()==1)
+    if (mNew && mContentFiles.size()==1)
         createBase();
     else
     {
         std::vector<boost::filesystem::path>::const_iterator end = mContentFiles.end();
 
-        if (new_)
+        if (mNew)
             --end;
 
-        load (mContentFiles.begin(), end, !new_);
+        load (mContentFiles.begin(), end, !mNew);
     }
 
-    if (new_)
+    if (mNew)
     {
         mData.setDescription ("");
         mData.setAuthor ("");
@@ -2315,6 +2315,11 @@ const boost::filesystem::path& CSMDoc::Document::getSavePath() const
 const std::vector<boost::filesystem::path>& CSMDoc::Document::getContentFiles() const
 {
     return mContentFiles;
+}
+
+bool CSMDoc::Document::isNew() const
+{
+    return mNew;
 }
 
 void CSMDoc::Document::save()

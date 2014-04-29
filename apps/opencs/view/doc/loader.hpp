@@ -36,7 +36,7 @@ namespace CSVDoc
 
         public slots:
 
-            void add (CSMDoc::Document *document, bool new_);
+            void add (CSMDoc::Document *document);
 
             void loadingStopped (CSMDoc::Document *document, bool completed,
                 const std::string& error);

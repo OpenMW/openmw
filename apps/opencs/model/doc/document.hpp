@@ -39,6 +39,7 @@ namespace CSMDoc
 
             boost::filesystem::path mSavePath;
             std::vector<boost::filesystem::path> mContentFiles;
+            bool mNew;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
             boost::filesystem::path mProjectPath;
@@ -72,12 +73,12 @@ namespace CSMDoc
         public:
 
             Document (const Files::ConfigurationManager& configuration,
-                const std::vector< boost::filesystem::path >& files,
+                const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir);
 
             ~Document();
 
-            void setupData (bool new_);
+            void setupData();
 
             QUndoStack& getUndoStack();
 
@@ -88,6 +89,9 @@ namespace CSMDoc
             const std::vector<boost::filesystem::path>& getContentFiles() const;
             ///< \attention The last element in this collection is the file that is being edited,
             /// but with its original path instead of the save path.
+
+            bool isNew() const;
+            ///< Is this a newly created content file?
 
             void save();
 
