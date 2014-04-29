@@ -53,7 +53,7 @@ namespace MWGui
     {
         onSlotSelected(sender, pos);
 
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (pos != MyGUI::ITEM_NONE && MyGUI::InputManager::getInstance().isShiftPressed())
         {
             ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
             dialog->open("#{sMessage3}");
