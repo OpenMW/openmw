@@ -3,6 +3,8 @@
 #include "opcodes.hpp"
 #include "extensions.hpp"
 
+#include <iostream>
+
 namespace Compiler
 {
     void registerExtensions (Extensions& extensions, bool consoleOnly)
@@ -19,6 +21,8 @@ namespace Compiler
         Sound::registerExtensions (extensions);
         Stats::registerExtensions (extensions);
         Transformation::registerExtensions (extensions);
+        std::cout << "TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST" << std::endl;
+        ScriptExtender::Math::registerExtensions(extensions);
 
         if (consoleOnly)
         {
@@ -489,6 +493,34 @@ namespace Compiler
             extensions.registerInstruction ("user2", "", opcodeUser2);
             extensions.registerInstruction ("user3", "", opcodeUser3, opcodeUser3);
             extensions.registerInstruction ("user4", "", opcodeUser4, opcodeUser4);
+        }
+    }
+
+    namespace ScriptExtender
+    {
+        //All codes have an alias which starts with x, so they work with MWSE extensions
+        namespace Math {
+            void registerExtensions (Extensions& extensions)
+            {
+                extensions.registerFunction ("hypot", 'f', "ff", opcodeHypot);
+                extensions.registerFunction ("xhypot", 'f', "f", opcodeHypot);
+                extensions.registerFunction ("degrad", 'f', "f", opcodeDegRad);
+                extensions.registerFunction ("xdegrad", 'f', "f", opcodeDegRad);
+                extensions.registerFunction ("raddeg", 'f', "f", opcodeRadDeg);
+                extensions.registerFunction ("xraddeg", 'f', "f", opcodeRadDeg);
+                extensions.registerFunction ("cos", 'f', "f", opcodeCos);
+                extensions.registerFunction ("xcos", 'f', "f", opcodeCos);
+                extensions.registerFunction ("sin", 'f', "f", opcodeSin);
+                extensions.registerFunction ("xsin", 'f', "f", opcodeSin);
+                extensions.registerFunction ("tan", 'f', "f", opcodeTan);
+                extensions.registerFunction ("xtan", 'f', "f", opcodeTan);
+                extensions.registerFunction ("arccos", 'f', "f", opcodeArcCos);
+                extensions.registerFunction ("xarccos", 'f', "f", opcodeArcCos);
+                extensions.registerFunction ("arcsin", 'f', "f", opcodeArcSin);
+                extensions.registerFunction ("xarcsin", 'f', "f", opcodeArcSin);
+                extensions.registerFunction ("arctan", 'f', "f", opcodeArcTan);
+                extensions.registerFunction ("xarctan", 'f', "f", opcodeArcTan);
+            }
         }
     }
 }

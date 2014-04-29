@@ -450,6 +450,55 @@ namespace Compiler
         const int opcodeUser4 = 0x2000170;
         const int opcodeUser4Explicit = 0x2000171;
     }
+
+    namespace ScriptExtender {
+        namespace References {
+            /*const int opcodeSetRef =
+            const int opcodeRefType =
+            const int opcodeGetRef =
+            const int opcodeGetCombat =
+            const int opcodeGetPCTarget =
+            const int opcodeFirstNPC =
+            const int opcodeFirstItem =
+            const int opcodeFirstStatic =
+            const int opcodeNextRef =*/
+        }
+        namespace Math {
+            const int opcodeHypot = 0x2050001;
+            const int opcodeDegRad = 0x2050002;
+            const int opcodeRadDeg = 0x2050003;
+            const int opcodeCos = 0x2050004;
+            const int opcodeSin = 0x2050005;
+            const int opcodeTan = 0x2050006;
+            const int opcodeArcCos = 0x2050007;
+            const int opcodeArcSin = 0x2050008;
+            const int opcodeArcTan = 0x2050009;
+        }
+        namespace AiMovement {
+
+        }
+        namespace Inventory {
+
+        }
+        namespace Attributes {
+
+        }
+        namespace NpcProperties {
+
+        }
+        namespace ItemProperties {
+
+        }
+        namespace KeyboardInput {
+
+        }
+        namespace FileIO {
+
+        }
+        namespace Strings {
+
+        }
+    }
 }
 
 #endif

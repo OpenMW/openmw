@@ -44,7 +44,7 @@ namespace Compiler
 
     namespace Gui
     {
-        void registerExtensions (Extensions& extensions);	
+        void registerExtensions (Extensions& extensions);
     }
 
     namespace Misc
@@ -75,6 +75,14 @@ namespace Compiler
     namespace User
     {
         void registerExtensions (Extensions& extensions);
+    }
+
+    namespace ScriptExtender
+    {
+        namespace Math
+        {
+            void registerExtensions (Extensions& extensions);
+        }
     }
 }
 
