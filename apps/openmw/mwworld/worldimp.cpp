@@ -2506,7 +2506,17 @@ namespace MWWorld
 
     bool World::isDark() const
     {
-        return mWeatherManager->isDark();
+        MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
+        if (cell->isExterior())
+            return mWeatherManager->isDark();
+        else
+        {
+            uint32_t ambient = cell->getCell()->mAmbi.mAmbient;
+            int ambientTotal = (ambient & 0xff)
+                    + ((ambient>>8) & 0xff)
+                    + ((ambient>>16) & 0xff);
+            return !(cell->getCell()->mData.mFlags & ESM::Cell::NoSleep) && ambientTotal <= 201;
+        }
     }
 
     bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
