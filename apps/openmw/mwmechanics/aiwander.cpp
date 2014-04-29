@@ -38,6 +38,8 @@ namespace MWMechanics
       , mRotate(false)
       , mTargetAngle(0)
       , mSaidGreeting(false)
+      , mHasReturnPosition(false)
+      , mReturnPosition(0,0,0)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
         {
@@ -331,6 +333,40 @@ namespace MWMechanics
         if(mDistance && cellChange)
             mDistance = 0;
 
+        // For stationary NPCs, move back to the starting location if another AiPackage moved us elsewhere
+        if (cellChange)
+            mHasReturnPosition = false;
+        if (mDistance == 0 && mHasReturnPosition && Ogre::Vector3(pos.pos).squaredDistance(mReturnPosition) > 20*20)
+        {
+            mChooseAction = false;
+            mIdleNow = false;
+
+            if (!mPathFinder.isPathConstructed())
+            {
+                Ogre::Vector3 destNodePos = mReturnPosition;
+
+                ESM::Pathgrid::Point dest;
+                dest.mX = destNodePos[0];
+                dest.mY = destNodePos[1];
+                dest.mZ = destNodePos[2];
+
+                // actor position is already in world co-ordinates
+                ESM::Pathgrid::Point start;
+                start.mX = pos.pos[0];
+                start.mY = pos.pos[1];
+                start.mZ = pos.pos[2];
+
+                // don't take shortcuts for wandering
+                mPathFinder.buildPath(start, dest, actor.getCell(), false);
+
+                if(mPathFinder.isPathConstructed())
+                {
+                    mMoveNow = false;
+                    mWalking = true;
+                }
+            }
+        }
+
         if(mChooseAction)
         {
             mPlayedIdle = 0;
@@ -365,7 +401,7 @@ namespace MWMechanics
         }
 
         // Allow interrupting a walking actor to trigger a greeting
-        if(mIdleNow || (mWalking && !mObstacleCheck.isNormalState()))
+        if(mIdleNow || (mWalking && !mObstacleCheck.isNormalState() && mDistance))
         {
             // Play a random voice greeting if the player gets too close
             int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
@@ -496,6 +532,7 @@ namespace MWMechanics
             mMoveNow = false;
             mWalking = false;
             mChooseAction = true;
+            mHasReturnPosition = false;
         }
 
         return false; // AiWander package not yet completed
@@ -578,6 +615,15 @@ namespace MWMechanics
             return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle9");
         else
             return false;
+    }
+
+    void AiWander::setReturnPosition(const Ogre::Vector3& position)
+    {
+        if (!mHasReturnPosition)
+        {
+            mHasReturnPosition = true;
+            mReturnPosition = position;
+        }
     }
 
     void AiWander::getRandomIdle()

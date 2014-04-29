@@ -253,8 +253,6 @@ void MWState::StateManager::quickSave (std::string name)
             slot = &*it;
     }
 
-    MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage4}");
-
     saveGame(name, slot);
 }
 
@@ -368,10 +366,7 @@ void MWState::StateManager::quickLoad()
 {
     if (Character* mCurrentCharacter = getCurrentCharacter (false))
         if (const MWState::Slot* slot = &*mCurrentCharacter->begin()) //Get newest save
-        {
-                //MWBase::Environment::get().getWindowManager()->messageBox("#{sLoadingMessage14}"); //it overlaps
             loadGame (mCurrentCharacter, slot);
-        }
 }
 
 void MWState::StateManager::deleteGame(const MWState::Character *character, const MWState::Slot *slot)
