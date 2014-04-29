@@ -444,6 +444,7 @@ namespace Compiler
             extensions.registerInstruction ("lowerrank", "", opcodeLowerRank, opcodeLowerRankExplicit);
 
             extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath, opcodeOnDeathExplicit);
+            extensions.registerFunction ("onknockout", 'l', "", opcodeOnKnockout, opcodeOnKnockoutExplicit);
 
             extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
 

@@ -879,11 +879,22 @@ namespace MWMechanics
                 iter->second->update(duration);
             }
 
-            // Kill dead actors
+            // Kill dead actors, update some variables
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
             {
                 const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
                 CreatureStats &stats = cls.getCreatureStats(iter->first);
+
+                //KnockedOutOneFrameLogic
+                //Used for "OnKnockedOut" command
+                //Put here to ensure that it's run for PRECISELY one frame.
+                if(stats.getKnockedDown() && !stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame()) { //Start it for one frame if nessesary
+                    stats.setKnockedDownOneFrame(true);
+                }
+                else if (stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame()) { //Turn off KnockedOutOneframe
+                    stats.setKnockedDownOneFrame(false);
+                    stats.setKnockedDownOverOneFrame(true);
+                }
 
                 if(!stats.isDead())
                 {
@@ -1018,7 +1029,6 @@ namespace MWMechanics
         {
             const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
             CreatureStats &stats = cls.getCreatureStats(iter->first);
-
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
             {
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
@@ -1040,7 +1050,6 @@ namespace MWMechanics
         {
             const MWWorld::Class &cls = MWWorld::Class::get(*iter);
             CreatureStats &stats = cls.getCreatureStats(*iter);
-
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
             {
                 MWMechanics::AiCombat* package = static_cast<MWMechanics::AiCombat*>(stats.getAiSequence().getActivePackage());

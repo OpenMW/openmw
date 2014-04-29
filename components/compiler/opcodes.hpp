@@ -377,6 +377,8 @@ namespace Compiler
         const int opcodeLowerRankExplicit = 0x20001eb;
         const int opcodeOnDeath = 0x20001fc;
         const int opcodeOnDeathExplicit = 0x2000205;
+        const int opcodeOnKnockout = 0x2000240;
+        const int opcodeOnKnockoutExplicit = 0x2000241;
 
         const int opcodeBecomeWerewolf = 0x2000217;
         const int opcodeBecomeWerewolfExplicit = 0x2000218;

@@ -47,14 +47,27 @@ namespace CSMSettings
 
     enum SettingType
     {
-        Type_MultiBool = 0,
-        Type_SingleBool = 1,
-        Type_MultiList = 2,
-        Type_SingleList  = 3,
-        Type_MultiRange = 4,
-        Type_SingleRange = 5,
-        Type_MultiText = 6,
-        Type_SingleText = 7
+        /*
+        * 0 - 9 - Boolean widgets
+        * 10-19 - List widgets
+        * 21-29 - Range widgets
+        * 31-39 - Text widgets
+        *
+        * Each range corresponds to a View_Type enum by a factor of 10.
+        *
+        * Even-numbered values are single-value widgets
+        * Odd-numbered values are multi-valued widgets
+        */
+
+        Type_CheckBox = 0,
+        Type_RadioButton = 1,
+        Type_ListView = 10,
+        Type_ComboBox = 11,
+        Type_SpinBox = 21,
+        Type_Slider = 23,
+        Type_Dial = 24,
+        Type_TextArea = 30,
+        Type_LineEdit = 31
     };
 
     enum MergeMethod
