@@ -341,26 +341,29 @@ namespace MWMechanics
             mChooseAction = false;
             mIdleNow = false;
 
-            Ogre::Vector3 destNodePos = mReturnPosition;
-
-            ESM::Pathgrid::Point dest;
-            dest.mX = destNodePos[0];
-            dest.mY = destNodePos[1];
-            dest.mZ = destNodePos[2];
-
-            // actor position is already in world co-ordinates
-            ESM::Pathgrid::Point start;
-            start.mX = pos.pos[0];
-            start.mY = pos.pos[1];
-            start.mZ = pos.pos[2];
-
-            // don't take shortcuts for wandering
-            mPathFinder.buildPath(start, dest, actor.getCell(), false);
-
-            if(mPathFinder.isPathConstructed())
+            if (!mPathFinder.isPathConstructed())
             {
-                mMoveNow = false;
-                mWalking = true;
+                Ogre::Vector3 destNodePos = mReturnPosition;
+
+                ESM::Pathgrid::Point dest;
+                dest.mX = destNodePos[0];
+                dest.mY = destNodePos[1];
+                dest.mZ = destNodePos[2];
+
+                // actor position is already in world co-ordinates
+                ESM::Pathgrid::Point start;
+                start.mX = pos.pos[0];
+                start.mY = pos.pos[1];
+                start.mZ = pos.pos[2];
+
+                // don't take shortcuts for wandering
+                mPathFinder.buildPath(start, dest, actor.getCell(), false);
+
+                if(mPathFinder.isPathConstructed())
+                {
+                    mMoveNow = false;
+                    mWalking = true;
+                }
             }
         }
 
@@ -529,6 +532,7 @@ namespace MWMechanics
             mMoveNow = false;
             mWalking = false;
             mChooseAction = true;
+            mHasReturnPosition = false;
         }
 
         return false; // AiWander package not yet completed
@@ -615,7 +619,11 @@ namespace MWMechanics
 
     void AiWander::setReturnPosition(const Ogre::Vector3& position)
     {
-        mHasReturnPosition = true; mReturnPosition = position;
+        if (!mHasReturnPosition)
+        {
+            mHasReturnPosition = true;
+            mReturnPosition = position;
+        }
     }
 
     void AiWander::getRandomIdle()
