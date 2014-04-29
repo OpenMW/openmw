@@ -1909,7 +1909,7 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
-
+    
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
@@ -1925,6 +1925,19 @@ namespace MWWorld
         std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
         if(result.first == "") return true;
         return false;
+    }
+
+    float World::getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist)
+    {
+        btVector3 btFrom(from.x, from.y, from.z);
+        btVector3 btTo = btVector3(dir.x, dir.y, dir.z);
+        btTo.normalize();
+        btTo = btFrom + btTo * maxDist;
+
+        std::pair<std::string, float> result = mPhysEngine->rayTest(btFrom, btTo, false);
+
+        if(result.second == -1) return maxDist;
+        else return result.second*(btTo-btFrom).length();
     }
 
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
