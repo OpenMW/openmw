@@ -394,8 +394,8 @@ void CSVWorld::RegionMap::dropEvent (QDropEvent* event)
         std::string cellId(regionModel->data (index, CSMWorld::RegionMap::Role_CellId).
             toString().toUtf8().constData());
 
-        QModelIndex index2 = cellsModel->getModelIndex (cellId,
-            cellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Region));
+        QModelIndex index2(cellsModel->getModelIndex (cellId,
+            cellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Region)));
 
         mDocument.getUndoStack().push(new CSMWorld::ModifyCommand 
                                         (*cellsModel, index2, QString::fromUtf8(record.getId().c_str())));
