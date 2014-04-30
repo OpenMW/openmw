@@ -392,7 +392,7 @@ namespace MWMechanics
         else // remote pathfinding
         {
             bool preferShortcut = false;
-            bool inLOS;
+            bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
 
             if(mReadyToAttack) isStuck = false;
 			
@@ -400,7 +400,7 @@ namespace MWMechanics
             if(!isStuck 
                 && (!mForceNoShortcut
                 || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
-                && (inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget)))
+                && inLOS)
             {
                 if(speed == 0.0f) speed = actorCls.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
@@ -437,7 +437,7 @@ namespace MWMechanics
                 if(inLOS && mPathFinder.getPath().size() > 1)
                 {
                     // get point just before target
-                    std::list<ESM::Pathgrid::Point>::iterator pntIter = --mPathFinder.getPath().end();
+                    std::list<ESM::Pathgrid::Point>::const_iterator pntIter = --mPathFinder.getPath().end();
                     --pntIter;
                     Ogre::Vector3 vBeforeTarget = Ogre::Vector3(pntIter->mX, pntIter->mY, pntIter->mZ);
 
