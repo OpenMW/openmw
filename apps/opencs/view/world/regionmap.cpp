@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
-#include <qt4/QtCore/qabstractitemmodel.h>
 
 #include <QHeaderView>
 #include <QContextMenuEvent>

@@ -13,6 +13,14 @@ namespace CSVRender
 
             CSMWorld::CellSelection mSelection;
 
+        private:
+
+            void dropEvent(QDropEvent* event);
+
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dragMoveEvent(QDragMoveEvent *event);
+
         public:
 
             PagedWorldspaceWidget (QWidget *parent);

@@ -3,9 +3,17 @@
 
 #include <sstream>
 
+#include <qt4/QtGui/qevent.h>
+
+#include <boost/algorithm/string.hpp>
+
+#include <apps/opencs/model/world/tablemimedata.hpp>
+
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent)
 : WorldspaceWidget (parent)
-{}
+{
+    setAcceptDrops(true);
+}
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
 {
@@ -44,4 +52,38 @@ void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSel
 {
     mSelection = selection;
     emit cellSelectionChanged (mSelection);
+}
+
+void CSVRender::PagedWorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
+{
+    event->accept();
+}
+
+void CSVRender::PagedWorldspaceWidget::dragMoveEvent (QDragMoveEvent* event)
+{
+    event->accept();
+}
+
+void CSVRender::PagedWorldspaceWidget::dropEvent (QDropEvent* event)
+{
+    /*
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (true)
+    {
+        if (mime->holdsType(CSMWorld::UniversalId::Type_Cell))
+        {
+            CSMWorld::UniversalId record(mime->returnMatching (CSMWorld::UniversalId::Type_Cell));
+            QString id(QString::fromUtf8(record.getId().c_str()));
+            if (*id.begin() == '#')
+            {
+                id.remove(0,1);
+                QStringList splited(id.split(' '));
+                int x = splited.begin()->toInt();
+                int y = (splited.begin()+1)->toInt();
+                mSelection.add(CSMWorld::CellCoordinates(x, y));
+            }
+        }
+    }
+    */
+    //TODO!
 }
