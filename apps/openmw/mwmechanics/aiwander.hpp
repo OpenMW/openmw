@@ -14,20 +14,27 @@
 
 namespace MWMechanics
 {
+    /// \brief Causes the Actor to wander within a specified range
     class AiWander : public AiPackage
     {
         public:
-
+            /// Constructor
+            /** \param distance Max distance the ACtor will wander
+                \param duration Time, in hours, that this package will be preformed
+                \param timeOfDay Start time of the package, if it has a duration. Currently unimplemented
+                \param idle Chances of each idle to play (9 in total)
+                \param repeat Repeat wander or not **/
             AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat);
-            virtual AiPackage *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
-            ///< \return Package completed?
-            virtual int getTypeId() const;
-            ///< 0: Wander
 
+            virtual AiPackage *clone() const;
+
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+
+            virtual int getTypeId() const;
+
+            /// Set the position to return to for a stationary (non-wandering) actor
+            /** In case another AI package moved the actor elsewhere **/
             void setReturnPosition (const Ogre::Vector3& position);
-            ///< Set the position to return to for a stationary (non-wandering) actor, in case
-            /// another AI package moved the actor elsewhere
 
         private:
             void stopWalking(const MWWorld::Ptr& actor);

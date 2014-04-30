@@ -46,10 +46,7 @@ namespace MyGUI
 
 namespace MWInput
 {
-
-    /**
-    * @brief Class that handles all input and key bindings for OpenMW.
-    */
+    /// \brief Class that handles all input and key bindings for OpenMW.
     class InputManager :
             public MWBase::InputManager,
             public SFO::KeyListener,
@@ -67,6 +64,7 @@ namespace MWInput
 
         /// Clear all savegame-specific data
         virtual void clear();
+
 
         virtual void update(float dt, bool disableControls=false, bool disableEvents=false);
 

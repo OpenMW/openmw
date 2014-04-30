@@ -8,14 +8,15 @@
 
 namespace MWMechanics
 {
-
+    /// \brief Causes actor to walk to activatable object and activate it
     class AiActivate : public AiPackage
     {
         public:
+            /// Constructor
+            /** \param objectId Reference to object to activate **/
             AiActivate(const std::string &objectId);
             virtual AiActivate *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
-                    ///< \return Package completed?
             virtual int getTypeId() const;
 
         private:
