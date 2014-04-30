@@ -57,7 +57,7 @@ namespace MWMechanics
                 return mPath.size();
             }
 
-            std::list<ESM::Pathgrid::Point> getPath() const
+            std::list<ESM::Pathgrid::Point>& getPath()
             {
                 return mPath;
             }

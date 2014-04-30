@@ -539,14 +539,14 @@ namespace MWMechanics
     }
 
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
-                                    const PathFinder& pathfinder)
+                                    PathFinder& pathfinder)
     {
         // TODO: how to add these back in once the door opens?
         // Idea: keep a list of detected closed doors (see aicombat.cpp)
         // Every now and then check whether one of the doors is opened. (maybe
         // at the end of playing idle?) If the door is opened then re-calculate
         // allowed nodes starting from the spawn point.
-        std::list<ESM::Pathgrid::Point> paths = pathfinder.getPath();
+        std::list<ESM::Pathgrid::Point>& paths = pathfinder.getPath();
         while(paths.size() >= 2)
         {
             ESM::Pathgrid::Point pt = paths.back();
