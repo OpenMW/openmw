@@ -56,6 +56,8 @@ namespace CSVWorld
 
             void mouseMoveEvent(QMouseEvent *event);
 
+            void dropEvent(QDropEvent* event);
+
         public:
 
             RegionMap (const CSMWorld::UniversalId& universalId, CSMDoc::Document& document,

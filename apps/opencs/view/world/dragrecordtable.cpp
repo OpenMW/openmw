@@ -26,3 +26,13 @@ void CSVWorld::DragRecordTable::setEditLock (bool locked)
 {
     mEditLock = locked;
 }
+
+void CSVWorld::DragRecordTable::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->accept();
+}

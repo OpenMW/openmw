@@ -516,11 +516,6 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
     }
 }
 
-void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
-{
-    event->acceptProposedAction();
-}
-
 void CSVWorld::Table::dropEvent(QDropEvent *event)
 {
     QModelIndex index = indexAt (event->pos());
@@ -546,11 +541,6 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
             mDocument.getUndoStack().push (command.release());
         }
     } //TODO handle drops from different document
-}
-
-void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
-{
-    event->accept();
 }
 
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const

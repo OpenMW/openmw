@@ -2,6 +2,7 @@
 #define CSV_WORLD_DRAGRECORDTABLE_H
 
 #include <QTableView>
+#include <QtGui/qevent.h>
 
 class QWidget;
 class QAction;
@@ -33,6 +34,10 @@ namespace CSVWorld
 
         protected:
             void startDrag(const DragRecordTable& table);
+
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dragMoveEvent(QDragMoveEvent *event);
     };
 }
 

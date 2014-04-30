@@ -59,10 +59,6 @@ namespace CSVWorld
 
             void mouseMoveEvent(QMouseEvent *event);
 
-            void dragEnterEvent(QDragEnterEvent *event);
-
-            void dragMoveEvent(QDragMoveEvent *event);
-
             void dropEvent(QDropEvent *event);
 
         public:
@@ -94,6 +90,7 @@ namespace CSVWorld
             /// \param modified Number of added and modified records
 
             void createRequest();
+
             void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:
