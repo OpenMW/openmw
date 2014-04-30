@@ -860,8 +860,8 @@ namespace MWMechanics
                     // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     {
-                        if (   *it == ptr 
-                            || !it->getClass().isNpc()) continue; // not the player and is an NPC
+                        if (   *it1 == ptr 
+                            || !it1->getClass().isNpc()) continue; // not the player and is an NPC
 
                         // TODO: Add more messages
                         if (type == OT_Theft)
