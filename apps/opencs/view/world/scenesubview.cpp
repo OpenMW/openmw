@@ -40,7 +40,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     if (id.getId()=="sys::default")
     {
-        CSVRender::PagedWorldspaceWidget *widget = new CSVRender::PagedWorldspaceWidget (this);
+        CSVRender::PagedWorldspaceWidget *widget = new CSVRender::PagedWorldspaceWidget (this, document);
         mScene = widget;
         connect (widget, SIGNAL (cellSelectionChanged (const CSMWorld::CellSelection&)),
             this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));

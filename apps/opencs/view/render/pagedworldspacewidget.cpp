@@ -9,8 +9,9 @@
 
 #include <apps/opencs/model/world/tablemimedata.hpp>
 
-CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent)
-: WorldspaceWidget (parent)
+CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent, const CSMDoc::Document& document)
+: WorldspaceWidget (parent),
+mDocument(document)
 {
     setAcceptDrops(true);
 }
@@ -66,24 +67,33 @@ void CSVRender::PagedWorldspaceWidget::dragMoveEvent (QDragMoveEvent* event)
 
 void CSVRender::PagedWorldspaceWidget::dropEvent (QDropEvent* event)
 {
-    /*
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
-    if (true)
+    if (mime->fromDocument(mDocument))
     {
-        if (mime->holdsType(CSMWorld::UniversalId::Type_Cell))
+        std::vector<CSMWorld::UniversalId> data(mime->getData());
+
+        for (unsigned i = 0; i < data.size(); ++i)
         {
-            CSMWorld::UniversalId record(mime->returnMatching (CSMWorld::UniversalId::Type_Cell));
-            QString id(QString::fromUtf8(record.getId().c_str()));
-            if (*id.begin() == '#')
+            if (data[i].getType() == CSMWorld::UniversalId::Type_Cell ||
+                data[i].getType() == CSMWorld::UniversalId::Type_Cell_Missing)
             {
-                id.remove(0,1);
-                QStringList splited(id.split(' '));
-                int x = splited.begin()->toInt();
-                int y = (splited.begin()+1)->toInt();
-                mSelection.add(CSMWorld::CellCoordinates(x, y));
+                if (*(data[i].getId().begin()) == '#')
+                {
+                    std::pair<int, int> coordinate(getCoordinatesFromId(data[i].getId()));
+                    mSelection.add(CSMWorld::CellCoordinates(coordinate.first, coordinate.second));
+                }
             }
         }
     }
-    */
-    //TODO!
 }
+
+std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
+{
+    QString id(QString::fromUtf8(record.c_str()));
+    id.remove(0,1);
+    QStringList splited(id.split(' ')); //Well, this is the simplest approach
+    int x = splited.begin()->toInt();
+    int y = (splited.begin()+1)->toInt();
+    return std::make_pair(x, y);
+}
+
