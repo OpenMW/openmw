@@ -135,7 +135,7 @@ namespace MWWorld
 
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
 
-        if (sneak == true)
+        if (sneak)
         {
             const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
@@ -145,15 +145,20 @@ namespace MWWorld
                                         esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt(), neighbors);
             for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
             {
+                if (*it == ptr) // not the player
+                    continue;
+
                 if ( MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, *it) )
                 { 
                     MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
                     break;
                 }
             }
-            if (neighbors.size() == 0)
+            if (neighbors.empty())
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
         }
+        else
+            MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
     }
 
     void Player::yaw(float yaw)
