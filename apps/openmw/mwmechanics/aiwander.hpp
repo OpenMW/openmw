@@ -77,7 +77,7 @@ namespace MWMechanics
             ESM::Pathgrid::Point mCurrentNode;
             bool mTrimCurrentNode;
             void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
-                                  PathFinder& pathfinder);
+                                  const PathFinder& pathfinder);
 
             PathFinder mPathFinder;
 
