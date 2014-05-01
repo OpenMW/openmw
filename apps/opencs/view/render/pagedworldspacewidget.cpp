@@ -5,8 +5,6 @@
 
 #include <qt4/QtGui/qevent.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include <apps/opencs/model/world/tablemimedata.hpp>
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent, const CSMDoc::Document& document)
@@ -89,11 +87,14 @@ void CSVRender::PagedWorldspaceWidget::dropEvent (QDropEvent* event)
 
 std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
 {
-    QString id(QString::fromUtf8(record.c_str()));
-    id.remove(0,1);
-    QStringList splited(id.split(' ')); //Well, this is the simplest approach
-    int x = splited.begin()->toInt();
-    int y = (splited.begin()+1)->toInt();
+    std::istringstream stream (record.c_str());
+    char ignore;
+    stream >> ignore;
+    char ignore1; // : or ;
+    char ignore2; // #
+    int x, y;
+
+    stream >> ignore1 >> ignore2 >> x >> y;
     return std::make_pair(x, y);
 }
 

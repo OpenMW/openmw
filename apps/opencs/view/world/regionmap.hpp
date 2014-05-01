@@ -63,7 +63,7 @@ namespace CSVWorld
             RegionMap (const CSMWorld::UniversalId& universalId, CSMDoc::Document& document,
                 QWidget *parent = 0);
 
-            virtual std::vector<CSMWorld::UniversalId> getDragedRecords() const;
+            virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
         signals:
 

@@ -1,5 +1,8 @@
 #include "tablemimedata.hpp"
+
 #include <string>
+
+#include <QDebug>
 
 #include "universalid.hpp"
 #include "columnbase.hpp"
@@ -33,7 +36,8 @@ std::string CSMWorld::TableMimeData::getIcon() const
 {
     if (mUniversalId.empty())
     {
-        return "";
+        qDebug()<<"TableMimeData object does not hold any records!"; //because throwing in the event loop tends to be problematic
+        throw("TableMimeData object does not hold any records!");
     }
 
     std::string tmpIcon;
@@ -50,7 +54,7 @@ std::string CSMWorld::TableMimeData::getIcon() const
 
         if (tmpIcon != mUniversalId[i].getIcon())
         {
-            return ":/multitype.png"; //icon stolen from gnome
+            return ":/multitype.png"; //icon stolen from gnome TODO: get new icon
         }
 
         tmpIcon = mUniversalId[i].getIcon();
@@ -360,8 +364,6 @@ CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::Col
         case CSMWorld::ColumnBase::Display_Script:
             return CSMWorld::UniversalId::Type_Script;
 
-        case CSMWorld::ColumnBase::Display_Cell_Missing:
-            return CSMWorld::UniversalId::Type_Cell_Missing; //this one actually never happens, since there is no display_Cell_missing column anywhere.
 
         default:
             return CSMWorld::UniversalId::Type_None;
@@ -375,10 +377,6 @@ CSMWorld::ColumnBase::Display CSMWorld::TableMimeData::convertEnums (CSMWorld::U
     {
         case CSMWorld::UniversalId::Type_Race:
             return CSMWorld::ColumnBase::Display_Race;
-
-
-        case CSMWorld::UniversalId::Type_Cell_Missing:
-            return CSMWorld::ColumnBase::Display_Cell_Missing;
 
 
         case CSMWorld::UniversalId::Type_Skill:

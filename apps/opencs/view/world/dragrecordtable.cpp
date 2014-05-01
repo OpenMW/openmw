@@ -5,7 +5,7 @@
 
 void CSVWorld::DragRecordTable::startDrag (const CSVWorld::DragRecordTable& table)
 {
-    CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData (table.getDragedRecords(), mDocument);
+    CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData (table.getDraggedRecords(), mDocument);
 
     if (mime)
     {

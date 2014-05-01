@@ -28,9 +28,9 @@ namespace CSVWorld
         public:
             DragRecordTable(CSMDoc::Document& document, QWidget* parent = NULL);
 
-            virtual std::vector<CSMWorld::UniversalId> getDragedRecords() const = 0;
+            virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const = 0;
 
-            virtual void setEditLock(bool locked);
+            void setEditLock(bool locked);
 
         protected:
             void startDrag(const DragRecordTable& table);

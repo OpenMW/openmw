@@ -348,7 +348,7 @@ void CSVWorld::RegionMap::mouseMoveEvent (QMouseEvent* event)
     startDrag(*this);
 }
 
-std::vector< CSMWorld::UniversalId > CSVWorld::RegionMap::getDragedRecords() const
+std::vector< CSMWorld::UniversalId > CSVWorld::RegionMap::getDraggedRecords() const
 {
     QModelIndexList selected(getSelectedCells(true, false));
     std::vector<CSMWorld::UniversalId> ids;

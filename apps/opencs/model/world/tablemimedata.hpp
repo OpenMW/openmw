@@ -56,6 +56,7 @@ namespace CSMWorld
             UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
 
             static CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);
+
             static CSMWorld::ColumnBase::Display convertEnums(CSMWorld::UniversalId::Type type);
 
         private:

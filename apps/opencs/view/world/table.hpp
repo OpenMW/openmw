@@ -76,7 +76,7 @@ namespace CSVWorld
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 
-            virtual std::vector<CSMWorld::UniversalId> getDragedRecords() const;
+            virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
         signals:
 

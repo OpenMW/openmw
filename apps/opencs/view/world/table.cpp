@@ -561,7 +561,7 @@ std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::Column
     return titles;
 }
 
-std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDragedRecords() const
+std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
 {
 
     QModelIndexList selectedRows = selectionModel()->selectedRows();
