@@ -7,7 +7,7 @@
 
 #include <apps/opencs/model/world/tablemimedata.hpp>
 
-CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent, const CSMDoc::Document& document)
+CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget (document, parent)
 {}
 
@@ -56,10 +56,9 @@ void CSVRender::PagedWorldspaceWidget::dropEvent (QDropEvent* event)
 
     if (mime->fromDocument(mDocument))
     {
-        const std::vector<CSMWorld::UniversalId> data(mime->getData());
+        const std::vector<CSMWorld::UniversalId>& data(mime->getData());
         CSVRender::WorldspaceWidget::dropType whatHappend = getDropType(data);
 
-        std::cout<<whatHappend<<std::endl;
         switch (whatHappend)
         {
             case CSVRender::WorldspaceWidget::cellsExterior:

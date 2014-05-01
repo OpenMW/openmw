@@ -23,8 +23,7 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     /// \todo deal with mSunlight and mFog/mForDensity
 }
 
-CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId,
-    CSMDoc::Document& document, QWidget *parent)
+CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
 : WorldspaceWidget (document, parent), mCellId (cellId)
 {
     mCellsModel = &dynamic_cast<CSMWorld::IdTable&> (
@@ -74,7 +73,7 @@ void CSVRender::UnpagedWorldspaceWidget::dropEvent (QDropEvent* event)
 
     if (mime->fromDocument (mDocument))
     {
-        const std::vector<CSMWorld::UniversalId> data (mime->getData());
+        const std::vector<CSMWorld::UniversalId>& data (mime->getData());
         CSVRender::WorldspaceWidget::dropType whatHappend = getDropType (data);
 
         switch (whatHappend)
@@ -96,5 +95,6 @@ void CSVRender::UnpagedWorldspaceWidget::dropEvent (QDropEvent* event)
 
 void CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
 {
-
+    mCellId = data.begin()->getId();
+    update();
 }

@@ -33,6 +33,7 @@ namespace CSVRender
             UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document,
                 QWidget *parent);
 
+
         private:
 
             void handleDrop(const std::vector<CSMWorld::UniversalId>& data);

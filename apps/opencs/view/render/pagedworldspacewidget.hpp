@@ -19,18 +19,18 @@ namespace CSVRender
 
             std::pair<int, int> getCoordinatesFromId(const std::string& record) const;
 
-            void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
-
         public:
 
-            PagedWorldspaceWidget (QWidget *parent, const CSMDoc::Document& document);
+            PagedWorldspaceWidget (QWidget *parent, CSMDoc::Document& document);
             ///< \note Sets the cell area selection to an invalid value to indicate that currently
             /// no cells are displayed. The cells to be displayed will be specified later through
             /// hint system.
 
-            virtual void useViewHint (const std::string& hint);
+            void useViewHint (const std::string& hint);
 
             void setCellSelection (const CSMWorld::CellSelection& selection);
+
+            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
         signals:
 

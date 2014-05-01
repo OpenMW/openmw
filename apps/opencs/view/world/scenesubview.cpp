@@ -18,11 +18,10 @@
 
 #include "tablebottombox.hpp"
 #include "creator.hpp"
-#include "scenetoolbar.hpp"
 #include "scenetoolmode.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id)
+: SubView (id), mLayout(new QHBoxLayout), mDocument(document)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -32,33 +31,43 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         new TableBottomBox (NullCreatorFactory(), document.getData(), document.getUndoStack(), id,
         this), 0);
 
-    QHBoxLayout *layout2 = new QHBoxLayout;
+    mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    layout2->setContentsMargins (QMargins (0, 0, 0, 0));
-
-    SceneToolbar *toolbar = new SceneToolbar (48+6, this);
+    mToolbar = new SceneToolbar (48+6, this);
 
     if (id.getId()=="sys::default")
     {
         CSVRender::PagedWorldspaceWidget *widget = new CSVRender::PagedWorldspaceWidget (this, document);
+
         mScene = widget;
+
         connect (widget, SIGNAL (cellSelectionChanged (const CSMWorld::CellSelection&)),
-            this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
+                 this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
+
+        connect (widget, SIGNAL(interiorCellsDropped (const std::vector<CSMWorld::UniversalId>&)),
+                 this, SLOT(changeToUnpaged (const std::vector<CSMWorld::UniversalId>&)));
     }
     else
-        mScene = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
+    {
+        CSVRender::UnpagedWorldspaceWidget *widget = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
-    SceneToolMode *navigationTool = mScene->makeNavigationSelector (toolbar);
-    toolbar->addTool (navigationTool);
+        mScene = widget;
 
-    SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
-    toolbar->addTool (lightingTool);
+        connect (widget, SIGNAL(exteriorCellsDropped(const std::vector<CSMWorld::UniversalId>&)),
+                 this, SLOT(changeToUnpaged(const std::vector<CSMWorld::UniversalId>&)));
+    }
 
-    layout2->addWidget (toolbar, 0);
+    SceneToolMode *navigationTool = mScene->makeNavigationSelector (mToolbar);
+    mToolbar->addTool (navigationTool);
 
-    layout2->addWidget (mScene, 1);
+    SceneToolMode *lightingTool = mScene->makeLightingSelector (mToolbar);
+    mToolbar->addTool (lightingTool);
 
-    layout->insertLayout (0, layout2, 1);
+    mLayout->addWidget (mToolbar, 0);
+
+    mLayout->addWidget (mScene, 1);
+
+    layout->insertLayout (0, mLayout, 1);
 
     CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (document.getData(), this);
 
@@ -126,4 +135,71 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection
     }
 
     setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
+}
+
+void CSVWorld::SceneSubView::changeToPaged (const std::vector< CSMWorld::UniversalId >& data)
+{
+    mLayout->removeWidget(mToolbar);
+    mLayout->removeWidget(mScene);
+
+    delete mScene;
+
+    delete mToolbar;
+
+    mToolbar = new SceneToolbar (48+6, this);
+
+    CSVRender::PagedWorldspaceWidget* widget = new CSVRender::PagedWorldspaceWidget (this, mDocument);
+
+    mScene = widget;
+
+    SceneToolMode* navigationTool = mScene->makeNavigationSelector (mToolbar);
+    mToolbar->addTool (navigationTool);
+
+    SceneToolMode* lightingTool = mScene->makeLightingSelector (mToolbar);
+    mToolbar->addTool (lightingTool);
+
+    connect (widget, SIGNAL (cellSelectionChanged (const CSMWorld::CellSelection&)),
+             this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
+
+    connect (widget, SIGNAL (interiorCellsDropped (const std::vector<CSMWorld::UniversalId>&)),
+             this, SLOT (changeToUnpaged (const std::vector<CSMWorld::UniversalId>&)));
+
+    mLayout->addWidget (mToolbar, 0);
+    mLayout->addWidget (mScene, 1);
+
+    mScene->selectDefaultNavigationMode();
+
+    connect (mScene, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
+
+    widget->handleDrop (data);
+}
+
+void CSVWorld::SceneSubView::changeToUnpaged (const std::vector< CSMWorld::UniversalId >& data)
+{
+    mLayout->removeWidget(mToolbar);
+    mLayout->removeWidget(mScene);
+
+    delete mScene;
+    delete mToolbar;
+
+    mToolbar = new SceneToolbar (48+6, this);
+    CSVRender::UnpagedWorldspaceWidget* widget = new CSVRender::UnpagedWorldspaceWidget (data.begin()->getId(), mDocument, this);
+
+    mScene = widget;
+
+    SceneToolMode* navigationTool = mScene->makeNavigationSelector (mToolbar);
+    mToolbar->addTool (navigationTool);
+
+    SceneToolMode* lightingTool = mScene->makeLightingSelector (mToolbar);
+    mToolbar->addTool (lightingTool);
+
+    connect (widget, SIGNAL (exteriorCellsDropped (const std::vector<CSMWorld::UniversalId>&)),
+             this, SLOT (changeToPaged (const std::vector<CSMWorld::UniversalId>&)));
+
+    mLayout->addWidget (mToolbar, 0);
+    mLayout->addWidget (mScene, 1);
+
+    mScene->selectDefaultNavigationMode();
+
+    connect (mScene, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
 }
