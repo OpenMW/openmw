@@ -2245,6 +2245,18 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
         }
     }
 
+    if (mNew)
+    {
+        mData.setDescription ("");
+        mData.setAuthor ("");
+
+        if (mContentFiles.size()==1)
+            createBase();
+    }
+
+    addOptionalGmsts();
+    addOptionalGlobals();
+
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
@@ -2262,9 +2274,7 @@ CSMDoc::Document::~Document()
 
 void CSMDoc::Document::setupData()
 {
-    if (mNew && mContentFiles.size()==1)
-        createBase();
-    else
+    if (!mNew || mContentFiles.size()>1)
     {
         std::vector<boost::filesystem::path>::const_iterator end = mContentFiles.end();
 
@@ -2274,16 +2284,7 @@ void CSMDoc::Document::setupData()
         load (mContentFiles.begin(), end, !mNew);
     }
 
-    if (mNew)
-    {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-    }
-
     getData().loadFile (mProjectPath, false, true);
-
-    addOptionalGmsts();
-    addOptionalGlobals();
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()
