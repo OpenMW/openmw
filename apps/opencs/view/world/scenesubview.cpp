@@ -143,9 +143,9 @@ void CSVWorld::SceneSubView::changeToPaged (const std::vector< CSMWorld::Univers
     mLayout->removeWidget(mScene);
 
     delete mScene;
-
     delete mToolbar;
 
+    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Cell, "sys::default"));
     mToolbar = new SceneToolbar (48+6, this);
 
     CSVRender::PagedWorldspaceWidget* widget = new CSVRender::PagedWorldspaceWidget (this, mDocument);
@@ -184,6 +184,7 @@ void CSVWorld::SceneSubView::changeToUnpaged (const std::vector< CSMWorld::Unive
 
     mToolbar = new SceneToolbar (48+6, this);
     CSVRender::UnpagedWorldspaceWidget* widget = new CSVRender::UnpagedWorldspaceWidget (data.begin()->getId(), mDocument, this);
+    setUniversalId(*(data.begin()));
 
     mScene = widget;
 
