@@ -1405,16 +1405,29 @@ namespace MWGui
     void WindowManager::clear()
     {
         mMap->clear();
+        mQuickKeysMenu->clear();
     }
 
     void WindowManager::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
         mMap->write(writer, progress);
+
+        mQuickKeysMenu->write(writer);
+        progress.increaseProgress();
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
     {
-        mMap->readRecord(reader, type);
+        if (type == ESM::REC_GMAP)
+            mMap->readRecord(reader, type);
+        else if (type == ESM::REC_KEYS)
+            mQuickKeysMenu->readRecord(reader, type);
+    }
+
+    int WindowManager::countSavedGameRecords() const
+    {
+        return 1 // Global map
+                + 1; // QuickKeysMenu
     }
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)

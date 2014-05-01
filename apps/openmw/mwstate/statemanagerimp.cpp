@@ -201,7 +201,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             +MWBase::Environment::get().getWorld()->countSavedGameRecords()
             +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
             +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
-           +1; // global map
+            +MWBase::Environment::get().getWindowManager()->countSavedGameRecords();
     writer.setRecordCount (recordCount);
 
     writer.save (stream);
@@ -323,7 +323,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                     break;
 
                 case ESM::REC_GMAP:
-
+                case ESM::REC_KEYS:
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
                     break;
 

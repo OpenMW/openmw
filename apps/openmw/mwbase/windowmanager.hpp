@@ -305,6 +305,7 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual int countSavedGameRecords() const = 0;
     };
 }
 

@@ -55,6 +55,14 @@ namespace MWGui
         }
     }
 
+    void QuickKeysMenu::clear()
+    {
+        for (int i=0; i<10; ++i)
+        {
+            unassign(mQuickKeyButtons[i], i);
+        }
+    }
+
     QuickKeysMenu::~QuickKeysMenu()
     {
         delete mAssignDialog;
@@ -154,8 +162,6 @@ namespace MWGui
         frame->setUserString ("ToolTipType", "ItemPtr");
         frame->setUserData(item);
         frame->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
-
-
         MyGUI::ImageBox* image = frame->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
         path += MWWorld::Class::get(item).getInventoryIcon(item);
@@ -165,7 +171,8 @@ namespace MWGui
         image->setImageTexture (path);
         image->setNeedMouseFocus (false);
 
-        mItemSelectionDialog->setVisible(false);
+        if (mItemSelectionDialog)
+            mItemSelectionDialog->setVisible(false);
     }
 
     void QuickKeysMenu::onAssignItemCancel()
@@ -198,7 +205,8 @@ namespace MWGui
         image->setImageTexture (path);
         image->setNeedMouseFocus (false);
 
-        mMagicSelectionDialog->setVisible(false);
+        if (mMagicSelectionDialog)
+            mMagicSelectionDialog->setVisible(false);
     }
 
     void QuickKeysMenu::onAssignMagic (const std::string& spellId)
@@ -239,7 +247,8 @@ namespace MWGui
         image->setImageTexture (path);
         image->setNeedMouseFocus (false);
 
-        mMagicSelectionDialog->setVisible(false);
+        if (mMagicSelectionDialog)
+            mMagicSelectionDialog->setVisible(false);
     }
 
     void QuickKeysMenu::onAssignMagicCancel ()
@@ -374,6 +383,106 @@ namespace MWGui
         center();
     }
 
+    void QuickKeysMenu::write(ESM::ESMWriter &writer)
+    {
+        const std::string recKey = "KEY_";
+        writer.startRecord(ESM::REC_KEYS);
+
+        for (int i=0; i<10; ++i)
+        {
+            writer.startSubRecord(recKey);
+
+            MyGUI::Button* button = mQuickKeyButtons[i];
+
+            int type = *button->getUserData<QuickKeyType>();
+            writer.writeHNT("TYPE", type);
+
+            switch (type)
+            {
+                case Type_Unassigned:
+                    writer.writeHNString("ID__", "");
+                    break;
+                case Type_Item:
+                case Type_MagicItem:
+                {
+                    MWWorld::Ptr item = *button->getChildAt(0)->getUserData<MWWorld::Ptr>();
+                    writer.writeHNString("ID__", item.getCellRef().mRefID);
+                    break;
+                }
+                case Type_Magic:
+                    std::string spellId = button->getChildAt(0)->getUserString("Spell");
+                    writer.writeHNString("ID__", spellId);
+                    break;
+            }
+
+            writer.endRecord(recKey);
+        }
+
+        writer.endRecord(ESM::REC_KEYS);
+    }
+
+    void QuickKeysMenu::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        if (type != ESM::REC_KEYS)
+            return;
+
+        int i=0;
+        while (reader.isNextSub("KEY_"))
+        {
+            reader.getSubHeader();
+            int keyType;
+            reader.getHNT(keyType, "TYPE");
+            std::string id;
+            id = reader.getHNString("ID__");
+
+            mSelectedIndex = i;
+
+            MyGUI::Button* button = mQuickKeyButtons[i];
+
+            switch (keyType)
+            {
+            case Type_Magic:
+                onAssignMagic(id);
+                break;
+            case Type_Item:
+            case Type_MagicItem:
+            {
+                // Find the item by id
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+                MWWorld::Ptr item;
+                for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                {
+                    if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, id))
+                    {
+                        if (item.isEmpty() ||
+                            // Prefer the stack with the lowest remaining uses
+                            (it->getCellRef().mCharge != -1 && (item.getCellRef().mCharge == -1 || it->getCellRef().mCharge < item.getCellRef().mCharge) ))
+                        {
+                            item = *it;
+                        }
+                    }
+                }
+
+                if (item.isEmpty())
+                    unassign(button, i);
+                else
+                {
+                    if (keyType == Type_Item)
+                        onAssignItem(item);
+                    else if (keyType == Type_MagicItem)
+                        onAssignMagicItem(item);
+                }
+
+                break;
+            }
+            case Type_Unassigned:
+                unassign(button, i);
+                break;
+            }
+            ++i;
+        }
+    }
 
     // ---------------------------------------------------------------------------------------------------------
 
