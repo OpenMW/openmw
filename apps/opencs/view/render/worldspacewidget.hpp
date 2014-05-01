@@ -6,7 +6,12 @@
 #include "navigation1st.hpp"
 #include "navigationfree.hpp"
 #include "navigationorbit.hpp"
+#include <apps/opencs/model/doc/document.hpp>
 
+namespace CSMWorld
+{
+    class UniversalId;
+}
 namespace CSVWorld
 {
     class SceneToolMode;
@@ -25,7 +30,7 @@ namespace CSVRender
 
         public:
 
-            WorldspaceWidget (QWidget *parent = 0);
+            WorldspaceWidget (const CSMDoc::Document& document, QWidget *parent = 0);
 
             CSVWorld::SceneToolMode *makeNavigationSelector (CSVWorld::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
@@ -35,6 +40,25 @@ namespace CSVRender
 
             virtual void useViewHint (const std::string& hint);
             ///< Default-implementation: ignored.
+
+        protected:
+        const CSMDoc::Document& mDocument; //for checking if drop comes from same document
+
+        enum dropType
+        {
+            cellsMixed,
+            cellsInterior,
+            cellsExterior,
+            notCells
+        };
+
+        dropType getDropType(const std::vector<CSMWorld::UniversalId>& data) const;
+
+        private:
+
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dragMoveEvent(QDragMoveEvent *event);
 
         private slots:
 

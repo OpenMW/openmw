@@ -2,7 +2,6 @@
 #define OPENCS_VIEW_PAGEDWORLDSPACEWIDGET_H
 
 #include "../../model/world/cellselection.hpp"
-#include <apps/opencs/model/doc/document.hpp>
 
 #include "worldspacewidget.hpp"
 
@@ -13,17 +12,14 @@ namespace CSVRender
             Q_OBJECT
 
             CSMWorld::CellSelection mSelection;
-            const CSMDoc::Document& mDocument; //for checking if drop comes from same document
 
         private:
 
             void dropEvent(QDropEvent* event);
 
-            void dragEnterEvent(QDragEnterEvent *event);
-
-            void dragMoveEvent(QDragMoveEvent *event);
-
             std::pair<int, int> getCoordinatesFromId(const std::string& record) const;
+
+            void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
         public:
 
@@ -39,6 +35,8 @@ namespace CSVRender
         signals:
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
+
+            void interiorCellsDropped(const std::vector<CSMWorld::UniversalId>& data);
     };
 }
 

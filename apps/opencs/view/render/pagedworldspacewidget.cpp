@@ -8,11 +8,8 @@
 #include <apps/opencs/model/world/tablemimedata.hpp>
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent, const CSMDoc::Document& document)
-: WorldspaceWidget (parent),
-mDocument(document)
-{
-    setAcceptDrops(true);
-}
+: WorldspaceWidget (document, parent)
+{}
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
 {
@@ -53,48 +50,55 @@ void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSel
     emit cellSelectionChanged (mSelection);
 }
 
-void CSVRender::PagedWorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
-{
-    event->accept();
-}
-
-void CSVRender::PagedWorldspaceWidget::dragMoveEvent (QDragMoveEvent* event)
-{
-    event->accept();
-}
-
 void CSVRender::PagedWorldspaceWidget::dropEvent (QDropEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+
     if (mime->fromDocument(mDocument))
     {
-        std::vector<CSMWorld::UniversalId> data(mime->getData());
+        const std::vector<CSMWorld::UniversalId> data(mime->getData());
+        CSVRender::WorldspaceWidget::dropType whatHappend = getDropType(data);
 
-        for (unsigned i = 0; i < data.size(); ++i)
+        std::cout<<whatHappend<<std::endl;
+        switch (whatHappend)
         {
-            if (data[i].getType() == CSMWorld::UniversalId::Type_Cell ||
-                data[i].getType() == CSMWorld::UniversalId::Type_Cell_Missing)
-            {
-                if (*(data[i].getId().begin()) == '#')
-                {
-                    std::pair<int, int> coordinate(getCoordinatesFromId(data[i].getId()));
-                    mSelection.add(CSMWorld::CellCoordinates(coordinate.first, coordinate.second));
-                }
-            }
+            case CSVRender::WorldspaceWidget::cellsExterior:
+                handleDrop(data);
+                break;
+
+            case CSVRender::WorldspaceWidget::cellsInterior:
+                emit interiorCellsDropped(data);
+                break;
+
+            default:
+                //not interior or exterior = either mixed or not actually cells. We don't need to do anything in this case.
+                break;
         }
-    }
+    } //not handling drops from different documents at the moment
 }
 
 std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
 {
     std::istringstream stream (record.c_str());
     char ignore;
-    stream >> ignore;
-    char ignore1; // : or ;
-    char ignore2; // #
     int x, y;
-
-    stream >> ignore1 >> ignore2 >> x >> y;
+    stream >> ignore >> x >> y;
     return std::make_pair(x, y);
 }
 
+void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
+{
+    bool selectionChanged = false;
+    for (unsigned i = 0; i < data.size(); ++i)
+    {
+        std::pair<int, int> coordinates(getCoordinatesFromId(data[i].getId()));
+        if (mSelection.add(CSMWorld::CellCoordinates(coordinates.first, coordinates.second)))
+        {
+            selectionChanged = true;
+        }
+    }
+    if (selectionChanged)
+    {
+        emit cellSelectionChanged(mSelection);
+    }
+}
