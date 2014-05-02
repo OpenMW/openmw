@@ -54,7 +54,7 @@ CSVWorld::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
 }
 
 CSVRender::WorldspaceWidget::dropType CSVRender::WorldspaceWidget::getDropType (
-    const std::vector< CSMWorld::UniversalId >& data) const
+    const std::vector< CSMWorld::UniversalId >& data)
 {
     dropType output = notCells;
     bool firstIteration = true;

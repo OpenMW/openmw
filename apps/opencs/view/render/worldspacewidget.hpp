@@ -30,20 +30,6 @@ namespace CSVRender
 
         public:
 
-            WorldspaceWidget (const CSMDoc::Document& document, QWidget *parent = 0);
-
-            CSVWorld::SceneToolMode *makeNavigationSelector (CSVWorld::SceneToolbar *parent);
-            ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
-            /// is the responsibility of the calling function.
-
-            void selectDefaultNavigationMode();
-
-            virtual void useViewHint (const std::string& hint);
-            ///< Default-implementation: ignored.
-
-        protected:
-        const CSMDoc::Document& mDocument; //for checking if drop comes from same document
-
         enum dropType
         {
             cellsMixed,
@@ -52,7 +38,21 @@ namespace CSVRender
             notCells
         };
 
-        dropType getDropType(const std::vector<CSMWorld::UniversalId>& data) const;
+            WorldspaceWidget (const CSMDoc::Document& document, QWidget *parent = 0);
+
+            CSVWorld::SceneToolMode *makeNavigationSelector (CSVWorld::SceneToolbar *parent);
+            ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
+            /// is the responsibility of the calling function.
+
+            void selectDefaultNavigationMode();
+
+            static dropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
+
+            virtual void useViewHint (const std::string& hint);
+            ///< Default-implementation: ignored.
+
+        protected:
+        const CSMDoc::Document& mDocument; //for checking if drop comes from same document
 
         private:
 
