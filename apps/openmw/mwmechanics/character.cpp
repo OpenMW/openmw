@@ -489,12 +489,13 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         mIdleState = CharState_Idle;
     }
 
-    refreshCurrentAnims(mIdleState, mMovementState, true);
 
     if(mDeathState != CharState_None)
     {
         playRandomDeath(1.0f);
     }
+    else
+        refreshCurrentAnims(mIdleState, mMovementState, true);
 }
 
 CharacterController::~CharacterController()
