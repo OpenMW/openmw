@@ -293,6 +293,10 @@ namespace MWGui
 
     virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress);
     virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+    virtual int countSavedGameRecords() const;
+
+    /// Does the current stack of GUI-windows permit saving?
+    virtual bool isSavingAllowed() const;
 
   private:
     bool mConsoleOnlyScripts;
