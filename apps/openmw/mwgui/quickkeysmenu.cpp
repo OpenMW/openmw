@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/esm/quickkeys.hpp>
+
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -385,38 +387,40 @@ namespace MWGui
 
     void QuickKeysMenu::write(ESM::ESMWriter &writer)
     {
-        const std::string recKey = "KEY_";
         writer.startRecord(ESM::REC_KEYS);
+
+        ESM::QuickKeys keys;
 
         for (int i=0; i<10; ++i)
         {
-            writer.startSubRecord(recKey);
-
             MyGUI::Button* button = mQuickKeyButtons[i];
 
             int type = *button->getUserData<QuickKeyType>();
-            writer.writeHNT("TYPE", type);
+
+            ESM::QuickKeys::QuickKey key;
+            key.mType = type;
 
             switch (type)
             {
                 case Type_Unassigned:
-                    writer.writeHNString("ID__", "");
                     break;
                 case Type_Item:
                 case Type_MagicItem:
                 {
                     MWWorld::Ptr item = *button->getChildAt(0)->getUserData<MWWorld::Ptr>();
-                    writer.writeHNString("ID__", item.getCellRef().mRefID);
+                    key.mId = item.getCellRef().mRefID;
                     break;
                 }
                 case Type_Magic:
                     std::string spellId = button->getChildAt(0)->getUserString("Spell");
-                    writer.writeHNString("ID__", spellId);
+                    key.mId = spellId;
                     break;
             }
 
-            writer.endRecord(recKey);
+            keys.mKeys.push_back(key);
         }
+
+        keys.save(writer);
 
         writer.endRecord(ESM::REC_KEYS);
     }
@@ -426,17 +430,18 @@ namespace MWGui
         if (type != ESM::REC_KEYS)
             return;
 
+        ESM::QuickKeys keys;
+        keys.load(reader);
+
         int i=0;
-        while (reader.isNextSub("KEY_"))
+        for (std::vector<ESM::QuickKeys::QuickKey>::const_iterator it = keys.mKeys.begin(); it != keys.mKeys.end(); ++it)
         {
-            reader.getSubHeader();
-            int keyType;
-            reader.getHNT(keyType, "TYPE");
-            std::string id;
-            id = reader.getHNString("ID__");
+            if (i >= 10)
+                return;
 
             mSelectedIndex = i;
-
+            int keyType = it->mType;
+            std::string id = it->mId;
             MyGUI::Button* button = mQuickKeyButtons[i];
 
             switch (keyType)
@@ -480,6 +485,7 @@ namespace MWGui
                 unassign(button, i);
                 break;
             }
+
             ++i;
         }
     }
