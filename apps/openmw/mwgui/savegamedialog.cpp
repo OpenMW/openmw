@@ -206,6 +206,13 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage65}");
                 return;
             }
+        }
+
+        setVisible(false);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
+
+        if (mSaving)
+        {
             MWBase::Environment::get().getStateManager()->saveGame (mSaveNameEdit->getCaption(), mCurrentSlot);
         }
         else
@@ -213,11 +220,8 @@ namespace MWGui
             if (mCurrentCharacter && mCurrentSlot)
             {
                 MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
-                MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
             }
         }
-
-        setVisible(false);
 
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_NoGame)
