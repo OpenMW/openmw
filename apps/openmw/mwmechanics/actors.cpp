@@ -728,18 +728,16 @@ namespace MWMechanics
         {
             const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
             int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
-            
-            // am I close enough to the player?
-            if (Ogre::Vector3(ptr.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos))
-                 <= radius * radius )
-            {
-                bool seen = false; // unseen
-                if (   !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr) 
-                    && !MWBase::Environment::get().getWorld()->getLOS(player, ptr) )
-                    seen = true; // seen
+            bool seen = false;
 
-                MWBase::Environment::get().getWindowManager()->setSneakVisibility(seen);
-            }
+            // am I close enough and can I see the player?
+            if (   (Ogre::Vector3(ptr.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius)
+                && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr)
+                && MWBase::Environment::get().getWorld()->getLOS(player, ptr))
+
+                    seen = true;
+
+            MWBase::Environment::get().getWindowManager()->setSneakVisibility(seen);
         }
     }
 
