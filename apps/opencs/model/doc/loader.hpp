@@ -15,9 +15,16 @@ namespace CSMDoc
     {
             Q_OBJECT
 
+            struct Stage
+            {
+                int mFile;
+
+                Stage();
+            };
+
             QMutex mMutex;
             QWaitCondition mThingsToDo;
-            std::vector<std::pair<Document *, bool> > mDocuments;
+            std::vector<std::pair<Document *, Stage> > mDocuments;
 
         public:
 

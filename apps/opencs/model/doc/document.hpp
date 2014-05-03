@@ -54,10 +54,6 @@ namespace CSMDoc
             Document (const Document&);
             Document& operator= (const Document&);
 
-            void load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-                const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified);
-            ///< \param lastAsModified Store the last file in Modified instead of merging it into Base.
-
             void createBase();
 
             void addGmsts();
@@ -78,13 +74,13 @@ namespace CSMDoc
 
             ~Document();
 
-            void setupData();
-
             QUndoStack& getUndoStack();
 
             int getState() const;
 
             const boost::filesystem::path& getSavePath() const;
+
+            const boost::filesystem::path& getProjectPath() const;
 
             const std::vector<boost::filesystem::path>& getContentFiles() const;
             ///< \attention The last element in this collection is the file that is being edited,

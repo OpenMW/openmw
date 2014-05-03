@@ -8,23 +8,6 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
-void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-                             const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
-{
-    assert (begin!=end);
-
-    std::vector<boost::filesystem::path>::const_iterator end2 (end);
-
-    if (lastAsModified)
-        --end2;
-
-    for (std::vector<boost::filesystem::path>::const_iterator iter (begin); iter!=end2; ++iter)
-        getData().loadFile (*iter, true, false);
-
-    if (lastAsModified)
-        getData().loadFile (*end2, false, false);
-}
-
 void CSMDoc::Document::addGmsts()
 {
     static const char *gmstFloats[] =
@@ -2272,21 +2255,6 @@ CSMDoc::Document::~Document()
 {
 }
 
-void CSMDoc::Document::setupData()
-{
-    if (!mNew || mContentFiles.size()>1)
-    {
-        std::vector<boost::filesystem::path>::const_iterator end = mContentFiles.end();
-
-        if (mNew)
-            --end;
-
-        load (mContentFiles.begin(), end, !mNew);
-    }
-
-    getData().loadFile (mProjectPath, false, true);
-}
-
 QUndoStack& CSMDoc::Document::getUndoStack()
 {
     return mUndoStack;
@@ -2311,6 +2279,11 @@ int CSMDoc::Document::getState() const
 const boost::filesystem::path& CSMDoc::Document::getSavePath() const
 {
     return mSavePath;
+}
+
+const boost::filesystem::path& CSMDoc::Document::getProjectPath() const
+{
+    return mProjectPath;
 }
 
 const std::vector<boost::filesystem::path>& CSMDoc::Document::getContentFiles() const
