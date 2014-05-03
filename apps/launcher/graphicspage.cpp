@@ -214,13 +214,13 @@ QStringList Launcher::GraphicsPage::getAvailableOptions(const QString &key, Ogre
     uint row = 0;
     Ogre::ConfigOptionMap options = renderer->getConfigOptions();
 
-    for (Ogre::ConfigOptionMap::iterator i = options.begin (); i != options.end (); i++, row++)
+    for (Ogre::ConfigOptionMap::iterator i = options.begin (); i != options.end (); ++i, ++row)
     {
         Ogre::StringVector::iterator opt_it;
         uint idx = 0;
 
         for (opt_it = i->second.possibleValues.begin();
-             opt_it != i->second.possibleValues.end(); opt_it++, idx++)
+             opt_it != i->second.possibleValues.end(); ++opt_it, ++idx)
         {
             if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0) {
                 result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();

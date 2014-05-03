@@ -401,10 +401,10 @@ namespace MWMechanics
         if (!exploded)
             MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, mTarget, effects, caster, mId, mSourceName);
 
-        if (reflectedEffects.mList.size())
+        if (!reflectedEffects.mList.empty())
             inflict(caster, target, reflectedEffects, range, true);
 
-        if (appliedLastingEffects.size())
+        if (!appliedLastingEffects.empty())
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, caster.getRefData().getHandle());
 
@@ -420,19 +420,20 @@ namespace MWMechanics
         {
             if (effectId == ESM::MagicEffect::Lock)
             {
-                if (target.getCellRef().mLockLevel < magnitude)
+                if (target.getCellRef().mLockLevel < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
                     target.getCellRef().mLockLevel = magnitude;
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
                 if (target.getCellRef().mLockLevel <= magnitude)
                 {
+                    //Door not already unlocked
                     if (target.getCellRef().mLockLevel > 0)
                     {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
                         MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
                     }
-                    target.getCellRef().mLockLevel = 0;
+                    target.getCellRef().mLockLevel = -abs(target.getCellRef().mLockLevel); //unlocks the door
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
@@ -574,7 +575,6 @@ namespace MWMechanics
         {
             if (mCaster.getRefData().getHandle() == "player")
             {
-                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
             }
         }

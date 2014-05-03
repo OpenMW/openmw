@@ -15,7 +15,8 @@
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
-#include "../settings/usersettingsdialog.hpp"
+
+#include "../../model/settings/usersettings.hpp"
 
 #include "view.hpp"
 
@@ -84,9 +85,6 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         mDelegateFactories->add (sMapping[i].mDisplay, new CSVWorld::EnumDelegateFactory (
             CSMWorld::Columns::getEnums (sMapping[i].mColumnId), sMapping[i].mAllowNone));
 
-    connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
-        this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
-
     connect (&mDocumentManager, SIGNAL (loadRequest (CSMDoc::Document *)),
         &mLoader, SLOT (add (CSMDoc::Document *)));
 
@@ -129,6 +127,11 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
     connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
+
+    connect (&CSMSettings::UserSettings::instance(),
+             SIGNAL (userSettingUpdated(const QString &, const QStringList &)),
+             view,
+             SLOT (updateUserSetting (const QString &, const QStringList &)));
 
     updateIndices();
 
@@ -323,10 +326,4 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
     if (notifySaveOnClose (view))
         QApplication::instance()->exit();
-}
-
-void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
-{
-    foreach (CSVDoc::View *view, mViews)
-        view->updateEditorSetting (settingName, settingValue);
 }

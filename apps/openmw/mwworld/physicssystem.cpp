@@ -313,8 +313,9 @@ namespace MWWorld
                 // NOTE: stepMove modifies newPosition if successful
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
                 {
-                    // don't let slaughterfish move out of water after stepMove
-                    if(ptr.getClass().canSwim(ptr) && newPosition.z > (waterlevel - halfExtents.z * 0.5))
+                    // don't let pure water creatures move out of water after stepMove
+                    if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
+                            && newPosition.z > (waterlevel - halfExtents.z * 0.5))
                         newPosition = oldPosition;
                     else // Only on the ground if there's gravity
                         isOnGround = !(newPosition.z < waterlevel || isFlying);
@@ -671,7 +672,7 @@ namespace MWWorld
     void PhysicsSystem::queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &movement)
     {
         PtrVelocityList::iterator iter = mMovementQueue.begin();
-        for(;iter != mMovementQueue.end();iter++)
+        for(;iter != mMovementQueue.end();++iter)
         {
             if(iter->first == ptr)
             {
@@ -692,7 +693,7 @@ namespace MWWorld
         {
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             PtrVelocityList::iterator iter = mMovementQueue.begin();
-            for(;iter != mMovementQueue.end();iter++)
+            for(;iter != mMovementQueue.end();++iter)
             {
                 float waterlevel = -std::numeric_limits<float>::max();
                 const ESM::Cell *cell = iter->first.getCell()->getCell();

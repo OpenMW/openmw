@@ -6,6 +6,7 @@
 namespace MWState
 {
     class Character;
+    class Slot;
 }
 
 namespace MWGui
@@ -24,8 +25,15 @@ namespace MWGui
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onOkButtonClicked (MyGUI::Widget* sender);
         void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
+        // Slot selected (mouse click or arrow keys)
         void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
+        // Slot activated (double click or enter key)
         void onSlotActivated (MyGUI::ListBox* sender, size_t pos);
+        // Slot clicked with mouse
+        void onSlotMouseClick(MyGUI::ListBox* sender, size_t pos);
+
+        void onDeleteSlotConfirmed();
+
         void onEditSelectAccept (MyGUI::EditBox* sender);
         void onSaveNameChanged (MyGUI::EditBox* sender);
         void onConfirmationGiven();
@@ -46,6 +54,7 @@ namespace MWGui
         MyGUI::Widget* mSpacer;
 
         const MWState::Character* mCurrentCharacter;
+        const MWState::Slot* mCurrentSlot;
 
     };
 

@@ -31,6 +31,7 @@ public:
    *************************************************************************/
 
   int getVer() const { return mHeader.mData.version; }
+  int getRecordCount() const { return mHeader.mData.records; }
   float getFVer() const { if(mHeader.mData.version == VER_12) return 1.2; else return 1.3; }
   const std::string getAuthor() const { return mHeader.mData.author.toString(); }
   const std::string getDesc() const { return mHeader.mData.desc.toString(); }

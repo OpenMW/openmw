@@ -686,7 +686,7 @@ bool WeatherManager::isDark() const
     return exterior && (mHour < mSunriseTime || mHour > mNightStart - 1);
 }
 
-void WeatherManager::write(ESM::ESMWriter& writer)
+void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
 {
     ESM::WeatherState state;
     state.mHour = mHour;
@@ -701,6 +701,7 @@ void WeatherManager::write(ESM::ESMWriter& writer)
     writer.startRecord(ESM::REC_WTHR);
     state.save(writer);
     writer.endRecord(ESM::REC_WTHR);
+    progress.increaseProgress();
 }
 
 bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)

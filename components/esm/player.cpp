@@ -26,9 +26,9 @@ void ESM::Player::load (ESMReader &esm)
 
     mBirthsign = esm.getHNString ("SIGN");
 
-    mCurrentCrimeId = 0;
+    mCurrentCrimeId = -1;
     esm.getHNOT (mCurrentCrimeId, "CURD");
-    mPayedCrimeId = 0;
+    mPayedCrimeId = -1;
     esm.getHNOT (mPayedCrimeId, "PAYD");
 }
 

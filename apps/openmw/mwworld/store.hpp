@@ -8,6 +8,8 @@
 
 #include <components/esm/esmwriter.hpp>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 #include "recordcmp.hpp"
 
 namespace MWWorld
@@ -313,7 +315,7 @@ namespace MWWorld
             return erase(item.mId);
         }
 
-        void write (ESM::ESMWriter& writer) const
+        void write (ESM::ESMWriter& writer, Loading::Listener& progress) const
         {
             for (typename Dynamic::const_iterator iter (mDynamic.begin()); iter!=mDynamic.end();
                  ++iter)
@@ -322,6 +324,7 @@ namespace MWWorld
                 writer.writeHNString ("NAME", iter->second.mId);
                 iter->second.save (writer);
                 writer.endRecord (T::sRecordId);
+                progress.increaseProgress();
             }
         }
 

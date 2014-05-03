@@ -231,9 +231,8 @@ namespace MWRender
         mOverlayTexture->getBuffer()->blitFromMemory(pb);
     }
 
-    void GlobalMap::write(ESM::ESMWriter &writer)
+    void GlobalMap::write(ESM::GlobalMap& map)
     {
-        ESM::GlobalMap map;
         map.mBounds.mMinX = mMinX;
         map.mBounds.mMaxX = mMaxX;
         map.mBounds.mMinY = mMinY;
@@ -244,95 +243,68 @@ namespace MWRender
         Ogre::DataStreamPtr encoded = image.encode("png");
         map.mImageData.resize(encoded->size());
         encoded->read(&map.mImageData[0], encoded->size());
-
-        writer.startRecord(ESM::REC_GMAP);
-        map.save(writer);
-        writer.endRecord(ESM::REC_GMAP);
     }
 
-    void GlobalMap::readRecord(ESM::ESMReader &reader, int32_t type, std::vector<std::pair<int, int> >& exploredCells)
+    void GlobalMap::read(ESM::GlobalMap& map)
     {
-        if (type == ESM::REC_GMAP)
-        {
-            ESM::GlobalMap map;
-            map.load(reader);
+        const ESM::GlobalMap::Bounds& bounds = map.mBounds;
 
-            const ESM::GlobalMap::Bounds& bounds = map.mBounds;
+        if (bounds.mMaxX-bounds.mMinX <= 0)
+            return;
+        if (bounds.mMaxY-bounds.mMinY <= 0)
+            return;
 
-            if (bounds.mMaxX-bounds.mMinX <= 0)
-                return;
-            if (bounds.mMaxY-bounds.mMinY <= 0)
-                return;
+        if (bounds.mMinX > bounds.mMaxX
+                || bounds.mMinY > bounds.mMaxY)
+            throw std::runtime_error("invalid map bounds");
 
-            if (bounds.mMinX > bounds.mMaxX
-                    || bounds.mMinY > bounds.mMaxY)
-                throw std::runtime_error("invalid map bounds");
+        Ogre::Image image;
+        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&map.mImageData[0], map.mImageData.size()));
+        image.load(stream, "png");
 
-            Ogre::Image image;
-            Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&map.mImageData[0], map.mImageData.size()));
-            image.load(stream, "png");
+        int xLength = (bounds.mMaxX-bounds.mMinX+1);
+        int yLength = (bounds.mMaxY-bounds.mMinY+1);
 
-            int xLength = (bounds.mMaxX-bounds.mMinX+1);
-            int yLength = (bounds.mMaxY-bounds.mMinY+1);
+        // Size of one cell in image space
+        int cellImageSizeSrc = image.getWidth() / xLength;
+        if (int(image.getHeight() / yLength) != cellImageSizeSrc)
+            throw std::runtime_error("cell size must be quadratic");
 
-            // Size of one cell in image space
-            int cellImageSizeSrc = image.getWidth() / xLength;
-            if (int(image.getHeight() / yLength) != cellImageSizeSrc)
-                throw std::runtime_error("cell size must be quadratic");
+        // If cell bounds of the currently loaded content and the loaded savegame do not match,
+        // we need to resize source/dest boxes to accommodate
+        // This means nonexisting cells will be dropped silently
+        int cellImageSizeDst = 24;
 
-            // Determine which cells were explored by reading the image data
-            for (int x=0; x < xLength; ++x)
-            {
-                for (int y=0; y < yLength; ++y)
-                {
-                    unsigned int imageX = (x) * cellImageSizeSrc;
-                    // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
-                    unsigned int imageY = (yLength - (y + 1)) * cellImageSizeSrc;
+        // Completely off-screen? -> no need to blit anything
+        if (bounds.mMaxX < mMinX
+                || bounds.mMaxY < mMinY
+                || bounds.mMinX > mMaxX
+                || bounds.mMinY > mMaxY)
+            return;
 
-                    assert(imageX < image.getWidth());
-                    assert(imageY < image.getHeight());
+        int leftDiff = (mMinX - bounds.mMinX);
+        int topDiff = (bounds.mMaxY - mMaxY);
+        int rightDiff = (bounds.mMaxX - mMaxX);
+        int bottomDiff =  (mMinY - bounds.mMinY);
+        Ogre::Image::Box srcBox ( std::max(0, leftDiff * cellImageSizeSrc),
+                                  std::max(0, topDiff * cellImageSizeSrc),
+                                  std::min(image.getWidth(), image.getWidth() - rightDiff * cellImageSizeSrc),
+                                  std::min(image.getHeight(), image.getHeight() - bottomDiff * cellImageSizeSrc));
 
-                    if (image.getColourAt(imageX, imageY, 0).a > 0)
-                        exploredCells.push_back(std::make_pair(x+bounds.mMinX,y+bounds.mMinY));
-                }
-            }
+        Ogre::Image::Box destBox ( std::max(0, -leftDiff * cellImageSizeDst),
+                                   std::max(0, -topDiff * cellImageSizeDst),
+                                   std::min(mOverlayTexture->getWidth(), mOverlayTexture->getWidth() + rightDiff * cellImageSizeDst),
+                                   std::min(mOverlayTexture->getHeight(), mOverlayTexture->getHeight() + bottomDiff * cellImageSizeDst));
 
-            // If cell bounds of the currently loaded content and the loaded savegame do not match,
-            // we need to resize source/dest boxes to accommodate
-            // This means nonexisting cells will be dropped silently
-            int cellImageSizeDst = 24;
+        // Looks like there is no interface for blitting from memory with src/dst boxes.
+        // So we create a temporary texture for blitting.
+        Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().createManual("@temp",
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, image.getWidth(),
+                                                                                 image.getHeight(), 0, Ogre::PF_A8B8G8R8);
+        tex->loadImage(image);
 
-            // Completely off-screen? -> no need to blit anything
-            if (bounds.mMaxX < mMinX
-                    || bounds.mMaxY < mMinY
-                    || bounds.mMinX > mMaxX
-                    || bounds.mMinY > mMaxY)
-                return;
+        mOverlayTexture->getBuffer()->blit(tex->getBuffer(), srcBox, destBox);
 
-            int leftDiff = (mMinX - bounds.mMinX);
-            int topDiff = (bounds.mMaxY - mMaxY);
-            int rightDiff = (bounds.mMaxX - mMaxX);
-            int bottomDiff =  (mMinY - bounds.mMinY);
-            Ogre::Image::Box srcBox ( std::max(0, leftDiff * cellImageSizeSrc),
-                                      std::max(0, topDiff * cellImageSizeSrc),
-                                      std::min(image.getWidth(), image.getWidth() - rightDiff * cellImageSizeSrc),
-                                      std::min(image.getHeight(), image.getHeight() - bottomDiff * cellImageSizeSrc));
-
-            Ogre::Image::Box destBox ( std::max(0, -leftDiff * cellImageSizeDst),
-                                       std::max(0, -topDiff * cellImageSizeDst),
-                                       std::min(mOverlayTexture->getWidth(), mOverlayTexture->getWidth() + rightDiff * cellImageSizeDst),
-                                       std::min(mOverlayTexture->getHeight(), mOverlayTexture->getHeight() + bottomDiff * cellImageSizeDst));
-
-            // Looks like there is no interface for blitting from memory with src/dst boxes.
-            // So we create a temporary texture for blitting.
-            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().createManual("@temp",
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, image.getWidth(),
-                                                                                     image.getHeight(), 0, Ogre::PF_A8B8G8R8);
-            tex->loadImage(image);
-
-            mOverlayTexture->getBuffer()->blit(tex->getBuffer(), srcBox, destBox);
-
-            Ogre::TextureManager::getSingleton().remove("@temp");
-        }
+        Ogre::TextureManager::getSingleton().remove("@temp");
     }
 }

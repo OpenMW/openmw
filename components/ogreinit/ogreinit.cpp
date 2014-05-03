@@ -62,6 +62,7 @@ namespace OgreInit
     OgreInit::~OgreInit()
     {
         delete mRoot;
+        delete Ogre::LogManager::getSingletonPtr();
 
         std::vector<Ogre::ParticleEmitterFactory*>::iterator ei;
         for(ei = mEmitterFactories.begin();ei != mEmitterFactories.end();++ei)

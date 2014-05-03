@@ -47,6 +47,25 @@ MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create)
     return mCurrent;
 }
 
+void MWState::CharacterManager::deleteSlot(const MWState::Character *character, const MWState::Slot *slot)
+{
+    int index = character - &mCharacters[0];
+
+    if (index<0 || index>=static_cast<int> (mCharacters.size()))
+        throw std::logic_error ("invalid character");
+
+    mCharacters[index].deleteSlot(slot);
+
+    if (mCharacters[index].begin() == mCharacters[index].end())
+    {
+        // All slots deleted, cleanup and remove this character
+        mCharacters[index].cleanup();
+        if (character == mCurrent)
+            mCurrent = NULL;
+        mCharacters.erase(mCharacters.begin() + index);
+    }
+}
+
 void MWState::CharacterManager::createCharacter()
 {
     std::ostringstream stream;

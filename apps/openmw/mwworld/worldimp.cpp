@@ -268,19 +268,20 @@ namespace MWWorld
     int World::countSavedGameRecords() const
     {
         return
-            mStore.countSavedGameRecords()
+            mCells.countSavedGameRecords()
+            +mStore.countSavedGameRecords()
             +mGlobalVariables.countSavedGameRecords()
             +1 // player record
-            +mCells.countSavedGameRecords();
+            +1; // weather record
     }
 
-    void World::write (ESM::ESMWriter& writer) const
+    void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        mStore.write (writer);
-        mGlobalVariables.write (writer);
-        mCells.write (writer);
-        mPlayer->write (writer);
-        mWeatherManager->write (writer);
+        mCells.write (writer, progress);
+        mStore.write (writer, progress);
+        mGlobalVariables.write (writer, progress);
+        mPlayer->write (writer, progress);
+        mWeatherManager->write (writer, progress);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -1908,7 +1909,7 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
-
+    
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
@@ -1924,6 +1925,19 @@ namespace MWWorld
         std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
         if(result.first == "") return true;
         return false;
+    }
+
+    float World::getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist)
+    {
+        btVector3 btFrom(from.x, from.y, from.z);
+        btVector3 btTo = btVector3(dir.x, dir.y, dir.z);
+        btTo.normalize();
+        btTo = btFrom + btTo * maxDist;
+
+        std::pair<std::string, float> result = mPhysEngine->rayTest(btFrom, btTo, false);
+
+        if(result.second == -1) return maxDist;
+        else return result.second*(btTo-btFrom).length();
     }
 
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
@@ -2056,7 +2070,6 @@ namespace MWWorld
         {
             // Update the GUI only when called on the player
             MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-            windowManager->unsetSelectedWeapon();
 
             if (werewolf)
             {
@@ -2506,7 +2519,17 @@ namespace MWWorld
 
     bool World::isDark() const
     {
-        return mWeatherManager->isDark();
+        MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
+        if (cell->isExterior())
+            return mWeatherManager->isDark();
+        else
+        {
+            uint32_t ambient = cell->getCell()->mAmbi.mAmbient;
+            int ambientTotal = (ambient & 0xff)
+                    + ((ambient>>8) & 0xff)
+                    + ((ambient>>16) & 0xff);
+            return !(cell->getCell()->mData.mFlags & ESM::Cell::NoSleep) && ambientTotal <= 201;
+        }
     }
 
     bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
@@ -2695,6 +2718,7 @@ namespace MWWorld
         MWWorld::Ptr closestChest;
         float closestDistance = FLT_MAX;
 
+        //Find closest stolen_goods chest
         std::vector<MWWorld::Ptr> chests;
         mCells.getInteriorPtrs("stolen_goods", chests);
 
@@ -2712,17 +2736,18 @@ namespace MWWorld
             }
         }
 
-        if (!closestChest.isEmpty())
+        if (!closestChest.isEmpty()) //Found a close chest
         {
             ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-            for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it) //Move all stolen stuff into chest
             {
-                if (!it->getCellRef().mOwner.empty() && it->getCellRef().mOwner != "player")
+                if (!it->getCellRef().mOwner.empty() && it->getCellRef().mOwner != "player") //Not owned by no one/player?
                 {
                     closestChest.getClass().getContainerStore(closestChest).add(*it, it->getRefData().getCount(), closestChest);
                     store.remove(*it, it->getRefData().getCount(), ptr);
                 }
             }
+            closestChest.getCellRef().mLockLevel = abs(closestChest.getCellRef().mLockLevel);
         }
     }
 
@@ -2791,7 +2816,7 @@ namespace MWWorld
                 message += "\n" + skillMsg;
             }
 
-            // TODO: Sleep the player 
+            // TODO: Sleep the player
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");

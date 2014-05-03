@@ -2,7 +2,10 @@
 #define GAME_MWMECHANICS_AIWANDER_H
 
 #include "aipackage.hpp"
+
 #include <vector>
+
+#include <OgreVector3.h>
 
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
@@ -22,10 +25,15 @@ namespace MWMechanics
             virtual int getTypeId() const;
             ///< 0: Wander
 
+            void setReturnPosition (const Ogre::Vector3& position);
+            ///< Set the position to return to for a stationary (non-wandering) actor, in case
+            /// another AI package moved the actor elsewhere
+
         private:
             void stopWalking(const MWWorld::Ptr& actor);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
+            void getRandomIdle();
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
@@ -37,6 +45,10 @@ namespace MWMechanics
             int mGreetDistanceMultiplier;
             float mGreetDistanceReset;
             float mChance;
+
+            bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
+                                    // if we had the actor in the AiWander constructor...
+            Ogre::Vector3 mReturnPosition;
 
             // Cached current cell location
             int mCellX;

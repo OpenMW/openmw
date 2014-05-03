@@ -206,7 +206,7 @@ namespace MWMechanics
                 if (effectIt->mKey.mId == effectId)
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
-                    effectIt++;
+                    ++effectIt;
             }
         }
         mSpellsChanged = true;
@@ -224,7 +224,7 @@ namespace MWMechanics
                         && it->second.mCasterHandle == actorHandle)
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
-                    effectIt++;
+                    ++effectIt;
             }
         }
         mSpellsChanged = true;

@@ -34,7 +34,7 @@ namespace MWGui
             MWWorld::Ptr getAvatarSelectedItem(int x, int y);
 
             void rebuildAvatar() {
-                mPreview.rebuild();
+                mPreview->rebuild();
             }
 
             TradeItemModel* getTradeModel();
@@ -81,7 +81,7 @@ namespace MWGui
             int mLastXSize;
             int mLastYSize;
 
-            MWRender::InventoryPreview mPreview;
+            std::auto_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
 

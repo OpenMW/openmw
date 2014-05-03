@@ -337,6 +337,8 @@ namespace Terrain
                 it->mTarget->loadLayers(*it);
             }
 
+            delete data;
+
             mRootNode->loadMaterials();
 
             mLayerLoadPending = false;

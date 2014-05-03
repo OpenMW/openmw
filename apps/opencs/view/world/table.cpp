@@ -298,7 +298,7 @@ void CSVWorld::Table::revertRecord()
     {
         std::vector<std::string> revertableIds = listRevertableSelectedIds();
 
-        if (revertableIds.size()>0)
+        if (!revertableIds.empty())
         {
             if (revertableIds.size()>1)
                 mDocument.getUndoStack().beginMacro (tr ("Revert multiple records"));
@@ -318,7 +318,7 @@ void CSVWorld::Table::deleteRecord()
     {
         std::vector<std::string> deletableIds = listDeletableSelectedIds();
 
-        if (deletableIds.size()>0)
+        if (!deletableIds.empty())
         {
             if (deletableIds.size()>1)
                 mDocument.getUndoStack().beginMacro (tr ("Delete multiple records"));
@@ -449,15 +449,21 @@ void CSVWorld::Table::previewRecord()
     }
 }
 
-void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QString &settingValue)
+void CSVWorld::Table::updateUserSetting
+                                (const QString &name, const QStringList &list)
 {
     int columns = mModel->columnCount();
 
     for (int i=0; i<columns; ++i)
         if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
-            if (dynamic_cast<CommandDelegate&> (*delegate).
-                updateEditorSetting (settingName, settingValue))
-                emit dataChanged (mModel->index (0, i), mModel->index (mModel->rowCount()-1, i));
+        {
+            dynamic_cast<CommandDelegate&>
+                                    (*delegate).updateUserSetting (name, list);
+            {
+                emit dataChanged (mModel->index (0, i),
+                                  mModel->index (mModel->rowCount()-1, i));
+            }
+        }
 }
 
 void CSVWorld::Table::tableSizeUpdate()
