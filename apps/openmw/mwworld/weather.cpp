@@ -329,7 +329,6 @@ void WeatherManager::update(float duration)
     const bool exterior = (world->isCellExterior() || world->isCellQuasiExterior());
     if (!exterior)
     {
-        mRendering->sunDisable(false);
         mRendering->skyDisable();
         mRendering->getSkyManager()->setLightningStrength(0.f);
         stopSounds(true);
