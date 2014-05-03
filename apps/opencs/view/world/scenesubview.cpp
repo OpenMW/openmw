@@ -142,7 +142,7 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& 
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection& selection)
 {
-    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Cell, "sys::default"));
+    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, "sys::default"));
     int size = selection.getSize();
 
     std::ostringstream stream;
