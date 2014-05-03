@@ -15,8 +15,6 @@ namespace CSVRender
 
         private:
 
-            void dropEvent(QDropEvent* event);
-
             std::pair<int, int> getCoordinatesFromId(const std::string& record) const;
 
         public:
@@ -32,11 +30,11 @@ namespace CSVRender
 
             virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
+            virtual dropRequirments getDropRequirements(dropType type) const;
+
         signals:
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
-
-            void interiorCellsDropped(const std::vector<CSMWorld::UniversalId>& data);
     };
 }
 

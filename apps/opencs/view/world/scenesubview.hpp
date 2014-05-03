@@ -21,6 +21,8 @@ namespace CSMDoc
 namespace CSVRender
 {
     class WorldspaceWidget;
+    class PagedWorldspaceWidget;
+    class UnpagedWorldspaceWidget;
 }
 
 namespace CSVWorld
@@ -51,15 +53,25 @@ namespace CSVWorld
 
             virtual void useHint (const std::string& hint);
 
+        private:
+
+            void makeConnections(CSVRender::PagedWorldspaceWidget* widget);
+
+            void makeConnections(CSVRender::UnpagedWorldspaceWidget* widget);
+
+            void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, SceneToolbar* toolbar);
+
+            SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget);
+
         private slots:
 
             void closeRequest();
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
 
-            void changeToPaged(const std::vector<CSMWorld::UniversalId>& data);
+            void cellSelectionChanged (const CSMWorld::UniversalId& id);
 
-            void changeToUnpaged(const std::vector<CSMWorld::UniversalId>& data);
+            void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
     };
 }
 

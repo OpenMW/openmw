@@ -50,32 +50,6 @@ void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSel
     emit cellSelectionChanged (mSelection);
 }
 
-void CSVRender::PagedWorldspaceWidget::dropEvent (QDropEvent* event)
-{
-    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
-
-    if (mime->fromDocument(mDocument))
-    {
-        const std::vector<CSMWorld::UniversalId>& data(mime->getData());
-        CSVRender::WorldspaceWidget::dropType whatHappend = getDropType(data);
-
-        switch (whatHappend)
-        {
-            case CSVRender::WorldspaceWidget::cellsExterior:
-                handleDrop(data);
-                break;
-
-            case CSVRender::WorldspaceWidget::cellsInterior:
-                emit interiorCellsDropped(data);
-                break;
-
-            default:
-                //not interior or exterior = either mixed or not actually cells. We don't need to do anything in this case.
-                break;
-        }
-    } //not handling drops from different documents at the moment
-}
-
 std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
 {
     std::istringstream stream (record.c_str());
@@ -99,5 +73,20 @@ void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::
     if (selectionChanged)
     {
         emit cellSelectionChanged(mSelection);
+    }
+}
+
+CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
+{
+    switch (type)
+    {
+        case cellsExterior:
+            return canHandle;
+
+        case cellsInterior:
+            return needUnpaged;
+
+        default:
+            return ignored;
     }
 }

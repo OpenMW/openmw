@@ -31,14 +31,11 @@ namespace CSVRender
         public:
 
             UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document,
-                QWidget *parent);
+                                     QWidget *parent);
 
+            virtual dropRequirments getDropRequirements(dropType type) const;
 
-        private:
-
-            void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
-
-            void dropEvent(QDropEvent* event);
+            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
         private slots:
 
@@ -48,8 +45,7 @@ namespace CSVRender
 
         signals:
 
-            void exteriorCellsDropped(const std::vector<CSMWorld::UniversalId>& data);
-
+            void cellChanged(const CSMWorld::UniversalId& id);
     };
 }
 

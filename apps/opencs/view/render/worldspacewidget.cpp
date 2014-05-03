@@ -115,3 +115,14 @@ void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     event->accept();
 }
+
+
+void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
+{
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+
+    if (mime->fromDocument (mDocument))
+    {
+        emit dataDropped(mime->getData());
+    } //not handling drops from different documents at the moment
+}

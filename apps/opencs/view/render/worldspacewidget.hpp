@@ -7,6 +7,7 @@
 #include "navigationfree.hpp"
 #include "navigationorbit.hpp"
 #include <apps/opencs/model/doc/document.hpp>
+#include <apps/opencs/model/world/tablemimedata.hpp>
 
 namespace CSMWorld
 {
@@ -30,13 +31,21 @@ namespace CSVRender
 
         public:
 
-        enum dropType
-        {
-            cellsMixed,
-            cellsInterior,
-            cellsExterior,
-            notCells
-        };
+            enum dropType
+            {
+                cellsMixed,
+                cellsInterior,
+                cellsExterior,
+                notCells
+            };
+
+            enum dropRequirments
+            {
+                canHandle,
+                needPaged,
+                needUnpaged,
+                ignored //either mixed cells, or not cells
+            };
 
             WorldspaceWidget (const CSMDoc::Document& document, QWidget *parent = 0);
 
@@ -48,8 +57,12 @@ namespace CSVRender
 
             static dropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
 
+            virtual dropRequirments getDropRequirements(dropType type) const = 0;
+
             virtual void useViewHint (const std::string& hint);
             ///< Default-implementation: ignored.
+
+            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data) = 0;
 
         protected:
         const CSMDoc::Document& mDocument; //for checking if drop comes from same document
@@ -57,6 +70,8 @@ namespace CSVRender
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);
+
+            void dropEvent(QDropEvent* event);
 
             void dragMoveEvent(QDragMoveEvent *event);
 
@@ -67,6 +82,7 @@ namespace CSVRender
         signals:
 
             void closeRequest();
+            void dataDropped(const std::vector<CSMWorld::UniversalId>& data);
     };
 }
 
