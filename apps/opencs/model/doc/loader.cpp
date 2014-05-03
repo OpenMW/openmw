@@ -5,7 +5,7 @@
 
 #include "document.hpp"
 
-CSMDoc::Loader::Stage::Stage() : mFile (0) {}
+CSMDoc::Loader::Stage::Stage() : mFile (0), mRecordsLeft (false) {}
 
 
 CSMDoc::Loader::Loader()
@@ -13,7 +13,7 @@ CSMDoc::Loader::Loader()
     QTimer *timer = new QTimer (this);
 
     connect (timer, SIGNAL (timeout()), this, SLOT (load()));
-    timer->start (1000);
+    timer->start();
 }
 
 QWaitCondition& CSMDoc::Loader::hasThingsToDo()
@@ -44,19 +44,29 @@ void CSMDoc::Loader::load()
 
     try
     {
+        if (iter->second.mRecordsLeft)
+        {
+            if (document->getData().continueLoading())
+                iter->second.mRecordsLeft = false;
+
+            return;
+        }
+
         if (iter->second.mFile<size)
         {
             boost::filesystem::path path = document->getContentFiles()[iter->second.mFile];
 
             emit nextStage (document, path.filename().string());
 
-            document->getData().loadFile (path, iter->second.mFile<size-1, false);
+            document->getData().startLoading (path, iter->second.mFile<size-1, false);
+            iter->second.mRecordsLeft = true;
         }
         else if (iter->second.mFile==size)
         {
             emit nextStage (document, "Project File");
 
-            document->getData().loadFile (document->getProjectPath(), false, true);
+            document->getData().startLoading (document->getProjectPath(), false, true);
+            iter->second.mRecordsLeft = true;
         }
         else
         {

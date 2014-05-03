@@ -18,6 +18,7 @@ namespace CSMDoc
             struct Stage
             {
                 int mFile;
+                bool mRecordsLeft;
 
                 Stage();
             };
