@@ -42,12 +42,20 @@ void CSMDoc::Loader::load()
 
     bool done = false;
 
+    const int batchingSize = 100;
+
     try
     {
         if (iter->second.mRecordsLeft)
         {
-            if (document->getData().continueLoading())
-                iter->second.mRecordsLeft = false;
+            for (int i=0; i<batchingSize; ++i) // do not flood the system with update signals
+                if (document->getData().continueLoading())
+                {
+                    iter->second.mRecordsLeft = false;
+                    break;
+                }
+
+            emit nextRecord (document);
 
             return;
         }
@@ -56,17 +64,17 @@ void CSMDoc::Loader::load()
         {
             boost::filesystem::path path = document->getContentFiles()[iter->second.mFile];
 
-            emit nextStage (document, path.filename().string());
-
-            document->getData().startLoading (path, iter->second.mFile<size-1, false);
+            int steps = document->getData().startLoading (path, iter->second.mFile<size-1, false);
             iter->second.mRecordsLeft = true;
+
+            emit nextStage (document, path.filename().string(), steps/batchingSize);
         }
         else if (iter->second.mFile==size)
         {
-            emit nextStage (document, "Project File");
-
-            document->getData().startLoading (document->getProjectPath(), false, true);
+            int steps = document->getData().startLoading (document->getProjectPath(), false, true);
             iter->second.mRecordsLeft = true;
+
+            emit nextStage (document, "Project File", steps/batchingSize);
         }
         else
         {

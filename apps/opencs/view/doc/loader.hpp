@@ -22,12 +22,15 @@ namespace CSVDoc
 
             QLabel *mFile;
             QProgressBar *mFileProgress;
+            QProgressBar *mRecordProgress;
 
         public:
 
             LoadingDocument (CSMDoc::Document *document);
 
-            void nextStage (const std::string& name);
+            void nextStage (const std::string& name, int steps);
+
+            void nextRecord();
     };
 
     class Loader : public QObject
@@ -49,7 +52,9 @@ namespace CSVDoc
             void loadingStopped (CSMDoc::Document *document, bool completed,
                 const std::string& error);
 
-            void nextStage (CSMDoc::Document *document, const std::string& name);
+            void nextStage (CSMDoc::Document *document, const std::string& name, int steps);
+
+            void nextRecord (CSMDoc::Document *document);
     };
 }
 

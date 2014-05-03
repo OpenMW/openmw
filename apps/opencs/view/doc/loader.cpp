@@ -14,6 +14,11 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     QVBoxLayout *layout = new QVBoxLayout (this);
 
+    // file progress
+    mFile = new QLabel (this);
+
+    layout->addWidget (mFile);
+
     mFileProgress = new QProgressBar (this);
 
     layout->addWidget (mFileProgress);
@@ -27,9 +32,16 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mFileProgress->setTextVisible (true);
     mFileProgress->setValue (0);
 
-    mFile = new QLabel (this);
+    // record progress
+    layout->addWidget (new QLabel ("Records", this));
 
-    layout->addWidget (mFile);
+    mRecordProgress = new QProgressBar (this);
+
+    layout->addWidget (mRecordProgress);
+
+    mRecordProgress->setMinimum (0);
+    mRecordProgress->setTextVisible (true);
+    mRecordProgress->setValue (0);
 
     setLayout (layout);
 
@@ -38,18 +50,27 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     show();
 }
 
-void CSVDoc::LoadingDocument::nextStage (const std::string& name)
+void CSVDoc::LoadingDocument::nextStage (const std::string& name, int steps)
 {
     mFile->setText (QString::fromUtf8 (("Loading: " + name).c_str()));
 
     mFileProgress->setValue (mFileProgress->value()+1);
+
+    mRecordProgress->setValue (0);
+    mRecordProgress->setMaximum (steps);
 }
 
 
-CSVDoc::Loader::Loader()
+void CSVDoc::LoadingDocument::nextRecord()
 {
+    int value = mRecordProgress->value()+1;
 
+    if (value<=mRecordProgress->maximum())
+        mRecordProgress->setValue (value);
 }
+
+
+CSVDoc::Loader::Loader() {}
 
 CSVDoc::Loader::~Loader()
 {
@@ -79,10 +100,18 @@ void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,
     }
 }
 
-void CSVDoc::Loader::nextStage (CSMDoc::Document *document, const std::string& name)
+void CSVDoc::Loader::nextStage (CSMDoc::Document *document, const std::string& name, int steps)
 {
     std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.find (document);
 
     if (iter!=mDocuments.end())
-        iter->second->nextStage (name);
+        iter->second->nextStage (name, steps);
+}
+
+void CSVDoc::Loader::nextRecord (CSMDoc::Document *document)
+{
+    std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.find (document);
+
+    if (iter!=mDocuments.end())
+        iter->second->nextRecord();
 }
