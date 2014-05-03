@@ -27,12 +27,8 @@ namespace CSMSettings
 
     public:
 
-
-        explicit Setting();
-
         explicit Setting(SettingType typ, const QString &settingName,
-                         const QString &pageName,
-                         const QStringList &values = QStringList());
+                         const QString &pageName);
 
         void addProxy (const Setting *setting, const QStringList &vals);
         void addProxy (const Setting *setting, const QList <QStringList> &list);
@@ -66,11 +62,17 @@ namespace CSMSettings
         void setIsMultiValue (bool state);
         bool isMultiValue() const;
 
+        void setMask (const QString &value);
+        QString mask() const;
+
         void setName (const QString &value);
         QString name() const;
 
         void setPage (const QString &value);
         QString page() const;
+
+        void setPrefix (const QString &value);
+        QString prefix() const;
 
         void setRowSpan (const int value);
         int rowSpan() const;
@@ -80,6 +82,24 @@ namespace CSMSettings
         void setSerializable (bool state);
         bool serializable() const;
 
+        void setSpecialValueText (const QString &text);
+        QString specialValueText() const;
+
+        void setSingleStep (int value);
+        void setSingleStep (double value);
+        QString singleStep() const;
+
+        void setSuffix (const QString &value);
+        QString suffix() const;
+
+        void setMaximum (int value);
+        void setMaximum (double value);
+        QString maximum() const;
+
+        void setMinimum (int value);
+        void setMinimum (double value);
+        QString minimum() const;
+
         void setViewColumn (int value);
         int viewColumn() const;
 
@@ -88,8 +108,13 @@ namespace CSMSettings
         void setViewRow (int value);
         int viewRow() const;
 
-        void setViewType (int vType);
+        void setType (int settingType);
+        CSMSettings::SettingType type() const;
+
         CSVSettings::ViewType viewType() const;
+
+        void setWrapping (bool state);
+        bool wrapping() const;
 
         void setWidgetWidth (int value);
         int widgetWidth() const;
@@ -100,6 +125,7 @@ namespace CSMSettings
         ///boilerplate code to convert setting values of common types
         void setProperty (SettingProperty prop, bool value);
         void setProperty (SettingProperty prop, int value);
+        void setProperty (SettingProperty prop, double value);
         void setProperty (SettingProperty prop, const QString &value);
         void setProperty (SettingProperty prop, const QStringList &value);
 
@@ -110,10 +136,5 @@ namespace CSMSettings
         void buildDefaultSetting();
     };
 }
-
-Q_DECLARE_METATYPE(CSMSettings::Setting)
-
-QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting);
-QDataStream &operator >>(QDataStream &stream, CSMSettings::Setting& setting);
 
 #endif // CSMSETTINGS_SETTING_HPP

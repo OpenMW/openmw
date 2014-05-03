@@ -27,7 +27,7 @@ namespace CSMSettings
     {
         Property_Name = 0,
         Property_Page = 1,
-        Property_ViewType = 2,
+        Property_SettingType = 2,
         Property_IsMultiValue = 3,
         Property_IsMultiLine = 4,
         Property_WidgetWidth = 5,
@@ -37,12 +37,19 @@ namespace CSMSettings
         Property_Serializable = 9,
         Property_ColumnSpan = 10,
         Property_RowSpan = 11,
+        Property_Minimum = 12,
+        Property_Maximum = 13,
+        Property_SpecialValueText = 14,
+        Property_Prefix = 15,
+        Property_Suffix = 16,
+        Property_SingleStep = 17,
+        Property_Wrapping = 18,
 
         //Stringlists should always be the last items
-        Property_DefaultValues = 12,
-        Property_DeclaredValues = 13,
-        Property_DefinedValues = 14,
-        Property_Proxies = 15
+        Property_DefaultValues = 19,
+        Property_DeclaredValues = 20,
+        Property_DefinedValues = 21,
+        Property_Proxies = 22
     };
 
     enum SettingType
@@ -64,10 +71,12 @@ namespace CSMSettings
         Type_ListView = 10,
         Type_ComboBox = 11,
         Type_SpinBox = 21,
-        Type_Slider = 23,
-        Type_Dial = 24,
+        Type_DoubleSpinBox = 23,
+        Type_Slider = 25,
+        Type_Dial = 27,
         Type_TextArea = 30,
-        Type_LineEdit = 31
+        Type_LineEdit = 31,
+        Type_Undefined = 40
     };
 
     enum MergeMethod
@@ -97,7 +106,7 @@ namespace CSVSettings
     };
 }
 
-//
+
 namespace CSMSettings
 {
     struct PropertyDefaultValues
@@ -109,9 +118,10 @@ namespace CSMSettings
 
     const QString sPropertyNames[] =
     {
-        "name", "page", "view_type", "is_multi_value",
+        "name", "page", "setting_type", "is_multi_value",
         "is_multi_line", "widget_width", "view_row", "view_column", "delimiter",
-        "is_serializable","column_span", "row_span",
+        "is_serializable","column_span", "row_span", "minimum", "maximum",
+        "special_value_text", "prefix", "suffix", "single_step", "wrapping",
         "defaults", "declarations", "definitions", "proxies"
     };
 
@@ -119,16 +129,23 @@ namespace CSMSettings
     {
         "",         //name
         "",         //page
-        "0",        //view type
+        "40",       //setting type
         "false",    //multivalue
         "false",    //multiline
-        "0",        //widget width
+        "7",        //widget width
         "-1",       //view row
         "-1",       //view column
         ",",        //delimiter
         "true",     //serialized
         "1",        //column span
         "1",        //row span
+        "0",        //value range
+        "0",        //value minimum
+        "0",        //value maximum
+        "",         //special text
+        "",         //prefix
+        "",         //suffix
+        "false",    //wrapping
         "",         //default values
         "",         //declared values
         "",         //defined values
