@@ -26,6 +26,10 @@ namespace CSVDoc
             QProgressBar *mFileProgress;
             QProgressBar *mRecordProgress;
 
+        private:
+
+            void closeEvent (QCloseEvent *event);
+
         public:
 
             LoadingDocument (CSMDoc::Document *document);

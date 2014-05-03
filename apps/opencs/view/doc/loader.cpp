@@ -6,8 +6,15 @@
 #include <QProgressBar>
 #include <QCursor>
 #include <QDialogButtonBox>
+#include <QCloseEvent>
 
 #include "../../model/doc/document.hpp"
+
+void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
+{
+    event->ignore();
+    emit cancel (mDocument);
+}
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 : mDocument (document)
