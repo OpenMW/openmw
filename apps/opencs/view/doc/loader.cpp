@@ -5,10 +5,12 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QCursor>
+#include <QDialogButtonBox>
 
 #include "../../model/doc/document.hpp"
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
+: mDocument (document)
 {
     setWindowTitle (("Opening " + document->getSavePath().filename().string()).c_str());
 
@@ -43,11 +45,18 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mRecordProgress->setTextVisible (true);
     mRecordProgress->setValue (0);
 
+    QDialogButtonBox *buttonBox = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal,
+        this);
+
+    layout->addWidget (buttonBox);
+
     setLayout (layout);
 
     move (QCursor::pos());
 
     show();
+
+    connect (buttonBox, SIGNAL (rejected()), this, SLOT (cancel()));
 }
 
 void CSVDoc::LoadingDocument::nextStage (const std::string& name, int steps)
@@ -69,6 +78,11 @@ void CSVDoc::LoadingDocument::nextRecord()
         mRecordProgress->setValue (value);
 }
 
+void CSVDoc::LoadingDocument::cancel()
+{
+    emit cancel (mDocument);
+}
+
 
 CSVDoc::Loader::Loader() {}
 
@@ -81,7 +95,11 @@ CSVDoc::Loader::~Loader()
 
 void CSVDoc::Loader::add (CSMDoc::Document *document)
 {
-    mDocuments.insert (std::make_pair (document, new LoadingDocument (document)));
+    LoadingDocument *loading = new LoadingDocument (document);
+    mDocuments.insert (std::make_pair (document, loading));
+
+    connect (loading, SIGNAL (cancel (CSMDoc::Document *)),
+        this, SIGNAL (cancel (CSMDoc::Document *)));
 }
 
 void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,

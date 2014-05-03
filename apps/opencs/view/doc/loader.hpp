@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QSignalMapper>
 
 class QLabel;
 class QProgressBar;
@@ -20,6 +21,7 @@ namespace CSVDoc
     {
             Q_OBJECT
 
+            CSMDoc::Document *mDocument;
             QLabel *mFile;
             QProgressBar *mFileProgress;
             QProgressBar *mRecordProgress;
@@ -31,6 +33,14 @@ namespace CSVDoc
             void nextStage (const std::string& name, int steps);
 
             void nextRecord();
+
+        private slots:
+
+            void cancel();
+
+        signals:
+
+            void cancel (CSMDoc::Document *document);
     };
 
     class Loader : public QObject
@@ -44,6 +54,10 @@ namespace CSVDoc
             Loader();
 
             virtual ~Loader();
+
+        signals:
+
+            void cancel (CSMDoc::Document *document);
 
         public slots:
 

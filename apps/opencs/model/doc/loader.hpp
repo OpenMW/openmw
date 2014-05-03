@@ -42,7 +42,7 @@ namespace CSMDoc
             void loadDocument (CSMDoc::Document *document);
             ///< The ownership of \a document is not transferred.
 
-            void abortLoading (Document *document);
+            void abortLoading (CSMDoc::Document *document);
             ///< Abort loading \a docuemnt (ignored if \a document has already finished being
             /// loaded). Will result in a documentNotLoaded signal, once the Loader has finished
             /// cleaning up.

@@ -99,6 +99,10 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     connect (
         &mDocumentManager, SIGNAL (nextRecord (CSMDoc::Document *)),
         &mLoader, SLOT (nextRecord (CSMDoc::Document *)));
+
+    connect (
+        &mLoader, SIGNAL (cancel (CSMDoc::Document *)),
+        &mDocumentManager, SIGNAL (cancelLoading (CSMDoc::Document *)));
 }
 
 CSVDoc::ViewManager::~ViewManager()

@@ -33,6 +33,8 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
         this, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)));
     connect (&mLoader, SIGNAL (nextRecord (CSMDoc::Document *)),
         this, SIGNAL (nextRecord (CSMDoc::Document *)));
+    connect (this, SIGNAL (cancelLoading (CSMDoc::Document *)),
+        &mLoader, SLOT (abortLoading (CSMDoc::Document *)));
 }
 
 CSMDoc::DocumentManager::~DocumentManager()

@@ -75,6 +75,8 @@ namespace CSMDoc
             void nextStage (CSMDoc::Document *document, const std::string& name, int steps);
 
             void nextRecord (CSMDoc::Document *document);
+
+            void cancelLoading (CSMDoc::Document *document);
     };
 }
 
