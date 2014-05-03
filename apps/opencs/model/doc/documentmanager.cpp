@@ -29,6 +29,8 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
         this, SLOT (documentNotLoaded (Document *, const std::string&)));
     connect (this, SIGNAL (loadRequest (CSMDoc::Document *)),
         &mLoader, SLOT (loadDocument (CSMDoc::Document *)));
+    connect (&mLoader, SIGNAL (nextStage (CSMDoc::Document *, const std::string&)),
+        this, SIGNAL (nextStage (CSMDoc::Document *, const std::string&)));
 }
 
 CSMDoc::DocumentManager::~DocumentManager()

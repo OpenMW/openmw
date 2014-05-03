@@ -46,11 +46,16 @@ void CSMDoc::Loader::load()
     {
         if (iter->second.mFile<size)
         {
-            document->getData().loadFile (document->getContentFiles()[iter->second.mFile],
-                iter->second.mFile<size-1, false);
+            boost::filesystem::path path = document->getContentFiles()[iter->second.mFile];
+
+            emit nextStage (document, path.filename().string());
+
+            document->getData().loadFile (path, iter->second.mFile<size-1, false);
         }
         else if (iter->second.mFile==size)
         {
+            emit nextStage (document, "Project File");
+
             document->getData().loadFile (document->getProjectPath(), false, true);
         }
         else

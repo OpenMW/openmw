@@ -1,12 +1,48 @@
 
 #include "loader.hpp"
 
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QProgressBar>
+#include <QCursor>
+
 #include "../../model/doc/document.hpp"
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 {
-    setWindowTitle (("Loading " + document->getSavePath().filename().string()).c_str());
+    setWindowTitle (("Opening " + document->getSavePath().filename().string()).c_str());
+
+    QVBoxLayout *layout = new QVBoxLayout (this);
+
+    mFileProgress = new QProgressBar (this);
+
+    layout->addWidget (mFileProgress);
+
+    int size = static_cast<int> (document->getContentFiles().size())+1;
+    if (document->isNew())
+        --size;
+
+    mFileProgress->setMinimum (0);
+    mFileProgress->setMaximum (size);
+    mFileProgress->setTextVisible (true);
+    mFileProgress->setValue (0);
+
+    mFile = new QLabel (this);
+
+    layout->addWidget (mFile);
+
+    setLayout (layout);
+
+    move (QCursor::pos());
+
     show();
+}
+
+void CSVDoc::LoadingDocument::nextStage (const std::string& name)
+{
+    mFile->setText (QString::fromUtf8 (("Loading: " + name).c_str()));
+
+    mFileProgress->setValue (mFileProgress->value()+1);
 }
 
 
@@ -41,4 +77,12 @@ void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,
                 break;
             }
     }
+}
+
+void CSVDoc::Loader::nextStage (CSMDoc::Document *document, const std::string& name)
+{
+    std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.find (document);
+
+    if (iter!=mDocuments.end())
+        iter->second->nextStage (name);
 }

@@ -6,6 +6,9 @@
 #include <QObject>
 #include <QWidget>
 
+class QLabel;
+class QProgressBar;
+
 namespace CSMDoc
 {
     class Document;
@@ -17,9 +20,14 @@ namespace CSVDoc
     {
             Q_OBJECT
 
+            QLabel *mFile;
+            QProgressBar *mFileProgress;
+
         public:
 
             LoadingDocument (CSMDoc::Document *document);
+
+            void nextStage (const std::string& name);
     };
 
     class Loader : public QObject
@@ -40,6 +48,8 @@ namespace CSVDoc
 
             void loadingStopped (CSMDoc::Document *document, bool completed,
                 const std::string& error);
+
+            void nextStage (CSMDoc::Document *document, const std::string& name);
     };
 }
 

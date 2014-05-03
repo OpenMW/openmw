@@ -71,6 +71,8 @@ namespace CSMDoc
 
             void loadingStopped (CSMDoc::Document *document, bool completed,
                 const std::string& error);
+
+            void nextStage (CSMDoc::Document *document, const std::string& name);
     };
 }
 

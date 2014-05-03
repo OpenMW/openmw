@@ -54,6 +54,8 @@ namespace CSMDoc
             void documentNotLoaded (Document *document, const std::string& error);
             ///< Document load has been interrupted either because of a call to abortLoading
             /// or a problem during loading). In the former case error will be an empty string.
+
+            void nextStage (CSMDoc::Document *document, const std::string& name);
     };
 }
 
