@@ -115,7 +115,7 @@ namespace SFO
                         mWindowListener->windowClosed();
                     break;
                 default:
-                    std::cerr << "Unhandled SDL event of type " << evt.type << std::endl;
+                    std::cerr << "Unhandled SDL event of type 0x" << std::hex << evt.type << std::endl;
                     break;
             }
         }
