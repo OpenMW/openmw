@@ -93,11 +93,16 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
     {
         if (!mPackages.empty())
         {
-            mLastAiPackage = mPackages.front()->getTypeId();
-            if (mPackages.front()->execute (actor,duration))
+            MWMechanics::AiPackage* package = mPackages.front();
+            mLastAiPackage = package->getTypeId();
+            if (package->execute (actor,duration))
             {
-                delete *mPackages.begin();
-                mPackages.erase (mPackages.begin());
+                // To account for the rare case where AiPackage::execute() queued another AI package
+                // (e.g. AiPersue executing a dialogue script that uses startCombat)
+                std::list<MWMechanics::AiPackage*>::iterator toRemove =
+                        std::find(mPackages.begin(), mPackages.end(), package);
+                mPackages.erase(toRemove);
+                delete package;
                 mDone = true;
             }
             else

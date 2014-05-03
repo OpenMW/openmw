@@ -719,22 +719,21 @@ namespace MWMechanics
             CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
             NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
 
-            // If I'm a guard and I'm not hostile
-            if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
+            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPersue && !creatureStats.isHostile())
             {
                 /// \todo Move me! I shouldn't be here...
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
-                            float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
-                            esmStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
-                // Attack on sight if bounty is greater than the cutoff
+                float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt());
+                // Force dialogue on sight if bounty is greater than the cutoff
+                // In vanilla morrowind, the greeting dialogue is scripted to either arrest the player (< 5000 bounty) or attack (>= 5000 bounty)
                 if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
+                       // TODO: do not run these two every frame. keep an Aware state for each actor and update it every 0.2 s or so?
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(player), ptr);
-                    creatureStats.setHostile(true);
-                    npcStats.setCrimeId( MWBase::Environment::get().getWorld()->getPlayer().getCrimeId() );
+                    creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)), ptr);
+                    creatureStats.setAlarmed(true);
+                    npcStats.setCrimeId(MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId());
                 }
             }
 
@@ -767,7 +766,6 @@ namespace MWMechanics
                         creatureStats.setHostile(true);
                 }
             }
-
             // if I didn't report a crime was I attacked?
             else if (creatureStats.getAttacked() && !creatureStats.isHostile())
             {
