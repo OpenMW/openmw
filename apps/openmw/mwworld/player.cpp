@@ -100,7 +100,6 @@ namespace MWWorld
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[0] = value;
     }
 
@@ -119,7 +118,6 @@ namespace MWWorld
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[2] = value;
     }
 
@@ -132,7 +130,6 @@ namespace MWWorld
     void Player::setSneak(bool sneak)
     {
         MWWorld::Ptr ptr = getPlayer();
-
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
 
         if (sneak)
@@ -157,8 +154,6 @@ namespace MWWorld
             if (neighbors.empty())
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
         }
-        else
-            MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
     }
 
     void Player::yaw(float yaw)

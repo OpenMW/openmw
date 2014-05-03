@@ -236,6 +236,7 @@ namespace MWMechanics
             updateDrowning(ptr, duration);
             calculateNpcStatModifiers(ptr);
             updateEquippedLight(ptr, duration);
+            updateSneak(ptr);
         }
     }
 
@@ -716,6 +717,28 @@ namespace MWMechanics
                 if(isPlayer)
                     MWBase::Environment::get().getSoundManager()->playSound("torch out",
                             1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
+            }
+        }
+    }
+
+    void Actors::updateSneak (const MWWorld::Ptr& ptr)
+    {  
+        const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak)) 
+        {
+            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+            int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
+            
+            // am I close enough to the player?
+            if (Ogre::Vector3(ptr.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos))
+                 <= radius * radius )
+            {
+                bool seen = false; // unseen
+                if (   !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr) 
+                    && !MWBase::Environment::get().getWorld()->getLOS(player, ptr) )
+                    seen = true; // seen
+
+                MWBase::Environment::get().getWindowManager()->setSneakVisibility(seen);
             }
         }
     }
