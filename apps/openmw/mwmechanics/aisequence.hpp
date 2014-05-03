@@ -50,8 +50,8 @@ namespace MWMechanics
             void stopCombat();
             ///< Removes all combat packages until first non-combat or stack empty.
 
-            void stopPersue();
-            ///< Removes all persue packages until first non-persue or stack empty.
+            void stopPursuit();
+            ///< Removes all pursue packages until first non-pursue or stack empty.
             
             bool isPackageDone() const;
             ///< Has a package been completed during the last update?

@@ -29,7 +29,7 @@
 
 #include "aicombat.hpp"
 #include "aifollow.hpp"
-#include "aipersue.hpp"
+#include "aipursue.hpp"
 
 namespace
 {
@@ -719,7 +719,7 @@ namespace MWMechanics
             CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
             NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
 
-            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPersue && !creatureStats.isHostile())
+            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.isHostile())
             {
                 /// \todo Move me! I shouldn't be here...
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
@@ -731,7 +731,7 @@ namespace MWMechanics
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)), ptr);
+                    creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);
                     creatureStats.setAlarmed(true);
                     npcStats.setCrimeId(MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId());
                 }
@@ -740,12 +740,12 @@ namespace MWMechanics
             // if I was a witness to a crime
             if (npcStats.getCrimeId() != -1)
             {
-                // if you've payed for your crimes and I havent noticed
+                // if you've paid for your crimes and I havent noticed
                 if( npcStats.getCrimeId() <= MWBase::Environment::get().getWorld()->getPlayer().getCrimeId() )
                 {
                     // Calm witness down
                     if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stopPersue();
+                        creatureStats.getAiSequence().stopPursuit();
                     creatureStats.getAiSequence().stopCombat();
 
                     // Reset factors to attack
@@ -760,7 +760,7 @@ namespace MWMechanics
                 else if (!creatureStats.isHostile())
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)), ptr);
+                        creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);
                     else
                         creatureStats.getAiSequence().stack(AiCombat(player), ptr);
                         creatureStats.setHostile(true);

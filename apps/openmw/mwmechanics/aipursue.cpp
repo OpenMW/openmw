@@ -1,4 +1,4 @@
-#include "aipersue.hpp"
+#include "aipursue.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -11,15 +11,15 @@
 #include "movement.hpp"
 #include "creaturestats.hpp"
 
-MWMechanics::AiPersue::AiPersue(const std::string &objectId)
+MWMechanics::AiPursue::AiPursue(const std::string &objectId)
     : mObjectId(objectId)
 {
 }
-MWMechanics::AiPersue *MWMechanics::AiPersue::clone() const
+MWMechanics::AiPursue *MWMechanics::AiPursue::clone() const
 {
-    return new AiPersue(*this);
+    return new AiPursue(*this);
 }
-bool MWMechanics::AiPersue::execute (const MWWorld::Ptr& actor, float duration)
+bool MWMechanics::AiPursue::execute (const MWWorld::Ptr& actor, float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     ESM::Position pos = actor.getRefData().getPosition();
@@ -100,7 +100,7 @@ bool MWMechanics::AiPersue::execute (const MWWorld::Ptr& actor, float duration)
     return false;
 }
 
-int MWMechanics::AiPersue::getTypeId() const
+int MWMechanics::AiPursue::getTypeId() const
 {
-    return TypeIdPersue;
+    return TypeIdPursue;
 }
