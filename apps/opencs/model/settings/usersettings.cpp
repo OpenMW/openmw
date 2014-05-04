@@ -251,13 +251,13 @@ CSMSettings::UserSettings::~UserSettings()
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
     mUserFilePath = QString::fromUtf8
-                            (mCfgMgr.getUserConfigPath().c_str()) + fileName.toUtf8();
+                            (mCfgMgr.getUserConfigPath().string().c_str()) + fileName.toUtf8();
 
     QString global = QString::fromUtf8
-                                (mCfgMgr.getGlobalPath().c_str()) + fileName.toUtf8();
+                                (mCfgMgr.getGlobalPath().string().c_str()) + fileName.toUtf8();
 
     QString local = QString::fromUtf8
-                                (mCfgMgr.getLocalPath().c_str()) + fileName.toUtf8();
+                                (mCfgMgr.getLocalPath().string().c_str()) + fileName.toUtf8();
 
     //open user and global streams
     QTextStream *userStream = openFilestream (mUserFilePath, true);

@@ -298,13 +298,15 @@ namespace MWMechanics
 
             if(stats.getTimeToStartDrowning() != mWatchedStats.getTimeToStartDrowning())
             {
+                const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("fHoldBreathTime")->getFloat();
                 mWatchedStats.setTimeToStartDrowning(stats.getTimeToStartDrowning());
-                if(stats.getTimeToStartDrowning() >= 20.0f)
+                if(stats.getTimeToStartDrowning() >= fHoldBreathTime)
                     winMgr->setDrowningBarVisibility(false);
                 else
                 {
                     winMgr->setDrowningBarVisibility(true);
-                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning());
+                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning(), fHoldBreathTime);
                 }
             }
 
@@ -338,6 +340,8 @@ namespace MWMechanics
             MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
             if (enchantItem != inv.end())
                 winMgr->setSelectedEnchantItem(*enchantItem);
+            else if (winMgr->getSelectedSpell() == "")
+                winMgr->unsetSelectedSpell();
         }
 
         if (mUpdatePlayer)
@@ -856,7 +860,8 @@ namespace MWMechanics
         // Find an actor who witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (*it == ptr) continue; // not the player
+            if (   *it == ptr 
+                || !it->getClass().isNpc()) continue; // not the player and is an NPC
 
             // Was the crime seen?
             if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
@@ -872,7 +877,8 @@ namespace MWMechanics
                     // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     {
-                        if (*it1 == ptr) continue; // not the player
+                        if (   *it == ptr 
+                            || !it->getClass().isNpc()) continue; // not the player and is an NPC
 
                         // TODO: Add more messages
                         if (type == OT_Theft)

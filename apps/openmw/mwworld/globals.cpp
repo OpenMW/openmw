@@ -77,7 +77,7 @@ namespace MWWorld
         return mVariables.size();
     }
 
-    void Globals::write (ESM::ESMWriter& writer) const
+    void Globals::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         for (Collection::const_iterator iter (mVariables.begin()); iter!=mVariables.end(); ++iter)
         {
@@ -85,6 +85,7 @@ namespace MWWorld
             writer.writeHNString ("NAME", iter->first);
             iter->second.write (writer, ESM::Variant::Format_Global);
             writer.endRecord (ESM::REC_GLOB);
+            progress.increaseProgress();
         }
     }
 

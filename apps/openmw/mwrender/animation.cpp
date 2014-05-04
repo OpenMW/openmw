@@ -411,7 +411,7 @@ Ogre::Node *Animation::getNode(const std::string &name)
 NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname)
 {
     NifOgre::TextKeyMap::const_iterator iter(keys.begin());
-    for(;iter != keys.end();iter++)
+    for(;iter != keys.end();++iter)
     {
         if(iter->second.compare(0, groupname.size(), groupname) == 0 &&
            iter->second.compare(groupname.size(), 2, ": ") == 0)
@@ -424,7 +424,7 @@ NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::Tex
 bool Animation::hasAnimation(const std::string &anim)
 {
     AnimSourceList::const_iterator iter(mAnimSources.begin());
-    for(;iter != mAnimSources.end();iter++)
+    for(;iter != mAnimSources.end();++iter)
     {
         const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
         if(findGroupStart(keys, anim) != keys.end())
@@ -465,7 +465,7 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
             stoptime = keyiter->first;
             break;
         }
-        keyiter++;
+        ++keyiter;
     }
 
     if(stoptime > starttime)
@@ -585,13 +585,13 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
     std::string starttag = groupname+": "+start;
     NifOgre::TextKeyMap::const_iterator startkey(groupstart);
     while(startkey != keys.end() && startkey->second != starttag)
-        startkey++;
+        ++startkey;
     if(startkey == keys.end() && start == "loop start")
     {
         starttag = groupname+": start";
         startkey = groupstart;
         while(startkey != keys.end() && startkey->second != starttag)
-            startkey++;
+            ++startkey;
     }
     if(startkey == keys.end())
         return false;
@@ -603,7 +603,7 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
           // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
           // Why, just why? :(
           && (stopkey->second.size() < stoptag.size() || stopkey->second.substr(0,stoptag.size()) != stoptag))
-        stopkey++;
+        ++stopkey;
     if(stopkey == keys.end())
         return false;
 
@@ -627,7 +627,7 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
                 state.mLoopStartTime = key->first;
             else if(key->second == loopstoptag)
                 state.mLoopStopTime = key->first;
-            key++;
+            ++key;
         }
     }
 
@@ -776,7 +776,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
 
     /* Look in reverse; last-inserted source has priority. */
     AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
-    for(;iter != mAnimSources.rend();iter++)
+    for(;iter != mAnimSources.rend();++iter)
     {
         const NifOgre::TextKeyMap &textkeys = (*iter)->mTextKeys;
         AnimState state;
@@ -795,7 +795,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
             while(textkey != textkeys.end() && textkey->first <= state.mTime)
             {
                 handleTextKey(state, groupname, textkey);
-                textkey++;
+                ++textkey;
             }
 
             if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
@@ -810,7 +810,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
                 {
                     handleTextKey(state, groupname, textkey);
-                    textkey++;
+                    ++textkey;
                 }
             }
 
@@ -965,7 +965,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             while(textkey != textkeys.end() && textkey->first <= state.mTime)
             {
                 handleTextKey(state, stateiter->first, textkey);
-                textkey++;
+                ++textkey;
             }
 
             if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
@@ -979,7 +979,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
                 {
                     handleTextKey(state, stateiter->first, textkey);
-                    textkey++;
+                    ++textkey;
                 }
 
                 if(state.mTime >= state.mLoopStopTime)

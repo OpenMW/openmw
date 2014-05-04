@@ -442,7 +442,7 @@ namespace MWSound
             {
                 snditer->first->setFadeout(duration);
             }
-            snditer++;
+            ++snditer;
         }
     }
 

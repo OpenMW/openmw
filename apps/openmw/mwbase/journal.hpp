@@ -11,6 +11,11 @@
 #include "../mwdialogue/topic.hpp"
 #include "../mwdialogue/quest.hpp"
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace ESM
 {
     class ESMReader;
@@ -80,7 +85,7 @@ namespace MWBase
 
             virtual int countSavedGameRecords() const = 0;
 
-            virtual void write (ESM::ESMWriter& writer) const = 0;
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
     };

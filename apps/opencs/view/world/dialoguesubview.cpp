@@ -183,7 +183,7 @@ CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CS
     {
         delegate = CommandDelegateFactoryCollection::get().makeDelegate (
                                     display, mUndoStack, mParent);
-        mDelegates.insert(std::make_pair<int, CommandDelegate*>(display, delegate));
+        mDelegates.insert(std::make_pair(display, delegate));
     } else
     {
         delegate = delegateIt->second;

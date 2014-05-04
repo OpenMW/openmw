@@ -41,6 +41,11 @@ namespace MWGui
         };
 
 
+        void write (ESM::ESMWriter& writer);
+        void readRecord (ESM::ESMReader& reader, int32_t type);
+        void clear();
+
+
     private:
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;

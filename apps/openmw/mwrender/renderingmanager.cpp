@@ -563,7 +563,8 @@ void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
         Ogre::ColourValue colour;
         colour.setAsABGR (mCell.getCell()->mAmbi.mSunlight);
         mSun->setDiffuseColour (colour);
-        mSun->setDirection(0,-1,0);
+        mSun->setDirection(1,-1,-1);
+        sunEnable(false);
     }
 }
 // Switch through lighting modes.
