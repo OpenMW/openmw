@@ -1447,7 +1447,7 @@ namespace MWGui
     {
         return !MyGUI::InputManager::getInstance().isModalAny()
                 // TODO: remove this, once we have properly serialized the state of open windows
-                && (!isGuiMode() || (mGuiModes.size() == 1 && getMode() == GM_MainMenu));
+                && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest || getMode() == GM_RestBed)));
     }
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)
