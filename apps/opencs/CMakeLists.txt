@@ -97,6 +97,7 @@ opencs_units (view/settings
     listview
     rangeview
     resizeablestackedwidget
+    spinbox
     )
 
 opencs_units_noqt (view/settings
