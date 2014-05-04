@@ -95,11 +95,41 @@ MWState::Character::Character (const boost::filesystem::path& saves, const std::
     }
 }
 
+void MWState::Character::cleanup()
+{
+    if (mSlots.size() == 0)
+    {
+        // All slots are gone, no need to keep the empty directory
+        if (boost::filesystem::is_directory (mPath))
+        {
+            // Extra safety check to make sure the directory is empty (e.g. slots failed to parse header)
+            boost::filesystem::directory_iterator it(mPath);
+            if (it == boost::filesystem::directory_iterator())
+                boost::filesystem::remove_all(mPath);
+        }
+    }
+}
+
 const MWState::Slot *MWState::Character::createSlot (const ESM::SavedGame& profile)
 {
     addSlot (profile);
 
     return &mSlots.back();
+}
+
+void MWState::Character::deleteSlot (const Slot *slot)
+{
+    int index = slot - &mSlots[0];
+
+    if (index<0 || index>=static_cast<int> (mSlots.size()))
+    {
+        // sanity check; not entirely reliable
+        throw std::logic_error ("slot not found");
+    }
+
+    boost::filesystem::remove(slot->mPath);
+
+    mSlots.erase (mSlots.begin()+index);
 }
 
 const MWState::Slot *MWState::Character::updateSlot (const Slot *slot, const ESM::SavedGame& profile)

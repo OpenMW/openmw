@@ -156,8 +156,9 @@ namespace MWBase
             virtual void setValue (const std::string& id, int value) = 0;
 
             /// Set time left for the player to start drowning (update the drowning bar)
-            /// @param time value from [0,20]
-            virtual void setDrowningTimeLeft (float time) =0;
+            /// @param time time left to start drowning
+            /// @param maxTime how long we can be underwater (in total) until drowning starts
+            virtual void setDrowningTimeLeft (float time, float maxTime) = 0;
 
             virtual void setPlayerClass (const ESM::Class &class_) = 0;
             ///< set current class of player
@@ -302,8 +303,12 @@ namespace MWBase
             /// Clear all savegame-specific data
             virtual void clear() = 0;
 
-            virtual void write (ESM::ESMWriter& writer) = 0;
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual int countSavedGameRecords() const = 0;
+
+            /// Does the current stack of GUI-windows permit saving?
+            virtual bool isSavingAllowed() const = 0;
     };
 }
 

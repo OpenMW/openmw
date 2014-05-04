@@ -33,7 +33,7 @@ namespace CSMWorld
         public:
             TableMimeData(UniversalId id, const CSMDoc::Document& document);
 
-            TableMimeData(std::vector<UniversalId>& id, const CSMDoc::Document& document);
+            TableMimeData(const std::vector<UniversalId>& id, const CSMDoc::Document& document);
 
             ~TableMimeData();
 
@@ -56,6 +56,7 @@ namespace CSMWorld
             UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
 
             static CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);
+
             static CSMWorld::ColumnBase::Display convertEnums(CSMWorld::UniversalId::Type type);
 
         private:

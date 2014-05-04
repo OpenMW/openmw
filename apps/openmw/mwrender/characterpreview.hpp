@@ -34,6 +34,10 @@ namespace MWRender
 
         virtual void rebuild();
 
+    private:
+        CharacterPreview(const CharacterPreview&);
+        CharacterPreview& operator=(const CharacterPreview&);
+
     protected:
         virtual bool renderHeadOnly() { return false; }
 

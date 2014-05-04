@@ -330,6 +330,10 @@ namespace Compiler
         const int opcodePCRaiseRank = 0x2000b;
         const int opcodePCLowerRank = 0x2000c;
         const int opcodePCJoinFaction = 0x2000d;
+        const int opcodePCRaiseRankExplicit = 0x20029;
+        const int opcodePCLowerRankExplicit = 0x2002a;
+        const int opcodePCJoinFactionExplicit = 0x2002b;
+
         const int opcodeGetPCRank = 0x2000e;
         const int opcodeGetPCRankExplicit = 0x2000f;
         const int opcodeModDisposition = 0x200014d;
@@ -373,6 +377,8 @@ namespace Compiler
         const int opcodeLowerRankExplicit = 0x20001eb;
         const int opcodeOnDeath = 0x20001fc;
         const int opcodeOnDeathExplicit = 0x2000205;
+        const int opcodeOnKnockout = 0x2000240;
+        const int opcodeOnKnockoutExplicit = 0x2000241;
 
         const int opcodeBecomeWerewolf = 0x2000217;
         const int opcodeBecomeWerewolfExplicit = 0x2000218;

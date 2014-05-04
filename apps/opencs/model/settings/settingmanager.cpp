@@ -30,8 +30,7 @@ void CSMSettings::SettingManager::dumpModel()
 }
 
 CSMSettings::Setting *CSMSettings::SettingManager::createSetting
-        (CSMSettings::SettingType typ, const QString &page, const QString &name,
-         const QStringList &values)
+        (CSMSettings::SettingType typ, const QString &page, const QString &name)
 {
     //get list of all settings for the current setting name
     if (findSetting (page, name))
@@ -41,7 +40,8 @@ CSMSettings::Setting *CSMSettings::SettingManager::createSetting
         return 0;
     }
 
-    Setting *setting = new Setting (typ, name, page, values);
+    Setting *setting = new Setting (typ, name, page);
+
 
     //add declaration to the model
     mSettings.append (setting);

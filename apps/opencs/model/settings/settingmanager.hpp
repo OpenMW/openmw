@@ -46,8 +46,7 @@ namespace CSMSettings
 
         ///add a new setting to the model and return it
         Setting *createSetting (CSMSettings::SettingType typ,
-                            const QString &page, const QString &name,
-                            const QStringList &values = QStringList());
+                            const QString &page, const QString &name);
 
         ///add definitions to the settings specified in the page map
         void addDefinitions (DefinitionPageMap &pageMap);

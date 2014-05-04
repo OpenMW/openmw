@@ -33,7 +33,7 @@ struct Creature
 
         Respawn     = 0x002,
         Weapon      = 0x004, // Has weapon and shield
-        None        = 0x008, // ??
+        None        = 0x008, // ?? This flag appears set for every creature in Morrowind.esm
         Essential   = 0x080,
 
         // Blood types

@@ -71,7 +71,7 @@ ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
     return -1;
 }
 
-void ContainerItemModel::copyItem (const ItemStack& item, size_t count)
+void ContainerItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
 {
     const MWWorld::Ptr& source = mItemSources[mItemSources.size()-1];
     if (item.mBase.getContainerStore() == &source.getClass().getContainerStore(source))

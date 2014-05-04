@@ -78,13 +78,13 @@ namespace MWGui
     }
 
     void TradeWindow::startTrade(const MWWorld::Ptr& actor)
-    {        
+    {
         mPtr = actor;
 
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
-        checkTradeTime(); 
+        checkTradeTime();
 
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
@@ -245,7 +245,7 @@ namespace MWGui
         // were there any items traded at all?
         std::vector<ItemStack> playerBought = playerItemModel->getItemsBorrowedToUs();
         std::vector<ItemStack> merchantBought = mTradeModel->getItemsBorrowedToUs();
-        if (!playerBought.size() && !merchantBought.size())
+        if (playerBought.empty() && merchantBought.empty())
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
@@ -476,7 +476,7 @@ namespace MWGui
     }
 
     // Relates to NPC gold reset delay
-    void TradeWindow::checkTradeTime() 
+    void TradeWindow::checkTradeTime()
     {
         MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
         double delay = boost::lexical_cast<double>(MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getInt());
@@ -488,14 +488,14 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::updateTradeTime() 
+    void TradeWindow::updateTradeTime()
     {
         MWWorld::ContainerStore store = mPtr.getClass().getContainerStore(mPtr);
         MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
         double delay = boost::lexical_cast<double>(MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getInt());
 
         // If trade timestamp is within reset delay don't set
-        if ( ! (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getTradeTime() && 
+        if ( ! (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getTradeTime() &&
                 MWBase::Environment::get().getWorld()->getTimeStamp() < sellerStats.getTradeTime() + delay) )
         {
             sellerStats.setTradeTime(MWBase::Environment::get().getWorld()->getTimeStamp());
