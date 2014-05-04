@@ -724,7 +724,8 @@ namespace MWMechanics
     void Actors::updateSneak (const MWWorld::Ptr& ptr)
     {  
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak)) 
+        if (   player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak)
+            && ptr != player) 
         {
             const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
             int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
