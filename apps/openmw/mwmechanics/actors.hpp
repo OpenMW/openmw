@@ -44,8 +44,6 @@ namespace MWMechanics
 
             void updateCrimePersuit (const MWWorld::Ptr& ptr, float duration);
 
-            void updateSneak (const MWWorld::Ptr& ptr);
-
         public:
 
             Actors();
