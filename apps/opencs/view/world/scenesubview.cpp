@@ -35,9 +35,12 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
 
     CSVRender::WorldspaceWidget* wordspaceWidget = NULL;
+    widgetType whatWidget;
 
     if (id.getId()=="sys::default")
     {
+        whatWidget = widget_Paged;
+
         CSVRender::PagedWorldspaceWidget *newWidget = new CSVRender::PagedWorldspaceWidget (this, document);
 
         wordspaceWidget = newWidget;
@@ -46,6 +49,8 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     }
     else
     {
+        whatWidget = widget_Unpaged;
+
         CSVRender::UnpagedWorldspaceWidget *newWidget = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
         wordspaceWidget = newWidget;
@@ -53,7 +58,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         makeConnections(newWidget);
     }
 
-    replaceToolbarAndWorldspace(wordspaceWidget, makeToolbar(wordspaceWidget));
+    replaceToolbarAndWorldspace(wordspaceWidget, makeToolbar(wordspaceWidget, whatWidget));
 
     layout->insertLayout (0, mLayout, 1);
 
@@ -90,7 +95,7 @@ void CSVWorld::SceneSubView::makeConnections (CSVRender::PagedWorldspaceWidget* 
              this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
 }
 
-CSVWorld::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::WorldspaceWidget* widget)
+CSVWorld::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::WorldspaceWidget* widget, widgetType type)
 {
     CSVWorld::SceneToolbar* toolbar = new SceneToolbar (48+6, this);
 
@@ -100,6 +105,18 @@ CSVWorld::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldspa
     SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
 
+/* Add buttons specific to the type. For now no need for it.
+ * 
+    switch (type)
+    {
+        case widget_Paged:
+            break;
+
+        case widget_Unpaged:
+            break;
+
+    }
+*/
     return toolbar;
 }
 
@@ -181,7 +198,7 @@ void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalI
 
         case CSVRender::WorldspaceWidget::needPaged:
             pagedNewWidget = new CSVRender::PagedWorldspaceWidget(this, mDocument);
-            toolbar = makeToolbar(pagedNewWidget);
+            toolbar = makeToolbar(pagedNewWidget, widget_Paged);
             makeConnections(pagedNewWidget);
             replaceToolbarAndWorldspace(pagedNewWidget, toolbar);
             mScene->handleDrop(data);
@@ -189,7 +206,7 @@ void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalI
 
         case CSVRender::WorldspaceWidget::needUnpaged:
             unPagedNewWidget = new CSVRender::UnpagedWorldspaceWidget(data.begin()->getId(), mDocument, this);
-            toolbar = makeToolbar(unPagedNewWidget);
+            toolbar = makeToolbar(unPagedNewWidget, widget_Unpaged);
             makeConnections(unPagedNewWidget);
             replaceToolbarAndWorldspace(unPagedNewWidget, toolbar);
             cellSelectionChanged(*(data.begin()));
