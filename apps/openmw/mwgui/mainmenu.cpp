@@ -170,7 +170,8 @@ namespace MWGui
             buttons.push_back("loadgame");
 
         if (state==MWBase::StateManager::State_Running &&
-            MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1)
+            MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1 &&
+                MWBase::Environment::get().getWindowManager()->isSavingAllowed())
             buttons.push_back("savegame");
 
         buttons.push_back("options");

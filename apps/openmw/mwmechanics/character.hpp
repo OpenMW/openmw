@@ -21,194 +21,199 @@ namespace MWRender
 namespace MWMechanics
 {
 
-class Movement;
-class CreatureStats;
+    class Movement;
+    class CreatureStats;
 
-enum Priority {
-    Priority_Default,
-    Priority_Jump,
-    Priority_Movement,
-    Priority_Hit,
-    Priority_Weapon,
-    Priority_Knockdown,
-    Priority_Torch,
+    ///Priority of actions
+    enum Priority {
+        Priority_Default,
+        Priority_Jump,
+        Priority_Movement,
+        Priority_Hit,
+        Priority_Weapon,
+        Priority_Knockdown,
+        Priority_Torch,
 
-    Priority_Death,
+        Priority_Death,
 
-    Num_Priorities
-};
+        Num_Priorities
+    };
 
-enum CharacterState {
-    CharState_None,
+    /// Current action of the character
+    enum CharacterState {
+        CharState_None,
 
-    CharState_SpecialIdle,
-    CharState_Idle,
-    CharState_Idle2,
-    CharState_Idle3,
-    CharState_Idle4,
-    CharState_Idle5,
-    CharState_Idle6,
-    CharState_Idle7,
-    CharState_Idle8,
-    CharState_Idle9,
-    CharState_IdleSwim,
-    CharState_IdleSneak,
+        CharState_SpecialIdle,
+        CharState_Idle,
+        CharState_Idle2,
+        CharState_Idle3,
+        CharState_Idle4,
+        CharState_Idle5,
+        CharState_Idle6,
+        CharState_Idle7,
+        CharState_Idle8,
+        CharState_Idle9,
+        CharState_IdleSwim,
+        CharState_IdleSneak,
 
-    CharState_WalkForward,
-    CharState_WalkBack,
-    CharState_WalkLeft,
-    CharState_WalkRight,
+        CharState_WalkForward,
+        CharState_WalkBack,
+        CharState_WalkLeft,
+        CharState_WalkRight,
 
-    CharState_SwimWalkForward,
-    CharState_SwimWalkBack,
-    CharState_SwimWalkLeft,
-    CharState_SwimWalkRight,
+        CharState_SwimWalkForward,
+        CharState_SwimWalkBack,
+        CharState_SwimWalkLeft,
+        CharState_SwimWalkRight,
 
-    CharState_RunForward,
-    CharState_RunBack,
-    CharState_RunLeft,
-    CharState_RunRight,
+        CharState_RunForward,
+        CharState_RunBack,
+        CharState_RunLeft,
+        CharState_RunRight,
 
-    CharState_SwimRunForward,
-    CharState_SwimRunBack,
-    CharState_SwimRunLeft,
-    CharState_SwimRunRight,
+        CharState_SwimRunForward,
+        CharState_SwimRunBack,
+        CharState_SwimRunLeft,
+        CharState_SwimRunRight,
 
-    CharState_SneakForward,
-    CharState_SneakBack,
-    CharState_SneakLeft,
-    CharState_SneakRight,
+        CharState_SneakForward,
+        CharState_SneakBack,
+        CharState_SneakLeft,
+        CharState_SneakRight,
 
-    CharState_TurnLeft,
-    CharState_TurnRight,
+        CharState_TurnLeft,
+        CharState_TurnRight,
 
-    CharState_Jump,
+        CharState_Jump,
 
-    CharState_Death1,
-    CharState_Death2,
-    CharState_Death3,
-    CharState_Death4,
-    CharState_Death5,
-    CharState_SwimDeath,
-    CharState_DeathKnockDown,
-    CharState_DeathKnockOut,
+        CharState_Death1,
+        CharState_Death2,
+        CharState_Death3,
+        CharState_Death4,
+        CharState_Death5,
+        CharState_SwimDeath,
+        CharState_DeathKnockDown,
+        CharState_DeathKnockOut,
 
-    CharState_Hit,
-    CharState_KnockDown,
-    CharState_KnockOut,
-    CharState_Block
-};
+        CharState_Hit,
+        CharState_KnockDown,
+        CharState_KnockOut,
+        CharState_Block
+    };
 
-enum WeaponType {
-    WeapType_None,
+    ///Weapon type
+    enum WeaponType {
+        WeapType_None,
 
-    WeapType_HandToHand,
-    WeapType_OneHand,
-    WeapType_TwoHand,
-    WeapType_TwoWide,
-    WeapType_BowAndArrow,
-    WeapType_Crossbow,
-    WeapType_Thrown,
-    WeapType_PickProbe,
+        WeapType_HandToHand,
+        WeapType_OneHand,
+        WeapType_TwoHand,
+        WeapType_TwoWide,
+        WeapType_BowAndArrow,
+        WeapType_Crossbow,
+        WeapType_Thrown,
+        WeapType_PickProbe,
 
-    WeapType_Spell
-};
+        WeapType_Spell
+    };
 
-enum UpperBodyCharacterState {
-    UpperCharState_Nothing,
-    UpperCharState_EquipingWeap,
-    UpperCharState_UnEquipingWeap,
-    UpperCharState_WeapEquiped,
-    UpperCharState_StartToMinAttack,
-    UpperCharState_MinAttackToMaxAttack,
-    UpperCharState_MaxAttackToMinHit,
-    UpperCharState_MinHitToHit,
-    UpperCharState_FollowStartToFollowStop,
-    UpperCharState_CastingSpell
-};
+    ///Specific, weapon based state of the character
+    enum UpperBodyCharacterState {
+        UpperCharState_Nothing,
+        UpperCharState_EquipingWeap,
+        UpperCharState_UnEquipingWeap,
+        UpperCharState_WeapEquiped,
+        UpperCharState_StartToMinAttack,
+        UpperCharState_MinAttackToMaxAttack,
+        UpperCharState_MaxAttackToMinHit,
+        UpperCharState_MinHitToHit,
+        UpperCharState_FollowStartToFollowStop,
+        UpperCharState_CastingSpell
+    };
 
-enum JumpingState {
-    JumpState_None,
-    JumpState_Falling,
-    JumpState_Landing
-};
+    ///Current jumping state
+    enum JumpingState {
+        JumpState_None,
+        JumpState_Falling,
+        JumpState_Landing
+    };
 
-class CharacterController
-{
-    MWWorld::Ptr mPtr;
-    MWRender::Animation *mAnimation;
+    class CharacterController
+    {
+        MWWorld::Ptr mPtr;
+        MWRender::Animation *mAnimation;
 
-    typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
-    AnimationQueue mAnimQueue;
+        typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
+        AnimationQueue mAnimQueue;
 
-    CharacterState mIdleState;
-    std::string mCurrentIdle;
+        CharacterState mIdleState;
+        std::string mCurrentIdle;
 
-    CharacterState mMovementState;
-    std::string mCurrentMovement;
-    float mMovementSpeed;
-    float mMovementAnimVelocity;
+        CharacterState mMovementState;
+        std::string mCurrentMovement;
+        float mMovementSpeed;
+        float mMovementAnimVelocity;
 
-    CharacterState mDeathState;
-    std::string mCurrentDeath;
+        CharacterState mDeathState;
+        std::string mCurrentDeath;
 
-    CharacterState mHitState;
-    std::string mCurrentHit;
+        CharacterState mHitState;
+        std::string mCurrentHit;
 
-    UpperBodyCharacterState mUpperBodyState;
+        UpperBodyCharacterState mUpperBodyState;
 
-    JumpingState mJumpState;
-    std::string mCurrentJump;
+        JumpingState mJumpState;
+        std::string mCurrentJump;
 
-    WeaponType mWeaponType;
-    std::string mCurrentWeapon;
+        WeaponType mWeaponType;
+        std::string mCurrentWeapon;
 
-    bool mSkipAnim;
+        bool mSkipAnim;
 
-    // counted for skill increase
-    float mSecondsOfSwimming;
-    float mSecondsOfRunning;
+        // counted for skill increase
+        float mSecondsOfSwimming;
+        float mSecondsOfRunning;
 
-    std::string mAttackType; // slash, chop or thrust
-    void determineAttackType();
+        std::string mAttackType; // slash, chop or thrust
+        void determineAttackType();
 
-    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
+        void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
-    void clearAnimQueue();
+        void clearAnimQueue();
 
-    bool updateWeaponState();
-    bool updateCreatureState();
+        bool updateWeaponState();
+        bool updateCreatureState();
 
-    void updateVisibility();
+        void updateVisibility();
 
-    void playRandomDeath(float startpoint = 0.0f);
+        void playRandomDeath(float startpoint = 0.0f);
 
-    /// choose a random animation group with \a prefix and numeric suffix
-    /// @param num if non-NULL, the chosen animation number will be written here
-    std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
+        /// choose a random animation group with \a prefix and numeric suffix
+        /// @param num if non-NULL, the chosen animation number will be written here
+        std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
 
-public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
-    virtual ~CharacterController();
+    public:
+        CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
+        virtual ~CharacterController();
 
-    // Be careful when to call this, see comment in Actors
-    void updateContinuousVfx();
+        // Be careful when to call this, see comment in Actors
+        void updateContinuousVfx();
 
-    void updatePtr(const MWWorld::Ptr &ptr);
+        void updatePtr(const MWWorld::Ptr &ptr);
 
-    void update(float duration);
+        void update(float duration);
 
-    void playGroup(const std::string &groupname, int mode, int count);
-    void skipAnim();
-    bool isAnimPlaying(const std::string &groupName);
+        void playGroup(const std::string &groupname, int mode, int count);
+        void skipAnim();
+        bool isAnimPlaying(const std::string &groupName);
 
-    bool kill();
-    void resurrect();
-    bool isDead() const
-    { return mDeathState != CharState_None; }
+        bool kill();
+        void resurrect();
+        bool isDead() const
+        { return mDeathState != CharState_None; }
 
-    void forceStateUpdate();
-};
+        void forceStateUpdate();
+    };
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);

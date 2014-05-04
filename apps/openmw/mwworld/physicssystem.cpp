@@ -227,10 +227,6 @@ namespace MWWorld
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
 
-            bool canWalk = ptr.getClass().canWalk(ptr);
-            bool isBipedal = ptr.getClass().isBipedal(ptr);
-            bool isNpc = ptr.getClass().isNpc();
-
             if(position.z < waterlevel || isFlying) // under water by 3/4 or can fly
             {
                 // TODO: Shouldn't water have higher drag in calculating velocity?
@@ -277,14 +273,11 @@ namespace MWWorld
                 // NOTE: velocity is either z axis only or x & z axis
                 Ogre::Vector3 nextpos = newPosition + velocity * remainingTime;
 
-                // If not able to fly, walk or bipedal don't allow to move out of water
+                // If not able to fly, don't allow to swim up into the air
                 // TODO: this if condition may not work for large creatures or situations
                 //        where the creature gets above the waterline for some reason
                 if(newPosition.z < waterlevel && // started 3/4 under water
                    !isFlying &&  // can't fly
-                   !canWalk &&   // can't walk
-                   !isBipedal && // not bipedal (assume bipedals can walk)
-                   !isNpc &&     // FIXME: shouldn't really need this
                    nextpos.z > waterlevel &&     // but about to go above water
                    newPosition.z <= waterlevel)
                 {

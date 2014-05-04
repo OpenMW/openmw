@@ -49,22 +49,6 @@
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
     </Skin>
 
-    <Skin name="DaedricText" size="16 16">
-        <Property key="FontName" value="daedric36"/>
-        <Property key="FontHeight" value="36"/>
-        <Property key="TextAlign" value="Default"/>
-        <Property key="TextColour" value="1 1 1"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
-    </Skin>
-
-    <Skin name="DaedricText_orig" size="16 16">
-        <Property key="FontName" value="daedric_orig36"/>
-        <Property key="FontHeight" value="36"/>
-        <Property key="TextAlign" value="Default"/>
-        <Property key="TextColour" value="1 1 1"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
-    </Skin>
-
     <Skin name="MW_StatNameC" size="200 18">
         <Child type="TextBoxC" skin="SandText" offset="0 0 200 18" align="Left HStretch" name="StatName"/>
     </Skin>

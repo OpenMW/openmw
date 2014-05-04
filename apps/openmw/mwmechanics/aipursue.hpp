@@ -1,5 +1,5 @@
-#ifndef GAME_MWMECHANICS_AIPERSUE_H
-#define GAME_MWMECHANICS_AIPERSUE_H
+#ifndef GAME_MWMECHANICS_AIPURSUE_H
+#define GAME_MWMECHANICS_AIPURSUE_H
 
 #include "aipackage.hpp"
 #include <string>
@@ -17,6 +17,12 @@ namespace MWMechanics
             /** \param objectId Actor to pursue **/
             AiPersue(const std::string &objectId);
             virtual AiPersue *clone() const;
+
+    class AiPursue : public AiPackage
+    {
+        public:
+            AiPursue(const std::string &objectId);
+            virtual AiPursue *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
             virtual int getTypeId() const;
 

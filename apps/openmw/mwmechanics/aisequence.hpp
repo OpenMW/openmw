@@ -65,6 +65,9 @@ namespace MWMechanics
             /// Has a package been completed during the last update?
             bool isPackageDone() const;
 
+            /// Removes all pursue packages until first non-pursue or stack empty.
+            void stopPursuit();
+            
             /// Execute current package, switching if needed.
             void execute (const MWWorld::Ptr& actor,float duration);
 

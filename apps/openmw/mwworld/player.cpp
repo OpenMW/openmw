@@ -37,7 +37,7 @@ namespace MWWorld
         mTeleported(false),
         mMarkedCell(NULL),
         mCurrentCrimeId(-1),
-        mPayedCrimeId(-1)
+        mPaidCrimeId(-1)
     {
         mPlayer.mBase = player;
         mPlayer.mRef.mRefID = "player";
@@ -223,7 +223,7 @@ namespace MWWorld
         player.mCellId = mCellStore->getCell()->getCellId();
 
         player.mCurrentCrimeId = mCurrentCrimeId;
-        player.mPayedCrimeId = mPayedCrimeId;
+        player.mPaidCrimeId = mPaidCrimeId;
 
         player.mBirthsign = mSign;
 
@@ -273,7 +273,7 @@ namespace MWWorld
                 throw std::runtime_error ("invalid player state record (birthsign)");
 
             mCurrentCrimeId = player.mCurrentCrimeId;
-            mPayedCrimeId = player.mPayedCrimeId;
+            mPaidCrimeId = player.mPaidCrimeId;
 
             mSign = player.mBirthsign;
 
@@ -318,11 +318,11 @@ namespace MWWorld
 
     void Player::recordCrimeId()
     {
-        mPayedCrimeId = mCurrentCrimeId;
+        mPaidCrimeId = mCurrentCrimeId;
     }
 
     int Player::getCrimeId() const
     {
-        return mPayedCrimeId;
+        return mPaidCrimeId;
     }
 }
