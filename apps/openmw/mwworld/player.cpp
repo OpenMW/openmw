@@ -131,9 +131,6 @@ namespace MWWorld
     {
         MWWorld::Ptr ptr = getPlayer();
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
-
-        if(!sneak)
-            MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
     }
 
     void Player::yaw(float yaw)
