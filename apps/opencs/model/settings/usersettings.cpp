@@ -127,7 +127,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         * proxy slave settings, but must match any declared values the proxy
         * slave has, if any.
         *******************************************************************/
-
+/*
         //create setting objects, specifying the basic widget type,
         //the page name, and the view name
 
@@ -240,6 +240,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         slaveDoubleSpinbox->setDefaultValue ("0.51");
         slaveDoubleSpinbox->setSingleStep(0.17);
         slaveDoubleSpinbox->setMaximum(4.0);
+*/
         }
 }
 
