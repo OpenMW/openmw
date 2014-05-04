@@ -95,6 +95,16 @@ QStringList CSMSettings::Setting::property (SettingProperty prop) const
     return mProperties.at(prop);
 }
 
+void CSMSettings::Setting::setDefaultValue (int value)
+{
+    setDefaultValues (QStringList() << QVariant (value).toString());
+}
+
+void CSMSettings::Setting::setDefaultValue (double value)
+{
+    setDefaultValues (QStringList() << QVariant (value).toString());
+}
+
 void CSMSettings::Setting::setDefaultValue (const QString &value)
 {
     setDefaultValues (QStringList() << value);

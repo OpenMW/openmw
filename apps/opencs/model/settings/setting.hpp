@@ -45,6 +45,8 @@ namespace CSMSettings
         void setDefinedValues (QStringList list);
         QStringList definedValues() const;
 
+        void setDefaultValue (int value);
+        void setDefaultValue (double value);
         void setDefaultValue (const QString &value);
 
         void setDefaultValues (const QStringList &values);

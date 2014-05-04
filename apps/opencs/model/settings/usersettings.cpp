@@ -132,27 +132,29 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         //the page name, and the view name
 /*
         Setting *masterBoolean = createSetting (Type_RadioButton, section,
-                                        "Master Proxy");
+                                                "Master Proxy");
 
         Setting *slaveBoolean = createSetting (Type_CheckBox, section,
-                                        "Proxy Checkboxes");
+                                                "Proxy Checkboxes");
 
         Setting *slaveSingleText = createSetting (Type_LineEdit, section,
-                                                  "Proxy TextBox 1");
+                                                "Proxy TextBox 1");
 
         Setting *slaveMultiText = createSetting (Type_LineEdit, section,
-                                                 "ProxyTextBox 2");
+                                                "ProxyTextBox 2");
 
         Setting *slaveAlphaSpinbox = createSetting (Type_SpinBox, section,
-                                               "Alpha Spinbox");
+                                                "Alpha Spinbox");
 
         Setting *slaveIntegerSpinbox = createSetting (Type_SpinBox, section,
-                                               "Int Spinbox");
+                                                "Int Spinbox");
 
         Setting *slaveDoubleSpinbox = createSetting (Type_DoubleSpinBox,
                                                 section, "Double Spinbox");
 
         Setting *slaveSlider = createSetting (Type_Slider, section, "Slider");
+
+        Setting *slaveDial = createSetting (Type_Dial, section, "Dial");
 
         //set declared values for selected views
         masterBoolean->setDeclaredValues (QStringList()
@@ -212,6 +214,13 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
                                  << (QStringList() << "100")
                                  );
 
+        masterBoolean->addProxy (slaveDial, QList <QStringList> ()
+                                 << (QStringList() << "25")
+                                 << (QStringList() << "50")
+                                 << (QStringList() << "75")
+                                 << (QStringList() << "100")
+                                 );
+
         //settings with proxies are not serialized by default
         //other settings non-serialized for demo purposes
         slaveBoolean->setSerializable (false);
@@ -239,7 +248,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         //slaveAlphaSpinbox->setSuffix ("!");
         slaveAlphaSpinbox->setWrapping (true);
 
-        slaveIntegerSpinbox->setDefaultValue ("14");
+        slaveIntegerSpinbox->setDefaultValue (14);
         slaveIntegerSpinbox->setMinimum (0);
         slaveIntegerSpinbox->setMaximum (58);
         slaveIntegerSpinbox->setPrefix ("$");
@@ -247,16 +256,23 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         slaveIntegerSpinbox->setWidgetWidth (10);
         slaveIntegerSpinbox->setSpecialValueText ("Nothing!");
 
-        slaveDoubleSpinbox->setDefaultValue ("0.51");
+        slaveDoubleSpinbox->setDefaultValue (0.51);
         slaveDoubleSpinbox->setSingleStep(0.17);
         slaveDoubleSpinbox->setMaximum(4.0);
 
         slaveSlider->setMinimum (0);
         slaveSlider->setMaximum (100);
-        slaveSlider->setDefaultValue ("75");
+        slaveSlider->setDefaultValue (75);
         slaveSlider->setWidgetWidth (100);
         slaveSlider->setTicksAbove (true);
-        slaveSlider->setTickInterval (25);*/
+        slaveSlider->setTickInterval (25);
+
+        slaveDial->setMinimum (0);
+        slaveDial->setMaximum (100);
+        slaveDial->setSingleStep (5);
+        slaveDial->setDefaultValue (75);
+        slaveDial->setTickInterval (25);
+*/
         }
 }
 
