@@ -246,6 +246,15 @@ namespace MWWorld
                     // If falling, add part of the incoming velocity with the current inertia
                     // TODO: but we could be jumping up?
                     velocity = velocity * time + physicActor->getInertialForce();
+
+                    // avoid getting infinite inertia in air
+                    float actorSpeed = ptr.getClass().getSpeed(ptr);
+                    float speedXY = Ogre::Vector2(velocity.x, velocity.y).length();
+                    if (speedXY > actorSpeed) 
+                    {
+                        velocity.x *= actorSpeed / speedXY;
+                        velocity.y *= actorSpeed / speedXY;
+                    }
                 }
                 inertia = velocity; // NOTE: velocity is for z axis only in this code block
 
@@ -314,7 +323,7 @@ namespace MWWorld
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
                 {
                     // don't let pure water creatures move out of water after stepMove
-                    if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
+                    if((ptr.getClass().canSwim(ptr) && !canWalk) 
                             && newPosition.z > (waterlevel - halfExtents.z * 0.5))
                         newPosition = oldPosition;
                     else // Only on the ground if there's gravity
