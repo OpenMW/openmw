@@ -3,7 +3,7 @@
 
 #include <OgreColourValue.h>
 
-#include <qt4/QtGui/qevent.h>
+#include <QtGui/qevent.h>
 
 #include "../../model/doc/document.hpp"
 
