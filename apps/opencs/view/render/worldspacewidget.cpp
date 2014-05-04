@@ -5,7 +5,7 @@
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
 
-#include <qt4/QtGui/qevent.h>
+#include <QtGui/qevent.h>
 
 #include "../world/scenetoolmode.hpp"
 #include <apps/opencs/model/world/universalid.hpp>

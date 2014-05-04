@@ -3,7 +3,7 @@
 
 #include <sstream>
 
-#include <qt4/QtGui/qevent.h>
+#include <QtGui/qevent.h>
 
 #include <apps/opencs/model/world/tablemimedata.hpp>
 
