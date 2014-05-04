@@ -215,16 +215,22 @@ namespace MWGui
         {
             std::vector<std::string> matches;
             listNames();
-            mCommandLine->setCaption(complete( mCommandLine->getOnlyText(), matches ));
-#if 0
-            int i = 0;
-            for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); ++it,++i )
+            std::string oldCaption = mCommandLine->getCaption();
+            std::string newCaption = complete( mCommandLine->getOnlyText(), matches );
+            mCommandLine->setCaption(newCaption);
+
+            // List candidates if repeatedly pressing tab
+            if (oldCaption == newCaption && matches.size())
             {
-                printOK( *it );
-                if( i == 50 )
-                    break;
+                int i = 0;
+                printOK("");
+                for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); ++it,++i )
+                {
+                    printOK( *it );
+                    if( i == 50 )
+                        break;
+                }
             }
-#endif
         }
 
         if(mCommandHistory.empty()) return;

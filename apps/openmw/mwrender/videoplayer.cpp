@@ -6,14 +6,9 @@
 #include <cstdio>
 #include <cmath>
 
-#include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
-#include <OgreRenderWindow.h>
 #include <OgreTextureManager.h>
-#include <OgreTechnique.h>
-#include <OgreRectangle2D.h>
-#include <OgreMaterialManager.h>
-#include <OgreSceneNode.h>
+#include <OgreStringConverter.h>
 
 #include <boost/thread.hpp>
 
@@ -21,9 +16,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwsound/sound_decoder.hpp"
 #include "../mwsound/sound.hpp"
-#include "../mwbase/inputmanager.hpp"
-
-#include "renderconst.hpp"
 
 #ifdef _WIN32
 #include <BaseTsd.h>

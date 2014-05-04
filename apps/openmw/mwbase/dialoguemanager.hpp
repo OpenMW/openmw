@@ -5,6 +5,11 @@
 
 #include <stdint.h>
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace ESM
 {
     class ESMReader;
@@ -45,9 +50,6 @@ namespace MWBase
 
             virtual void goodbye() = 0;
 
-            virtual MWWorld::Ptr getActor() const = 0;
-            ///< Return the actor the player is currently talking to.
-
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic) const = 0;
 
             //calbacks for the GUI
@@ -63,7 +65,7 @@ namespace MWBase
 
             virtual int countSavedGameRecords() const = 0;
 
-            virtual void write (ESM::ESMWriter& writer) const = 0;
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
     };

@@ -12,8 +12,7 @@ namespace Loading
 
 namespace ESM
 {
-    class ESMWriter;
-    class ESMReader;
+    class GlobalMap;
 }
 
 namespace MWRender
@@ -40,8 +39,8 @@ namespace MWRender
         /// Clears the overlay
         void clear();
 
-        void write (ESM::ESMWriter& writer);
-        void readRecord (ESM::ESMReader& reader, int32_t type, std::vector<std::pair<int, int> >& exploredCells);
+        void write (ESM::GlobalMap& map);
+        void read (ESM::GlobalMap& map);
 
     private:
         std::string mCacheDir;

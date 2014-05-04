@@ -124,7 +124,7 @@ void printEffectList(ESM::EffectList effects)
 {
     int i = 0;
     std::vector<ESM::ENAMstruct>::iterator eit;
-    for (eit = effects.mList.begin(); eit != effects.mList.end(); eit++)
+    for (eit = effects.mList.begin(); eit != effects.mList.end(); ++eit)
     {
         std::cout << "  Effect[" << i << "]: " << magicEffectLabel(eit->mEffectID)
                   << " (" << eit->mEffectID << ")" << std::endl;

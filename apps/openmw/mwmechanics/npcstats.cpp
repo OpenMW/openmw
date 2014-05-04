@@ -491,7 +491,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
             if (iter->second.mExpelled)
                 mExpelled.insert (iter->first);
 
-            if (iter->second.mRank)
+            if (iter->second.mRank >= 0)
                 mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
 
             if (iter->second.mReputation)

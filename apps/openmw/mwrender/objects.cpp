@@ -240,25 +240,25 @@ Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
 void Objects::enableLights()
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->enableLights(true);
 }
 
 void Objects::disableLights()
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->enableLights(false);
 }
 
 void Objects::update(float dt, Ogre::Camera* camera)
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->runAnimation(dt);
 
     it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->preRender(camera);
 
 }

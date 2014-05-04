@@ -55,6 +55,9 @@ namespace MWGui
         bool mChanged;
         bool mFogOfWar;
 
+        typedef std::pair<int, int> CellId;
+        std::vector<CellId> mMarkers;
+
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
@@ -105,7 +108,7 @@ namespace MWGui
         /// Clear all savegame-specific data
         void clear();
 
-        void write (ESM::ESMWriter& writer);
+        void write (ESM::ESMWriter& writer, Loading::Listener& progress);
         void readRecord (ESM::ESMReader& reader, int32_t type);
 
     private:

@@ -3,9 +3,12 @@
 #include "booleanview.hpp"
 #include "textview.hpp"
 #include "listview.hpp"
+#include "rangeview.hpp"
 
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/connector.hpp"
+#include "../../model/settings/support.hpp"
+
 #include "settingwindow.hpp"
 
 QMap <CSVSettings::ViewType, CSVSettings::IViewFactory *>
@@ -85,4 +88,5 @@ void CSVSettings::Page::buildFactories()
     mViewFactories[ViewType_Boolean] = new BooleanViewFactory (this);
     mViewFactories[ViewType_Text] = new TextViewFactory (this);
     mViewFactories[ViewType_List] = new ListViewFactory (this);
+    mViewFactories[ViewType_Range] = new RangeViewFactory (this);
 }

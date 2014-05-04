@@ -29,10 +29,8 @@
 
 namespace
 {
-    std::string getDialogueActorFaction()
+    std::string getDialogueActorFaction(MWWorld::Ptr actor)
     {
-        MWWorld::Ptr actor = MWBase::Environment::get().getDialogueManager()->getActor();
-
         const MWMechanics::NpcStats &stats = MWWorld::Class::get (actor).getNpcStats (actor);
 
         if (stats.getFactionRanks().empty())
@@ -523,6 +521,7 @@ namespace MWScript
                 }
         };
 
+        template<class R>
         class OpPCJoinFaction : public Interpreter::Opcode1
         {
             public:
@@ -533,7 +532,8 @@ namespace MWScript
 
                     if(arg0==0)
                     {
-                        factionID = getDialogueActorFaction();
+                        MWWorld::Ptr actor = R()(runtime);
+                        factionID = getDialogueActorFaction(actor);
                     }
                     else
                     {
@@ -552,6 +552,7 @@ namespace MWScript
                 }
         };
 
+        template<class R>
         class OpPCRaiseRank : public Interpreter::Opcode1
         {
             public:
@@ -562,7 +563,8 @@ namespace MWScript
 
                     if(arg0==0)
                     {
-                        factionID = getDialogueActorFaction();
+                        MWWorld::Ptr actor = R()(runtime);
+                        factionID = getDialogueActorFaction(actor);
                     }
                     else
                     {
@@ -585,6 +587,7 @@ namespace MWScript
                 }
         };
 
+        template<class R>
         class OpPCLowerRank : public Interpreter::Opcode1
         {
             public:
@@ -595,7 +598,8 @@ namespace MWScript
 
                     if(arg0==0)
                     {
-                        factionID = getDialogueActorFaction();
+                        MWWorld::Ptr actor = R()(runtime);
+                        factionID = getDialogueActorFaction(actor);
                     }
                     else
                     {
@@ -1057,6 +1061,22 @@ namespace MWScript
         };
 
         template <class R>
+        class OpOnKnockout : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value =
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).getKnockedDownOneFrame();
+
+                    runtime.push (value);
+                }
+        };
+
+        template <class R>
         class OpIsWerewolf : public Interpreter::Opcode0
         {
             public:
@@ -1180,9 +1200,12 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpell, new OpGetSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
 
-            interpreter.installSegment3(Compiler::Stats::opcodePCRaiseRank,new OpPCRaiseRank);
-            interpreter.installSegment3(Compiler::Stats::opcodePCLowerRank,new OpPCLowerRank);
-            interpreter.installSegment3(Compiler::Stats::opcodePCJoinFaction,new OpPCJoinFaction);
+            interpreter.installSegment3(Compiler::Stats::opcodePCRaiseRank,new OpPCRaiseRank<ImplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodePCLowerRank,new OpPCLowerRank<ImplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodePCJoinFaction,new OpPCJoinFaction<ImplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodePCRaiseRankExplicit,new OpPCRaiseRank<ExplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodePCLowerRankExplicit,new OpPCLowerRank<ExplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodePCJoinFactionExplicit,new OpPCJoinFaction<ExplicitRef>);
             interpreter.installSegment3(Compiler::Stats::opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
             interpreter.installSegment3(Compiler::Stats::opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
 
@@ -1229,6 +1252,8 @@ namespace MWScript
 
             interpreter.installSegment5 (Compiler::Stats::opcodeOnDeath, new OpOnDeath<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockout, new OpOnKnockout<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockoutExplicit, new OpOnKnockout<ExplicitRef>);
 
             interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
@@ -1238,7 +1263,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolf, new OpSetWerewolf<ImplicitRef, false>);
             interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
             interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobatics, new OpSetWerewolfAcrobatics<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);           
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);
         }
     }
 }

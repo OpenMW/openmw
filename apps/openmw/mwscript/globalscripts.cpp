@@ -97,7 +97,7 @@ namespace MWScript
         return mScripts.size();
     }
 
-    void GlobalScripts::write (ESM::ESMWriter& writer) const
+    void GlobalScripts::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         for (std::map<std::string, std::pair<bool, Locals> >::const_iterator iter (mScripts.begin());
             iter!=mScripts.end(); ++iter)
@@ -113,6 +113,7 @@ namespace MWScript
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
             writer.endRecord (ESM::REC_GSCR);
+            progress.increaseProgress();
         }
     }
 

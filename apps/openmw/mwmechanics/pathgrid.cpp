@@ -296,7 +296,7 @@ namespace MWMechanics
                             // add this edge to openset, lowest cost goes to the front
                             // TODO: if this causes performance problems a hash table may help
                             std::list<int>::iterator it = openset.begin();
-                            for(it = openset.begin(); it!= openset.end(); it++)
+                            for(it = openset.begin(); it!= openset.end(); ++it)
                             {
                                 if(fScore[*it] > fScore[dest])
                                     break;

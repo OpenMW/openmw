@@ -187,11 +187,38 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
 {
-    MWWorld::ContainerStoreIterator it = addImp(itemPtr, count);
+    Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+
+    MWWorld::ContainerStoreIterator it = end();
+
+    if (setOwner && actorPtr.getClass().isActor())
+    {
+        // HACK: Set owner on the original item, then reset it after we have copied it
+        // If we set the owner on the copied item, it would not stack correctly...
+        std::string oldOwner = itemPtr.getCellRef().mOwner;
+        if (actorPtr == player)
+        {
+            // No point in setting owner to the player - NPCs will not respect this anyway
+            // Additionally, setting it to "player" would make those items not stack with items that don't have an owner
+            itemPtr.getCellRef().mOwner = "";
+        }
+        else
+            itemPtr.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
+
+        it = addImp(itemPtr, count);
+
+        itemPtr.getCellRef().mOwner = oldOwner;
+    }
+    else
+    {
+        it = addImp(itemPtr, count);
+    }
+
+    // The copy of the original item we just made
     MWWorld::Ptr item = *it;
 
     // we may have copied an item from the world, so reset a few things first
-    item.getRefData().setBaseNode(NULL);
+    item.getRefData().setBaseNode(NULL); // Especially important, otherwise scripts on the item could think that it's actually in a cell
     item.getCellRef().mPos.rot[0] = 0;
     item.getCellRef().mPos.rot[1] = 0;
     item.getCellRef().mPos.rot[2] = 0;
@@ -199,15 +226,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().mPos.pos[1] = 0;
     item.getCellRef().mPos.pos[2] = 0;
 
-    if (setOwner && actorPtr.getClass().isActor())
-        item.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
-
     std::string script = MWWorld::Class::get(item).getScript(item);
     if(script != "")
     {
         CellStore *cell;
 
-        Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
 
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
@@ -221,7 +245,6 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
 
         item.mCell = cell;
         item.mContainerStore = 0;
-        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
     }
 
     return it;
