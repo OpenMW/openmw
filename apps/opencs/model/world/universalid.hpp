@@ -60,6 +60,7 @@ namespace CSMWorld
                 Type_Spell,
                 Type_Cells,
                 Type_Cell,
+                Type_Cell_Missing, //For cells that does not exist yet.
                 Type_Referenceables,
                 Type_Referenceable,
                 Type_Activator,
