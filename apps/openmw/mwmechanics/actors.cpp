@@ -976,9 +976,9 @@ namespace MWMechanics
 
                 if (!detected)
                     MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
-                else
-                    MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
             }
+            else
+                MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
         }
     }
     void Actors::restoreDynamicStats(bool sleep)
