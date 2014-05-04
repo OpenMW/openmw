@@ -127,10 +127,10 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         * proxy slave settings, but must match any declared values the proxy
         * slave has, if any.
         *******************************************************************/
-/*
+
         //create setting objects, specifying the basic widget type,
         //the page name, and the view name
-
+/*
         Setting *masterBoolean = createSetting (Type_RadioButton, section,
                                         "Master Proxy");
 
@@ -151,6 +151,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         Setting *slaveDoubleSpinbox = createSetting (Type_DoubleSpinBox,
                                                 section, "Double Spinbox");
+
+        Setting *slaveSlider = createSetting (Type_Slider, section, "Slider");
 
         //set declared values for selected views
         masterBoolean->setDeclaredValues (QStringList()
@@ -203,6 +205,13 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
                                  << (QStringList() << "0.51")
                                  << (QStringList() << "0.68"));
 
+        masterBoolean->addProxy (slaveSlider, QList <QStringList> ()
+                                 << (QStringList() << "25")
+                                 << (QStringList() << "50")
+                                 << (QStringList() << "75")
+                                 << (QStringList() << "100")
+                                 );
+
         //settings with proxies are not serialized by default
         //other settings non-serialized for demo purposes
         slaveBoolean->setSerializable (false);
@@ -211,6 +220,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         slaveAlphaSpinbox->setSerializable (false);
         slaveIntegerSpinbox->setSerializable (false);
         slaveDoubleSpinbox->setSerializable (false);
+        slaveSlider->setSerializable (false);
 
         slaveBoolean->setDefaultValues (QStringList()
                                         << "One" << "Three" << "Five");
@@ -240,7 +250,13 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         slaveDoubleSpinbox->setDefaultValue ("0.51");
         slaveDoubleSpinbox->setSingleStep(0.17);
         slaveDoubleSpinbox->setMaximum(4.0);
-*/
+
+        slaveSlider->setMinimum (0);
+        slaveSlider->setMaximum (100);
+        slaveSlider->setDefaultValue ("75");
+        slaveSlider->setWidgetWidth (100);
+        slaveSlider->setTicksAbove (true);
+        slaveSlider->setTickInterval (25);*/
         }
 }
 

@@ -13,7 +13,7 @@ namespace CSVSettings
     {
         Q_OBJECT
 
-        QAbstractSpinBox *mRangeWidget;
+        QWidget *mRangeWidget;
         CSMSettings::SettingType mRangeType;
 
     public:
@@ -23,6 +23,7 @@ namespace CSVSettings
     protected:
         void updateView (bool signalUpdate = true) const;
 
+        void buildSlider (CSMSettings::Setting *setting);
         void buildSpinBox (CSMSettings::Setting *setting);
 
     private slots:

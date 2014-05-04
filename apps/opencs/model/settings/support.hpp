@@ -44,12 +44,15 @@ namespace CSMSettings
         Property_Suffix = 16,
         Property_SingleStep = 17,
         Property_Wrapping = 18,
+        Property_TickInterval = 19,
+        Property_TicksAbove = 20,
+        Property_TicksBelow = 21,
 
         //Stringlists should always be the last items
-        Property_DefaultValues = 19,
-        Property_DeclaredValues = 20,
-        Property_DefinedValues = 21,
-        Property_Proxies = 22
+        Property_DefaultValues = 22,
+        Property_DeclaredValues = 23,
+        Property_DefinedValues = 24,
+        Property_Proxies = 25
     };
 
     enum SettingType
@@ -122,6 +125,7 @@ namespace CSMSettings
         "is_multi_line", "widget_width", "view_row", "view_column", "delimiter",
         "is_serializable","column_span", "row_span", "minimum", "maximum",
         "special_value_text", "prefix", "suffix", "single_step", "wrapping",
+        "tick_interval", "ticks_above", "ticks_below",
         "defaults", "declarations", "definitions", "proxies"
     };
 
@@ -146,6 +150,9 @@ namespace CSMSettings
         "",         //prefix
         "",         //suffix
         "false",    //wrapping
+        "1",        //tick interval
+        "false",    //ticks above
+        "true",     //ticks below
         "",         //default values
         "",         //declared values
         "",         //defined values

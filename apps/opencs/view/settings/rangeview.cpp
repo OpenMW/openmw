@@ -4,6 +4,9 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QAbstractSpinBox>
+#include <QAbstractSlider>
+#include <QDial>
+#include <QSlider>
 
 #include "rangeview.hpp"
 #include "spinbox.hpp"
@@ -20,12 +23,68 @@ CSVSettings::RangeView::RangeView (CSMSettings::Setting *setting,
     if (isMultiValue())
         return;
 
-    buildSpinBox (setting);
+    switch (mRangeType)
+    {
+    case CSMSettings::Type_SpinBox:
+    case CSMSettings::Type_DoubleSpinBox:
+        buildSpinBox (setting);
+    break;
+
+    case CSMSettings::Type_Dial:
+    case CSMSettings::Type_Slider:
+        buildSlider (setting);
+    break;
+
+    default:
+        break;
+    }
 
     mRangeWidget->setFixedWidth (widgetWidth (setting->widgetWidth()));
     mRangeWidget->setObjectName (setting->name());
 
     addWidget (mRangeWidget);
+}
+
+void CSVSettings::RangeView::buildSlider (CSMSettings::Setting *setting)
+{
+    switch (setting->type())
+    {
+    case CSMSettings::Type_Slider:
+        mRangeWidget = new QSlider (Qt::Horizontal, this);
+        mRangeWidget->setProperty ("tickInterval", setting->tickInterval());
+
+        if (setting->ticksAbove())
+        {
+            if (setting->ticksBelow())
+                mRangeWidget->setProperty ("tickPosition", QSlider::TicksBothSides);
+            else
+                mRangeWidget->setProperty ("tickPosition", QSlider::TicksAbove);
+        }
+        else if (setting->ticksBelow())
+            mRangeWidget->setProperty ("tickPosition", QSlider::TicksBelow);
+        else
+            mRangeWidget->setProperty ("tickPosition", QSlider::NoTicks);
+
+    break;
+
+    case CSMSettings::Type_Dial:
+        mRangeWidget = new QDial (this);
+        mRangeWidget->setProperty ("wrapping", setting->wrapping());
+        mRangeWidget->setProperty ("notchesVisible",
+                            (setting->ticksAbove() || setting->ticksBelow()));
+    break;
+
+    default:
+        break;
+    }
+
+    mRangeWidget->setProperty ("minimum", setting->minimum());
+    mRangeWidget->setProperty ("maximum", setting->maximum());
+    mRangeWidget->setProperty ("tracking", false);
+    mRangeWidget->setProperty ("singleStep", setting->singleStep());
+
+    connect (mRangeWidget, SIGNAL (valueChanged (int)),
+             this, SLOT (slotUpdateView (int)));
 }
 
 void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
@@ -77,13 +136,18 @@ void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
 void CSVSettings::RangeView::slotUpdateView (int value)
 {
     QString textValue = "";
+    QStringList list;
 
-    if (mRangeType == CSMSettings::Type_SpinBox)
+    switch (mRangeType)
     {
-        QStringList list =
-                static_cast <SpinBox *> (mRangeWidget)->valueList();
+    case CSMSettings::Type_SpinBox:
+        list = static_cast <SpinBox *> (mRangeWidget)->valueList();
         if (!list.isEmpty())
             textValue = list.at(value);
+    break;
+
+    default:
+    break;
     }
 
     if (textValue.isEmpty())
@@ -92,7 +156,6 @@ void CSVSettings::RangeView::slotUpdateView (int value)
     setSelectedValue (textValue, false);
 
     View::updateView();
-
 }
 
 void CSVSettings::RangeView::slotUpdateView (double value)
@@ -117,6 +180,12 @@ void CSVSettings::RangeView::updateView (bool signalUpdate) const
 
     case CSMSettings::Type_DoubleSpinBox:
         static_cast <QDoubleSpinBox *> (mRangeWidget)->setValue (value.toDouble());
+    break;
+
+    case CSMSettings::Type_Slider:
+    case CSMSettings::Type_Dial:
+        mRangeWidget->setProperty ("value", value.toInt());
+        mRangeWidget->setProperty ("sliderPosition", value.toInt());
     break;
 
     default:

@@ -239,6 +239,36 @@ QString CSMSettings::Setting::suffix() const
     return property (Property_Suffix).at(0);
 }
 
+void CSMSettings::Setting::setTickInterval (int value)
+{
+    setProperty (Property_TickInterval, value);
+}
+
+int CSMSettings::Setting::tickInterval () const
+{
+    return property (Property_TickInterval).at(0).toInt();
+}
+
+void CSMSettings::Setting::setTicksAbove (bool state)
+{
+    setProperty (Property_TicksAbove, state);
+}
+
+bool CSMSettings::Setting::ticksAbove() const
+{
+    return (property (Property_TicksAbove).at(0) == "true");
+}
+
+void CSMSettings::Setting::setTicksBelow (bool state)
+{
+    setProperty (Property_TicksBelow, state);
+}
+
+bool CSMSettings::Setting::ticksBelow() const
+{
+    return (property (Property_TicksBelow).at(0) == "true");
+}
+
 void CSMSettings::Setting::setType (int settingType)
 {
     setProperty (Property_SettingType, settingType);

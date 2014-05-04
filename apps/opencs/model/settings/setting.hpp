@@ -65,6 +65,14 @@ namespace CSMSettings
         void setMask (const QString &value);
         QString mask() const;
 
+        void setMaximum (int value);
+        void setMaximum (double value);
+        QString maximum() const;
+
+        void setMinimum (int value);
+        void setMinimum (double value);
+        QString minimum() const;
+
         void setName (const QString &value);
         QString name() const;
 
@@ -92,13 +100,14 @@ namespace CSMSettings
         void setSuffix (const QString &value);
         QString suffix() const;
 
-        void setMaximum (int value);
-        void setMaximum (double value);
-        QString maximum() const;
+        void setTickInterval (int value);
+        int tickInterval() const;
 
-        void setMinimum (int value);
-        void setMinimum (double value);
-        QString minimum() const;
+        void setTicksAbove (bool state);
+        bool ticksAbove() const;
+
+        void setTicksBelow (bool state);
+        bool ticksBelow() const;
 
         void setViewColumn (int value);
         int viewColumn() const;
