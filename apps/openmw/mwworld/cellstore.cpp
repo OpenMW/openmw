@@ -52,7 +52,7 @@ namespace
                 iter!=collection.mList.end(); ++iter)
             {
                 if (iter->mData.getCount()==0 && iter->mRef.mRefNum.mContentFile==-1)
-                    continue; // deleted reference that did not come from a content file -> ignore
+                    continue; // deleted file that did not came from a content file -> ignore
 
                 RecordType state;
                 iter->save (state);
@@ -72,17 +72,13 @@ namespace
         RecordType state;
         state.load (reader);
 
-        // If the reference came from a content file, make sure this content file is loaded
-        if (state.mRef.mRefNum.mContentFile != -1)
-        {
-            std::map<int, int>::const_iterator iter =
-                contentFileMap.find (state.mRef.mRefNum.mContentFile);
+        std::map<int, int>::const_iterator iter =
+            contentFileMap.find (state.mRef.mRefNum.mContentFile);
 
-            if (iter==contentFileMap.end())
-                return; // content file has been removed -> skip
+        if (iter==contentFileMap.end())
+            return; // content file has been removed -> skip
 
-            state.mRef.mRefNum.mContentFile = iter->second;
-        }
+        state.mRef.mRefNum.mContentFile = iter->second;
 
         if (!MWWorld::LiveCellRef<T>::checkState (state))
             return; // not valid anymore with current content files -> skip
@@ -433,6 +429,7 @@ namespace MWWorld
             while(mCell->getNextRef(esm[index], ref, deleted))
             {
                 // Don't load reference if it was moved to a different cell.
+                std::string lowerCase = Misc::StringUtils::lowerCase(ref.mRefID);
                 ESM::MovedCellRefTracker::const_iterator iter =
                     std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
                 if (iter != mCell->mMovedRefs.end()) {

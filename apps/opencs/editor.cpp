@@ -121,7 +121,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     //iterate the data directories and add them to the file dialog for loading
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
-        QString path = QString::fromUtf8 (iter->string().c_str());
+        QString path = QString::fromStdString(iter->string());
         mFileDialog.addFiles(path);
     }
 /*

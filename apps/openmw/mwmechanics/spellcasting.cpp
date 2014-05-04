@@ -401,10 +401,10 @@ namespace MWMechanics
         if (!exploded)
             MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, mTarget, effects, caster, mId, mSourceName);
 
-        if (!reflectedEffects.mList.empty())
+        if (reflectedEffects.mList.size())
             inflict(caster, target, reflectedEffects, range, true);
 
-        if (!appliedLastingEffects.empty())
+        if (appliedLastingEffects.size())
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, caster.getRefData().getHandle());
 
@@ -575,6 +575,7 @@ namespace MWMechanics
         {
             if (mCaster.getRefData().getHandle() == "player")
             {
+                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
             }
         }

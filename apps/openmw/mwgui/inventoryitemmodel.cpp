@@ -4,8 +4,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 namespace MWGui
 {
 
@@ -40,11 +38,11 @@ ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
     return -1;
 }
 
-void InventoryItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
+void InventoryItemModel::copyItem (const ItemStack& item, size_t count)
 {
     if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, setNewOwner);
+    mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor);
 }
 
 
@@ -57,18 +55,6 @@ void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
         throw std::runtime_error("Item to remove not found in container store");
     else if (removed < static_cast<int>(count))
         throw std::runtime_error("Not enough items in the stack to remove");
-}
-
-void InventoryItemModel::moveItem(const ItemStack &item, size_t count, ItemModel *otherModel)
-{
-    bool setNewOwner = false;
-
-    // Are you dead? Then you wont need that anymore
-    if (mActor.getClass().isActor() && mActor.getClass().getCreatureStats(mActor).isDead())
-        setNewOwner = true;
-
-    otherModel->copyItem(item, count, setNewOwner);
-    removeItem(item, count);
 }
 
 void InventoryItemModel::update()

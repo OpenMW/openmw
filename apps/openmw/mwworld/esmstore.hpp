@@ -212,7 +212,7 @@ namespace MWWorld
 
         int countSavedGameRecords() const;
 
-        void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
+        void write (ESM::ESMWriter& writer) const;
 
         bool readRecord (ESM::ESMReader& reader, int32_t type);
         ///< \return Known type?

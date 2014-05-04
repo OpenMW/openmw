@@ -4,11 +4,11 @@
 #include <vector>
 #include <string>
 
+#include <QTableView>
 #include <QtGui/qevent.h>
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
-#include "dragrecordtable.hpp"
 
 class QUndoStack;
 class QAction;
@@ -31,7 +31,7 @@ namespace CSVWorld
     class CommandDelegate;
 
     ///< Table widget
-    class Table : public DragRecordTable
+    class Table : public QTableView
     {
             Q_OBJECT
 
@@ -47,7 +47,9 @@ namespace CSVWorld
             QAction *mPreviewAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
+            bool mEditLock;
             int mRecordStatusDisplay;
+            CSMDoc::Document& mDocument;
 
         private:
 
@@ -59,6 +61,10 @@ namespace CSVWorld
 
             void mouseMoveEvent(QMouseEvent *event);
 
+            void dragEnterEvent(QDragEnterEvent *event);
+
+            void dragMoveEvent(QDragMoveEvent *event);
+
             void dropEvent(QDropEvent *event);
 
         public:
@@ -68,13 +74,11 @@ namespace CSVWorld
             ///< \param createAndDelete Allow creation and deletion of records.
             /// \param sorting Allow changing order of rows in the view via column headers.
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked);
 
             CSMWorld::UniversalId getUniversalId (int row) const;
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
-
-            virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
         signals:
 
@@ -88,7 +92,6 @@ namespace CSVWorld
             /// \param modified Number of added and modified records
 
             void createRequest();
-
             void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:

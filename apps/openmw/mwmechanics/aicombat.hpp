@@ -39,16 +39,17 @@ namespace MWMechanics
             // when mCombatMove is true
             float mTimerCombatMove;
 
+            // the z rotation angle (degrees) we want to reach
+            // used every frame when mRotate is true
+            float mTargetAngle;
+
             // AiCombat states
-            bool mReadyToAttack, mAttack;
+            bool mReadyToAttack, mStrike;
             bool mFollowTarget;
             bool mCombatMove;
             bool mBackOffDoor;
+            bool mRotate;
 
-            bool mForceNoShortcut;
-            ESM::Position mShortcutFailPos;
-
-            ESM::Position mLastPos;
             MWMechanics::Movement mMovement;
             MWWorld::Ptr mTarget;
 

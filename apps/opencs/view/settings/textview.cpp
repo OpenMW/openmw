@@ -28,6 +28,11 @@ bool CSVSettings::TextView::isEquivalent
     return (lhs.trimmed() == rhs.trimmed());
 }
 
+void CSVSettings::TextView::setWidgetText (const QString &value) const
+{
+    mTextWidget->setProperty ("text", value);
+}
+
 void CSVSettings::TextView::slotTextEdited (QString value)
 {
     QStringList values = value.split (mDelimiter, QString::SkipEmptyParts);
@@ -46,12 +51,17 @@ void CSVSettings::TextView::updateView(bool signalUpdate) const
 {
     QString values = selectedValues().join (mDelimiter);
 
-    if (isEquivalent (mTextWidget->property("text").toString(), values))
+    if (isEquivalent (widgetText(), values))
         return;
 
-    mTextWidget->setProperty("text", values);
+    setWidgetText (values);
 
     View::updateView (signalUpdate);
+}
+
+QString CSVSettings::TextView::widgetText() const
+{
+    return mTextWidget->property("text").toString();
 }
 
 CSVSettings::TextView *CSVSettings::TextViewFactory::createView

@@ -68,6 +68,9 @@ namespace MWDialogue
 
             virtual void goodbye();
 
+            virtual MWWorld::Ptr getActor() const;
+            ///< Return the actor the player is currently talking to.
+
             virtual bool checkServiceRefused ();
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic) const;
@@ -83,7 +86,7 @@ namespace MWDialogue
 
             virtual int countSavedGameRecords() const;
 
-            virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
+            virtual void write (ESM::ESMWriter& writer) const;
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type);
     };

@@ -1,5 +1,5 @@
 #ifndef CSVSETTINGS_BOOLEANVIEW_HPP
-#define CSVSETTINGS_BOOLEANVIEW_HPP
+#define CSVSETTINGS_BOOELANVIEW_HPP
 
 #include <QWidget>
 #include <QAbstractButton>

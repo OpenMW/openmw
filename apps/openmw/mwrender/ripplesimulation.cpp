@@ -28,9 +28,7 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
       mRippleAreaLength(1000),
       mImpulseSize(20),
       mTexelOffset(0,0),
-      mFirstUpdate(true),
-      mRectangle(NULL),
-      mImpulse(NULL)
+      mFirstUpdate(true)
 {
     Ogre::AxisAlignedBox aabInf;
     aabInf.setInfinite();
@@ -107,7 +105,6 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
 RippleSimulation::~RippleSimulation()
 {
     delete mRectangle;
-    delete mImpulse;
 
     Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
 }

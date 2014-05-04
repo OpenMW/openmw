@@ -298,15 +298,13 @@ namespace MWMechanics
 
             if(stats.getTimeToStartDrowning() != mWatchedStats.getTimeToStartDrowning())
             {
-                const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fHoldBreathTime")->getFloat();
                 mWatchedStats.setTimeToStartDrowning(stats.getTimeToStartDrowning());
-                if(stats.getTimeToStartDrowning() >= fHoldBreathTime)
+                if(stats.getTimeToStartDrowning() >= 20.0f)
                     winMgr->setDrowningBarVisibility(false);
                 else
                 {
                     winMgr->setDrowningBarVisibility(true);
-                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning(), fHoldBreathTime);
+                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning());
                 }
             }
 
@@ -327,21 +325,6 @@ namespace MWMechanics
                 winMgr->updateSkillArea();
 
             winMgr->setValue("level", stats.getLevel());
-
-            // Update the equipped weapon icon
-            MWWorld::InventoryStore& inv = mWatched.getClass().getInventoryStore(mWatched);
-            MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            if (weapon == inv.end())
-                winMgr->unsetSelectedWeapon();
-            else
-                winMgr->setSelectedWeapon(*weapon);
-
-            // Update the selected spell icon
-            MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
-            if (enchantItem != inv.end())
-                winMgr->setSelectedEnchantItem(*enchantItem);
-            else if (winMgr->getSelectedSpell() == "")
-                winMgr->unsetSelectedSpell();
         }
 
         if (mUpdatePlayer)

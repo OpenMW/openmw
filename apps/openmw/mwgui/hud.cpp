@@ -52,7 +52,7 @@ namespace MWGui
         , mWeaponVisible(true)
         , mSpellVisible(true)
         , mWorldMouseOver(false)
-        , mEnemyHealthTimer(-1)
+        , mEnemyHealthTimer(0)
         , mIsDrowning(false)
         , mWeaponSpellTimer(0.f)
         , mDrowningFlashTheta(0.f)
@@ -203,9 +203,9 @@ namespace MWGui
         }
     }
 
-    void HUD::setDrowningTimeLeft(float time, float maxTime)
+    void HUD::setDrowningTimeLeft(float time)
     {
-        size_t progress = time/maxTime*200.0;
+        size_t progress = time/20.0*200.0;
         mDrowning->setProgressPosition(progress);
 
         bool isDrowning = (progress == 0);
@@ -625,7 +625,7 @@ namespace MWGui
         if (mIsDrowning)
         {
             float intensity = (cos(mDrowningFlashTheta) + 1.0f) / 2.0f;
-            mDrowningFlash->setColour(MyGUI::Colour(intensity, 0, 0));
+            mDrowningFlash->setColour(MyGUI::Colour(intensity, intensity, intensity));
         }
     }
 
@@ -637,12 +637,6 @@ namespace MWGui
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
         mEnemyHealth->setVisible(true);
         updateEnemyHealthBar();
-    }
-
-    void HUD::resetEnemy()
-    {
-        mEnemy = MWWorld::Ptr();
-        mEnemyHealthTimer = -1;
     }
 
 }

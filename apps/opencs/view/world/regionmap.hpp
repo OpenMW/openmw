@@ -1,13 +1,7 @@
 #ifndef CSV_WORLD_REGIONMAP_H
 #define CSV_WORLD_REGIONMAP_H
 
-#include <cstddef>
-#include <vector>
-
-#include <QObject>
 #include <QTableView>
-
-#include "./dragrecordtable.hpp"
 
 class QAction;
 
@@ -23,7 +17,7 @@ namespace CSMWorld
 
 namespace CSVWorld
 {
-    class RegionMap : public DragRecordTable
+    class RegionMap : public QTableView
     {
             Q_OBJECT
 
@@ -35,6 +29,8 @@ namespace CSVWorld
             QAction *mUnsetRegionAction;
             QAction *mViewAction;
             QAction *mViewInTableAction;
+            bool mEditLock;
+            CSMDoc::Document& mDocument;
             std::string mRegionId;
 
         private:
@@ -54,16 +50,12 @@ namespace CSVWorld
             void setRegion (const std::string& regionId);
             ///< Set region Id of selected cells.
 
-            void mouseMoveEvent(QMouseEvent *event);
-
-            void dropEvent(QDropEvent* event);
-
         public:
 
             RegionMap (const CSMWorld::UniversalId& universalId, CSMDoc::Document& document,
                 QWidget *parent = 0);
 
-            virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
+            void setEditLock (bool locked);
 
         signals:
 

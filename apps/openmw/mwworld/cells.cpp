@@ -277,23 +277,17 @@ int MWWorld::Cells::countSavedGameRecords() const
     return count;
 }
 
-void MWWorld::Cells::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
+void MWWorld::Cells::write (ESM::ESMWriter& writer) const
 {
     for (std::map<std::pair<int, int>, CellStore>::iterator iter (mExteriors.begin());
         iter!=mExteriors.end(); ++iter)
         if (iter->second.hasState())
-        {
             writeCell (writer, iter->second);
-            progress.increaseProgress(); // Assumes that each cell writes one record
-        }
 
     for (std::map<std::string, CellStore>::iterator iter (mInteriors.begin());
         iter!=mInteriors.end(); ++iter)
         if (iter->second.hasState())
-        {
             writeCell (writer, iter->second);
-            progress.increaseProgress(); // Assumes that each cell writes one record
-        }
 }
 
 bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,

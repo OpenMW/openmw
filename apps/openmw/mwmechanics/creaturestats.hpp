@@ -41,8 +41,6 @@ namespace MWMechanics
         bool mHostile;
         bool mAttackingOrSpell;
         bool mKnockdown;
-        bool mKnockdownOneFrame;
-        bool mKnockdownOverOneFrame;
         bool mHitRecovery;
         bool mBlock;
         unsigned int mMovementFlags;
@@ -190,14 +188,7 @@ namespace MWMechanics
         float getEvasion() const;
 
         void setKnockedDown(bool value);
-        ///Returns true for the entire duration of the actor being knocked down
         bool getKnockedDown() const;
-        void setKnockedDownOneFrame(bool value);
-        ///Returns true only for the first frame of the actor being knocked out; used for "onKnockedOut" command
-        bool getKnockedDownOneFrame() const;
-        void setKnockedDownOverOneFrame(bool value);
-        ///Returns true for all but the first frame of being knocked out; used to know to not reset mKnockedDownOneFrame
-        bool getKnockedDownOverOneFrame() const;
         void setHitRecovery(bool value);
         bool getHitRecovery() const;
         void setBlock(bool value);

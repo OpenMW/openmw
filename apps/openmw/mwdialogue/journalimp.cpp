@@ -167,7 +167,7 @@ namespace MWDialogue
         return count;
     }
 
-    void Journal::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
+    void Journal::write (ESM::ESMWriter& writer) const
     {
         for (TQuestIter iter (mQuests.begin()); iter!=mQuests.end(); ++iter)
         {
@@ -178,7 +178,6 @@ namespace MWDialogue
             writer.startRecord (ESM::REC_QUES);
             state.save (writer);
             writer.endRecord (ESM::REC_QUES);
-            progress.increaseProgress();
 
             for (Topic::TEntryIter iter (quest.begin()); iter!=quest.end(); ++iter)
             {
@@ -189,7 +188,6 @@ namespace MWDialogue
                 writer.startRecord (ESM::REC_JOUR);
                 entry.save (writer);
                 writer.endRecord (ESM::REC_JOUR);
-                progress.increaseProgress();
             }
         }
 
@@ -201,7 +199,6 @@ namespace MWDialogue
             writer.startRecord (ESM::REC_JOUR);
             entry.save (writer);
             writer.endRecord (ESM::REC_JOUR);
-            progress.increaseProgress();
         }
 
         for (TTopicIter iter (mTopics.begin()); iter!=mTopics.end(); ++iter)
@@ -217,7 +214,6 @@ namespace MWDialogue
                 writer.startRecord (ESM::REC_JOUR);
                 entry.save (writer);
                 writer.endRecord (ESM::REC_JOUR);
-                progress.increaseProgress();
             }
         }
     }

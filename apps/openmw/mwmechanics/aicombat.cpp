@@ -31,52 +31,10 @@ namespace
 
     //chooses an attack depending on probability to avoid uniformity
     void chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
-
-    float getZAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
-    {
-        float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return Ogre::Radian( Ogre::Math::ACos(dir.y / len) * sgn(Ogre::Math::ASin(dir.x / len)) ).valueDegrees();
-    }
-
-    float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
-    {
-        float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return Ogre::Radian(-Ogre::Math::ASin(dir.z / len)).valueDegrees();
-    }
-
-
-    const float PATHFIND_Z_REACH = 50.0f;
-    // distance at which actor pays more attention to decide whether to shortcut or stick to pathgrid
-    const float PATHFIND_CAUTION_DIST = 500.0f;
-    // distance after which actor (failed previously to shortcut) will try again
-    const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
-
-    // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
-    // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
-    bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offset)
-    {
-        if((to - from).length() >= PATHFIND_CAUTION_DIST || abs(from.z - to.z) <= PATHFIND_Z_REACH)
-        {
-            Ogre::Vector3 dir = to - from;
-            dir.z = 0;
-            dir.normalise();
-			float verticalOffset = 200; // instead of '200' here we want the height of the actor
-            Ogre::Vector3 _from = from + dir*offset + Ogre::Vector3::UNIT_Z * verticalOffset;
-
-            // cast up-down ray and find height in world space of hit
-            float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
-
-            if(abs(from.z - h) <= PATHFIND_Z_REACH)
-                return true;
-        }
-
-        return false;
-    }
 }
 
 namespace MWMechanics
 {
-    static const float MAX_ATTACK_DURATION = 0.35f;
     static const float DOOR_CHECK_INTERVAL = 1.5f; // same as AiWander
     // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
 
@@ -87,16 +45,16 @@ namespace MWMechanics
         mTimerCombatMove(0),
         mFollowTarget(false),
         mReadyToAttack(false),
-        mAttack(false),
+        mStrike(false),
         mCombatMove(false),
-        mMovement(),
-        mForceNoShortcut(false),
-        mShortcutFailPos(),
         mBackOffDoor(false),
+        mRotate(false),
+        mMovement(),
         mCell(NULL),
         mDoorIter(actor.getCell()->get<ESM::Door>().mList.end()),
         mDoors(actor.getCell()->get<ESM::Door>()),
-        mDoorCheckDuration(0)
+        mDoorCheckDuration(0),
+        mTargetAngle(0)
     {
     }
 
@@ -167,23 +125,17 @@ namespace MWMechanics
                 mCombatMove = false;
             }
         }
-        
-        actor.getClass().getMovementSettings(actor) = mMovement;
-        actor.getClass().getMovementSettings(actor).mRotation[0] = 0;
-        actor.getClass().getMovementSettings(actor).mRotation[2] = 0;
 
-        if(mMovement.mRotation[2] != 0)
+        actor.getClass().getMovementSettings(actor) = mMovement;
+
+        if (mRotate)
         {
-            if(zTurn(actor, Ogre::Degree(mMovement.mRotation[2]))) mMovement.mRotation[2] = 0;
-        }
-        
-        if(mMovement.mRotation[0] != 0)
-        {
-            if(smoothTurn(actor, Ogre::Degree(mMovement.mRotation[0]), 0)) mMovement.mRotation[0] = 0;
+            if (zTurn(actor, Ogre::Degree(mTargetAngle)))
+                mRotate = false;
         }
 
         mTimerAttack -= duration;
-        actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mAttack);
+        actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mStrike);
 
         float tReaction = 0.25f;
         if(mTimerReact < tReaction)
@@ -193,7 +145,7 @@ namespace MWMechanics
         }
 
         //Update with period = tReaction
-        
+
         mTimerReact = 0;
 
         bool cellChange = mCell && (actor.getCell() != mCell);
@@ -204,16 +156,16 @@ namespace MWMechanics
 
         //actual attacking logic
         //TODO: Some skills affect period of strikes.For berserk-like style period ~ 0.25f
-        float attacksPeriod = 1.0f;
+        float attackPeriod = 1.0f;
         if(mReadyToAttack)
         {
-            if(mTimerAttack <= -attacksPeriod)
+            if(mTimerAttack <= -attackPeriod)
             {
                 //TODO: should depend on time between 'start' to 'min attack'
                 //for better controlling of NPCs' attack strength.
                 //Also it seems that this time is different for slash/thrust/chop
-                mTimerAttack = MAX_ATTACK_DURATION * static_cast<float>(rand())/RAND_MAX;
-                mAttack = true;
+                mTimerAttack = 0.35f * static_cast<float>(rand())/RAND_MAX;
+                mStrike = true;
 
                 //say a provoking combat phrase
                 if (actor.getClass().isNpc())
@@ -228,31 +180,30 @@ namespace MWMechanics
                 }
             }
             else if (mTimerAttack <= 0)
-                mAttack = false;
+                mStrike = false;
         }
         else
         {
-            mTimerAttack = -attacksPeriod;
-            mAttack = false;
+            mTimerAttack = -attackPeriod;
+            mStrike = false;
         }
 
-        const MWWorld::Class &actorCls = actor.getClass();
+        const MWWorld::Class &cls = actor.getClass();
         const ESM::Weapon *weapon = NULL;
         MWMechanics::WeaponType weaptype;
         float weapRange, weapSpeed = 1.0f;
 
-        actorCls.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
-        // Get weapon characteristics
-        if (actorCls.hasInventoryStore(actor))
+        if (actor.getClass().hasInventoryStore(actor))
         {
-            MWMechanics::DrawState_ state = actorCls.getCreatureStats(actor).getDrawState();
+            MWMechanics::DrawState_ state = actor.getClass().getCreatureStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                actorCls.getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
+                actor.getClass().getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
 
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot =
-                MWMechanics::getActiveWeapon(actorCls.getCreatureStats(actor), actorCls.getInventoryStore(actor), &weaptype);
+                MWMechanics::getActiveWeapon(cls.getCreatureStats(actor), cls.getInventoryStore(actor), &weaptype);
 
             if (weaptype == WeapType_HandToHand)
             {
@@ -274,27 +225,36 @@ namespace MWMechanics
             weapRange = 150; //TODO: use true attack range (the same problem in Creature::hit)
         }
 
+        ESM::Position pos = actor.getRefData().getPosition();
 
         /*
          * Some notes on meanings of variables:
          *
-         * rangeAttack:
+         * rangeMelee:
          *
-         *  - Distance where attack using the actor's weapon is possible:
-         *    longer for ranged weapons (obviously?) vs. melee weapons
-         *  - Determined by weapon's reach parameter; hardcoded value 
-         *    for ranged weapon and for creatures
+         *  - Distance where attack using the actor's weapon is possible
+         *  - longer for ranged weapons (obviously?) vs. melee weapons
          *  - Once within this distance mFollowTarget is triggered
+         *    (TODO: check whether the follow logic still works for ranged
+         *    weapons, since rangeCloseup is set to zero)
+         *  - TODO: The variable name is confusing.  It was ok when AiCombat only
+         *    had melee weapons but now that ranged weapons are supported that is
+         *    no longer the case.  It should really be renamed to something
+         *    like rangeStrike - alternatively, keep this name for melee
+         *    weapons and use a different variable for tracking ranged weapon
+         *    distance (rangeRanged maybe?)
          *
-         * rangeFollow:
+         * rangeCloseup:
          *
          *  - Applies to melee weapons or hand to hand only (or creatures without
          *    weapons)
-         *  - Distance a little further away than the actor's weapon reach
-         *    i.e. rangeFollow > rangeAttack for melee weapons
-         *  - Hardcoded value (0 for ranged weapons)
+         *  - Distance a little further away from the actor's weapon strike
+         *    i.e. rangeCloseup > rangeMelee for melee weapons
+         *    (the variable names make this simple concept counter-intuitive,
+         *    something like rangeMelee > rangeStrike may be better)
          *  - Once the target gets beyond this distance mFollowTarget is cleared
          *    and a path to the target needs to be found
+         *  - TODO: Possibly rename this variable to rangeMelee or even rangeFollow
          *
          * mFollowTarget:
          *
@@ -303,72 +263,58 @@ namespace MWMechanics
          *    available, since the default path without pathgrids is direct to
          *    target even if LOS is not achieved)
          */
-
-        float rangeAttack;
-        float rangeFollow;
+        float rangeMelee;
+        float rangeCloseUp;
         bool distantCombat = false;
-        if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
+        if (weaptype==WeapType_BowAndArrow || weaptype==WeapType_Crossbow || weaptype==WeapType_Thrown)
         {
-            rangeAttack = 1000; // TODO: should depend on archer skill
-            rangeFollow = 0; // not needed in ranged combat
+            rangeMelee = 1000; // TODO: should depend on archer skill
+            rangeCloseUp = 0; //doesn't needed when attacking from distance
             distantCombat = true;
         }
         else
         {
-            rangeAttack = weapRange;
-            rangeFollow = 300;
+            rangeMelee = weapRange;
+            rangeCloseUp = 300;
         }
-        
-        ESM::Position pos = actor.getRefData().getPosition();
-        Ogre::Vector3 vActorPos(pos.pos); 
-        Ogre::Vector3 vTargetPos(mTarget.getRefData().getPosition().pos);
-        Ogre::Vector3 vDirToTarget = vTargetPos - vActorPos;
 
-        bool isStuck = false;
-        float speed = 0.0f;
-        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) / 10.0f) 
-            isStuck = true;
-
-        mLastPos = pos;
-
-        // check if actor can move along z-axis
-        bool canMoveByZ = (actorCls.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-            || MWBase::Environment::get().getWorld()->isFlying(actor);
-
-        // determine vertical angle to target
-        // if actor can move along z-axis it will control movement dir
-        // if can't - it will control correct aiming
-        mMovement.mRotation[0] = getXAngleToDir(vDirToTarget);
-
-        vDirToTarget.z = 0;
-        float distToTarget = vDirToTarget.length();
+        Ogre::Vector3 vStart(pos.pos[0], pos.pos[1], pos.pos[2]);
+        ESM::Position targetPos = mTarget.getRefData().getPosition();
+        Ogre::Vector3 vDest(targetPos.pos[0], targetPos.pos[1], targetPos.pos[2]);
+        Ogre::Vector3 vDir = vDest - vStart;
+        float distBetween = vDir.length();
 
         // (within strike dist) || (not quite strike dist while following)
-        if(distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck) )
+        if(distBetween < rangeMelee || (distBetween <= rangeCloseUp && mFollowTarget) )
         {
             //Melee and Close-up combat
-            mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
+            vDir.z = 0;
+            float dirLen = vDir.length();
+            mTargetAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / dirLen) * sgn(Ogre::Math::ASin(vDir.x / dirLen)) ).valueDegrees();
+            mRotate = true;
 
+            //bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
             // (not quite strike dist while following)
-            if (mFollowTarget && distToTarget > rangeAttack)
+            if (mFollowTarget && distBetween > rangeMelee)
             {
                 //Close-up combat: just run up on target
                 mMovement.mPosition[1] = 1;
             }
             else // (within strike dist)
             {
+                //Melee: stop running and attack
                 mMovement.mPosition[1] = 0;
 
-                // set slash/thrust/chop attack
-                if (mAttack && !distantCombat) chooseBestAttack(weapon, mMovement);
+                // When attacking with a weapon, choose between slash, thrust or chop
+                if (actor.getClass().hasInventoryStore(actor))
+                    chooseBestAttack(weapon, mMovement);
 
                 if(mMovement.mPosition[0] || mMovement.mPosition[1])
                 {
                     mTimerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
                     mCombatMove = true;
                 }
-                // only NPCs are smart enough to use dodge movements
-                else if(actorCls.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
+                else if(actor.getClass().isNpc() && (!distantCombat || (distantCombat && rangeMelee/5)))
                 {
                     //apply sideway movement (kind of dodging) with some probability
                     if(static_cast<float>(rand())/RAND_MAX < 0.25)
@@ -379,7 +325,7 @@ namespace MWMechanics
                     }
                 }
 
-                if(distantCombat && distToTarget < rangeAttack/4)
+                if(distantCombat && distBetween < rangeMelee/4)
                 {
                     mMovement.mPosition[1] = -1;
                 }
@@ -389,105 +335,56 @@ namespace MWMechanics
                 mFollowTarget = true;
             }
         }
-        else // remote pathfinding
+        else
         {
-            bool preferShortcut = false;
-            bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
+            //target is at far distance: build path to target
+            mFollowTarget = false;
 
-            if(mReadyToAttack) isStuck = false;
-			
-            // check if shortcut is available
-            if(!isStuck 
-                && (!mForceNoShortcut
-                || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
-                && inLOS)
+            buildNewPath(actor); //may fail to build a path, check before use
+
+            //delete visited path node
+            mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
+
+            //if no new path leave mTargetAngle unchanged
+            if(!mPathFinder.getPath().empty())
             {
-                if(speed == 0.0f) speed = actorCls.getSpeed(actor);
-                // maximum dist before pit/obstacle for actor to avoid them depending on his speed
-                float maxAvoidDist = tReaction * speed + speed / MAX_VEL_ANGULAR.valueRadians() * 2; // *2 - for reliability
-				preferShortcut = checkWayIsClear(vActorPos, vTargetPos, distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
-            }
-
-            // don't use pathgrid when actor can move in 3 dimensions
-            if(canMoveByZ) preferShortcut = true;
-
-            if(preferShortcut)
-            {
-                mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
-                mForceNoShortcut = false;
-                mShortcutFailPos.pos[0] = mShortcutFailPos.pos[1] = mShortcutFailPos.pos[2] = 0;
-                mPathFinder.clearPath();
-            }
-            else // if shortcut failed stick to path grid
-            {
-                if(!isStuck && mShortcutFailPos.pos[0] == 0.0f && mShortcutFailPos.pos[1] == 0.0f && mShortcutFailPos.pos[2] == 0.0f)
-                {
-                    mForceNoShortcut = true;
-                    mShortcutFailPos = pos;
-                }
-
-                mFollowTarget = false;
-
-                buildNewPath(actor); //may fail to build a path, check before use
-
-                //delete visited path node
-                mPathFinder.checkWaypoint(pos.pos[0],pos.pos[1],pos.pos[2]);
-
-                // This works on the borders between the path grid and areas with no waypoints.
-                if(inLOS && mPathFinder.getPath().size() > 1)
-                {
-                    // get point just before target
-                    std::list<ESM::Pathgrid::Point>::const_iterator pntIter = --mPathFinder.getPath().end();
-                    --pntIter;
-                    Ogre::Vector3 vBeforeTarget = Ogre::Vector3(pntIter->mX, pntIter->mY, pntIter->mZ);
-
-                    // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
-                    if(distToTarget <= (vTargetPos - vBeforeTarget).length())
-                    {
-                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
-                        preferShortcut = true;
-                    }
-                }
-
-                // if there is no new path, then go straight on target
-                if(!preferShortcut)
-                {
-                    if(!mPathFinder.getPath().empty())
-                        mMovement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-                    else 
-                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
-                }
+                //try shortcut
+                if(vDir.length() < mPathFinder.getDistToNext(pos.pos[0],pos.pos[1],pos.pos[2]) && MWBase::Environment::get().getWorld()->getLOS(actor, mTarget))
+                    mTargetAngle = Ogre::Radian( Ogre::Math::ACos(vDir.y / vDir.length()) * sgn(Ogre::Math::ASin(vDir.x / vDir.length())) ).valueDegrees();
+                else
+                    mTargetAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+                mRotate = true;
             }
 
             mMovement.mPosition[1] = 1;
             mReadyToAttack = false;
         }
 
-        if(distToTarget > rangeAttack && !distantCombat)
+        if(distBetween > rangeMelee)
         {
             //special run attack; it shouldn't affect melee combat tactics
-            if(actorCls.getMovementSettings(actor).mPosition[1] == 1)
+            if(actor.getClass().getMovementSettings(actor).mPosition[1] == 1)
             {
                 //check if actor can overcome the distance = distToTarget - attackerWeapRange
                 //less than in time of playing weapon anim from 'start' to 'hit' tags (t_swing)
                 //then start attacking
-                float speed1 = actorCls.getSpeed(actor);
+                float speed1 = cls.getSpeed(actor);
                 float speed2 = mTarget.getClass().getSpeed(mTarget);
                 if(mTarget.getClass().getMovementSettings(mTarget).mPosition[0] == 0
                         && mTarget.getClass().getMovementSettings(mTarget).mPosition[1] == 0)
                     speed2 = 0;
 
-                float s1 = distToTarget - weapRange;
+                float s1 = distBetween - weapRange;
                 float t = s1/speed1;
                 float s2 = speed2 * t;
-                float t_swing = (MAX_ATTACK_DURATION/2) / weapSpeed;//instead of 0.17 should be the time of playing weapon anim from 'start' to 'hit' tags
+                float t_swing = 0.17f/weapSpeed;//instead of 0.17 should be the time of playing weapon anim from 'start' to 'hit' tags
                 if (t + s2/speed1 <= t_swing)
                 {
                     mReadyToAttack = true;
-                    if(mTimerAttack <= -attacksPeriod)
+                    if(mTimerAttack <= -attackPeriod)
                     {
-                        mTimerAttack = MAX_ATTACK_DURATION * static_cast<float>(rand())/RAND_MAX;
-                        mAttack = true;
+                        mTimerAttack = 0.3f*static_cast<float>(rand())/RAND_MAX;
+                        mStrike = true;
                     }
                 }
             }
@@ -497,7 +394,7 @@ namespace MWMechanics
         //       coded at 250ms or 1/4 second
         //
         // TODO: Add a parameter to vary DURATION_SAME_SPOT?
-        if((distToTarget > rangeAttack || mFollowTarget) &&
+        if((distBetween > rangeMelee || mFollowTarget) &&
             mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
         {
             // first check if we're walking into a door
@@ -509,11 +406,12 @@ namespace MWMechanics
                 // Check all the doors in this cell
                 mDoors = cell->get<ESM::Door>(); // update
                 mDoorIter = mDoors.mList.begin();
+                Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
                 for (; mDoorIter != mDoors.mList.end(); ++mDoorIter)
                 {
                     MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
                     float minSqr = 1.3*1.3*MIN_DIST_TO_DOOR_SQUARED; // for legibility
-                    if(vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr &&
+                    if(actorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr &&
                        ref.mData.getLocalRotation().rot[2] < 0.4f) // even small opening
                     {
                         //std::cout<<"closed door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
@@ -543,10 +441,11 @@ namespace MWMechanics
         }
 
         MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
+        Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
         float minSqr = 1.6 * 1.6 * MIN_DIST_TO_DOOR_SQUARED; // for legibility
         // TODO: add reaction to checking open doors
         if(mBackOffDoor &&
-           vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr)
+           actorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr)
         {
             mMovement.mPosition[1] = -0.2; // back off, but slowly
         }
@@ -555,38 +454,47 @@ namespace MWMechanics
                 ref.mData.getLocalRotation().rot[2] >= 1)
         {
             mDoorIter = mDoors.mList.end();
-            mBackOffDoor = false; 
+            mBackOffDoor = false;
             //std::cout<<"open door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
             mMovement.mPosition[1] = 1;
         }
-        // these lines break ranged combat distance keeping
-        //else
-        //{
-        //    mMovement.mPosition[1] = 1;  // FIXME: oscillation?
-        //}
+        else
+        {
+            mMovement.mPosition[1] = 1;  // FIXME: oscillation?
+        }
+
+        actor.getClass().getMovementSettings(actor) = mMovement;
 
         return false;
     }
 
     void AiCombat::buildNewPath(const MWWorld::Ptr& actor)
     {
-        Ogre::Vector3 newPathTarget = Ogre::Vector3(mTarget.getRefData().getPosition().pos);
+        //Construct path to target
+        ESM::Pathgrid::Point dest;
+        dest.mX = mTarget.getRefData().getPosition().pos[0];
+        dest.mY = mTarget.getRefData().getPosition().pos[1];
+        dest.mZ = mTarget.getRefData().getPosition().pos[2];
+        Ogre::Vector3 newPathTarget = Ogre::Vector3(dest.mX, dest.mY, dest.mZ);
 
-        float dist;
-        
+        float dist = -1; //hack to indicate first time, to construct a new path
         if(!mPathFinder.getPath().empty())
         {
             ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
             Ogre::Vector3 currPathTarget(lastPt.mX, lastPt.mY, lastPt.mZ);
-            dist = (newPathTarget - currPathTarget).length();
+            dist = Ogre::Math::Abs((newPathTarget - currPathTarget).length());
         }
-        else dist = 1e+38F; // necessarily construct a new path
 
-        float targetPosThreshold = (actor.getCell()->getCell()->isExterior())? 300 : 100;
+        float targetPosThreshold;
+        bool isOutside = actor.getCell()->getCell()->isExterior();
+        if (isOutside)
+            targetPosThreshold = 300;
+        else
+            targetPosThreshold = 100;
 
-        //construct new path only if target has moved away more than on [targetPosThreshold]
-        if(dist > targetPosThreshold)
+        if((dist < 0) || (dist > targetPosThreshold))
         {
+            //construct new path only if target has moved away more than on <targetPosThreshold>
             ESM::Position pos = actor.getRefData().getPosition();
 
             ESM::Pathgrid::Point start;
@@ -594,18 +502,17 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            ESM::Pathgrid::Point dest;
-            dest.mX = newPathTarget.x;
-            dest.mY = newPathTarget.y;
-            dest.mZ = newPathTarget.z;
-
             if(!mPathFinder.isPathConstructed())
-                mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                mPathFinder.buildPath(start, dest, actor.getCell(), isOutside);
             else
             {
                 PathFinder newPathFinder;
-                newPathFinder.buildPath(start, dest, actor.getCell(), false);
+                newPathFinder.buildPath(start, dest, actor.getCell(), isOutside);
 
+                //TO EXPLORE:
+                //maybe here is a mistake (?): PathFinder::getPathSize() returns number of grid points in the path,
+                //not the actual path length. Here we should know if the new path is actually more effective.
+                //if(pathFinder2.getPathSize() < mPathFinder.getPathSize())
                 if(!mPathFinder.getPath().empty())
                 {
                     newPathFinder.syncStart(mPathFinder.getPath());

@@ -28,8 +28,8 @@ void ESM::Player::load (ESMReader &esm)
 
     mCurrentCrimeId = -1;
     esm.getHNOT (mCurrentCrimeId, "CURD");
-    mPaidCrimeId = -1;
-    esm.getHNOT (mPaidCrimeId, "PAYD");
+    mPayedCrimeId = -1;
+    esm.getHNOT (mPayedCrimeId, "PAYD");
 }
 
 void ESM::Player::save (ESMWriter &esm) const
@@ -52,5 +52,5 @@ void ESM::Player::save (ESMWriter &esm) const
     esm.writeHNString ("SIGN", mBirthsign);
 
     esm.writeHNT ("CURD", mCurrentCrimeId);
-    esm.writeHNT ("PAYD", mPaidCrimeId);
+    esm.writeHNT ("PAYD", mPayedCrimeId);
 }

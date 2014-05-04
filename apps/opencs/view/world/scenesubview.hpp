@@ -1,10 +1,7 @@
 #ifndef CSV_WORLD_SCENESUBVIEW_H
 #define CSV_WORLD_SCENESUBVIEW_H
 
-#include <QHBoxLayout>
-
 #include "../doc/subview.hpp"
-#include "scenetoolbar.hpp"
 
 class QModelIndex;
 
@@ -21,8 +18,6 @@ namespace CSMDoc
 namespace CSVRender
 {
     class WorldspaceWidget;
-    class PagedWorldspaceWidget;
-    class UnpagedWorldspaceWidget;
 }
 
 namespace CSVWorld
@@ -37,9 +32,6 @@ namespace CSVWorld
 
             TableBottomBox *mBottom;
             CSVRender::WorldspaceWidget *mScene;
-            QHBoxLayout* mLayout;
-            CSMDoc::Document& mDocument;
-            SceneToolbar* mToolbar;
 
         public:
 
@@ -53,30 +45,11 @@ namespace CSVWorld
 
             virtual void useHint (const std::string& hint);
 
-        private:
-
-            void makeConnections(CSVRender::PagedWorldspaceWidget* widget);
-
-            void makeConnections(CSVRender::UnpagedWorldspaceWidget* widget);
-
-            void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, SceneToolbar* toolbar);
-
-            enum widgetType
-            {
-                widget_Paged,
-                widget_Unpaged
-            };
-            SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
-
         private slots:
 
             void closeRequest();
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
-
-            void cellSelectionChanged (const CSMWorld::UniversalId& id);
-
-            void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
     };
 }
 

@@ -26,7 +26,7 @@ namespace ESM
         std::string mBirthsign;
         
         int mCurrentCrimeId;
-        int mPaidCrimeId;
+        int mPayedCrimeId;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

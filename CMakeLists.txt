@@ -86,6 +86,8 @@ option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock fram
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" ON)
+option(USE_AUDIERE "use audiere for sound" ON)
+option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
@@ -168,6 +170,27 @@ if (USE_FFMPEG)
         set(GOT_SOUND_INPUT 1)
     endif (FFMPEG_FOUND)
 endif (USE_FFMPEG)
+
+if (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
+    find_package(Audiere)
+    if (AUDIERE_FOUND)
+        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
+        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
+        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
+        set(GOT_SOUND_INPUT 1)
+    endif (AUDIERE_FOUND)
+endif (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
+
+if (USE_MPG123 AND NOT GOT_SOUND_INPUT)
+    find_package(MPG123 REQUIRED)
+    find_package(SNDFILE REQUIRED)
+    if (MPG123_FOUND AND SNDFILE_FOUND)
+        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
+        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
+        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_MPG123)
+        set(GOT_SOUND_INPUT 1)
+    endif (MPG123_FOUND AND SNDFILE_FOUND)
+endif (USE_MPG123 AND NOT GOT_SOUND_INPUT)
 
 if (NOT GOT_SOUND_INPUT)
     message(WARNING "--------------------")
@@ -411,6 +434,7 @@ IF(NOT WIN32 AND NOT APPLE)
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+        INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
         INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
     ENDIF (DPKG_PROGRAM)
 

@@ -188,13 +188,12 @@ namespace MWGui
                 break;
 
             case GM_ClassCreate:
-                if (!mCreateClassDialog)
-                {
-                    mCreateClassDialog = new CreateClassDialog();
-                    mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
-                    mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
-                }
+                MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
+                mCreateClassDialog = 0;
+                mCreateClassDialog = new CreateClassDialog();
                 mCreateClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
+                mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
+                mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
                 mCreateClassDialog->setVisible(true);
                 if (mCreationStage < CSE_RaceChosen)
                     mCreationStage = CSE_RaceChosen;
@@ -532,8 +531,8 @@ namespace MWGui
             mPlayerClass = klass;
             MWBase::Environment::get().getWindowManager()->setPlayerClass(klass);
 
-            // Do not delete dialog, so that choices are rembered in case we want to go back and adjust them later
-            mCreateClassDialog->setVisible(false);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
+            mCreateClassDialog = 0;
         }
 
         updatePlayerHealth();
@@ -555,8 +554,8 @@ namespace MWGui
 
     void CharacterCreation::onCreateClassDialogBack()
     {
-        // Do not delete dialog, so that choices are rembered in case we want to go back and adjust them later
-        mCreateClassDialog->setVisible(false);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
+        mCreateClassDialog = 0;
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);

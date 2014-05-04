@@ -1,4 +1,4 @@
-#include "aipursue.hpp"
+#include "aipersue.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -11,15 +11,15 @@
 #include "movement.hpp"
 #include "creaturestats.hpp"
 
-MWMechanics::AiPursue::AiPursue(const std::string &objectId)
+MWMechanics::AiPersue::AiPersue(const std::string &objectId)
     : mObjectId(objectId)
 {
 }
-MWMechanics::AiPursue *MWMechanics::AiPursue::clone() const
+MWMechanics::AiPersue *MWMechanics::AiPersue::clone() const
 {
-    return new AiPursue(*this);
+    return new AiPersue(*this);
 }
-bool MWMechanics::AiPursue::execute (const MWWorld::Ptr& actor, float duration)
+bool MWMechanics::AiPersue::execute (const MWWorld::Ptr& actor, float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     ESM::Position pos = actor.getRefData().getPosition();
@@ -52,13 +52,11 @@ bool MWMechanics::AiPursue::execute (const MWWorld::Ptr& actor, float duration)
         }
     }
 
-    // Big TODO: Sync this with current AiFollow. Move common code to a shared base class or helpers (applies to all AI packages, way too much duplicated code)
-
     MWWorld::Ptr target = world->getPtr(mObjectId,false);
     ESM::Position targetPos = target.getRefData().getPosition();
 
     bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
-    if(!mPathFinder.isPathConstructed() || cellChange || mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+    if(!mPathFinder.isPathConstructed() || cellChange)
     {
         mCellX = cell->mData.mX;
         mCellY = cell->mData.mY;
@@ -78,7 +76,15 @@ bool MWMechanics::AiPursue::execute (const MWWorld::Ptr& actor, float duration)
 
     if((pos.pos[0]-targetPos.pos[0])*(pos.pos[0]-targetPos.pos[0])+
         (pos.pos[1]-targetPos.pos[1])*(pos.pos[1]-targetPos.pos[1])+
-        (pos.pos[2]-targetPos.pos[2])*(pos.pos[2]-targetPos.pos[2]) < 100*100)
+        (pos.pos[2]-targetPos.pos[2])*(pos.pos[2]-targetPos.pos[2]) < 200*200)
+    {
+        movement.mPosition[1] = 0;
+        MWWorld::Ptr target = world->getPtr(mObjectId,false);
+        MWWorld::Class::get(target).activate(target,actor).get()->execute(actor);
+        return true;
+    }
+
+    if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
     {
         movement.mPosition[1] = 0;
         MWWorld::Ptr target = world->getPtr(mObjectId,false);
@@ -94,7 +100,7 @@ bool MWMechanics::AiPursue::execute (const MWWorld::Ptr& actor, float duration)
     return false;
 }
 
-int MWMechanics::AiPursue::getTypeId() const
+int MWMechanics::AiPersue::getTypeId() const
 {
-    return TypeIdPursue;
+    return TypeIdPersue;
 }

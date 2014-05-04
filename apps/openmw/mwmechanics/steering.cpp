@@ -10,9 +10,9 @@
 namespace MWMechanics
 {
 
-bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis, Ogre::Degree epsilon)
+bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, Ogre::Degree epsilon)
 {
-    Ogre::Radian currentAngle (actor.getRefData().getPosition().rot[axis]);
+    Ogre::Radian currentAngle (actor.getRefData().getPosition().rot[2]);
     Ogre::Radian diff (targetAngle - currentAngle);
     if (diff >= Ogre::Degree(180))
     {
@@ -30,17 +30,13 @@ bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis, O
     if (absDiff < epsilon)
         return true;
 
-    Ogre::Radian limit = MAX_VEL_ANGULAR * MWBase::Environment::get().getFrameDuration();
+    // Max. speed of 10 radian per sec
+    Ogre::Radian limit = Ogre::Radian(10) * MWBase::Environment::get().getFrameDuration();
     if (absDiff > limit)
         diff = Ogre::Math::Sign(diff) * limit;
 
-    actor.getClass().getMovementSettings(actor).mRotation[axis] = diff.valueRadians();
+    actor.getClass().getMovementSettings(actor).mRotation[2] = diff.valueRadians();
     return false;
-}
-
-bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, Ogre::Degree epsilon)
-{
-    return smoothTurn(actor, targetAngle, 2, epsilon);
 }
 
 }

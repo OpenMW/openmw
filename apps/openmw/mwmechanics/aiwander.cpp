@@ -1,7 +1,6 @@
 #include "aiwander.hpp"
 
 #include <OgreVector3.h>
-#include <OgreSceneNode.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -38,8 +37,6 @@ namespace MWMechanics
       , mRotate(false)
       , mTargetAngle(0)
       , mSaidGreeting(false)
-      , mHasReturnPosition(false)
-      , mReturnPosition(0,0,0)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
         {
@@ -214,7 +211,7 @@ namespace MWMechanics
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(5)))
+            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(12)))
                 mRotate = false;
         }
 
@@ -333,44 +330,21 @@ namespace MWMechanics
         if(mDistance && cellChange)
             mDistance = 0;
 
-        // For stationary NPCs, move back to the starting location if another AiPackage moved us elsewhere
-        if (cellChange)
-            mHasReturnPosition = false;
-        if (mDistance == 0 && mHasReturnPosition && Ogre::Vector3(pos.pos).squaredDistance(mReturnPosition) > 20*20)
-        {
-            mChooseAction = false;
-            mIdleNow = false;
-
-            if (!mPathFinder.isPathConstructed())
-            {
-                Ogre::Vector3 destNodePos = mReturnPosition;
-
-                ESM::Pathgrid::Point dest;
-                dest.mX = destNodePos[0];
-                dest.mY = destNodePos[1];
-                dest.mZ = destNodePos[2];
-
-                // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start;
-                start.mX = pos.pos[0];
-                start.mY = pos.pos[1];
-                start.mZ = pos.pos[2];
-
-                // don't take shortcuts for wandering
-                mPathFinder.buildPath(start, dest, actor.getCell(), false);
-
-                if(mPathFinder.isPathConstructed())
-                {
-                    mMoveNow = false;
-                    mWalking = true;
-                }
-            }
-        }
-
         if(mChooseAction)
         {
             mPlayedIdle = 0;
-            getRandomIdle(); // NOTE: sets mPlayedIdle with a random selection
+            unsigned short idleRoll = 0;
+
+            for(unsigned int counter = 0; counter < mIdle.size(); counter++)
+            {
+                unsigned short idleChance = mIdleChanceMultiplier * mIdle[counter];
+                unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mIdleChanceMultiplier));
+                if(randSelect < idleChance && randSelect > idleRoll)
+                {
+                    mPlayedIdle = counter+2;
+                    idleRoll = randSelect;
+                }
+            }
 
             if(!mPlayedIdle && mDistance)
             {
@@ -401,7 +375,7 @@ namespace MWMechanics
         }
 
         // Allow interrupting a walking actor to trigger a greeting
-        if(mIdleNow || (mWalking && !mObstacleCheck.isNormalState() && mDistance))
+        if(mIdleNow || (mWalking && !mObstacleCheck.isNormalState()))
         {
             // Play a random voice greeting if the player gets too close
             int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
@@ -421,8 +395,6 @@ namespace MWMechanics
                     mMoveNow = false;
                     mWalking = false;
                     mObstacleCheck.clear();
-                    mIdleNow = true;
-                    getRandomIdle();
                 }
 
                 if(!mRotate)
@@ -430,11 +402,11 @@ namespace MWMechanics
                     Ogre::Vector3 dir = playerPos - actorPos;
                     float length = dir.length();
 
+                    // FIXME: horrible hack
                     float faceAngle = Ogre::Radian(Ogre::Math::ACos(dir.y / length) *
                             ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees();
-                    float actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll().valueDegrees();
                     // an attempt at reducing the turning animation glitch
-                    if(abs(abs(faceAngle) - abs(actorAngle)) >= 5) // TODO: is there a better way?
+                    if(abs(faceAngle) > 10)
                     {
                         mTargetAngle = faceAngle;
                         mRotate = true;
@@ -460,8 +432,7 @@ namespace MWMechanics
             }
 
             // Check if idle animation finished
-            // FIXME: don't stay forever
-            if(!checkIdle(actor, mPlayedIdle) && playerDistSqr > helloDistance*helloDistance)
+            if(!checkIdle(actor, mPlayedIdle))
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;
@@ -532,7 +503,6 @@ namespace MWMechanics
             mMoveNow = false;
             mWalking = false;
             mChooseAction = true;
-            mHasReturnPosition = false;
         }
 
         return false; // AiWander package not yet completed
@@ -615,31 +585,6 @@ namespace MWMechanics
             return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle9");
         else
             return false;
-    }
-
-    void AiWander::setReturnPosition(const Ogre::Vector3& position)
-    {
-        if (!mHasReturnPosition)
-        {
-            mHasReturnPosition = true;
-            mReturnPosition = position;
-        }
-    }
-
-    void AiWander::getRandomIdle()
-    {
-        unsigned short idleRoll = 0;
-
-        for(unsigned int counter = 0; counter < mIdle.size(); counter++)
-        {
-            unsigned short idleChance = mIdleChanceMultiplier * mIdle[counter];
-            unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mIdleChanceMultiplier));
-            if(randSelect < idleChance && randSelect > idleRoll)
-            {
-                mPlayedIdle = counter+2;
-                idleRoll = randSelect;
-            }
-        }
     }
 }
 

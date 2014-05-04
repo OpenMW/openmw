@@ -13,7 +13,6 @@
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/pickpocket.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
@@ -85,7 +84,8 @@ namespace MWGui
         // otherwise, do the transfer
         if (targetModel != mSourceModel)
         {
-            mSourceModel->moveItem(mItem, mDraggedCount, targetModel);
+            targetModel->copyItem(mItem, mDraggedCount);
+            mSourceModel->removeItem(mItem, mDraggedCount);
         }
 
         mSourceModel->update();
@@ -292,7 +292,8 @@ namespace MWGui
                 if (!onTakeItem(item, item.mCount))
                     break;
 
-                mModel->moveItem(item, item.mCount, playerModel);
+                playerModel->copyItem(item, item.mCount);
+                mModel->removeItem(item, item.mCount);
             }
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
@@ -340,11 +341,7 @@ namespace MWGui
         }
         else
         {
-            // Looting a dead corpse is considered OK
-            if (mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead())
-                return true;
-            else
-                MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item.mBase, count);
+            MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item.mBase, count);
         }
         return true;
     }

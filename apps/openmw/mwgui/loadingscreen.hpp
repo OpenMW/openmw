@@ -25,7 +25,7 @@ namespace MWGui
 
         virtual void setProgressRange (size_t range);
         virtual void setProgress (size_t value);
-        virtual void increaseProgress (size_t increase=1);
+        virtual void increaseProgress (size_t increase);
 
         virtual void setVisible(bool visible);
 

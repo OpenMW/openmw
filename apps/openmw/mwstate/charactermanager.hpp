@@ -30,8 +30,6 @@ namespace MWState
             Character *getCurrentCharacter (bool create = true);
             ///< \param create Create a new character, if there is no current character.
 
-            void deleteSlot(const MWState::Character *character, const MWState::Slot *slot);
-
             void createCharacter();
             ///< Create new character within saved game management
 

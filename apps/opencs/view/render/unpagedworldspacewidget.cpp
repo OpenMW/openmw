@@ -3,13 +3,10 @@
 
 #include <OgreColourValue.h>
 
-#include <qt4/QtGui/qevent.h>
-
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
-#include "../../model/world/tablemimedata.hpp"
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {
@@ -23,8 +20,9 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     /// \todo deal with mSunlight and mFog/mForDensity
 }
 
-CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
-: WorldspaceWidget (document, parent), mCellId (cellId)
+CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId,
+    CSMDoc::Document& document, QWidget *parent)
+: WorldspaceWidget (parent), mCellId (cellId)
 {
     mCellsModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
@@ -65,26 +63,4 @@ void CSVRender::UnpagedWorldspaceWidget::cellRowsAboutToBeRemoved (const QModelI
 
     if (cellIndex.row()>=start && cellIndex.row()<=end)
         emit closeRequest();
-}
-
-void CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
-{
-    mCellId = data.begin()->getId();
-    update();
-    emit cellChanged(*data.begin());
-}
-
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
-{
-    switch(type)
-    {
-        case cellsInterior:
-            return canHandle;
-
-        case cellsExterior:
-            return needPaged;
-
-        default:
-            return ignored;
-    }
 }

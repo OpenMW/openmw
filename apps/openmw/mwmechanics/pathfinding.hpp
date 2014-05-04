@@ -57,20 +57,16 @@ namespace MWMechanics
                 return mPath.size();
             }
 
-            const std::list<ESM::Pathgrid::Point>& getPath() const
+            std::list<ESM::Pathgrid::Point> getPath() const
             {
                 return mPath;
             }
 
-            /** Synchronize new path with old one to avoid visiting 1 waypoint 2 times
-            @note
-                If the first point is chosen as the nearest one
-                the situation can occur when the 1st point of the new path is undesirable
-                (i.e. the 2nd point of new path == the 1st point of old path).
-            @param path - old path
-            @return true if such point was found and deleted
-             */
-            bool syncStart(const std::list<ESM::Pathgrid::Point> &path);
+            // When first point of newly created path is the nearest to actor point,
+            // then a situation can occure when this point is undesirable
+            // (if the 2nd point of new path == the 1st point of old path)
+            // This functions deletes that point.
+            void syncStart(const std::list<ESM::Pathgrid::Point> &path);
 
             void addPointToPath(ESM::Pathgrid::Point &point)
             {

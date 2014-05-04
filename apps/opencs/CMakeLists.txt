@@ -60,7 +60,7 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
+    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap
     )
 
 opencs_units (view/render
@@ -95,9 +95,7 @@ opencs_units (view/settings
     booleanview
     textview
     listview
-    rangeview
     resizeablestackedwidget
-    spinbox
     )
 
 opencs_units_noqt (view/settings

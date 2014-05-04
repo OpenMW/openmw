@@ -160,6 +160,7 @@ namespace MWGui
 
     void LoadingScreen::setProgress (size_t value)
     {
+        assert(value < mProgressBar->getScrollRange());
         if (value - mProgress < mProgressBar->getScrollRange()/100.f)
             return;
         mProgress = value;
@@ -173,6 +174,7 @@ namespace MWGui
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
         mProgress = value;
+        assert(mProgress < mProgressBar->getScrollRange());
         mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
         draw();
     }

@@ -108,7 +108,7 @@ namespace MWBase
 
             virtual int countSavedGameRecords() const = 0;
 
-            virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
+            virtual void write (ESM::ESMWriter& writer) const = 0;
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
@@ -406,8 +406,6 @@ namespace MWBase
 
             virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
-
-            virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 

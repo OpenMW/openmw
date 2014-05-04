@@ -329,6 +329,7 @@ void WeatherManager::update(float duration)
     const bool exterior = (world->isCellExterior() || world->isCellQuasiExterior());
     if (!exterior)
     {
+        mRendering->sunDisable(false);
         mRendering->skyDisable();
         mRendering->getSkyManager()->setLightningStrength(0.f);
         stopSounds(true);
@@ -685,7 +686,7 @@ bool WeatherManager::isDark() const
     return exterior && (mHour < mSunriseTime || mHour > mNightStart - 1);
 }
 
-void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
+void WeatherManager::write(ESM::ESMWriter& writer)
 {
     ESM::WeatherState state;
     state.mHour = mHour;
@@ -700,7 +701,6 @@ void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
     writer.startRecord(ESM::REC_WTHR);
     state.save(writer);
     writer.endRecord(ESM::REC_WTHR);
-    progress.increaseProgress();
 }
 
 bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)

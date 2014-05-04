@@ -187,7 +187,7 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        //SDL_ShowCursor(false);
+        SDL_ShowCursor(false);
 
         mCursorManager->setEnabled(true);
 
@@ -289,10 +289,6 @@ namespace MWGui
 
     void WindowManager::setNewGame(bool newgame)
     {
-        // This method will always be called after loading a savegame or starting a new game
-        // Reset enemy, it could be a dangling pointer from a previous game
-        mHud->resetEnemy();
-
         if (newgame)
         {
             disallowAll();
@@ -625,9 +621,9 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
     }
 
-    void WindowManager::setDrowningTimeLeft (float time, float maxTime)
+    void WindowManager::setDrowningTimeLeft (float time)
     {
-        mHud->setDrowningTimeLeft(time, maxTime);
+        mHud->setDrowningTimeLeft(time);
     }
 
     void WindowManager::setPlayerClass (const ESM::Class &class_)
@@ -1405,49 +1401,16 @@ namespace MWGui
     void WindowManager::clear()
     {
         mMap->clear();
-        mQuickKeysMenu->clear();
-
-        mTrainingWindow->resetReference();
-        mDialogueWindow->resetReference();
-        mTradeWindow->resetReference();
-        mSpellBuyingWindow->resetReference();
-        mSpellCreationDialog->resetReference();
-        mEnchantingDialog->resetReference();
-        mContainerWindow->resetReference();
-        mCompanionWindow->resetReference();
-        mConsole->resetReference();
-
-        mGuiModes.clear();
-        updateVisible();
     }
 
-    void WindowManager::write(ESM::ESMWriter &writer, Loading::Listener& progress)
+    void WindowManager::write(ESM::ESMWriter &writer)
     {
-        mMap->write(writer, progress);
-
-        mQuickKeysMenu->write(writer);
-        progress.increaseProgress();
+        mMap->write(writer);
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
     {
-        if (type == ESM::REC_GMAP)
-            mMap->readRecord(reader, type);
-        else if (type == ESM::REC_KEYS)
-            mQuickKeysMenu->readRecord(reader, type);
-    }
-
-    int WindowManager::countSavedGameRecords() const
-    {
-        return 1 // Global map
-                + 1; // QuickKeysMenu
-    }
-
-    bool WindowManager::isSavingAllowed() const
-    {
-        return !MyGUI::InputManager::getInstance().isModalAny()
-                // TODO: remove this, once we have properly serialized the state of open windows
-                && (!isGuiMode() || (mGuiModes.size() == 1 && getMode() == GM_MainMenu));
+        mMap->readRecord(reader, type);
     }
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)

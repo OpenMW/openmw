@@ -320,7 +320,7 @@ namespace CSVRender
 
         }
 
-        if (mUpdate && mWindow)
+        if (mUpdate)
         {
             mUpdate = false;
             mWindow->update();

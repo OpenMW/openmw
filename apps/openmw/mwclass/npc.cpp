@@ -624,8 +624,6 @@ namespace MWClass
         if (!attacker.isEmpty() && ptr.getClass().isNpc() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
-        getCreatureStats(ptr).setAttacked(true);
-
         if(!successful)
         {
             // TODO: Handle HitAttemptOnMe script function
@@ -661,6 +659,7 @@ namespace MWClass
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
             }
+            getCreatureStats(ptr).setAttacked(true);
 
             // Check for knockdown
             float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();

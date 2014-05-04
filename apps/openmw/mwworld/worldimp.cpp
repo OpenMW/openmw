@@ -268,20 +268,19 @@ namespace MWWorld
     int World::countSavedGameRecords() const
     {
         return
-            mCells.countSavedGameRecords()
-            +mStore.countSavedGameRecords()
+            mStore.countSavedGameRecords()
             +mGlobalVariables.countSavedGameRecords()
             +1 // player record
-            +1; // weather record
+            +mCells.countSavedGameRecords();
     }
 
-    void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
+    void World::write (ESM::ESMWriter& writer) const
     {
-        mCells.write (writer, progress);
-        mStore.write (writer, progress);
-        mGlobalVariables.write (writer, progress);
-        mPlayer->write (writer, progress);
-        mWeatherManager->write (writer, progress);
+        mStore.write (writer);
+        mGlobalVariables.write (writer);
+        mCells.write (writer);
+        mPlayer->write (writer);
+        mWeatherManager->write (writer);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -1909,7 +1908,7 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
-    
+
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
@@ -1925,19 +1924,6 @@ namespace MWWorld
         std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
         if(result.first == "") return true;
         return false;
-    }
-
-    float World::getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist)
-    {
-        btVector3 btFrom(from.x, from.y, from.z);
-        btVector3 btTo = btVector3(dir.x, dir.y, dir.z);
-        btTo.normalize();
-        btTo = btFrom + btTo * maxDist;
-
-        std::pair<std::string, float> result = mPhysEngine->rayTest(btFrom, btTo, false);
-
-        if(result.second == -1) return maxDist;
-        else return result.second*(btTo-btFrom).length();
     }
 
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
@@ -2070,6 +2056,7 @@ namespace MWWorld
         {
             // Update the GUI only when called on the player
             MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+            windowManager->unsetSelectedWeapon();
 
             if (werewolf)
             {
@@ -2519,17 +2506,7 @@ namespace MWWorld
 
     bool World::isDark() const
     {
-        MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
-        if (cell->isExterior())
-            return mWeatherManager->isDark();
-        else
-        {
-            uint32_t ambient = cell->getCell()->mAmbi.mAmbient;
-            int ambientTotal = (ambient & 0xff)
-                    + ((ambient>>8) & 0xff)
-                    + ((ambient>>16) & 0xff);
-            return !(cell->getCell()->mData.mFlags & ESM::Cell::NoSleep) && ambientTotal <= 201;
-        }
+        return mWeatherManager->isDark();
     }
 
     bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)

@@ -3,12 +3,8 @@
 
 #include <sstream>
 
-#include <qt4/QtGui/qevent.h>
-
-#include <apps/opencs/model/world/tablemimedata.hpp>
-
-CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget (document, parent)
+CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget *parent)
+: WorldspaceWidget (parent)
 {}
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
@@ -48,45 +44,4 @@ void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSel
 {
     mSelection = selection;
     emit cellSelectionChanged (mSelection);
-}
-
-std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
-{
-    std::istringstream stream (record.c_str());
-    char ignore;
-    int x, y;
-    stream >> ignore >> x >> y;
-    return std::make_pair(x, y);
-}
-
-void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
-{
-    bool selectionChanged = false;
-    for (unsigned i = 0; i < data.size(); ++i)
-    {
-        std::pair<int, int> coordinates(getCoordinatesFromId(data[i].getId()));
-        if (mSelection.add(CSMWorld::CellCoordinates(coordinates.first, coordinates.second)))
-        {
-            selectionChanged = true;
-        }
-    }
-    if (selectionChanged)
-    {
-        emit cellSelectionChanged(mSelection);
-    }
-}
-
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
-{
-    switch (type)
-    {
-        case cellsExterior:
-            return canHandle;
-
-        case cellsInterior:
-            return needUnpaged;
-
-        default:
-            return ignored;
-    }
 }

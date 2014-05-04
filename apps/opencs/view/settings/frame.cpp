@@ -60,10 +60,8 @@ void CSVSettings::Frame::showWidgets()
         QWidget *widg = static_cast <QWidget *> (obj);
 
         if (widg->property("sizePolicy").isValid())
-        {
             widg->setSizePolicy
                 (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-        }
     }
     layout()->activate();
     setFixedSize(minimumSizeHint());

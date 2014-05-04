@@ -192,7 +192,6 @@ bool CSVSettings::View::stringListsMatch (
 QList <QStandardItem *> CSVSettings::View::toStandardItemList
                                                 (const QStringList &list) const
 {
-
     QList <QStandardItem *> itemList;
 
     foreach (const QString &value, list)

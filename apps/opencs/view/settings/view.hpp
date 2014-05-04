@@ -101,7 +101,7 @@ namespace CSVSettings
         void showEvent ( QShowEvent * event );
 
         ///Virtual for updating a specific View subclass
-        ///bool indicates whether viewUpdated() signal is emitted
+        ///bool indicates whether a signal is emitted that the view was updated
         virtual void updateView (bool signalUpdate = true) const;
 
         ///Returns the pixel width corresponding to the specified number of

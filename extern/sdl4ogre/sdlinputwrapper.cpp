@@ -115,7 +115,7 @@ namespace SFO
                         mWindowListener->windowClosed();
                     break;
                 default:
-                    std::cerr << "Unhandled SDL event of type 0x" << std::hex << evt.type << std::endl;
+                    std::cerr << "Unhandled SDL event of type " << evt.type << std::endl;
                     break;
             }
         }
@@ -241,8 +241,8 @@ namespace SFO
 
         //eep, wrap the pointer manually if the input driver doesn't support
         //relative positioning natively
-        bool success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
-        if(relative && !success)
+        int success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
+        if(relative && success != 0)
             mWrapPointer = true;
 
         //now remove all mouse events using the old setting from the queue

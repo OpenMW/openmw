@@ -29,12 +29,7 @@ class ESMWriter
         void setEncoder(ToUTF8::Utf8Encoder *encoding);
         void setAuthor(const std::string& author);
         void setDescription(const std::string& desc);
-        // Set the record count for writing it in the file header
         void setRecordCount (int count);
-        // Counts how many records we have actually written.
-        // It is a good idea to compare this with the value you wrote into the header (setRecordCount)
-        // It should be the record count you set + 1 (1 additional record for the TES3 header)
-        int getRecordCount() { return mRecordCount; }
         void setFormat (int format);
 
         void clearMaster();

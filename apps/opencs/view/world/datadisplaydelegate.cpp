@@ -25,7 +25,7 @@ CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
 
 void CSVWorld::DataDisplayDelegate::buildPixmaps ()
 {
-    if (!mPixmaps.empty())
+    if (mPixmaps.size() > 0)
         mPixmaps.clear();
 
     IconList::iterator it = mIcons.begin();
@@ -33,7 +33,7 @@ void CSVWorld::DataDisplayDelegate::buildPixmaps ()
     while (it != mIcons.end())
     {
         mPixmaps.push_back (std::make_pair (it->first, it->second.pixmap (mIconSize) ) );
-        ++it;
+        it++;
     }
 }
 
