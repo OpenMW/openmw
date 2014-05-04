@@ -123,10 +123,8 @@ void CSVSettings::Dialog::show()
 {
     if (pages().isEmpty())
         buildPages();
-
     QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
 
     move (screenCenter - geometry().center());
-
     QWidget::show();
 }

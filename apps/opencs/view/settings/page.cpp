@@ -7,6 +7,8 @@
 
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/connector.hpp"
+#include "../../model/settings/support.hpp"
+
 #include "settingwindow.hpp"
 
 QMap <CSVSettings::ViewType, CSVSettings::IViewFactory *>
