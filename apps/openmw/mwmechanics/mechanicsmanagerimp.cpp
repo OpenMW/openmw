@@ -13,6 +13,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include "../mwmechanics/aicombat.hpp"
+
 #include <OgreSceneNode.h>
 
 #include "spellcasting.hpp"
@@ -1005,6 +1007,14 @@ namespace MWMechanics
         int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
 
         return (roll >= target);
+    }
+
+    void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
+    {
+        MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+        ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
+        if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            ptr.getClass().getCreatureStats(ptr).setHostile(true);
     }
 
     void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)

@@ -206,8 +206,7 @@ namespace MWMechanics
 
                     if (LOS)
                     {
-                        creatureStats.getAiSequence().stack(AiCombat(MWBase::Environment::get().getWorld()->getPlayerPtr()), ptr);
-                        creatureStats.setHostile(true);
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
                     }
                 }
             }
@@ -784,15 +783,16 @@ namespace MWMechanics
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);
                     else
-                        creatureStats.getAiSequence().stack(AiCombat(player), ptr);
-                        creatureStats.setHostile(true);
+                    {
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
+                    }
                 }
             }
             // if I didn't report a crime was I attacked?
+            // TODO: this is incorrect, getAttacked also triggers if attacked by other non-player actors.
             else if (creatureStats.getAttacked() && !creatureStats.isHostile())
             {
-                creatureStats.getAiSequence().stack(AiCombat(player), ptr);
-                creatureStats.setHostile(true);
+                MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
             }
         }
     }
@@ -1073,6 +1073,8 @@ namespace MWMechanics
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
             {
                 MWMechanics::AiCombat* package = static_cast<MWMechanics::AiCombat*>(stats.getAiSequence().getActivePackage());
+                // TODO: This is wrong! It's comparing Ref IDs with Ogre handles. The only case where this (coincidentally) works is the player.
+                // possibly applies to other code using getTargetId.
                 if(package->getTargetId() == actor.getCellRef().mRefID)
                     list.push_front(*iter);
             }
