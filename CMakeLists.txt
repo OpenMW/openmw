@@ -368,7 +368,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs.conf
     "${OpenMW_BINARY_DIR}/opencs.cfg")
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters

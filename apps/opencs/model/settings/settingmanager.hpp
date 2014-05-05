@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QStringList>
 #include <QTextStream>
+#include <QSettings>
 
 #include "support.hpp"
 #include "setting.hpp"
@@ -30,7 +31,7 @@ namespace CSMSettings
 
         ///retrieve a setting object from a given page and setting name
         Setting *findSetting
-                        (const QString &pageName, const QString &settingName);
+            (const QString &pageName, const QString &settingName = QString());
 
         ///retrieve all settings for a specified page
         QList <Setting *> findSettings (const QString &pageName);
@@ -49,28 +50,12 @@ namespace CSMSettings
                             const QString &page, const QString &name);
 
         ///add definitions to the settings specified in the page map
-        void addDefinitions (DefinitionPageMap &pageMap);
-
-        ///read setting definitions from file
-        DefinitionPageMap readFilestream(QTextStream *stream);
-
-        ///write setting definitions to file
-        bool writeFilestream (QTextStream *stream,
-                              const QMap <QString, QStringList > &settingMap);
-
-        ///merge PageMaps of settings when loading from multiple files
-        void mergeSettings (DefinitionPageMap &destMap, DefinitionPageMap &srcMap);
-
-        QTextStream *openFilestream (const QString &filePath,
-                                     bool isReadOnly) const;
-
-        void destroyStream(QTextStream *stream) const;
+        void addDefinitions (const QSettings *settings);
 
         void displayFileErrorMessage(const QString &message,
                                      bool isReadOnly) const;
 
         QList <Setting *> settings() const           { return mSettings; }
-        void dumpModel();
 
     signals:
 

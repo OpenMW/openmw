@@ -14,7 +14,7 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
     : mDataModel(0), mParentPage (parent),
       mHasFixedValues (!setting->declaredValues().isEmpty()),
       mIsMultiValue (setting->isMultiValue()),
-      mViewKey (setting->page() + '.' + setting->name()),
+      mViewKey (setting->page() + '/' + setting->name()),
       mSerializable (setting->serializable()),
       Frame(true, setting->name(), parent)
 {

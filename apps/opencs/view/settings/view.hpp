@@ -42,8 +42,10 @@ namespace CSVSettings
         ///State indicating whether the view will allow multiple values
         bool mIsMultiValue;
 
+        ///'pagename.settingname' form of the view's id
         QString mViewKey;
 
+        ///indicates whether or not the setting is written to file
         bool mSerializable;
 
     public:

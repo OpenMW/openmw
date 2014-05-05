@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QMessageBox>
 #include <QTextCodec>
+#include <QSettings>
 
 #include <QFile>
 #include <QSortFilterProxyModel>
@@ -16,6 +17,7 @@
 
 #include "setting.hpp"
 #include "support.hpp"
+#include <QDebug>
 
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
@@ -39,6 +41,8 @@ CSMSettings::UserSettings::UserSettings()
 {
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
+
+    mSettings = 0;
 
     buildSettingModelDefaults();
 }
@@ -293,16 +297,16 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
                                 (mCfgMgr.getLocalPath().string().c_str()) + fileName.toUtf8();
 
     //open user and global streams
-    QTextStream *userStream = openFilestream (mUserFilePath, true);
-    QTextStream *otherStream = openFilestream (global, true);
+    //QTextStream *userStream = openFilestream (mUserFilePath, true);
+   // QTextStream *otherStream = openFilestream (global, true);
 
     //failed stream, try for local
-    if (!otherStream)
-        otherStream = openFilestream (local, true);
+  //  if (!otherStream)
+  //      otherStream = openFilestream (local, true);
 
     //error condition - notify and return
-    if (!otherStream || !userStream)
-    {
+ //   if (!otherStream || !userStream)
+  /*  {
         QString message = QObject::tr("<br><b>An error was encountered loading \
                 user settings files.</b><br><br> One or several files could not \
                 be read.  This may be caused by a missing configuration file, \
@@ -316,40 +320,34 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
         displayFileErrorMessage ( message, true);
         return;
     }
+*/
+    //QSETTINGS TEST
+    qDebug() << mCfgMgr.getUserConfigPath().string().c_str() << ',' << mCfgMgr.getGlobalPath().string().c_str();
 
-    //success condition - merge the two streams into a single map and save
-    DefinitionPageMap totalMap = readFilestream (userStream);
-    DefinitionPageMap otherMap = readFilestream(otherStream);
+    QSettings::setPath (QSettings::IniFormat, QSettings::UserScope, mCfgMgr.getUserConfigPath().string().c_str());
+    QSettings::setPath (QSettings::IniFormat, QSettings::SystemScope, mCfgMgr.getGlobalPath().string().c_str());
 
-    //merging other settings file in and ignore duplicate settings to
-    //avoid overwriting user-level settings
-    mergeSettings (totalMap, otherMap);
+    if (mSettings)
+        delete mSettings;
 
-    if (!totalMap.isEmpty())
-        addDefinitions (totalMap);
+    mSettings = new QSettings
+        (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
+
+    addDefinitions (mSettings);
 }
 
 void CSMSettings::UserSettings::saveSettings
                                 (const QMap <QString, QStringList> &settingMap)
 {
-    for (int i = 0; i < settings().size(); i++)
-    {
-        Setting* setting = settings().at(i);
+    foreach (const QString &key, settingMap.keys())
+        mSettings->setValue (key, settingMap.value (key));
 
-        QString key = setting->page() + '.' + setting->name();
-
-        if (!settingMap.keys().contains(key))
-            continue;
-
-        setting->setDefinedValues (settingMap.value(key));
-    }
-
-   writeFilestream (openFilestream (mUserFilePath, false), settingMap);
+    delete mSettings;
 }
 
 QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
-    QStringList names = settingKey.split('.');
+    QStringList names = settingKey.split('/');
 
     Setting *setting = findSetting(names.at(0), names.at(1));
 

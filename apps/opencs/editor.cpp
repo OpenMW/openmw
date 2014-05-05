@@ -27,7 +27,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     setupDataFiles (config.first);
 
-    CSMSettings::UserSettings::instance().loadSettings ("opencs.cfg");
+    CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());

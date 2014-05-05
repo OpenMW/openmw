@@ -18,6 +18,7 @@ namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
                   struct ConfigurationManager;}
 
 class QFile;
+class QSettings;
 
 namespace CSMSettings {
 
@@ -32,6 +33,8 @@ namespace CSMSettings {
 
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
+        QSettings *mSettings;
+
 
     public:
 
