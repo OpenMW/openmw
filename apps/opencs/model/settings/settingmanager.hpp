@@ -22,8 +22,6 @@ namespace CSMSettings
     {
         Q_OBJECT
 
-        QString mReadOnlyMessage;
-        QString mReadWriteMessage;
         QList <Setting *> mSettings;
 
     public:
@@ -32,13 +30,6 @@ namespace CSMSettings
         ///retrieve a setting object from a given page and setting name
         Setting *findSetting
             (const QString &pageName, const QString &settingName = QString());
-
-        ///retrieve all settings for a specified page
-        QList <Setting *> findSettings (const QString &pageName);
-
-        ///retrieve all settings named in the attached list.
-        ///Setting names are specified in "PageName.SettingName" format.
-        QList <Setting *> findSettings (const QStringList &list);
 
         ///Retreive a map of the settings, keyed by page name
         SettingPageMap settingPageMap() const;
@@ -51,11 +42,6 @@ namespace CSMSettings
 
         ///add definitions to the settings specified in the page map
         void addDefinitions (const QSettings *settings);
-
-        void displayFileErrorMessage(const QString &message,
-                                     bool isReadOnly) const;
-
-        QList <Setting *> settings() const           { return mSettings; }
 
     signals:
 

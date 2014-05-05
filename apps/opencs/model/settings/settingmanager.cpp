@@ -10,17 +10,7 @@
 
 CSMSettings::SettingManager::SettingManager(QObject *parent) :
     QObject(parent)
-{
-    mReadWriteMessage = QObject::tr("<br><b>Could not open or create file for \
-                        writing</b><br><br> Please make sure you have the right\
-                         permissions and try again.<br>");
-
-    mReadOnlyMessage = QObject::tr("<br><b>Could not open file for \
-                        reading</b><br><br> Please make sure you have the \
-                        right permissions and try again.<br>");
-
-}
-
+{}
 
 CSMSettings::Setting *CSMSettings::SettingManager::createSetting
         (CSMSettings::SettingType typ, const QString &page, const QString &name)
@@ -40,23 +30,6 @@ CSMSettings::Setting *CSMSettings::SettingManager::createSetting
     mSettings.append (setting);
 
     return setting;
-}
-
-void CSMSettings::SettingManager::displayFileErrorMessage(const QString &message,
-                                                        bool isReadOnly) const
-{
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(QObject::tr("OpenCS configuration file I/O error"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-
-        if (!isReadOnly)
-            msgBox.setText (mReadWriteMessage + message);
-        else
-            msgBox.setText (message);
-
-        msgBox.exec();
 }
 
 void CSMSettings::SettingManager::addDefinitions (const QSettings *settings)
@@ -80,34 +53,8 @@ void CSMSettings::SettingManager::addDefinitions (const QSettings *settings)
             values.append (setting->defaultValues());
 
         setting->setDefinedValues (values);
-
-        qDebug() << "added definitons " << values;
     }
 }
-
-QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
-                                                    (const QStringList &list)
-{
-    QList <CSMSettings::Setting *> settings;
-
-    foreach (const QString &value, list)
-    {
-        QStringList names = value.split(".", QString::SkipEmptyParts);
-
-        if (names.size() != 2)
-            continue;
-
-        Setting *setting = findSetting (names.at(0), names.at(1));
-
-        if (!setting)
-            continue;
-
-        settings.append (setting);
-    }
-
-    return settings;
-}
-
 
 CSMSettings::Setting *CSMSettings::SettingManager::findSetting
                         (const QString &pageName, const QString &settingName)
@@ -121,19 +68,6 @@ CSMSettings::Setting *CSMSettings::SettingManager::findSetting
         }
     }
     return 0;
-}
-
-QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
-                                                    (const QString &pageName)
-{
-    QList <CSMSettings::Setting *> settings;
-
-    foreach (Setting *setting, mSettings)
-    {
-        if (setting->page() == pageName)
-            settings.append (setting);
-    }
-    return settings;
 }
 
 CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const

@@ -28,13 +28,11 @@ namespace CSMSettings {
         Q_OBJECT
 
         static UserSettings *mUserSettingsInstance;
-        QString mUserFilePath;
         Files::ConfigurationManager mCfgMgr;
 
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
         QSettings *mSettings;
-
 
     public:
 
@@ -47,9 +45,6 @@ namespace CSMSettings {
         UserSettings (UserSettings const &);        //not implemented
         void operator= (UserSettings const &);      //not implemented
 
-        /// Writes settings to the last loaded settings file
-        bool writeSettings();
-
         /// Retrieves the settings file at all three levels (global, local and user).
         void loadSettings (const QString &fileName);
 
@@ -61,6 +56,10 @@ namespace CSMSettings {
     private:
 
         void buildSettingModelDefaults();
+        void displayFileErrorMessage(const QString &userpath,
+                                     const QString &globalpath,
+                                     const QString &localpath) const;
+
     };
 }
 #endif // USERSETTINGS_HPP
