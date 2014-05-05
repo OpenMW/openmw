@@ -288,44 +288,48 @@ CSMSettings::UserSettings::~UserSettings()
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
     mUserFilePath = QString::fromUtf8
-                            (mCfgMgr.getUserConfigPath().string().c_str()) + fileName.toUtf8();
+                                (mCfgMgr.getUserConfigPath().string().c_str());
 
-    QString global = QString::fromUtf8
-                                (mCfgMgr.getGlobalPath().string().c_str()) + fileName.toUtf8();
+    QString globalFilePath = QString::fromUtf8
+                                (mCfgMgr.getGlobalPath().string().c_str());
 
-    QString local = QString::fromUtf8
-                                (mCfgMgr.getLocalPath().string().c_str()) + fileName.toUtf8();
+    QString localFilePath = QString::fromUtf8
+                                (mCfgMgr.getLocalPath().string().c_str());
 
-    //open user and global streams
-    //QTextStream *userStream = openFilestream (mUserFilePath, true);
-   // QTextStream *otherStream = openFilestream (global, true);
+    bool isUser = QFile (mUserFilePath + fileName).exists();
+    bool isSystem = QFile (globalFilePath + fileName).exists();
 
-    //failed stream, try for local
-  //  if (!otherStream)
-  //      otherStream = openFilestream (local, true);
+    QString otherFilePath = globalFilePath;
+
+    //test for local only if global fails (uninstalled copy)
+    if (!isSystem)
+    {
+        isSystem = QFile (localFilePath + fileName).exists();
+        otherFilePath = localFilePath;
+    }
 
     //error condition - notify and return
- //   if (!otherStream || !userStream)
-  /*  {
+    if (!isUser || !isSystem)
+    {
         QString message = QObject::tr("<br><b>An error was encountered loading \
                 user settings files.</b><br><br> One or several files could not \
                 be read.  This may be caused by a missing configuration file, \
                 incorrect file permissions or a corrupted installation of \
                 OpenCS.<br>");
 
-        message += QObject::tr("<br>Global filepath: ") + global;
-        message += QObject::tr("<br>Local filepath: ") + local;
+        message += QObject::tr("<br>Global filepath: ") + globalFilePath;
+        message += QObject::tr("<br>Local filepath: ") + localFilePath;
         message += QObject::tr("<br>User filepath: ") + mUserFilePath;
 
         displayFileErrorMessage ( message, true);
         return;
     }
-*/
-    //QSETTINGS TEST
-    qDebug() << mCfgMgr.getUserConfigPath().string().c_str() << ',' << mCfgMgr.getGlobalPath().string().c_str();
 
-    QSettings::setPath (QSettings::IniFormat, QSettings::UserScope, mCfgMgr.getUserConfigPath().string().c_str());
-    QSettings::setPath (QSettings::IniFormat, QSettings::SystemScope, mCfgMgr.getGlobalPath().string().c_str());
+    QSettings::setPath
+                (QSettings::IniFormat, QSettings::UserScope, mUserFilePath);
+
+    QSettings::setPath
+                (QSettings::IniFormat, QSettings::SystemScope, otherFilePath);
 
     if (mSettings)
         delete mSettings;

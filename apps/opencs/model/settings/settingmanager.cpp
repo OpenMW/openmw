@@ -21,6 +21,7 @@ CSMSettings::SettingManager::SettingManager(QObject *parent) :
 
 }
 
+
 CSMSettings::Setting *CSMSettings::SettingManager::createSetting
         (CSMSettings::SettingType typ, const QString &page, const QString &name)
 {
@@ -113,7 +114,7 @@ CSMSettings::Setting *CSMSettings::SettingManager::findSetting
 {
     foreach (Setting *setting, mSettings)
     {
-        if (settingName.isEmpty() || (setting->name() == settingName))
+        if (setting->name() == settingName)
         {
             if (setting->page() == pageName)
                 return setting;
@@ -121,7 +122,7 @@ CSMSettings::Setting *CSMSettings::SettingManager::findSetting
     }
     return 0;
 }
-/*
+
 QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
                                                     (const QString &pageName)
 {
@@ -134,7 +135,7 @@ QList <CSMSettings::Setting *> CSMSettings::SettingManager::findSettings
     }
     return settings;
 }
-*/
+
 CSMSettings::SettingPageMap CSMSettings::SettingManager::settingPageMap() const
 {
     SettingPageMap pageMap;
