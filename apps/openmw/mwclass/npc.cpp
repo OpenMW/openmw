@@ -621,7 +621,7 @@ namespace MWClass
         // NOTE: 'object' and/or 'attacker' may be empty.
 
         // Attacking peaceful NPCs is a crime
-        if (!attacker.isEmpty() && ptr.getClass().isNpc() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         getCreatureStats(ptr).setAttacked(true);

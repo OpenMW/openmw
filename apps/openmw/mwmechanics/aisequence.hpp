@@ -64,6 +64,7 @@ namespace MWMechanics
 
             void stack (const AiPackage& package, const MWWorld::Ptr& actor);
             ///< Add \a package to the front of the sequence (suspends current package)
+            /// @param actor The actor that owns this AiSequence
             
             void queue (const AiPackage& package);
             ///< Add \a package to the end of the sequence (executed after all other packages have been

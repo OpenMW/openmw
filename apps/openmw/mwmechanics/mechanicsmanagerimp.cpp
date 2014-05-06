@@ -13,6 +13,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
+#include "../mwmechanics/aicombat.hpp"
+
 #include <OgreSceneNode.h>
 
 #include "spellcasting.hpp"
@@ -852,39 +854,51 @@ namespace MWMechanics
         // Innocent until proven guilty
         bool reported = false;
 
-        // Find all the NPCs within the alarm radius
+        // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
         mActors.getObjectsInRange(Ogre::Vector3(ptr.getRefData().getPosition().pos),
                                     esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
 
-        // Find an actor who witnessed the crime
+        int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
+
+        // Find actors who witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (   *it == ptr 
-                || !it->getClass().isNpc()) continue; // not the player and is an NPC
+            if (*it == ptr) continue; // not the player
 
             // Was the crime seen?
-            if ( ( MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) ) ||
-                type == OT_Assault )
+            if (MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) )
             {
+                // TODO: Add more messages
+                if (type == OT_Theft)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+
+                if (*it == victim)
+                {
+                    // Self-defense
+                    // The victim is aware of the criminal/assailant. If being assaulted, fight back now
+                    // (regardless of whether the assault is reported or not)
+                    // This applies to both NPCs and creatures
+
+                    // ... except if this is a guard: then the player is given a chance to pay a fine / go to jail instead
+                    if (type == OT_Assault && !ptr.getClass().isClass(ptr, "guard"))
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(victim, ptr);
+                }
+
+                // Crime reporting only applies to NPCs
+                if (!it->getClass().isNpc())
+                    continue;
 
                 // Will the witness report the crime?
                 if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
                     reported = true;
-                    int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
 
                     // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     {
                         if (   *it1 == ptr 
                             || !it1->getClass().isNpc()) continue; // not the player and is an NPC
-
-                        // TODO: Add more messages
-                        if (type == OT_Theft)
-                            MWBase::Environment::get().getDialogueManager()->say(*it1, "thief");
-                        else if (type == OT_Assault)
-                            MWBase::Environment::get().getDialogueManager()->say(*it1, "attack");
 
                         // Will other witnesses paticipate in crime
                         if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm
@@ -896,7 +910,6 @@ namespace MWMechanics
                         // Mark as Alarmed for dialogue
                         it1->getClass().getCreatureStats(*it1).setAlarmed(true);
                     }
-                    break; // Someone saw the crime and everyone has been told
                 }
             }
         }
@@ -1005,6 +1018,14 @@ namespace MWMechanics
         int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
 
         return (roll >= target);
+    }
+
+    void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
+    {
+        MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+        ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
+        if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            ptr.getClass().getCreatureStats(ptr).setHostile(true);
     }
 
     void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
