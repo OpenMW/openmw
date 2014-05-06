@@ -7,8 +7,7 @@
 #include <QMap>
 
 #include <boost/filesystem/path.hpp>
-
-#include "settingmanager.hpp"
+#include "support.hpp"
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
@@ -22,7 +21,10 @@ class QSettings;
 
 namespace CSMSettings {
 
-    class UserSettings: public SettingManager
+    class Setting;
+    typedef QMap <QString, QList <Setting *> > SettingPageMap;
+
+    class UserSettings: public QObject
     {
 
         Q_OBJECT
@@ -32,7 +34,8 @@ namespace CSMSettings {
 
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
-        QSettings *mSettings;
+        QSettings *mSettingDefinitions;
+        QList <Setting *> mSettings;
 
     public:
 
@@ -53,13 +56,38 @@ namespace CSMSettings {
 
         QString settingValue (const QString &settingKey);
 
+        ///retrieve a setting object from a given page and setting name
+        Setting *findSetting
+            (const QString &pageName, const QString &settingName = QString());
+
+        ///remove a setting from the list
+        void removeSetting
+                        (const QString &pageName, const QString &settingName);
+
+        ///Retreive a map of the settings, keyed by page name
+        SettingPageMap settingPageMap() const;
+
     private:
+
+        ///add definitions to the settings specified in the page map
+        void addDefinitions();
 
         void buildSettingModelDefaults();
         void displayFileErrorMessage(const QString &userpath,
                                      const QString &globalpath,
                                      const QString &localpath) const;
 
+        ///add a new setting to the model and return it
+        Setting *createSetting (CSMSettings::SettingType typ,
+                            const QString &page, const QString &name);
+
+    signals:
+
+        void userSettingUpdated (const QString &, const QStringList &);
+
+    public slots:
+
+        void updateUserSetting (const QString &, const QStringList &);
     };
 }
 #endif // USERSETTINGS_HPP

@@ -42,7 +42,7 @@ CSMSettings::UserSettings::UserSettings()
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 
-    mSettings = 0;
+    mSettingDefinitions = 0;
 
     mReadWriteMessage = QObject::tr("<br><b>Could not open or create file for \
                         writing</b><br><br> Please make sure you have the right\
@@ -53,6 +53,31 @@ CSMSettings::UserSettings::UserSettings()
                         right permissions and try again.<br>");
 
     buildSettingModelDefaults();
+}
+
+void CSMSettings::UserSettings::addDefinitions ()
+{
+    foreach (const QString &key, mSettingDefinitions->allKeys())
+    {
+        QStringList names = key.split('/');
+
+        Setting *setting = findSetting (names.at(0), names.at(1));
+
+        if (!setting)
+        {
+            qWarning() << "Found definitions for undeclared setting "
+                       << names.at(0) << "/" << names.at(1);
+            removeSetting (names.at(0), names.at(1));
+            continue;
+        }
+
+        QStringList values = mSettingDefinitions->value (key).toStringList();
+
+        if (values.isEmpty())
+            values.append (setting->defaultValues());
+
+        setting->setDefinedValues (values);
+    }
 }
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
@@ -355,22 +380,19 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     QSettings::setPath
                 (QSettings::IniFormat, QSettings::SystemScope, otherFilePath);
 
-    if (mSettings)
-        delete mSettings;
-
-    mSettings = new QSettings
+    mSettingDefinitions = new QSettings
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
 
-    addDefinitions (mSettings);
+    addDefinitions();
 }
 
 void CSMSettings::UserSettings::saveSettings
                                 (const QMap <QString, QStringList> &settingMap)
 {
     foreach (const QString &key, settingMap.keys())
-        mSettings->setValue (key, settingMap.value (key));
+        mSettingDefinitions->setValue (key, settingMap.value (key));
 
-    delete mSettings;
+    mSettingDefinitions->sync();
 }
 
 QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
@@ -391,4 +413,83 @@ CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 {
     assert(mUserSettingsInstance);
     return *mUserSettingsInstance;
+}
+
+void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
+                                                    const QStringList &list)
+{
+    QStringList names = settingKey.split('/');
+
+    Setting *setting = findSetting (names.at(0), names.at(1));
+
+    setting->setDefinedValues (list);
+
+    emit userSettingUpdated (settingKey, list);
+}
+
+CSMSettings::Setting *CSMSettings::UserSettings::findSetting
+                        (const QString &pageName, const QString &settingName)
+{
+    foreach (Setting *setting, mSettings)
+    {
+        if (setting->name() == settingName)
+        {
+            if (setting->page() == pageName)
+                return setting;
+        }
+    }
+    return 0;
+}
+
+void CSMSettings::UserSettings::removeSetting
+                        (const QString &pageName, const QString &settingName)
+{
+    if (mSettings.isEmpty())
+        return;
+
+    QList <Setting *>::iterator removeIterator = mSettings.begin();
+
+    while (removeIterator != mSettings.end())
+    {
+        if ((*removeIterator)->name() == settingName)
+        {
+            if ((*removeIterator)->page() == pageName)
+            {
+                mSettings.erase (removeIterator);
+                break;
+            }
+        }
+        removeIterator++;
+    }
+}
+
+
+CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
+{
+    SettingPageMap pageMap;
+
+    foreach (Setting *setting, mSettings)
+        pageMap[setting->page()].append (setting);
+
+    return pageMap;
+}
+
+CSMSettings::Setting *CSMSettings::UserSettings::createSetting
+        (CSMSettings::SettingType typ, const QString &page, const QString &name)
+{
+    //get list of all settings for the current setting name
+    if (findSetting (page, name))
+    {
+        qWarning() << "Duplicate declaration encountered: "
+                   << (name + '/' + page);
+        return 0;
+    }
+
+    Setting *setting = new Setting (typ, name, page);
+
+
+    //add declaration to the model
+    mSettings.append (setting);
+
+    return setting;
 }

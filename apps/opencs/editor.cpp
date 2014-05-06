@@ -124,11 +124,6 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
     }
-/*
-    //load the settings into the userSettings instance.
-    const QString settingFileName = "opencs.cfg";
-    CSMSettings::UserSettings::instance().loadSettings(settingFileName);
-*/
 
     return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
 }
