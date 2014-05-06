@@ -87,13 +87,14 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
 
 CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0), mNextReportNumber (0)
 {
-    for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
-        delete iter->second;
 }
 
 CSMTools::Tools::~Tools()
 {
     delete mVerifier;
+
+    for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
+        delete iter->second;
 }
 
 CSMWorld::UniversalId CSMTools::Tools::runVerifier()
