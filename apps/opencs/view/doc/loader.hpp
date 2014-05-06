@@ -9,6 +9,7 @@
 
 class QLabel;
 class QProgressBar;
+class QDialogButtonBox;
 
 namespace CSMDoc
 {
@@ -25,6 +26,9 @@ namespace CSVDoc
             QLabel *mFile;
             QProgressBar *mFileProgress;
             QProgressBar *mRecordProgress;
+            bool mAborted;
+            QDialogButtonBox *mButtons;
+            QLabel *mError;
 
         private:
 
@@ -38,6 +42,8 @@ namespace CSVDoc
 
             void nextRecord();
 
+            void abort (const std::string& error);
+
         private slots:
 
             void cancel();
@@ -45,6 +51,10 @@ namespace CSVDoc
         signals:
 
             void cancel (CSMDoc::Document *document);
+            ///< Stop loading process.
+
+            void close (CSMDoc::Document *document);
+            ///< Close stopped loading process.
     };
 
     class Loader : public QObject
@@ -62,6 +72,8 @@ namespace CSVDoc
         signals:
 
             void cancel (CSMDoc::Document *document);
+
+            void close (CSMDoc::Document *document);
 
         public slots:
 

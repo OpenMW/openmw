@@ -59,7 +59,7 @@ void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::
     mLoader.hasThingsToDo().wakeAll();
 }
 
-void CSMDoc::DocumentManager::removeDocument (Document *document)
+void CSMDoc::DocumentManager::removeDocument (CSMDoc::Document *document)
 {
     std::vector<Document *>::iterator iter = std::find (mDocuments.begin(), mDocuments.end(), document);
 
@@ -86,6 +86,8 @@ void CSMDoc::DocumentManager::documentLoaded (Document *document)
 
 void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::string& error)
 {
-//    emit loadingStopped (document, false, error);
-    removeDocument (document);
+    emit loadingStopped (document, false, error);
+
+    if (error.empty()) // do not remove the document yet, if we have an error
+        removeDocument (document);
 }

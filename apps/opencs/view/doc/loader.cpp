@@ -13,11 +13,11 @@
 void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 {
     event->ignore();
-    emit cancel (mDocument);
+    cancel();
 }
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
-: mDocument (document)
+: mDocument (document), mAborted (false)
 {
     setWindowTitle (("Opening " + document->getSavePath().filename().string()).c_str());
 
@@ -52,10 +52,16 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mRecordProgress->setTextVisible (true);
     mRecordProgress->setValue (0);
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal,
-        this);
+    // error message
+    mError = new QLabel (this);
+    mError->setWordWrap (true);
 
-    layout->addWidget (buttonBox);
+    layout->addWidget (mError);
+
+    // buttons
+    mButtons = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal, this);
+
+    layout->addWidget (mButtons);
 
     setLayout (layout);
 
@@ -63,7 +69,7 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     show();
 
-    connect (buttonBox, SIGNAL (rejected()), this, SLOT (cancel()));
+    connect (mButtons, SIGNAL (rejected()), this, SLOT (cancel()));
 }
 
 void CSVDoc::LoadingDocument::nextStage (const std::string& name, int steps)
@@ -73,9 +79,8 @@ void CSVDoc::LoadingDocument::nextStage (const std::string& name, int steps)
     mFileProgress->setValue (mFileProgress->value()+1);
 
     mRecordProgress->setValue (0);
-    mRecordProgress->setMaximum (steps);
+    mRecordProgress->setMaximum (steps>0 ? steps : 1);
 }
-
 
 void CSVDoc::LoadingDocument::nextRecord()
 {
@@ -85,9 +90,22 @@ void CSVDoc::LoadingDocument::nextRecord()
         mRecordProgress->setValue (value);
 }
 
+void CSVDoc::LoadingDocument::abort (const std::string& error)
+{
+    mAborted = true;
+    mError->setText (QString::fromUtf8 (("Loading failed: " + error).c_str()));
+    mButtons->setStandardButtons (QDialogButtonBox::Close);
+}
+
 void CSVDoc::LoadingDocument::cancel()
 {
-    emit cancel (mDocument);
+    if (!mAborted)
+        emit cancel (mDocument);
+    else
+    {
+        emit close (mDocument);
+        deleteLater();
+    }
 }
 
 
@@ -107,21 +125,32 @@ void CSVDoc::Loader::add (CSMDoc::Document *document)
 
     connect (loading, SIGNAL (cancel (CSMDoc::Document *)),
         this, SIGNAL (cancel (CSMDoc::Document *)));
+    connect (loading, SIGNAL (close (CSMDoc::Document *)),
+        this, SIGNAL (close (CSMDoc::Document *)));
 }
 
 void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,
     const std::string& error)
 {
+    std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.begin();
+
+    for (; iter!=mDocuments.end(); ++iter)
+        if (iter->first==document)
+            break;
+
+    if (iter==mDocuments.end())
+        return;
+
     if (completed || error.empty())
     {
-        for (std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter (mDocuments.begin());
-            iter!=mDocuments.end(); ++iter)
-            if (iter->first==document)
-            {
-                delete iter->second;
-                mDocuments.erase (iter);
-                break;
-            }
+        delete iter->second;
+        mDocuments.erase (iter);
+    }
+    else if (!completed && !error.empty())
+    {
+        iter->second->abort (error);
+        // Leave the window open for now (wait for the user to close it)
+        mDocuments.erase (iter);
     }
 }
 

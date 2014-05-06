@@ -103,6 +103,10 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     connect (
         &mLoader, SIGNAL (cancel (CSMDoc::Document *)),
         &mDocumentManager, SIGNAL (cancelLoading (CSMDoc::Document *)));
+
+    connect (
+        &mLoader, SIGNAL (close (CSMDoc::Document *)),
+        &mDocumentManager, SLOT (removeDocument (CSMDoc::Document *)));
 }
 
 CSVDoc::ViewManager::~ViewManager()

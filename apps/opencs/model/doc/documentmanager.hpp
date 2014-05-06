@@ -43,9 +43,6 @@ namespace CSMDoc
             ///< \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
 
-            void removeDocument (Document *document);
-            ///< Emits the lastDocumentDeleted signal, if applicable.
-
 	    void setResourceDir (const boost::filesystem::path& parResDir);
 
         private:
@@ -60,6 +57,11 @@ namespace CSMDoc
             void documentNotLoaded (Document *document, const std::string& error);
             ///< Document load has been interrupted either because of a call to abortLoading
             /// or a problem during loading). In the former case error will be an empty string.
+
+        public slots:
+
+            void removeDocument (CSMDoc::Document *document);
+            ///< Emits the lastDocumentDeleted signal, if applicable.
 
         signals:
 
