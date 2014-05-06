@@ -885,8 +885,6 @@ namespace MWMechanics
                         // TODO: Add more messages
                         if (type == OT_Theft)
                             MWBase::Environment::get().getDialogueManager()->say(*it1, "thief");
-                        else if (type == OT_Assault)
-                            MWBase::Environment::get().getDialogueManager()->say(*it1, "attack");
 
                         // Will other witnesses paticipate in crime
                         if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm
