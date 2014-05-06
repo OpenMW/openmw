@@ -328,6 +328,12 @@ namespace MWMechanics
             path.push_front(pt);
             current = graphParent[current];
         }
+
+        // add first node to path explicitly
+        ESM::Pathgrid::Point pt = mPathgrid->mPoints[start];
+        pt.mX += xCell;
+        pt.mY += yCell;
+        path.push_front(pt);
         return path;
     }
 }
