@@ -48,7 +48,7 @@ namespace MWWorld
         bool                    mTeleported;
 
         int                     mCurrentCrimeId;    // the id assigned witnesses
-        int                     mPayedCrimeId;      // the last id payed off (0 bounty)
+        int                     mPaidCrimeId;      // the last id paid off (0 bounty)
 
     public:
 
@@ -105,8 +105,8 @@ namespace MWWorld
         bool readRecord (ESM::ESMReader& reader, int32_t type);
 
         int getNewCrimeId();  // get new id for witnesses
-        void recordCrimeId(); // record the payed crime id when bounty is 0
-        int getCrimeId() const;     // get the last payed crime id
+        void recordCrimeId(); // record the paid crime id when bounty is 0
+        int getCrimeId() const;     // get the last paid crime id
     };
 }
 #endif

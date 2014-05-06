@@ -35,7 +35,7 @@ namespace MWGui
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
-        , mPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr())
+        , mPreview(new MWRender::InventoryPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr()))
         , mPreviewDirty(true)
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
@@ -91,8 +91,8 @@ namespace MWGui
         mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel(mSortModel);
-        mPreview = MWRender::InventoryPreview(mPtr);
-        mPreview.setup();
+        mPreview.reset(new MWRender::InventoryPreview(mPtr));
+        mPreview->setup();
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -444,7 +444,7 @@ namespace MWGui
 
     MWWorld::Ptr InventoryWindow::getAvatarSelectedItem(int x, int y)
     {
-        int slot = mPreview.getSlotSelected (x, y);
+        int slot = mPreview->getSlotSelected (x, y);
 
         if (slot == -1)
             return MWWorld::Ptr();
@@ -493,7 +493,7 @@ namespace MWGui
             mPreviewDirty = false;
             MyGUI::IntSize size = mAvatarImage->getSize();
 
-            mPreview.update (size.width, size.height);
+            mPreview->update (size.width, size.height);
 
             mAvatarImage->setImageTexture("CharacterPreview");
             mAvatarImage->setImageCoord(MyGUI::IntCoord(0, 0, std::min(512, size.width), std::min(1024, size.height)));

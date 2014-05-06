@@ -1,5 +1,8 @@
 #include "tablemimedata.hpp"
+
 #include <string>
+
+#include <QDebug>
 
 #include "universalid.hpp"
 #include "columnbase.hpp"
@@ -11,7 +14,7 @@ mDocument(document)
     mObjectsFormats << QString::fromUtf8 (("tabledata/" + id.getTypeName()).c_str());
 }
 
-CSMWorld::TableMimeData::TableMimeData (std::vector< CSMWorld::UniversalId >& id, const CSMDoc::Document& document) :
+CSMWorld::TableMimeData::TableMimeData (const std::vector< CSMWorld::UniversalId >& id, const CSMDoc::Document& document) :
     mUniversalId (id), mDocument(document)
 {
     for (std::vector<UniversalId>::iterator it (mUniversalId.begin()); it != mUniversalId.end(); ++it)
@@ -33,7 +36,8 @@ std::string CSMWorld::TableMimeData::getIcon() const
 {
     if (mUniversalId.empty())
     {
-        throw ("TableMimeData holds no UniversalId");
+        qDebug()<<"TableMimeData object does not hold any records!"; //because throwing in the event loop tends to be problematic
+        throw("TableMimeData object does not hold any records!");
     }
 
     std::string tmpIcon;
@@ -50,7 +54,7 @@ std::string CSMWorld::TableMimeData::getIcon() const
 
         if (tmpIcon != mUniversalId[i].getIcon())
         {
-            return ":/multitype.png"; //icon stolen from gnome
+            return ":/multitype.png"; //icon stolen from gnome TODO: get new icon
         }
 
         tmpIcon = mUniversalId[i].getIcon();

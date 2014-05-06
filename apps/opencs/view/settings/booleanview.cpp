@@ -18,10 +18,19 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
     {
         QAbstractButton *button = 0;
 
-        if (isMultiValue())
+        switch (setting->type())
+        {
+        case CSMSettings::Type_CheckBox:
             button = new QCheckBox (value, this);
-        else
+        break;
+
+        case CSMSettings::Type_RadioButton:
             button = new QRadioButton (value, this);
+        break;
+
+        default:
+        break;
+        }
 
         connect (button, SIGNAL (clicked (bool)),
                 this, SLOT (slotToggled (bool)));

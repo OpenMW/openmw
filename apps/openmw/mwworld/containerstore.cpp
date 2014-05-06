@@ -231,6 +231,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     {
         CellStore *cell;
 
+        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
+
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
             cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
@@ -243,7 +245,6 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
 
         item.mCell = cell;
         item.mContainerStore = 0;
-        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
     }
 
     return it;

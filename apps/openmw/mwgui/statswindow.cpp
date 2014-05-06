@@ -475,7 +475,7 @@ namespace MWGui
                 text += std::string("#DDC79E") + faction->mName;
 
                 if (expelled.find(it->first) != expelled.end())
-                    text += "\n#{sExpelled}";
+                    text += "\n#BF9959#{sExpelled}";
                 else
                 {
                     text += std::string("\n#BF9959") + faction->mRanks[it->second];

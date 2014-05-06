@@ -29,7 +29,7 @@
 
 #include "aicombat.hpp"
 #include "aifollow.hpp"
-#include "aipersue.hpp"
+#include "aipursue.hpp"
 
 namespace
 {
@@ -226,6 +226,7 @@ namespace MWMechanics
             updateDrowning(ptr, duration);
             calculateNpcStatModifiers(ptr);
             updateEquippedLight(ptr, duration);
+            updateSneak(ptr);
         }
     }
 
@@ -710,6 +711,27 @@ namespace MWMechanics
         }
     }
 
+    void Actors::updateSneak (const MWWorld::Ptr& ptr)
+    {  
+        const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (   player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak)
+            && ptr != player) 
+        {
+            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+            int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
+            bool seen = false;
+
+            // am I close enough and can I see the player?
+            if (   (Ogre::Vector3(ptr.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius)
+                && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr)
+                && MWBase::Environment::get().getWorld()->getLOS(player, ptr))
+
+                    seen = true;
+
+            MWBase::Environment::get().getWindowManager()->setSneakVisibility(seen);
+        }
+    }
+
     void Actors::updateCrimePersuit(const MWWorld::Ptr& ptr, float duration)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -719,34 +741,33 @@ namespace MWMechanics
             CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
             NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
 
-            // If I'm a guard and I'm not hostile
-            if (ptr.getClass().isClass(ptr, "Guard") && !creatureStats.isHostile())
+            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.isHostile())
             {
                 /// \todo Move me! I shouldn't be here...
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt()) *
-                            float(esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt()) *
-                            esmStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
-                // Attack on sight if bounty is greater than the cutoff
+                float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt());
+                // Force dialogue on sight if bounty is greater than the cutoff
+                // In vanilla morrowind, the greeting dialogue is scripted to either arrest the player (< 5000 bounty) or attack (>= 5000 bounty)
                 if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
+                       // TODO: do not run these two every frame. keep an Aware state for each actor and update it every 0.2 s or so?
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    creatureStats.getAiSequence().stack(AiCombat(player), ptr);
-                    creatureStats.setHostile(true);
-                    npcStats.setCrimeId( MWBase::Environment::get().getWorld()->getPlayer().getCrimeId() );
+                    creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);
+                    creatureStats.setAlarmed(true);
+                    npcStats.setCrimeId(MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId());
                 }
             }
 
             // if I was a witness to a crime
             if (npcStats.getCrimeId() != -1)
             {
-                // if you've payed for your crimes and I havent noticed
+                // if you've paid for your crimes and I havent noticed
                 if( npcStats.getCrimeId() <= MWBase::Environment::get().getWorld()->getPlayer().getCrimeId() )
                 {
                     // Calm witness down
                     if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stopPersue();
+                        creatureStats.getAiSequence().stopPursuit();
                     creatureStats.getAiSequence().stopCombat();
 
                     // Reset factors to attack
@@ -761,13 +782,12 @@ namespace MWMechanics
                 else if (!creatureStats.isHostile())
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stack(AiPersue(player.getClass().getId(player)), ptr);
+                        creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);
                     else
                         creatureStats.getAiSequence().stack(AiCombat(player), ptr);
                         creatureStats.setHostile(true);
                 }
             }
-
             // if I didn't report a crime was I attacked?
             else if (creatureStats.getAttacked() && !creatureStats.isHostile())
             {
