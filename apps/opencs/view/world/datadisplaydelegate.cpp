@@ -7,18 +7,19 @@
 CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
                                                    const IconList &icons,
                                                    QUndoStack &undoStack,
-                                                   const QString &settingKey,
+                                                   const QString &pageName,
+                                                   const QString &settingName,
                                                    QObject *parent)
     : EnumDelegate (values, undoStack, parent), mDisplayMode (Mode_TextOnly),
       mIcons (icons), mIconSize (QSize(16, 16)), mIconLeftOffset(3),
-      mTextLeftOffset(8), mSettingKey (settingKey)
+      mTextLeftOffset(8), mSettingKey (pageName + '/' + settingName)
 {
     mTextAlignment.setAlignment (Qt::AlignLeft | Qt::AlignVCenter );
 
     buildPixmaps();
 
     QString value =
-            CSMSettings::UserSettings::instance().settingValue (settingKey);
+            CSMSettings::UserSettings::instance().settingValue (mSettingKey);
 
     updateDisplayMode(value);
 }
@@ -140,7 +141,7 @@ CSVWorld::CommandDelegate *CSVWorld::DataDisplayDelegateFactory::makeDelegate (Q
     QObject *parent) const
 {
 
-    return new DataDisplayDelegate (mValues, mIcons, undoStack, "", parent);
+    return new DataDisplayDelegate (mValues, mIcons, undoStack, "", "", parent);
 }
 
 

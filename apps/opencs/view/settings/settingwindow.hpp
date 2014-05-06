@@ -8,7 +8,7 @@
 
 namespace CSMSettings {
     class Setting;
-    class SettingManager;
+    class UserSettings;
 }
 
 namespace CSVSettings {
@@ -23,13 +23,13 @@ namespace CSVSettings {
         Q_OBJECT
 
         PageList mPages;
-        CSMSettings::SettingManager *mModel;
+        CSMSettings::UserSettings *mModel;
 
     public:
         explicit SettingWindow(QWidget *parent = 0);
 
         View *findView (const QString &pageName, const QString &setting);
-        void setModel (CSMSettings::SettingManager &model)  { mModel = &model; }
+        void setModel (CSMSettings::UserSettings &model)  { mModel = &model; }
 
     protected:
 
