@@ -788,12 +788,6 @@ namespace MWMechanics
                     }
                 }
             }
-            // if I didn't report a crime was I attacked?
-            // TODO: this is incorrect, getAttacked also triggers if attacked by other non-player actors.
-            else if (creatureStats.getAttacked() && !creatureStats.isHostile())
-            {
-                MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
-            }
         }
     }
 
