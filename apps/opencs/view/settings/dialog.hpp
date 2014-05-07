@@ -41,7 +41,6 @@ namespace CSVSettings {
         void buildPages();
         void buildPageListWidget (QWidget *centralWidget);
         void buildStackedWidget (QWidget *centralWidget);
-        void addDebugPage();
 
     public slots:
 

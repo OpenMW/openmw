@@ -1,6 +1,3 @@
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGroupBox>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QAbstractSpinBox>

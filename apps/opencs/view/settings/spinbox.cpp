@@ -1,6 +1,5 @@
 #include "spinbox.hpp"
 
-#include <QSpinBox>
 #include <QLineEdit>
 
 CSVSettings::SpinBox::SpinBox(QWidget *parent)
@@ -14,7 +13,7 @@ QString CSVSettings::SpinBox::textFromValue(int val) const
     if (mValueList.isEmpty())
         return QVariant (val).toString();
 
-    QString value = "";
+    QString value;
 
     if (val < mValueList.size())
         value = mValueList.at (val);

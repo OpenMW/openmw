@@ -57,7 +57,7 @@ void CSVSettings::SettingWindow::createConnections
 
         foreach (const QString &key, proxyMap.keys())
         {
-            QStringList keyPair = key.split('.');
+            QStringList keyPair = key.split('/');
 
             if (keyPair.size() != 2)
                 continue;
