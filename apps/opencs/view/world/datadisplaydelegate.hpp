@@ -41,7 +41,8 @@ namespace CSVWorld
         explicit DataDisplayDelegate (const ValueList & values,
                                       const IconList & icons,
                                       QUndoStack& undoStack,
-                                      const QString &settingKey,
+                                      const QString &pageName,
+                                      const QString &settingName,
                                       QObject *parent);
 
         ~DataDisplayDelegate();

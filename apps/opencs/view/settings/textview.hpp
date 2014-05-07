@@ -20,6 +20,7 @@ namespace CSVSettings
 
     protected:
 
+        /// virtual function called through View
         void updateView (bool signalUpdate = true) const;
 
     protected slots:
