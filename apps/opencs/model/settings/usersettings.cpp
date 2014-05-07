@@ -318,7 +318,7 @@ CSMSettings::UserSettings::~UserSettings()
 {
     mUserSettingsInstance = 0;
 }
-
+/*
 void CSMSettings::UserSettings::displayFileErrorMessage
                                                 (const QString &userpath,
                                                  const QString &globalpath,
@@ -343,7 +343,7 @@ void CSMSettings::UserSettings::displayFileErrorMessage
     msgBox.setText (mReadWriteMessage + message);
     msgBox.exec();
 }
-
+*/
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
     QString userFilePath = QString::fromUtf8
@@ -366,14 +366,14 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
         isSystem = QFile (localFilePath + fileName).exists();
         otherFilePath = localFilePath;
     }
-
+/*
     //error condition - notify and return
     if (!isUser || !isSystem)
     {
         displayFileErrorMessage (userFilePath, globalFilePath, localFilePath);
         return;
     }
-
+*/
     QSettings::setPath
                 (QSettings::IniFormat, QSettings::UserScope, userFilePath);
 

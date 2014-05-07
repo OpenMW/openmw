@@ -73,9 +73,6 @@ namespace CSMSettings {
         void addDefinitions();
 
         void buildSettingModelDefaults();
-        void displayFileErrorMessage(const QString &userpath,
-                                     const QString &globalpath,
-                                     const QString &localpath) const;
 
         ///add a new setting to the model and return it
         Setting *createSetting (CSMSettings::SettingType typ,
