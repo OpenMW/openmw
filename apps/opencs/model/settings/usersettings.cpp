@@ -1,16 +1,7 @@
 #include "usersettings.hpp"
 
-#include <QTextStream>
-#include <QDir>
-#include <QString>
-#include <QRegExp>
-#include <QMap>
-#include <QMessageBox>
-#include <QTextCodec>
 #include <QSettings>
-
 #include <QFile>
-#include <QSortFilterProxyModel>
 
 #include <components/files/configurationmanager.hpp>
 #include <boost/version.hpp>
@@ -43,14 +34,6 @@ CSMSettings::UserSettings::UserSettings()
     mUserSettingsInstance = this;
 
     mSettingDefinitions = 0;
-
-    mReadWriteMessage = QObject::tr("<br><b>Could not open or create file for \
-                        writing</b><br><br> Please make sure you have the right\
-                         permissions and try again.<br>");
-
-    mReadOnlyMessage = QObject::tr("<br><b>Could not open file for \
-                        reading</b><br><br> Please make sure you have the \
-                        right permissions and try again.<br>");
 
     buildSettingModelDefaults();
 }
@@ -318,32 +301,7 @@ CSMSettings::UserSettings::~UserSettings()
 {
     mUserSettingsInstance = 0;
 }
-/*
-void CSMSettings::UserSettings::displayFileErrorMessage
-                                                (const QString &userpath,
-                                                 const QString &globalpath,
-                                                 const QString &localpath) const
-{
-    QString message = QObject::tr("<br><b>An error was encountered loading \
-            user settings files.</b><br><br> One or several files could not \
-            be read.  This may be caused by a missing configuration file, \
-            incorrect file permissions or a corrupted installation of \
-            OpenCS.<br>");
 
-    message += QObject::tr("<br>Global filepath: ") + globalpath;
-    message += QObject::tr("<br>Local filepath: ") + localpath;
-    message += QObject::tr("<br>User filepath: ") + userpath;
-
-    QMessageBox msgBox;
-
-    msgBox.setWindowTitle(QObject::tr("OpenCS configuration file I/O error"));
-    msgBox.setIcon(QMessageBox::Critical);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-
-    msgBox.setText (mReadWriteMessage + message);
-    msgBox.exec();
-}
-*/
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
     QString userFilePath = QString::fromUtf8
@@ -352,28 +310,16 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
     QString globalFilePath = QString::fromUtf8
                                 (mCfgMgr.getGlobalPath().string().c_str());
 
-    QString localFilePath = QString::fromUtf8
-                                (mCfgMgr.getLocalPath().string().c_str());
-
-    bool isUser = QFile (userFilePath + fileName).exists();
-    bool isSystem = QFile (globalFilePath + fileName).exists();
-
     QString otherFilePath = globalFilePath;
 
     //test for local only if global fails (uninstalled copy)
-    if (!isSystem)
+    if (!QFile (globalFilePath + fileName).exists())
     {
-        isSystem = QFile (localFilePath + fileName).exists();
-        otherFilePath = localFilePath;
+        //if global is invalid, use the local path
+        otherFilePath = QString::fromUtf8
+                                    (mCfgMgr.getLocalPath().string().c_str());
     }
-/*
-    //error condition - notify and return
-    if (!isUser || !isSystem)
-    {
-        displayFileErrorMessage (userFilePath, globalFilePath, localFilePath);
-        return;
-    }
-*/
+
     QSettings::setPath
                 (QSettings::IniFormat, QSettings::UserScope, userFilePath);
 

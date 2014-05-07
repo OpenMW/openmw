@@ -1,7 +1,8 @@
-#include <QStringListModel>
-#include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 #include <QStandardItem>
 #include <QApplication>
+#include <QItemSelectionModel>
+#include <QStringListModel>
 
 #include "view.hpp"
 #include "../../model/settings/support.hpp"
@@ -42,24 +43,22 @@ void CSVSettings::View::buildModel (const CSMSettings::Setting *setting)
 
 void CSVSettings::View::buildFixedValueModel (const QStringList &values)
 {
+    //fixed value models are simple string list models, since they are read-only
     mDataModel = new QStringListModel (values, this);
 }
 
 void CSVSettings::View::buildUpdatableValueModel (const QStringList &values)
 {
+    //updateable models are standard item models because they support
+    //replacing entire columns
     QList <QStandardItem *> itemList;
 
     foreach (const QString &value, values)
         itemList.append (new QStandardItem(value));
 
-//        QSortFilterProxyModel *filter = new QSortFilterProxyModel (this);
     QStandardItemModel *model = new QStandardItemModel (this);
     model->appendColumn (itemList);
 
-//      filter->setSourceModel (model);
- /*   filter->setFilterRegExp ("*");
-    filter->setFilterKeyColumn (0);
-    filter->setFilterRole (Qt::DisplayRole);*/
     mDataModel = model;
 }
 
@@ -151,9 +150,6 @@ void CSVSettings::View::setSelectedValues (const QStringList &list,
     }
     select (selection);
 
-    //push changes to model side
-
-
     //update the view if the selection was set from the model side, not by the
     //user
     if (doViewUpdate)
@@ -192,7 +188,6 @@ bool CSVSettings::View::stringListsMatch (
 QList <QStandardItem *> CSVSettings::View::toStandardItemList
                                                 (const QStringList &list) const
 {
-
     QList <QStandardItem *> itemList;
 
     foreach (const QString &value, list)
@@ -212,12 +207,12 @@ QString CSVSettings::View::value (int row) const
     if (row > -1 && row < mDataModel->rowCount())
         return mDataModel->data (mDataModel->index(row, 0)).toString();
 
-    return "";
+    return QString();
 }
 
 int CSVSettings::View::widgetWidth(int characterCount) const
 {
-    QString widthToken = QString().fill ('P', characterCount);
+    QString widthToken = QString().fill ('m', characterCount);
     QFontMetrics fm (QApplication::font());
 
     return (fm.width (widthToken));

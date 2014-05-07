@@ -7,22 +7,10 @@
 #include <QVariant>
 #include <QStringList>
 
-//Typedefs
-namespace CSMSettings
-{
-    // Definition / Declaration model typedefs
-    // "Pair" = Setting name and specific data
-    // "ListItem" = Page name and associated setting pair
-
-    typedef QPair <QString, QString> StringPair;
-    typedef QPair <QString, QStringList> StringListPair;
-    typedef QList <StringListPair> StringListPairs;
-
-}
-
 //Enums
 namespace CSMSettings
 {
+    ///Enumerated properties for scripting
     enum SettingProperty
     {
         Property_Name = 0,
@@ -55,6 +43,7 @@ namespace CSMSettings
         Property_Proxies = 25
     };
 
+    ///Basic setting widget types.
     enum SettingType
     {
         /*
@@ -82,16 +71,11 @@ namespace CSMSettings
         Type_Undefined = 40
     };
 
-    enum MergeMethod
-    {
-        Merge_Accept,
-        Merge_Ignore,
-        Merge_Overwrite
-    };
 }
 
 namespace CSVSettings
 {
+    ///Categorical view types which encompass the setting widget types
     enum ViewType
     {
         ViewType_Boolean = 0,
@@ -100,18 +84,12 @@ namespace CSVSettings
         ViewType_Text = 3,
         ViewType_Undefined = 4
     };
-
-    enum Alignment
-    {
-        Align_Left    = Qt::AlignLeft,
-        Align_Center  = Qt::AlignHCenter,
-        Align_Right   = Qt::AlignRight
-    };
 }
 
 
 namespace CSMSettings
 {
+    ///used to construct default settings in the Setting class
     struct PropertyDefaultValues
     {
         int id;
@@ -119,6 +97,9 @@ namespace CSMSettings
         QVariant value;
     };
 
+    ///strings which correspond to setting values.  These strings represent
+    ///the script language keywords which would be used to declare setting
+    ///views for 3rd party addons
     const QString sPropertyNames[] =
     {
         "name", "page", "setting_type", "is_multi_value",
@@ -129,6 +110,7 @@ namespace CSMSettings
         "defaults", "declarations", "definitions", "proxies"
     };
 
+    ///Default values for a setting.  Used in setting creation.
     const QString sPropertyDefaults[] =
     {
         "",         //name

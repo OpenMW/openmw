@@ -21,13 +21,19 @@ namespace CSVSettings
                               Page *parent);
 
     protected:
+
+        ///virtual function called through View
         void updateView (bool signalUpdate = true) const;
 
+        ///construct a slider-based view
         void buildSlider (CSMSettings::Setting *setting);
+
+        ///construct a spinbox-based view
         void buildSpinBox (CSMSettings::Setting *setting);
 
     private slots:
 
+        ///responds to valueChanged signals
         void slotUpdateView (int value);
         void slotUpdateView (double value);
 

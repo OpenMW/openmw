@@ -7,11 +7,17 @@
 
 namespace CSMSettings
 {
-    //Maps setting id ("page.name") to a list of corresponding proxy values.
-    //Order of proxy value stringlists corresponds to order of master proxy's
-    //values in it's declared value list
+    //QString is the setting id in the form of "page/name"
+    //QList is  a list of stringlists of proxy values.
+    //Order is important!  Proxy stringlists are matched against
+    //master values by their position in the QList.
     typedef QMap <QString, QList <QStringList> > ProxyValueMap;
 
+    ///Setting class is the interface for the User Settings.  It contains
+    ///a great deal of boiler plate to provide the core API functions, as
+    ///well as the property() functions which use enumeration to be iterable.
+    ///This makes the Setting class capable of being manipulated by script.
+    ///See CSMSettings::support.hpp for enumerations / string values.
     class Setting
     {
         QList <QStringList> mProperties;
@@ -19,10 +25,6 @@ namespace CSMSettings
 
         bool mIsEditorSetting;
 
-        //QString is the setting id in the form of "page.name"
-        //QList is  a list of stringlists of proxy values.
-        //Order is important!  Proxy stringlists are matched against
-        //master values by their position in the QList.
         ProxyValueMap mProxies;
 
     public:

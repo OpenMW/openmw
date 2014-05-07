@@ -28,20 +28,28 @@ namespace CSVSettings {
     public:
         explicit SettingWindow(QWidget *parent = 0);
 
+        ///retrieve a reference to a view based on it's page and setting name
         View *findView (const QString &pageName, const QString &setting);
+
+        ///set the model the view uses (instance of UserSettings)
         void setModel (CSMSettings::UserSettings &model)  { mModel = &model; }
 
     protected:
 
         virtual void closeEvent (QCloseEvent *event);
 
+        ///construct the pages to be displayed in the dialog
         void createPages();
 
+        ///return the list of constructed pages
         const PageList &pages() const     { return mPages; }
 
+        ///save settings from the GUI to file
         void saveSettings();
 
     private:
+
+        ///create connections between settings (used for proxy settings)
         void createConnections (const QList <CSMSettings::Setting *> &list);
     };
 }

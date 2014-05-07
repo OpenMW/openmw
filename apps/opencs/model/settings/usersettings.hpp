@@ -1,7 +1,7 @@
 #ifndef USERSETTINGS_HPP
 #define USERSETTINGS_HPP
 
-#include <QTextStream>
+#include <QList>
 #include <QStringList>
 #include <QString>
 #include <QMap>
@@ -32,8 +32,6 @@ namespace CSMSettings {
         static UserSettings *mUserSettingsInstance;
         Files::ConfigurationManager mCfgMgr;
 
-        QString mReadOnlyMessage;
-        QString mReadWriteMessage;
         QSettings *mSettingDefinitions;
         QList <Setting *> mSettings;
 
