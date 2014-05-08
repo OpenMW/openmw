@@ -11,8 +11,6 @@ class QGroupBox;
 class QStringList;
 class QStandardItem;
 class QItemSelection;
-class QStringListModel;
-class QStandardItemModel;
 class QAbstractItemModel;
 class QItemSelectionModel;
 
@@ -42,16 +40,15 @@ namespace CSVSettings
         ///State indicating whether the view will allow multiple values
         bool mIsMultiValue;
 
+        ///'pagename.settingname' form of the view's id
         QString mViewKey;
 
+        ///indicates whether or not the setting is written to file
         bool mSerializable;
 
     public:
 
         explicit View (CSMSettings::Setting *setting, Page *parent);
-
-        ///Physical frame in which the view UI is contained
-        void addViewWidget (QWidget *widget, int row = -1, int col = -1) const;
 
         ///Returns the index / row of the passed value, -1 if not found.
         int currentIndex () const;
@@ -74,7 +71,7 @@ namespace CSVSettings
         ///or signaling the view was updatedto avoid viscious cylcing.
         void setSelectedValues (const QStringList &values,
                                 bool updateView = true,
-                                bool signalUpdate = true);
+                                bool signalUpdate = true) const;
 
         void setSelectedValue (const QString &value,
                                bool updateView = true,
@@ -101,7 +98,7 @@ namespace CSVSettings
         void showEvent ( QShowEvent * event );
 
         ///Virtual for updating a specific View subclass
-        ///bool indicates whether a signal is emitted that the view was updated
+        ///bool indicates whether viewUpdated() signal is emitted
         virtual void updateView (bool signalUpdate = true) const;
 
         ///Returns the pixel width corresponding to the specified number of

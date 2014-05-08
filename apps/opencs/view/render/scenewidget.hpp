@@ -36,7 +36,7 @@ namespace CSVRender
             SceneWidget(QWidget *parent);
             virtual ~SceneWidget();
 
-            QPaintEngine*	paintEngine() const;
+            QPaintEngine* paintEngine() const;
 
             CSVWorld::SceneToolMode *makeLightingSelector (CSVWorld::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that

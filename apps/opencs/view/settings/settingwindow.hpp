@@ -8,7 +8,7 @@
 
 namespace CSMSettings {
     class Setting;
-    class SettingManager;
+    class UserSettings;
 }
 
 namespace CSVSettings {
@@ -23,25 +23,36 @@ namespace CSVSettings {
         Q_OBJECT
 
         PageList mPages;
-        CSMSettings::SettingManager *mModel;
+        CSMSettings::UserSettings *mModel;
 
     public:
         explicit SettingWindow(QWidget *parent = 0);
 
+        ///retrieve a reference to a view based on it's page and setting name
         View *findView (const QString &pageName, const QString &setting);
-        void setModel (CSMSettings::SettingManager &model)  { mModel = &model; }
+
+        ///set the model the view uses (instance of UserSettings)
+        void setModel (CSMSettings::UserSettings &model)  { mModel = &model; }
 
     protected:
 
         virtual void closeEvent (QCloseEvent *event);
 
+        ///construct the pages to be displayed in the dialog
         void createPages();
 
+        ///return the list of constructed pages
         const PageList &pages() const     { return mPages; }
 
+        ///save settings from the GUI to file
         void saveSettings();
 
+        ///sets the defined values for the views that have been created
+        void setViewValues();
+
     private:
+
+        ///create connections between settings (used for proxy settings)
         void createConnections (const QList <CSMSettings::Setting *> &list);
     };
 }

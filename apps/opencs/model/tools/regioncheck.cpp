@@ -17,7 +17,7 @@ int CSMTools::RegionCheckStage::setup()
     return mRegions.getSize();
 }
 
-void CSMTools::RegionCheckStage::perform (int stage, std::vector<std::string>& messages)
+void CSMTools::RegionCheckStage::perform (int stage, Messages& messages)
 {
     const CSMWorld::Record<ESM::Region>& record = mRegions.getRecord (stage);
 
@@ -30,7 +30,7 @@ void CSMTools::RegionCheckStage::perform (int stage, std::vector<std::string>& m
 
     // test for empty name
     if (region.mName.empty())
-        messages.push_back (id.toString() + "|" + region.mId + " has an empty name");
+        messages.push_back (std::make_pair (id, region.mId + " has an empty name"));
 
     /// \todo test that the ID in mSleeplist exists
 

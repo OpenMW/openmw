@@ -1,7 +1,8 @@
-#include <QStringListModel>
-#include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 #include <QStandardItem>
 #include <QApplication>
+#include <QItemSelectionModel>
+#include <QStringListModel>
 
 #include "view.hpp"
 #include "../../model/settings/support.hpp"
@@ -14,7 +15,7 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
     : mDataModel(0), mParentPage (parent),
       mHasFixedValues (!setting->declaredValues().isEmpty()),
       mIsMultiValue (setting->isMultiValue()),
-      mViewKey (setting->page() + '.' + setting->name()),
+      mViewKey (setting->page() + '/' + setting->name()),
       mSerializable (setting->serializable()),
       Frame(true, setting->name(), parent)
 {
@@ -25,10 +26,7 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
 
 void CSVSettings::View::buildModel (const CSMSettings::Setting *setting)
 {
-    QStringList values = setting->definedValues();
-
-    if (values.isEmpty())
-        values.append (setting->defaultValues());
+    QStringList values = setting->defaultValues();
 
     if (mHasFixedValues)
         buildFixedValueModel (setting->declaredValues());
@@ -42,24 +40,22 @@ void CSVSettings::View::buildModel (const CSMSettings::Setting *setting)
 
 void CSVSettings::View::buildFixedValueModel (const QStringList &values)
 {
+    //fixed value models are simple string list models, since they are read-only
     mDataModel = new QStringListModel (values, this);
 }
 
 void CSVSettings::View::buildUpdatableValueModel (const QStringList &values)
 {
+    //updateable models are standard item models because they support
+    //replacing entire columns
     QList <QStandardItem *> itemList;
 
     foreach (const QString &value, values)
         itemList.append (new QStandardItem(value));
 
-//        QSortFilterProxyModel *filter = new QSortFilterProxyModel (this);
     QStandardItemModel *model = new QStandardItemModel (this);
     model->appendColumn (itemList);
 
-//      filter->setSourceModel (model);
- /*   filter->setFilterRegExp ("*");
-    filter->setFilterKeyColumn (0);
-    filter->setFilterRole (Qt::DisplayRole);*/
     mDataModel = model;
 }
 
@@ -117,7 +113,7 @@ void CSVSettings::View::setSelectedValue (const QString &value,
 }
 
 void CSVSettings::View::setSelectedValues (const QStringList &list,
-                                           bool doViewUpdate, bool signalUpdate)
+                                           bool doViewUpdate, bool signalUpdate) const
 {
     QItemSelection selection;
 
@@ -150,9 +146,6 @@ void CSVSettings::View::setSelectedValues (const QStringList &list,
         }
     }
     select (selection);
-
-    //push changes to model side
-
 
     //update the view if the selection was set from the model side, not by the
     //user
@@ -211,12 +204,12 @@ QString CSVSettings::View::value (int row) const
     if (row > -1 && row < mDataModel->rowCount())
         return mDataModel->data (mDataModel->index(row, 0)).toString();
 
-    return "";
+    return QString();
 }
 
 int CSVSettings::View::widgetWidth(int characterCount) const
 {
-    QString widthToken = QString().fill ('P', characterCount);
+    QString widthToken = QString().fill ('m', characterCount);
     QFontMetrics fm (QApplication::font());
 
     return (fm.width (widthToken));

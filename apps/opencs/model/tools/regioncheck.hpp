@@ -21,7 +21,7 @@ namespace CSMTools
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this tage will be appended to \a messages.
     };
 }

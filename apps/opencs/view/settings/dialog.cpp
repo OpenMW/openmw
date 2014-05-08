@@ -76,20 +76,7 @@ void CSVSettings::Dialog::buildPages()
         mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
     }
 
-    addDebugPage();
-
     resize (mStackedWidget->sizeHint());
-}
-
-void CSVSettings::Dialog::addDebugPage()
-{
-    /*
-  QTreeView *tree = new QTreeView();
-
-  //tree->setModel( &CSMSettings::UserSettings::instance().model() );
-
-  mStackedWidget->addWidget(tree);
-     new QListWidgetItem ("Standard Item Model", mPageListWidget);*/
 }
 
 void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
@@ -122,11 +109,13 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
 void CSVSettings::Dialog::show()
 {
     if (pages().isEmpty())
+    {
         buildPages();
+        setViewValues();
+    }
 
     QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
 
     move (screenCenter - geometry().center());
-
     QWidget::show();
 }

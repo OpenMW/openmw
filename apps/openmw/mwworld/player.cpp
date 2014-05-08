@@ -37,7 +37,7 @@ namespace MWWorld
         mTeleported(false),
         mMarkedCell(NULL),
         mCurrentCrimeId(-1),
-        mPayedCrimeId(-1)
+        mPaidCrimeId(-1)
     {
         mPlayer.mBase = player;
         mPlayer.mRef.mRefID = "player";
@@ -100,7 +100,6 @@ namespace MWWorld
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[0] = value;
     }
 
@@ -119,7 +118,6 @@ namespace MWWorld
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[2] = value;
     }
 
@@ -132,28 +130,7 @@ namespace MWWorld
     void Player::setSneak(bool sneak)
     {
         MWWorld::Ptr ptr = getPlayer();
-
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
-
-        if (sneak == true)
-        {
-            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-
-            // Find all the actors who might be able to see the player
-            std::vector<MWWorld::Ptr> neighbors;
-            MWBase::Environment::get().getMechanicsManager()->getActorsInRange( Ogre::Vector3(ptr.getRefData().getPosition().pos),
-                                        esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt(), neighbors);
-            for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-            {
-                if ( MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, *it) )
-                {
-                    MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
-                    break;
-                }
-            }
-            if (neighbors.empty())
-                MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
-        }
     }
 
     void Player::yaw(float yaw)
@@ -223,7 +200,7 @@ namespace MWWorld
         player.mCellId = mCellStore->getCell()->getCellId();
 
         player.mCurrentCrimeId = mCurrentCrimeId;
-        player.mPayedCrimeId = mPayedCrimeId;
+        player.mPaidCrimeId = mPaidCrimeId;
 
         player.mBirthsign = mSign;
 
@@ -273,7 +250,7 @@ namespace MWWorld
                 throw std::runtime_error ("invalid player state record (birthsign)");
 
             mCurrentCrimeId = player.mCurrentCrimeId;
-            mPayedCrimeId = player.mPayedCrimeId;
+            mPaidCrimeId = player.mPaidCrimeId;
 
             mSign = player.mBirthsign;
 
@@ -318,11 +295,11 @@ namespace MWWorld
 
     void Player::recordCrimeId()
     {
-        mPayedCrimeId = mCurrentCrimeId;
+        mPaidCrimeId = mCurrentCrimeId;
     }
 
     int Player::getCrimeId() const
     {
-        return mPayedCrimeId;
+        return mPaidCrimeId;
     }
 }

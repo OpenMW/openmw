@@ -27,7 +27,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     setupDataFiles (config.first);
 
-    CSMSettings::UserSettings::instance().loadSettings ("opencs.cfg");
+    CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
@@ -129,11 +129,6 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
     }
-/*
-    //load the settings into the userSettings instance.
-    const QString settingFileName = "opencs.cfg";
-    CSMSettings::UserSettings::instance().loadSettings(settingFileName);
-*/
 
     return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
 }

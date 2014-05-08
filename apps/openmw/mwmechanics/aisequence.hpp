@@ -50,8 +50,8 @@ namespace MWMechanics
             void stopCombat();
             ///< Removes all combat packages until first non-combat or stack empty.
 
-            void stopPersue();
-            ///< Removes all persue packages until first non-persue or stack empty.
+            void stopPursuit();
+            ///< Removes all pursue packages until first non-pursue or stack empty.
             
             bool isPackageDone() const;
             ///< Has a package been completed during the last update?
@@ -64,6 +64,7 @@ namespace MWMechanics
 
             void stack (const AiPackage& package, const MWWorld::Ptr& actor);
             ///< Add \a package to the front of the sequence (suspends current package)
+            /// @param actor The actor that owns this AiSequence
             
             void queue (const AiPackage& package);
             ///< Add \a package to the end of the sequence (executed after all other packages have been

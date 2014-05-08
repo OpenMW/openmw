@@ -5,7 +5,7 @@
 CSVWorld::IdTypeDelegate::IdTypeDelegate
     (const ValueList &values, const IconList &icons, QUndoStack& undoStack, QObject *parent)
     : DataDisplayDelegate (values, icons, undoStack,
-                           "Display Format.Referenceable ID Type Display",
+                           "Display Format", "Referenceable ID Type Display",
                            parent)
 {}
 
