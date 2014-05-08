@@ -71,7 +71,7 @@ namespace CSVSettings
         ///or signaling the view was updatedto avoid viscious cylcing.
         void setSelectedValues (const QStringList &values,
                                 bool updateView = true,
-                                bool signalUpdate = true);
+                                bool signalUpdate = true) const;
 
         void setSelectedValue (const QString &value,
                                bool updateView = true,

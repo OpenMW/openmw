@@ -26,10 +26,7 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
 
 void CSVSettings::View::buildModel (const CSMSettings::Setting *setting)
 {
-    QStringList values = setting->definedValues();
-
-    if (values.isEmpty())
-        values.append (setting->defaultValues());
+    QStringList values = setting->defaultValues();
 
     if (mHasFixedValues)
         buildFixedValueModel (setting->declaredValues());
@@ -116,7 +113,7 @@ void CSVSettings::View::setSelectedValue (const QString &value,
 }
 
 void CSVSettings::View::setSelectedValues (const QStringList &list,
-                                           bool doViewUpdate, bool signalUpdate)
+                                           bool doViewUpdate, bool signalUpdate) const
 {
     QItemSelection selection;
 

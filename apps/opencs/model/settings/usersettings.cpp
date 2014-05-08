@@ -38,31 +38,6 @@ CSMSettings::UserSettings::UserSettings()
     buildSettingModelDefaults();
 }
 
-void CSMSettings::UserSettings::addDefinitions ()
-{
-    foreach (const QString &key, mSettingDefinitions->allKeys())
-    {
-        QStringList names = key.split('/');
-
-        Setting *setting = findSetting (names.at(0), names.at(1));
-
-        if (!setting)
-        {
-            qWarning() << "Found definitions for undeclared setting "
-                       << names.at(0) << "/" << names.at(1);
-            removeSetting (names.at(0), names.at(1));
-            continue;
-        }
-
-        QStringList values = mSettingDefinitions->value (key).toStringList();
-
-        if (values.isEmpty())
-            values.append (setting->defaultValues());
-
-        setting->setDefinedValues (values);
-    }
-}
-
 void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section = "Window Size";
@@ -139,13 +114,14 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         * Defined values
         *
         *       Values which represent the actual, current value of
-        *       a setting.  For settings with declared values, this must be one or
-        *       several declared values, as appropriate.
+        *       a setting.  For settings with declared values, this must be one
+        *       or several declared values, as appropriate.
         *
-        * Proxy values - values the proxy master updates the proxy slave when
-        * it's own definition is set / changed.  These are definitions for
-        * proxy slave settings, but must match any declared values the proxy
-        * slave has, if any.
+        * Proxy values
+        *       Values the proxy master updates the proxy slave when
+        *       it's own definition is set / changed.  These are definitions for
+        *       proxy slave settings, but must match any declared values the
+        *       proxy slave has, if any.
         *******************************************************************/
 /*
         //create setting objects, specifying the basic widget type,
@@ -328,31 +304,36 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 
     mSettingDefinitions = new QSettings
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
-
-    addDefinitions();
 }
 
-void CSMSettings::UserSettings::saveSettings
-                                (const QMap <QString, QStringList> &settingMap)
+bool CSMSettings::UserSettings::hasSettingDefinitions
+                                                (const QString &viewKey) const
 {
-    foreach (const QString &key, settingMap.keys())
-        mSettingDefinitions->setValue (key, settingMap.value (key));
+    return (mSettingDefinitions->contains (viewKey));
+}
 
+void CSMSettings::UserSettings::setDefinitions
+                                (const QString &key, const QStringList &list)
+{
+    mSettingDefinitions->setValue (key, list);
+}
+
+void CSMSettings::UserSettings::saveDefinitions() const
+{
     mSettingDefinitions->sync();
 }
 
 QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
-    QStringList names = settingKey.split('/');
+    if (!mSettingDefinitions->contains (settingKey))
+        return QString();
 
-    Setting *setting = findSetting(names.at(0), names.at(1));
+    QStringList defs = mSettingDefinitions->value (settingKey).toStringList();
 
-    if (setting)
-    {
-        if (!setting->definedValues().isEmpty())
-            return setting->definedValues().at(0);
-    }
-    return "";
+    if (defs.isEmpty())
+        return QString();
+
+    return defs.at(0);
 }
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
@@ -364,11 +345,7 @@ CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
                                                     const QStringList &list)
 {
-    QStringList names = settingKey.split('/');
-
-    Setting *setting = findSetting (names.at(0), names.at(1));
-
-    setting->setDefinedValues (list);
+    mSettingDefinitions->setValue (settingKey ,list);
 
     emit userSettingUpdated (settingKey, list);
 }
@@ -438,4 +415,12 @@ CSMSettings::Setting *CSMSettings::UserSettings::createSetting
     mSettings.append (setting);
 
     return setting;
+}
+
+QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const
+{
+    if (mSettingDefinitions->contains (viewKey))
+        return mSettingDefinitions->value (viewKey).toStringList();
+
+    return QStringList();
 }

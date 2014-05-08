@@ -47,6 +47,9 @@ namespace CSVSettings {
         ///save settings from the GUI to file
         void saveSettings();
 
+        ///sets the defined values for the views that have been created
+        void setViewValues();
+
     private:
 
         ///create connections between settings (used for proxy settings)
