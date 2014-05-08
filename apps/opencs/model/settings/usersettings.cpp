@@ -1,21 +1,14 @@
 #include "usersettings.hpp"
 
-#include <QTextStream>
-#include <QDir>
-#include <QString>
-#include <QRegExp>
-#include <QMap>
-#include <QMessageBox>
-#include <QTextCodec>
-
+#include <QSettings>
 #include <QFile>
-#include <QSortFilterProxyModel>
 
 #include <components/files/configurationmanager.hpp>
 #include <boost/version.hpp>
 
 #include "setting.hpp"
 #include "support.hpp"
+#include <QDebug>
 
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
@@ -39,6 +32,8 @@ CSMSettings::UserSettings::UserSettings()
 {
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
+
+    mSettingDefinitions = 0;
 
     buildSettingModelDefaults();
 }
@@ -119,18 +114,19 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         * Defined values
         *
         *       Values which represent the actual, current value of
-        *       a setting.  For settings with declared values, this must be one or
-        *       several declared values, as appropriate.
+        *       a setting.  For settings with declared values, this must be one
+        *       or several declared values, as appropriate.
         *
-        * Proxy values - values the proxy master updates the proxy slave when
-        * it's own definition is set / changed.  These are definitions for
-        * proxy slave settings, but must match any declared values the proxy
-        * slave has, if any.
+        * Proxy values
+        *       Values the proxy master updates the proxy slave when
+        *       it's own definition is set / changed.  These are definitions for
+        *       proxy slave settings, but must match any declared values the
+        *       proxy slave has, if any.
         *******************************************************************/
-
+/*
         //create setting objects, specifying the basic widget type,
         //the page name, and the view name
-/*
+
         Setting *masterBoolean = createSetting (Type_RadioButton, section,
                                                 "Master Proxy");
 
@@ -230,6 +226,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         slaveIntegerSpinbox->setSerializable (false);
         slaveDoubleSpinbox->setSerializable (false);
         slaveSlider->setSerializable (false);
+        slaveDial->setSerializable (false);
 
         slaveBoolean->setDefaultValues (QStringList()
                                         << "One" << "Three" << "Five");
@@ -283,86 +280,147 @@ CSMSettings::UserSettings::~UserSettings()
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
-    mUserFilePath = QString::fromUtf8
-                            (mCfgMgr.getUserConfigPath().string().c_str()) + fileName.toUtf8();
+    QString userFilePath = QString::fromUtf8
+                                (mCfgMgr.getUserConfigPath().string().c_str());
 
-    QString global = QString::fromUtf8
-                                (mCfgMgr.getGlobalPath().string().c_str()) + fileName.toUtf8();
+    QString globalFilePath = QString::fromUtf8
+                                (mCfgMgr.getGlobalPath().string().c_str());
 
-    QString local = QString::fromUtf8
-                                (mCfgMgr.getLocalPath().string().c_str()) + fileName.toUtf8();
+    QString otherFilePath = globalFilePath;
 
-    //open user and global streams
-    QTextStream *userStream = openFilestream (mUserFilePath, true);
-    QTextStream *otherStream = openFilestream (global, true);
-
-    //failed stream, try for local
-    if (!otherStream)
-        otherStream = openFilestream (local, true);
-
-    //error condition - notify and return
-    if (!otherStream || !userStream)
+    //test for local only if global fails (uninstalled copy)
+    if (!QFile (globalFilePath + fileName).exists())
     {
-        QString message = QObject::tr("<br><b>An error was encountered loading \
-                user settings files.</b><br><br> One or several files could not \
-                be read.  This may be caused by a missing configuration file, \
-                incorrect file permissions or a corrupted installation of \
-                OpenCS.<br>");
-
-        message += QObject::tr("<br>Global filepath: ") + global;
-        message += QObject::tr("<br>Local filepath: ") + local;
-        message += QObject::tr("<br>User filepath: ") + mUserFilePath;
-
-        displayFileErrorMessage ( message, true);
-        return;
+        //if global is invalid, use the local path
+        otherFilePath = QString::fromUtf8
+                                    (mCfgMgr.getLocalPath().string().c_str());
     }
 
-    //success condition - merge the two streams into a single map and save
-    DefinitionPageMap totalMap = readFilestream (userStream);
-    DefinitionPageMap otherMap = readFilestream(otherStream);
+    QSettings::setPath
+                (QSettings::IniFormat, QSettings::UserScope, userFilePath);
 
-    //merging other settings file in and ignore duplicate settings to
-    //avoid overwriting user-level settings
-    mergeSettings (totalMap, otherMap);
+    QSettings::setPath
+                (QSettings::IniFormat, QSettings::SystemScope, otherFilePath);
 
-    if (!totalMap.isEmpty())
-        addDefinitions (totalMap);
+    mSettingDefinitions = new QSettings
+        (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
 }
 
-void CSMSettings::UserSettings::saveSettings
-                                (const QMap <QString, QStringList> &settingMap)
+bool CSMSettings::UserSettings::hasSettingDefinitions
+                                                (const QString &viewKey) const
 {
-    for (int i = 0; i < settings().size(); i++)
-    {
-        Setting* setting = settings().at(i);
+    return (mSettingDefinitions->contains (viewKey));
+}
 
-        QString key = setting->page() + '.' + setting->name();
+void CSMSettings::UserSettings::setDefinitions
+                                (const QString &key, const QStringList &list)
+{
+    mSettingDefinitions->setValue (key, list);
+}
 
-        if (!settingMap.keys().contains(key))
-            continue;
-
-        setting->setDefinedValues (settingMap.value(key));
-    }
-
-   writeFilestream (openFilestream (mUserFilePath, false), settingMap);
+void CSMSettings::UserSettings::saveDefinitions() const
+{
+    mSettingDefinitions->sync();
 }
 
 QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
-    QStringList names = settingKey.split('.');
+    if (!mSettingDefinitions->contains (settingKey))
+        return QString();
 
-    Setting *setting = findSetting(names.at(0), names.at(1));
+    QStringList defs = mSettingDefinitions->value (settingKey).toStringList();
 
-    if (setting)
-    {
-        if (!setting->definedValues().isEmpty())
-            return setting->definedValues().at(0);
-    }
-    return "";
+    if (defs.isEmpty())
+        return QString();
+
+    return defs.at(0);
 }
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 {
     assert(mUserSettingsInstance);
     return *mUserSettingsInstance;
+}
+
+void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
+                                                    const QStringList &list)
+{
+    mSettingDefinitions->setValue (settingKey ,list);
+
+    emit userSettingUpdated (settingKey, list);
+}
+
+CSMSettings::Setting *CSMSettings::UserSettings::findSetting
+                        (const QString &pageName, const QString &settingName)
+{
+    foreach (Setting *setting, mSettings)
+    {
+        if (setting->name() == settingName)
+        {
+            if (setting->page() == pageName)
+                return setting;
+        }
+    }
+    return 0;
+}
+
+void CSMSettings::UserSettings::removeSetting
+                        (const QString &pageName, const QString &settingName)
+{
+    if (mSettings.isEmpty())
+        return;
+
+    QList <Setting *>::iterator removeIterator = mSettings.begin();
+
+    while (removeIterator != mSettings.end())
+    {
+        if ((*removeIterator)->name() == settingName)
+        {
+            if ((*removeIterator)->page() == pageName)
+            {
+                mSettings.erase (removeIterator);
+                break;
+            }
+        }
+        removeIterator++;
+    }
+}
+
+
+CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
+{
+    SettingPageMap pageMap;
+
+    foreach (Setting *setting, mSettings)
+        pageMap[setting->page()].append (setting);
+
+    return pageMap;
+}
+
+CSMSettings::Setting *CSMSettings::UserSettings::createSetting
+        (CSMSettings::SettingType typ, const QString &page, const QString &name)
+{
+    //get list of all settings for the current setting name
+    if (findSetting (page, name))
+    {
+        qWarning() << "Duplicate declaration encountered: "
+                   << (name + '/' + page);
+        return 0;
+    }
+
+    Setting *setting = new Setting (typ, name, page);
+
+
+    //add declaration to the model
+    mSettings.append (setting);
+
+    return setting;
+}
+
+QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const
+{
+    if (mSettingDefinitions->contains (viewKey))
+        return mSettingDefinitions->value (viewKey).toStringList();
+
+    return QStringList();
 }

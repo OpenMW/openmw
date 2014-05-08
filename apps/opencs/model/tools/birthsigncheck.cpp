@@ -17,7 +17,7 @@ int CSMTools::BirthsignCheckStage::setup()
     return mBirthsigns.getSize();
 }
 
-void CSMTools::BirthsignCheckStage::perform (int stage, std::vector<std::string>& messages)
+void CSMTools::BirthsignCheckStage::perform (int stage, Messages& messages)
 {
     const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord (stage);
 
@@ -30,13 +30,13 @@ void CSMTools::BirthsignCheckStage::perform (int stage, std::vector<std::string>
 
     // test for empty name, description and texture
     if (birthsign.mName.empty())
-        messages.push_back (id.toString() + "|" + birthsign.mId + " has an empty name");
+        messages.push_back (std::make_pair (id, birthsign.mId + " has an empty name"));
 
     if (birthsign.mDescription.empty())
-        messages.push_back (id.toString() + "|" + birthsign.mId + " has an empty description");
+        messages.push_back (std::make_pair (id, birthsign.mId + " has an empty description"));
 
     if (birthsign.mTexture.empty())
-        messages.push_back (id.toString() + "|" + birthsign.mId + " is missing a texture");
+        messages.push_back (std::make_pair (id, birthsign.mId + " is missing a texture"));
 
     /// \todo test if the texture exists
 

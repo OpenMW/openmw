@@ -23,7 +23,7 @@ int CSMDoc::OpenSaveStage::setup()
     return 1;
 }
 
-void CSMDoc::OpenSaveStage::perform (int stage, std::vector<std::string>& messages)
+void CSMDoc::OpenSaveStage::perform (int stage, Messages& messages)
 {
     mState.start (mDocument, mProjectFile);
 
@@ -43,7 +43,7 @@ int CSMDoc::WriteHeaderStage::setup()
     return 1;
 }
 
-void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& messages)
+void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
 {
     mState.getWriter().setVersion();
 
@@ -96,7 +96,7 @@ int CSMDoc::WriteDialogueCollectionStage::setup()
     return mTopics.getSize();
 }
 
-void CSMDoc::WriteDialogueCollectionStage::perform (int stage, std::vector<std::string>& messages)
+void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& messages)
 {
     const CSMWorld::Record<ESM::Dialogue>& topic = mTopics.getRecord (stage);
 
@@ -191,7 +191,7 @@ int CSMDoc::WriteRefIdCollectionStage::setup()
     return mDocument.getData().getReferenceables().getSize();
 }
 
-void CSMDoc::WriteRefIdCollectionStage::perform (int stage, std::vector<std::string>& messages)
+void CSMDoc::WriteRefIdCollectionStage::perform (int stage, Messages& messages)
 {
     mDocument.getData().getReferenceables().save (stage, mState.getWriter());
 }
@@ -204,7 +204,7 @@ CSMDoc::WriteFilterStage::WriteFilterStage (Document& document, SavingState& sta
   mDocument (document), mScope (scope)
 {}
 
-void CSMDoc::WriteFilterStage::perform (int stage, std::vector<std::string>& messages)
+void CSMDoc::WriteFilterStage::perform (int stage, Messages& messages)
 {
     const CSMWorld::Record<CSMFilter::Filter>& record =
         mDocument.getData().getFilters().getRecord (stage);
@@ -223,7 +223,7 @@ int CSMDoc::CloseSaveStage::setup()
     return 1;
 }
 
-void CSMDoc::CloseSaveStage::perform (int stage, std::vector<std::string>& messages)
+void CSMDoc::CloseSaveStage::perform (int stage, Messages& messages)
 {
     mState.getStream().close();
 
@@ -241,7 +241,7 @@ int CSMDoc::FinalSavingStage::setup()
     return 1;
 }
 
-void CSMDoc::FinalSavingStage::perform (int stage, std::vector<std::string>& messages)
+void CSMDoc::FinalSavingStage::perform (int stage, Messages& messages)
 {
     if (mState.hasError())
     {

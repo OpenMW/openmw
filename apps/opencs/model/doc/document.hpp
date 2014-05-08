@@ -111,7 +111,8 @@ namespace CSMDoc
 
             void modificationStateChanged (bool clean);
 
-            void reportMessage (const QString& message, int type);
+            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
+                int type);
 
             void operationDone (int type);
 

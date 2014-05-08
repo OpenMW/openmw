@@ -6,10 +6,13 @@
 
 #include <QApplication>
 #include <QIcon>
+#include <QMetaType>
 
 #include <extern/shiny/Main/Factory.hpp>
 
 #include <components/ogreinit/ogreinit.hpp>
+
+#include "model/world/universalid.hpp"
 
 #ifdef Q_OS_MAC
 #include <QDir>
@@ -41,6 +44,8 @@ class Application : public QApplication
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE (resources);
+
+    qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
 
     OgreInit::OgreInit ogreInit;
 
