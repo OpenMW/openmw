@@ -2288,8 +2288,9 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
-    connect (&mSaving, SIGNAL (reportMessage (const QString&, int)),
-             this, SLOT (reportMessage (const QString&, int)));
+    connect (
+        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
+        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)));
 }
 
 CSMDoc::Document::~Document()
@@ -2358,10 +2359,11 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::reportMessage (const QString& message, int type)
+void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
+    int type)
 {
     /// \todo find a better way to get these messages to the user.
-    std::cout << message.toUtf8().constData() << std::endl;
+    std::cout << message << std::endl;
 }
 
 void CSMDoc::Document::operationDone (int type)
