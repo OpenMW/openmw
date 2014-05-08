@@ -49,8 +49,8 @@ namespace CSMSettings {
         /// Retrieves the settings file at all three levels (global, local and user).
         void loadSettings (const QString &fileName);
 
-        /// Writes settings to the user's config file path
-        void saveSettings (const QMap <QString, QStringList > &settingMap);
+        /// Updates QSettings and syncs with the ini file
+        void setDefinitions (const QString &key, const QStringList &defs);
 
         QString settingValue (const QString &settingKey);
 
@@ -65,10 +65,17 @@ namespace CSMSettings {
         ///Retreive a map of the settings, keyed by page name
         SettingPageMap settingPageMap() const;
 
-    private:
+        ///Returns a string list of defined vlaues for the specified setting
+        ///in "page/name" format.
+        QStringList definitions (const QString &viewKey) const;
 
-        ///add definitions to the settings specified in the page map
-        void addDefinitions();
+        ///Test to indicate whether or not a setting has any definitions
+        bool hasSettingDefinitions (const QString &viewKey) const;
+
+        ///Save any unsaved changes in the QSettings object
+        void saveDefinitions() const;
+
+    private:
 
         void buildSettingModelDefaults();
 

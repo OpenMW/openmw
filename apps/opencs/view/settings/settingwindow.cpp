@@ -82,6 +82,25 @@ void CSVSettings::SettingWindow::createConnections
     }
 }
 
+void CSVSettings::SettingWindow::setViewValues()
+{
+    //iterate each page and view, setting their definintions
+    //if they exist in the model
+    foreach (const Page *page, mPages)
+    {
+        foreach (const View *view, page->views())
+        {
+            //testing beforehand prevents overwriting a proxy setting
+            if (!mModel->hasSettingDefinitions (view->viewKey()))
+                continue;
+
+            QStringList defs = mModel->definitions (view->viewKey());
+
+            view->setSelectedValues(defs);
+        }
+    }
+}
+
 CSVSettings::View *CSVSettings::SettingWindow::findView
                             (const QString &pageName, const QString &setting)
 {
@@ -95,17 +114,19 @@ CSVSettings::View *CSVSettings::SettingWindow::findView
 
 void CSVSettings::SettingWindow::saveSettings()
 {
-    QMap <QString, QStringList> settingMap;
-
+    //setting the definition in the model automatically syncs with the file
     foreach (const Page *page, mPages)
     {
         foreach (const View *view, page->views())
         {
-            if (view->serializable())
-                settingMap[view->viewKey()] = view->selectedValues();
+            if (!view->serializable())
+                continue;
+
+            mModel->setDefinitions (view->viewKey(), view->selectedValues());
         }
     }
-    CSMSettings::UserSettings::instance().saveSettings (settingMap);
+
+    mModel->saveDefinitions();
 }
 
 void CSVSettings::SettingWindow::closeEvent (QCloseEvent *event)

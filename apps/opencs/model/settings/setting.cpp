@@ -77,16 +77,6 @@ QStringList CSMSettings::Setting::declaredValues() const
     return property (Property_DeclaredValues);
 }
 
-void CSMSettings::Setting::setDefinedValues (QStringList list)
-{
-    setProperty (Property_DefinedValues, list);
-}
-
-QStringList CSMSettings::Setting::definedValues() const
-{
-    return property (Property_DefinedValues);
-}
-
 QStringList CSMSettings::Setting::property (SettingProperty prop) const
 {
     if (prop >= mProperties.size())

@@ -109,7 +109,10 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
 void CSVSettings::Dialog::show()
 {
     if (pages().isEmpty())
+    {
         buildPages();
+        setViewValues();
+    }
 
     QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
 
