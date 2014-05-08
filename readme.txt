@@ -153,6 +153,7 @@ Feature #58: Sneaking Skill
 Feature #73: Crime and Punishment
 Feature #135: Editor: OGRE integration
 Feature #541: Editor: Dialogue Sub-Views
+Feature #853: Editor: Rework User Settings
 Feature #944: Editor: lighting modes
 Feature #945: Editor: Camera navigation mode
 Feature #953: Trader gold
