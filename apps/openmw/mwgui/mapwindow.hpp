@@ -55,11 +55,12 @@ namespace MWGui
         bool mChanged;
         bool mFogOfWar;
 
-        typedef std::pair<int, int> CellId;
-        std::vector<CellId> mMarkers;
-
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
+
+        // Keep track of created marker widgets, just to easily remove them later.
+        std::vector<MyGUI::Widget*> mDoorMarkerWidgets; // Doors
+        std::vector<MyGUI::Widget*> mMarkerWidgets; // Other markers
 
         void applyFogOfWar();
 
@@ -126,6 +127,10 @@ namespace MWGui
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
         bool mGlobal;
+
+        // Markers on global map
+        typedef std::pair<int, int> CellId;
+        std::vector<CellId> mMarkers;
 
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;

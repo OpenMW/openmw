@@ -22,7 +22,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
         std::string scriptId = mClass->getScript (ptr);
 
         mData.setLocals (*MWBase::Environment::get().getWorld()->getStore().
-            get<ESM::Script>().search (scriptId));
+            get<ESM::Script>().find (scriptId));
         mData.getLocals().read (state.mLocals, scriptId);
     }
 
