@@ -825,13 +825,13 @@ namespace MWMechanics
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
-    bool MechanicsManager::commitCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         // NOTE: int arg can be from itemTaken() so DON'T modify it, since it is
         //  passed to reportCrime later on in this function.
 
         // Only player can commit crime
-        if (ptr.getRefData().getHandle() != "player")
+        if (player.getRefData().getHandle() != "player")
             return false;
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
@@ -856,7 +856,7 @@ namespace MWMechanics
 
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
-        mActors.getObjectsInRange(Ogre::Vector3(ptr.getRefData().getPosition().pos),
+        mActors.getObjectsInRange(Ogre::Vector3(player.getRefData().getPosition().pos),
                                     esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
 
         int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
@@ -864,10 +864,10 @@ namespace MWMechanics
         // Find actors who witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (*it == ptr) continue; // not the player
+            if (*it == player) continue; // not the player
 
             // Was the crime seen?
-            if (MWBase::Environment::get().getWorld()->getLOS(ptr, *it) && awarenessCheck(ptr, *it) )
+            if (MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
             {
                 // TODO: Add more messages
                 if (type == OT_Theft)
@@ -881,8 +881,8 @@ namespace MWMechanics
                     // This applies to both NPCs and creatures
 
                     // ... except if this is a guard: then the player is given a chance to pay a fine / go to jail instead
-                    if (type == OT_Assault && !ptr.getClass().isClass(ptr, "guard"))
-                        MWBase::Environment::get().getMechanicsManager()->startCombat(victim, ptr);
+                    if (type == OT_Assault && !it->getClass().isClass(*it, "guard"))
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(victim, player);
                 }
 
                 // Crime reporting only applies to NPCs
@@ -897,7 +897,7 @@ namespace MWMechanics
                     // Tell everyone, including yourself
                     for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
                     {
-                        if (   *it1 == ptr 
+                        if (   *it1 == player
                             || !it1->getClass().isNpc()) continue; // not the player and is an NPC
 
                         // Will other witnesses paticipate in crime
@@ -914,7 +914,7 @@ namespace MWMechanics
             }
         }
         if (reported)
-            reportCrime(ptr, victim, type, arg);
+            reportCrime(player, victim, type, arg);
         return reported;
     }
 
