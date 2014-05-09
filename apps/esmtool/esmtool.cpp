@@ -218,8 +218,6 @@ int main(int argc, char**argv)
         std::cout << "Invalid or no mode specified, dying horribly. Have a nice day." << std::endl;
         return 1;
     }
-
-    return 0;
 }
 
 void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)

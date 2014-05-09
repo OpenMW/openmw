@@ -267,7 +267,7 @@ void LocalMap::render(const float x, const float y,
         // initialize to (0, 0, 0, 1)
         for (int p=0; p<sFogOfWarResolution*sFogOfWarResolution; ++p)
         {
-            buffer[p] = (255 << 24);
+            buffer[p] = (255u << 24);
         }
 
         memcpy(tex2->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);

@@ -42,7 +42,7 @@ namespace CSVRender
 
         mCamera->setPosition (300, 0, 0);
         mCamera->lookAt (0, 0, 0);
-        mCamera->setNearClipDistance (0.1);
+        mCamera->setNearClipDistance (0.1f);
         mCamera->setFarClipDistance (30000);
         mCamera->roll (Ogre::Degree (90));
 
@@ -104,7 +104,7 @@ namespace CSVRender
 #endif
 
         mWindow = Ogre::Root::getSingleton().createRenderWindow(windowTitle.str(), this->width(), this->height(), false, &params);
-        mWindow->addViewport(mCamera)->setBackgroundColour(Ogre::ColourValue(0.3,0.3,0.3,1));
+        mWindow->addViewport(mCamera)->setBackgroundColour(Ogre::ColourValue(0.3f,0.3f,0.3f,1.0f));
 
         Ogre::Real aspectRatio = Ogre::Real(width()) / Ogre::Real(height());
         mCamera->setAspectRatio(aspectRatio);

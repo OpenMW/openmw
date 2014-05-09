@@ -767,7 +767,7 @@ public:
 
     PageDisplay ()
     {
-        mPage = -1;
+        mPage = static_cast<size_t>(-1);
         mViewTop = 0;
         mViewBottom = 0;
         mFocusItem = NULL;
@@ -917,7 +917,7 @@ public:
             else
             {
                 mBook.reset ();
-                mPage = -1;
+                mPage = static_cast<size_t>(-1);
                 mViewTop = 0;
                 mViewBottom = 0;
             }

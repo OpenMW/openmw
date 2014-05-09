@@ -23,7 +23,7 @@ CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* ma
     : WindowBase("openmw_companion_window.layout")
     , mDragAndDrop(dragAndDrop)
     , mMessageBoxManager(manager)
-    , mSelectedItem(-1)
+    , mSelectedItem(static_cast<size_t>(-1))
     , mModel(NULL)
     , mSortModel(NULL)
 {

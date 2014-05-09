@@ -192,7 +192,6 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         default:
             return Qt::AlignLeft + Qt::AlignVCenter;
         }
-        return QVariant();
         break;
     }
 

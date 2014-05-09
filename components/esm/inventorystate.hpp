@@ -14,6 +14,8 @@ namespace ESM
     /// \brief State for inventories and containers
     struct InventoryState
     {
+        virtual ~InventoryState() {}
+
         // anything but lights (type, slot)
         std::vector<std::pair<ObjectState, std::pair<unsigned int, int> > > mItems;
 

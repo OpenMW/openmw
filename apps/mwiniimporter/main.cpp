@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "cfg file does not exist" << std::endl;
 
     MwIniImporter importer;
-    importer.setVerbose(vm.count("verbose"));
+    importer.setVerbose(vm.count("verbose") != 0);
 
     // Font encoding settings
     std::string encoding(vm["encoding"].as<std::string>());

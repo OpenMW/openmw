@@ -295,7 +295,7 @@ namespace MWScript
                     {
                         store = MWBase::Environment::get().getWorld()->getInterior(cellID);
                     }
-                    catch(std::exception &e)
+                    catch(std::exception&)
                     {
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         if(cell)
@@ -395,7 +395,7 @@ namespace MWScript
                     {
                         store = MWBase::Environment::get().getWorld()->getInterior(cellID);
                     }
-                    catch(std::exception &e)
+                    catch(std::exception&)
                     {
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         if(cell)

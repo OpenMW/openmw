@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    class Dialogue;
+    struct Dialogue;
 }
 
 namespace CSMWorld

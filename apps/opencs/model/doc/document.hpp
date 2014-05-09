@@ -26,7 +26,7 @@ namespace ESM
 
 namespace Files
 {
-    class ConfigurationManager;
+    struct ConfigurationManager;
 }
 
 namespace CSMDoc
