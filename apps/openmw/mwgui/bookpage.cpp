@@ -783,7 +783,8 @@ public:
 
             ActiveTextFormats::iterator i = mActiveTextFormats.find (Font);
 
-            mNode->outOfDate (i->second->mRenderItem);
+            if (mNode)
+                mNode->outOfDate (i->second->mRenderItem);
         }
     }
 
@@ -1125,6 +1126,8 @@ public:
 protected:
     void onMouseLostFocus(Widget* _new)
     {
+        // NOTE: MyGUI also fires eventMouseLostFocus for widgets that are about to be destroyed (if they had focus).
+        // Child widgets may already be destroyed! So be careful.
         if (PageDisplay* pd = dynamic_cast <PageDisplay*> (getSubWidgetText ()))
         {
             pd->onMouseLostFocus ();
