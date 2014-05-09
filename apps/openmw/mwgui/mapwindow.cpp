@@ -86,6 +86,11 @@ namespace MWGui
     {
         mFogOfWar = !mFogOfWar;
         applyFogOfWar();
+
+        // clear all previous door markers
+        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
+            MyGUI::Gui::getInstance().destroyWidget(*it);
+        mDoorMarkerWidgets.clear();
     }
 
     void LocalMapBase::applyFogOfWar()
@@ -172,14 +177,10 @@ namespace MWGui
         mInterior = interior;
         mChanged = false;
 
-        // clear all previous markers
-        for (unsigned int i=0; i< mLocalMap->getChildCount(); ++i)
-        {
-            if (mLocalMap->getChildAt(i)->getName ().substr (0, 4) == "Door")
-            {
-                MyGUI::Gui::getInstance ().destroyWidget (mLocalMap->getChildAt(i));
-            }
-        }
+        // clear all previous door markers
+        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
+            MyGUI::Gui::getInstance().destroyWidget(*it);
+        mDoorMarkerWidgets.clear();
 
         // Update the map textures
         for (int mx=0; mx<3; ++mx)
@@ -243,6 +244,8 @@ namespace MWGui
             // Used by tooltips to not show the tooltip if marker is hidden by fog of war
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
+
+            mDoorMarkerWidgets.push_back(markerWidget);
         }
 
         updateMarkers();
@@ -344,13 +347,9 @@ namespace MWGui
     void LocalMapBase::updateMarkers()
     {
         // clear all previous markers
-        for (unsigned int i=0; i< mLocalMap->getChildCount(); ++i)
-        {
-            if (mLocalMap->getChildAt(i)->getName ().substr (0, 6) == "Marker")
-            {
-                MyGUI::Gui::getInstance ().destroyWidget (mLocalMap->getChildAt(i));
-            }
-        }
+        for (std::vector<MyGUI::Widget*>::iterator it = mMarkerWidgets.begin(); it != mMarkerWidgets.end(); ++it)
+            MyGUI::Gui::getInstance().destroyWidget(*it);
+        mMarkerWidgets.clear();
 
         addDetectionMarkers(MWBase::World::Detect_Creature);
         addDetectionMarkers(MWBase::World::Detect_Key);
@@ -373,6 +372,7 @@ namespace MWGui
             markerWidget->setImageTexture("textures\\menu_map_smark.dds");
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
+            mMarkerWidgets.push_back(markerWidget);
         }
     }
 
