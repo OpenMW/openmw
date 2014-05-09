@@ -41,6 +41,13 @@ namespace MWGui
 
     LocalMapBase::~LocalMapBase()
     {
+        // Clear our "lost focus" delegate for marker widgets first, otherwise it will
+        // fire when the widget is about to be destroyed and the mouse cursor is over it.
+        // At that point, other widgets may already be destroyed, so applyFogOfWar (which is called by the delegate) would crash.
+        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
+            (*it)->eventMouseLostFocus.clear();
+        for (std::vector<MyGUI::Widget*>::iterator it = mMarkerWidgets.begin(); it != mMarkerWidgets.end(); ++it)
+            (*it)->eventMouseLostFocus.clear();
     }
 
     void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, OEngine::GUI::Layout* layout, bool mapDragAndDrop)
