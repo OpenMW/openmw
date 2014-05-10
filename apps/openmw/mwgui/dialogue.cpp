@@ -162,7 +162,8 @@ namespace MWGui
         {
             std::string::const_iterator i = text.begin ();
             KeywordSearchT::Match match;
-            while (i != text.end () && keywordSearch->search (i, text.end (), match))
+
+            while (i != text.end () && keywordSearch->search (i, text.end (), match, false))
             {
                 if (i != match.mBeg)
                     addTopicLink (typesetter, 0, i - text.begin (), match.mBeg - text.begin ());
