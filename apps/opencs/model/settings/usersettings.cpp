@@ -28,7 +28,8 @@ namespace boost
 
 CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
 
-CSMSettings::UserSettings::UserSettings()
+CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
+: mCfgMgr (configurationManager)
 {
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;

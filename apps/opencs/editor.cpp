@@ -20,7 +20,7 @@
 #include "model/world/data.hpp"
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
-: mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
+: mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS")
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
