@@ -11,6 +11,7 @@ class QLabel;
 class QProgressBar;
 class QDialogButtonBox;
 class QListWidget;
+class QVBoxLayout;
 
 namespace CSMDoc
 {
@@ -31,6 +32,7 @@ namespace CSVDoc
             QDialogButtonBox *mButtons;
             QLabel *mError;
             QListWidget *mMessages;
+            QVBoxLayout *mLayout;
 
         private:
 

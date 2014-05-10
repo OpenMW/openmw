@@ -18,20 +18,22 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 }
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
-: mDocument (document), mAborted (false)
+: mDocument (document), mAborted (false), mMessages (0)
 {
     setWindowTitle (("Opening " + document->getSavePath().filename().string()).c_str());
 
-    QVBoxLayout *layout = new QVBoxLayout (this);
+    setMinimumWidth (400);
+
+    mLayout = new QVBoxLayout (this);
 
     // file progress
     mFile = new QLabel (this);
 
-    layout->addWidget (mFile);
+    mLayout->addWidget (mFile);
 
     mFileProgress = new QProgressBar (this);
 
-    layout->addWidget (mFileProgress);
+    mLayout->addWidget (mFileProgress);
 
     int size = static_cast<int> (document->getContentFiles().size())+1;
     if (document->isNew())
@@ -43,11 +45,11 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mFileProgress->setValue (0);
 
     // record progress
-    layout->addWidget (new QLabel ("Records", this));
+    mLayout->addWidget (new QLabel ("Records", this));
 
     mRecordProgress = new QProgressBar (this);
 
-    layout->addWidget (mRecordProgress);
+    mLayout->addWidget (mRecordProgress);
 
     mRecordProgress->setMinimum (0);
     mRecordProgress->setTextVisible (true);
@@ -57,19 +59,14 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mError = new QLabel (this);
     mError->setWordWrap (true);
 
-    layout->addWidget (mError);
-
-    // other messages
-    mMessages = new QListWidget (this);
-
-    layout->addWidget (mMessages);
+    mLayout->addWidget (mError);
 
     // buttons
     mButtons = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
-    layout->addWidget (mButtons);
+    mLayout->addWidget (mButtons);
 
-    setLayout (layout);
+    setLayout (mLayout);
 
     move (QCursor::pos());
 
@@ -105,6 +102,12 @@ void CSVDoc::LoadingDocument::abort (const std::string& error)
 
 void CSVDoc::LoadingDocument::addMessage (const std::string& message)
 {
+    if (!mMessages)
+    {
+        mMessages = new QListWidget (this);
+        mLayout->insertWidget (4, mMessages);
+    }
+
     new QListWidgetItem (QString::fromUtf8 (message.c_str()), mMessages);
 }
 
