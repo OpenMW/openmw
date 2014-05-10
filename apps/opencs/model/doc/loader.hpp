@@ -62,6 +62,9 @@ namespace CSMDoc
             ///< \note This signal is only given once per group of records. The group size is
             /// approximately the total number of records divided by the steps value of the
             /// previous nextStage signal.
+
+            void loadMessage (CSMDoc::Document *document, const std::string& message);
+            ///< Non-critical load error or warning
     };
 }
 

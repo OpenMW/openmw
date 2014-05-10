@@ -101,6 +101,10 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         &mLoader, SLOT (nextRecord (CSMDoc::Document *)));
 
     connect (
+        &mDocumentManager, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),
+        &mLoader, SLOT (loadMessage (CSMDoc::Document *, const std::string&)));
+
+    connect (
         &mLoader, SIGNAL (cancel (CSMDoc::Document *)),
         &mDocumentManager, SIGNAL (cancelLoading (CSMDoc::Document *)));
 

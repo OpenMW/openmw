@@ -79,6 +79,8 @@ namespace CSMDoc
             void nextRecord (CSMDoc::Document *document);
 
             void cancelLoading (CSMDoc::Document *document);
+
+            void loadMessage (CSMDoc::Document *document, const std::string& message);
     };
 }
 

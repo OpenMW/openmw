@@ -7,6 +7,7 @@
 #include <QCursor>
 #include <QDialogButtonBox>
 #include <QCloseEvent>
+#include <QListWidget>
 
 #include "../../model/doc/document.hpp"
 
@@ -58,6 +59,11 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     layout->addWidget (mError);
 
+    // other messages
+    mMessages = new QListWidget (this);
+
+    layout->addWidget (mMessages);
+
     // buttons
     mButtons = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
@@ -95,6 +101,11 @@ void CSVDoc::LoadingDocument::abort (const std::string& error)
     mAborted = true;
     mError->setText (QString::fromUtf8 (("Loading failed: " + error).c_str()));
     mButtons->setStandardButtons (QDialogButtonBox::Close);
+}
+
+void CSVDoc::LoadingDocument::addMessage (const std::string& message)
+{
+    new QListWidgetItem (QString::fromUtf8 (message.c_str()), mMessages);
 }
 
 void CSVDoc::LoadingDocument::cancel()
@@ -168,4 +179,12 @@ void CSVDoc::Loader::nextRecord (CSMDoc::Document *document)
 
     if (iter!=mDocuments.end())
         iter->second->nextRecord();
+}
+
+void CSVDoc::Loader::loadMessage (CSMDoc::Document *document, const std::string& message)
+{
+    std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.find (document);
+
+    if (iter!=mDocuments.end())
+        iter->second->addMessage (message);
 }

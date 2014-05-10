@@ -63,7 +63,10 @@ void CSMDoc::Loader::load()
 
             for (CSMDoc::Stage::Messages::const_iterator iter (messages.begin());
                 iter!=messages.end(); ++iter)
+            {
                 document->getReport (log)->add (iter->first, iter->second);
+                emit loadMessage (document, iter->second);
+            }
 
             emit nextRecord (document);
 

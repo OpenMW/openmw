@@ -10,6 +10,7 @@
 class QLabel;
 class QProgressBar;
 class QDialogButtonBox;
+class QListWidget;
 
 namespace CSMDoc
 {
@@ -29,6 +30,7 @@ namespace CSVDoc
             bool mAborted;
             QDialogButtonBox *mButtons;
             QLabel *mError;
+            QListWidget *mMessages;
 
         private:
 
@@ -43,6 +45,8 @@ namespace CSVDoc
             void nextRecord();
 
             void abort (const std::string& error);
+
+            void addMessage (const std::string& message);
 
         private slots:
 
@@ -85,6 +89,8 @@ namespace CSVDoc
             void nextStage (CSMDoc::Document *document, const std::string& name, int steps);
 
             void nextRecord (CSMDoc::Document *document);
+
+            void loadMessage (CSMDoc::Document *document, const std::string& message);
     };
 }
 
