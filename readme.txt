@@ -148,6 +148,7 @@ Bug #1296: Caius doesn't leave at start of quest "Mehra Milo and the Lost Prophe
 Bug #1297: Saved game: map markers
 Bug #1302: ring_keley script causes vector::_M_range_check exception
 Bug #1309: Bug on "You violated the law" dialog
+Bug #1319: Creatures sometimes rendered incorrectly
 Feature #50: Ranged Combat
 Feature #58: Sneaking Skill
 Feature #73: Crime and Punishment
