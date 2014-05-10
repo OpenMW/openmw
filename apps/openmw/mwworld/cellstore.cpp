@@ -92,14 +92,17 @@ namespace
         if (!record)
             return;
 
-        for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
-            iter!=collection.mList.end(); ++iter)
-            if (iter->mRef.mRefNum==state.mRef.mRefNum)
-            {
-                // overwrite existing reference
-                iter->load (state);
-                return;
-            }
+        if (state.mRef.mRefNum.mContentFile != -1)
+        {
+            for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
+                iter!=collection.mList.end(); ++iter)
+                if (iter->mRef.mRefNum==state.mRef.mRefNum)
+                {
+                    // overwrite existing reference
+                    iter->load (state);
+                    return;
+                }
+        }
 
         // new reference
         MWWorld::LiveCellRef<T> ref (record);
