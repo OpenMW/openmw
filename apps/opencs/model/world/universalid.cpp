@@ -18,7 +18,7 @@ namespace
 
     static const TypeData sNoArg[] =
     {
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "empty", 0 },
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "-", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Globals, "Global Variables", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Gmsts, "Game Settings", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Skills, "Skills", 0 },
@@ -101,6 +101,7 @@ namespace
     static const TypeData sIndexArg[] =
     {
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", 0 },
+        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_LoadErrorLog, "Load Error Log", 0 },
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 }

@@ -10,9 +10,12 @@
 #include <QtGui/QApplication>
 
 #include "../../model/doc/document.hpp"
-#include "../world/subviews.hpp"
-#include "../tools/subviews.hpp"
 #include "../../model/settings/usersettings.hpp"
+
+#include "../world/subviews.hpp"
+
+#include "../tools/subviews.hpp"
+
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
@@ -46,6 +49,10 @@ void CSVDoc::View::setupFileMenu()
     mVerify = new QAction (tr ("&Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
     file->addAction (mVerify);
+
+    QAction *loadErrors = new QAction (tr ("Load Error Log"), this);
+    connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
+    file->addAction (loadErrors);
 
     QAction *close = new QAction (tr ("&Close"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
@@ -501,4 +508,9 @@ void CSVDoc::View::toggleShowStatusBar (bool show)
         if (CSVDoc::SubView *subView = dynamic_cast<CSVDoc::SubView *> (view))
             subView->setStatusBar (show);
     }
+}
+
+void CSVDoc::View::loadErrorLog()
+{
+    addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_LoadErrorLog, 0));
 }

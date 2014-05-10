@@ -24,6 +24,8 @@
 
 #include "../filter/filter.hpp"
 
+#include "../doc/stage.hpp"
+
 #include "idcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
@@ -33,12 +35,19 @@
 
 class QAbstractItemModel;
 
+namespace ESM
+{
+    class ESMReader;
+    struct Dialogue;
+}
+
 namespace CSMWorld
 {
     class Data : public QObject
     {
             Q_OBJECT
 
+            ToUTF8::Utf8Encoder mEncoder;
             IdCollection<ESM::Global> mGlobals;
             IdCollection<ESM::GameSetting> mGmsts;
             IdCollection<ESM::Skill> mSkills;
@@ -62,6 +71,10 @@ namespace CSMWorld
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
             std::string mAuthor;
             std::string mDescription;
+            ESM::ESMReader *mReader;
+            const ESM::Dialogue *mDialogue; // last loaded dialogue
+            bool mBase;
+            bool mProject;
 
             // not implemented
             Data (const Data&);
@@ -167,10 +180,15 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            void loadFile (const boost::filesystem::path& path, bool base, bool project);
-            ///< Merging content of a file into base or modified.
+            int startLoading (const boost::filesystem::path& path, bool base, bool project);
+            ///< Begin merging content of a file into base or modified.
             ///
             /// \param project load project file instead of content file
+            ///
+            ///< \return estimated number of records
+
+            bool continueLoading (CSMDoc::Stage::Messages& messages);
+            ///< \return Finished?
 
             bool hasId (const std::string& id) const;
 

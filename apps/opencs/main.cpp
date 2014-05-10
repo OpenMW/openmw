@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <iostream>
+#include <string>
 
 #include <QApplication>
 #include <QIcon>
@@ -17,6 +18,8 @@
 #ifdef Q_OS_MAC
 #include <QDir>
 #endif
+
+Q_DECLARE_METATYPE (std::string)
 
 class Application : public QApplication
 {
@@ -45,6 +48,7 @@ int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE (resources);
 
+    qRegisterMetaType<std::string> ("std::string");
     qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
 
     OgreInit::OgreInit ogreInit;
