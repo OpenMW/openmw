@@ -93,11 +93,6 @@ namespace MWGui
     {
         mFogOfWar = !mFogOfWar;
         applyFogOfWar();
-
-        // clear all previous door markers
-        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(*it);
-        mDoorMarkerWidgets.clear();
     }
 
     void LocalMapBase::applyFogOfWar()
