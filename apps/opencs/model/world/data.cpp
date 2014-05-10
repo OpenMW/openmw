@@ -505,7 +505,7 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     return mReader->getRecordCount();
 }
 
-bool CSMWorld::Data::continueLoading()
+bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 {
     if (!mReader)
         throw std::logic_error ("can't continue loading, because no load has been started");

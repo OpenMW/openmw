@@ -24,6 +24,8 @@
 
 #include "../filter/filter.hpp"
 
+#include "../doc/stage.hpp"
+
 #include "idcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
@@ -185,7 +187,7 @@ namespace CSMWorld
             ///
             ///< \return estimated number of records
 
-            bool continueLoading();
+            bool continueLoading (CSMDoc::Stage::Messages& messages);
             ///< \return Finished?
 
             bool hasId (const std::string& id) const;

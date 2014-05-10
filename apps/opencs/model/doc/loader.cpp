@@ -3,7 +3,10 @@
 
 #include <QTimer>
 
+#include "../tools/reportmodel.hpp"
+
 #include "document.hpp"
+#include "state.hpp"
 
 CSMDoc::Loader::Stage::Stage() : mFile (0), mRecordsLeft (false) {}
 
@@ -48,12 +51,19 @@ void CSMDoc::Loader::load()
     {
         if (iter->second.mRecordsLeft)
         {
+            CSMDoc::Stage::Messages messages;
             for (int i=0; i<batchingSize; ++i) // do not flood the system with update signals
-                if (document->getData().continueLoading())
+                if (document->getData().continueLoading (messages))
                 {
                     iter->second.mRecordsLeft = false;
                     break;
                 }
+
+            CSMWorld::UniversalId log (CSMWorld::UniversalId::Type_LoadErrorLog, 0);
+
+            for (CSMDoc::Stage::Messages::const_iterator iter (messages.begin());
+                iter!=messages.end(); ++iter)
+                document->getReport (log)->add (iter->first, iter->second);
 
             emit nextRecord (document);
 

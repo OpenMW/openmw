@@ -88,6 +88,9 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
 
 CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0), mNextReportNumber (0)
 {
+    // index 0: load error log
+    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
+    mActiveReports.insert (std::make_pair (CSMDoc::State_Loading, 0));
 }
 
 CSMTools::Tools::~Tools()
@@ -134,7 +137,8 @@ int CSMTools::Tools::getRunningOperations() const
 
 CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& id)
 {
-    if (id.getType()!=CSMWorld::UniversalId::Type_VerificationResults)
+    if (id.getType()!=CSMWorld::UniversalId::Type_VerificationResults &&
+        id.getType()!=CSMWorld::UniversalId::Type_LoadErrorLog)
         throw std::logic_error ("invalid request for report model: " + id.toString());
 
     return mReports.at (id.getIndex());
