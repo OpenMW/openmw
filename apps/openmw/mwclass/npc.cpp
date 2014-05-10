@@ -797,6 +797,10 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        // player got activated by another NPC
+        if(ptr.getRefData().getHandle() == "player")
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
+
         if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -814,10 +818,6 @@ namespace MWClass
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         
-        // player got activated by another NPC
-        if(ptr.getRefData().getHandle() == "player")
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
-
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
 
     }
