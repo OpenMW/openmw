@@ -160,8 +160,9 @@ namespace MWGui
             markerPos.cellX = cellX;
             markerPos.cellY = cellY;
 
-            widgetPos = MyGUI::IntPoint(nX * 512 + (1+cellX-mCurX) * 512,
-                                        nY * 512 + (1+cellY-mCurY) * 512);
+            // Image space is -Y up, cells are Y up
+            widgetPos = MyGUI::IntPoint(nX * 512 + (1+(cellX-mCurX)) * 512,
+                                        nY * 512 + (1-(cellY-mCurY)) * 512);
         }
 
         markerPos.nX = nX;
