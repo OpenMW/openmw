@@ -592,7 +592,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
                 }
                 else
                 {
-                    /// \todo report deletion of non-existing record
+                    messages.push_back (std::make_pair (UniversalId::Type_None,
+                        "Trying to delete dialogue record " + id + " which does not exist"));
                 }
             }
             else
@@ -608,7 +609,9 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         {
             if (!mDialogue)
             {
-                /// \todo INFO record without matching DIAL record -> report to user
+                messages.push_back (std::make_pair (UniversalId::Type_None,
+                    "Found info record not following a dialogue record"));
+
                 mReader->skipRecord();
                 break;
             }
@@ -636,8 +639,9 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
         default:
 
-            /// \todo throw an exception instead, once all records are implemented
-            /// or maybe report error and continue?
+            messages.push_back (std::make_pair (UniversalId::Type_None,
+                "Unsupported record type: " + n.toString()));
+
             mReader->skipRecord();
     }
 
