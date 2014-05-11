@@ -296,7 +296,8 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
                 ESM::FogState* fog = cell->getFog();
 
                 // We are using the same bounds and angle as we were using when the textures were originally made. Segments should come out the same.
-                assert (i < int(fog->mFogTextures.size()));
+                if (i >= int(fog->mFogTextures.size()))
+                    throw std::runtime_error("fog texture count mismatch");
 
                 ESM::FogTexture& esm = fog->mFogTextures[i];
                 loadFogOfWar(texturePrefix, esm);
@@ -351,7 +352,8 @@ void LocalMap::loadFogOfWar (const std::string& texturePrefix, ESM::FogTexture& 
     Ogre::Image image;
     image.load(stream, "tga");
 
-    assert (image.getWidth() == sFogOfWarResolution && image.getHeight() == sFogOfWarResolution);
+    if (image.getWidth() != sFogOfWarResolution || image.getHeight() != sFogOfWarResolution)
+        throw std::runtime_error("fog texture size mismatch");
 
     std::string texName = texturePrefix + "_fog";
 
