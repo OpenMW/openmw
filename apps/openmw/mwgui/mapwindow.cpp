@@ -65,11 +65,11 @@ namespace MWGui
             {
                 MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                     MyGUI::IntCoord(mx*widgetSize, my*widgetSize, widgetSize, widgetSize),
-                    MyGUI::Align::Top | MyGUI::Align::Left, "Map_" + boost::lexical_cast<std::string>(mx) + "_" + boost::lexical_cast<std::string>(my));
+                    MyGUI::Align::Top | MyGUI::Align::Left);
 
                 MyGUI::ImageBox* fog = map->createWidget<MyGUI::ImageBox>("ImageBox",
                     MyGUI::IntCoord(0, 0, widgetSize, widgetSize),
-                    MyGUI::Align::Top | MyGUI::Align::Left, "Map_" + boost::lexical_cast<std::string>(mx) + "_" + boost::lexical_cast<std::string>(my) + "_fog");
+                    MyGUI::Align::Top | MyGUI::Align::Left);
 
                 if (!mMapDragAndDrop)
                 {
@@ -93,11 +93,6 @@ namespace MWGui
     {
         mFogOfWar = !mFogOfWar;
         applyFogOfWar();
-
-        // clear all previous door markers
-        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(*it);
-        mDoorMarkerWidgets.clear();
     }
 
     void LocalMapBase::applyFogOfWar()
@@ -165,8 +160,9 @@ namespace MWGui
             markerPos.cellX = cellX;
             markerPos.cellY = cellY;
 
-            widgetPos = MyGUI::IntPoint(nX * 512 + (1+cellX-mCurX) * 512,
-                                        nY * 512 + (1+cellY-mCurY) * 512);
+            // Image space is -Y up, cells are Y up
+            widgetPos = MyGUI::IntPoint(nX * 512 + (1+(cellX-mCurX)) * 512,
+                                        nY * 512 + (1-(cellY-mCurY)) * 512);
         }
 
         markerPos.nX = nX;
@@ -241,7 +237,7 @@ namespace MWGui
                                         8, 8);
             ++counter;
             MyGUI::Button* markerWidget = mLocalMap->createWidget<MyGUI::Button>("ButtonImage",
-                widgetCoord, MyGUI::Align::Default, "Door" + boost::lexical_cast<std::string>(counter));
+                widgetCoord, MyGUI::Align::Default);
             markerWidget->setImageResource("DoorMarker");
             markerWidget->setUserString("ToolTipType", "Layout");
             markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
@@ -343,7 +339,7 @@ namespace MWGui
                                         8, 8);
             ++counter;
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(counter));
+                widgetCoord, MyGUI::Align::Default);
             markerWidget->setImageTexture(markerTexture);
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
@@ -375,7 +371,7 @@ namespace MWGui
                                         widgetPos.top - 4,
                                         8, 8);
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                widgetCoord, MyGUI::Align::Default, "MarkerMarked");
+                widgetCoord, MyGUI::Align::Default);
             markerWidget->setImageTexture("textures\\menu_map_smark.dds");
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
@@ -447,7 +443,7 @@ namespace MWGui
 
         static int _counter=0;
         MyGUI::Button* markerWidget = mGlobalMapOverlay->createWidget<MyGUI::Button>("ButtonImage",
-            widgetCoord, MyGUI::Align::Default, "Door" + boost::lexical_cast<std::string>(_counter));
+            widgetCoord, MyGUI::Align::Default);
         markerWidget->setImageResource("DoorMarker");
         markerWidget->setUserString("ToolTipType", "Layout");
         markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
