@@ -89,6 +89,8 @@ namespace MWWorld
     {
         if (mNeedMapUpdate)
         {
+            // Note: exterior cell maps must be updated, even if they were visited before, because the set of surrounding cells might be different
+            // (and objects in a different cell can "bleed" into another cells map if they cross the border)
             for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
                 mRendering.requestMap(*active);
             mNeedMapUpdate = false;

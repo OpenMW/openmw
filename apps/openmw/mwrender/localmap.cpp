@@ -168,7 +168,10 @@ void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
 
     mCameraPosNode->setPosition(Vector3(0,0,0));
 
-    render((x+0.5)*sSize, (y+0.5)*sSize, zMin, zMax, sSize, sSize, name);
+    // Note: using force=true for exterior cell maps.
+    // They must be updated even if they were visited before, because the set of surrounding active cells might be different
+    // (and objects in a different cell can "bleed" into another cell's map if they cross the border)
+    render((x+0.5)*sSize, (y+0.5)*sSize, zMin, zMax, sSize, sSize, name, true);
 
     if (mBuffers.find(name) == mBuffers.end())
     {
@@ -371,7 +374,7 @@ void LocalMap::loadFogOfWar (const std::string& texturePrefix, ESM::FogTexture& 
 
 void LocalMap::render(const float x, const float y,
                     const float zlow, const float zhigh,
-                    const float xw, const float yw, const std::string& texture)
+                    const float xw, const float yw, const std::string& texture, bool force)
 {
     mCellCamera->setFarClipDistance( (zhigh-zlow) + 2000 );
     mCellCamera->setNearClipDistance(50);
@@ -408,6 +411,11 @@ void LocalMap::render(const float x, const float y,
                         sMapResolution, sMapResolution,
                         0,
                         PF_R8G8B8);
+        tex->getBuffer()->blit(mRenderTexture->getBuffer());
+    }
+    else if (force)
+    {
+        mRenderTarget->update();
         tex->getBuffer()->blit(mRenderTexture->getBuffer());
     }
 
