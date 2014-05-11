@@ -141,8 +141,8 @@ void ESMStore::setUp()
 
     int ESMStore::countSavedGameRecords() const
     {
-        return
-            mPotions.getDynamicSize()
+        return 1 // DYNA (dynamic name counter)
+            +mPotions.getDynamicSize()
             +mArmors.getDynamicSize()
             +mBooks.getDynamicSize()
             +mClasses.getDynamicSize()
@@ -155,6 +155,13 @@ void ESMStore::setUp()
 
     void ESMStore::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
+        writer.startRecord(ESM::REC_DYNA);
+        writer.startSubRecord("COUN");
+        writer.writeT(mDynamicCount);
+        writer.endRecord("COUN");
+        writer.endRecord(ESM::REC_DYNA);
+        progress.increaseProgress();
+
         mPotions.write (writer, progress);
         mArmors.write (writer, progress);
         mBooks.write (writer, progress);
@@ -195,6 +202,11 @@ void ESMStore::setUp()
                         throw std::runtime_error ("Invalid player record (race or class unavilable");
                 }
 
+                return true;
+
+            case ESM::REC_DYNA:
+                reader.getSubNameIs("COUN");
+                reader.getHT(mDynamicCount);
                 return true;
 
             default:

@@ -100,6 +100,7 @@ enum RecNameInts
     REC_DIAS = 0x53414944,
     REC_WTHR = 0x52485457,
     REC_KEYS = FourCC<'K','E','Y','S'>::value,
+    REC_DYNA = FourCC<'D','Y','N','A'>::value,
 
     // format 1
     REC_FILT = 0x544C4946

@@ -231,6 +231,8 @@ namespace MWWorld
 
     void World::clear()
     {
+        mRendering->clear();
+
         mLocalScripts.clear();
         mPlayer->clear();
 
@@ -277,6 +279,14 @@ namespace MWWorld
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
+        // Active cells could have a dirty fog of war, sync it to the CellStore first
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        {
+            CellStore* cellstore = *iter;
+            mRendering->writeFog(cellstore);
+        }
+
         mCells.write (writer, progress);
         mStore.write (writer, progress);
         mGlobalVariables.write (writer, progress);

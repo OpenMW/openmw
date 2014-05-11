@@ -11,6 +11,7 @@
 #include <components/esm/containerstate.hpp>
 #include <components/esm/npcstate.hpp>
 #include <components/esm/creaturestate.hpp>
+#include <components/esm/fogstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -533,6 +534,21 @@ namespace MWWorld
             state.mWaterLevel = mWaterLevel;
 
         state.mWaterLevel = mWaterLevel;
+        state.mHasFogOfWar = (mFogState.get() ? 1 : 0);
+    }
+
+    void CellStore::writeFog(ESM::ESMWriter &writer) const
+    {
+        if (mFogState.get())
+        {
+            mFogState->save(writer, mCell->mData.mFlags & ESM::Cell::Interior);
+        }
+    }
+
+    void CellStore::readFog(ESM::ESMReader &reader)
+    {
+        mFogState.reset(new ESM::FogState());
+        mFogState->load(reader);
     }
 
     void CellStore::writeReferences (ESM::ESMWriter& writer) const
@@ -696,5 +712,15 @@ namespace MWWorld
     std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end) const
     {
         return mPathgridGraph.aStarSearch(start, end);
+    }
+
+    void CellStore::setFog(ESM::FogState *fog)
+    {
+        mFogState.reset(fog);
+    }
+
+    ESM::FogState* CellStore::getFog() const
+    {
+        return mFogState.get();
     }
 }

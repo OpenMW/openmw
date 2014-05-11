@@ -3,21 +3,27 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <boost/shared_ptr.hpp>
 
 #include "livecellref.hpp"
 #include "esmstore.hpp"
 #include "cellreflist.hpp"
+
+#include <components/esm/fogstate.hpp>
 
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
 namespace ESM
 {
     struct CellState;
+    struct FogState;
 }
 
 namespace MWWorld
 {
     class Ptr;
+
+
 
     /// \brief Mutable state of a cell
     class CellStore
@@ -30,6 +36,11 @@ namespace MWWorld
             };
 
         private:
+
+            // Even though fog actually belongs to the player and not cells,
+            // it makes sense to store it here since we need it once for each cell.
+            // Note this is NULL until the cell is explored to save some memory
+            boost::shared_ptr<ESM::FogState> mFogState;
 
             const ESM::Cell *mCell;
             State mState;
@@ -84,6 +95,11 @@ namespace MWWorld
 
             void setWaterLevel (float level);
 
+            void setFog (ESM::FogState* fog);
+            ///< \note Takes ownership of the pointer
+
+            ESM::FogState* getFog () const;
+
             int count() const;
             ///< Return total number of references, including deleted ones.
 
@@ -133,6 +149,10 @@ namespace MWWorld
             void loadState (const ESM::CellState& state);
 
             void saveState (ESM::CellState& state) const;
+
+            void writeFog (ESM::ESMWriter& writer) const;
+
+            void readFog (ESM::ESMReader& reader);
 
             void writeReferences (ESM::ESMWriter& writer) const;
 
