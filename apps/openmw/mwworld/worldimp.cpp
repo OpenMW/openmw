@@ -1491,6 +1491,9 @@ namespace MWWorld
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
+            if (!ref.mData.isEnabled())
+                continue;
+
             if (ref.mRef.mTeleport)
             {
                 World::DoorMarker newMarker;
