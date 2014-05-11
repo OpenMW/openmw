@@ -66,10 +66,19 @@ public:
         return false;
     }
 
-    bool search (Point beg, Point end, Match & match)
+    bool search (Point beg, Point end, Match & match, Point start)
     {
         for (Point i = beg; i != end; ++i)
         {
+            // check if previous character marked start of new word
+            if (i != start)
+            {
+                Point prev = i;
+                --prev; 
+                if(isalpha(*prev))
+                    continue;
+            }
+
             // check first character
             typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (std::tolower (*i, mLocale));
 
