@@ -432,9 +432,9 @@ float MWMechanics::NpcStats::getTimeToStartDrowning() const
 {
     return mTimeToStartDrowning;
 }
+
 void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
 {
-    assert(time>=0 && time<=20);
     mTimeToStartDrowning=time;
 }
 
