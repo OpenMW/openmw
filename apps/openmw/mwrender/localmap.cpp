@@ -466,10 +466,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
         mCellX = x;
         mCellY = y;
     }
-    else
-    {
-        MWBase::Environment::get().getWindowManager()->setInteriorMapTexture(x,y);
-    }
+    MWBase::Environment::get().getWindowManager()->setActiveMap(x,y,mInterior);
 
     // convert from world coordinates to texture UV coordinates
     std::string texBaseName;
