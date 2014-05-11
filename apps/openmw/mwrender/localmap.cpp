@@ -44,6 +44,24 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
     mLight->setDirection (Ogre::Vector3(0.3, 0.3, -0.7));
     mLight->setVisible (false);
     mLight->setDiffuseColour (ColourValue(0.7,0.7,0.7));
+
+    mRenderTexture = TextureManager::getSingleton().createManual(
+                    "localmap/rtt",
+                    ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                    TEX_TYPE_2D,
+                    sMapResolution, sMapResolution,
+                    0,
+                    PF_R8G8B8,
+                    TU_RENDERTARGET);
+
+    mRenderTarget = mRenderTexture->getBuffer()->getRenderTarget();
+    mRenderTarget->setAutoUpdated(false);
+    Viewport* vp = mRenderTarget->addViewport(mCellCamera);
+    vp->setOverlaysEnabled(false);
+    vp->setShadowsEnabled(false);
+    vp->setBackgroundColour(ColourValue(0, 0, 0));
+    vp->setVisibilityMask(RV_Map);
+    vp->setMaterialScheme("local_map");
 }
 
 LocalMap::~LocalMap()
@@ -318,7 +336,7 @@ Ogre::TexturePtr LocalMap::createFogOfWarTexture(const std::string &texName)
                         sFogOfWarResolution, sFogOfWarResolution,
                         0,
                         PF_A8R8G8B8,
-                        TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+                        TU_DYNAMIC_WRITE_ONLY);
     }
     else
         tex->unload();
@@ -378,26 +396,17 @@ void LocalMap::render(const float x, const float y,
     if (tex.isNull())
     {
         // render
-        tex = TextureManager::getSingleton().createManual(
+        mRenderTarget->update();
+
+        // create a new texture and blit to it
+        Ogre::TexturePtr tex = TextureManager::getSingleton().createManual(
                         texture,
                         ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                         TEX_TYPE_2D,
-                        xw*sMapResolution/sSize, yw*sMapResolution/sSize,
+                        sMapResolution, sMapResolution,
                         0,
-                        PF_R8G8B8,
-                        TU_RENDERTARGET);
-
-        RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
-
-        rtt->setAutoUpdated(false);
-        Viewport* vp = rtt->addViewport(mCellCamera);
-        vp->setOverlaysEnabled(false);
-        vp->setShadowsEnabled(false);
-        vp->setBackgroundColour(ColourValue(0, 0, 0));
-        vp->setVisibilityMask(RV_Map);
-        vp->setMaterialScheme("local_map");
-
-        rtt->update();
+                        PF_R8G8B8);
+        tex->getBuffer()->blit(mRenderTexture->getBuffer());
     }
 
     mRenderingManager->enableLights(true);

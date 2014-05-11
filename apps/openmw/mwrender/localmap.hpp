@@ -84,7 +84,6 @@ namespace MWRender
         OEngine::Render::OgreRenderer* mRendering;
         MWRender::RenderingManager* mRenderingManager;
 
-        // 1024*1024 pixels for a cell
         static const int sMapResolution = 512;
 
         // the dynamic texture is a bottleneck, so don't set this too high
@@ -125,6 +124,10 @@ namespace MWRender
         // A buffer for the "fog of war" textures of the current cell.
         // Both interior and exterior maps are possibly divided into multiple textures.
         std::map <std::string, std::vector<Ogre::uint32> > mBuffers;
+
+        // The render texture we will use to create the map images
+        Ogre::TexturePtr mRenderTexture;
+        Ogre::RenderTarget* mRenderTarget;
 
         bool mInterior;
         int mCellX, mCellY;
