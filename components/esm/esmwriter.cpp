@@ -100,6 +100,9 @@ namespace ESM
 
     void ESMWriter::startSubRecord(const std::string& name)
     {
+        // Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
+        assert (mRecords.size() <= 1);
+
         writeName(name);
         RecordData rec;
         rec.name = name;

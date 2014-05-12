@@ -465,7 +465,18 @@ namespace MWGui
 
     void MapWindow::cellExplored(int x, int y)
     {
-        mGlobalMapRender->exploreCell(x,y);
+        mQueuedToExplore.push_back(std::make_pair(x,y));
+    }
+
+    void MapWindow::onFrame(float dt)
+    {
+        for (std::vector<CellId>::iterator it = mQueuedToExplore.begin(); it != mQueuedToExplore.end(); ++it)
+        {
+            mGlobalMapRender->exploreCell(it->first, it->second);
+        }
+        mQueuedToExplore.clear();
+
+        NoDrop::onFrame(dt);
     }
 
     void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)

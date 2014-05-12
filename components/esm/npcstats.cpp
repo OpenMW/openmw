@@ -36,6 +36,18 @@ void ESM::NpcStats::load (ESMReader &esm)
         mSkills[i].mWerewolf.load (esm);
     }
 
+    bool hasWerewolfAttributes = false;
+    esm.getHNOT (hasWerewolfAttributes, "HWAT");
+
+    if (hasWerewolfAttributes)
+    {
+        for (int i=0; i<8; ++i)
+            mWerewolfAttributes[i].load (esm);
+    }
+
+    mIsWerewolf = false;
+    esm.getHNOT (mIsWerewolf, "WOLF");
+
     mBounty = 0;
     esm.getHNOT (mBounty, "BOUN");
 
@@ -48,8 +60,9 @@ void ESM::NpcStats::load (ESMReader &esm)
     mProfit = 0;
     esm.getHNOT (mProfit, "PROF");
 
-    mAttackStrength = 0;
-    esm.getHNOT (mAttackStrength, "ASTR");
+    // No longer used. Now part of CreatureStats.
+    float attackStrength = 0;
+    esm.getHNOT (attackStrength, "ASTR");
 
     mLevelProgress = 0;
     esm.getHNOT (mLevelProgress, "LPRO");
@@ -101,6 +114,13 @@ void ESM::NpcStats::save (ESMWriter &esm) const
         mSkills[i].mWerewolf.save (esm);
     }
 
+    esm.writeHNT ("HWAT", true);
+    for (int i=0; i<8; ++i)
+        mWerewolfAttributes[i].save (esm);
+
+    if (mIsWerewolf)
+        esm.writeHNT ("WOLF", mIsWerewolf);
+
     if (mBounty)
         esm.writeHNT ("BOUN", mBounty);
 
@@ -112,9 +132,6 @@ void ESM::NpcStats::save (ESMWriter &esm) const
 
     if (mProfit)
         esm.writeHNT ("PROF", mProfit);
-
-    if (mAttackStrength)
-        esm.writeHNT ("ASTR", mAttackStrength);
 
     if (mLevelProgress)
         esm.writeHNT ("LPRO", mLevelProgress);

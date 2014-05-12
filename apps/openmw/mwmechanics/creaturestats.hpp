@@ -55,15 +55,15 @@ namespace MWMechanics
         // Do we need to recalculate stats derived from attributes or other factors?
         bool mRecalcDynamicStats;
 
-        std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
-
         MWWorld::TimeStamp mTradeTime; // Relates to NPC gold reset delay
 
         int mGoldPool; // the pool of merchant gold not in inventory
 
     protected:
+        // These two are only set by NpcStats, but they are declared in CreatureStats to prevent using virtual methods.
         bool mIsWerewolf;
         AttributeValue mWerewolfAttributes[8];
+
         int mLevel;
 
     public:
@@ -83,9 +83,6 @@ namespace MWMechanics
         /// Reset the fall height
         /// @return total fall height
         float land();
-
-        bool canUsePower (const std::string& power) const;
-        void usePower (const std::string& power);
 
         const AttributeValue & getAttribute(int index) const;
 

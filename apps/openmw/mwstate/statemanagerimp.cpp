@@ -326,6 +326,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
                 case ESM::REC_GMAP:
                 case ESM::REC_KEYS:
+                case ESM::REC_ASPL:
+
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
                     break;
 
