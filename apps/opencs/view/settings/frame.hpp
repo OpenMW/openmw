@@ -44,11 +44,13 @@ namespace CSVSettings
         void setHLayout()           { mIsHorizontal = true; }
         void setVLayout()           { mIsHorizontal = false; }
 
+        ///show / hide widgets (when stacked widget page changes)
         void showWidgets();
         void hideWidgets();
 
     private:
 
+        ///functions which return the index for the next layout row / column
         int getNextColumn() const;
         int getNextRow() const;
 

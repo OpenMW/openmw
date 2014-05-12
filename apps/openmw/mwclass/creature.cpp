@@ -337,6 +337,12 @@ namespace MWClass
     {
         // NOTE: 'object' and/or 'attacker' may be empty.
 
+        getCreatureStats(ptr).setAttacked(true);
+
+        // Self defense
+        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
+            MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
+
         if(!successful)
         {
             // TODO: Handle HitAttemptOnMe script function

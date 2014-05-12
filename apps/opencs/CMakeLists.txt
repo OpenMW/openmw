@@ -5,11 +5,11 @@ opencs_units (. editor)
 set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
-    document operation saving
+    document operation saving documentmanager loader
     )
 
 opencs_units_noqt (model/doc
-    documentmanager stage savingstate savingstages
+    stage savingstate savingstages
     )
 
 opencs_hdrs_noqt (model/doc
@@ -44,7 +44,7 @@ opencs_units_noqt (model/tools
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget
+    filewidget adjusterwidget loader
     )
 
 
@@ -60,7 +60,7 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap
+    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
     )
 
 opencs_units (view/render
@@ -97,6 +97,7 @@ opencs_units (view/settings
     listview
     rangeview
     resizeablestackedwidget
+    spinbox
     )
 
 opencs_units_noqt (view/settings
@@ -105,7 +106,6 @@ opencs_units_noqt (view/settings
 
 opencs_units (model/settings
     usersettings
-    settingmanager
     setting
     connector
     )

@@ -7,11 +7,17 @@
 
 namespace CSMSettings
 {
-    //Maps setting id ("page.name") to a list of corresponding proxy values.
-    //Order of proxy value stringlists corresponds to order of master proxy's
-    //values in it's declared value list
+    //QString is the setting id in the form of "page/name"
+    //QList is  a list of stringlists of proxy values.
+    //Order is important!  Proxy stringlists are matched against
+    //master values by their position in the QList.
     typedef QMap <QString, QList <QStringList> > ProxyValueMap;
 
+    ///Setting class is the interface for the User Settings.  It contains
+    ///a great deal of boiler plate to provide the core API functions, as
+    ///well as the property() functions which use enumeration to be iterable.
+    ///This makes the Setting class capable of being manipulated by script.
+    ///See CSMSettings::support.hpp for enumerations / string values.
     class Setting
     {
         QList <QStringList> mProperties;
@@ -19,20 +25,12 @@ namespace CSMSettings
 
         bool mIsEditorSetting;
 
-        //QString is the setting id in the form of "page.name"
-        //QList is  a list of stringlists of proxy values.
-        //Order is important!  Proxy stringlists are matched against
-        //master values by their position in the QList.
         ProxyValueMap mProxies;
 
     public:
 
-
-        explicit Setting();
-
         explicit Setting(SettingType typ, const QString &settingName,
-                         const QString &pageName,
-                         const QStringList &values = QStringList());
+                         const QString &pageName);
 
         void addProxy (const Setting *setting, const QStringList &vals);
         void addProxy (const Setting *setting, const QList <QStringList> &list);
@@ -46,9 +44,8 @@ namespace CSMSettings
         void setDeclaredValues (QStringList list);
         QStringList declaredValues() const;
 
-        void setDefinedValues (QStringList list);
-        QStringList definedValues() const;
-
+        void setDefaultValue (int value);
+        void setDefaultValue (double value);
         void setDefaultValue (const QString &value);
 
         void setDefaultValues (const QStringList &values);
@@ -66,11 +63,25 @@ namespace CSMSettings
         void setIsMultiValue (bool state);
         bool isMultiValue() const;
 
+        void setMask (const QString &value);
+        QString mask() const;
+
+        void setMaximum (int value);
+        void setMaximum (double value);
+        QString maximum() const;
+
+        void setMinimum (int value);
+        void setMinimum (double value);
+        QString minimum() const;
+
         void setName (const QString &value);
         QString name() const;
 
         void setPage (const QString &value);
         QString page() const;
+
+        void setPrefix (const QString &value);
+        QString prefix() const;
 
         void setRowSpan (const int value);
         int rowSpan() const;
@@ -80,6 +91,25 @@ namespace CSMSettings
         void setSerializable (bool state);
         bool serializable() const;
 
+        void setSpecialValueText (const QString &text);
+        QString specialValueText() const;
+
+        void setSingleStep (int value);
+        void setSingleStep (double value);
+        QString singleStep() const;
+
+        void setSuffix (const QString &value);
+        QString suffix() const;
+
+        void setTickInterval (int value);
+        int tickInterval() const;
+
+        void setTicksAbove (bool state);
+        bool ticksAbove() const;
+
+        void setTicksBelow (bool state);
+        bool ticksBelow() const;
+
         void setViewColumn (int value);
         int viewColumn() const;
 
@@ -88,8 +118,13 @@ namespace CSMSettings
         void setViewRow (int value);
         int viewRow() const;
 
-        void setViewType (int vType);
+        void setType (int settingType);
+        CSMSettings::SettingType type() const;
+
         CSVSettings::ViewType viewType() const;
+
+        void setWrapping (bool state);
+        bool wrapping() const;
 
         void setWidgetWidth (int value);
         int widgetWidth() const;
@@ -100,6 +135,7 @@ namespace CSMSettings
         ///boilerplate code to convert setting values of common types
         void setProperty (SettingProperty prop, bool value);
         void setProperty (SettingProperty prop, int value);
+        void setProperty (SettingProperty prop, double value);
         void setProperty (SettingProperty prop, const QString &value);
         void setProperty (SettingProperty prop, const QStringList &value);
 
@@ -110,10 +146,5 @@ namespace CSMSettings
         void buildDefaultSetting();
     };
 }
-
-Q_DECLARE_METATYPE(CSMSettings::Setting)
-
-QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting);
-QDataStream &operator >>(QDataStream &stream, CSMSettings::Setting& setting);
 
 #endif // CSMSETTINGS_SETTING_HPP

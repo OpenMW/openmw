@@ -20,6 +20,7 @@ namespace CSVSettings
 
     protected:
 
+        /// virtual function called through View
         void updateView (bool signalUpdate = true) const;
 
     protected slots:
@@ -32,12 +33,6 @@ namespace CSVSettings
         ///Comparison function that returns true if the trimmed() strings
         ///are equal
         bool isEquivalent (const QString &lhs, const QString &rhs) const;
-
-        ///Convenience function to return the text of the widget
-        QString widgetText() const;
-
-        ///Convenience function to set the text of the widget
-        void setWidgetText (const QString &value) const;
     };
 
     class TextViewFactory : public QObject, public IViewFactory

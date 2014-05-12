@@ -7,27 +7,15 @@
 #include <QVariant>
 #include <QStringList>
 
-//Typedefs
-namespace CSMSettings
-{
-    // Definition / Declaration model typedefs
-    // "Pair" = Setting name and specific data
-    // "ListItem" = Page name and associated setting pair
-
-    typedef QPair <QString, QString> StringPair;
-    typedef QPair <QString, QStringList> StringListPair;
-    typedef QList <StringListPair> StringListPairs;
-
-}
-
 //Enums
 namespace CSMSettings
 {
+    ///Enumerated properties for scripting
     enum SettingProperty
     {
         Property_Name = 0,
         Property_Page = 1,
-        Property_ViewType = 2,
+        Property_SettingType = 2,
         Property_IsMultiValue = 3,
         Property_IsMultiLine = 4,
         Property_WidgetWidth = 5,
@@ -37,14 +25,25 @@ namespace CSMSettings
         Property_Serializable = 9,
         Property_ColumnSpan = 10,
         Property_RowSpan = 11,
+        Property_Minimum = 12,
+        Property_Maximum = 13,
+        Property_SpecialValueText = 14,
+        Property_Prefix = 15,
+        Property_Suffix = 16,
+        Property_SingleStep = 17,
+        Property_Wrapping = 18,
+        Property_TickInterval = 19,
+        Property_TicksAbove = 20,
+        Property_TicksBelow = 21,
 
         //Stringlists should always be the last items
-        Property_DefaultValues = 12,
-        Property_DeclaredValues = 13,
-        Property_DefinedValues = 14,
-        Property_Proxies = 15
+        Property_DefaultValues = 22,
+        Property_DeclaredValues = 23,
+        Property_DefinedValues = 24,
+        Property_Proxies = 25
     };
 
+    ///Basic setting widget types.
     enum SettingType
     {
         /*
@@ -64,22 +63,19 @@ namespace CSMSettings
         Type_ListView = 10,
         Type_ComboBox = 11,
         Type_SpinBox = 21,
-        Type_Slider = 23,
-        Type_Dial = 24,
+        Type_DoubleSpinBox = 23,
+        Type_Slider = 25,
+        Type_Dial = 27,
         Type_TextArea = 30,
-        Type_LineEdit = 31
+        Type_LineEdit = 31,
+        Type_Undefined = 40
     };
 
-    enum MergeMethod
-    {
-        Merge_Accept,
-        Merge_Ignore,
-        Merge_Overwrite
-    };
 }
 
 namespace CSVSettings
 {
+    ///Categorical view types which encompass the setting widget types
     enum ViewType
     {
         ViewType_Boolean = 0,
@@ -88,18 +84,12 @@ namespace CSVSettings
         ViewType_Text = 3,
         ViewType_Undefined = 4
     };
-
-    enum Alignment
-    {
-        Align_Left    = Qt::AlignLeft,
-        Align_Center  = Qt::AlignHCenter,
-        Align_Right   = Qt::AlignRight
-    };
 }
 
-//
+
 namespace CSMSettings
 {
+    ///used to construct default settings in the Setting class
     struct PropertyDefaultValues
     {
         int id;
@@ -107,28 +97,44 @@ namespace CSMSettings
         QVariant value;
     };
 
+    ///strings which correspond to setting values.  These strings represent
+    ///the script language keywords which would be used to declare setting
+    ///views for 3rd party addons
     const QString sPropertyNames[] =
     {
-        "name", "page", "view_type", "is_multi_value",
+        "name", "page", "setting_type", "is_multi_value",
         "is_multi_line", "widget_width", "view_row", "view_column", "delimiter",
-        "is_serializable","column_span", "row_span",
+        "is_serializable","column_span", "row_span", "minimum", "maximum",
+        "special_value_text", "prefix", "suffix", "single_step", "wrapping",
+        "tick_interval", "ticks_above", "ticks_below",
         "defaults", "declarations", "definitions", "proxies"
     };
 
+    ///Default values for a setting.  Used in setting creation.
     const QString sPropertyDefaults[] =
     {
         "",         //name
         "",         //page
-        "0",        //view type
+        "40",       //setting type
         "false",    //multivalue
         "false",    //multiline
-        "0",        //widget width
+        "7",        //widget width
         "-1",       //view row
         "-1",       //view column
         ",",        //delimiter
         "true",     //serialized
         "1",        //column span
         "1",        //row span
+        "0",        //value range
+        "0",        //value minimum
+        "0",        //value maximum
+        "",         //special text
+        "",         //prefix
+        "",         //suffix
+        "false",    //wrapping
+        "1",        //tick interval
+        "false",    //ticks above
+        "true",     //ticks below
         "",         //default values
         "",         //declared values
         "",         //defined values

@@ -10,6 +10,10 @@
         <Property key="VerticalAlignment" value="false"/>
         <Property key="MoveToClick" value="true"/>
 
+        <Property key="WheelPage" value="36"/>
+        <Property key="ViewPage" value="36"/>
+        <Property key="Page" value="36"/>
+
         <!-- Tracker must be last to be on top and receive mouse events -->
 
         <Child type="Button" skin="MW_Box" offset="18 0 54 14" align="Stretch" name="Background"/>
@@ -46,6 +50,10 @@
         <Property key="TrackRangeMargins" value="14 14"/>
         <Property key="MinTrackSize" value="14"/>
         <Property key="MoveToClick" value="true"/>
+
+        <Property key="WheelPage" value="36"/>
+        <Property key="ViewPage" value="36"/>
+        <Property key="Page" value="36"/>
 
         <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
 

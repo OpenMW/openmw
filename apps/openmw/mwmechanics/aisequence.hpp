@@ -67,7 +67,7 @@ namespace MWMechanics
 
             /// Removes all pursue packages until first non-pursue or stack empty.
             void stopPursuit();
-            
+
             /// Execute current package, switching if needed.
             void execute (const MWWorld::Ptr& actor,float duration);
 
@@ -75,7 +75,8 @@ namespace MWMechanics
             void clear();
 
             ///< Add \a package to the front of the sequence
-            /** Suspends current package **/
+            /** Suspends current package
+                @param actor The actor that owns this AiSequence **/
             void stack (const AiPackage& package, const MWWorld::Ptr& actor);
 
             /// Add \a package to the end of the sequence

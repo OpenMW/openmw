@@ -20,14 +20,14 @@
 #include "model/world/data.hpp"
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
-: mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
+: mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS")
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
     setupDataFiles (config.first);
 
-    CSMSettings::UserSettings::instance().loadSettings ("opencs.cfg");
+    CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
@@ -37,6 +37,11 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
+
+    connect (&mDocumentManager, SIGNAL (documentAdded (CSMDoc::Document *)),
+        this, SLOT (documentAdded (CSMDoc::Document *)));
+    connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
+        this, SLOT (lastDocumentDeleted()));
 
     connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
@@ -85,6 +90,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     mCfgMgr.readConfiguration(variables, desc);
 
+    mDocumentManager.setEncoding (
+        ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
+
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
 
     mFsStrict = variables["fs-strict"].as<bool>();
@@ -124,11 +132,6 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
     }
-/*
-    //load the settings into the userSettings instance.
-    const QString settingFileName = "opencs.cfg";
-    CSMSettings::UserSettings::instance().loadSettings(settingFileName);
-*/
 
     return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
 }
@@ -163,9 +166,8 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath)
     foreach (const QString &path, mFileDialog.selectedFilePaths())
         files.push_back(path.toUtf8().constData());
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
+    mDocumentManager.addDocument (files, savePath, false);
 
-    mViewManager.addView (document);
     mFileDialog.hide();
 }
 
@@ -179,9 +181,8 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
 
     files.push_back(mFileDialog.filename().toUtf8().constData());
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
+    mDocumentManager.addDocument (files, savePath, true);
 
-    mViewManager.addView (document);
     mFileDialog.hide();
 }
 
@@ -191,9 +192,7 @@ void CS::Editor::createNewGame (const boost::filesystem::path& file)
 
     files.push_back (file);
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, file, true);
-
-    mViewManager.addView (document);
+    mDocumentManager.addDocument (files, file, true);
 
     mNewGame.hide();
 }
@@ -299,4 +298,14 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     /// \todo add more configurable shiny settings
 
     return factory;
+}
+
+void CS::Editor::documentAdded (CSMDoc::Document *document)
+{
+    mViewManager.addView (document);
+}
+
+void CS::Editor::lastDocumentDeleted()
+{
+    exit (0);
 }

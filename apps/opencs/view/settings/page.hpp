@@ -1,7 +1,6 @@
 #ifndef CSVSETTINGS_PAGE_HPP
 #define CSVSETTINGS_PAGE_HPP
 
-#include <QSizePolicy>
 #include <QWidget>
 #include <QMap>
 #include <QList>
@@ -40,6 +39,7 @@ namespace CSVSettings
         ///and returns it.
         View *findView (const QString &page, const QString &setting) const;
 
+        ///returns the list of views associated with the page
         const QList <View *> &views () const              { return mViews; }
 
     private:

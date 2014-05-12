@@ -5,6 +5,11 @@
 
 #include <QThread>
 
+namespace CSMWorld
+{
+    class UniversalId;
+}
+
 namespace CSMDoc
 {
     class Stage;
@@ -46,7 +51,8 @@ namespace CSMDoc
 
             void progress (int current, int max, int type);
 
-            void reportMessage (const QString& message, int type);
+            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
+                int type);
 
             void done (int type);
 
