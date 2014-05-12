@@ -9,6 +9,7 @@
 #include "aifollow.hpp"
 #include "aiactivate.hpp"
 #include "aicombat.hpp"
+#include "aipursue.hpp"
 
 #include "../mwworld/class.hpp"
 #include "creaturestats.hpp"
@@ -128,7 +129,12 @@ void MWMechanics::AiSequence::stack (const AiPackage& package, const MWWorld::Pt
         // Notify AiWander of our current position so we can return to it after combat finished
         for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
         {
-            if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
+            if((*iter)->getTypeId() == AiPackage::TypeIdPursue && package.getTypeId() == AiPackage::TypeIdPursue
+                && static_cast<const AiPursue*>(*iter)->getTarget() == static_cast<const AiPursue*>(&package)->getTarget())
+            {
+                return; // target is already pursued
+            }
+            else if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
                 static_cast<AiWander*>(*iter)->setReturnPosition(Ogre::Vector3(actor.getRefData().getPosition().pos));
         }
     }
