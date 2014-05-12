@@ -199,7 +199,7 @@ void ESMStore::setUp()
 
                     if (!mRaces.find (player->mRace) ||
                         !mClasses.find (player->mClass))
-                        throw std::runtime_error ("Invalid player record (race or class unavilable");
+                        throw std::runtime_error ("Invalid player record (race or class unavailable");
                 }
 
                 return true;

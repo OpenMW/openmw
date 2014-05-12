@@ -342,7 +342,9 @@ namespace MWMechanics
             MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
             if (enchantItem != inv.end())
                 winMgr->setSelectedEnchantItem(*enchantItem);
-            else if (winMgr->getSelectedSpell() == "")
+            else if (!winMgr->getSelectedSpell().empty())
+                winMgr->setSelectedSpell(winMgr->getSelectedSpell(), int(MWMechanics::getSpellSuccessChance(winMgr->getSelectedSpell(), mWatched)));
+            else
                 winMgr->unsetSelectedSpell();
         }
 

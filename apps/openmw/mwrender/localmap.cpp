@@ -342,8 +342,6 @@ Ogre::TexturePtr LocalMap::createFogOfWarTexture(const std::string &texName)
                         PF_A8R8G8B8,
                         TU_DYNAMIC_WRITE_ONLY);
     }
-    else
-        tex->unload();
 
     return tex;
 }
@@ -362,6 +360,7 @@ void LocalMap::loadFogOfWar (const std::string& texturePrefix, ESM::FogTexture& 
 
     Ogre::TexturePtr tex = createFogOfWarTexture(texName);
 
+    tex->unload();
     tex->loadImage(image);
 
     // create a buffer to use for dynamic operations

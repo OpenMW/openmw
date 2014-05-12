@@ -96,6 +96,7 @@ class ESMWriter
 
         void startRecord(const std::string& name, uint32_t flags = 0);
         void startRecord(uint32_t name, uint32_t flags = 0);
+        /// @note Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
         void startSubRecord(const std::string& name);
         void endRecord(const std::string& name);
         void endRecord(uint32_t name);

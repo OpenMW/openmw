@@ -446,11 +446,16 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
 
     state.mDisposition = mDisposition;
 
-    for (int i=0; i<27; ++i)
+    for (int i=0; i<ESM::Skill::Length; ++i)
     {
         mSkill[i].writeState (state.mSkills[i].mRegular);
         mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
     }
+    for (int i=0; i<ESM::Attribute::Length; ++i)
+    {
+        mWerewolfAttributes[i].writeState (state.mWerewolfAttributes[i]);
+    }
+    state.mIsWerewolf = mIsWerewolf;
 
     state.mCrimeId = mCrimeId;
 
@@ -467,10 +472,9 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     state.mReputation = mReputation;
     state.mWerewolfKills = mWerewolfKills;
     state.mProfit = mProfit;
-    state.mAttackStrength = mAttackStrength;
     state.mLevelProgress = mLevelProgress;
 
-    for (int i=0; i<8; ++i)
+    for (int i=0; i<ESM::Attribute::Length; ++i)
         state.mSkillIncrease[i] = mSkillIncreases[i];
 
     std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
@@ -500,21 +504,26 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
 
     mDisposition = state.mDisposition;
 
-    for (int i=0; i<27; ++i)
+    for (int i=0; i<ESM::Skill::Length; ++i)
     {
         mSkill[i].readState (state.mSkills[i].mRegular);
         mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
     }
+    for (int i=0; i<ESM::Attribute::Length; ++i)
+    {
+        mWerewolfAttributes[i].readState (state.mWerewolfAttributes[i]);
+    }
+
+    mIsWerewolf = state.mIsWerewolf;
 
     mCrimeId = state.mCrimeId;
     mBounty = state.mBounty;
     mReputation = state.mReputation;
     mWerewolfKills = state.mWerewolfKills;
     mProfit = state.mProfit;
-    mAttackStrength = state.mAttackStrength;
     mLevelProgress = state.mLevelProgress;
 
-    for (int i=0; i<8; ++i)
+    for (int i=0; i<ESM::Attribute::Length; ++i)
         mSkillIncreases[i] = state.mSkillIncrease[i];
 
     for (std::vector<std::string>::const_iterator iter (state.mUsedIds.begin());
