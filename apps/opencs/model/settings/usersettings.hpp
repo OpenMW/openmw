@@ -30,7 +30,7 @@ namespace CSMSettings {
         Q_OBJECT
 
         static UserSettings *mUserSettingsInstance;
-        Files::ConfigurationManager mCfgMgr;
+        const Files::ConfigurationManager& mCfgMgr;
 
         QSettings *mSettingDefinitions;
         QList <Setting *> mSettings;
@@ -40,11 +40,11 @@ namespace CSMSettings {
         /// Singleton implementation
         static UserSettings& instance();
 
-        UserSettings();
+        UserSettings (const Files::ConfigurationManager& configurationManager);
         ~UserSettings();
 
-        UserSettings (UserSettings const &);        //not implemented
-        void operator= (UserSettings const &);      //not implemented
+        UserSettings (UserSettings const &); //not implemented
+        UserSettings& operator= (UserSettings const &); //not implemented
 
         /// Retrieves the settings file at all three levels (global, local and user).
         void loadSettings (const QString &fileName);

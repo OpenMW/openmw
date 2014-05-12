@@ -8,8 +8,9 @@
 #include "savingstages.hpp"
 #include "document.hpp"
 
-CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& projectPath)
-: Operation (State_Saving, true, true), mDocument (document), mState (*this, projectPath)
+CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& projectPath,
+    ToUTF8::FromType encoding)
+: Operation (State_Saving, true, true), mDocument (document), mState (*this, projectPath, encoding)
 {
     // save project file
     appendStage (new OpenSaveStage (mDocument, mState, true));
