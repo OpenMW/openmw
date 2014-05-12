@@ -1957,7 +1957,7 @@ namespace MWWorld
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
 
-        physicActor->enableCollisions(enable);
+        physicActor->enableCollisionBody(enable);
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
