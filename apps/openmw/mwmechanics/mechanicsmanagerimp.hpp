@@ -105,6 +105,9 @@ namespace MWMechanics
             /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
             virtual bool awarenessCheck (const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer);
 
+            /// Makes \a ptr fight \a target. Also shouts a combat taunt.
+            virtual void startCombat (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target);
+
             /**
              * @brief Commit a crime. If any actors witness the crime and report it,
              *        reportCrime will be called automatically.

@@ -11,7 +11,7 @@ CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values,
                                                      const IconList & icons,
                                                      QUndoStack &undoStack, QObject *parent)
     : DataDisplayDelegate (values, icons, undoStack,
-                           "Display Format.Record Status Display",
+                           "Display Format", "Record Status Display",
                            parent)
 {}
 

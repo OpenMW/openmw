@@ -20,7 +20,7 @@ namespace MWMechanics
                 TypeIdFollow = 3,
                 TypeIdActivate = 4,
                 TypeIdCombat = 5,
-                TypeIdPersue = 6
+                TypeIdPursue = 6
             };
 
             virtual ~AiPackage();

@@ -766,8 +766,6 @@ namespace MWGui
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
-            mMap->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
-            mHud->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
         }
         else
         {
@@ -783,10 +781,10 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setInteriorMapTexture(const int x, const int y)
+    void WindowManager::setActiveMap(int x, int y, bool interior)
     {
-        mMap->setActiveCell(x,y, true);
-        mHud->setActiveCell(x,y, true);
+        mMap->setActiveCell(x,y, interior);
+        mHud->setActiveCell(x,y, interior);
     }
 
     void WindowManager::setPlayerPos(const float x, const float y)
@@ -1405,16 +1403,49 @@ namespace MWGui
     void WindowManager::clear()
     {
         mMap->clear();
+        mQuickKeysMenu->clear();
+
+        mTrainingWindow->resetReference();
+        mDialogueWindow->resetReference();
+        mTradeWindow->resetReference();
+        mSpellBuyingWindow->resetReference();
+        mSpellCreationDialog->resetReference();
+        mEnchantingDialog->resetReference();
+        mContainerWindow->resetReference();
+        mCompanionWindow->resetReference();
+        mConsole->resetReference();
+
+        mGuiModes.clear();
+        updateVisible();
     }
 
     void WindowManager::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
         mMap->write(writer, progress);
+
+        mQuickKeysMenu->write(writer);
+        progress.increaseProgress();
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
     {
-        mMap->readRecord(reader, type);
+        if (type == ESM::REC_GMAP)
+            mMap->readRecord(reader, type);
+        else if (type == ESM::REC_KEYS)
+            mQuickKeysMenu->readRecord(reader, type);
+    }
+
+    int WindowManager::countSavedGameRecords() const
+    {
+        return 1 // Global map
+                + 1; // QuickKeysMenu
+    }
+
+    bool WindowManager::isSavingAllowed() const
+    {
+        return !MyGUI::InputManager::getInstance().isModalAny()
+                // TODO: remove this, once we have properly serialized the state of open windows
+                && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest || getMode() == GM_RestBed)));
     }
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)

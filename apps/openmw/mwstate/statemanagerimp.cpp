@@ -201,7 +201,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             +MWBase::Environment::get().getWorld()->countSavedGameRecords()
             +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
             +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
-           +1; // global map
+            +MWBase::Environment::get().getWindowManager()->countSavedGameRecords();
     writer.setRecordCount (recordCount);
 
     writer.save (stream);
@@ -235,8 +235,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
 void MWState::StateManager::quickSave (std::string name)
 {
-    if (mState!=State_Running ||
-        MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")!=-1) // char gen
+    if (!(mState==State_Running &&
+        MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1 // char gen
+            && MWBase::Environment::get().getWindowManager()->isSavingAllowed()))
     {
         //You can not save your game right now
         MWBase::Environment::get().getWindowManager()->messageBox("#{sSaveGameDenied}");
@@ -313,6 +314,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_PLAY:
                 case ESM::REC_CSTA:
                 case ESM::REC_WTHR:
+                case ESM::REC_DYNA:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -323,7 +325,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                     break;
 
                 case ESM::REC_GMAP:
-
+                case ESM::REC_KEYS:
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
                     break;
 

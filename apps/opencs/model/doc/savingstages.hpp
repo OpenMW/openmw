@@ -39,7 +39,7 @@ namespace CSMDoc
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -57,7 +57,7 @@ namespace CSMDoc
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -75,7 +75,7 @@ namespace CSMDoc
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -92,7 +92,7 @@ namespace CSMDoc
     }
 
     template<class CollectionT>
-    void WriteCollectionStage<CollectionT>::perform (int stage, std::vector<std::string>& messages)
+    void WriteCollectionStage<CollectionT>::perform (int stage, Messages& messages)
     {
         CSMWorld::RecordBase::State state = mCollection.getRecord (stage).mState;
 
@@ -130,7 +130,7 @@ namespace CSMDoc
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -147,7 +147,7 @@ namespace CSMDoc
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -161,7 +161,7 @@ namespace CSMDoc
 
             WriteFilterStage (Document& document, SavingState& state, CSMFilter::Filter::Scope scope);
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -177,7 +177,7 @@ namespace CSMDoc
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -193,7 +193,7 @@ namespace CSMDoc
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 }

@@ -96,6 +96,88 @@ Allowed options:
 
 CHANGELOG
 
+0.30.0
+
+Bug #416: Extreme shaking can occur during cell transitions while moving
+Bug #1003: Province Cyrodiil: Ogre Exception in Stirk
+Bug #1071: Crash when given a non-existent content file
+Bug #1080: OpenMW allows resting/using a bed while in combat
+Bug #1097: Wrong punishment for stealing in Census and Excise Office at the start of a new game
+Bug #1098: Unlocked evidence chests should get locked after new evidence is put into them
+Bug #1099: NPCs that you attacked still fight you after you went to jail/paid your fine
+Bug #1100: Taking items from a corpse is considered stealing
+Bug #1126: Some creatures can't get close enough to attack
+Bug #1144: Killed creatures seem to die again each time player transitions indoors/outdoors
+Bug #1181: loading a saved game does not reset the player control status
+Bug #1185: Collision issues in Addamasartus
+Bug #1187: Athyn Sarethi mission, rescuing varvur sarethi from the doesnt end the mission
+Bug #1189: Crash when entering interior cell "Gnisis, Arvs-Drelen"
+Bug #1191: Picking up papers without inventory in new game
+Bug #1195: NPCs do not equip torches in certain interiors
+Bug #1197: mouse wheel makes things scroll too fast
+Bug #1200: door blocked by monsters
+Bug #1201: item's magical charges are only refreshed when they are used
+Bug #1203: Scribs do not defend themselves
+Bug #1204: creatures life is not empty when they are dead
+Bug #1205: armor experience does not progress when hits are taken
+Bug #1206: blood particules always red. Undeads and mechanicals should have a different one.
+Bug #1209: Tarhiel never falls
+Bug #1210: journal adding script is ran again after having saved/loaded
+Bug #1224: Names of custom classes are not properly handled in save games
+Bug #1227: Editor: Fixed case handling for broken localised versions of Morrowind.esm
+Bug #1235: Indoors walk stutter
+Bug #1236: Aborting intro movie brings up the menu
+Bug #1239: NPCs get stuck when walking past each other
+Bug #1240: BTB - Settings 14.1 and Health Bar.
+Bug #1241: BTB - Character and Khajiit Prejudice
+Bug #1248: GUI Weapon icon is changed to hand-to-hand after save load
+Bug #1254: Guild ranks do not show in dialogue
+Bug #1255: When opening a container and selecting "Take All", the screen flashes blue
+Bug #1260: Level Up menu doesn't show image when using a custom class
+Bug #1265: Quit Menu Has Misaligned Buttons
+Bug #1270: Active weapon icon is not updated when weapon is repaired
+Bug #1271: NPC Stuck in hovering "Jumping" animation
+Bug #1272: Crash when attempting to load Big City esm file.
+Bug #1276: Editor: Dropping a region into the filter of a cell subview fails
+Bug #1286: Dialogue topic list clips with window frame
+Bug #1291: Saved game: store faction membership
+Bug #1293: Pluginless Khajiit Head Pack by ashiraniir makes OpenMW close.
+Bug #1294: Pasting in console adds text to end, not at cursor
+Bug #1295: Conversation loop when asking about "specific place" in Vivec
+Bug #1296: Caius doesn't leave at start of quest "Mehra Milo and the Lost Prophecies"
+Bug #1297: Saved game: map markers
+Bug #1302: ring_keley script causes vector::_M_range_check exception
+Bug #1309: Bug on "You violated the law" dialog
+Bug #1319: Creatures sometimes rendered incorrectly
+Feature #50: Ranged Combat
+Feature #58: Sneaking Skill
+Feature #73: Crime and Punishment
+Feature #135: Editor: OGRE integration
+Feature #541: Editor: Dialogue Sub-Views
+Feature #853: Editor: Rework User Settings
+Feature #944: Editor: lighting modes
+Feature #945: Editor: Camera navigation mode
+Feature #953: Trader gold
+Feature #1140: AI: summoned creatures
+Feature #1142: AI follow: Run stance
+Feature #1154: Not all NPCs get aggressive when one is attacked
+Feature #1169: Terrain threading
+Feature #1172: Loading screen and progress bars during saved/loading game
+Feature #1173: Saved Game: include weather state
+Feature #1207: Class creation form does not remember
+Feature #1220: Editor: Preview Subview
+Feature #1223: Saved Game: Local Variables
+Feature #1229: Quicksave, quickload, autosave
+Feature #1230: Deleting saves
+Feature #1233: Bribe gold is placed into NPCs inventory
+Feature #1252: Saved Game: quick key bindings
+Feature #1273: Editor: Region Map context menu
+Feature #1274: Editor: Region Map drag & drop
+Feature #1275: Editor: Scene subview drop
+Feature #1282: Non-faction member crime recognition.
+Feature #1289: NPCs return to default position
+Task #941: Remove unused cmake files
+
 0.29.0
 
 Bug #556: Video soundtrack not played when music volume is set to zero

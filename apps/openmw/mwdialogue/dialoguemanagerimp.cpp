@@ -144,7 +144,6 @@ namespace MWDialogue
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
-        updateGlobals();
 
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
@@ -392,6 +391,8 @@ namespace MWDialogue
         win->setKeywords(keywordList);
 
         mChoice = choice;
+
+        updateGlobals();
     }
 
     void DialogueManager::keywordSelected (const std::string& keyword)

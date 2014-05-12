@@ -179,6 +179,8 @@ namespace CSVDoc
             void addJournalInfosSubView();
 
             void toggleShowStatusBar (bool show);
+
+            void loadErrorLog();
     };
 }
 

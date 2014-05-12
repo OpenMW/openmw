@@ -4,11 +4,9 @@
 #include "operation.hpp"
 #include "document.hpp"
 
-CSMDoc::SavingState::SavingState (Operation& operation, const boost::filesystem::path& projectPath)
-: mOperation (operation),
-   /// \todo set encoding properly, once config implementation has been fixed.
-  mEncoder (ToUTF8::calculateEncoding ("win1252")),
-  mProjectPath (projectPath), mProjectFile (false)
+CSMDoc::SavingState::SavingState (Operation& operation, const boost::filesystem::path& projectPath,
+    ToUTF8::FromType encoding)
+: mOperation (operation), mEncoder (encoding),  mProjectPath (projectPath), mProjectFile (false)
 {
     mWriter.setEncoder (&mEncoder);
 }

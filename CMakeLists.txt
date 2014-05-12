@@ -86,8 +86,6 @@ option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock fram
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" ON)
-option(USE_AUDIERE "use audiere for sound" ON)
-option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
@@ -170,27 +168,6 @@ if (USE_FFMPEG)
         set(GOT_SOUND_INPUT 1)
     endif (FFMPEG_FOUND)
 endif (USE_FFMPEG)
-
-if (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
-    find_package(Audiere)
-    if (AUDIERE_FOUND)
-        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
-        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
-        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
-        set(GOT_SOUND_INPUT 1)
-    endif (AUDIERE_FOUND)
-endif (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
-
-if (USE_MPG123 AND NOT GOT_SOUND_INPUT)
-    find_package(MPG123 REQUIRED)
-    find_package(SNDFILE REQUIRED)
-    if (MPG123_FOUND AND SNDFILE_FOUND)
-        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
-        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
-        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_MPG123)
-        set(GOT_SOUND_INPUT 1)
-    endif (MPG123_FOUND AND SNDFILE_FOUND)
-endif (USE_MPG123 AND NOT GOT_SOUND_INPUT)
 
 if (NOT GOT_SOUND_INPUT)
     message(WARNING "--------------------")
@@ -368,8 +345,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
-    "${OpenMW_BINARY_DIR}/opencs.cfg")
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs.ini
+    "${OpenMW_BINARY_DIR}/opencs.ini")
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
@@ -434,7 +411,6 @@ IF(NOT WIN32 AND NOT APPLE)
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-        INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
         INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
     ENDIF (DPKG_PROGRAM)
 
@@ -451,7 +427,7 @@ IF(NOT WIN32 AND NOT APPLE)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     IF(BUILD_OPENCS)
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
     ENDIF(BUILD_OPENCS)
 
     # Install resources
@@ -480,7 +456,7 @@ if(WIN32)
     ENDIF(BUILD_MWINIIMPORTER)
     IF(BUILD_OPENCS)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION ".")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
@@ -687,7 +663,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})

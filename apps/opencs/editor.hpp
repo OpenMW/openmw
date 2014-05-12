@@ -85,6 +85,10 @@ namespace CS
 
             void showSettings();
 
+            void documentAdded (CSMDoc::Document *document);
+
+            void lastDocumentDeleted();
+
         private:
 
             QString mIpcServerName;

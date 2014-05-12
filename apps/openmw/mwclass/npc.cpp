@@ -621,8 +621,10 @@ namespace MWClass
         // NOTE: 'object' and/or 'attacker' may be empty.
 
         // Attacking peaceful NPCs is a crime
-        if (!attacker.isEmpty() && ptr.getClass().isNpc() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+
+        getCreatureStats(ptr).setAttacked(true);
 
         if(!successful)
         {
@@ -659,7 +661,6 @@ namespace MWClass
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
             }
-            getCreatureStats(ptr).setAttacked(true);
 
             // Check for knockdown
             float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
@@ -796,6 +797,10 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        // player got activated by another NPC
+        if(ptr.getRefData().getHandle() == "player")
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
+
         if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -813,10 +818,6 @@ namespace MWClass
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         
-        // player got activated by another NPC
-        if(ptr.getRefData().getHandle() == "player")
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
-
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
 
     }

@@ -18,7 +18,7 @@ int CSMTools::ClassCheckStage::setup()
     return mClasses.getSize();
 }
 
-void CSMTools::ClassCheckStage::perform (int stage, std::vector<std::string>& messages)
+void CSMTools::ClassCheckStage::perform (int stage, Messages& messages)
 {
     const CSMWorld::Record<ESM::Class>& record = mClasses.getRecord (stage);
 
@@ -31,10 +31,10 @@ void CSMTools::ClassCheckStage::perform (int stage, std::vector<std::string>& me
 
     // test for empty name and description
     if (class_.mName.empty())
-        messages.push_back (id.toString() + "|" + class_.mId + " has an empty name");
+        messages.push_back (std::make_pair (id, class_.mId + " has an empty name"));
 
     if (class_.mDescription.empty())
-        messages.push_back (id.toString() + "|" + class_.mId + " has an empty description");
+        messages.push_back (std::make_pair (id, class_.mId + " has an empty description"));
 
     // test for invalid attributes
     for (int i=0; i<2; ++i)
@@ -42,18 +42,14 @@ void CSMTools::ClassCheckStage::perform (int stage, std::vector<std::string>& me
         {
             std::ostringstream stream;
 
-            stream << id.toString() << "|Attribute #" << i << " of " << class_.mId << " is not set";
+            stream << "Attribute #" << i << " of " << class_.mId << " is not set";
 
-            messages.push_back (stream.str());
+            messages.push_back (std::make_pair (id, stream.str()));
         }
 
     if (class_.mData.mAttribute[0]==class_.mData.mAttribute[1] && class_.mData.mAttribute[0]!=-1)
     {
-        std::ostringstream stream;
-
-        stream << id.toString() << "|Class lists same attribute twice";
-
-        messages.push_back (stream.str());
+        messages.push_back (std::make_pair (id, "Class lists same attribute twice"));
     }
 
     // test for non-unique skill
@@ -66,12 +62,7 @@ void CSMTools::ClassCheckStage::perform (int stage, std::vector<std::string>& me
     for (std::map<int, int>::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
         if (iter->second>1)
         {
-            std::ostringstream stream;
-
-            stream
-                << id.toString() << "|"
-                << ESM::Skill::indexToId (iter->first) << " is listed more than once";
-
-            messages.push_back (stream.str());
+            messages.push_back (std::make_pair (id,
+                ESM::Skill::indexToId (iter->first) + " is listed more than once"));
         }
 }

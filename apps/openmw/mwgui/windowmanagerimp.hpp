@@ -192,8 +192,8 @@ namespace MWGui
     virtual void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
     virtual bool getFullHelp() const;
 
-    virtual void setInteriorMapTexture(const int x, const int y);
-    ///< set the index of the map texture that should be used (for interiors)
+    virtual void setActiveMap(int x, int y, bool interior);
+    ///< set the indices of the map texture that should be used
 
     /// sets the visibility of the drowning bar
     virtual void setDrowningBarVisibility(bool visible);
@@ -293,6 +293,10 @@ namespace MWGui
 
     virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress);
     virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+    virtual int countSavedGameRecords() const;
+
+    /// Does the current stack of GUI-windows permit saving?
+    virtual bool isSavingAllowed() const;
 
   private:
     bool mConsoleOnlyScripts;

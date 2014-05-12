@@ -188,8 +188,8 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
-: mCreateAction (0), mCloneAction(0), mEditLock (false), mRecordStatusDisplay (0),
-  mDocument (document)
+: mCreateAction (0), mCloneAction(0), mRecordStatusDisplay (0),
+  DragRecordTable(document)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*mDocument.getData().getTableModel (id));
 
@@ -282,7 +282,7 @@ void CSVWorld::Table::setEditLock (bool locked)
     for (std::vector<CommandDelegate *>::iterator iter (mDelegates.begin()); iter!=mDelegates.end(); ++iter)
         (*iter)->setEditLock (locked);
 
-    mEditLock = locked;
+    DragRecordTable::setEditLock(locked);
 }
 
 CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
@@ -518,42 +518,8 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 {
     if (event->buttons() & Qt::LeftButton)
     {
-        QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-        if (selectedRows.size() == 0)
-        {
-            return;
-        }
-
-        QDrag* drag = new QDrag (this);
-        CSMWorld::TableMimeData* mime = NULL;
-
-        if (selectedRows.size() == 1)
-        {
-            mime = new CSMWorld::TableMimeData (getUniversalId (selectedRows.begin()->row()), mDocument);
-        }
-        else
-        {
-            std::vector<CSMWorld::UniversalId> idToDrag;
-
-            foreach (QModelIndex it, selectedRows) //I had a dream. Dream where you could use C++11 in OpenMW.
-            {
-                idToDrag.push_back (getUniversalId (it.row()));
-            }
-
-            mime = new CSMWorld::TableMimeData (idToDrag, mDocument);
-        }
-
-        drag->setMimeData (mime);
-        drag->setPixmap (QString::fromUtf8 (mime->getIcon().c_str()));
-        drag->exec(Qt::CopyAction);
+        startDrag(*this);
     }
-
-}
-
-void CSVWorld::Table::dragEnterEvent(QDragEnterEvent *event)
-{
-    event->acceptProposedAction();
 }
 
 void CSVWorld::Table::dropEvent(QDropEvent *event)
@@ -583,11 +549,6 @@ void CSVWorld::Table::dropEvent(QDropEvent *event)
     } //TODO handle drops from different document
 }
 
-void CSVWorld::Table::dragMoveEvent(QDragMoveEvent *event)
-{
-    event->accept();
-}
-
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const
 {
     const int count = mModel->columnCount();
@@ -605,3 +566,18 @@ std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::Column
     }
     return titles;
 }
+
+std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
+{
+
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+    std::vector<CSMWorld::UniversalId> idToDrag;
+
+    foreach (QModelIndex it, selectedRows) //I had a dream. Dream where you could use C++11 in OpenMW.
+    {
+        idToDrag.push_back (getUniversalId (it.row()));
+    }
+
+    return idToDrag;
+}
+

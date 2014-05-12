@@ -216,13 +216,14 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
- MWRender::Camera* RenderingManager::getCamera() const
+MWRender::Camera* RenderingManager::getCamera() const
 {
     return mCamera;
 }
 
 void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
+    mLocalMap->saveFogOfWar(store);
     mObjects->removeCell(store);
     mActors->removeCell(store);
     mDebugging->cellRemoved(store);
@@ -563,7 +564,8 @@ void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
         Ogre::ColourValue colour;
         colour.setAsABGR (mCell.getCell()->mAmbi.mSunlight);
         mSun->setDiffuseColour (colour);
-        mSun->setDirection(0,-1,0);
+        mSun->setDirection(1,-1,-1);
+        sunEnable(false);
     }
 }
 // Switch through lighting modes.
@@ -670,7 +672,7 @@ void RenderingManager::requestMap(MWWorld::CellStore* cell)
         mLocalMap->requestMap(cell, mObjects->getDimensions(cell));
 }
 
-void RenderingManager::preCellChange(MWWorld::CellStore* cell)
+void RenderingManager::writeFog(MWWorld::CellStore* cell)
 {
     mLocalMap->saveFogOfWar(cell);
 }
@@ -1054,6 +1056,11 @@ float RenderingManager::getCameraDistance() const
 void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition, float scale)
 {
     mEffectManager->addEffect(model, texture, worldPosition, scale);
+}
+
+void RenderingManager::clear()
+{
+    mLocalMap->clear();
 }
 
 } // namespace

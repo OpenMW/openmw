@@ -84,6 +84,33 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)
         mDelegateFactories->add (sMapping[i].mDisplay, new CSVWorld::EnumDelegateFactory (
             CSMWorld::Columns::getEnums (sMapping[i].mColumnId), sMapping[i].mAllowNone));
+
+    connect (&mDocumentManager, SIGNAL (loadRequest (CSMDoc::Document *)),
+        &mLoader, SLOT (add (CSMDoc::Document *)));
+
+    connect (
+        &mDocumentManager, SIGNAL (loadingStopped (CSMDoc::Document *, bool, const std::string&)),
+        &mLoader, SLOT (loadingStopped (CSMDoc::Document *, bool, const std::string&)));
+
+    connect (
+        &mDocumentManager, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)),
+        &mLoader, SLOT (nextStage (CSMDoc::Document *, const std::string&, int)));
+
+    connect (
+        &mDocumentManager, SIGNAL (nextRecord (CSMDoc::Document *)),
+        &mLoader, SLOT (nextRecord (CSMDoc::Document *)));
+
+    connect (
+        &mDocumentManager, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),
+        &mLoader, SLOT (loadMessage (CSMDoc::Document *, const std::string&)));
+
+    connect (
+        &mLoader, SIGNAL (cancel (CSMDoc::Document *)),
+        &mDocumentManager, SIGNAL (cancelLoading (CSMDoc::Document *)));
+
+    connect (
+        &mLoader, SIGNAL (close (CSMDoc::Document *)),
+        &mDocumentManager, SLOT (removeDocument (CSMDoc::Document *)));
 }
 
 CSVDoc::ViewManager::~ViewManager()

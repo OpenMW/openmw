@@ -1,13 +1,8 @@
 #include "setting.hpp"
 #include "support.hpp"
 
-CSMSettings::Setting::Setting()
-{
-    buildDefaultSetting();
-}
-
 CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
-                             const QString &pageName, const QStringList &values)
+                             const QString &pageName)
     : mIsEditorSetting (false)
 {
     buildDefaultSetting();
@@ -19,10 +14,9 @@ CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
         setProperty (Property_IsMultiValue, QVariant(true).toString());
 
     //view type is related to setting type by an order of magnitude
-    setProperty (Property_ViewType, QVariant (settingType / 10).toString());
+    setProperty (Property_SettingType, QVariant (settingType).toString());
     setProperty (Property_Page, pageName);
     setProperty (Property_Name, settingName);
-    setProperty (Property_DeclaredValues, values);
 }
 
 void CSMSettings::Setting::buildDefaultSetting()
@@ -51,7 +45,7 @@ void CSMSettings::Setting::addProxy (const Setting *setting,
     foreach  (const QString &val, vals)
         list << (QStringList() << val);
 
-    mProxies [setting->page() + '.' + setting->name()] = list;
+    mProxies [setting->page() + '/' + setting->name()] = list;
 }
 
 void CSMSettings::Setting::addProxy (const Setting *setting,
@@ -60,7 +54,7 @@ void CSMSettings::Setting::addProxy (const Setting *setting,
     if (serializable())
         setProperty (Property_Serializable, false);
 
-    mProxies [setting->page() + '.' + setting->name()] = list;
+    mProxies [setting->page() + '/' + setting->name()] = list;
 }
 
 void CSMSettings::Setting::setColumnSpan (int value)
@@ -73,19 +67,14 @@ int CSMSettings::Setting::columnSpan() const
     return property (Property_ColumnSpan).at(0).toInt();
 }
 
+void CSMSettings::Setting::setDeclaredValues (QStringList list)
+{
+    setProperty (Property_DeclaredValues, list);
+}
+
 QStringList CSMSettings::Setting::declaredValues() const
 {
     return property (Property_DeclaredValues);
-}
-
-void CSMSettings::Setting::setDefinedValues (QStringList list)
-{
-    setProperty (Property_DefinedValues, list);
-}
-
-QStringList CSMSettings::Setting::definedValues() const
-{
-    return property (Property_DefinedValues);
 }
 
 QStringList CSMSettings::Setting::property (SettingProperty prop) const
@@ -94,6 +83,16 @@ QStringList CSMSettings::Setting::property (SettingProperty prop) const
         return QStringList();
 
     return mProperties.at(prop);
+}
+
+void CSMSettings::Setting::setDefaultValue (int value)
+{
+    setDefaultValues (QStringList() << QVariant (value).toString());
+}
+
+void CSMSettings::Setting::setDefaultValue (double value)
+{
+    setDefaultValues (QStringList() << QVariant (value).toString());
 }
 
 void CSMSettings::Setting::setDefaultValue (const QString &value)
@@ -165,6 +164,16 @@ bool CSMSettings::Setting::serializable() const
     return (property (Property_Serializable).at(0) == "true");
 }
 
+void CSMSettings::Setting::setSpecialValueText(const QString &text)
+{
+    setProperty (Property_SpecialValueText, text);
+}
+
+QString CSMSettings::Setting::specialValueText() const
+{
+    return property (Property_SpecialValueText).at(0);
+}
+
 void CSMSettings::Setting::setName (const QString &value)
 {
     setProperty (Property_Name, value);
@@ -185,6 +194,16 @@ QString CSMSettings::Setting::page() const
     return property (Property_Page).at(0);
 }
 
+void CSMSettings::Setting::setPrefix (const QString &value)
+{
+    setProperty (Property_Prefix, value);
+}
+
+QString CSMSettings::Setting::prefix() const
+{
+    return property (Property_Prefix).at(0);
+}
+
 void CSMSettings::Setting::setRowSpan (const int value)
 {
     setProperty (Property_RowSpan, value);
@@ -195,15 +214,106 @@ int CSMSettings::Setting::rowSpan () const
     return property (Property_RowSpan).at(0).toInt();
 }
 
-void CSMSettings::Setting::setViewType (int vType)
+void CSMSettings::Setting::setSingleStep (int value)
 {
-    setProperty (Property_ViewType, vType);
+    setProperty (Property_SingleStep, value);
+}
+
+void CSMSettings::Setting::setSingleStep (double value)
+{
+    setProperty (Property_SingleStep, value);
+}
+
+QString CSMSettings::Setting::singleStep() const
+{
+    return property (Property_SingleStep).at(0);
+}
+
+void CSMSettings::Setting::setSuffix (const QString &value)
+{
+    setProperty (Property_Suffix, value);
+}
+
+QString CSMSettings::Setting::suffix() const
+{
+    return property (Property_Suffix).at(0);
+}
+
+void CSMSettings::Setting::setTickInterval (int value)
+{
+    setProperty (Property_TickInterval, value);
+}
+
+int CSMSettings::Setting::tickInterval () const
+{
+    return property (Property_TickInterval).at(0).toInt();
+}
+
+void CSMSettings::Setting::setTicksAbove (bool state)
+{
+    setProperty (Property_TicksAbove, state);
+}
+
+bool CSMSettings::Setting::ticksAbove() const
+{
+    return (property (Property_TicksAbove).at(0) == "true");
+}
+
+void CSMSettings::Setting::setTicksBelow (bool state)
+{
+    setProperty (Property_TicksBelow, state);
+}
+
+bool CSMSettings::Setting::ticksBelow() const
+{
+    return (property (Property_TicksBelow).at(0) == "true");
+}
+
+void CSMSettings::Setting::setType (int settingType)
+{
+    setProperty (Property_SettingType, settingType);
+}
+
+CSMSettings::SettingType CSMSettings::Setting::type() const
+{
+    return static_cast <CSMSettings::SettingType> ( property (
+                                        Property_SettingType).at(0).toInt());
+}
+
+void CSMSettings::Setting::setMaximum (int value)
+{
+    setProperty (Property_Maximum, value);
+}
+
+void CSMSettings::Setting::setMaximum (double value)
+{
+    setProperty (Property_Maximum, value);
+}
+
+QString CSMSettings::Setting::maximum() const
+{
+    return property (Property_Maximum).at(0);
+}
+
+void CSMSettings::Setting::setMinimum (int value)
+{
+    setProperty (Property_Minimum, value);
+}
+
+void CSMSettings::Setting::setMinimum (double value)
+{
+    setProperty (Property_Minimum, value);
+}
+
+QString CSMSettings::Setting::minimum() const
+{
+    return property (Property_Minimum).at(0);
 }
 
 CSVSettings::ViewType CSMSettings::Setting::viewType() const
 {
-    return static_cast <CSVSettings::ViewType>
-                                    (property(Property_ViewType).at(0).toInt());
+    return static_cast <CSVSettings::ViewType> ( property (
+                                    Property_SettingType).at(0).toInt() / 10);
 }
 
 void CSMSettings::Setting::setViewColumn (int value)
@@ -241,12 +351,28 @@ int CSMSettings::Setting::widgetWidth() const
 {
     return property (Property_WidgetWidth).at(0).toInt();
 }
+
+void CSMSettings::Setting::setWrapping (bool state)
+{
+    setProperty (Property_Wrapping, state);
+}
+
+bool CSMSettings::Setting::wrapping() const
+{
+    return (property (Property_Wrapping).at(0) == "true");
+}
+
 void CSMSettings::Setting::setProperty (SettingProperty prop, bool value)
 {
     setProperty (prop, QStringList() << QVariant (value).toString());
 }
 
 void CSMSettings::Setting::setProperty (SettingProperty prop, int value)
+{
+    setProperty (prop, QStringList() << QVariant (value).toString());
+}
+
+void CSMSettings::Setting::setProperty (SettingProperty prop, double value)
 {
     setProperty (prop, QStringList() << QVariant (value).toString());
 }
@@ -262,19 +388,4 @@ void CSMSettings::Setting::setProperty (SettingProperty prop,
 {
     if (prop < mProperties.size())
         mProperties.replace (prop, value);
-}
-
-QDataStream &operator <<(QDataStream &stream, const CSMSettings::Setting& setting)
-{
- //   stream << setting.properties();
-
- //   stream << setting.proxies();
-    return stream;
-}
-
-QDataStream &operator >>(QDataStream& stream, CSMSettings::Setting& setting)
-{
-  //  stream >> setting.properties();
-  //  stream >> setting.proxies();
-    return stream;
 }

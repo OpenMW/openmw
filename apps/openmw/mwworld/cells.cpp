@@ -78,6 +78,7 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
     writer.startRecord (ESM::REC_CSTA);
     cellState.mId.save (writer);
     cellState.save (writer);
+    cell.writeFog(writer);
     cell.writeReferences (writer);
     writer.endRecord (ESM::REC_CSTA);
 }
@@ -318,6 +319,9 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
 
         state.load (reader);
         cellStore->loadState (state);
+
+        if (state.mHasFogOfWar)
+            cellStore->readFog(reader);
 
         if (cellStore->getState()!=CellStore::State_Loaded)
             cellStore->load (mStore, mReader);

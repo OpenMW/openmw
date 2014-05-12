@@ -55,7 +55,8 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data() : mRefs (mCells)
+CSMWorld::Data::Data (ToUTF8::FromType encoding)
+: mEncoder (encoding), mRefs (mCells), mReader (0), mDialogue (0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -260,6 +261,8 @@ CSMWorld::Data::~Data()
 {
     for (std::vector<QAbstractItemModel *>::iterator iter (mModels.begin()); iter!=mModels.end(); ++iter)
         delete *iter;
+
+    delete mReader;
 }
 
 const CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals() const
@@ -453,7 +456,7 @@ CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters()
     return mFilters;
 }
 
-QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
+QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
 
@@ -481,148 +484,166 @@ void CSMWorld::Data::merge()
     mGlobals.merge();
 }
 
-void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, bool project)
+int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
-    ESM::ESMReader reader;
+    delete mReader;
+    mReader = 0;
+    mDialogue = 0;
 
-    /// \todo set encoding properly, once config implementation has been fixed.
-    ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding ("win1252"));
-    reader.setEncoder (&encoder);
+    mReader = new ESM::ESMReader;
+    mReader->setEncoder (&mEncoder);
+    mReader->open (path.string());
 
-    reader.open (path.string());
+    mBase = base;
+    mProject = project;
 
-    const ESM::Dialogue *dialogue = 0;
+    mAuthor = mReader->getAuthor();
+    mDescription = mReader->getDesc();
 
-    mAuthor = reader.getAuthor();
-    mDescription = reader.getDesc();
+    return mReader->getRecordCount();
+}
 
-    // Note: We do not need to send update signals here, because at this point the model is not connected
-    // to any view.
-    while (reader.hasMoreRecs())
+bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
+{
+    if (!mReader)
+        throw std::logic_error ("can't continue loading, because no load has been started");
+
+    if (!mReader->hasMoreRecs())
     {
-        ESM::NAME n = reader.getRecName();
-        reader.getRecHeader();
-
-        switch (n.val)
-        {
-            case ESM::REC_GLOB: mGlobals.load (reader, base); break;
-            case ESM::REC_GMST: mGmsts.load (reader, base); break;
-            case ESM::REC_SKIL: mSkills.load (reader, base); break;
-            case ESM::REC_CLAS: mClasses.load (reader, base); break;
-            case ESM::REC_FACT: mFactions.load (reader, base); break;
-            case ESM::REC_RACE: mRaces.load (reader, base); break;
-            case ESM::REC_SOUN: mSounds.load (reader, base); break;
-            case ESM::REC_SCPT: mScripts.load (reader, base); break;
-            case ESM::REC_REGN: mRegions.load (reader, base); break;
-            case ESM::REC_BSGN: mBirthsigns.load (reader, base); break;
-            case ESM::REC_SPEL: mSpells.load (reader, base); break;
-
-            case ESM::REC_CELL:
-                mCells.load (reader, base);
-                mRefs.load (reader, mCells.getSize()-1, base);
-                break;
-
-            case ESM::REC_ACTI: mReferenceables.load (reader, base, UniversalId::Type_Activator); break;
-            case ESM::REC_ALCH: mReferenceables.load (reader, base, UniversalId::Type_Potion); break;
-            case ESM::REC_APPA: mReferenceables.load (reader, base, UniversalId::Type_Apparatus); break;
-            case ESM::REC_ARMO: mReferenceables.load (reader, base, UniversalId::Type_Armor); break;
-            case ESM::REC_BOOK: mReferenceables.load (reader, base, UniversalId::Type_Book); break;
-            case ESM::REC_CLOT: mReferenceables.load (reader, base, UniversalId::Type_Clothing); break;
-            case ESM::REC_CONT: mReferenceables.load (reader, base, UniversalId::Type_Container); break;
-            case ESM::REC_CREA: mReferenceables.load (reader, base, UniversalId::Type_Creature); break;
-            case ESM::REC_DOOR: mReferenceables.load (reader, base, UniversalId::Type_Door); break;
-            case ESM::REC_INGR: mReferenceables.load (reader, base, UniversalId::Type_Ingredient); break;
-            case ESM::REC_LEVC:
-                mReferenceables.load (reader, base, UniversalId::Type_CreatureLevelledList); break;
-            case ESM::REC_LEVI:
-                mReferenceables.load (reader, base, UniversalId::Type_ItemLevelledList); break;
-            case ESM::REC_LIGH: mReferenceables.load (reader, base, UniversalId::Type_Light); break;
-            case ESM::REC_LOCK: mReferenceables.load (reader, base, UniversalId::Type_Lockpick); break;
-            case ESM::REC_MISC:
-                mReferenceables.load (reader, base, UniversalId::Type_Miscellaneous); break;
-            case ESM::REC_NPC_: mReferenceables.load (reader, base, UniversalId::Type_Npc); break;
-            case ESM::REC_PROB: mReferenceables.load (reader, base, UniversalId::Type_Probe); break;
-            case ESM::REC_REPA: mReferenceables.load (reader, base, UniversalId::Type_Repair); break;
-            case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
-            case ESM::REC_WEAP: mReferenceables.load (reader, base, UniversalId::Type_Weapon); break;
-
-            case ESM::REC_DIAL:
-            {
-                std::string id = reader.getHNOString ("NAME");
-
-                ESM::Dialogue record;
-                record.mId = id;
-                record.load (reader);
-
-                if (record.mType==ESM::Dialogue::Journal)
-                {
-                    mJournals.load (record, base);
-                    dialogue = &mJournals.getRecord (id).get();
-                }
-                else if (record.mType==ESM::Dialogue::Deleted)
-                {
-                    dialogue = 0; // record vector can be shuffled around which would make pointer
-                                  // to record invalid
-
-                    if (mJournals.tryDelete (id))
-                    {
-                        /// \todo handle info records
-                    }
-                    else if (mTopics.tryDelete (id))
-                    {
-                        /// \todo handle info records
-                    }
-                    else
-                    {
-                        /// \todo report deletion of non-existing record
-                    }
-                }
-                else
-                {
-                    mTopics.load (record, base);
-                    dialogue = &mTopics.getRecord (id).get();
-                }
-
-                break;
-            }
-
-            case ESM::REC_INFO:
-            {
-                if (!dialogue)
-                {
-                    /// \todo INFO record without matching DIAL record -> report to user
-                    reader.skipRecord();
-                    break;
-                }
-
-                if (dialogue->mType==ESM::Dialogue::Journal)
-                    mJournalInfos.load (reader, base, *dialogue);
-                else
-                    mTopicInfos.load (reader, base, *dialogue);
-
-                break;
-            }
-
-            case ESM::REC_FILT:
-
-                if (project)
-                {
-                    mFilters.load (reader, base);
-                    mFilters.setData (mFilters.getSize()-1,
-                        mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
-                        static_cast<int> (CSMFilter::Filter::Scope_Project));
-                    break;
-                }
-
-                // fall through (filter record in a content file is an error with format 0)
-
-            default:
-
-                /// \todo throw an exception instead, once all records are implemented
-                /// or maybe report error and continue?
-                reader.skipRecord();
-        }
+        delete mReader;
+        mReader = 0;
+        mDialogue = 0;
+        return true;
     }
+
+    ESM::NAME n = mReader->getRecName();
+    mReader->getRecHeader();
+
+    switch (n.val)
+    {
+        case ESM::REC_GLOB: mGlobals.load (*mReader, mBase); break;
+        case ESM::REC_GMST: mGmsts.load (*mReader, mBase); break;
+        case ESM::REC_SKIL: mSkills.load (*mReader, mBase); break;
+        case ESM::REC_CLAS: mClasses.load (*mReader, mBase); break;
+        case ESM::REC_FACT: mFactions.load (*mReader, mBase); break;
+        case ESM::REC_RACE: mRaces.load (*mReader, mBase); break;
+        case ESM::REC_SOUN: mSounds.load (*mReader, mBase); break;
+        case ESM::REC_SCPT: mScripts.load (*mReader, mBase); break;
+        case ESM::REC_REGN: mRegions.load (*mReader, mBase); break;
+        case ESM::REC_BSGN: mBirthsigns.load (*mReader, mBase); break;
+        case ESM::REC_SPEL: mSpells.load (*mReader, mBase); break;
+
+        case ESM::REC_CELL:
+            mCells.load (*mReader, mBase);
+            mRefs.load (*mReader, mCells.getSize()-1, mBase);
+            break;
+
+        case ESM::REC_ACTI: mReferenceables.load (*mReader, mBase, UniversalId::Type_Activator); break;
+        case ESM::REC_ALCH: mReferenceables.load (*mReader, mBase, UniversalId::Type_Potion); break;
+        case ESM::REC_APPA: mReferenceables.load (*mReader, mBase, UniversalId::Type_Apparatus); break;
+        case ESM::REC_ARMO: mReferenceables.load (*mReader, mBase, UniversalId::Type_Armor); break;
+        case ESM::REC_BOOK: mReferenceables.load (*mReader, mBase, UniversalId::Type_Book); break;
+        case ESM::REC_CLOT: mReferenceables.load (*mReader, mBase, UniversalId::Type_Clothing); break;
+        case ESM::REC_CONT: mReferenceables.load (*mReader, mBase, UniversalId::Type_Container); break;
+        case ESM::REC_CREA: mReferenceables.load (*mReader, mBase, UniversalId::Type_Creature); break;
+        case ESM::REC_DOOR: mReferenceables.load (*mReader, mBase, UniversalId::Type_Door); break;
+        case ESM::REC_INGR: mReferenceables.load (*mReader, mBase, UniversalId::Type_Ingredient); break;
+        case ESM::REC_LEVC:
+            mReferenceables.load (*mReader, mBase, UniversalId::Type_CreatureLevelledList); break;
+        case ESM::REC_LEVI:
+            mReferenceables.load (*mReader, mBase, UniversalId::Type_ItemLevelledList); break;
+        case ESM::REC_LIGH: mReferenceables.load (*mReader, mBase, UniversalId::Type_Light); break;
+        case ESM::REC_LOCK: mReferenceables.load (*mReader, mBase, UniversalId::Type_Lockpick); break;
+        case ESM::REC_MISC:
+            mReferenceables.load (*mReader, mBase, UniversalId::Type_Miscellaneous); break;
+        case ESM::REC_NPC_: mReferenceables.load (*mReader, mBase, UniversalId::Type_Npc); break;
+        case ESM::REC_PROB: mReferenceables.load (*mReader, mBase, UniversalId::Type_Probe); break;
+        case ESM::REC_REPA: mReferenceables.load (*mReader, mBase, UniversalId::Type_Repair); break;
+        case ESM::REC_STAT: mReferenceables.load (*mReader, mBase, UniversalId::Type_Static); break;
+        case ESM::REC_WEAP: mReferenceables.load (*mReader, mBase, UniversalId::Type_Weapon); break;
+
+        case ESM::REC_DIAL:
+        {
+            std::string id = mReader->getHNOString ("NAME");
+
+            ESM::Dialogue record;
+            record.mId = id;
+            record.load (*mReader);
+
+            if (record.mType==ESM::Dialogue::Journal)
+            {
+                mJournals.load (record, mBase);
+                mDialogue = &mJournals.getRecord (id).get();
+            }
+            else if (record.mType==ESM::Dialogue::Deleted)
+            {
+                mDialogue = 0; // record vector can be shuffled around which would make pointer
+                               // to record invalid
+
+                if (mJournals.tryDelete (id))
+                {
+                    /// \todo handle info records
+                }
+                else if (mTopics.tryDelete (id))
+                {
+                    /// \todo handle info records
+                }
+                else
+                {
+                    messages.push_back (std::make_pair (UniversalId::Type_None,
+                        "Trying to delete dialogue record " + id + " which does not exist"));
+                }
+            }
+            else
+            {
+                mTopics.load (record, mBase);
+                mDialogue = &mTopics.getRecord (id).get();
+            }
+
+            break;
+        }
+
+        case ESM::REC_INFO:
+        {
+            if (!mDialogue)
+            {
+                messages.push_back (std::make_pair (UniversalId::Type_None,
+                    "Found info record not following a dialogue record"));
+
+                mReader->skipRecord();
+                break;
+            }
+
+            if (mDialogue->mType==ESM::Dialogue::Journal)
+                mJournalInfos.load (*mReader, mBase, *mDialogue);
+            else
+                mTopicInfos.load (*mReader, mBase, *mDialogue);
+
+            break;
+        }
+
+        case ESM::REC_FILT:
+
+            if (mProject)
+            {
+                mFilters.load (*mReader, mBase);
+                mFilters.setData (mFilters.getSize()-1,
+                    mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
+                    static_cast<int> (CSMFilter::Filter::Scope_Project));
+                break;
+            }
+
+            // fall through (filter record in a content file is an error with format 0)
+
+        default:
+
+            messages.push_back (std::make_pair (UniversalId::Type_None,
+                "Unsupported record type: " + n.toString()));
+
+            mReader->skipRecord();
+    }
+
+    return false;
 }
 
 bool CSMWorld::Data::hasId (const std::string& id) const

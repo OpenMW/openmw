@@ -16,7 +16,7 @@ int CSMTools::SkillCheckStage::setup()
     return mSkills.getSize();
 }
 
-void CSMTools::SkillCheckStage::perform (int stage, std::vector<std::string>& messages)
+void CSMTools::SkillCheckStage::perform (int stage, Messages& messages)
 {
     const CSMWorld::Record<ESM::Skill>& record = mSkills.getRecord (stage);
 
@@ -32,11 +32,11 @@ void CSMTools::SkillCheckStage::perform (int stage, std::vector<std::string>& me
         {
             std::ostringstream stream;
 
-            stream << id.toString() << "|Use value #" << i << " of " << skill.mId << " is negative";
+            stream << "Use value #" << i << " of " << skill.mId << " is negative";
 
-            messages.push_back (stream.str());
+            messages.push_back (std::make_pair (id, stream.str()));
         }
 
     if (skill.mDescription.empty())
-        messages.push_back (id.toString() + "|" + skill.mId + " has an empty description");
+        messages.push_back (std::make_pair (id, skill.mId + " has an empty description"));
 }

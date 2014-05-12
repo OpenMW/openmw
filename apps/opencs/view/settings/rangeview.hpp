@@ -1,13 +1,11 @@
 #ifndef CSVSETTINGS_RANGEVIEW_HPP
 #define CSVSETTINGS_RANGEVIEW_HPP
 
-#include <QWidget>
-#include <QAbstractButton>
-
 #include "view.hpp"
 #include "../../model/settings/support.hpp"
 
 class QStringListModel;
+class QAbstractSpinBox;
 
 namespace CSVSettings
 {
@@ -15,17 +13,30 @@ namespace CSVSettings
     {
         Q_OBJECT
 
-        QMap <QString, QAbstractButton *> mButtons;
+        QWidget *mRangeWidget;
+        CSMSettings::SettingType mRangeType;
 
     public:
         explicit RangeView (CSMSettings::Setting *setting,
                               Page *parent);
 
     protected:
+
+        ///virtual function called through View
         void updateView (bool signalUpdate = true) const;
 
+        ///construct a slider-based view
+        void buildSlider (CSMSettings::Setting *setting);
+
+        ///construct a spinbox-based view
+        void buildSpinBox (CSMSettings::Setting *setting);
+
     private slots:
-        void slotToggled (bool state);
+
+        ///responds to valueChanged signals
+        void slotUpdateView (int value);
+        void slotUpdateView (double value);
+
     };
 
     class RangeViewFactory : public QObject, public IViewFactory

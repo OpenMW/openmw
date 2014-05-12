@@ -34,6 +34,12 @@ struct Position
 };
 #pragma pack(pop)
 
+template <int a, int b, int c, int d>
+struct FourCC
+{
+    static const unsigned int value = (((((d << 8) | c) << 8) | b) << 8) | a;
+};
+
 enum RecNameInts
 {
     // format 0 / legacy
@@ -93,6 +99,8 @@ enum RecNameInts
     REC_GMAP = 0x50414d47,
     REC_DIAS = 0x53414944,
     REC_WTHR = 0x52485457,
+    REC_KEYS = FourCC<'K','E','Y','S'>::value,
+    REC_DYNA = FourCC<'D','Y','N','A'>::value,
 
     // format 1
     REC_FILT = 0x544C4946
