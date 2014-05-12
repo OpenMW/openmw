@@ -9,6 +9,8 @@
 #include <QObject>
 #include <QThread>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "loader.hpp"
 
 namespace Files
@@ -28,6 +30,7 @@ namespace CSMDoc
             const Files::ConfigurationManager& mConfiguration;
             QThread mLoaderThread;
             Loader mLoader;
+            ToUTF8::FromType mEncoding;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
@@ -44,6 +47,8 @@ namespace CSMDoc
             /// appropriate way.
 
 	    void setResourceDir (const boost::filesystem::path& parResDir);
+
+            void setEncoding (ToUTF8::FromType encoding);
 
         private:
 

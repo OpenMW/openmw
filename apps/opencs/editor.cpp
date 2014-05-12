@@ -90,6 +90,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     mCfgMgr.readConfiguration(variables, desc);
 
+    mDocumentManager.setEncoding (
+        ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
+
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
 
     mFsStrict = variables["fs-strict"].as<bool>();

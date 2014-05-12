@@ -13,7 +13,7 @@
 #include "document.hpp"
 
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
-: mConfiguration (configuration)
+: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252)
 {
     boost::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
@@ -52,7 +52,7 @@ CSMDoc::DocumentManager::~DocumentManager()
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir);
+    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding);
 
     mDocuments.push_back (document);
 
@@ -78,6 +78,11 @@ void CSMDoc::DocumentManager::removeDocument (CSMDoc::Document *document)
 void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& parResDir)
 {
     mResDir = boost::filesystem::system_complete(parResDir);
+}
+
+void CSMDoc::DocumentManager::setEncoding (ToUTF8::FromType encoding)
+{
+    mEncoding = encoding;
 }
 
 void CSMDoc::DocumentManager::documentLoaded (Document *document)

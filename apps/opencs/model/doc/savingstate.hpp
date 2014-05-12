@@ -7,6 +7,8 @@
 
 #include <components/esm/esmwriter.hpp>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 namespace CSMDoc
 {
     class Operation;
@@ -25,7 +27,8 @@ namespace CSMDoc
 
         public:
 
-            SavingState (Operation& operation, const boost::filesystem::path& projectPath);
+            SavingState (Operation& operation, const boost::filesystem::path& projectPath,
+                ToUTF8::FromType encoding);
 
             bool hasError() const;
 
