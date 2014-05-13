@@ -58,6 +58,8 @@ namespace MWWorld
             PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
 
+            bool mNeedMapUpdate;
+
             void playerCellChange (CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
 

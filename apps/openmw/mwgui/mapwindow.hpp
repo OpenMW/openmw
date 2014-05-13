@@ -97,14 +97,17 @@ namespace MWGui
 
         void renderGlobalMap(Loading::Listener* loadingListener);
 
-        void addVisitedLocation(const std::string& name, int x, int y); // adds the marker to the global map
+        // adds the marker to the global map
+        void addVisitedLocation(const std::string& name, int x, int y);
+
+        // reveals this cell's map on the global map
         void cellExplored(int x, int y);
 
         void setGlobalMapPlayerPosition (float worldX, float worldY);
 
         virtual void open();
 
-        void onFrame(float dt) { NoDrop::onFrame(dt); }
+        void onFrame(float dt);
 
         /// Clear all savegame-specific data
         void clear();
@@ -131,6 +134,10 @@ namespace MWGui
         // Markers on global map
         typedef std::pair<int, int> CellId;
         std::vector<CellId> mMarkers;
+
+        // Cells that should be explored in the next frame (i.e. their map revealed on the global map)
+        // We can't do this immediately, because the map update is not immediate either (see mNeedMapUpdate in scene.cpp)
+        std::vector<CellId> mQueuedToExplore;
 
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;

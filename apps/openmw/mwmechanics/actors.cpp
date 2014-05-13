@@ -920,9 +920,6 @@ namespace MWMechanics
                     spells.purge(iter->first.getRefData().getHandle());
                 }
 
-                // FIXME: see http://bugs.openmw.org/issues/869
-                MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
-
                 if (iter->second->kill())
                 {
                     ++mDeathCount[cls.getId(iter->first)];
@@ -938,6 +935,8 @@ namespace MWMechanics
                     // One case where we need this is to make sure bound items are removed upon death
                     stats.setMagicEffects(MWMechanics::MagicEffects());
                     calculateCreatureStatModifiers(iter->first, 0);
+
+                    MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
 
                     if (cls.isEssential(iter->first))
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");

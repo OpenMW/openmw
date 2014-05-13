@@ -1496,6 +1496,9 @@ namespace MWWorld
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
+            if (!ref.mData.isEnabled())
+                continue;
+
             if (ref.mRef.mTeleport)
             {
                 World::DoorMarker newMarker;
@@ -1969,7 +1972,7 @@ namespace MWWorld
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
 
-        physicActor->enableCollisions(enable);
+        physicActor->enableCollisionBody(enable);
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
@@ -2176,8 +2179,8 @@ namespace MWWorld
             // If this is a power, check if it was already used in the last 24h
             if (!fail && spell->mData.mType == ESM::Spell::ST_Power)
             {
-                if (stats.canUsePower(spell->mId))
-                    stats.usePower(spell->mId);
+                if (stats.getSpells().canUsePower(spell->mId))
+                    stats.getSpells().usePower(spell->mId);
                 else
                 {
                     message = "#{sPowerAlreadyUsed}";

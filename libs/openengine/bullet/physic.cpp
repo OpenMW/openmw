@@ -41,14 +41,17 @@ namespace Physic
         }
     }
 
-    void PhysicActor::enableCollisions(bool collision)
+    void PhysicActor::enableCollisionMode(bool collision)
+    {
+        mCollisionMode = collision;
+    }
+
+    void PhysicActor::enableCollisionBody(bool collision)
     {
         assert(mBody);
         if(collision && !mCollisionMode) enableCollisionBody();
         if(!collision && mCollisionMode) disableCollisionBody();
-        mCollisionMode = collision;
     }
-
 
     void PhysicActor::setPosition(const Ogre::Vector3 &pos)
     {

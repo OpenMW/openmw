@@ -8,11 +8,13 @@ namespace ESM
 
     void QuickKeys::load(ESMReader &esm)
     {
-        while (esm.isNextSub("KEY_"))
+        if (esm.isNextSub("KEY_"))
+            esm.getSubHeader(); // no longer used, because sub-record hierachies do not work properly in esmreader
+
+        while (esm.isNextSub("TYPE"))
         {
-            esm.getSubHeader();
             int keyType;
-            esm.getHNT(keyType, "TYPE");
+            esm.getHT(keyType);
             std::string id;
             id = esm.getHNString("ID__");
 
@@ -21,21 +23,18 @@ namespace ESM
             key.mId = id;
 
             mKeys.push_back(key);
+
+            if (esm.isNextSub("KEY_"))
+                esm.getSubHeader();  // no longer used, because sub-record hierachies do not work properly in esmreader
         }
     }
 
     void QuickKeys::save(ESMWriter &esm) const
     {
-        const std::string recKey = "KEY_";
-
         for (std::vector<QuickKey>::const_iterator it = mKeys.begin(); it != mKeys.end(); ++it)
         {
-            esm.startSubRecord(recKey);
-
             esm.writeHNT("TYPE", it->mType);
             esm.writeHNString("ID__", it->mId);
-
-            esm.endRecord(recKey);
         }
     }
 
