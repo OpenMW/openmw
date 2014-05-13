@@ -90,7 +90,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     {
 /// TODO (tluppi#1#): Use ObstacleCheck here. Not working for some reason
         //if(mObstacleCheck.check(actor, duration)) {
-        if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10) { //Actually stuck
+        if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10 && distance(dest, start) > 20) { //Actually stuck, and far enough away from destination to care
             // first check if we're walking into a door
             MWWorld::LiveCellRef<ESM::Door>* door = getNearbyDoor(actor);
             if(door != NULL) // NOTE: checks interior cells only
@@ -125,4 +125,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     }
 
     zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+
+    return false;
 }
