@@ -16,12 +16,12 @@ namespace Compiler
         every argument is optional. <BR>
         Eg: fff/f represents 3 required floats followed by one optional float <BR>
         f - Float <BR>
-        c - String <BR>
+        c - String, case smashed <BR>
         l - Integer <BR>
         s - Short <BR>
-        S - Also string (Seemed to be mostly used for Cell Names) <BR>
-        x - none?
-
+        S - String, case preserved <BR>
+        x - Optional, ignored argument
+        \see Compiler::ExprParser::parseArguments
     **/
     typedef std::string ScriptArgs;
 
