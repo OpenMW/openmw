@@ -2,7 +2,7 @@
 #define GAME_MWMECHANICS_AIPACKAGE_H
 
 #include "pathfinding.hpp"
-#include "../../../components/esm/defs.hpp"
+#include <components/esm/defs.hpp>
 
 #include "obstacle.hpp"
 

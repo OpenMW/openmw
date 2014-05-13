@@ -4,7 +4,7 @@
 #include "aipackage.hpp"
 #include <string>
 #include "pathfinding.hpp"
-#include "../../../components/esm/defs.hpp"
+#include <components/esm/defs.hpp>
 
 namespace MWMechanics
 {
