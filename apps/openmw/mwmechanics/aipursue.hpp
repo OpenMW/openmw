@@ -9,18 +9,12 @@
 namespace MWMechanics
 {
     /// \brief Makes the actor very closely follow the actor
-    /** Used for getting closer to fight, or to arrest (I think?) **/
-    class AiPersue : public AiPackage
+    /** Used for arresting players. Causes the actor to run to the pursued actor and activate them, to arrest them. **/
+    class AiPursue : public AiPackage
     {
         public:
             ///Constructor
             /** \param objectId Actor to pursue **/
-            AiPersue(const std::string &objectId);
-            virtual AiPersue *clone() const;
-
-    class AiPursue : public AiPackage
-    {
-        public:
             AiPursue(const std::string &objectId);
             virtual AiPursue *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
@@ -28,8 +22,6 @@ namespace MWMechanics
 
         private:
             std::string mObjectId;
-
-            PathFinder mPathFinder;
             int mCellX;
             int mCellY;
     };

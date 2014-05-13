@@ -40,14 +40,6 @@ namespace MWMechanics
             float mZ;
             std::string mActorId;
             std::string mCellId;
-
-            float mTimer;
-            float mStuckTimer;
-            float mTotalTime;
-
-            ESM::Position mStuckPos;
-
-            PathFinder mPathFinder;
     };
 }
 #endif

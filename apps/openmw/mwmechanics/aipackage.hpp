@@ -1,6 +1,9 @@
 #ifndef GAME_MWMECHANICS_AIPACKAGE_H
 #define GAME_MWMECHANICS_AIPACKAGE_H
 
+#include "pathfinding.hpp"
+#include "../../../components/esm/defs.hpp"
+
 namespace MWWorld
 {
     class Ptr;
@@ -38,8 +41,21 @@ namespace MWMechanics
             /// \see enum TypeId
             virtual int getTypeId() const = 0;
 
-            /// Higher number is higher priority (0 beeing the lowest)
+            /// Higher number is higher priority (0 being the lowest)
             virtual unsigned int getPriority() const {return 0;}
+
+        protected:
+            /// Causes the actor to attempt to walk to the specified location
+            /** \return If the actor has arrived at his destination **/
+            bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
+
+            PathFinder mPathFinder;
+
+            float mTimer;
+            float mStuckTimer;
+            float mTotalTime;
+
+            ESM::Position mStuckPos;
     };
 }
 
