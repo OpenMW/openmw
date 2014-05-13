@@ -12,23 +12,17 @@
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId("")
+: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), AiPackage()
 {
-    mTimer = 0;
-    mStuckTimer = 0;
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId)
+: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId), AiPackage()
 {
-    mTimer = 0;
-    mStuckTimer = 0;
 }
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId)
-: mAlwaysFollow(true), mDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId("")
+: mAlwaysFollow(true), mDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId(""), AiPackage()
 {
-    mTimer = 0;
-    mStuckTimer = 0;
 }
 
 bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)

@@ -30,6 +30,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -1210,7 +1211,11 @@ namespace MWWorld
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
                     if (MWWorld::Class::get(ptr).isActor())
                     {
-                        // we collided with an actor, we need to undo the rotation
+                        // Collided with actor, ask actor to try to avoid door
+                        MWMechanics::AiSequence& seq = MWWorld::Class::get(ptr).getCreatureStats(ptr).getAiSequence();
+                        if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
+                            seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
+                        // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
                         break;
                     }
@@ -1853,6 +1858,16 @@ namespace MWWorld
         return door.getRefData().getLocalRotation().rot[2] == 0;
     }
 
+    bool World::getIsMovingDoor(const Ptr& door)
+    {
+        //This more expensive comparison is needed for some reason
+        // TODO (tluppi#1#): Figure out why comparing Ptr isn't working
+        for(std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin(); it != mDoorStates.end(); it++)
+            if(it->first.getCellRef().mRefID == door.getCellRef().mRefID)
+                return true;
+        return false;
+    }
+
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
     {
         MWWorld::Ptr player = mPlayer->getPlayer();
@@ -1919,7 +1934,7 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
-    
+
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())

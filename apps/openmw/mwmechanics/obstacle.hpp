@@ -1,6 +1,10 @@
 #ifndef OPENMW_MECHANICS_OBSTACLE_H
 #define OPENMW_MECHANICS_OBSTACLE_H
 
+//#include "../mwbase/world.hpp"
+//#include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
+
 namespace MWWorld
 {
     class Ptr;
@@ -8,11 +12,17 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    // NOTE: determined empirically based on in-game behaviour
+    /// NOTE: determined empirically based on in-game behaviour
     static const float MIN_DIST_TO_DOOR_SQUARED = 128*128;
 
-    // tests actor's proximity to a closed door by default
+    /// tests actor's proximity to a closed door by default
     bool proximityToDoor(const MWWorld::Ptr& actor,
+                         float minSqr = MIN_DIST_TO_DOOR_SQUARED,
+                         bool closed = true);
+
+    /// Returns door pointer within range. No guarentee is given as too which one
+    /** \return Pointer to the door, or NULL if none exists **/
+    MWWorld::LiveCellRef<ESM::Door>* getNearbyDoor(const MWWorld::Ptr& actor,
                          float minSqr = MIN_DIST_TO_DOOR_SQUARED,
                          bool closed = true);
 

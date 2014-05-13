@@ -20,10 +20,18 @@ namespace MWMechanics
     // actor is facing the door.
     bool proximityToDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
     {
+        if(getNearbyDoor(actor, minSqr, closed)!=NULL)
+            return true;
+        else
+            return false;
+    }
+
+    MWWorld::LiveCellRef<ESM::Door>* getNearbyDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
+    {
         MWWorld::CellStore *cell = actor.getCell();
 
         if(cell->getCell()->isExterior())
-            return false; // check interior cells only
+            return NULL; // check interior cells only
 
         // Check all the doors in this cell
         MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
@@ -31,14 +39,14 @@ namespace MWMechanics
         MWWorld::CellRefList<ESM::Door>::List::iterator it = refList.begin();
         Ogre::Vector3 pos(actor.getRefData().getPosition().pos);
 
-        // TODO: How to check whether the actor is facing a door? Below code is for
-        //       the player, perhaps it can be adapted.
+        /// TODO: How to check whether the actor is facing a door? Below code is for
+        ///       the player, perhaps it can be adapted.
         //MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getFacedObject();
         //if(!ptr.isEmpty())
             //std::cout << "faced door " << ptr.getClass().getName(ptr) << std::endl;
 
-        // TODO: The in-game observation of rot[2] value seems to be the
-        //       opposite of the code in World::activateDoor() ::confused::
+        /// TODO: The in-game observation of rot[2] value seems to be the
+        ///       opposite of the code in World::activateDoor() ::confused::
         for (; it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
@@ -46,10 +54,10 @@ namespace MWMechanics
                 if((closed && ref.mData.getLocalRotation().rot[2] == 0) ||
                    (!closed && ref.mData.getLocalRotation().rot[2] >= 1))
                 {
-                    return true; // found, stop searching
+                    return &ref; // found, stop searching
                 }
         }
-        return false; // none found
+        return NULL; // none found
     }
 
     ObstacleCheck::ObstacleCheck():

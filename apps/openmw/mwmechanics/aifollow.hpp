@@ -1,5 +1,5 @@
-#ifndef GAME_MWMECHANICS_AIFALLOW_H
-#define GAME_MWMECHANICS_AIFALLOW_H
+#ifndef GAME_MWMECHANICS_AIFOLLOW_H
+#define GAME_MWMECHANICS_AIFOLLOW_H
 
 #include "aipackage.hpp"
 #include <string>

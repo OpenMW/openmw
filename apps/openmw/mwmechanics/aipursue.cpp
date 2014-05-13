@@ -31,16 +31,15 @@ bool MWMechanics::AiPursue::execute (const MWWorld::Ptr& actor, float duration)
     //Set the target desition from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    pathTo(actor, dest, duration); //Go to the destination
-
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 100) { //Stop when you get close
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);
         MWWorld::Class::get(target).activate(target,actor).get()->execute(actor); //Arrest player
         return true;
     }
-    else
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+    else {
+        pathTo(actor, dest, duration); //Go to the destination
+    }
 
     actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
 

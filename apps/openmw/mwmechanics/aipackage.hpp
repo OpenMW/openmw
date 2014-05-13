@@ -4,6 +4,8 @@
 #include "pathfinding.hpp"
 #include "../../../components/esm/defs.hpp"
 
+#include "obstacle.hpp"
+
 namespace MWWorld
 {
     class Ptr;
@@ -24,8 +26,12 @@ namespace MWMechanics
                 TypeIdFollow = 3,
                 TypeIdActivate = 4,
                 TypeIdCombat = 5,
-                TypeIdPursue = 6
+                TypeIdPursue = 6,
+                TypeIdAvoidDoor = 7
             };
+
+            ///Default constructor
+            AiPackage();
 
             ///Default Deconstructor
             virtual ~AiPackage();
@@ -50,10 +56,14 @@ namespace MWMechanics
             bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
 
             PathFinder mPathFinder;
+            ObstacleCheck mObstacleCheck;
 
+            float mDoorCheckDuration;
             float mTimer;
             float mStuckTimer;
             float mTotalTime;
+
+            MWWorld::LiveCellRef<ESM::Door>* mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
 
             ESM::Position mStuckPos;
     };

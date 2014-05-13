@@ -9,6 +9,7 @@
 namespace MWMechanics
 {
     /// \brief Causes actor to walk to activatable object and activate it
+    /** Will actiavte when close to object or path grid complete **/
     class AiActivate : public AiPackage
     {
         public:
@@ -21,8 +22,6 @@ namespace MWMechanics
 
         private:
             std::string mObjectId;
-
-            PathFinder mPathFinder;
             int mCellX;
             int mCellY;
     };

@@ -8,6 +8,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
+#include "../mwworld/action.hpp"
 
 #include <OgreMath.h>
 
@@ -15,13 +16,18 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
+MWMechanics::AiPackage::AiPackage() : mLastDoorChecked(NULL), mTimer(0), mStuckTimer(0) {
+
+}
+
 
 bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration)
 {
     //Update various Timers
-    mTimer = mTimer + duration; //Update timer
-    mStuckTimer = mStuckTimer + duration;   //Update stuck timer
-    mTotalTime = mTotalTime + duration; //Update total time following
+    mTimer += duration; //Update timer
+    mStuckTimer += duration;   //Update stuck timer
+    mTotalTime += duration; //Update total time following
+
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
@@ -78,18 +84,45 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //************************
     /// Checks if you aren't moving; attempts to unstick you
     //************************
-    if(mStuckTimer>0.5) //Checks every half of a second
+    if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2])) //Path finished?
+        return true;
+    else if(mStuckTimer>0.5) //Every half second see if we need to take action to avoid something
     {
-        if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10)  //NPC hasn't moved much is half a second, he's stuck
-            mPathFinder.buildPath(start, dest, actor.getCell(), true);
-
-        mStuckTimer = 0;
-        mStuckPos = pos;
+/// TODO (tluppi#1#): Use ObstacleCheck here. Not working for some reason
+        //if(mObstacleCheck.check(actor, duration)) {
+        if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10) { //Actually stuck
+            // first check if we're walking into a door
+            MWWorld::LiveCellRef<ESM::Door>* door = getNearbyDoor(actor);
+            if(door != NULL) // NOTE: checks interior cells only
+            {
+                if(door->mRef.mTrap.empty() && mLastDoorChecked != door) { //Open the door if untrapped
+                    door->mClass->activate(MWBase::Environment::get().getWorld()->getPtr(door->mRef.mRefID,false), actor).get()->execute(actor);
+                    mLastDoorChecked = door;
+                }
+            }
+            else // probably walking into another NPC
+            {
+                // TODO: diagonal should have same animation as walk forward
+                //       but doesn't seem to do that?
+                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+                // change the angle a bit, too
+                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+            }
+            /*else if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10) {  //NPC hasn't moved much is half a second, he's stuck
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+            }*/
+        }
+        else {
+            mStuckTimer = 0;
+            mStuckPos = pos;
+            mLastDoorChecked = NULL; //Resets it, in case he gets stuck behind the door again
+        }
+    }
+    else {
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
     }
 
-    //Checks if the path isn't over, turn tomards the direction that you're going
-    if(!mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
-    {
-        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
-    }
+    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
 }
