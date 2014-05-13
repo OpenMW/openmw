@@ -40,7 +40,6 @@ namespace MWMechanics
             /// Assignment operator
             AiSequence& operator= (const AiSequence& sequence);
 
-            /// Destructor
             virtual ~AiSequence();
 
             /// Returns currently executing AiPackage type
