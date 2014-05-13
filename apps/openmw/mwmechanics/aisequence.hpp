@@ -15,13 +15,13 @@ namespace MWMechanics
     class AiPackage;
 
     /// \brief Sequence of AI-packages for a single actor
-    /** Each package will be run in succession for an actor until completed **/
+    /** The top-most AI package is run each frame. When completed, it is removed from the stack. **/
     class AiSequence
     {
             ///AiPackages to run though
             std::list<AiPackage *> mPackages;
 
-            ///Finished with all AiPackages
+            ///Finished with top AIPackage, set for one frame
             bool mDone;
 
             ///Copy AiSequence
