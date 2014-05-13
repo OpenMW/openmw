@@ -781,7 +781,7 @@ namespace MWMechanics
       }
     }
 
-    void Actors::addActor (const MWWorld::Ptr& ptr)
+    void Actors::addActor (const MWWorld::Ptr& ptr, bool updateImmediately)
     {
         // erase previous death events since we are currently only tracking them while in an active cell
         MWWorld::Class::get(ptr).getCreatureStats(ptr).clearHasDied();
@@ -790,6 +790,8 @@ namespace MWMechanics
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         mActors.insert(std::make_pair(ptr, new CharacterController(ptr, anim)));
+        if (updateImmediately)
+            mActors[ptr]->update(0);
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)

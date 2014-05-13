@@ -385,7 +385,7 @@ namespace MWMechanics
             // have been made for them. Make sure they're properly updated.
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
             mActors.removeActor(ptr);
-            mActors.addActor(ptr);
+            mActors.addActor(ptr, true);
         }
 
         mActors.update(duration, paused);
