@@ -380,6 +380,10 @@ void RenderingManager::update (float duration, bool paused)
 
     mCamera->update(duration, paused);
 
+    Ogre::SceneNode *node = data.getBaseNode();
+    Ogre::Quaternion orient = node->_getDerivedOrientation();
+    mLocalMap->updatePlayer(playerPos, orient);
+
     if(paused)
         return;
 
@@ -393,10 +397,6 @@ void RenderingManager::update (float duration, bool paused)
 
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
 
-    Ogre::SceneNode *node = data.getBaseNode();
-    Ogre::Quaternion orient = node->_getDerivedOrientation();
-
-    mLocalMap->updatePlayer(playerPos, orient);
 
     mWater->updateUnderwater(world->isUnderwater(player.getCell(), cam));
 

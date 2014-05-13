@@ -17,8 +17,10 @@ namespace MWMechanics
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
-          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
+          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
+          mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
+          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
+          mTradeTime(0,0), mGoldPool(0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -348,20 +350,6 @@ namespace MWMechanics
         return mLastHitObject;
     }
 
-    bool CreatureStats::canUsePower(const std::string &power) const
-    {
-        std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.find(power);
-        if (it == mUsedPowers.end() || it->second + 24 <= MWBase::Environment::get().getWorld()->getTimeStamp())
-            return true;
-        else
-            return false;
-    }
-
-    void CreatureStats::usePower(const std::string &power)
-    {
-        mUsedPowers[power] = MWBase::Environment::get().getWorld()->getTimeStamp();
-    }
-
     void CreatureStats::addToFallHeight(float height)
     {
         mFallHeight += height;
@@ -481,20 +469,75 @@ namespace MWMechanics
 
     void CreatureStats::writeState (ESM::CreatureStats& state) const
     {
-        for (int i=0; i<8; ++i)
+        for (int i=0; i<ESM::Attribute::Length; ++i)
             mAttributes[i].writeState (state.mAttributes[i]);
 
         for (int i=0; i<3; ++i)
             mDynamic[i].writeState (state.mDynamic[i]);
+
+        state.mTradeTime = mTradeTime.toEsm();
+        state.mGoldPool = mGoldPool;
+
+        state.mDead = mDead;
+        state.mDied = mDied;
+        state.mFriendlyHits = mFriendlyHits;
+        state.mTalkedTo = mTalkedTo;
+        state.mAlarmed = mAlarmed;
+        state.mAttacked = mAttacked;
+        state.mHostile = mHostile;
+        state.mAttackingOrSpell = mAttackingOrSpell;
+        // TODO: rewrite. does this really need 3 separate bools?
+        state.mKnockdown = mKnockdown;
+        state.mKnockdownOneFrame = mKnockdownOneFrame;
+        state.mKnockdownOverOneFrame = mKnockdownOverOneFrame;
+        state.mHitRecovery = mHitRecovery;
+        state.mBlock = mBlock;
+        state.mMovementFlags = mMovementFlags;
+        state.mAttackStrength = mAttackStrength;
+        state.mFallHeight = mFallHeight;
+        state.mLastHitObject = mLastHitObject;
+        state.mRecalcDynamicStats = mRecalcDynamicStats;
+        state.mDrawState = mDrawState;
+        state.mLevel = mLevel;
+
+        mSpells.writeState(state.mSpells);
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
     {
-        for (int i=0; i<8; ++i)
+        for (int i=0; i<ESM::Attribute::Length; ++i)
             mAttributes[i].readState (state.mAttributes[i]);
 
         for (int i=0; i<3; ++i)
             mDynamic[i].readState (state.mDynamic[i]);
+
+        mTradeTime = MWWorld::TimeStamp(state.mTradeTime);
+        mGoldPool = state.mGoldPool;
+        mFallHeight = state.mFallHeight;
+
+        mDead = state.mDead;
+        mDied = state.mDied;
+        mFriendlyHits = state.mFriendlyHits;
+        mTalkedTo = state.mTalkedTo;
+        mAlarmed = state.mAlarmed;
+        mAttacked = state.mAttacked;
+        mHostile = state.mHostile;
+        mAttackingOrSpell = state.mAttackingOrSpell;
+        // TODO: rewrite. does this really need 3 separate bools?
+        mKnockdown = state.mKnockdown;
+        mKnockdownOneFrame = state.mKnockdownOneFrame;
+        mKnockdownOverOneFrame = state.mKnockdownOverOneFrame;
+        mHitRecovery = state.mHitRecovery;
+        mBlock = state.mBlock;
+        mMovementFlags = state.mMovementFlags;
+        mAttackStrength = state.mAttackStrength;
+        mFallHeight = state.mFallHeight;
+        mLastHitObject = state.mLastHitObject;
+        mRecalcDynamicStats = state.mRecalcDynamicStats;
+        mDrawState = DrawState_(state.mDrawState);
+        mLevel = state.mLevel;
+
+        mSpells.readState(state.mSpells);
     }
 
     // Relates to NPC gold reset delay

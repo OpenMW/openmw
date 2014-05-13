@@ -541,9 +541,11 @@ namespace MWGui
 
         int count = object.getRefData().getCount();
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWBase::Environment::get().getWorld()->breakInvisibility(player);
+
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
