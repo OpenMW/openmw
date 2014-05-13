@@ -21,7 +21,6 @@ namespace Compiler
         s - Short <BR>
         S - String, case preserved <BR>
         x - Optional, ignored argument
-        \see Compiler::ExprParser::parseArguments
     **/
     typedef std::string ScriptArgs;
 
