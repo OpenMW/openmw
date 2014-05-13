@@ -8,13 +8,13 @@ namespace ESM
 {
     unsigned int Pathgrid::sRecordId = REC_PGRD;
 
-    Pathgrid::Point& Pathgrid::Point::operator=(const float rhs[]) {
+    Pathgrid::Point& Pathgrid::Point::operator=(const float rhs[3]) {
         mX = rhs[0];
         mY = rhs[1];
         mZ = rhs[2];
         return *this;
     }
-    Pathgrid::Point::Point(const float rhs[]) {
+    Pathgrid::Point::Point(const float rhs[3]) {
         mX = rhs[0];
         mY = rhs[1];
         mZ = rhs[2];
