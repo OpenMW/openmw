@@ -501,6 +501,7 @@ namespace MWMechanics
         state.mRecalcDynamicStats = mRecalcDynamicStats;
         state.mDrawState = mDrawState;
         state.mLevel = mLevel;
+        state.mActorId = mActorId;
 
         mSpells.writeState(state.mSpells);
     }
@@ -538,6 +539,7 @@ namespace MWMechanics
         mRecalcDynamicStats = state.mRecalcDynamicStats;
         mDrawState = DrawState_(state.mDrawState);
         mLevel = state.mLevel;
+        mActorId = state.mActorId;
 
         mSpells.readState(state.mSpells);
     }
@@ -578,5 +580,17 @@ namespace MWMechanics
     void CreatureStats::cleanup()
     {
         sActorId = 0;
+    }
+
+    void CreatureStats::writeActorIdCounter (ESM::ESMWriter& esm)
+    {
+        esm.startRecord(ESM::REC_ACTC);
+        esm.writeHNT("COUN", sActorId);
+        esm.endRecord(ESM::REC_ACTC);
+    }
+
+    void CreatureStats::readActorIdCounter (ESM::ESMReader& esm)
+    {
+        esm.getHNT(sActorId, "COUN");
     }
 }

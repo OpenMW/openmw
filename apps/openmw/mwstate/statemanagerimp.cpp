@@ -318,6 +318,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_CSTA:
                 case ESM::REC_WTHR:
                 case ESM::REC_DYNA:
+                case ESM::REC_ACTC:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;

@@ -238,6 +238,9 @@ namespace MWMechanics
 
         void readState (const ESM::CreatureStats& state);
 
+        static void writeActorIdCounter (ESM::ESMWriter& esm);
+        static void readActorIdCounter (ESM::ESMReader& esm);
+
         // Relates to NPC gold reset delay
         void setTradeTime(MWWorld::TimeStamp tradeTime);
         MWWorld::TimeStamp getTradeTime() const;

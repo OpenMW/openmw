@@ -274,7 +274,8 @@ namespace MWWorld
             +mStore.countSavedGameRecords()
             +mGlobalVariables.countSavedGameRecords()
             +1 // player record
-            +1; // weather record
+            +1 // weather record
+            +1; // actorId counter
     }
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -287,6 +288,9 @@ namespace MWWorld
             mRendering->writeFog(cellstore);
         }
 
+        MWMechanics::CreatureStats::writeActorIdCounter(writer);
+        progress.increaseProgress();
+
         mCells.write (writer, progress);
         mStore.write (writer, progress);
         mGlobalVariables.write (writer, progress);
@@ -297,6 +301,12 @@ namespace MWWorld
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
         const std::map<int, int>& contentFileMap)
     {
+        if (type == ESM::REC_ACTC)
+        {
+            MWMechanics::CreatureStats::readActorIdCounter(reader);
+            return;
+        }
+
         if (!mStore.readRecord (reader, type) &&
             !mGlobalVariables.readRecord (reader, type) &&
             !mPlayer->readRecord (reader, type) &&

@@ -24,6 +24,7 @@ namespace ESM
 
         ESM::TimeStamp mTradeTime;
         int mGoldPool;
+        int mActorId;
 
         bool mDead;
         bool mDied;
