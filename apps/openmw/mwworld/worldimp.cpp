@@ -1863,12 +1863,8 @@ namespace MWWorld
 
     bool World::getIsMovingDoor(const Ptr& door)
     {
-        //This more expensive comparison is needed for some reason
-        // TODO (tluppi#1#): Figure out why comparing Ptr isn't working
-        for(std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin(); it != mDoorStates.end(); it++)
-            if(it->first.getCellRef().mRefID == door.getCellRef().mRefID)
-                return true;
-        return false;
+        bool result = mDoorStates.find(door) != mDoorStates.end();
+        return result;
     }
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)

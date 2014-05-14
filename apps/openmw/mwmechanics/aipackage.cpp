@@ -96,7 +96,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
             if(door != NULL) // NOTE: checks interior cells only
             {
                 if(door->mRef.mTrap.empty() && mLastDoorChecked != door) { //Open the door if untrapped
-                    door->mClass->activate(MWBase::Environment::get().getWorld()->getPtr(door->mRef.mRefID,false), actor).get()->execute(actor);
+                    door->mClass->activate(MWWorld::Ptr(door, actor.getCell()), actor).get()->execute(actor);
                     mLastDoorChecked = door;
                 }
             }

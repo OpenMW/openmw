@@ -29,7 +29,7 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     //Set the target desition from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 200 || mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2])) { //Stop when you get close
+    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 200) { //Stop when you get close
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);
         MWWorld::Class::get(target).activate(target,actor).get()->execute(actor); //Arrest player

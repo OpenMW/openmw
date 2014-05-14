@@ -29,7 +29,7 @@ namespace MWMechanics
 
         private:
             float mDuration;
-            MWWorld::Ptr mDoorPtr;
+            const MWWorld::Ptr& mDoorPtr;
     };
 }
 #endif
