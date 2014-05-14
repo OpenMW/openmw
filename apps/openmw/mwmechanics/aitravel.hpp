@@ -7,14 +7,15 @@
 
 namespace MWMechanics
 {
+    /// \brief Causes the AI to travel to the specified point
     class AiTravel : public AiPackage
     {
         public:
+            /// Default constructor
             AiTravel(float x, float y, float z);
             virtual AiTravel *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
-                    ///< \return Package completed?
 
             virtual int getTypeId() const;
 

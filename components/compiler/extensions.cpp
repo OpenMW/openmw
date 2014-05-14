@@ -21,7 +21,7 @@ namespace Compiler
         return iter->second;
     }
 
-    bool Extensions::isFunction (int keyword, char& returnType, std::string& argumentType,
+    bool Extensions::isFunction (int keyword, ScriptReturn& returnType, ScriptArgs& argumentType,
         bool& explicitReference) const
     {
         std::map<int, Function>::const_iterator iter = mFunctions.find (keyword);
@@ -37,7 +37,7 @@ namespace Compiler
         return true;
     }
 
-    bool Extensions::isInstruction (int keyword, std::string& argumentType,
+    bool Extensions::isInstruction (int keyword, ScriptArgs& argumentType,
         bool& explicitReference) const
     {
         std::map<int, Instruction>::const_iterator iter = mInstructions.find (keyword);
@@ -52,8 +52,8 @@ namespace Compiler
         return true;
     }
 
-    void Extensions::registerFunction (const std::string& keyword, char returnType,
-        const std::string& argumentType, int code, int codeExplicit)
+    void Extensions::registerFunction (const std::string& keyword, ScriptReturn returnType,
+        const ScriptArgs& argumentType, int code, int codeExplicit)
     {
         Function function;
 
@@ -83,7 +83,7 @@ namespace Compiler
     }
 
     void Extensions::registerInstruction (const std::string& keyword,
-        const std::string& argumentType, int code, int codeExplicit)
+        const ScriptArgs& argumentType, int code, int codeExplicit)
     {
         Instruction instruction;
 
