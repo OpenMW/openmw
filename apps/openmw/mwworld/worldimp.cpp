@@ -30,6 +30,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -1216,9 +1217,16 @@ namespace MWWorld
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
                     if (MWWorld::Class::get(ptr).isActor())
                     {
-                        // we collided with an actor, we need to undo the rotation
+                        // Collided with actor, ask actor to try to avoid door
+                        if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr() ) {
+                            MWMechanics::AiSequence& seq = MWWorld::Class::get(ptr).getCreatureStats(ptr).getAiSequence();
+                            if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
+                                seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
+                        }
+
+                        // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
-                        break;
+                        //break; //Removed in case multiple actors are touching
                     }
                 }
 
@@ -1860,6 +1868,12 @@ namespace MWWorld
         if (mDoorStates.find(door) != mDoorStates.end())
             return !mDoorStates[door]; // if currently opening or closing, then do the opposite
         return door.getRefData().getLocalRotation().rot[2] == 0;
+    }
+
+    bool World::getIsMovingDoor(const Ptr& door)
+    {
+        bool result = mDoorStates.find(door) != mDoorStates.end();
+        return result;
     }
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)

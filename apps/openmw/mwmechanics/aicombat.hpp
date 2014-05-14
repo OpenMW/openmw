@@ -14,20 +14,23 @@
 
 namespace MWMechanics
 {
+    /// \brief Causes the actor to fight another actor
     class AiCombat : public AiPackage
     {
         public:
+            ///Constructor
+            /** \param actor Actor to fight **/
             AiCombat(const MWWorld::Ptr& actor);
 
             virtual AiCombat *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
-            ///< \return Package completed?
 
             virtual int getTypeId() const;
 
             virtual unsigned int getPriority() const;
 
+            ///Returns target ID
             const std::string &getTargetId() const;
 
         private:

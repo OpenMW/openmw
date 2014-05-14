@@ -22,6 +22,8 @@
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loaddial.hpp>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "../filter/filter.hpp"
 
 #include "../doc/stage.hpp"
@@ -91,7 +93,7 @@ namespace CSMWorld
 
         public:
 
-            Data();
+            Data (ToUTF8::FromType encoding);
 
             virtual ~Data();
 

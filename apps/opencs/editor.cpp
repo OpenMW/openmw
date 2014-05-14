@@ -20,7 +20,7 @@
 #include "model/world/data.hpp"
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
-: mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
+: mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS")
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
@@ -89,6 +89,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc);
+
+    mDocumentManager.setEncoding (
+        ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
 

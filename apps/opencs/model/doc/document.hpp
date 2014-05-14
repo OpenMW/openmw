@@ -9,6 +9,8 @@
 #include <QObject>
 #include <QTimer>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "../world/data.hpp"
 
 #include "../tools/tools.hpp"
@@ -70,7 +72,8 @@ namespace CSMDoc
 
             Document (const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
-                const boost::filesystem::path& savePath, const boost::filesystem::path& resDir);
+                const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+                ToUTF8::FromType encoding);
 
             ~Document();
 

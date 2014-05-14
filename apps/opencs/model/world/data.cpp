@@ -55,10 +55,8 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data()
-/// \todo set encoding properly, once config implementation has been fixed.
-: mEncoder (ToUTF8::calculateEncoding ("win1252")),
-  mRefs (mCells), mReader (0), mDialogue (0)
+CSMWorld::Data::Data (ToUTF8::FromType encoding)
+: mEncoder (encoding), mRefs (mCells), mReader (0), mDialogue (0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
