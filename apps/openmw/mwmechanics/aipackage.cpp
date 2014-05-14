@@ -69,7 +69,11 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //***********************
     if(mTimer > 0.25)
     {
-        mPathFinder.buildPath(start, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
+        if(distance(mPrevDest, dest) > 10) { //Only rebuild path if it's moved
+            mPathFinder.buildPath(start, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
+            mPrevDest = dest;
+        }
+
         if(!mPathFinder.getPath().empty()) //Path has points in it
         {
             ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back(); //Get the end of the proposed path

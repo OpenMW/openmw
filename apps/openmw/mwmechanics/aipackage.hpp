@@ -67,6 +67,7 @@ namespace MWMechanics
             MWWorld::Ptr mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
 
             ESM::Position mStuckPos;
+            ESM::Pathgrid::Point mPrevDest;
     };
 }
 

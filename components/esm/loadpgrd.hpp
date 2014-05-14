@@ -34,6 +34,7 @@ struct Pathgrid
         Point& operator=(const float[3]);
         Point(const float[3]);
         Point();
+        Point(int x, int y, int z) : mX(x), mY(y), mZ(z) {}
     }; // 16 bytes
 
     struct Edge // path grid edge
