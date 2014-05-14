@@ -109,19 +109,15 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
                 // change the angle a bit, too
                 zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
             }
-            /*else if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10) {  //NPC hasn't moved much is half a second, he's stuck
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-            }*/
         }
-        else {
+        else { //Not stuck, so reset things
             mStuckTimer = 0;
             mStuckPos = pos;
             mLastDoorChecked = NULL; //Resets it, in case he gets stuck behind the door again
         }
     }
     else {
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward the rest of the time
     }
 
     zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));

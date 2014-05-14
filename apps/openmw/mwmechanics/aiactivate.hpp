@@ -9,7 +9,7 @@
 namespace MWMechanics
 {
     /// \brief Causes actor to walk to activatable object and activate it
-    /** Will actiavte when close to object or path grid complete **/
+    /** Will activate when close to object **/
     class AiActivate : public AiPackage
     {
         public:
