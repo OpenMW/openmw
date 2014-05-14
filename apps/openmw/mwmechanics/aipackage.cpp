@@ -16,7 +16,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : mLastDoorChecked(MWWorld::Ptr()), mTimer(0), mStuckTimer(0) {
+MWMechanics::AiPackage::AiPackage() : mLastDoorChecked(MWWorld::Ptr()), mTimer(.26), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
 
 }
 
@@ -118,6 +118,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
             mStuckTimer = 0;
             mStuckPos = pos;
             mLastDoorChecked = MWWorld::Ptr(); //Resets it, in case he gets stuck behind the door again
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward
         }
     }
     else {

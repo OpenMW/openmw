@@ -37,7 +37,6 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     }
     else {
         pathTo(actor, dest, duration); //Go to the destination
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
     }
 
     return false;

@@ -58,12 +58,11 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
     //Set the target desition from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    pathTo(actor, dest, duration); //Go to the destination
-
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 100) //Stop when you get close
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-    else
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+    else {
+        pathTo(actor, dest, duration); //Go to the destination
+    }
 
     //Check if you're far away
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) > 1000)

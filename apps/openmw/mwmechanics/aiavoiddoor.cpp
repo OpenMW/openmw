@@ -22,7 +22,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor,float duration
 {
 
     ESM::Position pos = actor.getRefData().getPosition();
-    if(mDuration = 1) //If it just started, get the actor position as the stuck detection thing
+    if(mDuration == 1) //If it just started, get the actor position as the stuck detection thing
         mLastPos = pos;
 
     mDuration -= duration; //Update timer
