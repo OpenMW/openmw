@@ -75,58 +75,6 @@ namespace MWMechanics
                 return true;
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        ESM::Position pos = actor.getRefData().getPosition();
-        bool cellChange = actor.getCell()->getCell()->mData.mX != mCellX || actor.getCell()->getCell()->mData.mY != mCellY;
-
-        if(actor.getCell()->getCell()->mData.mX != player.getCell()->getCell()->mData.mX)
-        {
-            int sideX = PathFinder::sgn(actor.getCell()->getCell()->mData.mX - player.getCell()->getCell()->mData.mX);
-            // Check if actor is near the border of an inactive cell. If so, pause walking.
-            if(sideX * (pos.pos[0] - actor.getCell()->getCell()->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
-                2.0 - 200))
-            {
-                MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return false;
-            }
-        }
-        if(actor.getCell()->getCell()->mData.mY != player.getCell()->getCell()->mData.mY)
-        {
-            int sideY = PathFinder::sgn(actor.getCell()->getCell()->mData.mY - player.getCell()->getCell()->mData.mY);
-            // Check if actor is near the border of an inactive cell. If so, pause walking.
-            if(sideY*(pos.pos[1] - actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
-                2.0 - 200))
-            {
-                MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return false;
-            }
-        }
-
-
-        if(!mPathFinder.isPathConstructed() || cellChange)
-        {
-            mCellX = actor.getCell()->getCell()->mData.mX;
-            mCellY = actor.getCell()->getCell()->mData.mY;
-
-            ESM::Pathgrid::Point dest;
-            dest.mX = mX;
-            dest.mY = mY;
-            dest.mZ = mZ;
-
-            ESM::Pathgrid::Point start;
-            start.mX = pos.pos[0];
-            start.mY = pos.pos[1];
-            start.mZ = pos.pos[2];
-
-            mPathFinder.buildPath(start, dest, actor.getCell(), true);
-        }
-
-        if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
-        {
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-            return true;
-        }
-
         const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
         const float* const leaderPos = actor.getRefData().getPosition().pos;
         const float* const followerPos = follower.getRefData().getPosition().pos;
@@ -141,9 +89,8 @@ namespace MWMechanics
 
         if(distanceBetweenResult <= mMaxDist * mMaxDist)
         {
-            float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            zTurn(actor, Ogre::Degree(zAngle));
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+            if(pathTo(actor,ESM::Pathgrid::Point(mX,mY,mZ),duration)) //Returns true on path complete
+                return true;
             mMaxDist = 470;
         }
         else

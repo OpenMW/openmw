@@ -390,10 +390,14 @@ namespace MWBase
             virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
 
+            /// if activated, should this door be opened or closed?
             virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door) = 0;
-            ///< if activated, should this door be opened or closed?
+
+            /// activate (open or close) an non-teleport door
             virtual void activateDoor(const MWWorld::Ptr& door) = 0;
-            ///< activate (open or close) an non-teleport door
+
+            /// Is door currently opening/closing?
+            virtual bool getIsMovingDoor(const MWWorld::Ptr& door) = 0;
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is standing on \a object
