@@ -959,6 +959,7 @@ namespace MWMechanics
                     // Reset magic effects and recalculate derived effects
                     // One case where we need this is to make sure bound items are removed upon death
                     stats.setMagicEffects(MWMechanics::MagicEffects());
+                    stats.getActiveSpells().clear();
                     calculateCreatureStatModifiers(iter->first, 0);
 
                     MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);

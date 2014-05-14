@@ -496,7 +496,7 @@ namespace MWMechanics
         state.mBlock = mBlock;
         state.mMovementFlags = mMovementFlags;
         state.mAttackStrength = mAttackStrength;
-        state.mFallHeight = mFallHeight;
+        state.mFallHeight = mFallHeight; // TODO: vertical velocity (move from PhysicActor to CreatureStats?)
         state.mLastHitObject = mLastHitObject;
         state.mRecalcDynamicStats = mRecalcDynamicStats;
         state.mDrawState = mDrawState;
@@ -504,6 +504,7 @@ namespace MWMechanics
         state.mActorId = mActorId;
 
         mSpells.writeState(state.mSpells);
+        mActiveSpells.writeState(state.mActiveSpells);
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
@@ -542,6 +543,7 @@ namespace MWMechanics
         mActorId = state.mActorId;
 
         mSpells.readState(state.mSpells);
+        mActiveSpells.readState(state.mActiveSpells);
     }
 
     // Relates to NPC gold reset delay

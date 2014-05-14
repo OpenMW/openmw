@@ -1,4 +1,3 @@
-
 #include "creaturestats.hpp"
 
 void ESM::CreatureStats::load (ESMReader &esm)
@@ -76,6 +75,7 @@ void ESM::CreatureStats::load (ESMReader &esm)
     esm.getHNOT (mActorId, "ACID");
 
     mSpells.load(esm);
+    mActiveSpells.load(esm);
 }
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
@@ -153,4 +153,5 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
         esm.writeHNT ("ACID", mActorId);
 
     mSpells.save(esm);
+    mActiveSpells.save(esm);
 }

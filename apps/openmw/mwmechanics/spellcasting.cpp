@@ -222,7 +222,7 @@ namespace MWMechanics
         }
 
         ESM::EffectList reflectedEffects;
-        std::vector<ActiveSpells::Effect> appliedLastingEffects;
+        std::vector<ActiveSpells::ActiveEffect> appliedLastingEffects;
         bool firstAppliedEffect = true;
         bool anyHarmfulEffect = false;
 
@@ -332,8 +332,9 @@ namespace MWMechanics
                 bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
                 if (target.getClass().isActor() && hasDuration)
                 {
-                    ActiveSpells::Effect effect;
-                    effect.mKey = MWMechanics::EffectKey(*effectIt);
+                    ActiveSpells::ActiveEffect effect;
+                    effect.mEffectId = effectIt->mEffectID;
+                    effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
                     effect.mDuration = effectIt->mDuration;
                     effect.mMagnitude = magnitude;
 
@@ -345,8 +346,8 @@ namespace MWMechanics
                     {
                         if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
                         {
-                            std::vector<ActiveSpells::Effect> effects;
-                            ActiveSpells::Effect effect_ = effect;
+                            std::vector<ActiveSpells::ActiveEffect> effects;
+                            ActiveSpells::ActiveEffect effect_ = effect;
                             effect_.mMagnitude *= -1;
                             effects.push_back(effect_);
                             // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
@@ -392,6 +393,7 @@ namespace MWMechanics
                     else
                         castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
 
+                    // TODO: VFX are no longer active after saving/reloading the game
                     bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
                     // Note: in case of non actor, a free effect should be fine as well
                     MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);

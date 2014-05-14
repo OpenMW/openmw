@@ -10,6 +10,7 @@
 #include "magiceffects.hpp"
 
 #include <components/esm/defs.hpp>
+#include <components/esm/activespells.hpp>
 
 namespace MWMechanics
 {
@@ -21,19 +22,11 @@ namespace MWMechanics
     {
         public:
 
-            // Parameters of an effect concerning lasting effects.
-            // Note we are not using ENAMstruct since the magnitude may be modified by magic resistance, etc.
-            // It could also be a negative magnitude, in case of inversing an effect, e.g. Absorb spell causes damage on target, but heals the caster.
-            struct Effect
-            {
-                float mMagnitude;
-                EffectKey mKey;
-                float mDuration;
-            };
+            typedef ESM::ActiveEffect ActiveEffect;
 
             struct ActiveSpellParams
             {
-                std::vector<Effect> mEffects;
+                std::vector<ActiveEffect> mEffects;
                 MWWorld::TimeStamp mTimeStamp;
                 std::string mDisplayName;
 
@@ -43,6 +36,9 @@ namespace MWMechanics
 
             typedef std::multimap<std::string, ActiveSpellParams > TContainer;
             typedef TContainer::const_iterator TIterator;
+
+            void readState (const ESM::ActiveSpells& state);
+            void writeState (ESM::ActiveSpells& state) const;
 
         private:
 
@@ -77,7 +73,7 @@ namespace MWMechanics
             /// \param effects
             /// \param displayName Name for display in magic menu.
             ///
-            void addSpell (const std::string& id, bool stack, std::vector<Effect> effects,
+            void addSpell (const std::string& id, bool stack, std::vector<ActiveEffect> effects,
                            const std::string& displayName, int casterActorId);
 
             /// Removes the active effects from this spell/potion/.. with \a id
@@ -91,6 +87,9 @@ namespace MWMechanics
 
             /// Remove all effects with CASTER_LINKED flag that were cast by \a casterActorId
             void purge (int casterActorId);
+
+            /// Remove all spells
+            void clear();
 
             bool isSpellActive (std::string id) const;
             ///< case insensitive

@@ -10,6 +10,7 @@
 #include "defs.hpp"
 
 #include "spellstate.hpp"
+#include "activespells.hpp"
 
 namespace ESM
 {
@@ -49,6 +50,7 @@ namespace ESM
         int mLevel;
 
         SpellState mSpells;
+        ActiveSpells mActiveSpells;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
