@@ -223,10 +223,16 @@ namespace MWMechanics
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
 
-        // Note, this is just a cache to avoid checking the whole container store every frame TODO: Put it somewhere else?
+        // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
+        // TODO: Put it somewhere else?
         std::set<int> mBoundItems;
-        // Same as above
-        std::map<int, std::string> mSummonedCreatures;
+
+        // TODO: store in savegame
+        // TODO: encapsulate?
+        // <ESM::MagicEffect index, actor index>
+        std::map<int, int> mSummonedCreatures;
+        // Contains summoned creatures with an expired lifetime that have not been deleted yet.
+        std::vector<int> mSummonGraveyard;
 
         void writeState (ESM::CreatureStats& state) const;
 

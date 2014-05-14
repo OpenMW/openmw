@@ -38,9 +38,12 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
 {
     if (bound)
     {
-        MWWorld::Ptr newPtr = *actor.getClass().getContainerStore(actor).add(item, 1, actor);
-        MWWorld::ActionEquip action(newPtr);
-        action.execute(actor);
+        if (actor.getClass().getContainerStore(actor).count(item) == 0)
+        {
+            MWWorld::Ptr newPtr = *actor.getClass().getContainerStore(actor).add(item, 1, actor);
+            MWWorld::ActionEquip action(newPtr);
+            action.execute(actor);
+        }
     }
     else
     {
@@ -534,27 +537,48 @@ namespace MWMechanics
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
                         ref.getPtr().getCellRef().mPos = ipos;
 
-                        // TODO: Add AI to follow player and fight for him
+                        MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
+
+                        // Make the summoned creature follow its master and help in fights
                         AiFollow package(ptr.getRefData().getHandle());
-                        MWWorld::Class::get (ref.getPtr()).getCreatureStats (ref.getPtr()).getAiSequence().stack(package, ptr);
+                        summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
+                        int creatureActorId = summonedCreatureStats.getActorId();
+
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+
                         // TODO: VFX_SummonStart, VFX_SummonEnd
-                        creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
-                            MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos).getRefData().getHandle()));
+                        creatureStats.mSummonedCreatures.insert(std::make_pair(it->first, creatureActorId));
                     }
                 }
                 else
                 {
-                    std::string handle = creatureStats.mSummonedCreatures[it->first];
-                    // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
-                    // plays though, which is a rather lame exploit in vanilla.
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(handle);
+                    // Summon lifetime has expired. Try to delete the creature.
+                    int actorId = creatureStats.mSummonedCreatures[it->first];
+                    creatureStats.mSummonedCreatures.erase(it->first);
+
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(actorId);
                     if (!ptr.isEmpty())
                     {
+                        // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
+                        // plays though, which is a rather lame exploit in vanilla.
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
                         creatureStats.mSummonedCreatures.erase(it->first);
                     }
+                    else
+                    {
+                        // We didn't find the creature. It's probably in an inactive cell.
+                        // Add to graveyard so we can delete it when the cell becomes active.
+                        creatureStats.mSummonGraveyard.push_back(actorId);
+                    }
                 }
             }
+        }
+
+        for (std::vector<int>::iterator it = creatureStats.mSummonGraveyard.begin(); it != creatureStats.mSummonGraveyard.end(); ++it)
+        {
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(*it);
+            if (!ptr.isEmpty())
+                MWBase::Environment::get().getWorld()->deleteObject(ptr);
         }
     }
 
