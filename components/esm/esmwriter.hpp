@@ -74,6 +74,18 @@ class ESMWriter
             endRecord(name);
         }
 
+private:
+        // Prevent using writeHNT with strings. This already happened by accident and results in
+        // state being discarded without any error on writing or reading it. :(
+        // writeHNString and friends must be used instead.
+        void writeHNT(const std::string &name, std::string data)
+        {
+        }
+        void writeT(const std::string& data)
+        {
+        }
+public:
+
         template<typename T>
         void writeHNT(const std::string& name, const T& data, int size)
         {
