@@ -321,7 +321,7 @@ namespace MWSound
             sound = mOutput->playSound(file, volume, basevol, pitch, mode|type, offset);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
-        catch(std::exception&)
+        catch(std::exception &e)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
@@ -349,7 +349,7 @@ namespace MWSound
             else
                 mActiveSounds[sound] = std::make_pair(ptr, soundId);
         }
-        catch(std::exception&)
+        catch(std::exception &e)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }

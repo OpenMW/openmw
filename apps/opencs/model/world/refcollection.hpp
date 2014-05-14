@@ -8,7 +8,7 @@
 namespace CSMWorld
 {
     struct Cell;
-    class UniversalId;
+    struct UniversalId;
 
     /// \brief References in cells
     class RefCollection : public Collection<CellRef>

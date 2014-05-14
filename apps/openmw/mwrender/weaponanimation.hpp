@@ -33,7 +33,6 @@ namespace MWRender
     {
     public:
         WeaponAnimation() : mPitchFactor(0) {}
-        virtual ~WeaponAnimation() {}
 
         virtual void attachArrow(MWWorld::Ptr actor);
         virtual void releaseArrow(MWWorld::Ptr actor);

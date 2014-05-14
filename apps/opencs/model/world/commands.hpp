@@ -20,7 +20,7 @@ namespace CSMWorld
 {
     class IdTable;
     class IdTable;
-    struct RecordBase;
+    class RecordBase;
 
     class ModifyCommand : public QUndoCommand
     {

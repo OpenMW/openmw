@@ -111,7 +111,7 @@ namespace MWGui
     ContainerWindow::ContainerWindow(DragAndDrop* dragAndDrop)
         : WindowBase("openmw_container_window.layout")
         , mDragAndDrop(dragAndDrop)
-        , mSelectedItem(static_cast<size_t>(-1))
+        , mSelectedItem(-1)
         , mModel(NULL)
         , mSortModel(NULL)
         , mPickpocketDetected(false)

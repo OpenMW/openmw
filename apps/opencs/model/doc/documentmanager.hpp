@@ -8,7 +8,7 @@
 
 namespace Files
 {
-    struct ConfigurationManager;
+    class ConfigurationManager;
 }
 
 namespace CSMDoc

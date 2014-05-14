@@ -11,7 +11,7 @@
 namespace CSMWorld
 {
     class CollectionBase;
-    struct RecordBase;
+    class RecordBase;
 
     class IdTable : public QAbstractItemModel
     {

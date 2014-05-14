@@ -35,7 +35,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
 
         mSupported = (mSunTotalAreaQuery != 0) && (mSunVisibleAreaQuery != 0);
     }
-    catch (Ogre::Exception&)
+    catch (Ogre::Exception& e)
     {
         mSupported = false;
     }

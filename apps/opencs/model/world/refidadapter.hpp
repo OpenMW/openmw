@@ -9,7 +9,7 @@ namespace CSMWorld
 {
     class RefIdColumn;
     class RefIdData;
-    struct RecordBase;
+    class RecordBase;
 
     class RefIdAdapter
     {

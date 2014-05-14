@@ -42,8 +42,6 @@ namespace MWGui
 
         std::map <int, std::vector<MagicEffectInfo> > mEffectSources;
 
-        virtual ~EffectSourceVisitor() {}
-
         virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, const std::string& casterHandle,
                             float magnitude, float remainingTime = -1);

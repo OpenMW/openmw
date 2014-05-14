@@ -610,7 +610,6 @@ if (WIN32)
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
-        4505 # Unreferenced local function has been removed
         4701 # Potentially uninitialized local variable used
         4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )

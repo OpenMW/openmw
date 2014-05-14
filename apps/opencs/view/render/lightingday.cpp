@@ -13,7 +13,7 @@ void CSVRender::LightingDay::activate (Ogre::SceneManager *sceneManager,
     if (defaultAmbient)
         mSceneManager->setAmbientLight (*defaultAmbient);
     else
-        mSceneManager->setAmbientLight (Ogre::ColourValue (0.7f, 0.7f, 0.7f, 1.0f));
+        mSceneManager->setAmbientLight (Ogre::ColourValue (0.7, 0.7, 0.7, 1));
 
     mLight = mSceneManager->createLight();
     mLight->setType (Ogre::Light::LT_DIRECTIONAL);
