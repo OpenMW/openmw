@@ -408,9 +408,9 @@ namespace MWMechanics
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, caster.getRefData().getHandle());
 
-        if (anyHarmfulEffect && target.getClass().isActor() && target != caster
-                && target.getClass().getCreatureStats(target).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
-            MWBase::Environment::get().getMechanicsManager()->commitCrime(caster, target, MWBase::MechanicsManager::OT_Assault);
+        // Notify the target actor they've been hit
+        if (anyHarmfulEffect && target.getClass().isActor() && target != caster)
+            target.getClass().onHit(target, 0.f, true, MWWorld::Ptr(), caster, true);
     }
 
     void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, const MWMechanics::EffectKey& effect, float magnitude)
