@@ -133,7 +133,7 @@ namespace MWMechanics
     }
 
     void ActiveSpells::addSpell(const std::string &id, bool stack, std::vector<Effect> effects,
-                                const std::string &displayName, const std::string& casterHandle)
+                                const std::string &displayName, int casterActorId)
     {
         bool exists = false;
         for (TContainer::const_iterator it = begin(); it != end(); ++it)
@@ -146,7 +146,7 @@ namespace MWMechanics
         params.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp();
         params.mEffects = effects;
         params.mDisplayName = displayName;
-        params.mCasterHandle = casterHandle;
+        params.mCasterActorId = casterActorId;
 
         if (!exists || stack)
             mSpells.insert (std::make_pair(id, params));
@@ -178,7 +178,7 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnitude;
 
                 if (magnitude)
-                    visitor.visit(effectIt->mKey, name, it->second.mCasterHandle, magnitude, remainingTime);
+                    visitor.visit(effectIt->mKey, name, it->second.mCasterActorId, magnitude, remainingTime);
             }
         }
     }
@@ -212,7 +212,7 @@ namespace MWMechanics
         mSpellsChanged = true;
     }
 
-    void ActiveSpells::purge(const std::string &actorHandle)
+    void ActiveSpells::purge(int casterActorId)
     {
         for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); ++it)
         {
@@ -221,7 +221,7 @@ namespace MWMechanics
             {
                 const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mKey.mId);
                 if (effect->mData.mFlags & ESM::MagicEffect::CasterLinked
-                        && it->second.mCasterHandle == actorHandle)
+                        && it->second.mCasterActorId == casterActorId)
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
                     ++effectIt;

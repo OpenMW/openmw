@@ -1372,9 +1372,9 @@ bool CharacterController::kill()
 {
     if( isDead() )
     {
-        //player's death animation is over
         if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) )
         {
+            //player's death animation is over
             MWBase::Environment::get().getStateManager()->askLoadRecent();
         }
         return false;

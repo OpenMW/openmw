@@ -119,7 +119,7 @@ namespace MWMechanics
             : mCreature(trappedCreature) {}
 
         virtual void visit (MWMechanics::EffectKey key,
-                                 const std::string& sourceName, const std::string& casterHandle,
+                                 const std::string& sourceName, int casterActorId,
                             float magnitude, float remainingTime = -1)
         {
             if (key.mId != ESM::MagicEffect::Soultrap)
@@ -129,7 +129,7 @@ namespace MWMechanics
 
             MWBase::World* world = MWBase::Environment::get().getWorld();
 
-            MWWorld::Ptr caster = world->searchPtrViaHandle(casterHandle);
+            MWWorld::Ptr caster = world->searchPtrViaActorId(casterActorId);
             if (caster.isEmpty() || !caster.getClass().isActor())
                 return;
 
@@ -938,17 +938,16 @@ namespace MWMechanics
                     continue;
                 }
 
-                // Make sure spell effects with CasterLinked flag are removed
-                // TODO: would be nice not to do this all the time...
-                for (PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
-                {
-                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
-                    spells.purge(iter->first.getRefData().getHandle());
-                }
-
                 if (iter->second->kill())
                 {
                     ++mDeathCount[cls.getId(iter->first)];
+
+                    // Make sure spell effects with CasterLinked flag are removed
+                    for (PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
+                    {
+                        MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
+                        spells.purge(stats.getActorId());
+                    }
 
                     // Apply soultrap
                     if (iter->first.getTypeName() == typeid(ESM::Creature).name())

@@ -349,9 +349,9 @@ namespace MWMechanics
                             ActiveSpells::Effect effect_ = effect;
                             effect_.mMagnitude *= -1;
                             effects.push_back(effect_);
-                            // Also make sure to set casterHandle = target, so that the effect on the caster gets purged when the target dies
+                            // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
                             caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                        effects, mSourceName, target.getRefData().getHandle());
+                                        effects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
                         }
                     }
                 }
@@ -409,7 +409,7 @@ namespace MWMechanics
 
         if (!appliedLastingEffects.empty())
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
-                                                                                  mSourceName, caster.getRefData().getHandle());
+                                                                                  mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
 
         // Notify the target actor they've been hit
         if (anyHarmfulEffect && target.getClass().isActor() && target != caster)
