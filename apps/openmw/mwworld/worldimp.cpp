@@ -2223,7 +2223,7 @@ namespace MWWorld
                                    const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed)
     {
         ProjectileState state;
-        state.mActorHandle = actor.getRefData().getHandle();
+        state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mBow = bow;
         state.mVelocity = orient.yAxis() * speed;
 
@@ -2310,7 +2310,7 @@ namespace MWWorld
         MagicBoltState state;
         state.mSourceName = sourceName;
         state.mId = id;
-        state.mActorHandle = actor.getRefData().getHandle();
+        state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mSpeed = speed;
         state.mStack = stack;
 
@@ -2374,7 +2374,7 @@ namespace MWWorld
                 if (obstacle == ptr)
                     continue;
 
-                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                MWWorld::Ptr caster = searchPtrViaActorId(it->second.mActorId);
 
                 // Arrow intersects with player immediately after shooting :/
                 if (obstacle == caster)
@@ -2460,7 +2460,7 @@ namespace MWWorld
                 if (obstacle == ptr)
                     continue;
 
-                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                MWWorld::Ptr caster = searchPtrViaActorId(it->second.mActorId);
                 if (caster.isEmpty())
                     caster = obstacle;
 
@@ -2483,7 +2483,7 @@ namespace MWWorld
 
             if (explode)
             {
-                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                MWWorld::Ptr caster = searchPtrViaActorId(it->second.mActorId);
                 explodeSpell(Ogre::Vector3(ptr.getRefData().getPosition().pos), ptr, it->second.mEffects, caster, it->second.mId, it->second.mSourceName);
 
                 deleteObject(ptr);

@@ -96,7 +96,7 @@ namespace MWWorld
                 std::string mId;
 
                 // Actor who casted this projectile
-                std::string mActorHandle;
+                int mActorId;
 
                 // Name of item to display as effect source in magic menu (in case we casted an enchantment)
                 std::string mSourceName;
@@ -111,7 +111,7 @@ namespace MWWorld
             struct ProjectileState
             {
                 // Actor who shot this projectile
-                std::string mActorHandle;
+                int mActorId;
 
                 MWWorld::Ptr mBow; // bow or crossbow the projectile was fired from
 
