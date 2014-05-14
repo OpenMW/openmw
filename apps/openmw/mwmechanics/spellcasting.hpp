@@ -61,6 +61,7 @@ namespace MWMechanics
         /// @note Auto detects if spell, ingredient or potion
         bool cast (const std::string& id);
 
+        /// @note \a target can be any type of object, not just actors.
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
 

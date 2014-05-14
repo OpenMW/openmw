@@ -189,6 +189,9 @@ namespace MWMechanics
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
                             const ESM::EffectList &effects, ESM::RangeType range, bool reflected, bool exploded)
     {
+        if (target.getClass().isActor() && target.getClass().getCreatureStats(target).isDead())
+            return;
+
         // If none of the effects need to apply, we can early-out
         bool found = false;
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
