@@ -1202,36 +1202,48 @@ namespace MWWorld
         while (it != mDoorStates.end())
         {
             if (!mWorldScene->isCellActive(*it->first.getCell()) || !it->first.getRefData().getBaseNode())
+            {
+                // The door is no longer in an active cell, or it was disabled.
+                // Erase from mDoorStates, since we no longer need to move it.
+                // Once we load the door's cell again (or re-enable the door), Door::insertObject will reinsert to mDoorStates.
                 mDoorStates.erase(it++);
+            }
             else
             {
                 float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
                 float diff = duration * 90;
-                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second ? 1 : -1)), 90.f);
+                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second == 1 ? 1 : -1)), 90.f);
                 localRotateObject(it->first, 0, 0, targetRot);
+
+                bool reached = (targetRot == 90.f && it->second) || targetRot == 0.f;
 
                 /// \todo should use convexSweepTest here
                 std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
-                    if (MWWorld::Class::get(ptr).isActor())
+                    if (ptr.getClass().isActor())
                     {
                         // Collided with actor, ask actor to try to avoid door
                         if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr() ) {
-                            MWMechanics::AiSequence& seq = MWWorld::Class::get(ptr).getCreatureStats(ptr).getAiSequence();
+                            MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
                                 seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
                         }
 
                         // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
+                        reached = false;
                         //break; //Removed in case multiple actors are touching
                     }
                 }
 
-                if ((targetRot == 90.f && it->second) || targetRot == 0.f)
+                if (reached)
+                {
+                    // Mark as non-moving
+                    it->first.getClass().setDoorState(it->first, 0);
                     mDoorStates.erase(it++);
+                }
                 else
                     ++it;
             }
@@ -1849,31 +1861,32 @@ namespace MWWorld
 
     void World::activateDoor(const MWWorld::Ptr& door)
     {
-        if (mDoorStates.find(door) != mDoorStates.end())
+        int state = door.getClass().getDoorState(door);
+        switch (state)
         {
-            // if currently opening, then close, if closing, then open
-            mDoorStates[door] = !mDoorStates[door];
-        }
-        else
-        {
+        case 0:
             if (door.getRefData().getLocalRotation().rot[2] == 0)
-                mDoorStates[door] = 1; // open
+                state = 1; // if closed, then open
             else
-                mDoorStates[door] = 0; // close
+                state = 2; // if open, then close
+            break;
+        case 2:
+            state = 1; // if closing, then open
+            break;
+        case 1:
+        default:
+            state = 2; // if opening, then close
+            break;
         }
+        door.getClass().setDoorState(door, state);
+        mDoorStates[door] = state;
     }
 
-    bool World::getOpenOrCloseDoor(const Ptr &door)
+    void World::activateDoor(const Ptr &door, bool open)
     {
-        if (mDoorStates.find(door) != mDoorStates.end())
-            return !mDoorStates[door]; // if currently opening or closing, then do the opposite
-        return door.getRefData().getLocalRotation().rot[2] == 0;
-    }
-
-    bool World::getIsMovingDoor(const Ptr& door)
-    {
-        bool result = mDoorStates.find(door) != mDoorStates.end();
-        return result;
+        int state = open ? 1 : 2;
+        door.getClass().setDoorState(door, state);
+        mDoorStates[door] = state;
     }
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)

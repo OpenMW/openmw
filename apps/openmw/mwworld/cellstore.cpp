@@ -13,6 +13,7 @@
 #include <components/esm/creaturestate.hpp>
 #include <components/esm/fogstate.hpp>
 #include <components/esm/creaturelevliststate.hpp>
+#include <components/esm/doorstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -591,7 +592,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mClothes);
         writeReferenceCollection<ESM::ContainerState> (writer, mContainers);
         writeReferenceCollection<ESM::CreatureState> (writer, mCreatures);
-        writeReferenceCollection<ESM::ObjectState> (writer, mDoors);
+        writeReferenceCollection<ESM::DoorState> (writer, mDoors);
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
         writeReferenceCollection<ESM::CreatureLevListState> (writer, mCreatureLists);
         writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
@@ -659,7 +660,7 @@ namespace MWWorld
 
                 case ESM::REC_DOOR:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mDoors, contentFileMap);
+                    readReferenceCollection<ESM::DoorState> (reader, mDoors, contentFileMap);
                     break;
 
                 case ESM::REC_INGR:

@@ -88,7 +88,7 @@ namespace MWWorld
             float mFacedDistance;
 
             std::map<MWWorld::Ptr, int> mDoorStates;
-            ///< only holds doors that are currently moving. 0 means closing, 1 opening
+            ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
             struct MagicBoltState
             {
@@ -496,13 +496,11 @@ namespace MWWorld
             virtual void setupPlayer();
             virtual void renderPlayer();
 
-            /// if activated, should this door be opened or closed?
-            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door);
-
-            /// activate (open or close) an non-teleport door
+            /// open or close a non-teleport door (depending on current state)
             virtual void activateDoor(const MWWorld::Ptr& door);
 
-            virtual bool getIsMovingDoor(const MWWorld::Ptr& door);
+            /// open or close a non-teleport door as specified
+            virtual void activateDoor(const MWWorld::Ptr& door, bool open);
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
