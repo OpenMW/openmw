@@ -13,32 +13,45 @@
 #include "steering.hpp"
 
 MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::Ptr& doorPtr)
-: AiPackage(), mDoorPtr(doorPtr), mDuration(1)
+: AiPackage(), mDoorPtr(doorPtr), mDuration(1), mAdjAngle(0)
 {
+
 }
 
 bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor,float duration)
 {
+
+    ESM::Position pos = actor.getRefData().getPosition();
+    if(mDuration = 1) //If it just started, get the actor position as the stuck detection thing
+        mLastPos = pos;
+
     mDuration -= duration; //Update timer
 
-    if(mDuration < 0)
-        return true; // We have tried backing up for more than one second, we've probably cleared it
+    if(mDuration < 0) {
+        float x = pos.pos[0] - mLastPos.pos[0];
+        float y = pos.pos[1] - mLastPos.pos[1];
+        float z = pos.pos[2] - mLastPos.pos[2];
+        int distance = x * x + y * y + z * z;
+        if(distance < 10 * 10) { //Got stuck, didn't move
+            if(mAdjAngle == 0) //Try going in various directions
+                mAdjAngle = 1.57079632679f; //pi/2
+            else if (mAdjAngle == 1.57079632679f)
+                mAdjAngle = -1.57079632679;
+            else
+                mAdjAngle = 0;
+            mDuration = 1; //reset timer
+        }
+        else //Not stuck
+            return true; // We have tried backing up for more than one second, we've probably cleared it
+    }
 
     if(!MWBase::Environment::get().getWorld()->getIsMovingDoor(mDoorPtr))
         return true; //Door is no longer opening
 
-    ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
     ESM::Position tPos = mDoorPtr.getRefData().getPosition(); //Position of the door
     float x = pos.pos[0] - tPos.pos[0];
     float y = pos.pos[1] - tPos.pos[1];
-    float z = pos.pos[2] - tPos.pos[2];
-    int distance = sqrt(x * x + y * y + z * z);
-
-    if(distance > 300) //Stop backing up when you're far enough away
-        return true;
-/// TODO: Calculate this from door size, not have it built in
-
-    float dirToDoor = std::atan2(x,y) + pos.rot[2]; //Calculates the direction to the door, relative to the direction of the NPC
+    float dirToDoor = std::atan2(x,y) + pos.rot[2] + mAdjAngle; //Calculates the direction to the door, relative to the direction of the NPC
                                                     // For example, if the NPC is directly facing the door this will be pi/2
 
     // Make actor move away from the door
@@ -47,7 +60,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor,float duration
 
     //Make all nearby actors also avoid the door
     std::vector<MWWorld::Ptr> actors;
-    MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(pos.pos[0],pos.pos[1],pos.pos[2]),50,actors);
+    MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(pos.pos[0],pos.pos[1],pos.pos[2]),100,actors);
     for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); it++) {
         if(*it != MWBase::Environment::get().getWorld()->getPlayerPtr()) { //Not the player
             MWMechanics::AiSequence& seq = MWWorld::Class::get(*it).getCreatureStats(*it).getAiSequence();
