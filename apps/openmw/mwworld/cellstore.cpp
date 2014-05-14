@@ -12,6 +12,7 @@
 #include <components/esm/npcstate.hpp>
 #include <components/esm/creaturestate.hpp>
 #include <components/esm/fogstate.hpp>
+#include <components/esm/creaturelevliststate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -592,7 +593,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::CreatureState> (writer, mCreatures);
         writeReferenceCollection<ESM::ObjectState> (writer, mDoors);
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
-        writeReferenceCollection<ESM::ObjectState> (writer, mCreatureLists);
+        writeReferenceCollection<ESM::CreatureLevListState> (writer, mCreatureLists);
         writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
         writeReferenceCollection<ESM::LightState> (writer, mLights);
         writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
@@ -668,7 +669,7 @@ namespace MWWorld
 
                 case ESM::REC_LEVC:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mCreatureLists, contentFileMap);
+                    readReferenceCollection<ESM::CreatureLevListState> (reader, mCreatureLists, contentFileMap);
                     break;
 
                 case ESM::REC_LEVI:
