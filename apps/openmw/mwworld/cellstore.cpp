@@ -16,6 +16,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "ptr.hpp"
 #include "esmstore.hpp"
 #include "class.hpp"
@@ -36,6 +38,22 @@ namespace
 
             if (!ptr.isEmpty())
                 return ptr;
+        }
+
+        return MWWorld::Ptr();
+    }
+
+    template<typename T>
+    MWWorld::Ptr searchViaActorId (MWWorld::CellRefList<T>& actorList, int actorId,
+        MWWorld::CellStore *cell)
+    {
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (actorList.mList.begin());
+             iter!=actorList.mList.end(); ++iter)
+        {
+            MWWorld::Ptr actor (&*iter, cell);
+
+            if (MWWorld::Class::get (actor).getCreatureStats (actor).matchesActorId (actorId))
+                return actor;
         }
 
         return MWWorld::Ptr();
@@ -319,6 +337,17 @@ namespace MWWorld
             return Ptr (ref, this);
 
         mHasState = oldState;
+
+        return Ptr();
+    }
+
+    Ptr CellStore::searchViaActorId (int id)
+    {
+        if (Ptr ptr = ::searchViaActorId (mNpcs, id, this))
+            return ptr;
+
+        if (Ptr ptr = ::searchViaActorId (mCreatures, id, this))
+            return ptr;
 
         return Ptr();
     }

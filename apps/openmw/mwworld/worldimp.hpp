@@ -287,6 +287,9 @@ namespace MWWorld
             virtual Ptr searchPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
 
+            virtual Ptr searchPtrViaActorId (int actorId);
+            ///< Search is limited to the active cells.
+
             virtual void adjustPosition (const Ptr& ptr);
             ///< Adjust position after load to be on ground. Must be called after model load.
 

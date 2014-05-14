@@ -546,17 +546,13 @@ namespace MWWorld
     {
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
-        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-            iter!=mWorldScene->getActiveCells().end(); ++iter)
-        {
-            CellStore* cellstore = *iter;
-            Ptr ptr = cellstore->searchViaHandle (handle);
 
-            if (!ptr.isEmpty())
-                return ptr;
-        }
+        return mWorldScene->searchPtrViaHandle (handle);
+    }
 
-        return MWWorld::Ptr();
+    Ptr World::searchPtrViaActorId (int actorId)
+    {
+        return mWorldScene->searchPtrViaActorId (actorId);
     }
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
@@ -1922,7 +1918,7 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
-    
+
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())

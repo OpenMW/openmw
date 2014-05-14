@@ -11,6 +11,8 @@
 
 namespace MWMechanics
 {
+    int CreatureStats::sActorId = 0;
+
     CreatureStats::CreatureStats()
         : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
@@ -20,7 +22,7 @@ namespace MWMechanics
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
           mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
-          mTradeTime(0,0), mGoldPool(0)
+          mTradeTime(0,0), mGoldPool(0), mActorId(-1)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -558,5 +560,23 @@ namespace MWMechanics
     int CreatureStats::getGoldPool() const
     {
         return mGoldPool;
+    }
+
+    int CreatureStats::getActorId()
+    {
+        if (mActorId==-1)
+            mActorId = sActorId++;
+
+        return mActorId;
+    }
+
+    bool CreatureStats::matchesActorId (int id) const
+    {
+        return mActorId!=-1 && id==mActorId;
+    }
+
+    void CreatureStats::cleanup()
+    {
+        sActorId = 0;
     }
 }
