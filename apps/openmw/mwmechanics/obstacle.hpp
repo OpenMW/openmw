@@ -22,7 +22,7 @@ namespace MWMechanics
 
     /// Returns door pointer within range. No guarentee is given as too which one
     /** \return Pointer to the door, or NULL if none exists **/
-    MWWorld::LiveCellRef<ESM::Door>* getNearbyDoor(const MWWorld::Ptr& actor,
+    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor,
                          float minSqr = MIN_DIST_TO_DOOR_SQUARED,
                          bool closed = true);
 

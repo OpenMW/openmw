@@ -3,6 +3,7 @@
 
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
+#include "../mwbase/world.hpp"
 
 #include "obstacle.hpp"
 
@@ -63,7 +64,7 @@ namespace MWMechanics
             float mStuckTimer;
             float mTotalTime;
 
-            MWWorld::LiveCellRef<ESM::Door>* mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
+            MWWorld::Ptr mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
 
             ESM::Position mStuckPos;
     };

@@ -16,7 +16,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : mLastDoorChecked(NULL), mTimer(0), mStuckTimer(0) {
+MWMechanics::AiPackage::AiPackage() : mLastDoorChecked(MWWorld::Ptr()), mTimer(0), mStuckTimer(0) {
 
 }
 
@@ -92,11 +92,11 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
         //if(mObstacleCheck.check(actor, duration)) {
         if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10 && distance(dest, start) > 20) { //Actually stuck, and far enough away from destination to care
             // first check if we're walking into a door
-            MWWorld::LiveCellRef<ESM::Door>* door = getNearbyDoor(actor);
-            if(door != NULL) // NOTE: checks interior cells only
+            MWWorld::Ptr door = getNearbyDoor(actor);
+            if(door != MWWorld::Ptr()) // NOTE: checks interior cells only
             {
-                if(door->mRef.mTrap.empty() && mLastDoorChecked != door) { //Open the door if untrapped
-                    door->mClass->activate(MWWorld::Ptr(door, actor.getCell()), actor).get()->execute(actor);
+                if(door.getCellRef().mTrap.empty() && mLastDoorChecked != door) { //Open the door if untrapped
+                    door.getClass().activate(door, actor).get()->execute(actor);
                     mLastDoorChecked = door;
                 }
             }
@@ -113,7 +113,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
         else { //Not stuck, so reset things
             mStuckTimer = 0;
             mStuckPos = pos;
-            mLastDoorChecked = NULL; //Resets it, in case he gets stuck behind the door again
+            mLastDoorChecked = MWWorld::Ptr(); //Resets it, in case he gets stuck behind the door again
         }
     }
     else {

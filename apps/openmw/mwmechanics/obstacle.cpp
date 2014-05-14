@@ -20,18 +20,18 @@ namespace MWMechanics
     // actor is facing the door.
     bool proximityToDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
     {
-        if(getNearbyDoor(actor, minSqr, closed)!=NULL)
+        if(getNearbyDoor(actor, minSqr, closed)!=MWWorld::Ptr())
             return true;
         else
             return false;
     }
 
-    MWWorld::LiveCellRef<ESM::Door>* getNearbyDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
+    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
     {
         MWWorld::CellStore *cell = actor.getCell();
 
         if(cell->getCell()->isExterior())
-            return NULL; // check interior cells only
+            return MWWorld::Ptr(); // check interior cells only
 
         // Check all the doors in this cell
         MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
@@ -54,10 +54,10 @@ namespace MWMechanics
                 if((closed && ref.mData.getLocalRotation().rot[2] == 0) ||
                    (!closed && ref.mData.getLocalRotation().rot[2] >= 1))
                 {
-                    return &ref; // found, stop searching
+                    return MWWorld::Ptr(&ref, actor.getCell()); // found, stop searching
                 }
         }
-        return NULL; // none found
+        return MWWorld::Ptr(); // none found
     }
 
     ObstacleCheck::ObstacleCheck():
