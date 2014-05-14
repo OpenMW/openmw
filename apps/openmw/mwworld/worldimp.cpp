@@ -1209,15 +1209,16 @@ namespace MWWorld
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
-                    if (MWWorld::Class::get(ptr).isActor())
+                    if (MWWorld::Class::get(ptr).isActor() && ptr != MWBase::Environment::get().getWorld()->getPlayerPtr() )
                     {
                         // Collided with actor, ask actor to try to avoid door
                         MWMechanics::AiSequence& seq = MWWorld::Class::get(ptr).getCreatureStats(ptr).getAiSequence();
                         if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
                             seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
+
                         // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
-                        break;
+                        //break; //Removed in case ultiple actors are touching
                     }
                 }
 

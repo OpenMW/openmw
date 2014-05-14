@@ -6,6 +6,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
+#include "mechanicsmanagerimp.hpp"
 
 #include <OgreMath.h>
 
@@ -43,6 +44,18 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor,float duration
     // Make actor move away from the door
     actor.getClass().getMovementSettings(actor).mPosition[1] = -1 * std::sin(dirToDoor); //I knew I'd use trig someday
     actor.getClass().getMovementSettings(actor).mPosition[0] = -1 * std::cos(dirToDoor);
+
+    //Make all nearby actors also avoid the door
+    std::vector<MWWorld::Ptr> actors;
+    MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(pos.pos[0],pos.pos[1],pos.pos[2]),50,actors);
+    for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); it++) {
+        if(*it != MWBase::Environment::get().getWorld()->getPlayerPtr()) { //Not the player
+            MWMechanics::AiSequence& seq = MWWorld::Class::get(*it).getCreatureStats(*it).getAiSequence();
+            if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) { //Only add it once
+                seq.stack(MWMechanics::AiAvoidDoor(mDoorPtr),*it);
+            }
+        }
+    }
 
     return false;
 }
