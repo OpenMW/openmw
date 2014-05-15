@@ -410,11 +410,16 @@ namespace MWMechanics
             inflict(caster, target, reflectedEffects, range, true);
 
         if (!appliedLastingEffects.empty())
+        {
+            int casterActorId = -1;
+            if (caster.getClass().isActor())
+                casterActorId = caster.getClass().getCreatureStats(caster).getActorId();
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
-                                                                                  mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
+                                                                                  mSourceName, casterActorId);
+        }
 
         // Notify the target actor they've been hit
-        if (anyHarmfulEffect && target.getClass().isActor() && target != caster)
+        if (anyHarmfulEffect && target.getClass().isActor() && target != caster && caster.getClass().isActor())
             target.getClass().onHit(target, 0.f, true, MWWorld::Ptr(), caster, true);
     }
 
