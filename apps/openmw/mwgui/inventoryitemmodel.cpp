@@ -40,11 +40,11 @@ ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
     return -1;
 }
 
-void InventoryItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
+MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
 {
     if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, setNewOwner);
+    return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, setNewOwner);
 }
 
 
@@ -59,7 +59,7 @@ void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
         throw std::runtime_error("Not enough items in the stack to remove");
 }
 
-void InventoryItemModel::moveItem(const ItemStack &item, size_t count, ItemModel *otherModel)
+MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack &item, size_t count, ItemModel *otherModel)
 {
     bool setNewOwner = false;
 
@@ -70,8 +70,9 @@ void InventoryItemModel::moveItem(const ItemStack &item, size_t count, ItemModel
             && Misc::StringUtils::ciEqual(item.mBase.getCellRef().mOwner, mActor.getCellRef().mRefID))
         setNewOwner = true;
 
-    otherModel->copyItem(item, count, setNewOwner);
+    MWWorld::Ptr ret = otherModel->copyItem(item, count, setNewOwner);
     removeItem(item, count);
+    return ret;
 }
 
 void InventoryItemModel::update()
