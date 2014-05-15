@@ -563,6 +563,10 @@ namespace MWWorld
 
     Ptr World::searchPtrViaActorId (int actorId)
     {
+        // The player is not registered in any CellStore so must be checked manually
+        if (actorId == getPlayerPtr().getClass().getCreatureStats(getPlayerPtr()).getActorId())
+            return getPlayerPtr();
+        // Now search cells
         return mWorldScene->searchPtrViaActorId (actorId);
     }
 
