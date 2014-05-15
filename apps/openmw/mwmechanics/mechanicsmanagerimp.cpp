@@ -29,7 +29,7 @@ namespace
 
         const std::string& faction = item.getCellRef().mFaction;
         bool isFactionOwned = false;
-        if (!faction.empty())
+        if (!faction.empty() && ptr.getClass().isNpc())
         {
             const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
             if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
