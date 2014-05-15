@@ -25,7 +25,7 @@ namespace
     bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
     {
         const std::string& owner = item.getCellRef().mOwner;
-        bool isOwned = !owner.empty();
+        bool isOwned = !owner.empty() && owner != "player";
 
         const std::string& faction = item.getCellRef().mFaction;
         bool isFactionOwned = false;
