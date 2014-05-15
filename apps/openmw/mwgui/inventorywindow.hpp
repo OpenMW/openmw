@@ -52,7 +52,7 @@ namespace MWGui
             DragAndDrop* mDragAndDrop;
 
             bool mPreviewDirty;
-            size_t mSelectedItem;
+            int mSelectedItem;
 
             MWWorld::Ptr mPtr;
 
