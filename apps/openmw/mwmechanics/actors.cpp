@@ -574,11 +574,16 @@ namespace MWMechanics
             }
         }
 
-        for (std::vector<int>::iterator it = creatureStats.mSummonGraveyard.begin(); it != creatureStats.mSummonGraveyard.end(); ++it)
+        for (std::vector<int>::iterator it = creatureStats.mSummonGraveyard.begin(); it != creatureStats.mSummonGraveyard.end(); )
         {
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(*it);
             if (!ptr.isEmpty())
+            {
+                it = creatureStats.mSummonGraveyard.erase(it);
                 MWBase::Environment::get().getWorld()->deleteObject(ptr);
+            }
+            else
+                ++it;
         }
     }
 
