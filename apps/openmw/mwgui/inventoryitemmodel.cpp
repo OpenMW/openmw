@@ -64,7 +64,10 @@ void InventoryItemModel::moveItem(const ItemStack &item, size_t count, ItemModel
     bool setNewOwner = false;
 
     // Are you dead? Then you wont need that anymore
-    if (mActor.getClass().isActor() && mActor.getClass().getCreatureStats(mActor).isDead())
+    if (mActor.getClass().isActor() && mActor.getClass().getCreatureStats(mActor).isDead()
+            // Make sure that the item is actually owned by the dead actor
+            // Prevents a potential exploit for resetting the owner of any item, by placing the item in a corpse
+            && Misc::StringUtils::ciEqual(item.mBase.getCellRef().mOwner, mActor.getCellRef().mRefID))
         setNewOwner = true;
 
     otherModel->copyItem(item, count, setNewOwner);
