@@ -55,13 +55,7 @@ namespace MWMechanics
             MWMechanics::Movement mMovement;
             int mTargetActorId;
 
-            const MWWorld::CellStore* mCell;
             ObstacleCheck mObstacleCheck;
-            float mDoorCheckDuration;
-            // TODO: for some reason mDoors.searchViaHandle() returns
-            // null pointers, workaround by keeping an iterator
-            MWWorld::CellRefList<ESM::Door>::List::iterator mDoorIter;
-            MWWorld::CellRefList<ESM::Door>& mDoors;
 
             void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
     };
