@@ -9,6 +9,8 @@ namespace MWClass
 {
     class Door : public MWWorld::Class
     {
+            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
@@ -48,7 +50,20 @@ namespace MWClass
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
-        private:
+
+            /// 0 = nothing, 1 = opening, 2 = closing
+            virtual int getDoorState (const MWWorld::Ptr &ptr) const;
+            /// This does not actually cause the door to move. Use World::activateDoor instead.
+            virtual void setDoorState (const MWWorld::Ptr &ptr, int state) const;
+
+
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const;
+            ///< Read additional state from \a state into \a ptr.
+
+            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+                const;
+            ///< Write additional state from \a ptr into \a state.
     };
 }
 

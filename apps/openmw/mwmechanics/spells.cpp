@@ -211,7 +211,7 @@ namespace MWMechanics
                     random = it->second.at(i);
 
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
-                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, "", magnitude);
+                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, -1, magnitude);
             }
         }
     }

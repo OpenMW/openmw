@@ -15,11 +15,11 @@ namespace MWMechanics
     {
         public:
             /// Follow Actor for duration or until you arrive at a world position
-            AiFollow(const std::string &ActorId,float duration, float X, float Y, float Z);
+            AiFollow(const MWWorld::Ptr& actor,float duration, float X, float Y, float Z);
             /// Follow Actor for duration or until you arrive at a position in a cell
-            AiFollow(const std::string &ActorId,const std::string &CellId,float duration, float X, float Y, float Z);
+            AiFollow(const MWWorld::Ptr& actor,const std::string &CellId,float duration, float X, float Y, float Z);
             /// Follow Actor indefinitively
-            AiFollow(const std::string &ActorId);
+            AiFollow(const MWWorld::Ptr& actor);
 
             virtual AiFollow *clone() const;
 
@@ -38,7 +38,7 @@ namespace MWMechanics
             float mX;
             float mY;
             float mZ;
-            std::string mActorId;
+            int mActorId; // The actor we should follow
             std::string mCellId;
     };
 }

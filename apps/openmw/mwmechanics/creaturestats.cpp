@@ -11,6 +11,8 @@
 
 namespace MWMechanics
 {
+    int CreatureStats::sActorId = 0;
+
     CreatureStats::CreatureStats()
         : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
@@ -20,7 +22,7 @@ namespace MWMechanics
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
           mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
-          mTradeTime(0,0), mGoldPool(0)
+          mTradeTime(0,0), mGoldPool(0), mActorId(-1)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -494,13 +496,15 @@ namespace MWMechanics
         state.mBlock = mBlock;
         state.mMovementFlags = mMovementFlags;
         state.mAttackStrength = mAttackStrength;
-        state.mFallHeight = mFallHeight;
+        state.mFallHeight = mFallHeight; // TODO: vertical velocity (move from PhysicActor to CreatureStats?)
         state.mLastHitObject = mLastHitObject;
         state.mRecalcDynamicStats = mRecalcDynamicStats;
         state.mDrawState = mDrawState;
         state.mLevel = mLevel;
+        state.mActorId = mActorId;
 
         mSpells.writeState(state.mSpells);
+        mActiveSpells.writeState(state.mActiveSpells);
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
@@ -536,8 +540,10 @@ namespace MWMechanics
         mRecalcDynamicStats = state.mRecalcDynamicStats;
         mDrawState = DrawState_(state.mDrawState);
         mLevel = state.mLevel;
+        mActorId = state.mActorId;
 
         mSpells.readState(state.mSpells);
+        mActiveSpells.readState(state.mActiveSpells);
     }
 
     // Relates to NPC gold reset delay
@@ -558,5 +564,35 @@ namespace MWMechanics
     int CreatureStats::getGoldPool() const
     {
         return mGoldPool;
+    }
+
+    int CreatureStats::getActorId()
+    {
+        if (mActorId==-1)
+            mActorId = sActorId++;
+
+        return mActorId;
+    }
+
+    bool CreatureStats::matchesActorId (int id) const
+    {
+        return mActorId!=-1 && id==mActorId;
+    }
+
+    void CreatureStats::cleanup()
+    {
+        sActorId = 0;
+    }
+
+    void CreatureStats::writeActorIdCounter (ESM::ESMWriter& esm)
+    {
+        esm.startRecord(ESM::REC_ACTC);
+        esm.writeHNT("COUN", sActorId);
+        esm.endRecord(ESM::REC_ACTC);
+    }
+
+    void CreatureStats::readActorIdCounter (ESM::ESMReader& esm)
+    {
+        esm.getHNT(sActorId, "COUN");
     }
 }

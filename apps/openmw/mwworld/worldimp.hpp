@@ -88,7 +88,7 @@ namespace MWWorld
             float mFacedDistance;
 
             std::map<MWWorld::Ptr, int> mDoorStates;
-            ///< only holds doors that are currently moving. 0 means closing, 1 opening
+            ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
             struct MagicBoltState
             {
@@ -96,7 +96,7 @@ namespace MWWorld
                 std::string mId;
 
                 // Actor who casted this projectile
-                std::string mActorHandle;
+                int mActorId;
 
                 // Name of item to display as effect source in magic menu (in case we casted an enchantment)
                 std::string mSourceName;
@@ -111,7 +111,7 @@ namespace MWWorld
             struct ProjectileState
             {
                 // Actor who shot this projectile
-                std::string mActorHandle;
+                int mActorId;
 
                 MWWorld::Ptr mBow; // bow or crossbow the projectile was fired from
 
@@ -286,6 +286,9 @@ namespace MWWorld
 
             virtual Ptr searchPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
+
+            virtual Ptr searchPtrViaActorId (int actorId);
+            ///< Search is limited to the active cells.
 
             virtual void adjustPosition (const Ptr& ptr);
             ///< Adjust position after load to be on ground. Must be called after model load.
@@ -493,13 +496,11 @@ namespace MWWorld
             virtual void setupPlayer();
             virtual void renderPlayer();
 
-            /// if activated, should this door be opened or closed?
-            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door);
-
-            /// activate (open or close) an non-teleport door
+            /// open or close a non-teleport door (depending on current state)
             virtual void activateDoor(const MWWorld::Ptr& door);
 
-            virtual bool getIsMovingDoor(const MWWorld::Ptr& door);
+            /// open or close a non-teleport door as specified
+            virtual void activateDoor(const MWWorld::Ptr& door, bool open);
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object

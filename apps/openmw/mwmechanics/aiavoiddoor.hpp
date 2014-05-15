@@ -29,7 +29,7 @@ namespace MWMechanics
 
         private:
             float mDuration;
-            const MWWorld::Ptr& mDoorPtr;
+            MWWorld::Ptr mDoorPtr;
             ESM::Position mLastPos;
             float mAdjAngle;
     };
