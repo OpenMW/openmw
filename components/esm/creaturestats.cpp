@@ -1,4 +1,3 @@
-
 #include "creaturestats.hpp"
 
 void ESM::CreatureStats::load (ESMReader &esm)
@@ -72,7 +71,11 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mLevel = 1;
     esm.getHNOT (mLevel, "LEVL");
 
+    mActorId = -1;
+    esm.getHNOT (mActorId, "ACID");
+
     mSpells.load(esm);
+    mActiveSpells.load(esm);
 }
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
@@ -146,5 +149,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mLevel != 1)
         esm.writeHNT ("LEVL", mLevel);
 
+    if (mActorId != -1)
+        esm.writeHNT ("ACID", mActorId);
+
     mSpells.save(esm);
+    mActiveSpells.save(esm);
 }

@@ -28,6 +28,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -46,6 +47,8 @@ void MWState::StateManager::cleanup (bool force)
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
         mTimePlayed = 0;
+
+        MWMechanics::CreatureStats::cleanup();
     }
 }
 
@@ -315,6 +318,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_CSTA:
                 case ESM::REC_WTHR:
                 case ESM::REC_DYNA:
+                case ESM::REC_ACTC:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;

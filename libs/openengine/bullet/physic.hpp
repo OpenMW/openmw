@@ -175,6 +175,7 @@ namespace Physic
         Ogre::Vector3 mForce;
         bool mOnGround;
         bool mCollisionMode;
+        bool mCollisionBody;
 
         std::string mMesh;
         std::string mName;

@@ -56,10 +56,10 @@ namespace MWGui
         virtual void update() = 0;
 
         /// Move items from this model to \a otherModel.
-        virtual void moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
+        virtual MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
 
         /// @param setNewOwner Set the copied item's owner to the actor we are copying to, or keep the original owner?
-        virtual void copyItem (const ItemStack& item, size_t count, bool setNewOwner=false) = 0;
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false) = 0;
         virtual void removeItem (const ItemStack& item, size_t count) = 0;
 
     private:
@@ -73,7 +73,7 @@ namespace MWGui
     {
     public:
         virtual ~ProxyItemModel();
-        virtual void copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual ModelIndex getIndex (ItemStack item);
 

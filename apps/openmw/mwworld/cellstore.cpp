@@ -12,9 +12,13 @@
 #include <components/esm/npcstate.hpp>
 #include <components/esm/creaturestate.hpp>
 #include <components/esm/fogstate.hpp>
+#include <components/esm/creaturelevliststate.hpp>
+#include <components/esm/doorstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "ptr.hpp"
 #include "esmstore.hpp"
@@ -36,6 +40,22 @@ namespace
 
             if (!ptr.isEmpty())
                 return ptr;
+        }
+
+        return MWWorld::Ptr();
+    }
+
+    template<typename T>
+    MWWorld::Ptr searchViaActorId (MWWorld::CellRefList<T>& actorList, int actorId,
+        MWWorld::CellStore *cell)
+    {
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (actorList.mList.begin());
+             iter!=actorList.mList.end(); ++iter)
+        {
+            MWWorld::Ptr actor (&*iter, cell);
+
+            if (actor.getClass().getCreatureStats (actor).matchesActorId (actorId) && actor.getRefData().getCount() > 0)
+                return actor;
         }
 
         return MWWorld::Ptr();
@@ -323,6 +343,17 @@ namespace MWWorld
         return Ptr();
     }
 
+    Ptr CellStore::searchViaActorId (int id)
+    {
+        if (Ptr ptr = ::searchViaActorId (mNpcs, id, this))
+            return ptr;
+
+        if (Ptr ptr = ::searchViaActorId (mCreatures, id, this))
+            return ptr;
+
+        return Ptr();
+    }
+
     float CellStore::getWaterLevel() const
     {
         return mWaterLevel;
@@ -561,9 +592,9 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mClothes);
         writeReferenceCollection<ESM::ContainerState> (writer, mContainers);
         writeReferenceCollection<ESM::CreatureState> (writer, mCreatures);
-        writeReferenceCollection<ESM::ObjectState> (writer, mDoors);
+        writeReferenceCollection<ESM::DoorState> (writer, mDoors);
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
-        writeReferenceCollection<ESM::ObjectState> (writer, mCreatureLists);
+        writeReferenceCollection<ESM::CreatureLevListState> (writer, mCreatureLists);
         writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
         writeReferenceCollection<ESM::LightState> (writer, mLights);
         writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
@@ -629,7 +660,7 @@ namespace MWWorld
 
                 case ESM::REC_DOOR:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mDoors, contentFileMap);
+                    readReferenceCollection<ESM::DoorState> (reader, mDoors, contentFileMap);
                     break;
 
                 case ESM::REC_INGR:
@@ -639,7 +670,7 @@ namespace MWWorld
 
                 case ESM::REC_LEVC:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mCreatureLists, contentFileMap);
+                    readReferenceCollection<ESM::CreatureLevListState> (reader, mCreatureLists, contentFileMap);
                     break;
 
                 case ESM::REC_LEVI:

@@ -11,23 +11,26 @@
 
 #include "steering.hpp"
 
-MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), AiPackage()
+MWMechanics::AiFollow::AiFollow(const MWWorld::Ptr& actor,float duration, float x, float y, float z)
+: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mCellId(""), AiPackage()
 {
+    mActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
-MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId), AiPackage()
+MWMechanics::AiFollow::AiFollow(const MWWorld::Ptr& actor,const std::string &cellId,float duration, float x, float y, float z)
+: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mCellId(cellId), AiPackage()
 {
+    mActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
 
-MWMechanics::AiFollow::AiFollow(const std::string &actorId)
-: mAlwaysFollow(true), mDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId(""), AiPackage()
+MWMechanics::AiFollow::AiFollow(const MWWorld::Ptr& actor)
+: mAlwaysFollow(true), mDuration(0), mX(0), mY(0), mZ(0), mCellId(""), AiPackage()
 {
+    mActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
 
 bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
-    const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorId, false); //The target to follow
+    const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId); //The target to follow
 
     if(target == MWWorld::Ptr()) return true;   //Target doesn't exist
 
@@ -75,7 +78,8 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
 std::string MWMechanics::AiFollow::getFollowedActor()
 {
-    return mActorId;
+    const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId); //The target to follow
+    return target.getCellRef().mRefID;
 }
 
 MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const

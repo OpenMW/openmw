@@ -104,6 +104,10 @@ namespace MWWorld
             ///< Remove an object from the scene, but not from the world model.
 
             bool isCellActive(const CellStore &cell);
+
+            Ptr searchPtrViaHandle (const std::string& handle);
+
+            Ptr searchPtrViaActorId (int actorId);
     };
 }
 

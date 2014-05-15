@@ -431,6 +431,11 @@ void CharacterController::playRandomDeath(float startpoint)
         mDeathState = static_cast<CharacterState>(CharState_Death1 + (selected-1));
     }
 
+    // For dead actors, refreshCurrentAnims is no longer called, so we need to disable the movement state manually.
+    mMovementState = CharState_None;
+    mAnimation->disable(mCurrentMovement);
+    mCurrentMovement = "";
+
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                     false, 1.0f, "start", "stop", startpoint, 0);
 }
@@ -1367,9 +1372,9 @@ bool CharacterController::kill()
 {
     if( isDead() )
     {
-        //player's death animation is over
         if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) )
         {
+            //player's death animation is over
             MWBase::Environment::get().getStateManager()->askLoadRecent();
         }
         return false;

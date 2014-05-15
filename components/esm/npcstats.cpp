@@ -140,7 +140,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
 
     for (std::vector<std::string>::const_iterator iter (mUsedIds.begin()); iter!=mUsedIds.end();
         ++iter)
-        esm.writeHNT ("USED", *iter);
+        esm.writeHNString ("USED", *iter);
 
     if (mTimeToStartDrowning)
         esm.writeHNT ("DRTI", mTimeToStartDrowning);

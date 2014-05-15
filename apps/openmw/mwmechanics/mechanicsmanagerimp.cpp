@@ -25,11 +25,11 @@ namespace
     bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
     {
         const std::string& owner = item.getCellRef().mOwner;
-        bool isOwned = !owner.empty();
+        bool isOwned = !owner.empty() && owner != "player";
 
         const std::string& faction = item.getCellRef().mFaction;
         bool isFactionOwned = false;
-        if (!faction.empty())
+        if (!faction.empty() && ptr.getClass().isNpc())
         {
             const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
             if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
@@ -385,7 +385,7 @@ namespace MWMechanics
             // have been made for them. Make sure they're properly updated.
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
             mActors.removeActor(ptr);
-            mActors.addActor(ptr);
+            mActors.addActor(ptr, true);
         }
 
         mActors.update(duration, paused);

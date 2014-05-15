@@ -200,6 +200,9 @@ namespace MWBase
             virtual MWWorld::Ptr searchPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
 
+            virtual MWWorld::Ptr searchPtrViaActorId (int actorId) = 0;
+            ///< Search is limited to the active cells.
+
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
@@ -390,14 +393,10 @@ namespace MWBase
             virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
 
-            /// if activated, should this door be opened or closed?
-            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door) = 0;
-
-            /// activate (open or close) an non-teleport door
+            /// open or close a non-teleport door (depending on current state)
             virtual void activateDoor(const MWWorld::Ptr& door) = 0;
-
-            /// Is door currently opening/closing?
-            virtual bool getIsMovingDoor(const MWWorld::Ptr& door) = 0;
+            /// open or close a non-teleport door as specified
+            virtual void activateDoor(const MWWorld::Ptr& door, bool open) = 0;
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is standing on \a object
