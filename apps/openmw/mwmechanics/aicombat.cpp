@@ -149,11 +149,8 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(!actor.getClass().getCreatureStats(actor).isHostile()
-                || actor.getClass().getCreatureStats(actor).getHealth().getCurrent() <= 0)
-            return true;
-
-        if(mTarget.getClass().getCreatureStats(mTarget).isDead())
+        if(actor.getClass().getCreatureStats(actor).isDead() 
+                || mTarget.getClass().getCreatureStats(mTarget).isDead() )
             return true;
 
         //Update every frame
@@ -627,9 +624,9 @@ namespace MWMechanics
         return 1;
     }
 
-    const std::string &AiCombat::getTargetId() const
+    const MWWorld::Ptr &AiCombat::getTarget() const
     {
-        return mTarget.getRefData().getHandle();
+        return mTarget;
     }
 
 

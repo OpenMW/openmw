@@ -47,6 +47,9 @@ namespace MWMechanics
             ///< Return true and assign target if combat package is currently
             /// active, return false otherwise
 
+            bool canAddTarget(const ESM::Position& actorPos, float distToTarget) const;
+            ///< Function assumes that actor can have only 1 target apart player
+
             void stopCombat();
             ///< Removes all combat packages until first non-combat or stack empty.
 

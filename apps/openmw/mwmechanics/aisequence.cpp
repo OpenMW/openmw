@@ -61,7 +61,35 @@ bool MWMechanics::AiSequence::getCombatTarget(std::string &targetActorId) const
     if (getTypeId() != AiPackage::TypeIdCombat)
         return false;
     const AiCombat *combat = static_cast<const AiCombat *>(mPackages.front());
-    targetActorId = combat->getTargetId();
+    targetActorId = combat->getTarget().getRefData().getHandle();
+
+    return true;
+}
+
+bool MWMechanics::AiSequence::canAddTarget(const ESM::Position& actorPos, float distToTarget) const
+{
+    bool firstCombatFound = false;
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+    for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+        {
+            firstCombatFound = true;
+
+            const AiCombat *combat = static_cast<const AiCombat *>(*it);
+            if (combat->getTarget() != player) return false; // only 1 non-player target allowed
+            else
+            {
+                // add new target only if current target (player) is farther
+                ESM::Position &targetPos = combat->getTarget().getRefData().getPosition();
+
+                float distToCurrTarget = (Ogre::Vector3(targetPos.pos) - Ogre::Vector3(actorPos.pos)).length();
+                return (distToCurrTarget > distToTarget);
+            }
+        }
+        else if (firstCombatFound) break; // assumes combat packages go one-by-one in packages list
+    }
     return true;
 }
 
@@ -96,6 +124,40 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
         {
             MWMechanics::AiPackage* package = mPackages.front();
             mLastAiPackage = package->getTypeId();
+
+            // if active package is combat one, choose nearest target
+            if (mLastAiPackage == AiPackage::TypeIdCombat)
+            {
+                std::list<AiPackage *>::const_iterator itActualCombat;
+
+                float nearestDist = std::numeric_limits<float>::max();
+                Ogre::Vector3 vActorPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
+
+                const AiCombat *package;
+
+                for(std::list<AiPackage *>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+                {
+                    package = static_cast<const AiCombat *>(*it);
+
+                    if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
+
+                    ESM::Position &targetPos = package->getTarget().getRefData().getPosition();
+
+                    float distTo = (Ogre::Vector3(targetPos.pos) - vActorPos).length();
+                    if (distTo < nearestDist)
+                    {
+                        nearestDist = distTo;
+                        itActualCombat = it;
+                    }
+                }
+
+                if (mPackages.cbegin() != itActualCombat)
+                {
+                    // move combat package with nearest target to the front
+                    mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
+                }
+            }
+
             if (package->execute (actor,duration))
             {
                 // To account for the rare case where AiPackage::execute() queued another AI package
