@@ -540,7 +540,7 @@ namespace MWMechanics
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
                         // Make the summoned creature follow its master and help in fights
-                        AiFollow package(ptr.getRefData().getHandle());
+                        AiFollow package(ptr);
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         int creatureActorId = summonedCreatureStats.getActorId();
 
@@ -754,7 +754,7 @@ namespace MWMechanics
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);
+                    creatureStats.getAiSequence().stack(AiPursue(player), ptr);
                     creatureStats.setAlarmed(true);
                     npcStats.setCrimeId(MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId());
                 }
@@ -783,7 +783,7 @@ namespace MWMechanics
                 else if (!creatureStats.isHostile())
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);
+                        creatureStats.getAiSequence().stack(AiPursue(player), ptr);
                     else
                     {
                         MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
