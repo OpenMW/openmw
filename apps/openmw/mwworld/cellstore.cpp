@@ -54,7 +54,7 @@ namespace
         {
             MWWorld::Ptr actor (&*iter, cell);
 
-            if (MWWorld::Class::get (actor).getCreatureStats (actor).matchesActorId (actorId))
+            if (actor.getClass().getCreatureStats (actor).matchesActorId (actorId) && actor.getRefData().getCount() > 0)
                 return actor;
         }
 
