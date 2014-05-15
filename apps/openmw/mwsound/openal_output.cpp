@@ -288,7 +288,7 @@ OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, Decode
 
         mOutput.mActiveSounds.push_back(this);
     }
-    catch(std::exception &e)
+    catch(std::exception&)
     {
         alDeleteBuffers(sNumBuffers, mBuffers);
         alGetError();
@@ -471,7 +471,7 @@ bool OpenAL_SoundStream::process()
 
         mIsFinished = finished;
     }
-    catch(std::exception &e) {
+    catch(std::exception&) {
         std::cout<< "Error updating stream \""<<mDecoder->getName()<<"\"" <<std::endl;
         mSamplesQueued = 0;
         mIsFinished = true;
@@ -781,7 +781,7 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
     {
         decoder->open(fname);
     }
-    catch(Ogre::FileNotFoundException &e)
+    catch(Ogre::FileNotFoundException&)
     {
         std::string::size_type pos = fname.rfind('.');
         if(pos == std::string::npos)
@@ -859,7 +859,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
         buf = getBuffer(fname);
         sound.reset(new OpenAL_Sound(*this, src, buf, Ogre::Vector3(0.0f), vol, basevol, pitch, 1.0f, 1000.0f, flags));
     }
-    catch(std::exception &e)
+    catch(std::exception&)
     {
         mFreeSources.push_back(src);
         if(buf && alIsBuffer(buf))
@@ -898,7 +898,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
         buf = getBuffer(fname);
         sound.reset(new OpenAL_Sound3D(*this, src, buf, pos, vol, basevol, pitch, min, max, flags));
     }
-    catch(std::exception &e)
+    catch(std::exception&)
     {
         mFreeSources.push_back(src);
         if(buf && alIsBuffer(buf))
@@ -940,7 +940,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, fl
     {
         sound.reset(new OpenAL_SoundStream(*this, src, decoder, volume, pitch, flags));
     }
-    catch(std::exception &e)
+    catch(std::exception&)
     {
         mFreeSources.push_back(src);
         throw;

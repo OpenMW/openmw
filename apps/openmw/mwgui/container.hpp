@@ -62,7 +62,7 @@ namespace MWGui
         MWGui::ItemView* mItemView;
         SortFilterItemModel* mSortModel;
         ItemModel* mModel;
-        size_t mSelectedItem;
+        int mSelectedItem;
 
         MyGUI::Button* mDisposeCorpseButton;
         MyGUI::Button* mTakeButton;

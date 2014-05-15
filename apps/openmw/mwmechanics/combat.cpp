@@ -146,8 +146,8 @@ namespace MWMechanics
               || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
             damage *= multiplier;
 
-        if (weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
-                & actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+        if ((weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver)
+                && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
 
         if (damage == 0 && attacker.getRefData().getHandle() == "player")

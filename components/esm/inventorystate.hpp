@@ -20,6 +20,8 @@ namespace ESM
         // lights (slot)
         std::vector<std::pair<LightState, int> > mLights;
 
+        virtual ~InventoryState() {}
+
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm) const;
     };
