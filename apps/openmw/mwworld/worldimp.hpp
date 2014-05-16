@@ -3,6 +3,8 @@
 
 #include "../mwrender/debugging.hpp"
 
+#include <boost/shared_ptr.hpp>
+
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "esmstore.hpp"
@@ -51,6 +53,7 @@ namespace MWWorld
 {
     class WeatherManager;
     class Player;
+    class ProjectileManager;
 
     /// \brief The game world and its visual representation
 
@@ -74,6 +77,8 @@ namespace MWWorld
 
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
+            boost::shared_ptr<ProjectileManager> mProjectileManager;
+
             bool mGodMode;
             std::vector<std::string> mContentFiles;
 
@@ -89,37 +94,6 @@ namespace MWWorld
 
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
-
-            struct MagicBoltState
-            {
-                // Id of spell or enchantment to apply when it hits
-                std::string mId;
-
-                // Actor who casted this projectile
-                int mActorId;
-
-                // Name of item to display as effect source in magic menu (in case we casted an enchantment)
-                std::string mSourceName;
-
-                ESM::EffectList mEffects;
-
-                float mSpeed;
-
-                bool mStack;
-            };
-
-            struct ProjectileState
-            {
-                // Actor who shot this projectile
-                int mActorId;
-
-                MWWorld::Ptr mBow; // bow or crossbow the projectile was fired from
-
-                Ogre::Vector3 mVelocity;
-            };
-
-            std::map<MWWorld::Ptr, MagicBoltState> mMagicBolts;
-            std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
 
             std::string mStartCell;
 
@@ -148,9 +122,6 @@ namespace MWWorld
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
-            void moveMagicBolts(float duration);
-            void moveProjectiles(float duration);
-
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
@@ -170,9 +141,6 @@ namespace MWWorld
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
-
-            /// Called when \a object is moved to an inactive cell
-            void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
 
             float feetToGameUnits(float feet);
 
@@ -572,7 +540,8 @@ namespace MWWorld
              */
             virtual void castSpell (const MWWorld::Ptr& actor);
 
-            virtual void launchMagicBolt (const std::string& id, bool stack, const ESM::EffectList& effects,
+            virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
+                                          float speed, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed);
@@ -612,7 +581,7 @@ namespace MWWorld
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition);
 
-            virtual void explodeSpell (const Ogre::Vector3& origin, const MWWorld::Ptr& object, const ESM::EffectList& effects,
+            virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName);
     };
 }

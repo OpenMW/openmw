@@ -344,8 +344,6 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mRendering.switchToExterior();
-
         mCellChanged = true;
 
         loadingListener->removeWallpaper();
@@ -439,7 +437,6 @@ namespace MWWorld
         mCurrentCell = cell;
 
         // adjust fog
-        mRendering.switchToInterior();
         mRendering.configureFog(*mCurrentCell);
 
         // adjust player

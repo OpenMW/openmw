@@ -21,6 +21,41 @@
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
 
+namespace
+{
+
+    /// Get projectile properties (model, sound and speed) for a spell with the given effects
+    /// If \a model is empty, the spell has no ranged effects and should not spawn a projectile.
+    void getProjectileInfo (const ESM::EffectList& effects, std::string& model, std::string& sound, float& speed)
+    {
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
+            iter!=effects.mList.end(); ++iter)
+        {
+            if (iter->mRange != ESM::RT_Target)
+                continue;
+
+            const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                iter->mEffectID);
+
+            model = magicEffect->mBolt;
+            if (model.empty())
+                model = "VFX_DefaultBolt";
+
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+            if (!magicEffect->mBoltSound.empty())
+                sound = magicEffect->mBoltSound;
+            else
+                sound = schools[magicEffect->mData.mSchool] + " bolt";
+
+            speed = magicEffect->mData.mSpeed;
+            break;
+        }
+    }
+
+}
+
 namespace MWMechanics
 {
 
@@ -409,7 +444,7 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, mTarget, effects, caster, mId, mSourceName);
+            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, mId, mSourceName);
 
         if (!reflectedEffects.mList.empty())
             inflict(caster, target, reflectedEffects, range, true);
@@ -603,7 +638,13 @@ namespace MWMechanics
                 inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
         }
 
-        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, false, enchantment->mEffects, mCaster, mSourceName);
+        std::string projectileModel;
+        std::string sound;
+        float speed = 0;
+        getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
+        if (!projectileModel.empty())
+            MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
+                                                               false, enchantment->mEffects, mCaster, mSourceName);
 
         return true;
     }
@@ -682,7 +723,15 @@ namespace MWMechanics
             }
         }
 
-        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, false, spell->mEffects, mCaster, mSourceName);
+
+        std::string projectileModel;
+        std::string sound;
+        float speed = 0;
+        getProjectileInfo(spell->mEffects, projectileModel, sound, speed);
+        if (!projectileModel.empty())
+            MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
+                                                               false, spell->mEffects, mCaster, mSourceName);
+
         return true;
     }
 
