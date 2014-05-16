@@ -621,7 +621,8 @@ namespace MWClass
 
         // Attacking peaceful NPCs is a crime
         // anything below 80 is considered peaceful (see Actors::updateActor)
-        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
+        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).isHostile() &&
+                ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         getCreatureStats(ptr).setAttacked(true);
