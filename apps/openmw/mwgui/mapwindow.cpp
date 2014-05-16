@@ -89,10 +89,11 @@ namespace MWGui
         mChanged = true;
     }
 
-    void LocalMapBase::toggleFogOfWar()
+    bool LocalMapBase::toggleFogOfWar()
     {
         mFogOfWar = !mFogOfWar;
         applyFogOfWar();
+        return mFogOfWar;
     }
 
     void LocalMapBase::applyFogOfWar()

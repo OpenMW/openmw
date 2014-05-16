@@ -547,9 +547,10 @@ namespace MWGui
             return " (" + boost::lexical_cast<std::string>(value) + ")";
     }
 
-    void ToolTips::toggleFullHelp()
+    bool ToolTips::toggleFullHelp()
     {
         mFullHelp = !mFullHelp;
+        return mFullHelp;
     }
 
     bool ToolTips::getFullHelp() const

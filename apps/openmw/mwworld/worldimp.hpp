@@ -213,7 +213,7 @@ namespace MWWorld
 
             virtual void setWaterHeight(const float height);
 
-            virtual void toggleWater();
+            virtual bool toggleWater();
 
             virtual void adjustSky();
 

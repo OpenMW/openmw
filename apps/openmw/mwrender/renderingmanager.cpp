@@ -234,9 +234,9 @@ void RenderingManager::removeWater ()
     mWater->setActive(false);
 }
 
-void RenderingManager::toggleWater()
+bool RenderingManager::toggleWater()
 {
-    mWater->toggle();
+    return mWater->toggle();
 }
 
 void RenderingManager::cellAdded (MWWorld::CellStore *store)

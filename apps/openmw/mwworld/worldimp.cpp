@@ -1553,9 +1553,9 @@ namespace MWWorld
         mRendering->setWaterHeight(height);
     }
 
-    void World::toggleWater()
+    bool World::toggleWater()
     {
-        mRendering->toggleWater();
+        return mRendering->toggleWater();
     }
 
     void World::PCDropped (const Ptr& item)

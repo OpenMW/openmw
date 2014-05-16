@@ -92,7 +92,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWBase::Environment::get().getWindowManager()->toggleFogOfWar();
+                    runtime.getContext().report(MWBase::Environment::get().getWindowManager()->toggleFogOfWar() ? "Fog of war -> On"
+                                                                                                                : "Fog of war -> Off");
                 }
         };
 
@@ -102,7 +103,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWBase::Environment::get().getWindowManager()->toggleFullHelp();
+                    runtime.getContext().report(MWBase::Environment::get().getWindowManager()->toggleFullHelp() ? "Full help -> On"
+                                                                                                                : "Full help -> Off");
                 }
         };
 

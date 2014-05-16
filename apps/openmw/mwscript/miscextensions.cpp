@@ -275,7 +275,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWBase::Environment::get().getWorld()->toggleWater();
+                    runtime.getContext().report(MWBase::Environment::get().getWorld()->toggleWater() ? "Water -> On"
+                                                                                                     : "Water -> Off");
                 }
         };
 
