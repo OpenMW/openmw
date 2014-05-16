@@ -8,8 +8,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 #include "steering.hpp"
 #include "movement.hpp"
 
@@ -21,8 +19,8 @@
 
 namespace MWMechanics
 {
-    AiEscort::AiEscort(const MWWorld::Ptr& actor, int duration, float x, float y, float z)
-    : mActorId(actor.getClass().getCreatureStats(actor).getActorId()), mX(x), mY(y), mZ(z), mDuration(duration)
+    AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
+    : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration)
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
@@ -40,8 +38,8 @@ namespace MWMechanics
         }
     }
 
-    AiEscort::AiEscort(const MWWorld::Ptr& actor, const std::string &cellId,int duration, float x, float y, float z)
-    : mActorId(actor.getClass().getCreatureStats(actor).getActorId()), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration)
+    AiEscort::AiEscort(const std::string &actorId, const std::string &cellId,int duration, float x, float y, float z)
+    : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration)
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
@@ -77,14 +75,7 @@ namespace MWMechanics
                 return true;
         }
 
-        const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
-        if (follower.isEmpty())
-        {
-            // The follower disappeared
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-            return true;
-        }
-
+        const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
         const float* const leaderPos = actor.getRefData().getPosition().pos;
         const float* const followerPos = follower.getRefData().getPosition().pos;
         double differenceBetween[3];

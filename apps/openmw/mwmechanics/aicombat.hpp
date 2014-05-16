@@ -31,7 +31,7 @@ namespace MWMechanics
             virtual unsigned int getPriority() const;
 
             ///Returns target ID
-            std::string getTargetId() const;
+            const std::string &getTargetId() const;
 
         private:
             PathFinder mPathFinder;
@@ -53,7 +53,7 @@ namespace MWMechanics
 
             ESM::Position mLastPos;
             MWMechanics::Movement mMovement;
-            int mTargetActorId;
+            MWWorld::Ptr mTarget;
 
             const MWWorld::CellStore* mCell;
             ObstacleCheck mObstacleCheck;
@@ -63,7 +63,7 @@ namespace MWMechanics
             MWWorld::CellRefList<ESM::Door>::List::iterator mDoorIter;
             MWWorld::CellRefList<ESM::Door>& mDoors;
 
-            void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+            void buildNewPath(const MWWorld::Ptr& actor);
     };
 }
 

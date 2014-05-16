@@ -16,14 +16,14 @@ namespace MWMechanics
     {
         public:
             ///Constructor
-            /** \param actor Actor to pursue **/
-            AiPursue(const MWWorld::Ptr& actor);
+            /** \param objectId Actor to pursue **/
+            AiPursue(const std::string &objectId);
             virtual AiPursue *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
             virtual int getTypeId() const;
 
         private:
-            int mActorId; // The actor to pursue
+            std::string mObjectId;
             int mCellX;
             int mCellY;
     };
