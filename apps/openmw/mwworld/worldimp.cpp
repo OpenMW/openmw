@@ -1567,12 +1567,12 @@ namespace MWWorld
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
-    bool World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
+    MWWorld::Ptr World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
 
         if (!result.first)
-            return false;
+            return MWWorld::Ptr();
 
         CellStore* cell = getPlayerPtr().getCell();
 
@@ -1593,7 +1593,7 @@ namespace MWWorld
         // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
 
-        return true;
+        return dropped;
     }
 
     bool World::canPlaceObject(float cursorX, float cursorY)
@@ -1644,7 +1644,7 @@ namespace MWWorld
         return dropped;
     }
 
-    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
+    MWWorld::Ptr World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
     {
         MWWorld::CellStore* cell = actor.getCell();
 
@@ -1673,6 +1673,7 @@ namespace MWWorld
 
         if(actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);
+        return dropped;
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)

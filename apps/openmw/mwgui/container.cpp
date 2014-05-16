@@ -91,7 +91,8 @@ namespace MWGui
         mSourceModel->update();
 
         finish();
-        targetView->update();
+        if (targetView)
+            targetView->update();
 
         // We need to update the view since an other item could be auto-equipped.
         mSourceView->update();
