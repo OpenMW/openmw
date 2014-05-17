@@ -106,10 +106,11 @@ namespace MWRender
         float mAngle;
         const Ogre::Vector2 rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle);
 
+        /// @param force Always render, even if we already have a cached map
         void render(const float x, const float y,
                     const float zlow, const float zhigh,
                     const float xw, const float yw,
-                    const std::string& texture);
+                    const std::string& texture, bool force=false);
 
         // Creates a fog of war texture and initializes it to full black
         void createFogOfWar(const std::string& texturePrefix);

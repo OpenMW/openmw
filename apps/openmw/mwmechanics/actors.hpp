@@ -58,7 +58,7 @@ namespace MWMechanics
             /// paused we may want to do it manually (after equipping permanent enchantment)
             void updateMagicEffects (const MWWorld::Ptr& ptr) { adjustMagicEffects(ptr); }
 
-            void addActor (const MWWorld::Ptr& ptr);
+            void addActor (const MWWorld::Ptr& ptr, bool updateImmediately=false);
             ///< Register an actor for stats management
             ///
             /// \note Dead actors are ignored.

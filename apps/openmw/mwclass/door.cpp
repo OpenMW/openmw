@@ -2,6 +2,7 @@
 #include "door.hpp"
 
 #include <components/esm/loaddoor.hpp>
+#include <components/esm/doorstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -17,11 +18,27 @@
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actiontrap.hpp"
+#include "../mwworld/customdata.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+
+namespace
+{
+    struct DoorCustomData : public MWWorld::CustomData
+    {
+        int mDoorState; // 0 = nothing, 1 = opening, 2 = closing
+
+        virtual MWWorld::CustomData *clone() const;
+    };
+
+    MWWorld::CustomData *DoorCustomData::clone() const
+    {
+        return new DoorCustomData (*this);
+    }
+}
 
 namespace MWClass
 {
@@ -38,6 +55,14 @@ namespace MWClass
         const std::string model = getModel(ptr);
         if(!model.empty())
             physics.addObject(ptr);
+
+        // Resume the door's opening/closing animation if it wasn't finished
+        ensureCustomData(ptr);
+        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+        if (customData.mDoorState > 0)
+        {
+            MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState == 1 ? true : false);
+        }
     }
 
     std::string Door::getModel(const MWWorld::Ptr &ptr) const
@@ -125,7 +150,14 @@ namespace MWClass
             {
                 // animated door
                 boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
-                if (MWBase::Environment::get().getWorld()->getOpenOrCloseDoor(ptr))
+                int doorstate = getDoorState(ptr);
+                bool opening = true;
+                if (doorstate == 1)
+                    opening = false;
+                if (doorstate == 0 && ptr.getRefData().getLocalRotation().rot[2] != 0)
+                    opening = false;
+
+                if (opening)
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
                             closeSound, 0.5);
@@ -262,4 +294,48 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.get<ESM::Door>().insert(*ref), &cell);
     }
+
+    void Door::ensureCustomData(const MWWorld::Ptr &ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+        {
+            std::auto_ptr<DoorCustomData> data(new DoorCustomData);
+
+            data->mDoorState = 0;
+            ptr.getRefData().setCustomData(data.release());
+        }
+    }
+
+    int Door::getDoorState (const MWWorld::Ptr &ptr) const
+    {
+        ensureCustomData(ptr);
+        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+        return customData.mDoorState;
+    }
+
+    void Door::setDoorState (const MWWorld::Ptr &ptr, int state) const
+    {
+        ensureCustomData(ptr);
+        DoorCustomData& customData = dynamic_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
+        customData.mDoorState = state;
+    }
+
+    void Door::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
+    {
+        ensureCustomData(ptr);
+        DoorCustomData& customData = dynamic_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
+
+        const ESM::DoorState& state2 = dynamic_cast<const ESM::DoorState&>(state);
+        customData.mDoorState = state2.mDoorState;
+    }
+
+    void Door::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const
+    {
+        ensureCustomData(ptr);
+        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+
+        ESM::DoorState& state2 = dynamic_cast<ESM::DoorState&>(state);
+        state2.mDoorState = customData.mDoorState;
+    }
+
 }

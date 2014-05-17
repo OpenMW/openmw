@@ -13,6 +13,8 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    float distance(ESM::Pathgrid::Point point, float x, float y, float);
+    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b);
     class PathFinder
     {
         public:

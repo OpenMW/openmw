@@ -408,14 +408,8 @@ namespace MWGui
 
             if (mDragAndDrop->mSourceModel != mTradeModel)
             {
-                // add item to the player's inventory
-                MWWorld::ContainerStore& invStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
-                MWWorld::ContainerStoreIterator it = invStore.begin();
-
-                it = invStore.add(ptr, mDragAndDrop->mDraggedCount, mPtr);
-
-                mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
-                ptr = *it;
+                // Move item to the player's inventory
+                ptr = mDragAndDrop->mSourceModel->moveItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
             useItem(ptr);
         }
@@ -541,9 +535,11 @@ namespace MWGui
 
         int count = object.getRefData().getCount();
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWBase::Environment::get().getWorld()->breakInvisibility(player);
+
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);

@@ -81,7 +81,7 @@ namespace MWMechanics
     // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
 
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
-        mTarget(actor),
+        mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId()),
         mTimerAttack(0),
         mTimerReact(0),
         mTimerCombatMove(0),
@@ -149,8 +149,11 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(actor.getClass().getCreatureStats(actor).isDead() 
-                || mTarget.getClass().getCreatureStats(mTarget).isDead() )
+        if(actor.getClass().getCreatureStats(actor).isDead()) return true;
+
+        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+
+        if(target.getClass().getCreatureStats(target).isDead())
             return true;
 
         //Update every frame
@@ -322,7 +325,7 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
         Ogre::Vector3 vActorPos(pos.pos);
-        Ogre::Vector3 vTargetPos(mTarget.getRefData().getPosition().pos);
+        Ogre::Vector3 vTargetPos(target.getRefData().getPosition().pos);
         Ogre::Vector3 vDirToTarget = vTargetPos - vActorPos;
 
         bool isStuck = false;
@@ -393,7 +396,7 @@ namespace MWMechanics
         else // remote pathfinding
         {
             bool preferShortcut = false;
-            bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
+            bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, target);
 
             if(mReadyToAttack) isStuck = false;
 			
@@ -429,7 +432,7 @@ namespace MWMechanics
 
                 mFollowTarget = false;
 
-                buildNewPath(actor); //may fail to build a path, check before use
+                buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
                 mPathFinder.checkWaypoint(pos.pos[0],pos.pos[1],pos.pos[2]);
@@ -473,9 +476,9 @@ namespace MWMechanics
                 //less than in time of playing weapon anim from 'start' to 'hit' tags (t_swing)
                 //then start attacking
                 float speed1 = actorCls.getSpeed(actor);
-                float speed2 = mTarget.getClass().getSpeed(mTarget);
-                if(mTarget.getClass().getMovementSettings(mTarget).mPosition[0] == 0
-                        && mTarget.getClass().getMovementSettings(mTarget).mPosition[1] == 0)
+                float speed2 = target.getClass().getSpeed(target);
+                if(target.getClass().getMovementSettings(target).mPosition[0] == 0
+                        && target.getClass().getMovementSettings(target).mPosition[1] == 0)
                     speed2 = 0;
 
                 float s1 = distToTarget - weapRange;
@@ -567,9 +570,9 @@ namespace MWMechanics
         return false;
     }
 
-    void AiCombat::buildNewPath(const MWWorld::Ptr& actor)
+    void AiCombat::buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
-        Ogre::Vector3 newPathTarget = Ogre::Vector3(mTarget.getRefData().getPosition().pos);
+        Ogre::Vector3 newPathTarget = Ogre::Vector3(target.getRefData().getPosition().pos);
 
         float dist;
 
@@ -624,9 +627,9 @@ namespace MWMechanics
         return 1;
     }
 
-    const MWWorld::Ptr &AiCombat::getTarget() const
+    MWWorld::Ptr AiCombat::getTarget() const
     {
-        return mTarget;
+        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     }
 
 

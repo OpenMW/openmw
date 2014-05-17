@@ -87,6 +87,7 @@ namespace MWWorld
                 float mMultiplier;
             };
 
+            // TODO: store in savegame
             typedef std::map<std::string, std::vector<EffectParams> > TEffectMagnitudes;
             TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 

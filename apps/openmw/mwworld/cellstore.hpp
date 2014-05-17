@@ -91,6 +91,9 @@ namespace MWWorld
             Ptr searchViaHandle (const std::string& handle);
             ///< Will return an empty Ptr if cell is not loaded.
 
+            Ptr searchViaActorId (int id);
+            ///< Will return an empty Ptr if cell is not loaded.
+
             float getWaterLevel() const;
 
             void setWaterLevel (float level);

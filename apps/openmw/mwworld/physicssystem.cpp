@@ -635,12 +635,12 @@ namespace MWWorld
                 bool cmode = act->getCollisionMode();
                 if(cmode)
                 {
-                    act->enableCollisions(false);
+                    act->enableCollisionMode(false);
                     return false;
                 }
                 else
                 {
-                    act->enableCollisions(true);
+                    act->enableCollisionMode(true);
                     return true;
                 }
             }

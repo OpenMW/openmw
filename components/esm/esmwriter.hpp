@@ -74,6 +74,18 @@ class ESMWriter
             endRecord(name);
         }
 
+private:
+        // Prevent using writeHNT with strings. This already happened by accident and results in
+        // state being discarded without any error on writing or reading it. :(
+        // writeHNString and friends must be used instead.
+        void writeHNT(const std::string &name, std::string data)
+        {
+        }
+        void writeT(const std::string& data)
+        {
+        }
+public:
+
         template<typename T>
         void writeHNT(const std::string& name, const T& data, int size)
         {
@@ -96,6 +108,7 @@ class ESMWriter
 
         void startRecord(const std::string& name, uint32_t flags = 0);
         void startRecord(uint32_t name, uint32_t flags = 0);
+        /// @note Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
         void startSubRecord(const std::string& name);
         void endRecord(const std::string& name);
         void endRecord(uint32_t name);

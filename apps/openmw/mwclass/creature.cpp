@@ -164,7 +164,11 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
+        {
             physics.addActor(ptr);
+            if (getCreatureStats(ptr).isDead())
+                MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
+        }
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 

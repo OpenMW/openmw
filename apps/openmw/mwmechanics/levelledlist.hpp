@@ -70,7 +70,7 @@ namespace MWMechanics
                     return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, failChance);
             }
         }
-        catch (std::logic_error& e)
+        catch (std::logic_error&)
         {
             // Vanilla doesn't fail on nonexistent items in levelled lists
             std::cerr << "Warning: ignoring nonexistent item '" << item << "'" << std::endl;

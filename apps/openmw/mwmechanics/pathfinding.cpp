@@ -11,30 +11,6 @@
 
 namespace
 {
-    float distanceZCorrected(ESM::Pathgrid::Point point, float x, float y, float z)
-    {
-        x -= point.mX;
-        y -= point.mY;
-        z -= point.mZ;
-        return sqrt(x * x + y * y + 0.1 * z * z);
-    }
-
-    float distance(ESM::Pathgrid::Point point, float x, float y, float z)
-    {
-        x -= point.mX;
-        y -= point.mY;
-        z -= point.mZ;
-        return sqrt(x * x + y * y + z * z);
-    }
-
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b)
-    {
-        float x = a.mX - b.mX;
-        float y = a.mY - b.mY;
-        float z = a.mZ - b.mZ;
-        return sqrt(x * x + y * y + z * z);
-    }
-
     // Slightly cheaper version for comparisons.
     // Caller needs to be careful for very short distances (i.e. less than 1)
     // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
@@ -114,6 +90,30 @@ namespace
 
 namespace MWMechanics
 {
+    float distanceZCorrected(ESM::Pathgrid::Point point, float x, float y, float z)
+    {
+        x -= point.mX;
+        y -= point.mY;
+        z -= point.mZ;
+        return sqrt(x * x + y * y + 0.1 * z * z);
+    }
+
+    float distance(ESM::Pathgrid::Point point, float x, float y, float z)
+    {
+        x -= point.mX;
+        y -= point.mY;
+        z -= point.mZ;
+        return sqrt(x * x + y * y + z * z);
+    }
+
+    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b)
+    {
+        float x = a.mX - b.mX;
+        float y = a.mY - b.mY;
+        float z = a.mZ - b.mZ;
+        return sqrt(x * x + y * y + z * z);
+    }
+
     PathFinder::PathFinder()
         : mIsPathConstructed(false),
           mPathgrid(NULL),

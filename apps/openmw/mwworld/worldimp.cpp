@@ -30,6 +30,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -274,7 +275,8 @@ namespace MWWorld
             +mStore.countSavedGameRecords()
             +mGlobalVariables.countSavedGameRecords()
             +1 // player record
-            +1; // weather record
+            +1 // weather record
+            +1; // actorId counter
     }
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -287,6 +289,9 @@ namespace MWWorld
             mRendering->writeFog(cellstore);
         }
 
+        MWMechanics::CreatureStats::writeActorIdCounter(writer);
+        progress.increaseProgress();
+
         mCells.write (writer, progress);
         mStore.write (writer, progress);
         mGlobalVariables.write (writer, progress);
@@ -297,6 +302,12 @@ namespace MWWorld
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
         const std::map<int, int>& contentFileMap)
     {
+        if (type == ESM::REC_ACTC)
+        {
+            MWMechanics::CreatureStats::readActorIdCounter(reader);
+            return;
+        }
+
         if (!mStore.readRecord (reader, type) &&
             !mGlobalVariables.readRecord (reader, type) &&
             !mPlayer->readRecord (reader, type) &&
@@ -546,17 +557,17 @@ namespace MWWorld
     {
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
-        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-            iter!=mWorldScene->getActiveCells().end(); ++iter)
-        {
-            CellStore* cellstore = *iter;
-            Ptr ptr = cellstore->searchViaHandle (handle);
 
-            if (!ptr.isEmpty())
-                return ptr;
-        }
+        return mWorldScene->searchPtrViaHandle (handle);
+    }
 
-        return MWWorld::Ptr();
+    Ptr World::searchPtrViaActorId (int actorId)
+    {
+        // The player is not registered in any CellStore so must be checked manually
+        if (actorId == getPlayerPtr().getClass().getCreatureStats(getPlayerPtr()).getActorId())
+            return getPlayerPtr();
+        // Now search cells
+        return mWorldScene->searchPtrViaActorId (actorId);
     }
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
@@ -1195,29 +1206,48 @@ namespace MWWorld
         while (it != mDoorStates.end())
         {
             if (!mWorldScene->isCellActive(*it->first.getCell()) || !it->first.getRefData().getBaseNode())
+            {
+                // The door is no longer in an active cell, or it was disabled.
+                // Erase from mDoorStates, since we no longer need to move it.
+                // Once we load the door's cell again (or re-enable the door), Door::insertObject will reinsert to mDoorStates.
                 mDoorStates.erase(it++);
+            }
             else
             {
                 float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
                 float diff = duration * 90;
-                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second ? 1 : -1)), 90.f);
+                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second == 1 ? 1 : -1)), 90.f);
                 localRotateObject(it->first, 0, 0, targetRot);
+
+                bool reached = (targetRot == 90.f && it->second) || targetRot == 0.f;
 
                 /// \todo should use convexSweepTest here
                 std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
-                    if (MWWorld::Class::get(ptr).isActor())
+                    if (ptr.getClass().isActor())
                     {
-                        // we collided with an actor, we need to undo the rotation
+                        // Collided with actor, ask actor to try to avoid door
+                        if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr() ) {
+                            MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+                            if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
+                                seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
+                        }
+
+                        // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
-                        break;
+                        reached = false;
+                        //break; //Removed in case multiple actors are touching
                     }
                 }
 
-                if ((targetRot == 90.f && it->second) || targetRot == 0.f)
+                if (reached)
+                {
+                    // Mark as non-moving
+                    it->first.getClass().setDoorState(it->first, 0);
                     mDoorStates.erase(it++);
+                }
                 else
                     ++it;
             }
@@ -1490,6 +1520,9 @@ namespace MWWorld
         for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+
+            if (!ref.mData.isEnabled())
+                continue;
 
             if (ref.mRef.mTeleport)
             {
@@ -1832,25 +1865,32 @@ namespace MWWorld
 
     void World::activateDoor(const MWWorld::Ptr& door)
     {
-        if (mDoorStates.find(door) != mDoorStates.end())
+        int state = door.getClass().getDoorState(door);
+        switch (state)
         {
-            // if currently opening, then close, if closing, then open
-            mDoorStates[door] = !mDoorStates[door];
-        }
-        else
-        {
+        case 0:
             if (door.getRefData().getLocalRotation().rot[2] == 0)
-                mDoorStates[door] = 1; // open
+                state = 1; // if closed, then open
             else
-                mDoorStates[door] = 0; // close
+                state = 2; // if open, then close
+            break;
+        case 2:
+            state = 1; // if closing, then open
+            break;
+        case 1:
+        default:
+            state = 2; // if opening, then close
+            break;
         }
+        door.getClass().setDoorState(door, state);
+        mDoorStates[door] = state;
     }
 
-    bool World::getOpenOrCloseDoor(const Ptr &door)
+    void World::activateDoor(const Ptr &door, bool open)
     {
-        if (mDoorStates.find(door) != mDoorStates.end())
-            return !mDoorStates[door]; // if currently opening or closing, then do the opposite
-        return door.getRefData().getLocalRotation().rot[2] == 0;
+        int state = open ? 1 : 2;
+        door.getClass().setDoorState(door, state);
+        mDoorStates[door] = state;
     }
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
@@ -1919,7 +1959,7 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
-    
+
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
@@ -1954,7 +1994,7 @@ namespace MWWorld
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
 
-        physicActor->enableCollisions(enable);
+        physicActor->enableCollisionBody(enable);
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
@@ -2161,8 +2201,8 @@ namespace MWWorld
             // If this is a power, check if it was already used in the last 24h
             if (!fail && spell->mData.mType == ESM::Spell::ST_Power)
             {
-                if (stats.canUsePower(spell->mId))
-                    stats.usePower(spell->mId);
+                if (stats.getSpells().canUsePower(spell->mId))
+                    stats.getSpells().usePower(spell->mId);
                 else
                 {
                     message = "#{sPowerAlreadyUsed}";
@@ -2214,7 +2254,7 @@ namespace MWWorld
                                    const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed)
     {
         ProjectileState state;
-        state.mActorHandle = actor.getRefData().getHandle();
+        state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mBow = bow;
         state.mVelocity = orient.yAxis() * speed;
 
@@ -2301,7 +2341,7 @@ namespace MWWorld
         MagicBoltState state;
         state.mSourceName = sourceName;
         state.mId = id;
-        state.mActorHandle = actor.getRefData().getHandle();
+        state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mSpeed = speed;
         state.mStack = stack;
 
@@ -2365,7 +2405,7 @@ namespace MWWorld
                 if (obstacle == ptr)
                     continue;
 
-                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                MWWorld::Ptr caster = searchPtrViaActorId(it->second.mActorId);
 
                 // Arrow intersects with player immediately after shooting :/
                 if (obstacle == caster)
@@ -2451,7 +2491,7 @@ namespace MWWorld
                 if (obstacle == ptr)
                     continue;
 
-                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                MWWorld::Ptr caster = searchPtrViaActorId(it->second.mActorId);
                 if (caster.isEmpty())
                     caster = obstacle;
 
@@ -2474,7 +2514,7 @@ namespace MWWorld
 
             if (explode)
             {
-                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                MWWorld::Ptr caster = searchPtrViaActorId(it->second.mActorId);
                 explodeSpell(Ogre::Vector3(ptr.getRefData().getPosition().pos), ptr, it->second.mEffects, caster, it->second.mId, it->second.mSourceName);
 
                 deleteObject(ptr);

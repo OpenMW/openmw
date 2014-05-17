@@ -1326,9 +1326,6 @@ namespace MWGui
 
     void WindowManager::updatePlayer()
     {
-        unsetSelectedSpell();
-        unsetSelectedWeapon();
-
         mInventoryWindow->updatePlayer();
     }
 
@@ -1425,6 +1422,14 @@ namespace MWGui
 
         mQuickKeysMenu->write(writer);
         progress.increaseProgress();
+
+        if (!mSelectedSpell.empty())
+        {
+            writer.startRecord(ESM::REC_ASPL);
+            writer.writeHNString("ID__", mSelectedSpell);
+            writer.endRecord(ESM::REC_ASPL);
+            progress.increaseProgress();
+        }
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
@@ -1433,12 +1438,18 @@ namespace MWGui
             mMap->readRecord(reader, type);
         else if (type == ESM::REC_KEYS)
             mQuickKeysMenu->readRecord(reader, type);
+        else if (type == ESM::REC_ASPL)
+        {
+            reader.getSubNameIs("ID__");
+            mSelectedSpell = reader.getHString();
+        }
     }
 
     int WindowManager::countSavedGameRecords() const
     {
         return 1 // Global map
-                + 1; // QuickKeysMenu
+                + 1 // QuickKeysMenu
+                + (!mSelectedSpell.empty() ? 1 : 0);
     }
 
     bool WindowManager::isSavingAllowed() const

@@ -594,6 +594,7 @@ if (WIN32)
         4706 # Assignment in conditional expression
         4738 # Storing 32-bit float result in memory, possible loss of performance
         4986 # Undocumented warning that occurs in the crtdbg.h file
+        4987 # nonstandard extension used (triggered by setjmp.h)
         4996 # Function was declared deprecated
 
         # cause by ogre extensivly
@@ -610,7 +611,9 @@ if (WIN32)
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
+        4505 # Unreferenced local function has been removed
         4701 # Potentially uninitialized local variable used
+        4702 # Unreachable code
         4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )
 
@@ -618,19 +621,31 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${WARNINGS})
-    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
+    set(SHINY_WARNINGS "${WARNINGS} /wd4245")
+    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${SHINY_WARNINGS})
+    # there's an unreferenced local variable in the ogre platform, suppress it
+    set(SHINY_OGRE_WARNINGS "${WARNINGS} /wd4101")
+    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${SHINY_OGRE_WARNINGS})
+    set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${WARNINGS})
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
     if (BUILD_LAUNCHER)
         set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_LAUNCHER)
     set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
-        if (BUILD_BSATOOL)
+    if (BUILD_BSATOOL)
         set_target_properties(bsatool PROPERTIES COMPILE_FLAGS ${WARNINGS})
-            endif (BUILD_BSATOOL)
+    endif (BUILD_BSATOOL)
     if (BUILD_ESMTOOL)
         set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_ESMTOOL)
+    if (BUILD_OPENCS)
+        set_target_properties(opencs PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_OPENCS)
+    if (BUILD_MWINIIMPORTER)
+        set_target_properties(mwiniimport PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_MWINIIMPORTER)
   endif(MSVC)
 
   # Same for MinGW

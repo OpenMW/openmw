@@ -1,43 +1,45 @@
-#ifndef GAME_MWMECHANICS_AIFALLOW_H
-#define GAME_MWMECHANICS_AIFALLOW_H
+#ifndef GAME_MWMECHANICS_AIFOLLOW_H
+#define GAME_MWMECHANICS_AIFOLLOW_H
 
 #include "aipackage.hpp"
 #include <string>
 #include "pathfinding.hpp"
-#include "../../../components/esm/defs.hpp"
+#include <components/esm/defs.hpp>
 
 namespace MWMechanics
 {
-
+    /// \brief AiPackage for an actor to follow another actor/the PC
+    /** The AI will follow the target until a condition (time, or position) are set. Both can be disabled to cause the actor to follow the other indefinitely
+    **/
     class AiFollow : public AiPackage
     {
         public:
-            AiFollow(const std::string &ActorId,float duration, float X, float Y, float Z);
-            AiFollow(const std::string &ActorId,const std::string &CellId,float duration, float X, float Y, float Z);
-            AiFollow(const std::string &ActorId);
+            /// Follow Actor for duration or until you arrive at a world position
+            AiFollow(const MWWorld::Ptr& actor,float duration, float X, float Y, float Z);
+            /// Follow Actor for duration or until you arrive at a position in a cell
+            AiFollow(const MWWorld::Ptr& actor,const std::string &CellId,float duration, float X, float Y, float Z);
+            /// Follow Actor indefinitively
+            AiFollow(const MWWorld::Ptr& actor);
+
             virtual AiFollow *clone() const;
+
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
-                    ///< \return Package completed?
+
             virtual int getTypeId() const;
 
+            /// Returns the actor being followed
             std::string getFollowedActor();
 
         private:
-            bool mAlwaysFollow; //this will make the actor always follow, thus ignoring mDuration and mX,mY,mZ (used for summoned creatures).
+            /// This will make the actor always follow.
+            /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
+            bool mAlwaysFollow;
             float mDuration;
             float mX;
             float mY;
             float mZ;
-            std::string mActorId;
+            int mActorId; // The actor we should follow
             std::string mCellId;
-
-            float mTimer;
-            float mStuckTimer;
-            float mTotalTime;
-
-            ESM::Position mStuckPos;
-
-            PathFinder mPathFinder;
     };
 }
 #endif

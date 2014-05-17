@@ -233,6 +233,9 @@ namespace MWGui
 
             MWBase::World* world = MWBase::Environment::get().getWorld();
 
+            MWBase::Environment::get().getWorld()->breakInvisibility(
+                        MWBase::Environment::get().getWorld()->getPlayerPtr());
+
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
             MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
             float mouseX = cursorPosition.left / float(viewSize.width);

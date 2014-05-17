@@ -357,9 +357,6 @@ namespace MWClass
             data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "",
                                        MWBase::Environment::get().getWorld()->getStore());
 
-            // Relates to NPC gold reset delay
-            data->mNpcStats.setTradeTime(MWWorld::TimeStamp(0.0, 0));
-
             data->mNpcStats.setGoldPool(gold);
 
             // store
@@ -391,6 +388,8 @@ namespace MWClass
     {
         physics.addActor(ptr);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
+        if (getCreatureStats(ptr).isDead())
+            MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
     }
 
     bool Npc::isPersistent(const MWWorld::Ptr &actor) const
@@ -621,7 +620,8 @@ namespace MWClass
         // NOTE: 'object' and/or 'attacker' may be empty.
 
         // Attacking peaceful NPCs is a crime
-        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+        // anything below 80 is considered peaceful (see Actors::updateActor)
+        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         getCreatureStats(ptr).setAttacked(true);
