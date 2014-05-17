@@ -5,6 +5,20 @@
 
 namespace MWRender
 {
+
+    class EffectAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        float mTime;
+    public:
+        EffectAnimationTime() : mTime(0) {  }
+        void addTime(float time) { mTime += time; }
+
+        virtual Ogre::Real getValue() const { return mTime; }
+        virtual void setValue(Ogre::Real value) {}
+    };
+
+
     // Note: effects attached to another object should be managed by MWRender::Animation::addEffect.
     // This class manages "free" effects, i.e. attached to a dedicated scene node in the world.
     class EffectManager

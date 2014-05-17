@@ -45,7 +45,7 @@ namespace MWGui
 
         void setEnabled(bool enabled);
 
-        void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
+        bool toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const;
 
         void setDelay(float delay);

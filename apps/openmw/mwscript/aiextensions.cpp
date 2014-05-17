@@ -91,7 +91,6 @@ namespace MWScript
 
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
                     Interpreter::Type_Float duration = runtime[0].mFloat;
                     runtime.pop();
@@ -108,7 +107,7 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiEscort escortPackage(actor, duration, x, y, z);
+                    MWMechanics::AiEscort escortPackage(actorID, duration, x, y, z);
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     std::cout << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration
@@ -127,7 +126,6 @@ namespace MWScript
 
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
                     std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -147,7 +145,7 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiEscort escortPackage(actor, cellID, duration, x, y, z);
+                    MWMechanics::AiEscort escortPackage(actorID, cellID, duration, x, y, z);
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     std::cout << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration
@@ -283,7 +281,6 @@ namespace MWScript
 
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
                     Interpreter::Type_Float duration = runtime[0].mFloat;
                     runtime.pop();
@@ -300,7 +297,7 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiFollow followPackage(actor, duration, x, y ,z);
+                    MWMechanics::AiFollow followPackage(actorID, duration, x, y ,z);
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
 
                     std::cout << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration
@@ -319,7 +316,6 @@ namespace MWScript
 
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
                     std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -339,8 +335,8 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiFollow followPackage(actor, cellID, duration, x, y ,z);
-                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
+                    MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y ,z);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
                     std::cout << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration
                         << std::endl;
                 }

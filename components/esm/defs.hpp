@@ -109,6 +109,8 @@ enum RecNameInts
     REC_DYNA = FourCC<'D','Y','N','A'>::value,
     REC_ASPL = FourCC<'A','S','P','L'>::value,
     REC_ACTC = FourCC<'A','C','T','C'>::value,
+    REC_MPRJ = FourCC<'M','P','R','J'>::value,
+    REC_PROJ = FourCC<'P','R','O','J'>::value,
 
     // format 1
     REC_FILT = 0x544C4946

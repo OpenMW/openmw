@@ -126,7 +126,7 @@ namespace MWBase
 
             virtual void setWaterHeight(const float height) = 0;
 
-            virtual void toggleWater() = 0;
+            virtual bool toggleWater() = 0;
 
             virtual void adjustSky() = 0;
 
@@ -255,7 +255,8 @@ namespace MWBase
             virtual void changeToExteriorCell (const ESM::Position& position) = 0;
             ///< Move to exterior cell.
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position) = 0;
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange=true) = 0;
+            ///< @param detectWorldSpaceChange if true, clean up worldspace-specific data when the world space changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
@@ -354,15 +355,14 @@ namespace MWBase
 
             virtual void update (float duration, bool paused) = 0;
 
-            virtual bool placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount) = 0;
+            virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount) = 0;
             ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
             /// @param number of objects to place
-            /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount) = 0;
+            virtual MWWorld::Ptr dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount) = 0;
             ///< copy and place an object into the gameworld at the given actor's position
             /// @param actor giving the dropped object position
             /// @param object
@@ -468,7 +468,8 @@ namespace MWBase
 
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
 
-            virtual void launchMagicBolt (const std::string& id, bool stack, const ESM::EffectList& effects,
+            virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
+                                          float speed, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed) = 0;
@@ -514,7 +515,7 @@ namespace MWBase
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
 
-            virtual void explodeSpell (const Ogre::Vector3& origin, const MWWorld::Ptr& object, const ESM::EffectList& effects,
+            virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
     };
 }

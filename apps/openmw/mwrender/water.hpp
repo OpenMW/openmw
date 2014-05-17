@@ -150,7 +150,7 @@ namespace MWRender {
 
         void setActive(bool active);
 
-        void toggle();
+        bool toggle();
         void update(float dt, Ogre::Vector3 player);
         void frameStarted(float dt);
 

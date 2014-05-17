@@ -814,10 +814,10 @@ namespace MWGui
         mHud->setMinimapVisible (visible);
     }
 
-    void WindowManager::toggleFogOfWar()
+    bool WindowManager::toggleFogOfWar()
     {
         mMap->toggleFogOfWar();
-        mHud->toggleFogOfWar();
+        return mHud->toggleFogOfWar();
     }
 
     void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
@@ -830,9 +830,9 @@ namespace MWGui
         mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
     }
 
-    void WindowManager::toggleFullHelp()
+    bool WindowManager::toggleFullHelp()
     {
-        mToolTips->toggleFullHelp();
+        return mToolTips->toggleFullHelp();
     }
 
     bool WindowManager::getFullHelp() const

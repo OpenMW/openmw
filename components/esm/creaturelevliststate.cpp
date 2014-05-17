@@ -12,6 +12,9 @@ namespace ESM
 
         mSpawnActorId = -1;
         esm.getHNOT (mSpawnActorId, "SPAW");
+
+        mSpawn = false;
+        esm.getHNOT (mSpawn, "RESP");
     }
 
     void CreatureLevListState::save(ESMWriter &esm, bool inInventory) const
@@ -20,6 +23,9 @@ namespace ESM
 
         if (mSpawnActorId != -1)
             esm.writeHNT ("SPAW", mSpawnActorId);
+
+        if (mSpawn)
+            esm.writeHNT ("RESP", mSpawn);
     }
 
 }

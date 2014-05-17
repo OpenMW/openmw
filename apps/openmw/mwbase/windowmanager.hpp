@@ -193,9 +193,9 @@ namespace MWBase
             virtual void setDragDrop(bool dragDrop) = 0;
             virtual bool getWorldMouseOver() = 0;
 
-            virtual void toggleFogOfWar() = 0;
+            virtual bool toggleFogOfWar() = 0;
 
-            virtual void toggleFullHelp() = 0;
+            virtual bool toggleFullHelp() = 0;
             ///< show extra info in item tooltips (owner, script)
 
             virtual bool getFullHelp() const = 0;
