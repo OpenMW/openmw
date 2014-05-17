@@ -13,6 +13,8 @@
 
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
+#include "timestamp.hpp"
+
 namespace ESM
 {
     struct CellState;
@@ -47,6 +49,8 @@ namespace MWWorld
             bool mHasState;
             std::vector<std::string> mIds;
             float mWaterLevel;
+
+            MWWorld::TimeStamp mLastRespawn;
 
             CellRefList<ESM::Activator>         mActivators;
             CellRefList<ESM::Potion>            mPotions;
@@ -160,6 +164,9 @@ namespace MWWorld
             void writeReferences (ESM::ESMWriter& writer) const;
 
             void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap);
+
+            void respawn ();
+            ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
 
             template <class T>
             CellRefList<T>& get() {

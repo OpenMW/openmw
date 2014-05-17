@@ -1310,6 +1310,26 @@ namespace MWClass
         return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
     }
 
+    void Npc::respawn(const MWWorld::Ptr &ptr) const
+    {
+        if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn)
+        {
+            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
+            // This also means we cannot respawn dynamically placed references with no content file connection.
+            if (ptr.getCellRef().mRefNum.mContentFile != -1)
+            {
+                if (ptr.getRefData().getCount() == 0)
+                    ptr.getRefData().setCount(1);
+
+                // Reset to original position
+                ESM::Position& pos = ptr.getRefData().getPosition();
+                pos = ptr.getCellRef().mPos;
+
+                ptr.getRefData().setCustomData(NULL);
+            }
+        }
+    }
+
     const ESM::GameSetting *Npc::fMinWalkSpeed;
     const ESM::GameSetting *Npc::fMaxWalkSpeed;
     const ESM::GameSetting *Npc::fEncumberedMoveEffect;
