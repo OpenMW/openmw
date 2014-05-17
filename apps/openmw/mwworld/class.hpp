@@ -341,6 +341,8 @@ namespace MWWorld
             virtual int getDoorState (const MWWorld::Ptr &ptr) const;
             /// This does not actually cause the door to move. Use World::activateDoor instead.
             virtual void setDoorState (const MWWorld::Ptr &ptr, int state) const;
+
+            virtual void respawn (const MWWorld::Ptr& ptr) const {}
     };
 }
 

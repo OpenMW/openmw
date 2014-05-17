@@ -15,11 +15,11 @@ namespace MWMechanics
             /// Implementation of AiEscort
             /** The Actor will escort the specified actor to the world position x, y, z until they reach their position, or they run out of time
                 \implement AiEscort **/
-            AiEscort(const MWWorld::Ptr& actor,int duration, float x, float y, float z);
+            AiEscort(const std::string &actorId,int duration, float x, float y, float z);
             /// Implementation of AiEscortCell
             /** The Actor will escort the specified actor to the cell position x, y, z until they reach their position, or they run out of time
                 \implement AiEscortCell **/
-            AiEscort(const MWWorld::Ptr& actor,const std::string &cellId,int duration, float x, float y, float z);
+            AiEscort(const std::string &actorId,const std::string &cellId,int duration, float x, float y, float z);
 
             virtual AiEscort *clone() const;
 
@@ -28,7 +28,7 @@ namespace MWMechanics
             virtual int getTypeId() const;
 
         private:
-            int mActorId;
+            std::string mActorId;
             std::string mCellId;
             float mX;
             float mY;

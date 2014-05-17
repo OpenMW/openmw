@@ -178,6 +178,8 @@ namespace MWClass
             virtual bool canWalk (const MWWorld::Ptr &ptr) const {
                 return true;
             }
+
+            virtual void respawn (const MWWorld::Ptr& ptr) const;
     };
 }
 

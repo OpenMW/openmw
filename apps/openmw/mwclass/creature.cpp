@@ -822,6 +822,26 @@ namespace MWClass
         return ptr.get<ESM::Creature>()->mBase->mData.mGold;
     }
 
+    void Creature::respawn(const MWWorld::Ptr &ptr) const
+    {
+        if (ptr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Respawn)
+        {
+            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
+            // This also means we cannot respawn dynamically placed references with no content file connection.
+            if (ptr.getCellRef().mRefNum.mContentFile != -1)
+            {
+                if (ptr.getRefData().getCount() == 0)
+                    ptr.getRefData().setCount(1);
+
+                // Reset to original position
+                ESM::Position& pos = ptr.getRefData().getPosition();
+                pos = ptr.getCellRef().mPos;
+
+                ptr.getRefData().setCustomData(NULL);
+            }
+        }
+    }
+
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
     const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
     const ESM::GameSetting *Creature::fEncumberedMoveEffect;

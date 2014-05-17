@@ -621,7 +621,8 @@ namespace MWClass
 
         // Attacking peaceful NPCs is a crime
         // anything below 80 is considered peaceful (see Actors::updateActor)
-        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
+        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).isHostile() &&
+                ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         getCreatureStats(ptr).setAttacked(true);
@@ -1307,6 +1308,26 @@ namespace MWClass
     bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
     {
         return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
+    }
+
+    void Npc::respawn(const MWWorld::Ptr &ptr) const
+    {
+        if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn)
+        {
+            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
+            // This also means we cannot respawn dynamically placed references with no content file connection.
+            if (ptr.getCellRef().mRefNum.mContentFile != -1)
+            {
+                if (ptr.getRefData().getCount() == 0)
+                    ptr.getRefData().setCount(1);
+
+                // Reset to original position
+                ESM::Position& pos = ptr.getRefData().getPosition();
+                pos = ptr.getCellRef().mPos;
+
+                ptr.getRefData().setCustomData(NULL);
+            }
+        }
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

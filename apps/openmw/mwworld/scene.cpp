@@ -165,6 +165,8 @@ namespace MWWorld
                 }
             }
 
+            cell->respawn();
+
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true, loadingListener);
@@ -344,8 +346,6 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mRendering.switchToExterior();
-
         mCellChanged = true;
 
         loadingListener->removeWallpaper();
@@ -439,7 +439,6 @@ namespace MWWorld
         mCurrentCell = cell;
 
         // adjust fog
-        mRendering.switchToInterior();
         mRendering.configureFog(*mCurrentCell);
 
         // adjust player

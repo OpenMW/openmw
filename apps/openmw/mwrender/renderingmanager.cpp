@@ -234,9 +234,9 @@ void RenderingManager::removeWater ()
     mWater->setActive(false);
 }
 
-void RenderingManager::toggleWater()
+bool RenderingManager::toggleWater()
 {
-    mWater->toggle();
+    return mWater->toggle();
 }
 
 void RenderingManager::cellAdded (MWWorld::CellStore *store)
@@ -694,15 +694,8 @@ Shadows* RenderingManager::getShadows()
     return mShadows;
 }
 
-void RenderingManager::switchToInterior()
+void RenderingManager::notifyWorldSpaceChanged()
 {
-    // TODO: also do this when switching worldspace
-    mEffectManager->clear();
-}
-
-void RenderingManager::switchToExterior()
-{
-    // TODO: also do this when switching worldspace
     mEffectManager->clear();
 }
 
@@ -1061,6 +1054,7 @@ void RenderingManager::spawnEffect(const std::string &model, const std::string &
 void RenderingManager::clear()
 {
     mLocalMap->clear();
+    notifyWorldSpaceChanged();
 }
 
 } // namespace

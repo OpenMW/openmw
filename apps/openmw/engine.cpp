@@ -66,9 +66,13 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
-    bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
-    MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame, paused);
-    MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
+    if (MWBase::Environment::get().getStateManager()->getState()!=
+        MWBase::StateManager::State_NoGame)
+    {
+        bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
+        MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame, paused);
+        MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
+    }
     return true;
 }
 
@@ -110,8 +114,12 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
 
         // update actors
-        MWBase::Environment::get().getMechanicsManager()->update(frametime,
-            paused);
+        if (MWBase::Environment::get().getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
+        {
+            MWBase::Environment::get().getMechanicsManager()->update(frametime,
+                paused);
+        }
 
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
@@ -122,16 +130,24 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         }
 
         // update world
-        MWBase::Environment::get().getWorld()->update(frametime, paused);
+        if (MWBase::Environment::get().getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
+        {
+            MWBase::Environment::get().getWorld()->update(frametime, paused);
+        }
 
         // update GUI
-        Ogre::RenderWindow* window = mOgre->getWindow();
-        unsigned int tri, batch;
-        MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
-        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
+        if (MWBase::Environment::get().getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
+        {
+            Ogre::RenderWindow* window = mOgre->getWindow();
+            unsigned int tri, batch;
+            MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
+            MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
-        MWBase::Environment::get().getWindowManager()->onFrame(frametime);
-        MWBase::Environment::get().getWindowManager()->update();
+            MWBase::Environment::get().getWindowManager()->onFrame(frametime);
+            MWBase::Environment::get().getWindowManager()->update();
+        }
     }
     catch (const std::exception& e)
     {
@@ -392,10 +408,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
-
-    mEnvironment.getWorld()->renderPlayer();
-    mechanics->buildPlayer();
-    window->updatePlayer();
 
     mOgre->getRoot()->addFrameListener (this);
 

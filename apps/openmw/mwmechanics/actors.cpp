@@ -540,7 +540,7 @@ namespace MWMechanics
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
                         // Make the summoned creature follow its master and help in fights
-                        AiFollow package(ptr);
+                        AiFollow package(ptr.getRefData().getHandle());
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         int creatureActorId = summonedCreatureStats.getActorId();
 
@@ -785,7 +785,7 @@ namespace MWMechanics
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
                 }
-                else if (!creatureStats.isHostile())
+                else if (!creatureStats.isHostile() && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue)
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stack(AiPursue(player), ptr);

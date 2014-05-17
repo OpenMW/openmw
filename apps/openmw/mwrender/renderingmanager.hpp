@@ -127,7 +127,7 @@ public:
     void rotateObject (const MWWorld::Ptr& ptr);
 
     void setWaterHeight(const float height);
-    void toggleWater();
+    bool toggleWater();
 
     /// Updates object rendering after cell change
     /// \param old Object reference in previous cell
@@ -163,8 +163,7 @@ public:
 
     Shadows* getShadows();
 
-    void switchToInterior();
-    void switchToExterior();
+    void notifyWorldSpaceChanged();
 
     void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 

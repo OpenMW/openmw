@@ -10,6 +10,7 @@ namespace ESM
     struct CreatureLevListState : public ObjectState
     {
         int mSpawnActorId;
+        bool mSpawn;
 
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm, bool inInventory = false) const;
