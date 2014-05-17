@@ -84,7 +84,8 @@ namespace MWWorld
             // RefID of the projectile
             std::string mProjectileId;
 
-            MWWorld::Ptr mBow; // bow or crossbow the projectile was fired from (may be empty)
+            // RefID of the bow or crossbow the actor was using when this projectile was fired (may be empty)
+            std::string mBowId;
 
             Ogre::Vector3 mVelocity;
         };

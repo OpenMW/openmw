@@ -6,6 +6,7 @@
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -96,7 +97,7 @@ namespace MWWorld
     {
         ProjectileState state;
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
-        state.mBow = bow;
+        state.mBowId = bow.getCellRef().mRefID;
         state.mVelocity = orient.yAxis() * speed;
         state.mProjectileId = projectile.getCellRef().mRefID;
 
@@ -217,17 +218,28 @@ namespace MWWorld
                 if (obstacle == caster)
                     continue;
 
-                if (caster.isEmpty())
-                    caster = obstacle;
-
                 if (obstacle.isEmpty())
                 {
                     // Terrain
                 }
                 else if (obstacle.getClass().isActor())
-                {
+                {                    
                     MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mProjectileId);
-                    MWMechanics::projectileHit(caster, obstacle, it->mBow, projectileRef.getPtr(), pos + (newPos - pos) * cIt->first);
+
+                    // Try to get a Ptr to the bow that was used. It might no longer exist.
+                    MWWorld::Ptr bow = projectileRef.getPtr();
+                    if (!caster.isEmpty())
+                    {
+                        MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                        MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().mRefID, it->mBowId))
+                            bow = *invIt;
+                    }
+
+                    if (caster.isEmpty())
+                        caster = obstacle;
+
+                    MWMechanics::projectileHit(caster, obstacle, bow, projectileRef.getPtr(), pos + (newPos - pos) * cIt->first);
                 }
                 hit = true;
             }
