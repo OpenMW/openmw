@@ -319,6 +319,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_WTHR:
                 case ESM::REC_DYNA:
                 case ESM::REC_ACTC:
+                case ESM::REC_PROJ:
+                case ESM::REC_MPRJ:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -361,7 +363,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
-        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
+        // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
+        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
+
+        // Do not trigger erroneous cellChanged events
+        MWBase::Environment::get().getWorld()->markCellAsUnchanged();
     }
     catch (const std::exception& e)
     {

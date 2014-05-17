@@ -237,6 +237,8 @@ namespace MWWorld
     {
         mRendering->clear();
 
+        mProjectileManager->clear();
+
         mLocalScripts.clear();
         mPlayer->clear();
 
@@ -275,6 +277,7 @@ namespace MWWorld
             mCells.countSavedGameRecords()
             +mStore.countSavedGameRecords()
             +mGlobalVariables.countSavedGameRecords()
+            +mProjectileManager->countSavedGameRecords()
             +1 // player record
             +1 // weather record
             +1; // actorId counter
@@ -298,6 +301,7 @@ namespace MWWorld
         mGlobalVariables.write (writer, progress);
         mPlayer->write (writer, progress);
         mWeatherManager->write (writer, progress);
+        mProjectileManager->write (writer, progress);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -313,7 +317,8 @@ namespace MWWorld
             !mGlobalVariables.readRecord (reader, type) &&
             !mPlayer->readRecord (reader, type) &&
             !mWeatherManager->readRecord (reader, type) &&
-            !mCells.readRecord (reader, type, contentFileMap))
+            !mCells.readRecord (reader, type, contentFileMap) &&
+            !mProjectileManager->readRecord (reader, type))
         {
             throw std::runtime_error ("unknown record in saved game");
         }
@@ -808,9 +813,13 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        // changed worldspace
-        mProjectileManager->clear();
-        mRendering->switchToInterior();
+        if (mCurrentWorldSpace != cellName)
+        {
+            // changed worldspace
+            mProjectileManager->clear();
+            mRendering->notifyWorldSpaceChanged();
+            mCurrentWorldSpace = cellName;
+        }
 
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToInteriorCell(cellName, position);
@@ -819,19 +828,22 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
-        if (!getPlayerPtr().getCell()->getCell()->isExterior())
+        if (mCurrentWorldSpace != "sys::default") // FIXME
         {
             // changed worldspace
             mProjectileManager->clear();
-            mRendering->switchToExterior();
+            mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToExteriorCell(position);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
-    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position)
+    void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange)
     {
+        if (!detectWorldSpaceChange)
+            mCurrentWorldSpace = cellId.mWorldspace;
+
         if (cellId.mPaged)
             changeToExteriorCell (position);
         else

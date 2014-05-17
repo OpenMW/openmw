@@ -75,6 +75,8 @@ namespace MWWorld
 
             Cells mCells;
 
+            std::string mCurrentWorldSpace;
+
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
             boost::shared_ptr<ProjectileManager> mProjectileManager;
@@ -311,7 +313,8 @@ namespace MWWorld
             virtual void changeToExteriorCell (const ESM::Position& position);
             ///< Move to exterior cell.
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position);
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange=true);
+            ///< @param detectWorldSpaceChange if true, clean up worldspace-specific data when the world space changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.

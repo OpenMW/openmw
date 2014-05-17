@@ -163,8 +163,7 @@ public:
 
     Shadows* getShadows();
 
-    void switchToInterior();
-    void switchToExterior();
+    void notifyWorldSpaceChanged();
 
     void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 

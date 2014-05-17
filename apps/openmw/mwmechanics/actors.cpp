@@ -785,7 +785,7 @@ namespace MWMechanics
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
                 }
-                else if (!creatureStats.isHostile())
+                else if (!creatureStats.isHostile() && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue)
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stack(AiPursue(player.getClass().getId(player)), ptr);

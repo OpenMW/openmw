@@ -255,7 +255,8 @@ namespace MWBase
             virtual void changeToExteriorCell (const ESM::Position& position) = 0;
             ///< Move to exterior cell.
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position) = 0;
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange=true) = 0;
+            ///< @param detectWorldSpaceChange if true, clean up worldspace-specific data when the world space changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const = 0;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.

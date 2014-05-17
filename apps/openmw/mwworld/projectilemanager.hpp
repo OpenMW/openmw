@@ -20,6 +20,11 @@ namespace Physic
 }
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace Ogre
 {
     class SceneManager;
@@ -46,6 +51,10 @@ namespace MWWorld
         /// Removes all current projectiles. Should be called when switching to a new worldspace.
         void clear();
 
+        void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
+        bool readRecord (ESM::ESMReader& reader, int32_t type);
+        int countSavedGameRecords() const;
+
     private:
         OEngine::Physic::PhysicEngine& mPhysEngine;
         Ogre::SceneManager* mSceneMgr;
@@ -54,15 +63,17 @@ namespace MWWorld
         {
             NifOgre::ObjectScenePtr mObject;
             Ogre::SceneNode* mNode;
+
+            // Actor who shot this projectile
+            int mActorId;
+
+            // MW-id of this projectile
+            std::string mId;
         };
 
         struct MagicBoltState : public State
         {
-            // Id of spell or enchantment to apply when it hits
-            std::string mId;
-
-            // Actor who casted this projectile
-            int mActorId;
+            std::string mSpellId;
 
             // Name of item to display as effect source in magic menu (in case we casted an enchantment)
             std::string mSourceName;
@@ -74,16 +85,11 @@ namespace MWWorld
             bool mStack;
 
             MWBase::SoundPtr mSound;
+            std::string mSoundId;
         };
 
         struct ProjectileState : public State
         {
-            // Actor who shot this projectile
-            int mActorId;
-
-            // RefID of the projectile
-            std::string mProjectileId;
-
             // RefID of the bow or crossbow the actor was using when this projectile was fired (may be empty)
             std::string mBowId;
 

@@ -4,6 +4,8 @@
 
 #include <libs/openengine/bullet/physic.hpp>
 
+#include <components/esm/projectilestate.hpp>
+
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -67,10 +69,12 @@ namespace MWWorld
 
         MagicBoltState state;
         state.mSourceName = sourceName;
-        state.mId = spellId;
+        state.mId = model;
+        state.mSpellId = spellId;
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mSpeed = speed;
         state.mStack = stack;
+        state.mSoundId = sound;
 
         // Only interested in "on target" effects
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
@@ -99,7 +103,7 @@ namespace MWWorld
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mBowId = bow.getCellRef().mRefID;
         state.mVelocity = orient.yAxis() * speed;
-        state.mProjectileId = projectile.getCellRef().mRefID;
+        state.mId = projectile.getCellRef().mRefID;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().mRefID);
         MWWorld::Ptr ptr = ref.getPtr();
@@ -159,7 +163,7 @@ namespace MWWorld
                 {
                     MWMechanics::CastSpell cast(caster, obstacle);
                     cast.mHitPosition = pos;
-                    cast.mId = it->mId;
+                    cast.mId = it->mSpellId;
                     cast.mSourceName = it->mSourceName;
                     cast.mStack = it->mStack;
                     cast.inflict(obstacle, caster, it->mEffects, ESM::RT_Target, false, true);
@@ -170,7 +174,7 @@ namespace MWWorld
             if (hit)
             {
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
-                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, it->mId, it->mSourceName);
+                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, it->mSpellId, it->mSourceName);
 
                 MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
 
@@ -224,7 +228,7 @@ namespace MWWorld
                 }
                 else if (obstacle.getClass().isActor())
                 {                    
-                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mProjectileId);
+                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
 
                     // Try to get a Ptr to the bow that was used. It might no longer exist.
                     MWWorld::Ptr bow = projectileRef.getPtr();
@@ -268,6 +272,129 @@ namespace MWWorld
             mSceneMgr->destroySceneNode(it->mNode);
         }
         mMagicBolts.clear();
+    }
+
+    void ProjectileManager::write(ESM::ESMWriter &writer, Loading::Listener &progress) const
+    {
+        for (std::vector<ProjectileState>::const_iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
+        {
+            writer.startRecord(ESM::REC_PROJ);
+
+            ESM::ProjectileState state;
+            state.mId = it->mId;
+            state.mPosition = it->mNode->getPosition();
+            state.mOrientation = it->mNode->getOrientation();
+            state.mActorId = it->mActorId;
+
+            state.mBowId = it->mBowId;
+            state.mVelocity = it->mVelocity;
+
+            state.save(writer);
+
+            writer.endRecord(ESM::REC_PROJ);
+
+            progress.increaseProgress();
+        }
+
+        for (std::vector<MagicBoltState>::const_iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
+        {
+            writer.startRecord(ESM::REC_MPRJ);
+
+            ESM::MagicBoltState state;
+            state.mId = it->mId;
+            state.mPosition = it->mNode->getPosition();
+            state.mOrientation = it->mNode->getOrientation();
+            state.mActorId = it->mActorId;
+
+            state.mSpellId = it->mSpellId;
+            state.mEffects = it->mEffects;
+            state.mSound = it->mSoundId;
+            state.mSourceName = it->mSourceName;
+            state.mSpeed = it->mSpeed;
+            state.mStack = it->mStack;
+
+            state.save(writer);
+
+            writer.endRecord(ESM::REC_MPRJ);
+
+            progress.increaseProgress();
+        }
+    }
+
+    bool ProjectileManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        if (type == ESM::REC_PROJ)
+        {
+            ESM::ProjectileState esm;
+            esm.load(reader);
+
+            ProjectileState state;
+            state.mActorId = esm.mActorId;
+            state.mBowId = esm.mBowId;
+            state.mVelocity = esm.mVelocity;
+            state.mId = esm.mId;
+
+            std::string model;
+            try
+            {
+                MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
+                MWWorld::Ptr ptr = ref.getPtr();
+                model = ptr.getClass().getModel(ptr);
+            }
+            catch(...)
+            {
+                return true;
+            }
+
+            state.mNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(esm.mPosition, esm.mOrientation);
+            createModel(state, model);
+
+            mProjectiles.push_back(state);
+            return true;
+        }
+        else if (type == ESM::REC_MPRJ)
+        {
+            ESM::MagicBoltState esm;
+            esm.load(reader);
+
+            MagicBoltState state;
+            state.mSourceName = esm.mSourceName;
+            state.mId = esm.mId;
+            state.mSpellId = esm.mSpellId;
+            state.mActorId = esm.mActorId;
+            state.mSpeed = esm.mSpeed;
+            state.mStack = esm.mStack;
+            state.mEffects = esm.mEffects;
+
+            std::string model;
+            try
+            {
+                MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
+                MWWorld::Ptr ptr = ref.getPtr();
+                model = ptr.getClass().getModel(ptr);
+            }
+            catch(...)
+            {
+                return true;
+            }
+
+            state.mNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(esm.mPosition, esm.mOrientation);
+            createModel(state, model);
+
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            state.mSound = sndMgr->playManualSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
+                                                     MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+
+            mMagicBolts.push_back(state);
+            return true;
+        }
+
+        return false;
+    }
+
+    int ProjectileManager::countSavedGameRecords() const
+    {
+        return mMagicBolts.size() + mProjectiles.size();
     }
 
 }
