@@ -56,9 +56,12 @@ namespace MWMechanics
         // Do we need to recalculate stats derived from attributes or other factors?
         bool mRecalcDynamicStats;
 
-        MWWorld::TimeStamp mTradeTime; // Relates to NPC gold reset delay
+        // For merchants: the last time items were restocked and gold pool refilled.
+        MWWorld::TimeStamp mLastRestock;
 
-        int mGoldPool; // the pool of merchant gold not in inventory
+        // The pool of merchant gold (not in inventory)
+        int mGoldPool;
+
         int mActorId;
 
     protected:
@@ -241,9 +244,8 @@ namespace MWMechanics
         static void writeActorIdCounter (ESM::ESMWriter& esm);
         static void readActorIdCounter (ESM::ESMReader& esm);
 
-        // Relates to NPC gold reset delay
-        void setTradeTime(MWWorld::TimeStamp tradeTime);
-        MWWorld::TimeStamp getTradeTime() const;
+        void setLastRestockTime(MWWorld::TimeStamp tradeTime);
+        MWWorld::TimeStamp getLastRestockTime() const;
 
         void setGoldPool(int pool);
         int getGoldPool() const;

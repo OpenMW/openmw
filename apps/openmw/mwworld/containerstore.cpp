@@ -376,7 +376,8 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::
 void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction,
                                               int count, bool topLevel)
 {
-    count = std::abs(count); /// \todo implement item restocking (indicated by negative count)
+    // A negative count indicates restocking items, but this is implemented elsewhere
+    count = std::abs(count);
 
     ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
 
