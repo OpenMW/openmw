@@ -93,7 +93,10 @@ struct TypesetBookImpl : TypesetBook
 
     typedef std::vector <Section> Sections;
 
+    // Holds "top" and "bottom" vertical coordinates in the source text.
+    // A page is basically a "window" into a portion of the source text, similar to a ScrollView.
     typedef std::pair <int, int> Page;
+
     typedef std::vector <Page> Pages;
 
     Pages mPages;
@@ -374,6 +377,29 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             else
             {
                 //split section
+                int sectionHeightLeft = sectionHeight;
+                while (sectionHeightLeft > mPageHeight)
+                {
+                    spaceLeft = mPageHeight - (curPageStop - curPageStart);
+
+                    // Adjust to the top of the first line that does not fit on the current page anymore
+                    int splitPos = curPageStop;
+                    for (Lines::iterator j = i->mLines.begin (); j != i->mLines.end (); ++j)
+                    {
+                        if (j->mRect.bottom > curPageStart + mPageHeight)
+                        {
+                            splitPos = j->mRect.top;
+                            break;
+                        }
+                    }
+
+                    mBook->mPages.push_back (Page (curPageStart, splitPos));
+                    curPageStart = splitPos;
+                    curPageStop = splitPos;
+
+                    sectionHeightLeft = (i->mRect.bottom - splitPos);
+                }
+                curPageStop = i->mRect.bottom;
             }
         }
 
