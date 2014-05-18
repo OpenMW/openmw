@@ -27,7 +27,7 @@ namespace MWMechanics
     {
             std::map<std::string, int> mDeathCount;
 
-            void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
+            void updateNpc(const MWWorld::Ptr &ptr, float duration);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
@@ -80,6 +80,12 @@ namespace MWMechanics
             void updateActor (const MWWorld::Ptr& ptr, float duration);
             ///< This function is normally called automatically during the update process, but it can
             /// also be called explicitly at any time to force an update.
+
+            /** Start combat between two actors
+                @Notes: If againstPlayer = true then actor2 should be the Player.
+                        If one of the combatants is creature it should be actor1.
+            */
+            void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer);
 
             void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.

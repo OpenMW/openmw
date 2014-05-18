@@ -2,7 +2,8 @@
 #define GAME_MWMECHANICS_AIPURSUE_H
 
 #include "aipackage.hpp"
-#include <string>
+
+#include "../mwbase/world.hpp"
 
 #include "pathfinding.hpp"
 
@@ -18,12 +19,16 @@ namespace MWMechanics
             ///Constructor
             /** \param actor Actor to pursue **/
             AiPursue(const MWWorld::Ptr& actor);
+
             virtual AiPursue *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
             virtual int getTypeId() const;
 
+            MWWorld::Ptr getTarget() const;
+
         private:
-            int mActorId; // The actor to pursue
+
+            int mTargetActorId; // The actor to pursue
             int mCellX;
             int mCellY;
     };

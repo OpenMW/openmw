@@ -31,7 +31,7 @@ namespace MWMechanics
             virtual unsigned int getPriority() const;
 
             ///Returns target ID
-            std::string getTargetId() const;
+            MWWorld::Ptr getTarget() const;
 
         private:
             PathFinder mPathFinder;

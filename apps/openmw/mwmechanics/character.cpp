@@ -1012,7 +1012,16 @@ void CharacterController::update(float duration)
         bool flying = world->isFlying(mPtr);
         //Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
-        vec.normalise();
+        if(vec.z > 0.0f) // to avoid slow-down when jumping
+        {
+            Ogre::Vector2 vecXY = Ogre::Vector2(vec.x, vec.y);
+            vecXY.normalise();
+            vec.x = vecXY.x;
+            vec.y = vecXY.y;
+        }
+        else 
+            vec.normalise();
+
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
@@ -1113,9 +1122,12 @@ void CharacterController::update(float duration)
             if(cls.isNpc())
             {
                 const NpcStats &stats = cls.getNpcStats(mPtr);
-                mult = gmst.find("fJumpMoveBase")->getFloat() +
+                static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
+                static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
+
+                mult = fJumpMoveBase +
                        (stats.getSkill(ESM::Skill::Acrobatics).getModified()/100.0f *
-                        gmst.find("fJumpMoveMult")->getFloat());
+                        fJumpMoveMult);
             }
 
             vec.x *= mult;
@@ -1125,14 +1137,7 @@ void CharacterController::update(float duration)
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
             // Started a jump.
-            float z = cls.getJump(mPtr);
-            if(vec.x == 0 && vec.y == 0)
-                vec = Ogre::Vector3(0.0f, 0.0f, z);
-            else
-            {
-                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
-            }
+            vec.z = cls.getJump(mPtr);
 
             // advance acrobatics
             if (mPtr.getRefData().getHandle() == "player")
@@ -1444,14 +1449,14 @@ void CharacterController::updateVisibility()
 
 void CharacterController::determineAttackType()
 {
-    float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
+    float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
 
     if(mPtr.getClass().hasInventoryStore(mPtr))
     {
-        if (move[0] && !move[1]) //sideway
-            mAttackType = "slash";
-        else if (move[1]) //forward
+        if (move[1]) // forward-backward
             mAttackType = "thrust";
+        else if (move[0]) //sideway
+            mAttackType = "slash";
         else
             mAttackType = "chop";
     }

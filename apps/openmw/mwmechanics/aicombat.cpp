@@ -149,9 +149,7 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(!actor.getClass().getCreatureStats(actor).isHostile()
-                || actor.getClass().getCreatureStats(actor).getHealth().getCurrent() <= 0)
-            return true;
+        if(actor.getClass().getCreatureStats(actor).isDead()) return true;
 
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
 
@@ -629,12 +627,9 @@ namespace MWMechanics
         return 1;
     }
 
-    std::string AiCombat::getTargetId() const
+    MWWorld::Ptr AiCombat::getTarget() const
     {
-        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
-        if (target.isEmpty())
-            return "";
-        return target.getRefData().getHandle();
+        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     }
 
 
