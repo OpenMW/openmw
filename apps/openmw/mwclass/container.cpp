@@ -74,16 +74,8 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
-        for (std::vector<ESM::ContItem>::const_iterator it = list.mList.begin(); it != list.mList.end(); ++it)
-        {
-            if (it->mCount < 0)
-            {
-                MWWorld::ContainerStore& store = getContainerStore(ptr);
-                int currentCount = store.count(it->mItem.toString());
-                if (currentCount < std::abs(it->mCount))
-                    store.add (it->mItem.toString(), std::abs(it->mCount) - currentCount, ptr);
-            }
-        }
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().mOwner, ptr.getCellRef().mFaction);
     }
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const

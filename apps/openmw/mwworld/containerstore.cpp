@@ -366,7 +366,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
-        std::string id = iter->mItem.toString();
+        std::string id = Misc::StringUtils::lowerCase(iter->mItem.toString());
         addInitialItem(id, owner, faction, iter->mCount);
     }
 
@@ -374,21 +374,18 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::
 }
 
 void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction,
-                                              int count, bool topLevel)
+                                              int count, bool topLevel, const std::string& levItem)
 {
-    // A negative count indicates restocking items, but this is implemented elsewhere
-    count = std::abs(count);
-
     ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
 
     if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
     {
         const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
 
-        if (topLevel && count > 1 && levItem->mFlags & ESM::ItemLevList::Each)
+        if (topLevel && std::abs(count) > 1 && levItem->mFlags & ESM::ItemLevList::Each)
         {
-            for (int i=0; i<count; ++i)
-                addInitialItem(id, owner, faction, 1);
+            for (int i=0; i<std::abs(count); ++i)
+                addInitialItem(id, owner, faction, count > 0 ? 1 : -1, true, levItem->mId);
             return;
         }
         else
@@ -396,15 +393,56 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
             if (id.empty())
                 return;
-            addInitialItem(id, owner, faction, count, false);
+            addInitialItem(id, owner, faction, count, false, levItem->mId);
         }
     }
     else
     {
+        // A negative count indicates restocking items
+        // For a restocking levelled item, remember what we spawned so we can delete it later when the merchant restocks
+        if (!levItem.empty() && count < 0)
+        {
+            if (mLevelledItemMap.find(id) == mLevelledItemMap.end())
+                mLevelledItemMap[id] = 0;
+            mLevelledItemMap[id] += std::abs(count);
+        }
+        count = std::abs(count);
+
         ref.getPtr().getCellRef().mOwner = owner;
         ref.getPtr().getCellRef().mFaction = faction;
         addImp (ref.getPtr(), count);
     }
+}
+
+void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction)
+{
+    // Remove the items already spawned by levelled items that will restock
+    for (std::map<std::string, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    {
+        if (count(it->first) >= it->second)
+            remove(it->first, it->second, ptr);
+    }
+    mLevelledItemMap.clear();
+
+    for (std::vector<ESM::ContItem>::const_iterator it = items.mList.begin(); it != items.mList.end(); ++it)
+    {
+        if (it->mCount >= 0)
+            continue;
+
+        std::string item = Misc::StringUtils::lowerCase(it->mItem.toString());
+
+        if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
+        {
+            addInitialItem(item, owner, faction, it->mCount, true);
+        }
+        else
+        {
+            int currentCount = count(item);
+            if (currentCount < std::abs(it->mCount))
+                add (item, std::abs(it->mCount) - currentCount, ptr);
+        }
+    }
+    flagAsModified();
 }
 
 void MWWorld::ContainerStore::clear()
@@ -585,6 +623,8 @@ void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
 
     state.mLights.clear();
 
+    state.mLevelledItemMap = mLevelledItemMap;
+
     for (MWWorld::CellRefList<ESM::Light>::List::const_iterator iter (lights.mList.begin());
         iter!=lights.mList.end(); ++iter)
     {
@@ -628,6 +668,8 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
     {
         getState (lights, iter->first);
     }
+
+    mLevelledItemMap = state.mLevelledItemMap;
 }
 
 
