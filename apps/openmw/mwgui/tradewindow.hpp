@@ -101,9 +101,7 @@ namespace MWGui
 
             int getMerchantGold();
 
-            // Relates to NPC gold reset delay
-            void checkTradeTime();
-            void updateTradeTime(); 
+            void restock();
     };
 }
 

@@ -145,6 +145,8 @@ namespace MWClass
             virtual int getBaseGold(const MWWorld::Ptr& ptr) const;
 
             virtual void respawn (const MWWorld::Ptr& ptr) const;
+
+            virtual void restock (const MWWorld::Ptr &ptr) const;
     };
 }
 

@@ -1330,6 +1330,14 @@ namespace MWClass
         }
     }
 
+    void Npc::restock(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const ESM::InventoryList& list = ref->mBase->mInventory;
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().mRefID, ptr.getCellRef().mFaction);
+    }
+
     const ESM::GameSetting *Npc::fMinWalkSpeed;
     const ESM::GameSetting *Npc::fMaxWalkSpeed;
     const ESM::GameSetting *Npc::fEncumberedMoveEffect;

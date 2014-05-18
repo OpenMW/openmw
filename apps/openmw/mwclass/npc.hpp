@@ -180,6 +180,8 @@ namespace MWClass
             }
 
             virtual void respawn (const MWWorld::Ptr& ptr) const;
+
+            virtual void restock (const MWWorld::Ptr& ptr) const;
     };
 }
 

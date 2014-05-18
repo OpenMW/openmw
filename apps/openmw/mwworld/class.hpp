@@ -343,6 +343,8 @@ namespace MWWorld
             virtual void setDoorState (const MWWorld::Ptr &ptr, int state) const;
 
             virtual void respawn (const MWWorld::Ptr& ptr) const {}
+
+            virtual void restock (const MWWorld::Ptr& ptr) const {}
     };
 }
 

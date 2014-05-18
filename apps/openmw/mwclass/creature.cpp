@@ -123,9 +123,6 @@ namespace MWClass
             else
                 data->mContainerStore = new MWWorld::ContainerStore();
 
-            // Relates to NPC gold reset delay
-            data->mCreatureStats.setTradeTime(MWWorld::TimeStamp(0.0, 0));
-
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
             // store
@@ -840,6 +837,14 @@ namespace MWClass
                 ptr.getRefData().setCustomData(NULL);
             }
         }
+    }
+
+    void Creature::restock(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const ESM::InventoryList& list = ref->mBase->mInventory;
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().mRefID, ptr.getCellRef().mFaction);
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
