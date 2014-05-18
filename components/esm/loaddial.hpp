@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <map>
 
 #include "loadinfo.hpp"
 
@@ -36,7 +37,12 @@ struct Dialogue
 
     typedef std::list<DialInfo> InfoContainer;
 
+    typedef std::map<std::string, InfoContainer::iterator> LookupMap;
+
     InfoContainer mInfo;
+
+    // This is only used during the loading phase to speed up DialInfo merging.
+    LookupMap mLookup;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;

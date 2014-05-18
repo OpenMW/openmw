@@ -47,37 +47,46 @@ void Dialogue::save(ESMWriter &esm) const
 
 void Dialogue::addInfo(const ESM::DialInfo& info, bool merge)
 {
-    // TODO: use std::move
     if (!merge || mInfo.empty() || info.mNext.empty())
     {
-        mInfo.push_back(info);
+        mLookup[info.mId] = mInfo.insert(mInfo.end(), info);
         return;
     }
     if (info.mPrev.empty())
     {
-        mInfo.push_front(info);
+        mLookup[info.mId] = mInfo.insert(mInfo.begin(), info);
         return;
     }
-    int i=0;
-    for (ESM::Dialogue::InfoContainer::iterator it = mInfo.begin(); it != mInfo.end(); ++it)
+
+    ESM::Dialogue::InfoContainer::iterator it = mInfo.end();
+
+    std::map<std::string, ESM::Dialogue::InfoContainer::iterator>::iterator lookup;
+    lookup = mLookup.find(info.mPrev);
+    if (lookup != mLookup.end())
     {
-        if (info.mPrev == it->mId)
-        {
-            mInfo.insert(++it, info);
-            return;
-        }
-        if (info.mNext == it->mId)
-        {
-            mInfo.insert(it, info);
-            return;
-        }
-        if (info.mId == it->mId)
-        {
-            *it = info;
-            return;
-        }
-        ++i;
+        it = lookup->second;
+
+        mLookup[info.mId] = mInfo.insert(++it, info);
+        return;
     }
+
+    lookup = mLookup.find(info.mNext);
+    if (lookup != mLookup.end())
+    {
+        it = lookup->second;
+
+        mLookup[info.mId] = mInfo.insert(it, info);
+        return;
+    }
+
+    lookup = mLookup.find(info.mId);
+    if (lookup != mLookup.end())
+    {
+        it = lookup->second;
+        *it = info;
+        return;
+    }
+
     std::cerr << "Failed to insert info " << info.mId << std::endl;
 }
 
