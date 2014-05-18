@@ -27,8 +27,6 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 {
     listener->setProgressRange(1000);
 
-    std::set<std::string> missing;
-
     ESM::Dialogue *dialogue = 0;
 
     /// \todo Move this to somewhere else. ESMReader?
@@ -72,9 +70,10 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             if (n.val == ESM::REC_INFO) {
                 std::string id = esm.getHNOString("INAM");
                 if (dialogue) {
-                    dialogue->mInfo.push_back(ESM::DialInfo());
-                    dialogue->mInfo.back().mId = id;
-                    dialogue->mInfo.back().load(esm);
+                    ESM::DialInfo info;
+                    info.mId = id;
+                    info.load(esm);
+                    dialogue->addInfo(info, esm.getIndex() != 0);
                 } else {
                     std::cerr << "error: info record without dialog" << std::endl;
                     esm.skipRecord();
@@ -84,9 +83,9 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             } else if (n.val == ESM::REC_SKIL) {
                 mSkills.load (esm);
             } else {
-                // Not found (this would be an error later)
-                esm.skipRecord();
-                missing.insert(n.toString());
+                std::stringstream error;
+                error << "Unknown record: " << n.toString();
+                throw std::runtime_error(error.str());
             }
         } else {
             // Load it
@@ -113,19 +112,6 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         }
         listener->setProgress(esm.getFileOffset() / (float)esm.getFileSize() * 1000);
     }
-
-  /* This information isn't needed on screen. But keep the code around
-     for debugging purposes later.
-
-  cout << "\n" << mStores.size() << " record types:\n";
-  for(RecListList::iterator it = mStores.begin(); it != mStores.end(); it++)
-    cout << "  " << toStr(it->first) << ": " << it->second->getSize() << endl;
-  cout << "\nNot implemented yet: ";
-  for(set<string>::iterator it = missing.begin();
-      it != missing.end(); it++ )
-    cout << *it << " ";
-  cout << endl;
-  */
 }
 
 void ESMStore::setUp()

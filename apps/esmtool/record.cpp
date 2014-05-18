@@ -651,7 +651,7 @@ void Record<ESM::Dialogue>::print()
     // Sadly, there are no DialInfos, because the loader dumps as it
     // loads, rather than loading and then dumping. :-( Anyone mind if
     // I change this?
-    std::vector<ESM::DialInfo>::iterator iit;
+    ESM::Dialogue::InfoContainer::iterator iit;
     for (iit = mData.mInfo.begin(); iit != mData.mInfo.end(); iit++)
         std::cout << "INFO!" << iit->mId << std::endl;
 }

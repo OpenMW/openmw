@@ -621,7 +621,7 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
     bool infoRefusal = false;
 
     // Iterate over topic responses to find a matching one
-    for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
         iter!=dialogue.mInfo.end(); ++iter)
     {
         if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
@@ -646,7 +646,7 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
 
         const ESM::Dialogue& infoRefusalDialogue = *dialogues.find ("Info Refusal");
 
-        for (std::vector<ESM::DialInfo>::const_iterator iter = infoRefusalDialogue.mInfo.begin();
+        for (ESM::Dialogue::InfoContainer::const_iterator iter = infoRefusalDialogue.mInfo.begin();
             iter!=infoRefusalDialogue.mInfo.end(); ++iter)
             if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter, invertDisposition)) {
                 infos.push_back(&*iter);
@@ -660,7 +660,7 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
 
 bool MWDialogue::Filter::responseAvailable (const ESM::Dialogue& dialogue) const
 {
-    for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
         iter!=dialogue.mInfo.end(); ++iter)
     {
         if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
