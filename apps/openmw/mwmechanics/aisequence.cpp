@@ -59,14 +59,13 @@ int AiSequence::getTypeId() const
     return mPackages.front()->getTypeId();
 }
 
-bool AiSequence::getCombatTarget(std::string &targetActorId) const
+bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
 {
     if (getTypeId() != AiPackage::TypeIdCombat)
         return false;
     const AiCombat *combat = static_cast<const AiCombat *>(mPackages.front());
     
-    MWWorld::Ptr target = combat->getTarget();
-    targetActorId = target.getClass().getCreatureStats(target).getActorId();
+    targetActor = combat->getTarget();
 
     return true;
 }
@@ -138,15 +137,11 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                 float nearestDist = std::numeric_limits<float>::max();
                 Ogre::Vector3 vActorPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
 
-                const AiCombat *package;
-
                 for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
                 {
-                    package = static_cast<const AiCombat *>(*it);
-
                     if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
 
-                    ESM::Position &targetPos = package->getTarget().getRefData().getPosition();
+                    ESM::Position &targetPos = static_cast<const AiCombat *>(*it)->getTarget().getRefData().getPosition();
 
                     float distTo = (Ogre::Vector3(targetPos.pos) - vActorPos).length();
                     if (distTo < nearestDist)

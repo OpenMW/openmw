@@ -419,9 +419,10 @@ namespace MWScript
                     std::string currentTargetId;
 
                     bool targetsAreEqual = false;
-                    if (creatureStats.getAiSequence().getCombatTarget (currentTargetId))
+                    MWWorld::Ptr targetPtr;
+                    if (creatureStats.getAiSequence().getCombatTarget (targetPtr))
                     {
-                        if (currentTargetId == testedTargetId)
+                        if (targetPtr.getRefData().getHandle() == testedTargetId)
                             targetsAreEqual = true;
                     }
                     runtime.push(int(targetsAreEqual));

@@ -322,11 +322,9 @@ namespace MWMechanics
 
     bool CreatureStats::getCreatureTargetted() const
     {
-        std::string target;
-        if (mAiSequence.getCombatTarget(target))
+        MWWorld::Ptr targetPtr;
+        if (mAiSequence.getCombatTarget(targetPtr))
         {
-            MWWorld::Ptr targetPtr;
-            targetPtr = MWBase::Environment::get().getWorld()->getPtr(target, true);
             return targetPtr.getTypeName() == typeid(ESM::Creature).name();
         }
         return false;
