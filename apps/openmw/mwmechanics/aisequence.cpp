@@ -133,14 +133,14 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
             // if active package is combat one, choose nearest target
             if (mLastAiPackage == AiPackage::TypeIdCombat)
             {
-                std::list<AiPackage *>::const_iterator itActualCombat;
+                std::list<AiPackage *>::iterator itActualCombat;
 
                 float nearestDist = std::numeric_limits<float>::max();
                 Ogre::Vector3 vActorPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
 
                 const AiCombat *package;
 
-                for(std::list<AiPackage *>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+                for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
                 {
                     package = static_cast<const AiCombat *>(*it);
 
@@ -159,9 +159,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                 if (mPackages.begin() != itActualCombat)
                 {
                     // move combat package with nearest target to the front
-                    AiPackage *package = (*itActualCombat)->clone();
-                    mPackages.erase(itActualCombat);
-                    mPackages.push_front(package);
+                    mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
                 }
             }
 
