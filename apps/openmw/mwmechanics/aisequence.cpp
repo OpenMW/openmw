@@ -156,7 +156,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                     }
                 }
 
-                if (mPackages.cbegin() != itActualCombat)
+                if (mPackages.begin() != itActualCombat)
                 {
                     // move combat package with nearest target to the front
                     mPackages.splice(mPackages.begin(), mPackages, itActualCombat);

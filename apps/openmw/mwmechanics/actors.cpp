@@ -922,7 +922,7 @@ namespace MWMechanics
                             sBasePoint = Ogre::Vector3(iter->first.getRefData().getPosition().pos);
                             listGuards.sort(comparePtrDist); // try to engage combat starting from the nearest creature
                             
-                            for (std::list<MWWorld::Ptr>::const_iterator it = listGuards.cbegin(); it != listGuards.cend(); ++it)
+                            for (std::list<MWWorld::Ptr>::iterator it = listGuards.begin(); it != listGuards.end(); ++it)
                             {
                                 engageCombat(iter->first, *it, false);
                             }
