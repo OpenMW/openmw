@@ -61,6 +61,15 @@ void Dialogue::addInfo(const ESM::DialInfo& info, bool merge)
     ESM::Dialogue::InfoContainer::iterator it = mInfo.end();
 
     std::map<std::string, ESM::Dialogue::InfoContainer::iterator>::iterator lookup;
+
+    lookup = mLookup.find(info.mId);
+    if (lookup != mLookup.end())
+    {
+        it = lookup->second;
+        *it = info;
+        return;
+    }
+
     lookup = mLookup.find(info.mPrev);
     if (lookup != mLookup.end())
     {
@@ -76,14 +85,6 @@ void Dialogue::addInfo(const ESM::DialInfo& info, bool merge)
         it = lookup->second;
 
         mLookup[info.mId] = mInfo.insert(it, info);
-        return;
-    }
-
-    lookup = mLookup.find(info.mId);
-    if (lookup != mLookup.end())
-    {
-        it = lookup->second;
-        *it = info;
         return;
     }
 
