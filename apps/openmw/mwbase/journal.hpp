@@ -37,7 +37,7 @@ namespace MWBase
 
             typedef std::deque<MWDialogue::StampedJournalEntry> TEntryContainer;
             typedef TEntryContainer::const_iterator TEntryIter;
-            typedef std::map<std::string, MWDialogue::Quest> TQuestContainer; // topc, quest
+            typedef std::map<std::string, MWDialogue::Quest> TQuestContainer; // topic, quest
             typedef TQuestContainer::const_iterator TQuestIter;
             typedef std::map<std::string, MWDialogue::Topic> TTopicContainer; // topic-id, topic-content
             typedef TTopicContainer::const_iterator TTopicIter;
