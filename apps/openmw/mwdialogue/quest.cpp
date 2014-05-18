@@ -45,7 +45,6 @@ namespace MWDialogue
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
 
-        bool found=false;
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mData.mDisposition==index && iter->mQuestStatus!=ESM::DialInfo::QS_Name)
@@ -55,14 +54,11 @@ namespace MWDialogue
                 else if (iter->mQuestStatus==ESM::DialInfo::QS_Restart)
                     mFinished = false;
 
-                found = true;
                 // Don't return here. Quest status may actually be in a different info record, since we don't merge these (yet?)
             }
 
-        if (found)
-            mIndex = index;
-        else
-            throw std::runtime_error ("unknown journal index for topic " + mTopic);
+        // The index must be set even if no related journal entry was found
+        mIndex = index;
     }
 
     bool Quest::isFinished() const

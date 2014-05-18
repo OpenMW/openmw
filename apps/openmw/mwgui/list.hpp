@@ -8,18 +8,6 @@ namespace MWGui
     namespace Widgets
     {
         /**
-         * \brief a custom ScrollView which has access to scrollbar properties
-         */
-        class MWScrollView : public MyGUI::ScrollView
-        {
-            MYGUI_RTTI_DERIVED(MWScrollView)
-        public:
-            size_t getScrollPosition();
-            void setScrollPosition(size_t);
-            size_t getScrollRange();
-        };
-
-        /**
          * \brief a very simple list widget that supports word-wrapping entries
          * \note if the width or height of the list changes, you must call adjustSize() method
          */
@@ -70,7 +58,7 @@ namespace MWGui
             void onItemSelected(MyGUI::Widget* _sender);
 
         private:
-            MWGui::Widgets::MWScrollView* mScrollView;
+            MyGUI::ScrollView* mScrollView;
             MyGUI::Widget* mClient;
 
             std::vector<std::string> mItems;

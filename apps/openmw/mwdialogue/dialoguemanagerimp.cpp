@@ -286,7 +286,18 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), title);
-            MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor.getClass().getName(mActor));
+
+            // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
+            // in which case it should not be added to the journal.
+            for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+                iter!=dialogue.mInfo.end(); ++iter)
+            {
+                if (iter->mId == info->mId)
+                {
+                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor.getClass().getName(mActor));
+                    break;
+                }
+            }
 
             executeScript (info->mResultScript);
 
@@ -453,7 +464,19 @@ namespace MWDialogue
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse (Interpreter::fixDefinesDialog(text, interpreterContext));
-                    MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor.getClass().getName(mActor));
+
+                    // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
+                    // in which case it should not be added to the journal.
+                    for (std::vector<ESM::DialInfo>::const_iterator iter = mDialogueMap[mLastTopic].mInfo.begin();
+                        iter!=mDialogueMap[mLastTopic].mInfo.end(); ++iter)
+                    {
+                        if (iter->mId == info->mId)
+                        {
+                            MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor.getClass().getName(mActor));
+                            break;
+                        }
+                    }
+
                     executeScript (info->mResultScript);
                 }
             }
