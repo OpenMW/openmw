@@ -25,7 +25,7 @@ namespace MWGui
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
         CompanionItemModel* mModel;
-        size_t mSelectedItem;
+        int mSelectedItem;
 
         DragAndDrop* mDragAndDrop;
 

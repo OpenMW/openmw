@@ -24,6 +24,8 @@ namespace ESM
 
         std::map<std::string, int> mLevelledItemMap;
 
+        virtual ~InventoryState() {}
+
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm) const;
     };
