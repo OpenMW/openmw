@@ -53,7 +53,10 @@ namespace MWMechanics
             int getLastRunTypeId() const { return mLastAiPackage; }
 
             /// Return true and assign target if combat package is currently active, return false otherwise
-            bool getCombatTarget (std::string &targetActorId) const;
+            bool getCombatTarget (MWWorld::Ptr &targetActor) const;
+
+            bool canAddTarget(const ESM::Position& actorPos, float distToTarget) const;
+            ///< Function assumes that actor can have only 1 target apart player
 
             /// Removes all combat packages until first non-combat or stack empty.
             void stopCombat();
