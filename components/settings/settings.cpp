@@ -6,8 +6,11 @@
 
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
+#include <OgreDataStream.h>
 
 using namespace Settings;
+
+namespace bfs = boost::filesystem;
 
 Ogre::ConfigFile Manager::mFile = Ogre::ConfigFile();
 Ogre::ConfigFile Manager::mDefaultFile = Ogre::ConfigFile();
@@ -16,17 +19,20 @@ CategorySettingValueMap Manager::mNewSettings = CategorySettingValueMap();
 
 void Manager::loadUser (const std::string& file)
 {
-    mFile.load(file);
+    bfs::ifstream fin((bfs::path(file)));
+    Ogre::DataStreamPtr stream((OGRE_NEW Ogre::FileStreamDataStream(file, &fin, false)));
+    mFile.load(stream);
 }
 
 void Manager::loadDefault (const std::string& file)
 {
-    mDefaultFile.load(file);
+    bfs::ifstream fin((bfs::path(file)));
+    Ogre::DataStreamPtr stream((OGRE_NEW Ogre::FileStreamDataStream(file, &fin, false)));
+    mDefaultFile.load(stream);
 }
 
 void Manager::saveUser(const std::string& file)
 {
-    namespace bfs = boost::filesystem;
     bfs::ofstream fout((bfs::path(file)));
 
     Ogre::ConfigFile::SectionIterator seci = mFile.getSectionIterator();
