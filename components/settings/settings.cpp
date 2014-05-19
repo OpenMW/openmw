@@ -8,6 +8,8 @@
 #include <OgreStringConverter.h>
 #include <OgreDataStream.h>
 
+#include <components/files/constrainedfiledatastream.hpp>
+
 using namespace Settings;
 
 namespace bfs = boost::filesystem;
@@ -19,15 +21,13 @@ CategorySettingValueMap Manager::mNewSettings = CategorySettingValueMap();
 
 void Manager::loadUser (const std::string& file)
 {
-    bfs::ifstream fin((bfs::path(file)));
-    Ogre::DataStreamPtr stream((OGRE_NEW Ogre::FileStreamDataStream(file, &fin, false)));
+    Ogre::DataStreamPtr stream = openConstrainedFileDataStream(file.c_str());
     mFile.load(stream);
 }
 
 void Manager::loadDefault (const std::string& file)
 {
-    bfs::ifstream fin((bfs::path(file)));
-    Ogre::DataStreamPtr stream((OGRE_NEW Ogre::FileStreamDataStream(file, &fin, false)));
+    Ogre::DataStreamPtr stream = openConstrainedFileDataStream(file.c_str());
     mDefaultFile.load(stream);
 }
 
