@@ -15,6 +15,9 @@
 
 #include <components/ogreinit/ogreinit.hpp>
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <cassert>
 #include <stdexcept>
 
@@ -48,7 +51,37 @@ void OgreRenderer::update(float dt)
 
 void OgreRenderer::screenshot(const std::string &file)
 {
-    mWindow->writeContentsToFile(file);
+    namespace bfs = boost::filesystem;
+    bfs::ofstream out((bfs::path(file)));
+
+    Ogre::Image image;
+
+    Ogre::PixelFormat pf = mWindow->suggestPixelFormat();
+    int w = mWindow->getWidth();
+    int h = mWindow->getHeight();
+
+    image.loadDynamicImage(
+        OGRE_ALLOC_T(Ogre::uchar, w * h * Ogre::PixelUtil::getNumElemBytes(pf), Ogre::MEMCATEGORY_GENERAL),
+        w, h, 1, pf, true
+    );
+    mWindow->copyContentsToMemory(image.getPixelBox());
+
+    Ogre::DataStreamPtr stream = image.encode("png");
+    Ogre::MemoryDataStream *mem = dynamic_cast<Ogre::MemoryDataStream *>(stream.get());
+    if (mem != 0) { // likely
+        const char *ptr = reinterpret_cast<char *>(mem->getCurrentPtr());
+        out.write(ptr, mem->size());
+    }
+    else {
+        char buf[4096];
+        size_t size = stream->size();
+        while (size > 0) {
+            size_t chunk = (size > sizeof(buf)) ? sizeof(buf) : size;
+            stream->read(buf, chunk);
+            out.write(buf, chunk);
+            size -= chunk;
+        }
+    }
 }
 
 float OgreRenderer::getFPS()
