@@ -1,12 +1,15 @@
 #include "importer.hpp"
 
-#include <iostream>
 #include <string>
+
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 namespace bpo = boost::program_options;
+namespace bfs = boost::filesystem;
 
 #ifndef _WIN32
 int main(int argc, char *argv[]) {
@@ -126,7 +129,7 @@ int wmain(int argc, wchar_t *wargv[]) {
     }
 
     std::cout << "write to: " << outputFile << std::endl;
-    boost::iostreams::stream<boost::iostreams::file_sink> file(outputFile);
+    bfs::ofstream file((bfs::path(outputFile)));
     importer.writeToFile(file, cfg);
 
     return 0;
