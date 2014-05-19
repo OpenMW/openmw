@@ -141,17 +141,34 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                 {
                     if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
 
-                    ESM::Position &targetPos = static_cast<const AiCombat *>(*it)->getTarget().getRefData().getPosition();
+                    MWWorld::Ptr target = static_cast<const AiCombat *>(*it)->getTarget();
 
-                    float distTo = (Ogre::Vector3(targetPos.pos) - vActorPos).length();
-                    if (distTo < nearestDist)
+                    // target disappeared (e.g. summoned creatures)
+                    if (target.isEmpty())
                     {
-                        nearestDist = distTo;
-                        itActualCombat = it;
+                        delete *it;
+                        mPackages.erase(it++);
+                    }
+                    else
+                    {
+                        ESM::Position &targetPos = target.getRefData().getPosition();
+
+                        float distTo = (Ogre::Vector3(targetPos.pos) - vActorPos).length();
+                        if (distTo < nearestDist)
+                        {
+                            nearestDist = distTo;
+                            itActualCombat = it;
+                        }
                     }
                 }
 
-                if (mPackages.begin() != itActualCombat)
+                // all targets disappeared
+                if (nearestDist == std::numeric_limits<float>::max())
+                {
+                    mDone = true;
+                    return;
+                }
+                else if (mPackages.begin() != itActualCombat)
                 {
                     // move combat package with nearest target to the front
                     mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
