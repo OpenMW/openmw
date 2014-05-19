@@ -12,6 +12,8 @@
 
 #include <OgreImage.h>
 
+#include <boost/filesystem/fstream.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -187,7 +189,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     else
         slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
 
-    std::ofstream stream (slot->mPath.string().c_str(), std::ios::binary);
+    boost::filesystem::ofstream stream (slot->mPath, std::ios::binary);
 
     ESM::ESMWriter writer;
 
