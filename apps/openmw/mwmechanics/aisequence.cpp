@@ -146,6 +146,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                     // target disappeared (e.g. summoned creatures)
                     if (target.isEmpty())
                     {
+                        delete *it;
                         mPackages.erase(it++);
                     }
                     else
