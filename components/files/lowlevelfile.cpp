@@ -232,7 +232,7 @@ void LowLevelFile::open (char const * filename)
 	std::wstring wname = boost::locale::conv::utf_to_utf<wchar_t>(filename);
 	HANDLE handle = CreateFileW (wname.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 
-	if (handle == NULL)
+	if (handle == INVALID_HANDLE_VALUE)
 	{
 		std::ostringstream os;
 		os << "Failed to open '" << filename << "' for reading.";
