@@ -104,6 +104,11 @@ namespace MWScript
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (!MWBase::Environment::get().getWorld()->getPlayerPtr().isInCell())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
                     const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
 
                     std::string current = cell->mName;

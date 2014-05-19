@@ -6,7 +6,8 @@
 #else
 #include <tr1/unordered_map>
 #endif
-
+#include "../mwbase/scriptmanager.hpp"
+#include "../mwscript/globalscripts.hpp"
 #include <OgreSceneNode.h>
 
 #include <libs/openengine/bullet/trace.h>
@@ -188,6 +189,18 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
+        if (!bypass)
+        {
+            // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
+            mPlayIntro = 2;
+
+            // set new game mark
+            mGlobalVariables["chargenstate"].setInteger (1);
+            mGlobalVariables["pcrace"].setInteger (3);
+
+            MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
+        }
+
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
@@ -204,27 +217,20 @@ namespace MWWorld
         }
         else
         {
-            /// \todo if !bypass, do not add player location to global map for the duration of one
-            /// frame
-            ESM::Position pos;
-            const int cellSize = 8192;
-            pos.pos[0] = cellSize/2;
-            pos.pos[1] = cellSize/2;
-            pos.pos[2] = 0;
-            pos.rot[0] = 0;
-            pos.rot[1] = 0;
-            pos.rot[2] = 0;
-            mWorldScene->changeToExteriorCell(pos);
-        }
-
-        if (!bypass)
-        {
-            // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
-            mPlayIntro = 2;
-
-            // set new game mark
-            mGlobalVariables["chargenstate"].setInteger (1);
-            mGlobalVariables["pcrace"].setInteger (3);
+            for (int i=0; i<5; ++i)
+                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+            if (!getPlayerPtr().isInCell())
+            {
+                ESM::Position pos;
+                const int cellSize = 8192;
+                pos.pos[0] = cellSize/2;
+                pos.pos[1] = cellSize/2;
+                pos.pos[2] = 0;
+                pos.rot[0] = 0;
+                pos.rot[1] = 0;
+                pos.rot[2] = 0;
+                mWorldScene->changeToExteriorCell(pos);
+            }
         }
 
         // we don't want old weather to persist on a new game
@@ -938,7 +944,7 @@ namespace MWWorld
 
         Ogre::Vector3 vec(x, y, z);
 
-        CellStore *currCell = ptr.getCell();
+        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL;
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
