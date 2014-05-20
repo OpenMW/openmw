@@ -52,7 +52,7 @@ void OgreRenderer::update(float dt)
 void OgreRenderer::screenshot(const std::string &file)
 {
     namespace bfs = boost::filesystem;
-    bfs::ofstream out((bfs::path(file)));
+    bfs::ofstream out(bfs::path(file), std::ios::binary);
 
     Ogre::Image image;
 
