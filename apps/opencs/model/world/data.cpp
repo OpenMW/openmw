@@ -539,7 +539,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         {
             mCells.load (*mReader, mBase);
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (mCells.getSize()-1));
-            mRefs.load (*mReader, mCells.getSize()-1, mBase, mRefLoadCache[cellId]);
+            mRefs.load (*mReader, mCells.getSize()-1, mBase, mRefLoadCache[cellId], messages);
             break;
         }
 

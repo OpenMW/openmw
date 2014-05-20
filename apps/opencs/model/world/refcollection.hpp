@@ -3,6 +3,8 @@
 
 #include <map>
 
+#include "../doc/stage.hpp"
+
 #include "collection.hpp"
 #include "ref.hpp"
 #include "record.hpp"
@@ -25,7 +27,8 @@ namespace CSMWorld
             {}
 
             void load (ESM::ESMReader& reader, int cellIndex, bool base,
-                std::map<ESM::CellRef::RefNum, std::string>& cache);
+                std::map<ESM::CellRef::RefNum, std::string>& cache,
+                CSMDoc::Stage::Messages& messages);
             ///< Load a sequence of references.
 
             std::string getNewId();

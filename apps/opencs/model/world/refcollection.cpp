@@ -11,7 +11,7 @@
 #include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<ESM::CellRef::RefNum, std::string>& cache)
+    std::map<ESM::CellRef::RefNum, std::string>& cache, CSMDoc::Stage::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
@@ -27,13 +27,38 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
         /// \todo handle moved references
 
+        std::map<ESM::CellRef::RefNum, std::string>::iterator iter = cache.find (ref.mRefNum);
+
         if (deleted)
         {
-            /// \todo handle deleted references
+            if (iter==cache.end())
+            {
+                CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
+                    mCells.getId (cellIndex));
+
+                messages.push_back (std::make_pair (id,
+                    "Attempt to delete a non-existing reference"));
+
+                continue;
+            }
+
+            int index = getIndex (iter->second);
+
+            Record<CellRef> record = getRecord (index);
+
+            if (record.mState==RecordBase::State_BaseOnly)
+            {
+                removeRows (index, 1);
+                cache.erase (iter);
+            }
+            else
+            {
+                record.mState = RecordBase::State_Deleted;
+                setRecord (index, record);
+            }
+
             continue;
         }
-
-        std::map<ESM::CellRef::RefNum, std::string>::iterator iter = cache.find (ref.mRefNum);
 
         if (iter==cache.end())
         {
