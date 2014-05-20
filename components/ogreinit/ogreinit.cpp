@@ -188,11 +188,6 @@ namespace OgreInit
             pluginDir = OGRE_PLUGIN_DIR_REL;
     #endif
         }
-
-        boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
-
-        pluginDir = absPluginPath.string();
-
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GLES2", *mRoot);
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
