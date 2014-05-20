@@ -44,7 +44,8 @@ FILE* TiXmlFOpen( const char* filename, const char* mode )
 	#if defined(_WIN32)
 		FILE* fp = 0;
 		size_t len = strlen(filename);
-		wchar_t *wname = new wchar_t[len]
+		wchar_t *wname = new wchar_t[len + 1];
+		memset(wname, 0, sizeof(*wname) * (len + 1));
 		wchar_t wmode[32] = { 0 };
 
 		MultiByteToWideChar(CP_UTF8, 0, filename, len, wname, len);
@@ -53,7 +54,7 @@ FILE* TiXmlFOpen( const char* filename, const char* mode )
 		#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 		errno_t err = _wfopen_s( &fp, wname, wmode );
 		#else
-		fp = _wfopen(wname, wmode)
+		fp = _wfopen(wname, wmode);
 		#endif
 		delete[] wname;
 
