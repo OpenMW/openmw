@@ -138,8 +138,6 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
-            int mPlayIntro;
-
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;

@@ -130,7 +130,7 @@ namespace MWWorld
     : mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (activationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(true),
+      mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
       mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles),
       mGoToJail(false),
       mStartCell (startCell)
@@ -191,9 +191,6 @@ namespace MWWorld
 
         if (!bypass)
         {
-            // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
-            mPlayIntro = 2;
-
             // set new game mark
             mGlobalVariables["chargenstate"].setInteger (1);
             mGlobalVariables["pcrace"].setInteger (3);
@@ -233,6 +230,9 @@ namespace MWWorld
             }
         }
 
+        if (!bypass)
+            MWBase::Environment::get().getWindowManager()->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
+
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
         mWeatherManager = 0;
@@ -271,7 +271,6 @@ namespace MWWorld
         mGodMode = false;
         mSky = true;
         mTeleportEnabled = true;
-        mPlayIntro = 0;
         mFacedDistance = FLT_MAX;
 
         mGlobalVariables.fill (mStore);
@@ -1369,13 +1368,6 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
-        if (mPlayIntro)
-        {
-            --mPlayIntro;
-            if (mPlayIntro == 0)
-                MWBase::Environment::get().getWindowManager()->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
-        }
-
         if (mGoToJail && !paused)
             goToJail();
 
