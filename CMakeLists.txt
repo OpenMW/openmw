@@ -129,6 +129,7 @@ set(OENGINE_OGRE
 )
 
 set(OENGINE_GUI
+  ${LIBDIR}/openengine/gui/loglistener.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
   ${LIBDIR}/openengine/gui/layout.hpp
 )
