@@ -31,7 +31,7 @@ public:
     }
 
     ~utf8argv() { delete[] argv; }
-    const char * const *get() const { return argv; }
+    char **get() const { return const_cast<char **>(argv); }
 
 private:
 
