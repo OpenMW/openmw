@@ -462,10 +462,12 @@ void OMW::Engine::go()
         catch (...) {}
     }
     else
+    {
         MWBase::Environment::get().getStateManager()->newGame (true);
 
-    if (!mStartupScript.empty())
-        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
+        if (!mStartupScript.empty())
+            MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
+    }
 
     // Start the main rendering loop
     while (!mEnvironment.get().getStateManager()->hasQuitRequest())
