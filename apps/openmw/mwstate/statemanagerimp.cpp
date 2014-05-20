@@ -371,6 +371,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     {
         std::cerr << "failed to load saved game: " << e.what() << std::endl;
         cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
     }
 }
 

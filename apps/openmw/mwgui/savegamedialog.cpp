@@ -222,12 +222,6 @@ namespace MWGui
                 MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
             }
         }
-
-        if (MWBase::Environment::get().getStateManager()->getState()==
-            MWBase::StateManager::State_NoGame)
-        {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-        }
     }
 
     void SaveGameDialog::onOkButtonClicked(MyGUI::Widget *sender)

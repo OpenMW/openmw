@@ -233,6 +233,10 @@ namespace MWWorld
         if (!bypass)
             MWBase::Environment::get().getWindowManager()->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
 
+        // enable collision
+        if (!mPhysics->toggleCollisionMode())
+            mPhysics->toggleCollisionMode();
+
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
         mWeatherManager = 0;
@@ -247,10 +251,6 @@ namespace MWWorld
 
         mLocalScripts.clear();
         mPlayer->clear();
-
-        // enable collision
-        if (!mPhysics->toggleCollisionMode())
-            mPhysics->toggleCollisionMode();
 
         mWorldScene->changeToVoid();
 
