@@ -144,7 +144,7 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
+set(BOOST_COMPONENTS system filesystem program_options thread wave locale)
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
