@@ -18,8 +18,3 @@ void CSMWorld::Cell::load (ESM::ESMReader &esm)
         mId = stream.str();
     }
 }
-
-void CSMWorld::Cell::addRef (const std::string& id)
-{
-    mRefs.push_back (std::make_pair (id, false));
-}

@@ -489,6 +489,7 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     delete mReader;
     mReader = 0;
     mDialogue = 0;
+    mRefLoadCache.clear();
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
@@ -513,6 +514,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         delete mReader;
         mReader = 0;
         mDialogue = 0;
+        mRefLoadCache.clear();
         return true;
     }
 
@@ -534,9 +536,12 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_SPEL: mSpells.load (*mReader, mBase); break;
 
         case ESM::REC_CELL:
+        {
             mCells.load (*mReader, mBase);
-            mRefs.load (*mReader, mCells.getSize()-1, mBase);
+            std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (mCells.getSize()-1));
+            mRefs.load (*mReader, mCells.getSize()-1, mBase, mRefLoadCache[cellId]);
             break;
+        }
 
         case ESM::REC_ACTI: mReferenceables.load (*mReader, mBase, UniversalId::Type_Activator); break;
         case ESM::REC_ALCH: mReferenceables.load (*mReader, mBase, UniversalId::Type_Potion); break;

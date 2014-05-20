@@ -77,6 +77,7 @@ namespace CSMWorld
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
+            std::map<std::string, std::map<ESM::CellRef::RefNum, std::string> > mRefLoadCache;
 
             // not implemented
             Data (const Data&);

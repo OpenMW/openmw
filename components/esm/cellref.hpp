@@ -95,6 +95,7 @@ namespace ESM
     };
 
     bool operator== (const CellRef::RefNum& left, const CellRef::RefNum& right);
+    bool operator< (const CellRef::RefNum& left, const CellRef::RefNum& right);
 }
 
 #endif
