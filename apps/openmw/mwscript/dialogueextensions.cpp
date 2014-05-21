@@ -34,7 +34,15 @@ namespace MWScript
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWBase::Environment::get().getJournal()->addEntry (quest, index);
+                    // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
+                    try
+                    {
+                        MWBase::Environment::get().getJournal()->addEntry (quest, index);
+                    }
+                    catch (...)
+                    {
+                        MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
+                    }
                 }
         };
 
