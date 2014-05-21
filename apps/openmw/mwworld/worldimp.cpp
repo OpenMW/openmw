@@ -126,14 +126,14 @@ namespace MWWorld
         const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-        int activationDistanceOverride, const std::string& startCell)
+        int activationDistanceOverride, const std::string& startCell, const std::string& startupScript)
     : mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (activationDistanceOverride),
       mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
       mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles),
       mGoToJail(false),
-      mStartCell (startCell)
+      mStartCell (startCell), mStartupScript(startupScript)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -241,6 +241,8 @@ namespace MWWorld
         delete mWeatherManager;
         mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
+
+        MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
     }
 
     void World::clear()

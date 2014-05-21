@@ -380,7 +380,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
-        mActivationDistanceOverride, mCellName));
+        mActivationDistanceOverride, mCellName, mStartupScript));
     MWBase::Environment::get().getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
@@ -464,9 +464,6 @@ void OMW::Engine::go()
     else
     {
         MWBase::Environment::get().getStateManager()->newGame (true);
-
-        if (!mStartupScript.empty())
-            MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
     }
 
     // Start the main rendering loop
