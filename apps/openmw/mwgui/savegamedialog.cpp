@@ -256,7 +256,16 @@ namespace MWGui
         {
             mSaveList->addItem(it->mProfile.mDescription);
         }
-        onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
+        // When loading, Auto-select the first save, if there is one
+        if (mSaveList->getItemCount() && !mSaving)
+        {
+            mSaveList->setIndexSelected(0);
+            onSlotSelected(mSaveList, 0);
+            // Give key focus to save list so we can confirm the selection with Enter
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
+        }
+        else
+            onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }
 
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox *sender, size_t pos)
