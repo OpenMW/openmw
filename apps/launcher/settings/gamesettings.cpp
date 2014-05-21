@@ -69,7 +69,8 @@ void Launcher::GameSettings::validatePaths()
         return;
 
     dataDirs.clear();
-    dataDirs.push_back(Files::PathContainer::value_type(local.toStdString()));
+    QByteArray bytes = local.toUtf8();
+    dataDirs.push_back(Files::PathContainer::value_type(std::string(bytes.constData(), bytes.length())));
 
     mCfgMgr.processPaths(dataDirs);
 
