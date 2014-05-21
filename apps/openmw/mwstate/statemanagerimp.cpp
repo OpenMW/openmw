@@ -136,8 +136,6 @@ void MWState::StateManager::newGame (bool bypass)
     else
         MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
 
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-
     mState = State_Running;
 }
 
@@ -373,6 +371,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     {
         std::cerr << "failed to load saved game: " << e.what() << std::endl;
         cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
     }
 }
 

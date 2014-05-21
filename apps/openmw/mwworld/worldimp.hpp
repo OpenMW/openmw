@@ -94,6 +94,8 @@ namespace MWWorld
             std::string mFacedHandle;
             float mFacedDistance;
 
+            std::string mStartupScript;
+
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
@@ -138,8 +140,6 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
-            int mPlayIntro;
-
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
@@ -153,7 +153,7 @@ namespace MWWorld
                 const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell);
+                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript);
 
             virtual ~World();
 

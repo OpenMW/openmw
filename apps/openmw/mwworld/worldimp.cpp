@@ -6,7 +6,8 @@
 #else
 #include <tr1/unordered_map>
 #endif
-
+#include "../mwbase/scriptmanager.hpp"
+#include "../mwscript/globalscripts.hpp"
 #include <OgreSceneNode.h>
 
 #include <libs/openengine/bullet/trace.h>
@@ -125,14 +126,14 @@ namespace MWWorld
         const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-        int activationDistanceOverride, const std::string& startCell)
+        int activationDistanceOverride, const std::string& startCell, const std::string& startupScript)
     : mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (activationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(true),
+      mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
       mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles),
       mGoToJail(false),
-      mStartCell (startCell)
+      mStartCell (startCell), mStartupScript(startupScript)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -188,6 +189,15 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
+        if (!bypass)
+        {
+            // set new game mark
+            mGlobalVariables["chargenstate"].setInteger (1);
+            mGlobalVariables["pcrace"].setInteger (3);
+
+            MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
+        }
+
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
@@ -204,33 +214,35 @@ namespace MWWorld
         }
         else
         {
-            /// \todo if !bypass, do not add player location to global map for the duration of one
-            /// frame
-            ESM::Position pos;
-            const int cellSize = 8192;
-            pos.pos[0] = cellSize/2;
-            pos.pos[1] = cellSize/2;
-            pos.pos[2] = 0;
-            pos.rot[0] = 0;
-            pos.rot[1] = 0;
-            pos.rot[2] = 0;
-            mWorldScene->changeToExteriorCell(pos);
+            for (int i=0; i<5; ++i)
+                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+            if (!getPlayerPtr().isInCell())
+            {
+                ESM::Position pos;
+                const int cellSize = 8192;
+                pos.pos[0] = cellSize/2;
+                pos.pos[1] = cellSize/2;
+                pos.pos[2] = 0;
+                pos.rot[0] = 0;
+                pos.rot[1] = 0;
+                pos.rot[2] = 0;
+                mWorldScene->changeToExteriorCell(pos);
+            }
         }
 
         if (!bypass)
-        {
-            // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
-            mPlayIntro = 2;
+            MWBase::Environment::get().getWindowManager()->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
 
-            // set new game mark
-            mGlobalVariables["chargenstate"].setInteger (1);
-            mGlobalVariables["pcrace"].setInteger (3);
-        }
+        // enable collision
+        if (!mPhysics->toggleCollisionMode())
+            mPhysics->toggleCollisionMode();
 
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
         mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
+
+        MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
     }
 
     void World::clear()
@@ -241,10 +253,6 @@ namespace MWWorld
 
         mLocalScripts.clear();
         mPlayer->clear();
-
-        // enable collision
-        if (!mPhysics->toggleCollisionMode())
-            mPhysics->toggleCollisionMode();
 
         mWorldScene->changeToVoid();
 
@@ -265,7 +273,6 @@ namespace MWWorld
         mGodMode = false;
         mSky = true;
         mTeleportEnabled = true;
-        mPlayIntro = 0;
         mFacedDistance = FLT_MAX;
 
         mGlobalVariables.fill (mStore);
@@ -938,7 +945,7 @@ namespace MWWorld
 
         Ogre::Vector3 vec(x, y, z);
 
-        CellStore *currCell = ptr.getCell();
+        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL;
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
@@ -1363,13 +1370,6 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
-        if (mPlayIntro)
-        {
-            --mPlayIntro;
-            if (mPlayIntro == 0)
-                MWBase::Environment::get().getWindowManager()->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
-        }
-
         if (mGoToJail && !paused)
             goToJail();
 

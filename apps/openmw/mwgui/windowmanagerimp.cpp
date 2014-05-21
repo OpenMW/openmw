@@ -298,6 +298,7 @@ namespace MWGui
             delete mCharGen;
             mCharGen = new CharacterCreation();
             mGuiModes.clear();
+            MWBase::Environment::get().getInputManager()->changeInputMode(false);
             mHud->unsetSelectedWeapon();
             mHud->unsetSelectedSpell();
             unsetForceHide(GW_ALL);
@@ -1412,6 +1413,7 @@ namespace MWGui
         mConsole->resetReference();
 
         mGuiModes.clear();
+        MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();
     }
 

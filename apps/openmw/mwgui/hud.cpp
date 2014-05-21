@@ -628,6 +628,9 @@ namespace MWGui
             effectsDx = (viewSize.width - mMinimapBoxBaseRight) - (viewSize.width - mEffectBoxBaseRight);
 
         mMapVisible = mMinimapBox->getVisible ();
+        if (!mMapVisible)
+            mCellNameBox->setVisible(false);
+
         mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
     }
 

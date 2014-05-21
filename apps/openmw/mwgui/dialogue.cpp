@@ -363,6 +363,8 @@ namespace MWGui
         mTopicsList->setEnabled(true);
         setTitle(npcName);
 
+        clearChoices();
+
         mTopicsList->clear();
 
         for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
