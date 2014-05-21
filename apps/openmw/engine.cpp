@@ -236,7 +236,7 @@ void OMW::Engine::addArchive (const std::string& archive) {
 // Set resource dir
 void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
 {
-    mResDir = boost::filesystem::system_complete(parResDir);
+    mResDir = parResDir;
 }
 
 // Set start cell name (only interiors for now)
