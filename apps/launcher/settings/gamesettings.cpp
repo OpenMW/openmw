@@ -45,7 +45,8 @@ void Launcher::GameSettings::validatePaths()
     Files::PathContainer dataDirs;
 
     foreach (const QString &path, paths) {
-        dataDirs.push_back(Files::PathContainer::value_type(path.toStdString()));
+        QByteArray bytes = path.toUtf8();
+        dataDirs.push_back(Files::PathContainer::value_type(std::string(bytes.constData(), bytes.length())));
     }
 
     // Parse the data dirs to convert the tokenized paths
