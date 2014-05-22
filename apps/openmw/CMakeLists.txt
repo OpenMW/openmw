@@ -48,7 +48,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder
+    soundmanagerimp openal_output ffmpeg_decoder sound
     )
 
 add_openmw_dir (mwworld
@@ -57,7 +57,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader actiontrap cellreflist
+    contentloader esmloader omwloader actiontrap cellreflist projectilemanager
     )
 
 add_openmw_dir (mwclass
@@ -67,7 +67,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
-    drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow
+    drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
     disease pickpocket levelledlist combat steering obstacle
     )

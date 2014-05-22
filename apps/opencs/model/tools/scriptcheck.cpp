@@ -16,8 +16,6 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
-    stream << id.toString() << "|";
-
     if (type==ErrorMessage)
         stream << "error ";
     else
@@ -28,25 +26,15 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
         << ", line " << loc.mLine << ", column " << loc.mColumn
         << " (" << loc.mLiteral << "): " << message;
 
-    mMessages->push_back (stream.str());
+    mMessages->push_back (std::make_pair (id, stream.str()));
 }
 
 void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
 {
-    std::ostringstream stream;
-
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
-    stream << id.toString() << "|";
-
-    if (type==ErrorMessage)
-        stream << "error: ";
-    else
-        stream << "warning: ";
-
-    stream << message;
-
-    mMessages->push_back (stream.str());
+    mMessages->push_back (std::make_pair (id,
+        (type==ErrorMessage ? "error: " : "warning: ") + message));
 }
 
 CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMWorld::Data& data)
@@ -68,7 +56,7 @@ int CSMTools::ScriptCheckStage::setup()
     return mData.getScripts().getSize();
 }
 
-void CSMTools::ScriptCheckStage::perform (int stage, std::vector<std::string>& messages)
+void CSMTools::ScriptCheckStage::perform (int stage, Messages& messages)
 {
     mMessages = &messages;
     mId = mData.getScripts().getId (stage);
@@ -90,13 +78,10 @@ void CSMTools::ScriptCheckStage::perform (int stage, std::vector<std::string>& m
     }
     catch (const std::exception& error)
     {
-        std::ostringstream stream;
-
         CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
-        stream << id.toString() << "|Critical compile error: " << error.what();
-
-        messages.push_back (stream.str());
+        messages.push_back (std::make_pair (id,
+            std::string ("Critical compile error: ") + error.what()));
     }
 
     mMessages = 0;

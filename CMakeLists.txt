@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 29)
+set(OPENMW_VERSION_MINOR 30)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -36,18 +36,8 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
                 string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_MINOR "${VERSION}")
                 string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_RELEASE "${VERSION}")
 
-                set(GIT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_RELEASE}")
-
-                if(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
-                    message(FATAL_ERROR "Silly Zini forgot to update the version again...")
-                else(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
-                    set(OPENMW_VERSION_MAJOR ${GIT_VERSION_MAJOR})
-                    set(OPENMW_VERSION_MINOR ${GIT_VERSION_MINOR})
-                    set(OPENMW_VERSION_RELEASE ${GIT_VERSION_RELEASE})
-
-                    set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
-                    set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
-                endif(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+                set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+                set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
 
                 message(STATUS "OpenMW version ${OPENMW_VERSION}")
             else(MATCH)
@@ -345,8 +335,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
-    "${OpenMW_BINARY_DIR}/opencs.cfg")
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs.ini
+    "${OpenMW_BINARY_DIR}/opencs.ini")
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
@@ -427,7 +417,7 @@ IF(NOT WIN32 AND NOT APPLE)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     IF(BUILD_OPENCS)
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
     ENDIF(BUILD_OPENCS)
 
     # Install resources
@@ -456,7 +446,7 @@ if(WIN32)
     ENDIF(BUILD_MWINIIMPORTER)
     IF(BUILD_OPENCS)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION ".")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
@@ -594,6 +584,7 @@ if (WIN32)
         4706 # Assignment in conditional expression
         4738 # Storing 32-bit float result in memory, possible loss of performance
         4986 # Undocumented warning that occurs in the crtdbg.h file
+        4987 # nonstandard extension used (triggered by setjmp.h)
         4996 # Function was declared deprecated
 
         # cause by ogre extensivly
@@ -610,7 +601,9 @@ if (WIN32)
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
+        4505 # Unreferenced local function has been removed
         4701 # Potentially uninitialized local variable used
+        4702 # Unreachable code
         4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )
 
@@ -618,19 +611,31 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${WARNINGS})
-    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
+    set(SHINY_WARNINGS "${WARNINGS} /wd4245")
+    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${SHINY_WARNINGS})
+    # there's an unreferenced local variable in the ogre platform, suppress it
+    set(SHINY_OGRE_WARNINGS "${WARNINGS} /wd4101")
+    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${SHINY_OGRE_WARNINGS})
+    set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${WARNINGS})
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
     if (BUILD_LAUNCHER)
         set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_LAUNCHER)
     set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
-        if (BUILD_BSATOOL)
+    if (BUILD_BSATOOL)
         set_target_properties(bsatool PROPERTIES COMPILE_FLAGS ${WARNINGS})
-            endif (BUILD_BSATOOL)
+    endif (BUILD_BSATOOL)
     if (BUILD_ESMTOOL)
         set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_ESMTOOL)
+    if (BUILD_OPENCS)
+        set_target_properties(opencs PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_OPENCS)
+    if (BUILD_MWINIIMPORTER)
+        set_target_properties(mwiniimport PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_MWINIIMPORTER)
   endif(MSVC)
 
   # Same for MinGW
@@ -663,7 +668,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})

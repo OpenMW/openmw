@@ -28,6 +28,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -46,6 +47,8 @@ void MWState::StateManager::cleanup (bool force)
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
         mTimePlayed = 0;
+
+        MWMechanics::CreatureStats::cleanup();
     }
 }
 
@@ -132,8 +135,6 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
     else
         MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
-
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
     mState = State_Running;
 }
@@ -314,6 +315,10 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_PLAY:
                 case ESM::REC_CSTA:
                 case ESM::REC_WTHR:
+                case ESM::REC_DYNA:
+                case ESM::REC_ACTC:
+                case ESM::REC_PROJ:
+                case ESM::REC_MPRJ:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -325,6 +330,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
                 case ESM::REC_GMAP:
                 case ESM::REC_KEYS:
+                case ESM::REC_ASPL:
+
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
                     break;
 
@@ -354,12 +361,18 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
-        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
+        // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
+        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
+
+        // Do not trigger erroneous cellChanged events
+        MWBase::Environment::get().getWorld()->markCellAsUnchanged();
     }
     catch (const std::exception& e)
     {
         std::cerr << "failed to load saved game: " << e.what() << std::endl;
         cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
     }
 }
 

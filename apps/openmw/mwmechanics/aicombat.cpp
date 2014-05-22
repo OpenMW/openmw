@@ -81,7 +81,7 @@ namespace MWMechanics
     // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
 
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
-        mTarget(actor),
+        mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId()),
         mTimerAttack(0),
         mTimerReact(0),
         mTimerCombatMove(0),
@@ -149,11 +149,11 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(!actor.getClass().getCreatureStats(actor).isHostile()
-                || actor.getClass().getCreatureStats(actor).getHealth().getCurrent() <= 0)
-            return true;
+        if(actor.getClass().getCreatureStats(actor).isDead()) return true;
 
-        if(mTarget.getClass().getCreatureStats(mTarget).isDead())
+        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+
+        if(target.getClass().getCreatureStats(target).isDead())
             return true;
 
         //Update every frame
@@ -167,7 +167,7 @@ namespace MWMechanics
                 mCombatMove = false;
             }
         }
-        
+
         actor.getClass().getMovementSettings(actor) = mMovement;
         actor.getClass().getMovementSettings(actor).mRotation[0] = 0;
         actor.getClass().getMovementSettings(actor).mRotation[2] = 0;
@@ -176,7 +176,7 @@ namespace MWMechanics
         {
             if(zTurn(actor, Ogre::Degree(mMovement.mRotation[2]))) mMovement.mRotation[2] = 0;
         }
-        
+
         if(mMovement.mRotation[0] != 0)
         {
             if(smoothTurn(actor, Ogre::Degree(mMovement.mRotation[0]), 0)) mMovement.mRotation[0] = 0;
@@ -193,7 +193,7 @@ namespace MWMechanics
         }
 
         //Update with period = tReaction
-        
+
         mTimerReact = 0;
 
         bool cellChange = mCell && (actor.getCell() != mCell);
@@ -250,6 +250,9 @@ namespace MWMechanics
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
                 actorCls.getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
 
+            // TODO: Check equipped weapon and equip a different one if we can't attack with it
+            // (e.g. no ammunition, or wrong type of ammunition equipped, etc. autoEquip is not very smart in this regard))
+
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot =
                 MWMechanics::getActiveWeapon(actorCls.getCreatureStats(actor), actorCls.getInventoryStore(actor), &weaptype);
@@ -260,8 +263,9 @@ namespace MWMechanics
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
                 weapRange = gmst.find("fHandToHandReach")->getFloat();
             }
-            else
+            else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell)
             {
+                // All other WeapTypes are actually weapons, so get<ESM::Weapon> is safe.
                 weapon = weaponSlot->get<ESM::Weapon>()->mBase;
                 weapRange = weapon->mData.mReach;
                 weapSpeed = weapon->mData.mSpeed;
@@ -282,7 +286,7 @@ namespace MWMechanics
          *
          *  - Distance where attack using the actor's weapon is possible:
          *    longer for ranged weapons (obviously?) vs. melee weapons
-         *  - Determined by weapon's reach parameter; hardcoded value 
+         *  - Determined by weapon's reach parameter; hardcoded value
          *    for ranged weapon and for creatures
          *  - Once within this distance mFollowTarget is triggered
          *
@@ -318,15 +322,15 @@ namespace MWMechanics
             rangeAttack = weapRange;
             rangeFollow = 300;
         }
-        
+
         ESM::Position pos = actor.getRefData().getPosition();
-        Ogre::Vector3 vActorPos(pos.pos); 
-        Ogre::Vector3 vTargetPos(mTarget.getRefData().getPosition().pos);
+        Ogre::Vector3 vActorPos(pos.pos);
+        Ogre::Vector3 vTargetPos(target.getRefData().getPosition().pos);
         Ogre::Vector3 vDirToTarget = vTargetPos - vActorPos;
 
         bool isStuck = false;
         float speed = 0.0f;
-        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) / 10.0f) 
+        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) / 10.0f)
             isStuck = true;
 
         mLastPos = pos;
@@ -392,12 +396,12 @@ namespace MWMechanics
         else // remote pathfinding
         {
             bool preferShortcut = false;
-            bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, mTarget);
+            bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, target);
 
             if(mReadyToAttack) isStuck = false;
 			
             // check if shortcut is available
-            if(!isStuck 
+            if(!isStuck
                 && (!mForceNoShortcut
                 || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
                 && inLOS)
@@ -428,7 +432,7 @@ namespace MWMechanics
 
                 mFollowTarget = false;
 
-                buildNewPath(actor); //may fail to build a path, check before use
+                buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
                 mPathFinder.checkWaypoint(pos.pos[0],pos.pos[1],pos.pos[2]);
@@ -454,7 +458,7 @@ namespace MWMechanics
                 {
                     if(!mPathFinder.getPath().empty())
                         mMovement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-                    else 
+                    else
                         mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
                 }
             }
@@ -472,9 +476,9 @@ namespace MWMechanics
                 //less than in time of playing weapon anim from 'start' to 'hit' tags (t_swing)
                 //then start attacking
                 float speed1 = actorCls.getSpeed(actor);
-                float speed2 = mTarget.getClass().getSpeed(mTarget);
-                if(mTarget.getClass().getMovementSettings(mTarget).mPosition[0] == 0
-                        && mTarget.getClass().getMovementSettings(mTarget).mPosition[1] == 0)
+                float speed2 = target.getClass().getSpeed(target);
+                if(target.getClass().getMovementSettings(target).mPosition[0] == 0
+                        && target.getClass().getMovementSettings(target).mPosition[1] == 0)
                     speed2 = 0;
 
                 float s1 = distToTarget - weapRange;
@@ -497,12 +501,12 @@ namespace MWMechanics
         //       coded at 250ms or 1/4 second
         //
         // TODO: Add a parameter to vary DURATION_SAME_SPOT?
+        MWWorld::CellStore *cell = actor.getCell();
         if((distToTarget > rangeAttack || mFollowTarget) &&
             mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
         {
             // first check if we're walking into a door
             mDoorCheckDuration += 1.0f; // add time taken for obstacle check
-            MWWorld::CellStore *cell = actor.getCell();
             if(mDoorCheckDuration >= DOOR_CHECK_INTERVAL && !cell->getCell()->isExterior())
             {
                 mDoorCheckDuration = 0;
@@ -542,38 +546,36 @@ namespace MWMechanics
             }
         }
 
-        MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
-        float minSqr = 1.6 * 1.6 * MIN_DIST_TO_DOOR_SQUARED; // for legibility
-        // TODO: add reaction to checking open doors
-        if(mBackOffDoor &&
-           vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr)
+        if(!cell->getCell()->isExterior() && !mDoors.mList.empty())
         {
-            mMovement.mPosition[1] = -0.2; // back off, but slowly
+            MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
+            float minSqr = 1.6 * 1.6 * MIN_DIST_TO_DOOR_SQUARED; // for legibility
+            // TODO: add reaction to checking open doors
+            if(mBackOffDoor &&
+               vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr)
+            {
+                mMovement.mPosition[1] = -0.2; // back off, but slowly
+            }
+            else if(mBackOffDoor &&
+                    mDoorIter != mDoors.mList.end() &&
+                    ref.mData.getLocalRotation().rot[2] >= 1)
+            {
+                mDoorIter = mDoors.mList.end();
+                mBackOffDoor = false;
+                //std::cout<<"open door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
+                mMovement.mPosition[1] = 1;
+            }
         }
-        else if(mBackOffDoor &&
-                mDoorIter != mDoors.mList.end() &&
-                ref.mData.getLocalRotation().rot[2] >= 1)
-        {
-            mDoorIter = mDoors.mList.end();
-            mBackOffDoor = false; 
-            //std::cout<<"open door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
-            mMovement.mPosition[1] = 1;
-        }
-        // these lines break ranged combat distance keeping
-        //else
-        //{
-        //    mMovement.mPosition[1] = 1;  // FIXME: oscillation?
-        //}
 
         return false;
     }
 
-    void AiCombat::buildNewPath(const MWWorld::Ptr& actor)
+    void AiCombat::buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
-        Ogre::Vector3 newPathTarget = Ogre::Vector3(mTarget.getRefData().getPosition().pos);
+        Ogre::Vector3 newPathTarget = Ogre::Vector3(target.getRefData().getPosition().pos);
 
         float dist;
-        
+
         if(!mPathFinder.getPath().empty())
         {
             ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
@@ -625,9 +627,9 @@ namespace MWMechanics
         return 1;
     }
 
-    const std::string &AiCombat::getTargetId() const
+    MWWorld::Ptr AiCombat::getTarget() const
     {
-        return mTarget.getRefData().getHandle();
+        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     }
 
 

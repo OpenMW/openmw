@@ -33,7 +33,7 @@ using namespace Ogre;
 namespace MWWorld
 {
 
-    static const float sMaxSlope = 60.0f;
+    static const float sMaxSlope = 49.0f;
     static const float sStepSize = 32.0f;
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -316,7 +316,7 @@ namespace MWWorld
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
                 {
                     // don't let pure water creatures move out of water after stepMove
-                    if((ptr.getClass().canSwim(ptr) && !canWalk) 
+                    if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
                             && newPosition.z > (waterlevel - halfExtents.z * 0.5))
                         newPosition = oldPosition;
                     else // Only on the ground if there's gravity
@@ -635,12 +635,12 @@ namespace MWWorld
                 bool cmode = act->getCollisionMode();
                 if(cmode)
                 {
-                    act->enableCollisions(false);
+                    act->enableCollisionMode(false);
                     return false;
                 }
                 else
                 {
-                    act->enableCollisions(true);
+                    act->enableCollisionMode(true);
                     return true;
                 }
             }

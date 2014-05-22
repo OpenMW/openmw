@@ -2,26 +2,33 @@
 #define GAME_MWMECHANICS_AIPURSUE_H
 
 #include "aipackage.hpp"
-#include <string>
+
+#include "../mwbase/world.hpp"
 
 #include "pathfinding.hpp"
 
 namespace MWMechanics
 {
-
+    /// \brief Makes the actor very closely follow the actor
+    /** Used for arresting players. Causes the actor to run to the pursued actor and activate them, to arrest them.
+        Note that while very similar to AiActivate, it will ONLY activate when evry close to target (Not also when the
+        path is completed). **/
     class AiPursue : public AiPackage
     {
         public:
-            AiPursue(const std::string &objectId);
+            ///Constructor
+            /** \param actor Actor to pursue **/
+            AiPursue(const MWWorld::Ptr& actor);
+
             virtual AiPursue *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
-                    ///< \return Package completed?
             virtual int getTypeId() const;
 
-        private:
-            std::string mObjectId;
+            MWWorld::Ptr getTarget() const;
 
-            PathFinder mPathFinder;
+        private:
+
+            int mTargetActorId; // The actor to pursue
             int mCellX;
             int mCellY;
     };

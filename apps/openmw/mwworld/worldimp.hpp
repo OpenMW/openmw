@@ -3,6 +3,8 @@
 
 #include "../mwrender/debugging.hpp"
 
+#include <boost/shared_ptr.hpp>
+
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "esmstore.hpp"
@@ -51,6 +53,7 @@ namespace MWWorld
 {
     class WeatherManager;
     class Player;
+    class ProjectileManager;
 
     /// \brief The game world and its visual representation
 
@@ -72,7 +75,11 @@ namespace MWWorld
 
             Cells mCells;
 
+            std::string mCurrentWorldSpace;
+
             OEngine::Physic::PhysicEngine* mPhysEngine;
+
+            boost::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mGodMode;
             std::vector<std::string> mContentFiles;
@@ -87,39 +94,10 @@ namespace MWWorld
             std::string mFacedHandle;
             float mFacedDistance;
 
+            std::string mStartupScript;
+
             std::map<MWWorld::Ptr, int> mDoorStates;
-            ///< only holds doors that are currently moving. 0 means closing, 1 opening
-
-            struct MagicBoltState
-            {
-                // Id of spell or enchantment to apply when it hits
-                std::string mId;
-
-                // Actor who casted this projectile
-                std::string mActorHandle;
-
-                // Name of item to display as effect source in magic menu (in case we casted an enchantment)
-                std::string mSourceName;
-
-                ESM::EffectList mEffects;
-
-                float mSpeed;
-
-                bool mStack;
-            };
-
-            struct ProjectileState
-            {
-                // Actor who shot this projectile
-                std::string mActorHandle;
-
-                MWWorld::Ptr mBow; // bow or crossbow the projectile was fired from
-
-                Ogre::Vector3 mVelocity;
-            };
-
-            std::map<MWWorld::Ptr, MagicBoltState> mMagicBolts;
-            std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
+            ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
             std::string mStartCell;
 
@@ -148,9 +126,6 @@ namespace MWWorld
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
-            void moveMagicBolts(float duration);
-            void moveProjectiles(float duration);
-
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
@@ -165,14 +140,9 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
-            int mPlayIntro;
-
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
-
-            /// Called when \a object is moved to an inactive cell
-            void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
 
             float feetToGameUnits(float feet);
 
@@ -183,7 +153,7 @@ namespace MWWorld
                 const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell);
+                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript);
 
             virtual ~World();
 
@@ -213,7 +183,7 @@ namespace MWWorld
 
             virtual void setWaterHeight(const float height);
 
-            virtual void toggleWater();
+            virtual bool toggleWater();
 
             virtual void adjustSky();
 
@@ -287,6 +257,9 @@ namespace MWWorld
             virtual Ptr searchPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
 
+            virtual Ptr searchPtrViaActorId (int actorId);
+            ///< Search is limited to the active cells.
+
             virtual void adjustPosition (const Ptr& ptr);
             ///< Adjust position after load to be on ground. Must be called after model load.
 
@@ -340,7 +313,8 @@ namespace MWWorld
             virtual void changeToExteriorCell (const ESM::Position& position);
             ///< Move to exterior cell.
 
-            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position);
+            virtual void changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool detectWorldSpaceChange=true);
+            ///< @param detectWorldSpaceChange if true, clean up worldspace-specific data when the world space changes
 
             virtual const ESM::Cell *getExterior (const std::string& cellName) const;
             ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
@@ -436,15 +410,14 @@ namespace MWWorld
 
             virtual void update (float duration, bool paused);
 
-            virtual bool placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
+            virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
             ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
             /// @param number of objects to place
-            /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount);
+            virtual MWWorld::Ptr dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount);
             ///< copy and place an object into the gameworld at the given actor's position
             /// @param actor giving the dropped object position
             /// @param object
@@ -493,10 +466,11 @@ namespace MWWorld
             virtual void setupPlayer();
             virtual void renderPlayer();
 
-            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door);
-            ///< if activated, should this door be opened or closed?
+            /// open or close a non-teleport door (depending on current state)
             virtual void activateDoor(const MWWorld::Ptr& door);
-            ///< activate (open or close) an non-teleport door
+
+            /// open or close a non-teleport door as specified
+            virtual void activateDoor(const MWWorld::Ptr& door, bool open);
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
@@ -569,7 +543,8 @@ namespace MWWorld
              */
             virtual void castSpell (const MWWorld::Ptr& actor);
 
-            virtual void launchMagicBolt (const std::string& id, bool stack, const ESM::EffectList& effects,
+            virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
+                                          float speed, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed);
@@ -609,7 +584,7 @@ namespace MWWorld
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition);
 
-            virtual void explodeSpell (const Ogre::Vector3& origin, const MWWorld::Ptr& object, const ESM::EffectList& effects,
+            virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName);
     };
 }

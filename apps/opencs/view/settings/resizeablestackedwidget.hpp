@@ -14,8 +14,10 @@ namespace CSVSettings
     public:
         explicit ResizeableStackedWidget(QWidget *parent = 0);
 
+        ///add a widget to the stacked widget
         void addWidget(QWidget* pWidget);
 
+        ///called whenever the stacked widget page is changed
         void changePage (int, int);
     };
 }

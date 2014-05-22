@@ -192,11 +192,16 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     {
         Ptr test = *iter;
 
-        // Don't autoEquip lights
+        // Don't autoEquip lights. Handled in Actors::updateEquippedLight based on environment light.
         if (test.getTypeName() == typeid(ESM::Light).name())
         {
             continue;
         }
+
+        // Don't auto-equip probes or lockpicks. NPCs can't use them (yet). And AiCombat would attempt to "attack" with them.
+        // NOTE: In the future AiCombat should handle equipping appropriate weapons
+        if (test.getTypeName() == typeid(ESM::Lockpick).name() || test.getTypeName() == typeid(ESM::Probe).name())
+            continue;
 
         // Only autoEquip if we are the original owner of the item.
         // This stops merchants from auto equipping anything you sell to them.
@@ -594,7 +599,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
             float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
-            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), "", magnitude);
+            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), -1, magnitude);
 
             ++i;
         }

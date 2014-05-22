@@ -12,7 +12,6 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
     file(GLOB UNITTEST_SRC_FILES
         components/misc/test_*.cpp
-        components/file_finder/test_*.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

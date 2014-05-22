@@ -45,7 +45,7 @@ void CSMSettings::Setting::addProxy (const Setting *setting,
     foreach  (const QString &val, vals)
         list << (QStringList() << val);
 
-    mProxies [setting->page() + '.' + setting->name()] = list;
+    mProxies [setting->page() + '/' + setting->name()] = list;
 }
 
 void CSMSettings::Setting::addProxy (const Setting *setting,
@@ -54,7 +54,7 @@ void CSMSettings::Setting::addProxy (const Setting *setting,
     if (serializable())
         setProperty (Property_Serializable, false);
 
-    mProxies [setting->page() + '.' + setting->name()] = list;
+    mProxies [setting->page() + '/' + setting->name()] = list;
 }
 
 void CSMSettings::Setting::setColumnSpan (int value)
@@ -75,16 +75,6 @@ void CSMSettings::Setting::setDeclaredValues (QStringList list)
 QStringList CSMSettings::Setting::declaredValues() const
 {
     return property (Property_DeclaredValues);
-}
-
-void CSMSettings::Setting::setDefinedValues (QStringList list)
-{
-    setProperty (Property_DefinedValues, list);
-}
-
-QStringList CSMSettings::Setting::definedValues() const
-{
-    return property (Property_DefinedValues);
 }
 
 QStringList CSMSettings::Setting::property (SettingProperty prop) const

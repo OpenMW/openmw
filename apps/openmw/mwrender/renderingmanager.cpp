@@ -216,13 +216,14 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
- MWRender::Camera* RenderingManager::getCamera() const
+MWRender::Camera* RenderingManager::getCamera() const
 {
     return mCamera;
 }
 
 void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
+    mLocalMap->saveFogOfWar(store);
     mObjects->removeCell(store);
     mActors->removeCell(store);
     mDebugging->cellRemoved(store);
@@ -233,9 +234,9 @@ void RenderingManager::removeWater ()
     mWater->setActive(false);
 }
 
-void RenderingManager::toggleWater()
+bool RenderingManager::toggleWater()
 {
-    mWater->toggle();
+    return mWater->toggle();
 }
 
 void RenderingManager::cellAdded (MWWorld::CellStore *store)
@@ -379,6 +380,10 @@ void RenderingManager::update (float duration, bool paused)
 
     mCamera->update(duration, paused);
 
+    Ogre::SceneNode *node = data.getBaseNode();
+    Ogre::Quaternion orient = node->_getDerivedOrientation();
+    mLocalMap->updatePlayer(playerPos, orient);
+
     if(paused)
         return;
 
@@ -392,10 +397,6 @@ void RenderingManager::update (float duration, bool paused)
 
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
 
-    Ogre::SceneNode *node = data.getBaseNode();
-    Ogre::Quaternion orient = node->_getDerivedOrientation();
-
-    mLocalMap->updatePlayer(playerPos, orient);
 
     mWater->updateUnderwater(world->isUnderwater(player.getCell(), cam));
 
@@ -671,7 +672,7 @@ void RenderingManager::requestMap(MWWorld::CellStore* cell)
         mLocalMap->requestMap(cell, mObjects->getDimensions(cell));
 }
 
-void RenderingManager::preCellChange(MWWorld::CellStore* cell)
+void RenderingManager::writeFog(MWWorld::CellStore* cell)
 {
     mLocalMap->saveFogOfWar(cell);
 }
@@ -693,15 +694,8 @@ Shadows* RenderingManager::getShadows()
     return mShadows;
 }
 
-void RenderingManager::switchToInterior()
+void RenderingManager::notifyWorldSpaceChanged()
 {
-    // TODO: also do this when switching worldspace
-    mEffectManager->clear();
-}
-
-void RenderingManager::switchToExterior()
-{
-    // TODO: also do this when switching worldspace
     mEffectManager->clear();
 }
 
@@ -1055,6 +1049,12 @@ float RenderingManager::getCameraDistance() const
 void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition, float scale)
 {
     mEffectManager->addEffect(model, texture, worldPosition, scale);
+}
+
+void RenderingManager::clear()
+{
+    mLocalMap->clear();
+    notifyWorldSpaceChanged();
 }
 
 } // namespace

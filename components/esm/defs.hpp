@@ -6,6 +6,12 @@
 namespace ESM
 {
 
+struct TimeStamp
+{
+    float mHour;
+    int mDay;
+};
+
 // Pixel color value. Standard four-byte rr,gg,bb,aa format.
 typedef int32_t Color;
 
@@ -100,6 +106,11 @@ enum RecNameInts
     REC_DIAS = 0x53414944,
     REC_WTHR = 0x52485457,
     REC_KEYS = FourCC<'K','E','Y','S'>::value,
+    REC_DYNA = FourCC<'D','Y','N','A'>::value,
+    REC_ASPL = FourCC<'A','S','P','L'>::value,
+    REC_ACTC = FourCC<'A','C','T','C'>::value,
+    REC_MPRJ = FourCC<'M','P','R','J'>::value,
+    REC_PROJ = FourCC<'P','R','O','J'>::value,
 
     // format 1
     REC_FILT = 0x544C4946

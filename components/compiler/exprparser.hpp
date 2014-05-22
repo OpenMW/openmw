@@ -98,10 +98,8 @@ namespace Compiler
             int parseArguments (const std::string& arguments, Scanner& scanner,
                 std::vector<Interpreter::Type_Code>& code, bool invert = false);
             ///< Parse sequence of arguments specified by \a arguments.
-            /// \param arguments Each character represents one arguments ('l': integer,
-            /// 'f': float, 'S': string, 'c': string (case smashed), '/': following arguments are
-            /// optional)
-            /// 'x': optional string that will be ignored (die in a fire, MW script compiler!)
+            /// \param arguments Uses ScriptArgs typedef
+            /// \see Compiler::ScriptArgs
             /// \param invert Store arguments in reverted order.
             /// \return number of optional arguments
     };

@@ -107,12 +107,15 @@ public:
     void cellAdded (MWWorld::CellStore *store);
     void waterAdded(MWWorld::CellStore *store);
 
+    /// Clear all savegame-specific data (i.e. fog of war textures)
+    void clear();
+
     void enableTerrain(bool enable);
 
     void removeWater();
 
-    void preCellChange (MWWorld::CellStore* store);
-    ///< this event is fired immediately before changing cell
+    /// Write current fog of war for this cell to the CellStore
+    void writeFog (MWWorld::CellStore* store);
 
     void addObject (const MWWorld::Ptr& ptr);
     void removeObject (const MWWorld::Ptr& ptr);
@@ -124,7 +127,7 @@ public:
     void rotateObject (const MWWorld::Ptr& ptr);
 
     void setWaterHeight(const float height);
-    void toggleWater();
+    bool toggleWater();
 
     /// Updates object rendering after cell change
     /// \param old Object reference in previous cell
@@ -160,8 +163,7 @@ public:
 
     Shadows* getShadows();
 
-    void switchToInterior();
-    void switchToExterior();
+    void notifyWorldSpaceChanged();
 
     void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 

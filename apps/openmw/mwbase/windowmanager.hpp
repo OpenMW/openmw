@@ -193,15 +193,15 @@ namespace MWBase
             virtual void setDragDrop(bool dragDrop) = 0;
             virtual bool getWorldMouseOver() = 0;
 
-            virtual void toggleFogOfWar() = 0;
+            virtual bool toggleFogOfWar() = 0;
 
-            virtual void toggleFullHelp() = 0;
+            virtual bool toggleFullHelp() = 0;
             ///< show extra info in item tooltips (owner, script)
 
             virtual bool getFullHelp() const = 0;
 
-            virtual void setInteriorMapTexture(const int x, const int y) = 0;
-            ///< set the index of the map texture that should be used (for interiors)
+            virtual void setActiveMap(int x, int y, bool interior) = 0;
+            ///< set the indices of the map texture that should be used
 
             /// sets the visibility of the drowning bar
             virtual void setDrowningBarVisibility(bool visible) = 0;

@@ -55,6 +55,7 @@ namespace MWDialogue
 
             std::vector<const ESM::DialInfo *> list (const ESM::Dialogue& dialogue,
                 bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition=false) const;
+            ///< \note If fallbackToInfoRefusal is used, the returned DialInfo might not be from the supplied ESM::Dialogue.
 
             const ESM::DialInfo* search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
             ///< Get a matching response for the requested dialogue.

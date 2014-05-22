@@ -85,7 +85,17 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::update (float duration, bool paused){
+    void Scene::update (float duration, bool paused)
+    {
+        if (mNeedMapUpdate)
+        {
+            // Note: exterior cell maps must be updated, even if they were visited before, because the set of surrounding cells might be different
+            // (and objects in a different cell can "bleed" into another cells map if they cross the border)
+            for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
+                mRendering.requestMap(*active);
+            mNeedMapUpdate = false;
+        }
+
         mRendering.update (duration, paused);
     }
 
@@ -155,6 +165,8 @@ namespace MWWorld
                 }
             }
 
+            cell->respawn();
+
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true, loadingListener);
@@ -197,8 +209,9 @@ namespace MWWorld
 
         mRendering.updateTerrain();
 
-        for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
-            mRendering.requestMap(*active);
+        // Delay the map update until scripts have been given a chance to run.
+        // If we don't do this, objects that should be disabled will still appear on the map.
+        mNeedMapUpdate = true;
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
     }
@@ -333,8 +346,6 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mRendering.switchToExterior();
-
         mCellChanged = true;
 
         loadingListener->removeWallpaper();
@@ -342,7 +353,7 @@ namespace MWWorld
 
     //We need the ogre renderer and a scene node.
     Scene::Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
+    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNeedMapUpdate(false)
     {
     }
 
@@ -428,7 +439,6 @@ namespace MWWorld
         mCurrentCell = cell;
 
         // adjust fog
-        mRendering.switchToInterior();
         mRendering.configureFog(*mCurrentCell);
 
         // adjust player
@@ -495,5 +505,25 @@ namespace MWWorld
             ++active;
         }
         return false;
+    }
+
+    Ptr Scene::searchPtrViaHandle (const std::string& handle)
+    {
+        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
+            iter!=mActiveCells.end(); ++iter)
+            if (Ptr ptr = (*iter)->searchViaHandle (handle))
+                return ptr;
+
+        return Ptr();
+    }
+
+    Ptr Scene::searchPtrViaActorId (int actorId)
+    {
+        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
+            iter!=mActiveCells.end(); ++iter)
+            if (Ptr ptr = (*iter)->searchViaActorId (actorId))
+                return ptr;
+
+        return Ptr();
     }
 }

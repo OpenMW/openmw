@@ -16,15 +16,22 @@ namespace CSVSettings
     public:
         explicit SpinBox(QWidget *parent = 0);
 
-        void setObjectName (const QString &name);
-
+        ///set the value displayed in the spin box
         void setValue (const QString &value);
+
+        ///set the stringlist that's used as a list of pre-defined values
+        ///to be displayed as the user scrolls
         void setValueList (const QStringList &list);
+
+        ///returns the pre-defined value list.
         const QStringList &valueList() const            { return mValueList; }
 
     protected:
 
+        ///converts an index value to corresponding text to be displayed
         QString textFromValue (int val) const;
+
+        ///converts a text value to a corresponding index
         int valueFromText (const QString &text) const;
     };
 }

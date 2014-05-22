@@ -5,6 +5,8 @@
 
 #include <QObject>
 
+#include "loader.hpp"
+
 namespace CSMDoc
 {
     class Document;
@@ -29,6 +31,7 @@ namespace CSVDoc
             CSVWorld::CommandDelegateFactoryCollection *mDelegateFactories;
             bool mExitOnSaveStateChange;
             bool mUserWarned;
+            Loader mLoader;
 
             // not implemented
             ViewManager (const ViewManager&);

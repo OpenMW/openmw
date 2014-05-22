@@ -18,6 +18,7 @@ namespace Physic
     PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
       : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
       , mBody(0), mRaycastingBody(0), mOnGround(false), mCollisionMode(true), mBoxRotation(0,0,0,0)
+      , mCollisionBody(true)
       , mForce(0.0f)
     {
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
@@ -41,14 +42,18 @@ namespace Physic
         }
     }
 
-    void PhysicActor::enableCollisions(bool collision)
+    void PhysicActor::enableCollisionMode(bool collision)
     {
-        assert(mBody);
-        if(collision && !mCollisionMode) enableCollisionBody();
-        if(!collision && mCollisionMode) disableCollisionBody();
         mCollisionMode = collision;
     }
 
+    void PhysicActor::enableCollisionBody(bool collision)
+    {
+        assert(mBody);
+        if(collision && !mCollisionBody) enableCollisionBody();
+        if(!collision && mCollisionBody) disableCollisionBody();
+        mCollisionBody = collision;
+    }
 
     void PhysicActor::setPosition(const Ogre::Vector3 &pos)
     {
@@ -105,7 +110,7 @@ namespace Physic
         //Create the newly scaled rigid body
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot);
         mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot, 0, 0, true);
-        mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
+        mEngine->addRigidBody(mCollisionBody ? mBody : 0, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
     }
 
     Ogre::Vector3 PhysicActor::getHalfExtents() const

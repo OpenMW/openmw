@@ -158,7 +158,6 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
@@ -299,6 +298,7 @@ namespace MWGui
             delete mCharGen;
             mCharGen = new CharacterCreation();
             mGuiModes.clear();
+            MWBase::Environment::get().getInputManager()->changeInputMode(false);
             mHud->unsetSelectedWeapon();
             mHud->unsetSelectedSpell();
             unsetForceHide(GW_ALL);
@@ -766,8 +766,6 @@ namespace MWGui
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
-            mMap->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
-            mHud->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
         }
         else
         {
@@ -783,10 +781,10 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setInteriorMapTexture(const int x, const int y)
+    void WindowManager::setActiveMap(int x, int y, bool interior)
     {
-        mMap->setActiveCell(x,y, true);
-        mHud->setActiveCell(x,y, true);
+        mMap->setActiveCell(x,y, interior);
+        mHud->setActiveCell(x,y, interior);
     }
 
     void WindowManager::setPlayerPos(const float x, const float y)
@@ -816,10 +814,10 @@ namespace MWGui
         mHud->setMinimapVisible (visible);
     }
 
-    void WindowManager::toggleFogOfWar()
+    bool WindowManager::toggleFogOfWar()
     {
         mMap->toggleFogOfWar();
-        mHud->toggleFogOfWar();
+        return mHud->toggleFogOfWar();
     }
 
     void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
@@ -832,9 +830,9 @@ namespace MWGui
         mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
     }
 
-    void WindowManager::toggleFullHelp()
+    bool WindowManager::toggleFullHelp()
     {
-        mToolTips->toggleFullHelp();
+        return mToolTips->toggleFullHelp();
     }
 
     bool WindowManager::getFullHelp() const
@@ -1328,9 +1326,6 @@ namespace MWGui
 
     void WindowManager::updatePlayer()
     {
-        unsetSelectedSpell();
-        unsetSelectedWeapon();
-
         mInventoryWindow->updatePlayer();
     }
 
@@ -1418,6 +1413,7 @@ namespace MWGui
         mConsole->resetReference();
 
         mGuiModes.clear();
+        MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();
     }
 
@@ -1427,6 +1423,14 @@ namespace MWGui
 
         mQuickKeysMenu->write(writer);
         progress.increaseProgress();
+
+        if (!mSelectedSpell.empty())
+        {
+            writer.startRecord(ESM::REC_ASPL);
+            writer.writeHNString("ID__", mSelectedSpell);
+            writer.endRecord(ESM::REC_ASPL);
+            progress.increaseProgress();
+        }
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
@@ -1435,19 +1439,25 @@ namespace MWGui
             mMap->readRecord(reader, type);
         else if (type == ESM::REC_KEYS)
             mQuickKeysMenu->readRecord(reader, type);
+        else if (type == ESM::REC_ASPL)
+        {
+            reader.getSubNameIs("ID__");
+            mSelectedSpell = reader.getHString();
+        }
     }
 
     int WindowManager::countSavedGameRecords() const
     {
         return 1 // Global map
-                + 1; // QuickKeysMenu
+                + 1 // QuickKeysMenu
+                + (!mSelectedSpell.empty() ? 1 : 0);
     }
 
     bool WindowManager::isSavingAllowed() const
     {
         return !MyGUI::InputManager::getInstance().isModalAny()
                 // TODO: remove this, once we have properly serialized the state of open windows
-                && (!isGuiMode() || (mGuiModes.size() == 1 && getMode() == GM_MainMenu));
+                && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest || getMode() == GM_RestBed)));
     }
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)

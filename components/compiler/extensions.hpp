@@ -11,14 +11,35 @@ namespace Compiler
 {
     class Literals;
 
-    /// \brief Collection of compiler extensions
+    /// Typedef for script arguments string
+    /** Every character reperesents an argument to the command. All arguments are required until a /, after which
+        every argument is optional. <BR>
+        Eg: fff/f represents 3 required floats followed by one optional float <BR>
+        f - Float <BR>
+        c - String, case smashed <BR>
+        l - Integer <BR>
+        s - Short <BR>
+        S - String, case preserved <BR>
+        x - Optional, ignored argument
+    **/
+    typedef std::string ScriptArgs;
 
+    /// Typedef for script return char
+    /** The character represents the type of data being returned. <BR>
+        f - float <BR>
+        S - String (Cell names) <BR>
+        l - Integer
+    **/
+    typedef char ScriptReturn;
+
+    /// \brief Collection of compiler extensions
     class Extensions
     {
+
             struct Function
             {
                 char mReturn;
-                std::string mArguments;
+                ScriptArgs mArguments;
                 int mCode;
                 int mCodeExplicit;
                 int mSegment;
@@ -26,7 +47,7 @@ namespace Compiler
 
             struct Instruction
             {
-                std::string mArguments;
+                ScriptArgs mArguments;
                 int mCode;
                 int mCodeExplicit;
                 int mSegment;
@@ -46,21 +67,21 @@ namespace Compiler
             /// - if no match is found 0 is returned.
             /// - keyword must be all lower case.
 
-            bool isFunction (int keyword, char& returnType, std::string& argumentType,
+            bool isFunction (int keyword, ScriptReturn& returnType, ScriptArgs& argumentType,
                 bool& explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return return and argument
             /// types.
             /// \param explicitReference In: has explicit reference; Out: set to false, if
             /// explicit reference is not available for this instruction.
 
-            bool isInstruction (int keyword, std::string& argumentType,
+            bool isInstruction (int keyword, ScriptArgs& argumentType,
                 bool& explicitReference) const;
             ///< Is this keyword registered with a function? If yes, return argument types.
             /// \param explicitReference In: has explicit reference; Out: set to false, if
             /// explicit reference is not available for this instruction.
 
-            void registerFunction (const std::string& keyword, char returnType,
-                const std::string& argumentType, int code, int codeExplicit = -1);
+            void registerFunction (const std::string& keyword, ScriptReturn returnType,
+                const ScriptArgs& argumentType, int code, int codeExplicit = -1);
             ///< Register a custom function
             /// - keyword must be all lower case.
             /// - keyword must be unique
@@ -68,7 +89,7 @@ namespace Compiler
             /// \note Currently only segment 3 and segment 5 opcodes are supported.
 
             void registerInstruction (const std::string& keyword,
-                const std::string& argumentType, int code, int codeExplicit = -1);
+                const ScriptArgs& argumentType, int code, int codeExplicit = -1);
             ///< Register a custom instruction
             /// - keyword must be all lower case.
             /// - keyword must be unique

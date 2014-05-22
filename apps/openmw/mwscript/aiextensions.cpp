@@ -16,7 +16,6 @@
 #include "../mwmechanics/aifollow.hpp"
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
-#include "../mwmechanics/aicombat.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -416,9 +415,10 @@ namespace MWScript
                     std::string currentTargetId;
 
                     bool targetsAreEqual = false;
-                    if (creatureStats.getAiSequence().getCombatTarget (currentTargetId))
+                    MWWorld::Ptr targetPtr;
+                    if (creatureStats.getAiSequence().getCombatTarget (targetPtr))
                     {
-                        if (currentTargetId == testedTargetId)
+                        if (targetPtr.getRefData().getHandle() == testedTargetId)
                             targetsAreEqual = true;
                     }
                     runtime.push(int(targetsAreEqual));
@@ -435,12 +435,8 @@ namespace MWScript
                     std::string targetID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-                    
-
-                    creatureStats.setHostile(true);
-                    creatureStats.getAiSequence().stack(
-                        MWMechanics::AiCombat(MWBase::Environment::get().getWorld()->getPtr(targetID, true) ), actor);
+                    MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(targetID, true);
+                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor, target);
                 }
         };
 

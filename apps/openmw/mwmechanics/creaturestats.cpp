@@ -11,14 +11,18 @@
 
 namespace MWMechanics
 {
+    int CreatureStats::sActorId = 0;
+
     CreatureStats::CreatureStats()
         : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
-          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f)
+          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
+          mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
+          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
+          mLastRestock(0,0), mGoldPool(0), mActorId(-1)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -318,11 +322,9 @@ namespace MWMechanics
 
     bool CreatureStats::getCreatureTargetted() const
     {
-        std::string target;
-        if (mAiSequence.getCombatTarget(target))
+        MWWorld::Ptr targetPtr;
+        if (mAiSequence.getCombatTarget(targetPtr))
         {
-            MWWorld::Ptr targetPtr;
-            targetPtr = MWBase::Environment::get().getWorld()->getPtr(target, true);
             return targetPtr.getTypeName() == typeid(ESM::Creature).name();
         }
         return false;
@@ -346,20 +348,6 @@ namespace MWMechanics
     const std::string &CreatureStats::getLastHitObject() const
     {
         return mLastHitObject;
-    }
-
-    bool CreatureStats::canUsePower(const std::string &power) const
-    {
-        std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.find(power);
-        if (it == mUsedPowers.end() || it->second + 24 <= MWBase::Environment::get().getWorld()->getTimeStamp())
-            return true;
-        else
-            return false;
-    }
-
-    void CreatureStats::usePower(const std::string &power)
-    {
-        mUsedPowers[power] = MWBase::Environment::get().getWorld()->getTimeStamp();
     }
 
     void CreatureStats::addToFallHeight(float height)
@@ -481,31 +469,89 @@ namespace MWMechanics
 
     void CreatureStats::writeState (ESM::CreatureStats& state) const
     {
-        for (int i=0; i<8; ++i)
+        for (int i=0; i<ESM::Attribute::Length; ++i)
             mAttributes[i].writeState (state.mAttributes[i]);
 
         for (int i=0; i<3; ++i)
             mDynamic[i].writeState (state.mDynamic[i]);
+
+        state.mTradeTime = mLastRestock.toEsm();
+        state.mGoldPool = mGoldPool;
+
+        state.mDead = mDead;
+        state.mDied = mDied;
+        state.mFriendlyHits = mFriendlyHits;
+        state.mTalkedTo = mTalkedTo;
+        state.mAlarmed = mAlarmed;
+        state.mAttacked = mAttacked;
+        state.mHostile = mHostile;
+        state.mAttackingOrSpell = mAttackingOrSpell;
+        // TODO: rewrite. does this really need 3 separate bools?
+        state.mKnockdown = mKnockdown;
+        state.mKnockdownOneFrame = mKnockdownOneFrame;
+        state.mKnockdownOverOneFrame = mKnockdownOverOneFrame;
+        state.mHitRecovery = mHitRecovery;
+        state.mBlock = mBlock;
+        state.mMovementFlags = mMovementFlags;
+        state.mAttackStrength = mAttackStrength;
+        state.mFallHeight = mFallHeight; // TODO: vertical velocity (move from PhysicActor to CreatureStats?)
+        state.mLastHitObject = mLastHitObject;
+        state.mRecalcDynamicStats = mRecalcDynamicStats;
+        state.mDrawState = mDrawState;
+        state.mLevel = mLevel;
+        state.mActorId = mActorId;
+
+        mSpells.writeState(state.mSpells);
+        mActiveSpells.writeState(state.mActiveSpells);
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
     {
-        for (int i=0; i<8; ++i)
+        for (int i=0; i<ESM::Attribute::Length; ++i)
             mAttributes[i].readState (state.mAttributes[i]);
 
         for (int i=0; i<3; ++i)
             mDynamic[i].readState (state.mDynamic[i]);
+
+        mLastRestock = MWWorld::TimeStamp(state.mTradeTime);
+        mGoldPool = state.mGoldPool;
+        mFallHeight = state.mFallHeight;
+
+        mDead = state.mDead;
+        mDied = state.mDied;
+        mFriendlyHits = state.mFriendlyHits;
+        mTalkedTo = state.mTalkedTo;
+        mAlarmed = state.mAlarmed;
+        mAttacked = state.mAttacked;
+        mHostile = state.mHostile;
+        mAttackingOrSpell = state.mAttackingOrSpell;
+        // TODO: rewrite. does this really need 3 separate bools?
+        mKnockdown = state.mKnockdown;
+        mKnockdownOneFrame = state.mKnockdownOneFrame;
+        mKnockdownOverOneFrame = state.mKnockdownOverOneFrame;
+        mHitRecovery = state.mHitRecovery;
+        mBlock = state.mBlock;
+        mMovementFlags = state.mMovementFlags;
+        mAttackStrength = state.mAttackStrength;
+        mFallHeight = state.mFallHeight;
+        mLastHitObject = state.mLastHitObject;
+        mRecalcDynamicStats = state.mRecalcDynamicStats;
+        mDrawState = DrawState_(state.mDrawState);
+        mLevel = state.mLevel;
+        mActorId = state.mActorId;
+
+        mSpells.readState(state.mSpells);
+        mActiveSpells.readState(state.mActiveSpells);
     }
 
-    // Relates to NPC gold reset delay
-    void CreatureStats::setTradeTime(MWWorld::TimeStamp tradeTime)
+    void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
     {
-        mTradeTime = tradeTime;
+        mLastRestock = tradeTime;
     }
 
-    MWWorld::TimeStamp CreatureStats::getTradeTime() const
+    MWWorld::TimeStamp CreatureStats::getLastRestockTime() const
     {
-        return mTradeTime;
+        return mLastRestock;
     }
 
     void CreatureStats::setGoldPool(int pool)
@@ -515,5 +561,35 @@ namespace MWMechanics
     int CreatureStats::getGoldPool() const
     {
         return mGoldPool;
+    }
+
+    int CreatureStats::getActorId()
+    {
+        if (mActorId==-1)
+            mActorId = sActorId++;
+
+        return mActorId;
+    }
+
+    bool CreatureStats::matchesActorId (int id) const
+    {
+        return mActorId!=-1 && id==mActorId;
+    }
+
+    void CreatureStats::cleanup()
+    {
+        sActorId = 0;
+    }
+
+    void CreatureStats::writeActorIdCounter (ESM::ESMWriter& esm)
+    {
+        esm.startRecord(ESM::REC_ACTC);
+        esm.writeHNT("COUN", sActorId);
+        esm.endRecord(ESM::REC_ACTC);
+    }
+
+    void CreatureStats::readActorIdCounter (ESM::ESMReader& esm)
+    {
+        esm.getHNT(sActorId, "COUN");
     }
 }

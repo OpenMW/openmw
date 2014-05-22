@@ -181,7 +181,7 @@ namespace Terrain
                 // shadow. TODO: repeated, put in function
                 if (mShadows)
                 {
-                    for (Ogre::uint i = 0; i < (mSplitShadows ? 3 : 1); ++i)
+                    for (int i = 0; i < (mSplitShadows ? 3 : 1); ++i)
                     {
                         sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
                         shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
@@ -334,7 +334,7 @@ namespace Terrain
                     // shadow
                     if (shadows)
                     {
-                        for (Ogre::uint i = 0; i < (mSplitShadows ? 3 : 1); ++i)
+                        for (int i = 0; i < (mSplitShadows ? 3 : 1); ++i)
                         {
                             sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
                             shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));

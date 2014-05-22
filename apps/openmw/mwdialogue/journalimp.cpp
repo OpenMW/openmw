@@ -56,7 +56,7 @@ namespace MWDialogue
             if (infoId.empty())
                 return true;
 
-            for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
+            for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
                 iter!=dialogue->mInfo.end(); ++iter)
                 if (iter->mId == infoId)
                     return true;

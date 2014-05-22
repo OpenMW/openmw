@@ -11,9 +11,14 @@
 #include <components/esm/containerstate.hpp>
 #include <components/esm/npcstate.hpp>
 #include <components/esm/creaturestate.hpp>
+#include <components/esm/fogstate.hpp>
+#include <components/esm/creaturelevliststate.hpp>
+#include <components/esm/doorstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "ptr.hpp"
 #include "esmstore.hpp"
@@ -35,6 +40,22 @@ namespace
 
             if (!ptr.isEmpty())
                 return ptr;
+        }
+
+        return MWWorld::Ptr();
+    }
+
+    template<typename T>
+    MWWorld::Ptr searchViaActorId (MWWorld::CellRefList<T>& actorList, int actorId,
+        MWWorld::CellStore *cell)
+    {
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (actorList.mList.begin());
+             iter!=actorList.mList.end(); ++iter)
+        {
+            MWWorld::Ptr actor (&*iter, cell);
+
+            if (actor.getClass().getCreatureStats (actor).matchesActorId (actorId) && actor.getRefData().getCount() > 0)
+                return actor;
         }
 
         return MWWorld::Ptr();
@@ -92,14 +113,17 @@ namespace
         if (!record)
             return;
 
-        for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
-            iter!=collection.mList.end(); ++iter)
-            if (iter->mRef.mRefNum==state.mRef.mRefNum)
-            {
-                // overwrite existing reference
-                iter->load (state);
-                return;
-            }
+        if (state.mRef.mRefNum.mContentFile != -1)
+        {
+            for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
+                iter!=collection.mList.end(); ++iter)
+                if (iter->mRef.mRefNum==state.mRef.mRefNum)
+                {
+                    // overwrite existing reference
+                    iter->load (state);
+                    return;
+                }
+        }
 
         // new reference
         MWWorld::LiveCellRef<T> ref (record);
@@ -145,7 +169,7 @@ namespace MWWorld
     }
 
     CellStore::CellStore (const ESM::Cell *cell)
-      : mCell (cell), mState (State_Unloaded), mHasState (false)
+      : mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {
         mWaterLevel = cell->mWater;
     }
@@ -315,6 +339,17 @@ namespace MWWorld
             return Ptr (ref, this);
 
         mHasState = oldState;
+
+        return Ptr();
+    }
+
+    Ptr CellStore::searchViaActorId (int id)
+    {
+        if (Ptr ptr = ::searchViaActorId (mNpcs, id, this))
+            return ptr;
+
+        if (Ptr ptr = ::searchViaActorId (mCreatures, id, this))
+            return ptr;
 
         return Ptr();
     }
@@ -520,6 +555,7 @@ namespace MWWorld
             mWaterLevel = state.mWaterLevel;
 
         mWaterLevel = state.mWaterLevel;
+        mLastRespawn = MWWorld::TimeStamp(state.mLastRespawn);
     }
 
     void CellStore::saveState (ESM::CellState& state) const
@@ -530,6 +566,22 @@ namespace MWWorld
             state.mWaterLevel = mWaterLevel;
 
         state.mWaterLevel = mWaterLevel;
+        state.mHasFogOfWar = (mFogState.get() ? 1 : 0);
+        state.mLastRespawn = mLastRespawn.toEsm();
+    }
+
+    void CellStore::writeFog(ESM::ESMWriter &writer) const
+    {
+        if (mFogState.get())
+        {
+            mFogState->save(writer, mCell->mData.mFlags & ESM::Cell::Interior);
+        }
+    }
+
+    void CellStore::readFog(ESM::ESMReader &reader)
+    {
+        mFogState.reset(new ESM::FogState());
+        mFogState->load(reader);
     }
 
     void CellStore::writeReferences (ESM::ESMWriter& writer) const
@@ -542,9 +594,9 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mClothes);
         writeReferenceCollection<ESM::ContainerState> (writer, mContainers);
         writeReferenceCollection<ESM::CreatureState> (writer, mCreatures);
-        writeReferenceCollection<ESM::ObjectState> (writer, mDoors);
+        writeReferenceCollection<ESM::DoorState> (writer, mDoors);
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
-        writeReferenceCollection<ESM::ObjectState> (writer, mCreatureLists);
+        writeReferenceCollection<ESM::CreatureLevListState> (writer, mCreatureLists);
         writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
         writeReferenceCollection<ESM::LightState> (writer, mLights);
         writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
@@ -610,7 +662,7 @@ namespace MWWorld
 
                 case ESM::REC_DOOR:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mDoors, contentFileMap);
+                    readReferenceCollection<ESM::DoorState> (reader, mDoors, contentFileMap);
                     break;
 
                 case ESM::REC_INGR:
@@ -620,7 +672,7 @@ namespace MWWorld
 
                 case ESM::REC_LEVC:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mCreatureLists, contentFileMap);
+                    readReferenceCollection<ESM::CreatureLevListState> (reader, mCreatureLists, contentFileMap);
                     break;
 
                 case ESM::REC_LEVI:
@@ -693,5 +745,47 @@ namespace MWWorld
     std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end) const
     {
         return mPathgridGraph.aStarSearch(start, end);
+    }
+
+    void CellStore::setFog(ESM::FogState *fog)
+    {
+        mFogState.reset(fog);
+    }
+
+    ESM::FogState* CellStore::getFog() const
+    {
+        return mFogState.get();
+    }
+
+    void CellStore::respawn()
+    {
+        if (mState == State_Loaded)
+        {
+            static int iMonthsToRespawn = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iMonthsToRespawn")->getInt();
+            if (MWBase::Environment::get().getWorld()->getTimeStamp() - mLastRespawn > 24*30*iMonthsToRespawn)
+            {
+                mLastRespawn = MWBase::Environment::get().getWorld()->getTimeStamp();
+                for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
+                {
+                    Ptr ptr (&*it, this);
+                    ptr.getClass().respawn(ptr);
+                }
+                for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+                {
+                    Ptr ptr (&*it, this);
+                    ptr.getClass().respawn(ptr);
+                }
+                for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+                {
+                    Ptr ptr (&*it, this);
+                    ptr.getClass().respawn(ptr);
+                }
+                for (CellRefList<ESM::CreatureLevList>::List::iterator it (mCreatureLists.mList.begin()); it!=mCreatureLists.mList.end(); ++it)
+                {
+                    Ptr ptr (&*it, this);
+                    ptr.getClass().respawn(ptr);
+                }
+            }
+        }
     }
 }

@@ -60,6 +60,24 @@ namespace MWClass
         }
     }
 
+    void Container::respawn(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref =
+            ptr.get<ESM::Container>();
+        if (ref->mBase->mFlags & ESM::Container::Respawn)
+        {
+            ptr.getRefData().setCustomData(NULL);
+        }
+    }
+
+    void Container::restock(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const ESM::InventoryList& list = ref->mBase->mInventory;
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().mOwner, ptr.getCellRef().mFaction);
+    }
+
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);

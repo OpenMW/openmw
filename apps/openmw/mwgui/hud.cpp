@@ -17,8 +17,46 @@
 #include "itemmodel.hpp"
 #include "container.hpp"
 
+#include "itemmodel.hpp"
+
 namespace MWGui
 {
+
+    /**
+     * Makes it possible to use ItemModel::moveItem to move an item from an inventory to the world.
+     */
+    class WorldItemModel : public ItemModel
+    {
+    public:
+        WorldItemModel(float left, float top) : mLeft(left), mTop(top) {}
+        virtual ~WorldItemModel() {}
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false)
+        {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+
+            MWWorld::Ptr dropped;
+            if (world->canPlaceObject(mLeft, mTop))
+                dropped = world->placeObject(item.mBase, mLeft, mTop, count);
+            else
+                dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
+            if (setNewOwner)
+                dropped.getCellRef().mOwner = "";
+
+            return dropped;
+        }
+
+        virtual void removeItem (const ItemStack& item, size_t count) { throw std::runtime_error("removeItem not implemented"); }
+        virtual ModelIndex getIndex (ItemStack item) { throw std::runtime_error("getIndex not implemented"); }
+        virtual void update() {}
+        virtual size_t getItemCount() { return 0; }
+        virtual ItemStack getItem (ModelIndex index) { throw std::runtime_error("getItem not implemented"); }
+
+    private:
+        // Where to drop the item
+        float mLeft;
+        float mTop;
+    };
+
 
     HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
         : Layout("openmw_hud.layout")
@@ -229,29 +267,18 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             // drop item into the gameworld
-            MWWorld::Ptr object = mDragAndDrop->mItem.mBase;
-
-            MWBase::World* world = MWBase::Environment::get().getWorld();
+            MWBase::Environment::get().getWorld()->breakInvisibility(
+                        MWBase::Environment::get().getWorld()->getPlayerPtr());
 
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
             MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
             float mouseX = cursorPosition.left / float(viewSize.width);
             float mouseY = cursorPosition.top / float(viewSize.height);
 
-            if (world->canPlaceObject(mouseX, mouseY))
-                world->placeObject(object, mouseX, mouseY, mDragAndDrop->mDraggedCount);
-            else
-                world->dropObjectOnGround(world->getPlayerPtr(), object, mDragAndDrop->mDraggedCount);
+            WorldItemModel drop (mouseX, mouseY);
+            mDragAndDrop->drop(&drop, NULL);
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
-
-            std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
-            MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
-            // remove object from the container it was coming from
-            mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
-            mDragAndDrop->finish();
-            mDragAndDrop->mSourceModel->update();
         }
         else
         {
@@ -601,6 +628,9 @@ namespace MWGui
             effectsDx = (viewSize.width - mMinimapBoxBaseRight) - (viewSize.width - mEffectBoxBaseRight);
 
         mMapVisible = mMinimapBox->getVisible ();
+        if (!mMapVisible)
+            mCellNameBox->setVisible(false);
+
         mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
     }
 

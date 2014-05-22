@@ -81,6 +81,7 @@ void CSMSettings::Connector::slotUpdateMaster() const
     }
 
     QString masterValue = mMasterView->value (masterColumn);
+
     mMasterView->setSelectedValue (masterValue);
 }
 
