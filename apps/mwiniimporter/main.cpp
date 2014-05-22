@@ -3,7 +3,6 @@
 #include <string>
 
 #include <boost/program_options.hpp>
-#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -14,6 +13,9 @@ namespace bfs = boost::filesystem;
 #ifndef _WIN32
 int main(int argc, char *argv[]) {
 #else
+
+// Include on Windows only
+#include <boost/locale.hpp>
 
 class utf8argv
 {
