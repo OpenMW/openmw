@@ -666,8 +666,6 @@ namespace MWMechanics
                 int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
                                        std::max(0, std::min(100, flee + int(std::max(iPerMinChange, s)))));
-                // TODO: initiate combat and quit dialogue if fight rating is too high
-                // or should setAiSetting handle this?
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
                                        std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
             }
