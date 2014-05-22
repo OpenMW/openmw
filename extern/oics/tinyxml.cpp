@@ -32,7 +32,7 @@ distribution.
 #include "tinyxml.h"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <Windows.h> // import MultiByteToWideChar
 #endif
 
 

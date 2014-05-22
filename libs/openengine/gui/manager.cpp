@@ -559,6 +559,8 @@ public:
     }
 };
 
+/// \brief Helper class holding data that required during
+/// MyGUI log creation
 class LogFacility
 {
     ConsoleLogListener  mConsole;
@@ -615,6 +617,8 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
         mRenderManager = new MyGUI::OgreRenderManager();
     mDataManager = new MyGUI::FixedOgreDataManager();
 
+    // Do not use default log since it don't support Unicode path on Windows.
+    // Instead, manually create log source using LogFacility and pass it.
     mLogFacility = new MyGUI::LogFacility(theLogFile, logging);
     LogManager::getInstance().addLogSource(mLogFacility->getSource());
 

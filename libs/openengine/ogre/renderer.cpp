@@ -51,6 +51,10 @@ void OgreRenderer::update(float dt)
 
 void OgreRenderer::screenshot(const std::string &file)
 {
+    /*  Since Ogre uses narrow character interfaces, it does not support
+        Unicode paths on Windows. Therefore we had to implement screenshot
+        saving manually.
+    */
     namespace bfs = boost::filesystem;
     bfs::ofstream out(bfs::path(file), std::ios::binary);
 

@@ -6,6 +6,15 @@
 
 #include <boost/filesystem/fstream.hpp>
 
+/*
+	Almost exact copy of load_file_to_string policy found in
+	boost::wave headers with the only change that it uses
+	boost::filesystem facility to handle UTF-8 paths used
+	throughout OpenMW (bfs::fstream, bfs::path).
+
+	Original namespace is used due to required bost::wave
+	internal symbols.
+*/
 namespace boost {
 namespace wave {
 namespace iteration_context_policies {

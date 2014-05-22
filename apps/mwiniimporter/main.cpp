@@ -41,6 +41,13 @@ private:
     std::vector<std::string> args;
 };
 
+/*  The only way to pass Unicode on Winodws with CLI is to use wide
+    characters interface which presents UTF-16 encoding. The rest of
+    OpenMW application stack assumes UTF-8 encoding, therefore this
+    conversion.
+
+    For boost::filesystem::path::imbue see components/files/windowspath.cpp
+*/
 int wmain(int argc, wchar_t *wargv[]) {
     utf8argv converter(argc, wargv);
     char **argv = converter.get();

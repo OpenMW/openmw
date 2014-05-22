@@ -8,6 +8,8 @@
 
 namespace MyGUI
 {
+    /// \brief  Custom MyGUI::ILogListener interface implementation
+    /// being able to portably handle UTF-8 encoded path.
     class CustomLogListener : public ILogListener
     {
     public:

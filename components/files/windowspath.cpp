@@ -27,6 +27,13 @@ namespace Files
 WindowsPath::WindowsPath(const std::string& application_name)
     : mName(application_name)
 {
+    /*  Since on Windows boost::path.string() returns string of narrow
+        characters in local encoding, it is required to path::imbue()
+        with UTF-8 encoding (generated for empty name from boost::locale)
+        to handle Unicode in platform-agnostic way using std::string.
+
+        See boost::filesystem and boost::locale reference for details.
+    */
     boost::filesystem::path::imbue(boost::locale::generator().generate(""));
 }
 

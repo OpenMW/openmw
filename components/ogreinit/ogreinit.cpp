@@ -26,6 +26,13 @@ namespace bfs = boost::filesystem;
 
 namespace
 {
+    /** \brief Custom Ogre::LogListener interface implementation being
+        able to portably handle UTF-8 encoded path.
+
+        Effectively this is used in conjunction with default listener,
+        but since on every message messageLogged() set 'skip' flag to
+        true, there should be no troubles sharing same file.
+    */
     class LogListener : public Ogre::LogListener
     {
         bfs::ofstream file;
@@ -87,6 +94,7 @@ namespace OgreInit
         Ogre::Log *log = Ogre::LogManager::getSingleton().createLog(logPath);
 
     #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        // Use custom listener only on Windows
         log->addListener(new LogListener(logPath));
     #endif
 
