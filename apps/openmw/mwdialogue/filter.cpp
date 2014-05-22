@@ -264,15 +264,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         {
             MWWorld::ContainerStore& store = MWWorld::Class::get (player).getContainerStore (player);
 
-            int sum = 0;
-
-            std::string name = select.getName();
-
-            for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, name))
-                    sum += iter->getRefData().getCount();
-
-            return sum;
+            return store.count(select.getName());
         }
 
         case SelectWrapper::Function_Dead:
