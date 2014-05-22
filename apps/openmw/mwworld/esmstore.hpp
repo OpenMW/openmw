@@ -85,7 +85,8 @@ namespace MWWorld
             return mStores.end();
         }
 
-        // Look up the given ID in 'all'. Returns 0 if not found.
+        /// Look up the given ID in 'all'. Returns 0 if not found.
+        /// \note id must be in lower case.
         int find(const std::string &id) const
         {
             std::map<std::string, int>::const_iterator it = mIds.find(id);
