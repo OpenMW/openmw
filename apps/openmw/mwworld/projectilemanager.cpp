@@ -152,6 +152,10 @@ namespace MWWorld
                 MWWorld::Ptr obstacle = MWBase::Environment::get().getWorld()->searchPtrViaHandle(cIt->second);
 
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
+
+                if (!obstacle.isEmpty() && obstacle == caster)
+                    continue;
+
                 if (caster.isEmpty())
                     caster = obstacle;
 
