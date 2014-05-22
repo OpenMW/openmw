@@ -277,7 +277,7 @@ namespace MWClass
 
         if (!weapon.isEmpty())
         {
-            const bool weaphashealth = get(weapon).hasItemHealth(weapon);
+            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -354,7 +354,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(MWWorld::Class::get(object).getId(object));
+            getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
         if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
@@ -444,7 +444,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfCreature");

@@ -112,7 +112,7 @@ namespace MWClass
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
 
-        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
@@ -127,7 +127,7 @@ namespace MWClass
         const std::string trapActivationSound = "Disarm Trap Fail";
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
         bool needKey = ptr.getCellRef().mLockLevel > 0;
         bool hasKey = false;
@@ -143,7 +143,7 @@ namespace MWClass
             if (refId == keyId)
             {
                 hasKey = true;
-                keyName = MWWorld::Class::get(*it).getName(*it);
+                keyName = it->getClass().getName(*it);
             }
         }
 

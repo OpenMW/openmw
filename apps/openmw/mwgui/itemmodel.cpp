@@ -13,7 +13,7 @@ namespace MWGui
         , mType(Type_Normal)
         , mBase(base)
     {
-        if (MWWorld::Class::get(base).getEnchantment(base) != "")
+        if (base.getClass().getEnchantment(base) != "")
             mFlags |= Flag_Enchanted;
     }
 

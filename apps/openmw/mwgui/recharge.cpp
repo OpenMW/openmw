@@ -41,7 +41,7 @@ void Recharge::open()
 void Recharge::start (const MWWorld::Ptr &item)
 {
     std::string path = std::string("icons\\");
-    path += MWWorld::Class::get(item).getInventoryIcon(item);
+    path += item.getClass().getInventoryIcon(item);
     int pos = path.rfind(".");
     path.erase(pos);
     path.append(".dds");
@@ -85,7 +85,7 @@ void Recharge::updateView()
     int currentY = 0;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+    MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     for (MWWorld::ContainerStoreIterator iter (store.begin());
          iter!=store.end(); ++iter)
     {
@@ -99,14 +99,14 @@ void Recharge::updateView()
 
         MyGUI::TextBox* text = mView->createWidget<MyGUI::TextBox> (
                     "SandText", MyGUI::IntCoord(8, currentY, mView->getWidth()-8, 18), MyGUI::Align::Default);
-        text->setCaption(MWWorld::Class::get(*iter).getName(*iter));
+        text->setCaption(iter->getClass().getName(*iter));
         text->setNeedMouseFocus(false);
         currentY += 19;
 
         MyGUI::ImageBox* icon = mView->createWidget<MyGUI::ImageBox> (
                     "ImageBox", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(*iter).getInventoryIcon(*iter);
+        path += iter->getClass().getInventoryIcon(*iter);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");

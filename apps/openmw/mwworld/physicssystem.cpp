@@ -538,7 +538,7 @@ namespace MWWorld
 
     void PhysicsSystem::addObject (const Ptr& ptr, bool placeable)
     {
-        std::string mesh = MWWorld::Class::get(ptr).getModel(ptr);
+        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
         OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(
@@ -550,7 +550,7 @@ namespace MWWorld
 
     void PhysicsSystem::addActor (const Ptr& ptr)
     {
-        std::string mesh = MWWorld::Class::get(ptr).getModel(ptr);
+        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
         mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
@@ -651,7 +651,7 @@ namespace MWWorld
 
     bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
     {
-        std::string model = MWWorld::Class::get(ptr).getModel(ptr);
+        std::string model = ptr.getClass().getModel(ptr);
         if (model.empty()) {
             return false;
         }

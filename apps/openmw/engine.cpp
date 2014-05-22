@@ -492,11 +492,11 @@ void OMW::Engine::activate()
     MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 
     boost::shared_ptr<MWWorld::Action> action =
-        MWWorld::Class::get (ptr).activate (ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
+        ptr.getClass().activate (ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 
     interpreterContext.activate (ptr, action);
 
-    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+    std::string script = ptr.getClass().getScript (ptr);
 
     MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayerPtr());
 
