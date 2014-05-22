@@ -118,11 +118,12 @@ namespace MWGui
 
     void WaitDialog::startWaiting(int hoursToWait)
     {
+        if(Settings::Manager::getBool("autosave","Saves") && mSleeping) //autosaves when enabled and sleeping
+            MWBase::Environment::get().getStateManager()->quickSave("Autosave");
+
         MWBase::World* world = MWBase::Environment::get().getWorld();
         world->getFader ()->fadeOut(0.2);
         setVisible(false);
-        if(Settings::Manager::getBool("autosave","Saves") && mSleeping) //autosaves when enabled and sleeping (Not resting, apparently)
-            MWBase::Environment::get().getStateManager()->quickSave("Autosave");
         mProgressBar.setVisible (true);
 
         mWaiting = true;
