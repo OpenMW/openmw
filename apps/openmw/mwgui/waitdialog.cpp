@@ -219,8 +219,20 @@ namespace MWGui
         }
 
         if (mCurHour > mHours)
+        {
             stopWaiting();
 
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            const MWMechanics::NpcStats &pcstats = MWWorld::Class::get(player).getNpcStats(player);
+
+            // trigger levelup if possible
+            const MWWorld::Store<ESM::GameSetting> &gmst =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
+            {
+                MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
+            }
+        }
     }
 
     void WaitDialog::stopWaiting ()
@@ -230,17 +242,6 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
         mWaiting = false;
-
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const MWMechanics::NpcStats &pcstats = MWWorld::Class::get(player).getNpcStats(player);
-
-        // trigger levelup if possible
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
-        {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
-        }
     }
 
 
