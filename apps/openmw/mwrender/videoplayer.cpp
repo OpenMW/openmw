@@ -1080,6 +1080,11 @@ VideoPlayer::~VideoPlayer()
 
 void VideoPlayer::playVideo(const std::string &resourceName)
 {
+#ifdef WIN32
+    // FIXME: Need FFmpeg FLTP audio support for BIK video format
+    std::cout<<"Temporarily disabled, did not play \""+resourceName+"\""<<std::endl;
+    return;
+#endif
     if(mState)
         close();
 
