@@ -1,7 +1,7 @@
 #ifndef CSM_WOLRD_CELL_H
 #define CSM_WOLRD_CELL_H
 
-#include <vector>
+#include <set>
 #include <string>
 
 #include <components/esm/loadcell.hpp>
@@ -16,8 +16,11 @@ namespace CSMWorld
     {
         std::string mId;
 
-        void load (ESM::ESMReader &esm);
+        /// These are the references modified by the edited content file. These are stored in
+        /// mModified only.
+        std::set<std::string> mTouchedRefs;
 
+        void load (ESM::ESMReader &esm);
     };
 }
 
