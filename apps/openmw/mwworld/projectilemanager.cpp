@@ -1,6 +1,7 @@
 #include "projectilemanager.hpp"
 
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 
 #include <libs/openengine/bullet/physic.hpp>
 
