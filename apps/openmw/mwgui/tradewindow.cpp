@@ -102,7 +102,7 @@ namespace MWGui
 
         // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
         // or we end up using a possibly invalid model.
-        setTitle(MWWorld::Class::get(actor).getName(actor));
+        setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
     }
@@ -133,7 +133,7 @@ namespace MWGui
 
     int TradeWindow::getMerchantServices()
     {
-        return MWWorld::Class::get(mPtr).getServices(mPtr);
+        return mPtr.getClass().getServices(mPtr);
     }
 
     void TradeWindow::onItemSelected (int index)
@@ -150,7 +150,7 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = "#{sQuanityMenuMessage02}";
-            dialog->open(MWWorld::Class::get(object).getName(object), message, count);
+            dialog->open(object.getClass().getName(object), message, count);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &TradeWindow::sellItem);
             mItemToSell = mSortModel->mapToSource(index);
@@ -165,7 +165,7 @@ namespace MWGui
     void TradeWindow::sellItem(MyGUI::Widget* sender, int count)
     {
         const ItemStack& item = mTradeModel->getItem(mItemToSell);
-        std::string sound = MWWorld::Class::get(item.mBase).getDownSoundId(item.mBase);
+        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
@@ -208,7 +208,7 @@ namespace MWGui
 
     void TradeWindow::addOrRemoveGold(int amount, const MWWorld::Ptr& actor)
     {
-        MWWorld::ContainerStore& store = MWWorld::Class::get(actor).getContainerStore(actor);
+        MWWorld::ContainerStore& store = actor.getClass().getContainerStore(actor);
 
         if (amount > 0)
         {
@@ -442,7 +442,7 @@ namespace MWGui
 
     void TradeWindow::sellToNpc(const MWWorld::Ptr& item, int count, bool boughtItem)
     {
-        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count, boughtItem);
+        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, item.getClass().getValue(item) * count, boughtItem);
 
         mCurrentBalance += diff;
         mCurrentMerchantOffer += diff;
@@ -452,7 +452,7 @@ namespace MWGui
 
     void TradeWindow::buyFromNpc(const MWWorld::Ptr& item, int count, bool soldItem)
     {
-        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count, !soldItem);
+        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, item.getClass().getValue(item) * count, !soldItem);
 
         mCurrentBalance -= diff;
         mCurrentMerchantOffer -= diff;

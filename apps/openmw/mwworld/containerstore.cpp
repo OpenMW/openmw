@@ -142,8 +142,8 @@ void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
 
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
-    const MWWorld::Class& cls1 = MWWorld::Class::get(ptr1);
-    const MWWorld::Class& cls2 = MWWorld::Class::get(ptr2);
+    const MWWorld::Class& cls1 = ptr1.getClass();
+    const MWWorld::Class& cls2 = ptr2.getClass();
 
     if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID))
         return false;
@@ -226,14 +226,14 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().mPos.pos[1] = 0;
     item.getCellRef().mPos.pos[2] = 0;
 
-    std::string script = MWWorld::Class::get(item).getScript(item);
+    std::string script = item.getClass().getScript(item);
     if(script != "")
     {
         CellStore *cell;
 
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
 
-        if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
+        if(&(player.getClass().getContainerStore (player)) == this)
         {
             cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
 

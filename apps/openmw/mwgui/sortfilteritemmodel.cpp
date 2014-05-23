@@ -47,8 +47,8 @@ namespace
 
         if (left.mBase.getTypeName() == right.mBase.getTypeName())
         {
-            int cmp = MWWorld::Class::get(left.mBase).getName(left.mBase).compare(
-                        MWWorld::Class::get(right.mBase).getName(right.mBase));
+            int cmp = left.mBase.getClass().getName(left.mBase).compare(
+                        right.mBase.getClass().getName(right.mBase));
             return cmp < 0;
         }
         else

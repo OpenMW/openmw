@@ -20,10 +20,10 @@ namespace MWWorld
         getTarget().getContainerStore()->remove(getTarget(), 1, actor);
 
         // apply to actor
-        std::string id = Class::get (getTarget()).getId (getTarget());
+        std::string id = getTarget().getClass().getId (getTarget());
 
-        if (Class::get (actor).apply (actor, id, actor))
-            Class::get (actor).skillUsageSucceeded (actor, ESM::Skill::Alchemy, 1);
+        if (actor.getClass().apply (actor, id, actor))
+            actor.getClass().skillUsageSucceeded (actor, ESM::Skill::Alchemy, 1);
     }
 
     ActionEat::ActionEat (const MWWorld::Ptr& object) : Action (false, object) {}

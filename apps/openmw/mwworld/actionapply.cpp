@@ -16,7 +16,7 @@ namespace MWWorld
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
 
-        MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor);
+        getTarget().getClass().apply (getTarget(), mId, actor);
     }
 
 
@@ -29,7 +29,7 @@ namespace MWWorld
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
 
-        if (MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor) && mUsageType!=-1)
-            MWWorld::Class::get (getTarget()).skillUsageSucceeded (actor, mSkillIndex, mUsageType);
+        if (getTarget().getClass().apply (getTarget(), mId, actor) && mUsageType!=-1)
+            getTarget().getClass().skillUsageSucceeded (actor, mSkillIndex, mUsageType);
     }
 }

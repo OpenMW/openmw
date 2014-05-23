@@ -50,7 +50,7 @@ MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count, 
 
 void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
 {
-    MWWorld::ContainerStore& store = MWWorld::Class::get(mActor).getContainerStore(mActor);
+    MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
     int removed = store.remove(item.mBase, count, mActor);
 
     if (removed == 0)
@@ -77,7 +77,7 @@ MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack &item, size_t count, I
 
 void InventoryItemModel::update()
 {
-    MWWorld::ContainerStore& store = MWWorld::Class::get(mActor).getContainerStore(mActor);
+    MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
 
     mItems.clear();
 

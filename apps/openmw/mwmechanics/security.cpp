@@ -18,8 +18,8 @@ namespace MWMechanics
     Security::Security(const MWWorld::Ptr &actor)
         : mActor(actor)
     {
-        CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
-        NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats(actor);
+        CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+        NpcStats& npcStats = actor.getClass().getNpcStats(actor);
         mAgility = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
         mLuck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
         mSecuritySkill = npcStats.getSkill(ESM::Skill::Security).getModified();
@@ -51,10 +51,10 @@ namespace MWMechanics
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {
-                MWWorld::Class::get(lock).unlock(lock);
+                lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
-                MWWorld::Class::get(mActor).skillUsageSucceeded(mActor, ESM::Skill::Security, 1);
+                mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);
             }
             else
                 resultMessage = "#{sLockFail}";
@@ -97,7 +97,7 @@ namespace MWMechanics
 
                 resultSound = "Disarm Trap";
                 resultMessage = "#{sTrapSuccess}";
-                MWWorld::Class::get(mActor).skillUsageSucceeded(mActor, ESM::Skill::Security, 0);
+                mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 0);
             }
             else
                 resultMessage = "#{sTrapFail}";

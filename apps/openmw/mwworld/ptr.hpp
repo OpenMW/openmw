@@ -7,12 +7,12 @@
 #include <sstream>
 
 #include "cellreflist.hpp"
-#include "livecellref.hpp"
 
 namespace MWWorld
 {
     class ContainerStore;
     class CellStore;
+    class LiveCellRefBase;
 
     /// \brief Pointer to a LiveCellRef
 

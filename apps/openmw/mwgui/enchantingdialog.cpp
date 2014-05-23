@@ -119,7 +119,7 @@ namespace MWGui
 
         MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(soulgem).getInventoryIcon(soulgem);
+        path += soulgem.getClass().getInventoryIcon(soulgem);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
@@ -164,7 +164,7 @@ namespace MWGui
 
         MyGUI::ImageBox* image = mItemBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
+        path += item.getClass().getInventoryIcon(item);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
@@ -207,7 +207,7 @@ namespace MWGui
 
         MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
+        path += item.getClass().getInventoryIcon(item);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
