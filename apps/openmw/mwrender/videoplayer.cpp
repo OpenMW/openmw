@@ -970,8 +970,13 @@ void VideoState::init(const std::string& resourceName)
         MWBase::Environment::get().getSoundManager()->pauseSounds();
 
     this->external_clock_base = av_gettime();
+#ifdef WIN32
+    // FIXME: Need FFmpeg FLTP audio support for BIK video format
+    std::cout<<"Sound temporarily disabled for \""+resourceName+"\""<<std::endl;
+#else
     if(audio_index >= 0)
         this->stream_open(audio_index, this->format_ctx);
+#endif
     if(video_index >= 0)
     {
         this->stream_open(video_index, this->format_ctx);
@@ -1080,11 +1085,6 @@ VideoPlayer::~VideoPlayer()
 
 void VideoPlayer::playVideo(const std::string &resourceName)
 {
-#ifdef WIN32
-    // FIXME: Need FFmpeg FLTP audio support for BIK video format
-    std::cout<<"Temporarily disabled, did not play \""+resourceName+"\""<<std::endl;
-    return;
-#endif
     if(mState)
         close();
 
