@@ -970,7 +970,7 @@ void VideoState::init(const std::string& resourceName)
         MWBase::Environment::get().getSoundManager()->pauseSounds();
 
     this->external_clock_base = av_gettime();
-#ifdef WIN32
+#ifdef _WIN64
     // FIXME: Need FFmpeg FLTP audio support for BIK video format
     std::cout<<"Sound temporarily disabled for \""+resourceName+"\""<<std::endl;
 #else
