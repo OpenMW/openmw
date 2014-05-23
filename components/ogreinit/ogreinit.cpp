@@ -1,11 +1,15 @@
 #include "ogreinit.hpp"
 
 #include <string>
+#include <ctime>
+#include <cstdio>
+#include <cstring>
 
 #include <OgreRoot.h>
 #include <OgreParticleEmitterFactory.h>
 #include <OgreParticleSystemManager.h>
 #include <OgreLogManager.h>
+#include <OgreLog.h>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <OSX/macUtils.h>
@@ -13,7 +17,53 @@
 
 #include <components/nifogre/particles.hpp>
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include "ogreplugin.hpp"
+
+namespace bfs = boost::filesystem;
+
+namespace
+{
+    /** \brief Custom Ogre::LogListener interface implementation being
+        able to portably handle UTF-8 encoded path.
+
+        Effectively this is used in conjunction with default listener,
+        but since on every message messageLogged() set 'skip' flag to
+        true, there should be no troubles sharing same file.
+    */
+    class LogListener : public Ogre::LogListener
+    {
+        bfs::ofstream file;
+        char buffer[16];
+
+
+    public:
+
+        LogListener(const std::string &path)
+            : file((bfs::path(path)))
+        {
+            memset(buffer, sizeof(buffer), 0);
+        }
+
+        void timestamp()
+        {
+            int local = time(0) % 86400;
+            int sec = local % 60;
+            int min = (local / 60) % 60;
+            int hrs = local / 3600;
+            sprintf(buffer, "%02d:%02d:%02d: ", hrs, min, sec);
+        }
+
+        virtual void messageLogged(const std::string &msg, Ogre::LogMessageLevel lvl, bool mask, const std::string &logName, bool &skip)
+        {
+            timestamp();
+            file << buffer << msg << std::endl;
+            skip = true;
+        }
+    };
+}
 
 namespace OgreInit
 {
@@ -42,6 +92,11 @@ namespace OgreInit
         // Set up logging first
         new Ogre::LogManager;
         Ogre::Log *log = Ogre::LogManager::getSingleton().createLog(logPath);
+
+    #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        // Use custom listener only on Windows
+        log->addListener(new LogListener(logPath));
+    #endif
 
         // Disable logging to cout/cerr
         log->setDebugOutputEnabled(false);
@@ -141,11 +196,6 @@ namespace OgreInit
             pluginDir = OGRE_PLUGIN_DIR_REL;
     #endif
         }
-
-        boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
-
-        pluginDir = absPluginPath.string();
-
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GLES2", *mRoot);
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);

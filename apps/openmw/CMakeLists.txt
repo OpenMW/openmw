@@ -83,6 +83,10 @@ add_openmw_dir (mwbase
 
 # Main executable
 set(BOOST_COMPONENTS system filesystem program_options thread wave)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 IF(OGRE_STATIC)
