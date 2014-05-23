@@ -537,8 +537,8 @@ namespace MWWorld
                 return ptr;
         }
 
-        Ptr ptr = Class::get (mPlayer->getPlayer()).
-            getContainerStore (mPlayer->getPlayer()).search (lowerCaseName);
+        Ptr ptr = mPlayer->getPlayer().getClass()
+            .getContainerStore(mPlayer->getPlayer()).search(lowerCaseName);
 
         if (!ptr.isEmpty())
             return ptr;
@@ -589,10 +589,10 @@ namespace MWWorld
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-            MWWorld::ContainerStore& container = MWWorld::Class::get(reference).getContainerStore(reference);
+            MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                std::string script = MWWorld::Class::get(*it).getScript(*it);
+                std::string script = it->getClass().getScript(*it);
                 if(script != "")
                 {
                     MWWorld::Ptr item = *it;
@@ -624,10 +624,10 @@ namespace MWWorld
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-            MWWorld::ContainerStore& container = MWWorld::Class::get(reference).getContainerStore(reference);
+            MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                std::string script = MWWorld::Class::get(*it).getScript(*it);
+                std::string script = it->getClass().getScript(*it);
                 if(script != "")
                 {
                     MWWorld::Ptr item = *it;
@@ -976,14 +976,14 @@ namespace MWWorld
                     removeContainerScripts (ptr);
                     haveToMove = false;
 
-                    MWWorld::Ptr newPtr = MWWorld::Class::get(ptr)
+                    MWWorld::Ptr newPtr = ptr.getClass()
                             .copyToCell(ptr, *newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
                 else
                 {
                     MWWorld::Ptr copy =
-                        MWWorld::Class::get(ptr).copyToCell(ptr, *newCell, pos);
+                        ptr.getClass().copyToCell(ptr, *newCell, pos);
 
                     mRendering->updateObjectCell(ptr, copy);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
@@ -992,7 +992,7 @@ namespace MWWorld
                     mechMgr->updateCell(ptr, copy);
 
                     std::string script =
-                        MWWorld::Class::get(ptr).getScript(ptr);
+                        ptr.getClass().getScript(ptr);
                     if (!script.empty())
                     {
                         mLocalScripts.remove(ptr);
@@ -1035,7 +1035,7 @@ namespace MWWorld
     void World::scaleObject (const Ptr& ptr, float scale)
     {
         ptr.getCellRef().mScale = scale;
-        MWWorld::Class::get(ptr).adjustScale(ptr,scale);
+        ptr.getClass().adjustScale(ptr,scale);
 
         if(ptr.getRefData().getBaseNode() == 0)
             return;
@@ -1062,7 +1062,7 @@ namespace MWWorld
             objRot[2] = rot.z;
         }
 
-        if(Class::get(ptr).isActor())
+        if(ptr.getClass().isActor())
         {
             /* HACK? Actors shouldn't really be rotating around X (or Y), but
              * currently it's done so for rotating the camera, which needs
@@ -1580,7 +1580,7 @@ namespace MWWorld
 
     void World::PCDropped (const Ptr& item)
     {
-        std::string script = MWWorld::Class::get(item).getScript(item);
+        std::string script = item.getClass().getScript(item);
 
         // Set OnPCDrop Variable on item's script, if it has a script with that variable declared
         if(script != "")
@@ -1648,13 +1648,13 @@ namespace MWWorld
         }
 
         MWWorld::Ptr dropped =
-            MWWorld::Class::get(object).copyToCell(object, *cell, pos);
+            object.getClass().copyToCell(object, *cell, pos);
 
         if (mWorldScene->isCellActive(*cell)) {
             if (dropped.getRefData().isEnabled()) {
                 mWorldScene->addObjectToScene(dropped);
             }
-            std::string script = MWWorld::Class::get(dropped).getScript(dropped);
+            std::string script = dropped.getClass().getScript(dropped);
             if (!script.empty()) {
                 mLocalScripts.add(script, dropped);
             }
@@ -1863,7 +1863,7 @@ namespace MWWorld
         if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos))
             return 2;
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
-           Class::get(player).getNpcStats(player).isWerewolf())
+           player.getClass().getNpcStats(player).isWerewolf())
             return 1;
 
         return 0;
@@ -2107,7 +2107,7 @@ namespace MWWorld
 
     void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
     {
-        MWMechanics::NpcStats& npcStats = Class::get(actor).getNpcStats(actor);
+        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats(actor);
 
         // The actor does not have to change state
         if (npcStats.isWerewolf() == werewolf)
@@ -2119,7 +2119,7 @@ namespace MWWorld
         // bones that do not even exist with the werewolf object root.
         // Therefore, make sure to unequip everything at once, and only fire the change event
         // (which will rebuild the animation parts) afterwards. unequipAll will do this for us.
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
+        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
         invStore.unequipAll(actor);
 
         if(werewolf)
@@ -2158,7 +2158,7 @@ namespace MWWorld
     void World::applyWerewolfAcrobatics(const Ptr &actor)
     {
         const Store<ESM::GameSetting> &gmst = getStore().get<ESM::GameSetting>();
-        MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
+        MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
 
         stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getFloat());
     }

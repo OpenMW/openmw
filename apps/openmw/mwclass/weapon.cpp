@@ -392,7 +392,7 @@ namespace MWClass
         if (ptr.getCellRef().mCharge == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
-        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
             return std::make_pair (0, "");

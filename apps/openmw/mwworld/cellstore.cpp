@@ -36,7 +36,7 @@ namespace
             MWWorld::Ptr container (&*iter, 0);
 
             MWWorld::Ptr ptr =
-                MWWorld::Class::get (container).getContainerStore (container).search (id);
+                container.getClass().getContainerStore (container).search (id);
 
             if (!ptr.isEmpty())
                 return ptr;

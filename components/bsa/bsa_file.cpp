@@ -25,6 +25,9 @@
 
 #include <stdexcept>
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include "../files/constrainedfiledatastream.hpp"
 
 using namespace std;
@@ -72,7 +75,8 @@ void BSAFile::readHeader()
      */
     assert(!isLoaded);
 
-    std::ifstream input(filename.c_str(), std::ios_base::binary);
+    namespace bfs = boost::filesystem;
+    bfs::ifstream input(bfs::path(filename), std::ios_base::binary);
 
     // Total archive size
     size_t fsize = 0;

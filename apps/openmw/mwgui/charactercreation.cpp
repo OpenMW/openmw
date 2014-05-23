@@ -47,7 +47,7 @@ namespace
     void updatePlayerHealth()
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats(player);
+        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
         npcStats.updateHealth();
     }
 }
@@ -220,7 +220,7 @@ namespace MWGui
 
                 {
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                    const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+                    const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
                     mReviewDialog->setHealth ( stats.getHealth()  );
                     mReviewDialog->setMagicka( stats.getMagicka() );

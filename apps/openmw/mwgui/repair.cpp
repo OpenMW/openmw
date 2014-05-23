@@ -40,7 +40,7 @@ void Repair::startRepairItem(const MWWorld::Ptr &item)
     mRepair.setTool(item);
 
     std::string path = std::string("icons\\");
-    path += MWWorld::Class::get(item).getInventoryIcon(item);
+    path += item.getClass().getInventoryIcon(item);
     int pos = path.rfind(".");
     path.erase(pos);
     path.append(".dds");
@@ -90,28 +90,28 @@ void Repair::updateRepairView()
     int currentY = 0;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+    MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
     for (MWWorld::ContainerStoreIterator iter (store.begin(categories));
          iter!=store.end(); ++iter)
     {
-        if (MWWorld::Class::get(*iter).hasItemHealth(*iter))
+        if (iter->getClass().hasItemHealth(*iter))
         {
-            int maxDurability = MWWorld::Class::get(*iter).getItemMaxHealth(*iter);
+            int maxDurability = iter->getClass().getItemMaxHealth(*iter);
             int durability = (iter->getCellRef().mCharge == -1) ? maxDurability : iter->getCellRef().mCharge;
             if (maxDurability == durability)
                 continue;
 
             MyGUI::TextBox* text = mRepairView->createWidget<MyGUI::TextBox> (
                         "SandText", MyGUI::IntCoord(8, currentY, mRepairView->getWidth()-8, 18), MyGUI::Align::Default);
-            text->setCaption(MWWorld::Class::get(*iter).getName(*iter));
+            text->setCaption(iter->getClass().getName(*iter));
             text->setNeedMouseFocus(false);
             currentY += 19;
 
             MyGUI::ImageBox* icon = mRepairView->createWidget<MyGUI::ImageBox> (
                         "ImageBox", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
             std::string path = std::string("icons\\");
-            path += MWWorld::Class::get(*iter).getInventoryIcon(*iter);
+            path += iter->getClass().getInventoryIcon(*iter);
             int pos = path.rfind(".");
             path.erase(pos);
             path.append(".dds");

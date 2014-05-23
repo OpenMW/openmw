@@ -10,8 +10,12 @@
 
 #pragma comment(lib, "Shlwapi.lib")
 
+#include <boost/locale.hpp>
+namespace bconv = boost::locale::conv;
+
 /**
  * FIXME: Someone with Windows system should check this and correct if necessary
+ * FIXME: MAX_PATH is irrelevant for extended-length paths, i.e. \\?\...
  */
 
 /**
@@ -23,22 +27,29 @@ namespace Files
 WindowsPath::WindowsPath(const std::string& application_name)
     : mName(application_name)
 {
+    /*  Since on Windows boost::path.string() returns string of narrow
+        characters in local encoding, it is required to path::imbue()
+        with UTF-8 encoding (generated for empty name from boost::locale)
+        to handle Unicode in platform-agnostic way using std::string.
+
+        See boost::filesystem and boost::locale reference for details.
+    */
+    boost::filesystem::path::imbue(boost::locale::generator().generate(""));
 }
 
 boost::filesystem::path WindowsPath::getUserConfigPath() const
 {
     boost::filesystem::path userPath(".");
 
-    TCHAR path[MAX_PATH];
+    WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
-    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, path)))
+    if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
-        PathAppend(path, TEXT("My Games"));
-        userPath = boost::filesystem::path(path);
+        userPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
-    return userPath / mName;
+    return userPath / "My Games" / mName;
 }
 
 boost::filesystem::path WindowsPath::getUserDataPath() const
@@ -51,12 +62,12 @@ boost::filesystem::path WindowsPath::getGlobalConfigPath() const
 {
     boost::filesystem::path globalPath(".");
 
-    TCHAR path[MAX_PATH];
+    WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
-    if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, NULL, 0, path)))
+    if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
-        globalPath = boost::filesystem::path(path);
+        globalPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
     return globalPath / mName;

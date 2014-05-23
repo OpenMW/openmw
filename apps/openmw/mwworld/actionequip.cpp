@@ -40,7 +40,7 @@ namespace MWWorld
         }
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
+        std::pair<std::vector<int>, bool> slots_ = getTarget().getClass().getEquipmentSlots(getTarget());
 
         // retrieve ContainerStoreIterator to the item
         MWWorld::ContainerStoreIterator it = invStore.begin();

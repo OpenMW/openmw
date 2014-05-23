@@ -97,7 +97,7 @@ namespace MWMechanics
         {
             // Stop moving if the player is to far away
             MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
             mMaxDist = 330;
         }
 

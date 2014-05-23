@@ -172,11 +172,11 @@ namespace MWGui
     void WaitDialog::setCanRest (bool canRest)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
                 && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
                 && (stats.getMagicka().getCurrent() >= stats.getMagicka().getModified());
-        MWMechanics::NpcStats& npcstats = MWWorld::Class::get(player).getNpcStats(player);
+        MWMechanics::NpcStats& npcstats = player.getClass().getNpcStats(player);
         bool werewolf = npcstats.isWerewolf();
 
         mUntilHealedButton->setVisible(canRest && !full);
@@ -223,7 +223,7 @@ namespace MWGui
             stopWaiting();
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            const MWMechanics::NpcStats &pcstats = MWWorld::Class::get(player).getNpcStats(player);
+            const MWMechanics::NpcStats &pcstats = player.getClass().getNpcStats(player);
 
             // trigger levelup if possible
             const MWWorld::Store<ESM::GameSetting> &gmst =

@@ -85,7 +85,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 
     for (std::vector<MWWorld::Ptr>::iterator source = mItemSources.begin(); source != mItemSources.end(); ++source)
     {
-        MWWorld::ContainerStore& store = MWWorld::Class::get(*source).getContainerStore(*source);
+        MWWorld::ContainerStore& store = source->getClass().getContainerStore(*source);
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
@@ -120,7 +120,7 @@ void ContainerItemModel::update()
     mItems.clear();
     for (std::vector<MWWorld::Ptr>::iterator source = mItemSources.begin(); source != mItemSources.end(); ++source)
     {
-        MWWorld::ContainerStore& store = MWWorld::Class::get(*source).getContainerStore(*source);
+        MWWorld::ContainerStore& store = source->getClass().getContainerStore(*source);
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {

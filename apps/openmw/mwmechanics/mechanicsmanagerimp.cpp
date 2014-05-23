@@ -49,8 +49,8 @@ namespace MWMechanics
     {
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
-        MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
+        MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
+        MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
 
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
@@ -215,7 +215,7 @@ namespace MWMechanics
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)
     {
-        if(MWWorld::Class::get(ptr).isActor())
+        if(ptr.getClass().isActor())
             mActors.addActor(ptr);
         else
             mObjects.addObject(ptr);
@@ -234,7 +234,7 @@ namespace MWMechanics
         if(old == mWatched)
             mWatched = ptr;
 
-        if(MWWorld::Class::get(ptr).isActor())
+        if(ptr.getClass().isActor())
             mActors.updateActor(old, ptr);
         else
             mObjects.updateObject(old, ptr);
@@ -475,13 +475,13 @@ namespace MWMechanics
 
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
-        const MWMechanics::NpcStats& npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        const MWMechanics::NpcStats& npcSkill = ptr.getClass().getNpcStats(ptr);
         float x = npcSkill.getBaseDisposition();
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
-        const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         if (Misc::StringUtils::ciEqual(npc->mBase->mRace, player->mBase->mRace))
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
@@ -547,10 +547,10 @@ namespace MWMechanics
         if (ptr.getTypeName() == typeid(ESM::Creature).name())
             return basePrice;
 
-        const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        const MWMechanics::NpcStats &sellerStats = ptr.getClass().getNpcStats(ptr);
 
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         // I suppose the temporary disposition change _has_ to be considered here,
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
@@ -592,10 +592,10 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(npc).getNpcStats(npc);
+        MWMechanics::NpcStats& npcStats = npc.getClass().getNpcStats(npc);
 
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         float persTerm = playerStats.getAttribute(ESM::Attribute::Personality).getModified()
                             / gmst.find("fPersonalityMod")->getFloat();
@@ -739,27 +739,27 @@ namespace MWMechanics
 
     void MechanicsManager::forceStateUpdate(const MWWorld::Ptr &ptr)
     {
-        if(MWWorld::Class::get(ptr).isActor())
+        if(ptr.getClass().isActor())
             mActors.forceStateUpdate(ptr);
     }
 
     void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
-        if(MWWorld::Class::get(ptr).isActor())
+        if(ptr.getClass().isActor())
             mActors.playAnimationGroup(ptr, groupName, mode, number);
         else
             mObjects.playAnimationGroup(ptr, groupName, mode, number);
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
-        if(MWWorld::Class::get(ptr).isActor())
+        if(ptr.getClass().isActor())
             mActors.skipAnimation(ptr);
         else
             mObjects.skipAnimation(ptr);
     }
     bool MechanicsManager::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName)
     {
-        if(MWWorld::Class::get(ptr).isActor())
+        if(ptr.getClass().isActor())
             return mActors.checkAnimationPlaying(ptr, groupName);
         else
             return false;

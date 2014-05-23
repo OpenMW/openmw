@@ -1,6 +1,5 @@
 #include "importer.hpp"
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
+
 #include <iostream>
 #include <string>
 #include <map>
@@ -9,6 +8,10 @@
 #include <sstream>
 #include <components/misc/stringops.hpp>
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+namespace bfs = boost::filesystem;
 
 MwIniImporter::MwIniImporter()
     : mVerbose(false)
@@ -661,7 +664,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
 
     std::string section("");
     MwIniImporter::multistrmap map;
-    boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
+    bfs::ifstream file((bfs::path(filename)));
     ToUTF8::Utf8Encoder encoder(mEncoding);
 
     std::string line;
@@ -672,6 +675,10 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
         // unify Unix-style and Windows file ending
         if (!(line.empty()) && (line[line.length()-1]) == '\r') {
             line = line.substr(0, line.length()-1);
+        }
+
+        if(line.empty()) {
+            continue;
         }
 
         if(line[0] == '[') {
@@ -688,10 +695,6 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
         int comment_pos = line.find(";");
         if(comment_pos > 0) {
             line = line.substr(0,comment_pos);
-        }
-
-        if(line.empty()) {
-            continue;
         }
 
         int pos = line.find("=");
@@ -720,7 +723,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::string& filenam
     std::cout << "load cfg file: " << filename << std::endl;
 
     MwIniImporter::multistrmap map;
-    boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
+    bfs::ifstream file((bfs::path(filename)));
 
     std::string line;
     while (std::getline(file, line)) {
@@ -858,7 +861,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini) co
     }
 }
 
-void MwIniImporter::writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, const multistrmap &cfg) {
+void MwIniImporter::writeToFile(std::ostream &out, const multistrmap &cfg) {
 
     for(multistrmap::const_iterator it=cfg.begin(); it != cfg.end(); ++it) {
         for(std::vector<std::string>::const_iterator entry=it->second.begin(); entry != it->second.end(); ++entry) {

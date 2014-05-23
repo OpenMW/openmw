@@ -31,18 +31,34 @@ distribution.
 
 #include "tinyxml.h"
 
+#ifdef _WIN32
+#include <Windows.h> // import MultiByteToWideChar
+#endif
+
 
 bool TiXmlBase::condenseWhiteSpace = true;
 
 // Microsoft compiler security
 FILE* TiXmlFOpen( const char* filename, const char* mode )
 {
-	#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+	#if defined(_WIN32)
 		FILE* fp = 0;
-		errno_t err = fopen_s( &fp, filename, mode );
-		if ( !err && fp )
-			return fp;
-		return 0;
+		size_t len = strlen(filename);
+		wchar_t *wname = new wchar_t[len + 1];
+		memset(wname, 0, sizeof(*wname) * (len + 1));
+		wchar_t wmode[32] = { 0 };
+
+		MultiByteToWideChar(CP_UTF8, 0, filename, len, wname, len);
+		MultiByteToWideChar(CP_UTF8, 0, mode, -1, wmode, sizeof(wmode) / sizeof(*wmode));
+
+		#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+		errno_t err = _wfopen_s( &fp, wname, wmode );
+		#else
+		fp = _wfopen(wname, wmode);
+		#endif
+		delete[] wname;
+
+		return fp;
 	#else
 		return fopen( filename, mode );
 	#endif

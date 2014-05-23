@@ -149,7 +149,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get(ptr).getNpcStats (ptr).setReputation (MWWorld::Class::get(ptr).getNpcStats (ptr).getReputation () + value);
+                    ptr.getClass().getNpcStats (ptr).setReputation (ptr.getClass().getNpcStats (ptr).getReputation () + value);
                 }
         };
 
@@ -164,7 +164,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get(ptr).getNpcStats (ptr).setReputation (value);
+                    ptr.getClass().getNpcStats (ptr).setReputation (value);
                 }
         };
 
@@ -177,7 +177,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).getReputation ());
+                    runtime.push (ptr.getClass().getNpcStats (ptr).getReputation ());
                 }
         };
 
@@ -192,7 +192,7 @@ namespace MWScript
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).isSameFaction (MWWorld::Class::get(player).getNpcStats (player)));
+                    runtime.push (ptr.getClass().getNpcStats (ptr).isSameFaction (player.getClass().getNpcStats (player)));
                 }
         };
 
