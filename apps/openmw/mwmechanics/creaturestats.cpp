@@ -102,7 +102,6 @@ namespace MWMechanics
 
     Stat<int> CreatureStats::getAiSetting (AiSetting index) const
     {
-        assert (index>=0 && index<4);
         return mAiSettings[index];
     }
 
@@ -220,7 +219,6 @@ namespace MWMechanics
 
     void CreatureStats::setAiSetting (AiSetting index, Stat<int> value)
     {
-        assert (index>=0 && index<4);
         mAiSettings[index] = value;
     }
 
