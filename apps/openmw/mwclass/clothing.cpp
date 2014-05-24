@@ -215,7 +215,7 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
-    void Clothing::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Clothing::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
@@ -226,8 +226,7 @@ namespace MWClass
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
         const ESM::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-        ref->mBase = record;
-        ref->mRef.mRefID = record->mId;
+        return record->mId;
     }
 
     std::pair<int, std::string> Clothing::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const

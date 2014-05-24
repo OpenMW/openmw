@@ -304,7 +304,7 @@ namespace MWWorld
         return "";
     }
 
-    void Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error ("class can't be enchanted");
     }
