@@ -353,7 +353,7 @@ void LocalMap::loadFogOfWar (const std::string& texturePrefix, ESM::FogTexture& 
     Ogre::Image image;
     image.load(stream, "tga");
 
-    if (image.getWidth() != sFogOfWarResolution || image.getHeight() != sFogOfWarResolution)
+    if (int(image.getWidth()) != sFogOfWarResolution || int(image.getHeight()) != sFogOfWarResolution)
         throw std::runtime_error("fog texture size mismatch");
 
     std::string texName = texturePrefix + "_fog";
