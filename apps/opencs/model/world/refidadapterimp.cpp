@@ -173,9 +173,9 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
 }
 
 CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
-    const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn)
+    const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content)
 : NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, columns), mWeight (weight),
-  mOrganic (organic), mRespawn (respawn)
+  mOrganic (organic), mRespawn (respawn), mContent(content)
 {}
 
 QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,

@@ -165,6 +165,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Respawn, ColumnBase::Display_Boolean));
     const RefIdColumn *respawn = &mColumns.back();
 
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_None, ColumnBase::Flag_Dialogue, false, false));
+    const RefIdColumn *content = &mColumns.back();
+
     CreatureColumns creatureColumns (actorsColumns);
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_CreatureType, ColumnBase::Display_CreatureType));
@@ -340,7 +343,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
         new ClothingRefIdAdapter (enchantableColumns, clothingType)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
-        new ContainerRefIdAdapter (nameColumns, weightCapacity, organic, respawn)));
+        new ContainerRefIdAdapter (nameColumns, weightCapacity, organic, respawn, content)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
         new CreatureRefIdAdapter (creatureColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,

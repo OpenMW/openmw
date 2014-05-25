@@ -34,7 +34,7 @@ namespace CSMWorld
             BaseRefIdAdapter (UniversalId::Type type, const BaseColumns& base);
 
             virtual std::string getId (const RecordBase& record) const;
-            
+
             virtual void setId (RecordBase& record, const std::string& id);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
@@ -57,7 +57,7 @@ namespace CSMWorld
     {
         (dynamic_cast<Record<RecordT>&> (record).get().mId) = id;
     }
-    
+
     template<typename RecordT>
     std::string BaseRefIdAdapter<RecordT>::getId (const RecordBase& record) const
     {
@@ -610,11 +610,12 @@ namespace CSMWorld
             const RefIdColumn *mWeight;
             const RefIdColumn *mOrganic;
             const RefIdColumn *mRespawn;
+            const RefIdColumn *mContent;
 
         public:
 
             ContainerRefIdAdapter (const NameColumns& columns, const RefIdColumn *weight,
-                const RefIdColumn *organic, const RefIdColumn *respawn);
+                const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;

@@ -167,6 +167,7 @@ namespace CSMWorld
             ColumnId_PcRank = 154,
             ColumnId_Scope = 155,
             ColumnId_ReferenceableId = 156,
+            ColumnId_ContainerContent = 157,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
