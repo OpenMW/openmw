@@ -162,7 +162,7 @@ namespace MWGui
         }
 
         const ItemStack& item = mTradeModel->getItem(index);
-        std::string sound = MWWorld::Class::get(item.mBase).getDownSoundId(item.mBase);
+        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
 
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
@@ -176,35 +176,6 @@ namespace MWGui
             return;
         }
 
-        if (item.mType == ItemStack::Type_Equipped)
-        {
-            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-            MWWorld::Ptr newStack = *invStore.unequipItem(item.mBase, mPtr);
-
-            // The unequipped item was re-stacked. We have to update the index
-            // since the item pointed does not exist anymore.
-            if (item.mBase != newStack)
-            {
-                // newIndex will store the index of the ItemStack the item was stacked on
-                int newIndex = -1;
-                for (size_t i=0; i < mTradeModel->getItemCount(); ++i)
-                {
-                    if (mTradeModel->getItem(i).mBase == newStack)
-                    {
-                        newIndex = i;
-                        break;
-                    }
-                }
-
-                if (newIndex == -1)
-                    throw std::runtime_error("Can't find restacked item");
-
-                index = newIndex;
-                object = mTradeModel->getItem(index).mBase;
-            }
-
-        }
-
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
@@ -213,7 +184,7 @@ namespace MWGui
         {
             // check if merchant accepts item
             int services = MWBase::Environment::get().getWindowManager()->getTradeWindow()->getMerchantServices();
-            if (!MWWorld::Class::get(object).canSell(object, services))
+            if (!object.getClass().canSell(object, services))
             {
                 MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
                 MWBase::Environment::get().getWindowManager()->
@@ -226,7 +197,7 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
-            dialog->open(MWWorld::Class::get(object).getName(object), message, count);
+            dialog->open(object.getClass().getName(object), message, count);
             dialog->eventOkClicked.clear();
             if (mTrading)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
@@ -247,15 +218,48 @@ namespace MWGui
         notifyContentChanged();
     }
 
+    void InventoryWindow::ensureSelectedItemUnequipped()
+    {
+        const ItemStack& item = mTradeModel->getItem(mSelectedItem);
+        if (item.mType == ItemStack::Type_Equipped)
+        {
+            MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+            MWWorld::Ptr newStack = *invStore.unequipItem(item.mBase, mPtr);
+
+            // The unequipped item was re-stacked. We have to update the index
+            // since the item pointed does not exist anymore.
+            if (item.mBase != newStack)
+            {
+                // newIndex will store the index of the ItemStack the item was stacked on
+                int newIndex = -1;
+                for (size_t i=0; i < mTradeModel->getItemCount(); ++i)
+                {
+                    if (mTradeModel->getItem(i).mBase == newStack)
+                    {
+                        newIndex = i;
+                        break;
+                    }
+                }
+
+                if (newIndex == -1)
+                    throw std::runtime_error("Can't find restacked item");
+
+                mSelectedItem = newIndex;
+            }
+        }
+    }
+
     void InventoryWindow::dragItem(MyGUI::Widget* sender, int count)
     {
+        ensureSelectedItemUnequipped();
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
     }
 
     void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
     {
+        ensureSelectedItemUnequipped();
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
-        std::string sound = MWWorld::Class::get(item.mBase).getDownSoundId(item.mBase);
+        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         if (item.mType == ItemStack::Type_Barter)
@@ -378,7 +382,7 @@ namespace MWGui
 
         if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
         {
-            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
+            boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
             action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
@@ -443,7 +447,7 @@ namespace MWGui
         if (slot == -1)
             return MWWorld::Ptr();
 
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+        MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
         if(invStore.getSlot(slot) != invStore.end())
         {
             MWWorld::Ptr item = *invStore.getSlot(slot);
@@ -462,8 +466,8 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-        float capacity = MWWorld::Class::get(player).getCapacity(player);
-        float encumbrance = MWWorld::Class::get(player).getEncumbrance(player);
+        float capacity = player.getClass().getCapacity(player);
+        float encumbrance = player.getClass().getEncumbrance(player);
         mEncumbranceBar->setValue(encumbrance, capacity);
     }
 
@@ -494,9 +498,9 @@ namespace MWGui
             mAvatarImage->setImageTile(MyGUI::IntSize(std::min(512, size.width), std::min(1024, size.height)));
 
             mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
-                + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
+                + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
             if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
-                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
+                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
         }
     }
 
@@ -530,7 +534,7 @@ namespace MWGui
             && (type != typeid(ESM::Potion).name()))
             return;
 
-        if (MWWorld::Class::get(object).getName(object) == "") // objects without name presented to user can never be picked up
+        if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
             return;
 
         int count = object.getRefData().getCount();

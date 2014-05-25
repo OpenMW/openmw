@@ -22,7 +22,7 @@ namespace MWMechanics
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
           mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
-          mTradeTime(0,0), mGoldPool(0), mActorId(-1)
+          mLastRestock(0,0), mGoldPool(0), mActorId(-1)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -475,7 +475,7 @@ namespace MWMechanics
         for (int i=0; i<3; ++i)
             mDynamic[i].writeState (state.mDynamic[i]);
 
-        state.mTradeTime = mTradeTime.toEsm();
+        state.mTradeTime = mLastRestock.toEsm();
         state.mGoldPool = mGoldPool;
 
         state.mDead = mDead;
@@ -513,7 +513,7 @@ namespace MWMechanics
         for (int i=0; i<3; ++i)
             mDynamic[i].readState (state.mDynamic[i]);
 
-        mTradeTime = MWWorld::TimeStamp(state.mTradeTime);
+        mLastRestock = MWWorld::TimeStamp(state.mTradeTime);
         mGoldPool = state.mGoldPool;
         mFallHeight = state.mFallHeight;
 
@@ -544,15 +544,14 @@ namespace MWMechanics
         mActiveSpells.readState(state.mActiveSpells);
     }
 
-    // Relates to NPC gold reset delay
-    void CreatureStats::setTradeTime(MWWorld::TimeStamp tradeTime)
+    void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
     {
-        mTradeTime = tradeTime;
+        mLastRestock = tradeTime;
     }
 
-    MWWorld::TimeStamp CreatureStats::getTradeTime() const
+    MWWorld::TimeStamp CreatureStats::getLastRestockTime() const
     {
-        return mTradeTime;
+        return mLastRestock;
     }
 
     void CreatureStats::setGoldPool(int pool)

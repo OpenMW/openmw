@@ -44,7 +44,7 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
 
-        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats (actor);
+        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 
         // NPC can train you in his best 3 skills
         std::vector< std::pair<int, int> > bestSkills;
@@ -73,7 +73,7 @@ namespace MWGui
         MyGUI::EnumeratorWidgetPtr widgets = mTrainingOptions->getEnumerator ();
         MyGUI::Gui::getInstance ().destroyWidgets (widgets);
 
-        MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -115,7 +115,7 @@ namespace MWGui
         int skillId = *sender->getUserData<int>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
@@ -123,7 +123,7 @@ namespace MWGui
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mPtr).getNpcStats (mPtr);
+        MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats (mPtr);
         if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sServiceTrainingWords}");

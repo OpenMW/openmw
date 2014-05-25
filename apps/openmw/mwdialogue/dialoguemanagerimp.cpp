@@ -134,13 +134,13 @@ namespace MWDialogue
 
         mActor = actor;
 
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
+        MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats (actor);
         mTalkedTo = creatureStats.hasTalkedToPlayer();
 
         mActorKnownTopics.clear();
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
+        win->startDialogue(actor, actor.getClass().getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
@@ -194,7 +194,7 @@ namespace MWDialogue
 
             Compiler::Locals locals;
 
-            std::string actorScript = MWWorld::Class::get (mActor).getScript (mActor);
+            std::string actorScript = mActor.getClass().getScript (mActor);
 
             if (!actorScript.empty())
             {
@@ -286,7 +286,18 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), title);
-            MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor.getClass().getName(mActor));
+
+            // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
+            // in which case it should not be added to the journal.
+            for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
+                iter!=dialogue.mInfo.end(); ++iter)
+            {
+                if (iter->mId == info->mId)
+                {
+                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor.getClass().getName(mActor));
+                    break;
+                }
+            }
 
             executeScript (info->mResultScript);
 
@@ -424,7 +435,7 @@ namespace MWDialogue
         // Apply disposition change to NPC's base disposition
         if (mActor.getClass().isNpc())
         {
-            MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
+            MWMechanics::NpcStats& npcStats = mActor.getClass().getNpcStats(mActor);
             npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
         }
         mPermanentDispositionChange = 0;
@@ -453,7 +464,19 @@ namespace MWDialogue
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse (Interpreter::fixDefinesDialog(text, interpreterContext));
-                    MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor.getClass().getName(mActor));
+
+                    // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
+                    // in which case it should not be added to the journal.
+                    for (ESM::Dialogue::InfoContainer::const_iterator iter = mDialogueMap[mLastTopic].mInfo.begin();
+                        iter!=mDialogueMap[mLastTopic].mInfo.end(); ++iter)
+                    {
+                        if (iter->mId == info->mId)
+                        {
+                            MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor.getClass().getName(mActor));
+                            break;
+                        }
+                    }
+
                     executeScript (info->mResultScript);
                 }
             }

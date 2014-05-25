@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 29)
+set(OPENMW_VERSION_MINOR 30)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -36,18 +36,8 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
                 string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_MINOR "${VERSION}")
                 string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_RELEASE "${VERSION}")
 
-                set(GIT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_RELEASE}")
-
-                if(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
-                    message(FATAL_ERROR "Silly Zini forgot to update the version again...")
-                else(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
-                    set(OPENMW_VERSION_MAJOR ${GIT_VERSION_MAJOR})
-                    set(OPENMW_VERSION_MINOR ${GIT_VERSION_MINOR})
-                    set(OPENMW_VERSION_RELEASE ${GIT_VERSION_RELEASE})
-
-                    set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
-                    set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
-                endif(NOT ${OPENMW_VERSION} STREQUAL ${GIT_VERSION})
+                set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+                set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
 
                 message(STATUS "OpenMW version ${OPENMW_VERSION}")
             else(MATCH)
@@ -129,6 +119,7 @@ set(OENGINE_OGRE
 )
 
 set(OENGINE_GUI
+  ${LIBDIR}/openengine/gui/loglistener.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
   ${LIBDIR}/openengine/gui/layout.hpp
 )
@@ -234,6 +225,9 @@ endif ()
 
 
 set(BOOST_COMPONENTS system filesystem program_options)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)

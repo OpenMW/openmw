@@ -165,6 +165,8 @@ namespace MWWorld
                 }
             }
 
+            cell->respawn();
+
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true, loadingListener);
@@ -196,7 +198,7 @@ namespace MWWorld
             float z = Ogre::Radian(pos.rot[2]).valueDegrees();
             world->rotateObject(player, x, y, z);
 
-            MWWorld::Class::get(player).adjustPosition(player);
+            player.getClass().adjustPosition(player);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -344,8 +346,6 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mRendering.switchToExterior();
-
         mCellChanged = true;
 
         loadingListener->removeWallpaper();
@@ -399,7 +399,7 @@ namespace MWWorld
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            MWWorld::Class::get(world->getPlayerPtr()).adjustPosition(world->getPlayerPtr());
+            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr());
             world->getFader()->fadeIn(0.5f);
             return;
         }
@@ -439,7 +439,6 @@ namespace MWWorld
         mCurrentCell = cell;
 
         // adjust fog
-        mRendering.switchToInterior();
         mRendering.configureFog(*mCurrentCell);
 
         // adjust player
@@ -483,7 +482,7 @@ namespace MWWorld
     void Scene::addObjectToScene (const Ptr& ptr)
     {
         mRendering.addObject(ptr);
-        MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
+        ptr.getClass().insertObject(ptr, *mPhysics);
         MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
         MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
     }

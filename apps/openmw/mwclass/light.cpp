@@ -250,7 +250,7 @@ namespace MWClass
 
     std::pair<int, std::string> Light::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
+        MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
         MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
         if(weapon == invStore.end())

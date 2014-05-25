@@ -60,6 +60,24 @@ namespace MWClass
         }
     }
 
+    void Container::respawn(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref =
+            ptr.get<ESM::Container>();
+        if (ref->mBase->mFlags & ESM::Container::Respawn)
+        {
+            ptr.getRefData().setCustomData(NULL);
+        }
+    }
+
+    void Container::restock(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const ESM::InventoryList& list = ref->mBase->mInventory;
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().mOwner, ptr.getCellRef().mFaction);
+    }
+
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -94,7 +112,7 @@ namespace MWClass
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
 
-        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
@@ -109,7 +127,7 @@ namespace MWClass
         const std::string trapActivationSound = "Disarm Trap Fail";
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
         bool needKey = ptr.getCellRef().mLockLevel > 0;
         bool hasKey = false;
@@ -125,7 +143,7 @@ namespace MWClass
             if (refId == keyId)
             {
                 hasKey = true;
-                keyName = MWWorld::Class::get(*it).getName(*it);
+                keyName = it->getClass().getName(*it);
             }
         }
 

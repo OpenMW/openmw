@@ -89,7 +89,7 @@ namespace MWGui
                 if (mFocusObject.isEmpty ())
                     return;
 
-                const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
+                const MWWorld::Class& objectclass = mFocusObject.getClass();
 
                 MyGUI::IntSize tooltipSize;
                 if ((!objectclass.hasToolTip(mFocusObject))&&(MWBase::Environment::get().getWindowManager()->getMode() == GM_Console))
@@ -305,7 +305,7 @@ namespace MWGui
 
         MyGUI::IntSize tooltipSize;
 
-        const MWWorld::Class& object = MWWorld::Class::get (mFocusObject);
+        const MWWorld::Class& object = mFocusObject.getClass();
         if (!object.hasToolTip(mFocusObject))
         {
             mDynamicToolTipBox->setVisible(false);
@@ -547,9 +547,10 @@ namespace MWGui
             return " (" + boost::lexical_cast<std::string>(value) + ")";
     }
 
-    void ToolTips::toggleFullHelp()
+    bool ToolTips::toggleFullHelp()
     {
         mFullHelp = !mFullHelp;
+        return mFullHelp;
     }
 
     bool ToolTips::getFullHelp() const

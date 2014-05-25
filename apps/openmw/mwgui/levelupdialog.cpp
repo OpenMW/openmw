@@ -61,8 +61,8 @@ namespace MWGui
     void LevelupDialog::setAttributeValues()
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
-        MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
+        MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats (player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
         for (int i=0; i<8; ++i)
         {
@@ -117,8 +117,8 @@ namespace MWGui
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
-        MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
+        MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats (player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
         mSpentAttributes.clear();
         resetCoins();
@@ -172,7 +172,7 @@ namespace MWGui
     void LevelupDialog::onOkButtonClicked (MyGUI::Widget* sender)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
         if (mSpentAttributes.size() < 3)
             MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage36}");

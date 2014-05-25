@@ -484,10 +484,10 @@ namespace MWClass
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
-        const MWWorld::Class &othercls = MWWorld::Class::get(victim);
+        const MWWorld::Class &othercls = victim.getClass();
         if(!othercls.isActor()) // Can't hit non-actors
             return;
-        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+        MWMechanics::CreatureStats &otherstats = othercls.getCreatureStats(victim);
         if(otherstats.isDead()) // Can't hit dead actors
             return;
 
@@ -496,7 +496,7 @@ namespace MWClass
 
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
-            weapskill = get(weapon).getEquipmentSkill(weapon);
+            weapskill = weapon.getClass().getEquipmentSkill(weapon);
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
@@ -511,7 +511,7 @@ namespace MWClass
         MWMechanics::NpcStats &stats = getNpcStats(ptr);
         if(!weapon.isEmpty())
         {
-            const bool weaphashealth = get(weapon).hasItemHealth(weapon);
+            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -621,7 +621,8 @@ namespace MWClass
 
         // Attacking peaceful NPCs is a crime
         // anything below 80 is considered peaceful (see Actors::updateActor)
-        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
+        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).isHostile() &&
+                ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         getCreatureStats(ptr).setAttacked(true);
@@ -636,7 +637,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(get(object).getId(object));
+            getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
         if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
@@ -715,9 +716,9 @@ namespace MWClass
                         inv.unequipItem(armor, ptr);
 
                     if (ptr.getRefData().getHandle() == "player")
-                        skillUsageSucceeded(ptr, get(armor).getEquipmentSkill(armor), 0);
+                        skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
 
-                    switch(get(armor).getEquipmentSkill(armor))
+                    switch(armor.getClass().getEquipmentSkill(armor))
                     {
                         case ESM::Skill::LightArmor:
                             sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
@@ -801,7 +802,7 @@ namespace MWClass
         if(ptr.getRefData().getHandle() == "player")
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
 
-        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfNPC");
@@ -813,7 +814,7 @@ namespace MWClass
         }
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(get(ptr).getCreatureStats(ptr).isHostile())
+        if(ptr.getClass().getCreatureStats(ptr).isHostile())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
@@ -942,7 +943,7 @@ namespace MWClass
 
         if (fallHeight >= fallDistanceMin)
         {
-            const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
+            const float acrobaticsSkill = ptr.getClass().getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
             const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
             const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).mMagnitude;
             const float fallAcroBase = gmst.find("fFallAcroBase")->getFloat();
@@ -1106,7 +1107,7 @@ namespace MWClass
             {
                 MWWorld::LiveCellRef<ESM::Armor> *ref = it->get<ESM::Armor>();
 
-                int armorSkillType = MWWorld::Class::get(*it).getEquipmentSkill(*it);
+                int armorSkillType = it->getClass().getEquipmentSkill(*it);
                 int armorSkill = stats.getSkill(armorSkillType).getModified();
 
                 if(ref->mBase->mData.mWeight == 0)
@@ -1176,7 +1177,7 @@ namespace MWClass
                 if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
                     return "FootBareLeft";
 
-                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                switch(boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
                         return "FootLightLeft";
@@ -1203,7 +1204,7 @@ namespace MWClass
                 if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
                     return "FootBareRight";
 
-                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                switch(boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
                         return "FootLightRight";
@@ -1307,6 +1308,34 @@ namespace MWClass
     bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
     {
         return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
+    }
+
+    void Npc::respawn(const MWWorld::Ptr &ptr) const
+    {
+        if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn)
+        {
+            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
+            // This also means we cannot respawn dynamically placed references with no content file connection.
+            if (ptr.getCellRef().mRefNum.mContentFile != -1)
+            {
+                if (ptr.getRefData().getCount() == 0)
+                    ptr.getRefData().setCount(1);
+
+                // Reset to original position
+                ESM::Position& pos = ptr.getRefData().getPosition();
+                pos = ptr.getCellRef().mPos;
+
+                ptr.getRefData().setCustomData(NULL);
+            }
+        }
+    }
+
+    void Npc::restock(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const ESM::InventoryList& list = ref->mBase->mInventory;
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().mRefID, ptr.getCellRef().mFaction);
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

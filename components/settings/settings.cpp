@@ -1,12 +1,18 @@
 #include "settings.hpp"
 
-#include <fstream>
 #include <stdexcept>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
+#include <OgreDataStream.h>
+
+#include <components/files/constrainedfiledatastream.hpp>
 
 using namespace Settings;
+
+namespace bfs = boost::filesystem;
 
 Ogre::ConfigFile Manager::mFile = Ogre::ConfigFile();
 Ogre::ConfigFile Manager::mDefaultFile = Ogre::ConfigFile();
@@ -15,17 +21,19 @@ CategorySettingValueMap Manager::mNewSettings = CategorySettingValueMap();
 
 void Manager::loadUser (const std::string& file)
 {
-    mFile.load(file);
+    Ogre::DataStreamPtr stream = openConstrainedFileDataStream(file.c_str());
+    mFile.load(stream);
 }
 
 void Manager::loadDefault (const std::string& file)
 {
-    mDefaultFile.load(file);
+    Ogre::DataStreamPtr stream = openConstrainedFileDataStream(file.c_str());
+    mDefaultFile.load(stream);
 }
 
 void Manager::saveUser(const std::string& file)
 {
-    std::fstream fout(file.c_str(), std::ios::out);
+    bfs::ofstream fout((bfs::path(file)));
 
     Ogre::ConfigFile::SectionIterator seci = mFile.getSectionIterator();
 

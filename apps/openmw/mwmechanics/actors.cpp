@@ -187,7 +187,7 @@ namespace MWMechanics
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
     {
-        CreatureStats& creatureStats = MWWorld::Class::get(actor1).getCreatureStats(actor1);
+        CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
         
         if (againstPlayer && creatureStats.isHostile()) return; // already fighting against player
 
@@ -244,13 +244,13 @@ namespace MWMechanics
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
     {
-        CreatureStats& creatureStats =  MWWorld::Class::get (creature).getCreatureStats (creature);
+        CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
 
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
         if (creature.getTypeName()==typeid (ESM::NPC).name())
         {
-            MWWorld::InventoryStore& store = MWWorld::Class::get (creature).getInventoryStore (creature);
+            MWWorld::InventoryStore& store = creature.getClass().getInventoryStore (creature);
             now += store.getMagicEffects();
         }
 
@@ -265,7 +265,7 @@ namespace MWMechanics
 
     void Actors::calculateDynamicStats (const MWWorld::Ptr& ptr)
     {
-        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+        CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
         int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
@@ -333,7 +333,7 @@ namespace MWMechanics
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
     {
-        CreatureStats &creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+        CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
         const MagicEffects &effects = creatureStats.getMagicEffects();
 
         // attributes
@@ -551,7 +551,7 @@ namespace MWMechanics
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
                         // Make the summoned creature follow its master and help in fights
-                        AiFollow package(ptr);
+                        AiFollow package(ptr.getRefData().getHandle());
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         int creatureActorId = summonedCreatureStats.getActorId();
 
@@ -600,7 +600,7 @@ namespace MWMechanics
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)
     {
-        NpcStats &npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        NpcStats &npcStats = ptr.getClass().getNpcStats(ptr);
         const MagicEffects &effects = npcStats.getMagicEffects();
 
         // skills
@@ -656,7 +656,7 @@ namespace MWMechanics
     {
         bool isPlayer = ptr.getRefData().getHandle()=="player";
 
-        MWWorld::InventoryStore &inventoryStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        MWWorld::InventoryStore &inventoryStore = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator heldIter =
                 inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         /**
@@ -678,7 +678,7 @@ namespace MWMechanics
             {
                 if (torch != inventoryStore.end())
                 {
-                    if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isHostile())
+                    if (!ptr.getClass().getCreatureStats (ptr).isHostile())
                     {
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
@@ -755,8 +755,8 @@ namespace MWMechanics
         if (ptr != player && ptr.getClass().isNpc())
         {
             // get stats of witness
-            CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
-            NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+            CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+            NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
 
             if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.isHostile())
             {
@@ -796,7 +796,7 @@ namespace MWMechanics
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
                 }
-                else if (!creatureStats.isHostile())
+                else if (!creatureStats.isHostile() && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue)
                 {
                     if (ptr.getClass().isClass(ptr, "Guard"))
                         creatureStats.getAiSequence().stack(AiPursue(player), ptr);
@@ -824,7 +824,7 @@ namespace MWMechanics
     void Actors::addActor (const MWWorld::Ptr& ptr, bool updateImmediately)
     {
         // erase previous death events since we are currently only tracking them while in an active cell
-        MWWorld::Class::get(ptr).getCreatureStats(ptr).clearHasDied();
+        ptr.getClass().getCreatureStats(ptr).clearHasDied();
 
         removeActor(ptr);
 
@@ -964,7 +964,7 @@ namespace MWMechanics
             // Kill dead actors, update some variables
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
-                const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
+                const MWWorld::Class &cls = iter->first.getClass();
                 CreatureStats &stats = cls.getCreatureStats(iter->first);
 
                 //KnockedOutOneFrameLogic
@@ -1137,7 +1137,7 @@ namespace MWMechanics
         std::list<MWWorld::Ptr> list;
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
         {
-            const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
+            const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
             {
@@ -1158,7 +1158,7 @@ namespace MWMechanics
             neighbors); //only care about those within the alarm disance
         for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();iter++)
         {
-            const MWWorld::Class &cls = MWWorld::Class::get(*iter);
+            const MWWorld::Class &cls = iter->getClass();
             CreatureStats &stats = cls.getCreatureStats(*iter);
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
             {

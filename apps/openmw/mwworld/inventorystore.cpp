@@ -129,7 +129,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
     std::pair<std::vector<int>, bool> slots_;
 
-    slots_ = Class::get (*iterator).getEquipmentSlots (*iterator);
+    slots_ = iterator->getClass().getEquipmentSlots (*iterator);
 
     if (std::find (slots_.first.begin(), slots_.first.end(), slot)==slots_.first.end())
         throw std::runtime_error ("invalid slot");
@@ -258,7 +258,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 }
             }
 
-            switch(MWWorld::Class::get (test).canBeEquipped (test, actor).first)
+            switch(test.getClass().canBeEquipped (test, actor).first)
             {
                 case 0:
                     continue;
@@ -325,7 +325,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
         if (*iter==end())
             continue;
 
-        std::string enchantmentId = MWWorld::Class::get (**iter).getEnchantment (**iter);
+        std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);
 
         if (!enchantmentId.empty())
         {
@@ -441,7 +441,7 @@ bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     {
         if (*iter != end() && (ptr1 == **iter || ptr2 == **iter))
         {
-            bool stackWhenEquipped = MWWorld::Class::get(**iter).getEquipmentSlots(**iter).second;
+            bool stackWhenEquipped = (*iter)->getClass().getEquipmentSlots(**iter).second;
             if (!stackWhenEquipped)
                 return false;
         }
@@ -527,7 +527,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
         if (actor.getRefData().getHandle() == "player")
         {
             // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
-            const std::string& script = Class::get(*it).getScript(*it);
+            const std::string& script = it->getClass().getScript(*it);
             if (script != "")
                 (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
 
@@ -579,7 +579,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
         if (*iter==end())
             continue;
 
-        std::string enchantmentId = MWWorld::Class::get (**iter).getEnchantment (**iter);
+        std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);
         if (enchantmentId.empty())
             continue;
 

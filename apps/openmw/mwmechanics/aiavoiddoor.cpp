@@ -63,7 +63,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor,float duration
     MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(pos.pos[0],pos.pos[1],pos.pos[2]),100,actors);
     for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); it++) {
         if(*it != MWBase::Environment::get().getWorld()->getPlayerPtr()) { //Not the player
-            MWMechanics::AiSequence& seq = MWWorld::Class::get(*it).getCreatureStats(*it).getAiSequence();
+            MWMechanics::AiSequence& seq = it->getClass().getCreatureStats(*it).getAiSequence();
             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) { //Only add it once
                 seq.stack(MWMechanics::AiAvoidDoor(mDoorPtr),*it);
             }

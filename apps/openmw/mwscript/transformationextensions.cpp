@@ -271,7 +271,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (!ptr.isInCell())
+                    if (ptr.getContainerStore())
                         return;
 
                     if (ptr.getRefData().getHandle() == "player")
@@ -308,6 +308,7 @@ namespace MWScript
                     if(store)
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
+                        ptr = MWWorld::Ptr(ptr.getBase(), store);
                         float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                         float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                         if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
@@ -318,7 +319,7 @@ namespace MWScript
                         }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
 
-                        MWWorld::Class::get(ptr).adjustPosition(ptr);
+                        ptr.getClass().adjustPosition(ptr);
                     }
                     else
                     {
@@ -365,7 +366,7 @@ namespace MWScript
                         zRot = zRot/60.;
                     }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
-                    MWWorld::Class::get(ptr).adjustPosition(ptr);
+                    ptr.getClass().adjustPosition(ptr);
                 }
         };
 

@@ -81,7 +81,7 @@ void ItemView::update()
 
         /// \todo performance improvement: don't create/destroy all the widgets everytime the container window changes size, only reposition them
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item.mBase).getInventoryIcon(item.mBase);
+        path += item.mBase.getClass().getInventoryIcon(item.mBase);
 
         // background widget (for the "equipped" frame and magic item background image)
         bool isMagic = (item.mFlags & ItemStack::Flag_Enchanted);

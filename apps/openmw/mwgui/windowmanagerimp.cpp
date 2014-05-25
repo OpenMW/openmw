@@ -158,7 +158,6 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
@@ -299,6 +298,7 @@ namespace MWGui
             delete mCharGen;
             mCharGen = new CharacterCreation();
             mGuiModes.clear();
+            MWBase::Environment::get().getInputManager()->changeInputMode(false);
             mHud->unsetSelectedWeapon();
             mHud->unsetSelectedSpell();
             unsetForceHide(GW_ALL);
@@ -814,10 +814,10 @@ namespace MWGui
         mHud->setMinimapVisible (visible);
     }
 
-    void WindowManager::toggleFogOfWar()
+    bool WindowManager::toggleFogOfWar()
     {
         mMap->toggleFogOfWar();
-        mHud->toggleFogOfWar();
+        return mHud->toggleFogOfWar();
     }
 
     void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
@@ -830,9 +830,9 @@ namespace MWGui
         mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
     }
 
-    void WindowManager::toggleFullHelp()
+    bool WindowManager::toggleFullHelp()
     {
-        mToolTips->toggleFullHelp();
+        return mToolTips->toggleFullHelp();
     }
 
     bool WindowManager::getFullHelp() const
@@ -1027,20 +1027,20 @@ namespace MWGui
     {
         mSelectedSpell = "";
         const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
-                .find(MWWorld::Class::get(item).getEnchantment(item));
+                .find(item.getClass().getEnchantment(item));
 
         int chargePercent = (item.getCellRef().mEnchantmentCharge == -1) ? 100
                 : (item.getCellRef().mEnchantmentCharge / static_cast<float>(ench->mData.mCharge) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
-        mSpellWindow->setTitle(MWWorld::Class::get(item).getName(item));
+        mSpellWindow->setTitle(item.getClass().getName(item));
     }
 
     void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item)
     {
         int durabilityPercent = (item.getCellRef().mCharge == -1) ? 100
-                 : (item.getCellRef().mCharge / static_cast<float>(MWWorld::Class::get(item).getItemMaxHealth(item)) * 100);
+                 : (item.getCellRef().mCharge / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
         mHud->setSelectedWeapon(item, durabilityPercent);
-        mInventoryWindow->setTitle(MWWorld::Class::get(item).getName(item));
+        mInventoryWindow->setTitle(item.getClass().getName(item));
     }
 
     void WindowManager::unsetSelectedSpell()
@@ -1413,6 +1413,7 @@ namespace MWGui
         mConsole->resetReference();
 
         mGuiModes.clear();
+        MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();
     }
 

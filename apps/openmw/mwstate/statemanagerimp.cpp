@@ -12,6 +12,8 @@
 
 #include <OgreImage.h>
 
+#include <boost/filesystem/fstream.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -136,8 +138,6 @@ void MWState::StateManager::newGame (bool bypass)
     else
         MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
 
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-
     mState = State_Running;
 }
 
@@ -187,7 +187,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     else
         slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
 
-    std::ofstream stream (slot->mPath.string().c_str(), std::ios::binary);
+    boost::filesystem::ofstream stream (slot->mPath, std::ios::binary);
 
     ESM::ESMWriter writer;
 
@@ -319,6 +319,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_WTHR:
                 case ESM::REC_DYNA:
                 case ESM::REC_ACTC:
+                case ESM::REC_PROJ:
+                case ESM::REC_MPRJ:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -361,12 +363,18 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
-        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
+        // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
+        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
+
+        // Do not trigger erroneous cellChanged events
+        MWBase::Environment::get().getWorld()->markCellAsUnchanged();
     }
     catch (const std::exception& e)
     {
         std::cerr << "failed to load saved game: " << e.what() << std::endl;
         cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
     }
 }
 

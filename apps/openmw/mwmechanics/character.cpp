@@ -459,7 +459,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     if(cls.isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
@@ -549,7 +549,7 @@ bool CharacterController::updateCreatureState()
 
 bool CharacterController::updateWeaponState()
 {
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
@@ -601,8 +601,8 @@ bool CharacterController::updateWeaponState()
         if(weapon != inv.end() && !(weaptype == WeapType_None && mWeaponType == WeapType_Spell))
         {
             std::string soundid = (weaptype == WeapType_None) ?
-                                   MWWorld::Class::get(*weapon).getDownSoundId(*weapon) :
-                                   MWWorld::Class::get(*weapon).getUpSoundId(*weapon);
+                                   weapon->getClass().getDownSoundId(*weapon) :
+                                   weapon->getClass().getUpSoundId(*weapon);
             if(!soundid.empty())
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -983,7 +983,7 @@ bool CharacterController::updateWeaponState()
 void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     Ogre::Vector3 movement(0.0f);
 
     updateVisibility();

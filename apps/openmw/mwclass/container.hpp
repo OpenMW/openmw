@@ -64,6 +64,10 @@ namespace MWClass
 
             static void registerSelf();
 
+            virtual void respawn (const MWWorld::Ptr& ptr) const;
+
+            virtual void restock (const MWWorld::Ptr &ptr) const;
+
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }

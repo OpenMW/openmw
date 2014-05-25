@@ -35,7 +35,7 @@ namespace MWGui
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(const float x, const float y);
 
-        void toggleFogOfWar();
+        bool toggleFogOfWar();
 
         struct MarkerPosition
         {

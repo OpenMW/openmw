@@ -102,6 +102,9 @@ namespace MWGui
             void notifyContentChanged();
 
             void adjustPanes();
+
+            /// Unequips mSelectedItem, if it is equipped, and then updates mSelectedItem in case it was re-stacked
+            void ensureSelectedItemUnequipped();
     };
 }
 

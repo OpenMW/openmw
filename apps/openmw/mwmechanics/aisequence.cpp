@@ -266,8 +266,7 @@ void AiSequence::fill(const ESM::AIPackageList &list)
         else if (it->mType == ESM::AI_Escort)
         {
             ESM::AITarget data = it->mTarget;
-            MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(data.mId.toString(), false);
-            package = new MWMechanics::AiEscort(target, data.mDuration, data.mX, data.mY, data.mZ);
+            package = new MWMechanics::AiEscort(data.mId.toString(), data.mDuration, data.mX, data.mY, data.mZ);
         }
         else if (it->mType == ESM::AI_Travel)
         {
@@ -282,8 +281,7 @@ void AiSequence::fill(const ESM::AIPackageList &list)
         else //if (it->mType == ESM::AI_Follow)
         {
             ESM::AITarget data = it->mTarget;
-            MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(data.mId.toString(), false);
-            package = new MWMechanics::AiFollow(target, data.mDuration, data.mX, data.mY, data.mZ);
+            package = new MWMechanics::AiFollow(data.mId.toString(), data.mDuration, data.mX, data.mY, data.mZ);
         }
         mPackages.push_back(package);
     }

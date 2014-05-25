@@ -325,12 +325,6 @@ namespace MWWorld
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
-            static const Class& get (const Ptr& ptr)
-            {
-                return ptr.getClass();
-            }
-            ///< If there is no class for this pointer, an exception is thrown.
-
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
 
             virtual int getBaseGold(const MWWorld::Ptr& ptr) const;
@@ -341,6 +335,10 @@ namespace MWWorld
             virtual int getDoorState (const MWWorld::Ptr &ptr) const;
             /// This does not actually cause the door to move. Use World::activateDoor instead.
             virtual void setDoorState (const MWWorld::Ptr &ptr, int state) const;
+
+            virtual void respawn (const MWWorld::Ptr& ptr) const {}
+
+            virtual void restock (const MWWorld::Ptr& ptr) const {}
     };
 }
 

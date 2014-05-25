@@ -142,7 +142,7 @@ namespace MWScript
                         runtime.pop();
                     }
 
-                    MWWorld::Class::get (ptr).lock (ptr, lockLevel);
+                    ptr.getClass().lock (ptr, lockLevel);
                 }
         };
 
@@ -155,7 +155,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Class::get (ptr).unlock (ptr);
+                    ptr.getClass().unlock (ptr);
                 }
         };
 
@@ -275,7 +275,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWBase::Environment::get().getWorld()->toggleWater();
+                    runtime.getContext().report(MWBase::Environment::get().getWorld()->toggleWater() ? "Water -> On"
+                                                                                                     : "Water -> Off");
                 }
         };
 
@@ -344,7 +345,7 @@ namespace MWScript
                     if(key < 0 || key > 32767 || *end != '\0')
                         key = ESM::MagicEffect::effectStringToId(effect);
 
-                    runtime.push(MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(
+                    runtime.push(ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(
                                       MWMechanics::EffectKey(key)).mMagnitude > 0);
                 }
         };
@@ -388,7 +389,7 @@ namespace MWScript
                     for (unsigned int i=0; i<arg0; ++i)
                         runtime.pop();
 
-                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
                     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                     {
                         if (::Misc::StringUtils::ciEqual(it->getCellRef().mSoul, soul))
@@ -423,7 +424,7 @@ namespace MWScript
                     if (amount == 0)
                         return;
 
-                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
 
                     int toRemove = amount;
@@ -456,7 +457,7 @@ namespace MWScript
                     std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
@@ -480,7 +481,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(MWWorld::Class::get(ptr).getCreatureStats (ptr).getAttacked ());
+                    runtime.push(ptr.getClass().getCreatureStats (ptr).getAttacked ());
                 }
         };
 
@@ -521,7 +522,7 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    runtime.push(MWWorld::Class::get(ptr).getCreatureStats(ptr).getActiveSpells().isSpellActive(id));
+                    runtime.push(ptr.getClass().getCreatureStats(ptr).getActiveSpells().isSpellActive(id));
                 }
         };
 
@@ -620,7 +621,7 @@ namespace MWScript
                     std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWMechanics::CreatureStats &stats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+                    MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
                     runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitObject()));
                 }
         };
@@ -656,7 +657,7 @@ namespace MWScript
             {
                 std::stringstream str;
 
-                const std::string script = MWWorld::Class::get(ptr).getScript(ptr);
+                const std::string script = ptr.getClass().getScript(ptr);
                 if(script.empty())
                     str<< ptr.getCellRef().mRefID<<" ("<<ptr.getRefData().getHandle()<<") does not have a script.";
                 else
