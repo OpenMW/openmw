@@ -82,6 +82,14 @@ namespace MWWorld
         return false;
     }
 
+    int Class::getItemHealth(const Ptr &ptr) const
+    {
+        if (ptr.getCellRef().getCharge() == -1)
+            return getItemMaxHealth(ptr);
+        else
+            return ptr.getCellRef().getCharge();
+    }
+
     int Class::getItemMaxHealth (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");

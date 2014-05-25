@@ -1034,7 +1034,7 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
-        ptr.getCellRef().mScale = scale;
+        ptr.getCellRef().setScale(scale);
         ptr.getClass().adjustScale(ptr,scale);
 
         if(ptr.getRefData().getBaseNode() == 0)
@@ -1544,7 +1544,7 @@ namespace MWWorld
             if (!ref.mData.isEnabled())
                 continue;
 
-            if (ref.mRef.mTeleport)
+            if (ref.mRef.getTeleport())
             {
                 World::DoorMarker newMarker;
                 newMarker.name = MWClass::Door::getDestination(ref);
@@ -1948,7 +1948,7 @@ namespace MWWorld
             for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
             {
                 MWWorld::Ptr ptr (&*container, *cellIt);
-                if (Misc::StringUtils::ciEqual(ptr.getCellRef().mOwner, npc.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(ptr);
             }
         }
@@ -1976,7 +1976,7 @@ namespace MWWorld
             (*cellIt)->forEach<ListHandlesFunctor>(functor);
 
             for (std::vector<std::string>::iterator it = functor.mHandles.begin(); it != functor.mHandles.end(); ++it)
-                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).getCellRef().mOwner, npc.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
@@ -2032,34 +2032,34 @@ namespace MWWorld
         }
         const DoorList &doors = cellStore->get<ESM::Door>().mList;
         for (DoorList::const_iterator it = doors.begin(); it != doors.end(); ++it) {
-            if (!it->mRef.mTeleport) {
+            if (!it->mRef.getTeleport()) {
                 continue;
             }
 
             MWWorld::CellStore *source = 0;
 
             // door to exterior
-            if (it->mRef.mDestCell.empty()) {
+            if (it->mRef.getDestCell().empty()) {
                 int x, y;
-                const float *pos = it->mRef.mDoorDest.pos;
+                const float *pos = it->mRef.getDoorDest().pos;
                 positionToIndex(pos[0], pos[1], x, y);
                 source = getExterior(x, y);
             }
             // door to interior
             else {
-                source = getInterior(it->mRef.mDestCell);
+                source = getInterior(it->mRef.getDestCell());
             }
             if (0 != source) {
                 // Find door leading to our current teleport door
                 // and use it destination to position inside cell.
                 const DoorList &doors = source->get<ESM::Door>().mList;
                 for (DoorList::const_iterator jt = doors.begin(); jt != doors.end(); ++jt) {
-                    if (it->mRef.mTeleport &&
-                        Misc::StringUtils::ciEqual(name, jt->mRef.mDestCell))
+                    if (it->mRef.getTeleport() &&
+                        Misc::StringUtils::ciEqual(name, jt->mRef.getDestCell()))
                     {
                         /// \note Using _any_ door pointed to the interior,
                         /// not the one pointed to current door.
-                        pos = jt->mRef.mDoorDest;
+                        pos = jt->mRef.getDoorDest();
                         return true;
                     }
                 }
@@ -2322,9 +2322,9 @@ namespace MWWorld
         for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if (ref.mRef.mTeleport && ref.mRef.mDestCell.empty())
+            if (ref.mRef.getTeleport() && ref.mRef.getDestCell().empty())
             {
-                ESM::Position pos = ref.mRef.mDoorDest;
+                ESM::Position pos = ref.mRef.getDoorDest();
                 result = Ogre::Vector3(pos.pos);
                 return true;
             }
@@ -2520,13 +2520,13 @@ namespace MWWorld
             ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it) //Move all stolen stuff into chest
             {
-                if (!it->getCellRef().mOwner.empty() && it->getCellRef().mOwner != "player") //Not owned by no one/player?
+                if (!it->getCellRef().getOwner().empty() && it->getCellRef().getOwner() != "player") //Not owned by no one/player?
                 {
                     closestChest.getClass().getContainerStore(closestChest).add(*it, it->getRefData().getCount(), closestChest);
                     store.remove(*it, it->getRefData().getCount(), ptr);
                 }
             }
-            closestChest.getCellRef().mLockLevel = abs(closestChest.getCellRef().mLockLevel);
+            closestChest.getClass().unlock(closestChest);
         }
     }
 
@@ -2630,7 +2630,7 @@ namespace MWWorld
 
             MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
             MWWorld::ManualRef ref(getStore(), selectedCreature, 1);
-            ref.getPtr().getCellRef().mPos = ipos;
+            ref.getPtr().getCellRef().setPosition(ipos);
 
             safePlaceObject(ref.getPtr(), cell, ipos);
         }

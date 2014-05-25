@@ -517,7 +517,7 @@ namespace MWMechanics
                 {
                     MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
                     float minSqr = 1.3*1.3*MIN_DIST_TO_DOOR_SQUARED; // for legibility
-                    if(vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr &&
+                    if(vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.getPosition().pos)) < minSqr &&
                        ref.mData.getLocalRotation().rot[2] < 0.4f) // even small opening
                     {
                         //std::cout<<"closed door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
@@ -552,7 +552,7 @@ namespace MWMechanics
             float minSqr = 1.6 * 1.6 * MIN_DIST_TO_DOOR_SQUARED; // for legibility
             // TODO: add reaction to checking open doors
             if(mBackOffDoor &&
-               vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr)
+               vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.getPosition().pos)) < minSqr)
             {
                 mMovement.mPosition[1] = -0.2; // back off, but slowly
             }

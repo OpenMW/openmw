@@ -238,7 +238,7 @@ namespace MWGui
             int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
             std::string cost = boost::lexical_cast<std::string>(castCost);
-            int currentCharge = int(item.getCellRef().mEnchantmentCharge);
+            int currentCharge = int(item.getCellRef().getEnchantmentCharge());
             if (currentCharge ==  -1)
                 currentCharge = enchant->mData.mCharge;
             std::string charge = boost::lexical_cast<std::string>(currentCharge);

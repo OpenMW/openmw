@@ -62,17 +62,17 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
         {
             if (!item->getClass().hasItemHealth(*item))
                 return false;
-            if (item->getCellRef().mCharge == -1)
-                item->getCellRef().mCharge = item->getClass().getItemMaxHealth(*item);
+            int charge = item->getClass().getItemHealth(*item);
 
-            if (item->getCellRef().mCharge == 0)
+            if (charge == 0)
                 return false;
 
-            item->getCellRef().mCharge -=
+            charge -=
                     std::min(disintegrate,
-                             static_cast<float>(item->getCellRef().mCharge));
+                             static_cast<float>(charge));
+            item->getCellRef().setCharge(charge);
 
-            if (item->getCellRef().mCharge == 0)
+            if (charge == 0)
             {
                 // Will unequip the broken item and try to find a replacement
                 if (ptr.getRefData().getHandle() != "player")
@@ -147,13 +147,13 @@ namespace MWMechanics
             for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
                  it != container.end(); ++it)
             {
-                const std::string& id = it->getCellRef().mRefID;
+                const std::string& id = it->getCellRef().getRefId();
                 if (id.size() >= soulgemFilter.size()
                         && id.substr(0,soulgemFilter.size()) == soulgemFilter)
                 {
                     float thisGemCapacity = it->get<ESM::Miscellaneous>()->mBase->mData.mValue * fSoulgemMult;
                     if (thisGemCapacity >= creatureSoulValue && thisGemCapacity < gemCapacity
-                            && it->getCellRef().mSoul.empty())
+                            && it->getCellRef().getSoul().empty())
                     {
                         gem = it;
                         gemCapacity = thisGemCapacity;
@@ -166,7 +166,7 @@ namespace MWMechanics
 
             // Set the soul on just one of the gems, not the whole stack
             gem->getContainerStore()->unstack(*gem, caster);
-            gem->getCellRef().mSoul = mCreature.getCellRef().mRefID;
+            gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
             if (caster.getRefData().getHandle() == "player")
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
@@ -546,7 +546,7 @@ namespace MWMechanics
                     {
                         MWWorld::CellStore* store = ptr.getCell();
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
-                        ref.getPtr().getCellRef().mPos = ipos;
+                        ref.getPtr().getCellRef().setPosition(ipos);
 
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
@@ -1142,7 +1142,7 @@ namespace MWMechanics
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
             {
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
-                if(package->getFollowedActor() == actor.getCellRef().mRefID)
+                if(package->getFollowedActor() == actor.getCellRef().getRefId())
                     list.push_front(iter->first);
             }
         }

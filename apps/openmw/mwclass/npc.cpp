@@ -526,20 +526,24 @@ namespace MWClass
                         (stats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult->getFloat() * 0.1);
                 if(weaphashealth)
                 {
-                    int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
-                    if(weapon.getCellRef().mCharge == -1)
-                        weapon.getCellRef().mCharge = weapmaxhealth;
-                    damage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
+                    int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
+                    int weaphealth = weapon.getClass().getItemHealth(weapon);
+
+                    damage *= float(weaphealth) / weapmaxhealth;
+
+                    if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                    {
+                        // Reduce weapon charge by at least one, but cap at 0
+                        weaphealth -= std::min(std::max(1,
+                                    (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weaphealth);
+
+                        weapon.getCellRef().setCharge(weaphealth);
+                    }
+
+                    // Weapon broken? unequip it
+                    if (weaphealth == 0)
+                        weapon = *inv.unequipItem(weapon, ptr);
                 }
-
-                if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                    weapon.getCellRef().mCharge -= std::min(std::max(1,
-                        (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
-
-                // Weapon broken? unequip it
-                if (weapon.getCellRef().mCharge == 0)
-                    weapon = *inv.unequipItem(weapon, ptr);
-
             }
             healthdmg = true;
         }
@@ -705,14 +709,13 @@ namespace MWClass
                 MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
-                    ESM::CellRef &armorref = armor.getCellRef();
-                    if(armorref.mCharge == -1)
-                        armorref.mCharge = armor.get<ESM::Armor>()->mBase->mData.mHealth;
-                    armorref.mCharge -= std::min(std::max(1, (int)damagediff),
-                                                 armorref.mCharge);
+                    int armorhealth = armor.getClass().getItemHealth(armor);
+                    armorhealth -= std::min(std::max(1, (int)damagediff),
+                                                 armorhealth);
+                    armor.getCellRef().setCharge(armorhealth);
 
                     // Armor broken? unequip it
-                    if (armorref.mCharge == 0)
+                    if (armorhealth == 0)
                         inv.unequipItem(armor, ptr);
 
                     if (ptr.getRefData().getHandle() == "player")
@@ -1316,14 +1319,14 @@ namespace MWClass
         {
             // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
             // This also means we cannot respawn dynamically placed references with no content file connection.
-            if (ptr.getCellRef().mRefNum.mContentFile != -1)
+            if (ptr.getCellRef().getRefNum().mContentFile != -1)
             {
                 if (ptr.getRefData().getCount() == 0)
                     ptr.getRefData().setCount(1);
 
                 // Reset to original position
                 ESM::Position& pos = ptr.getRefData().getPosition();
-                pos = ptr.getCellRef().mPos;
+                pos = ptr.getCellRef().getPosition();
 
                 ptr.getRefData().setCustomData(NULL);
             }
@@ -1335,7 +1338,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().mRefID, ptr.getCellRef().mFaction);
+        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

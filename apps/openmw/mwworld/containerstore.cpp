@@ -74,7 +74,6 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState (CellRefList<T
 
     LiveCellRef<T> ref (record);
     ref.load (state);
-    ref.mRef.mRefNum.mContentFile = -1;
     collection.mList.push_back (ref);
 
     return ContainerStoreIterator (this, --collection.mList.end());
@@ -127,7 +126,7 @@ int MWWorld::ContainerStore::count(const std::string &id)
 {
     int total=0;
     for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
-        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, id))
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
             total += iter->getRefData().getCount();
     return total;
 }
@@ -145,7 +144,7 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
 
-    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID))
+    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().getRefId(), ptr2.getCellRef().getRefId()))
         return false;
 
     // If it has an enchantment, don't stack when some of the charge is already used
@@ -154,25 +153,24 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
                     ptr1.getClass().getEnchantment(ptr1));
         float maxCharge = enchantment->mData.mCharge;
-        float enchantCharge1 = ptr1.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr1.getCellRef().mEnchantmentCharge;
-        float enchantCharge2 = ptr2.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr2.getCellRef().mEnchantmentCharge;
+        float enchantCharge1 = ptr1.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr1.getCellRef().getEnchantmentCharge();
+        float enchantCharge2 = ptr2.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr2.getCellRef().getEnchantmentCharge();
         if (enchantCharge1 != maxCharge || enchantCharge2 != maxCharge)
             return false;
     }
 
     return ptr1 != ptr2 // an item never stacks onto itself
-        && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
-        && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
+        && ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()
+        && ptr1.getCellRef().getSoul() == ptr2.getCellRef().getSoul()
 
         && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
 
         && cls1.getScript(ptr1) == cls2.getScript(ptr2)
 
         // item that is already partly used up never stacks
-        && (!cls1.hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
-            || cls1.getItemMaxHealth(ptr1) == ptr1.getCellRef().mCharge)
-        && (!cls2.hasItemHealth(ptr2) || ptr2.getCellRef().mCharge == -1
-            || cls2.getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge);
+        && (!cls1.hasItemHealth(ptr1) || (
+                cls1.getItemHealth(ptr1) == cls1.getItemMaxHealth(ptr1)
+            && cls2.getItemHealth(ptr2) == cls2.getItemMaxHealth(ptr2)));
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
@@ -195,19 +193,19 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     {
         // HACK: Set owner on the original item, then reset it after we have copied it
         // If we set the owner on the copied item, it would not stack correctly...
-        std::string oldOwner = itemPtr.getCellRef().mOwner;
+        std::string oldOwner = itemPtr.getCellRef().getOwner();
         if (actorPtr == player)
         {
             // No point in setting owner to the player - NPCs will not respect this anyway
             // Additionally, setting it to "player" would make those items not stack with items that don't have an owner
-            itemPtr.getCellRef().mOwner = "";
+            itemPtr.getCellRef().setOwner("");
         }
         else
-            itemPtr.getCellRef().mOwner = actorPtr.getCellRef().mRefID;
+            itemPtr.getCellRef().setOwner(actorPtr.getCellRef().getRefId());
 
         it = addImp(itemPtr, count);
 
-        itemPtr.getCellRef().mOwner = oldOwner;
+        itemPtr.getCellRef().setOwner(oldOwner);
     }
     else
     {
@@ -219,12 +217,14 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
 
     // we may have copied an item from the world, so reset a few things first
     item.getRefData().setBaseNode(NULL); // Especially important, otherwise scripts on the item could think that it's actually in a cell
-    item.getCellRef().mPos.rot[0] = 0;
-    item.getCellRef().mPos.rot[1] = 0;
-    item.getCellRef().mPos.rot[2] = 0;
-    item.getCellRef().mPos.pos[0] = 0;
-    item.getCellRef().mPos.pos[1] = 0;
-    item.getCellRef().mPos.pos[2] = 0;
+    ESM::Position pos;
+    pos.rot[0] = 0;
+    pos.rot[1] = 0;
+    pos.rot[2] = 0;
+    pos.pos[0] = 0;
+    pos.pos[1] = 0;
+    pos.pos[2] = 0;
+    item.getCellRef().setPosition(pos);
 
     std::string script = item.getClass().getScript(item);
     if(script != "")
@@ -259,17 +259,17 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
-    if (Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_001")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_005")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_010")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
+    if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100"))
     {
         int realCount = count * ptr.getClass().getValue(ptr);
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual((*iter).getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
+            if (Misc::StringUtils::ciEqual((*iter).getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             {
                 iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
@@ -328,7 +328,7 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
     int toRemove = count;
 
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
-        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, itemId))
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
             toRemove -= remove(*iter, toRemove, actor);
 
     flagAsModified();
@@ -408,8 +408,8 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         }
         count = std::abs(count);
 
-        ref.getPtr().getCellRef().mOwner = owner;
-        ref.getPtr().getCellRef().mFaction = faction;
+        ref.getPtr().getCellRef().setOwner(owner);
+        ref.getPtr().getCellRef().setFaction(faction);
         addImp (ref.getPtr(), count);
     }
 }

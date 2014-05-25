@@ -306,7 +306,7 @@ namespace MWGui
             for (int i=0; i<2; ++i)
             {
                 MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
-                if (Misc::StringUtils::ciEqual(item.getCellRef().mOwner, mPtr.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), mPtr.getCellRef().getRefId()))
                 {
                     std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->getString();
                     if (msg.find("%s") != std::string::npos)

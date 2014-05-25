@@ -23,10 +23,20 @@ namespace MWWorld
             {
                 const T* base = list.find(name);
 
-                LiveCellRef<T> ref;
-                ref.mBase = base;
-                ref.mRef.mRefNum.mIndex = 0;
-                ref.mRef.mRefNum.mContentFile = -1;
+                ESM::CellRef cellRef;
+                cellRef.mRefNum.mIndex = 0;
+                cellRef.mRefNum.mContentFile = -1;
+                cellRef.mRefID = name;
+                cellRef.mScale = 1;
+                cellRef.mFactIndex = 0;
+                cellRef.mCharge = -1;
+                cellRef.mGoldValue = 1;
+                cellRef.mEnchantmentCharge = -1;
+                cellRef.mTeleport = false;
+                cellRef.mLockLevel = 0;
+                cellRef.mReferenceBlocked = 0;
+
+                LiveCellRef<T> ref(cellRef, base);
 
                 mRef = ref;
                 mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);
@@ -67,19 +77,6 @@ namespace MWWorld
                         throw std::logic_error ("failed to create manual cell ref for " + lowerName + " (unknown type)");
                 }
 
-                // initialise
-                ESM::CellRef& cellRef = mPtr.getCellRef();
-                cellRef.mRefID = lowerName;
-                cellRef.mRefNum.mIndex = 0;
-                cellRef.mRefNum.mContentFile = -1;
-                cellRef.mScale = 1;
-                cellRef.mFactIndex = 0;
-                cellRef.mCharge = -1;
-                cellRef.mGoldValue = 1;
-                cellRef.mEnchantmentCharge = -1;
-                cellRef.mTeleport = false;
-                cellRef.mLockLevel = 0;
-                cellRef.mReferenceBlocked = 0;
                 mPtr.getRefData().setCount(count);
             }
 

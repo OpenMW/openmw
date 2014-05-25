@@ -193,14 +193,14 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
         info.enchant = ref->mBase->mEnchant;
         if (!info.enchant.empty())
-            info.remainingEnchantCharge = ptr.getCellRef().mEnchantmentCharge;
+            info.remainingEnchantCharge = ptr.getCellRef().getEnchantmentCharge();
 
         info.text = text;
 

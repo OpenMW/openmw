@@ -290,7 +290,7 @@ void Animation::addAnimSource(const std::string &model)
             mAccumRoot = mNonAccumRoot->getParent();
             if(!mAccumRoot)
             {
-                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().getRefId()<<" is skeleton root??" <<std::endl;
                 mNonAccumRoot = NULL;
             }
         }
@@ -301,7 +301,7 @@ void Animation::addAnimSource(const std::string &model)
             mAccumRoot = mNonAccumRoot->getParent();
             if(!mAccumRoot)
             {
-                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().getRefId()<<" is skeleton root??" <<std::endl;
                 mNonAccumRoot = NULL;
             }
         }
@@ -818,7 +818,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
         }
     }
     if(iter == mAnimSources.rend())
-        std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().mRefID <<std::endl;
+        std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().getRefId() <<std::endl;
 
     resetActiveGroups();
 }

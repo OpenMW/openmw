@@ -206,7 +206,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         // Only autoEquip if we are the original owner of the item.
         // This stops merchants from auto equipping anything you sell to them.
         // ...unless this is a companion, he should always equip items given to him.
-        if (!Misc::StringUtils::ciEqual(test.getCellRef().mOwner, actor.getCellRef().mRefID) &&
+        if (!Misc::StringUtils::ciEqual(test.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
                 (actor.getClass().getScript(actor).empty() ||
                 !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
             continue;
@@ -337,7 +337,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
 
             std::vector<EffectParams> params;
 
-            bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().mRefID) != mPermanentMagicEffectMagnitudes.end());
+            bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().getRefId()) != mPermanentMagicEffectMagnitudes.end());
             if (!existed)
             {
                 // Roll some dice, one for each effect
@@ -358,10 +358,10 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 // Consider equipping the same item twice (e.g. a ring)
                 // However, permanent enchantments with a random magnitude are kind of an exploit anyway,
                 // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
-                mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = params;
+                mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()] = params;
             }
             else
-                params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID];
+                params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()];
 
             int i=0;
             for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
@@ -407,7 +407,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
         {
             if (*iter == end())
                 continue;
-            if ((**iter).getCellRef().mRefID == it->first)
+            if ((**iter).getCellRef().getRefId() == it->first)
             {
                 found = true;
             }
@@ -589,14 +589,14 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
         if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
             continue;
 
-        if (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().mRefID) == mPermanentMagicEffectMagnitudes.end())
+        if (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().getRefId()) == mPermanentMagicEffectMagnitudes.end())
             continue;
 
         int i=0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
             effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
         {
-            const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
+            const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()][i];
             float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
             visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), -1, magnitude);
@@ -626,15 +626,15 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 {
     for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
     {
-        if (it->first->getCellRef().mEnchantmentCharge == -1
-                || it->first->getCellRef().mEnchantmentCharge == it->second)
+        if (it->first->getCellRef().getEnchantmentCharge() == -1
+                || it->first->getCellRef().getEnchantmentCharge() == it->second)
             continue;
 
         static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "fMagicItemRechargePerSecond")->getFloat();
 
-        it->first->getCellRef().mEnchantmentCharge = std::min (it->first->getCellRef().mEnchantmentCharge + fMagicItemRechargePerSecond * duration,
-                                                              it->second);
+        it->first->getCellRef().setEnchantmentCharge(std::min (it->first->getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
+                                                              it->second));
     }
 }
 

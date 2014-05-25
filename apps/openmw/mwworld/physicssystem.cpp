@@ -656,7 +656,7 @@ namespace MWWorld
             return false;
         }
         btVector3 btMin, btMax;
-        float scale = ptr.getCellRef().mScale;
+        float scale = ptr.getCellRef().getScale();
         mEngine->getObjectAABB(model, scale, btMin, btMax);
 
         min.x = btMin.x();

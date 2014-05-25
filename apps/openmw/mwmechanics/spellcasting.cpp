@@ -470,21 +470,21 @@ namespace MWMechanics
         {
             if (effectId == ESM::MagicEffect::Lock)
             {
-                if (target.getCellRef().mLockLevel < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
-                    target.getCellRef().mLockLevel = magnitude;
+                if (target.getCellRef().getLockLevel() < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
+                    target.getCellRef().setLockLevel(magnitude);
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
-                if (target.getCellRef().mLockLevel <= magnitude)
+                if (target.getCellRef().getLockLevel() <= magnitude)
                 {
-                    //Door not already unlocked
-                    if (target.getCellRef().mLockLevel > 0)
+                    if (target.getCellRef().getLockLevel() > 0)
                     {
+                        //Door not already unlocked
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
                         if (!caster.isEmpty() && caster.getClass().isActor())
                             MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
                     }
-                    target.getCellRef().mLockLevel = -abs(target.getCellRef().mLockLevel); //unlocks the door
+                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel())); //unlocks the door
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
@@ -588,7 +588,7 @@ namespace MWMechanics
             throw std::runtime_error("can't cast an item without an enchantment");
 
         mSourceName = item.getClass().getName(item);
-        mId = item.getCellRef().mRefID;
+        mId = item.getCellRef().getRefId();
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantmentName);
 
@@ -601,10 +601,10 @@ namespace MWMechanics
             int eSkill = mCaster.getClass().getSkill(mCaster, ESM::Skill::Enchant);
             const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
-            if (item.getCellRef().mEnchantmentCharge == -1)
-                item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+            if (item.getCellRef().getEnchantmentCharge() == -1)
+                item.getCellRef().setEnchantmentCharge(enchantment->mData.mCharge);
 
-            if (item.getCellRef().mEnchantmentCharge < castCost)
+            if (item.getCellRef().getEnchantmentCharge() < castCost)
             {
                 // TODO: Should there be a sound here?
                 if (mCaster.getRefData().getHandle() == "player")
@@ -612,7 +612,7 @@ namespace MWMechanics
                 return false;
             }
             // Reduce charge
-            item.getCellRef().mEnchantmentCharge -= castCost;
+            item.getCellRef().setEnchantmentCharge(item.getCellRef().getEnchantmentCharge() - castCost);
         }
 
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)

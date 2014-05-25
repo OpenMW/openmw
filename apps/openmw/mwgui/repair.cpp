@@ -56,7 +56,7 @@ void Repair::updateRepairView()
     MWWorld::LiveCellRef<ESM::Repair> *ref =
         mRepair.getTool().get<ESM::Repair>();
 
-    int uses = (mRepair.getTool().getCellRef().mCharge != -1) ? mRepair.getTool().getCellRef().mCharge : ref->mBase->mData.mUses;
+    int uses = mRepair.getTool().getClass().getItemHealth(mRepair.getTool());
 
     float quality = ref->mBase->mData.mQuality;
 
@@ -98,7 +98,7 @@ void Repair::updateRepairView()
         if (iter->getClass().hasItemHealth(*iter))
         {
             int maxDurability = iter->getClass().getItemMaxHealth(*iter);
-            int durability = (iter->getCellRef().mCharge == -1) ? maxDurability : iter->getCellRef().mCharge;
+            int durability = iter->getClass().getItemHealth(*iter);
             if (maxDurability == durability)
                 continue;
 

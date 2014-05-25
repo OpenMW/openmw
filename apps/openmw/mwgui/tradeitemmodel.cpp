@@ -148,14 +148,14 @@ namespace MWGui
             if(!mMerchant.isEmpty())
             {
                 MWWorld::Ptr base = item.mBase;
-                if(Misc::StringUtils::ciEqual(base.getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
+                if(Misc::StringUtils::ciEqual(base.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
                     continue;
                 if(!base.getClass().canSell(base, services))
                     continue;
 
                 // Bound items may not be bought
-                if (item.mBase.getCellRef().mRefID.size() > 6
-                        && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
+                if (item.mBase.getCellRef().getRefId().size() > 6
+                        && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
                 {
                     continue;
                 }

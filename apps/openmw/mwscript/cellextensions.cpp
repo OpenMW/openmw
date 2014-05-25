@@ -88,6 +88,11 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    if (!MWBase::Environment::get().getWorld()->getPlayerPtr().isInCell())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
                     bool interior =
                         !MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->isExterior();
 

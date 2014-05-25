@@ -114,7 +114,7 @@ namespace MWGui
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
         if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM::Miscellaneous).name()
-                                                     || base.getCellRef().mSoul == ""))
+                                                     || base.getCellRef().getSoul() == ""))
             return false;
         if ((mFilter & Filter_OnlyEnchantable) && (item.mFlags & ItemStack::Flag_Enchanted
                                                || (base.getTypeName() != typeid(ESM::Armor).name()

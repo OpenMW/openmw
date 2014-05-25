@@ -40,7 +40,7 @@ namespace MWGui
             else
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
             if (setNewOwner)
-                dropped.getCellRef().mOwner = "";
+                dropped.getCellRef().setOwner("");
 
             return dropped;
         }

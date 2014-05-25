@@ -116,9 +116,12 @@ namespace MWWorld
             virtual bool hasItemHealth (const Ptr& ptr) const;
             ///< \return Item health data available? (default implementation: false)
 
+            virtual int getItemHealth (const Ptr& ptr) const;
+            ///< Return current item health or throw an exception if class does not have item health
+
             virtual int getItemMaxHealth (const Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
-            /// (default implementation: throw an exceoption)
+            /// (default implementation: throw an exception)
 
             virtual void hit(const Ptr& ptr, int type=-1) const;
             ///< Execute a melee hit, using the current weapon. This will check the relevant skills

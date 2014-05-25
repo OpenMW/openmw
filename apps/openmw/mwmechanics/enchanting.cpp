@@ -234,9 +234,9 @@ namespace MWMechanics
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         if(soulEmpty())
             return 0;
-        if(mSoulGemPtr.getCellRef().mSoul=="")
+        if(mSoulGemPtr.getCellRef().getSoul()=="")
             return 0;
-        const ESM::Creature* soul = store.get<ESM::Creature>().find(mSoulGemPtr.getCellRef().mSoul);
+        const ESM::Creature* soul = store.get<ESM::Creature>().find(mSoulGemPtr.getCellRef().getSoul());
         return soul->mData.mSoul;
     }
 

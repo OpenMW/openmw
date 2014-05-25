@@ -1029,16 +1029,16 @@ namespace MWGui
         const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
-        int chargePercent = (item.getCellRef().mEnchantmentCharge == -1) ? 100
-                : (item.getCellRef().mEnchantmentCharge / static_cast<float>(ench->mData.mCharge) * 100);
+        int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
+                : (item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
         mSpellWindow->setTitle(item.getClass().getName(item));
     }
 
     void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item)
     {
-        int durabilityPercent = (item.getCellRef().mCharge == -1) ? 100
-                 : (item.getCellRef().mCharge / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
+        int durabilityPercent =
+             (item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
     }

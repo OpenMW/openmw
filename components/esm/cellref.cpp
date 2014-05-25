@@ -168,7 +168,7 @@ void ESM::CellRef::blank()
     }
 }
 
-bool ESM::operator== (const CellRef::RefNum& left, const CellRef::RefNum& right)
+bool ESM::operator== (const RefNum& left, const RefNum& right)
 {
     return left.mIndex==right.mIndex && left.mContentFile==right.mContentFile;
 }

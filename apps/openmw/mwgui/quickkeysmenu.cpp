@@ -274,11 +274,11 @@ namespace MWGui
             if (item.getRefData ().getCount() < 1)
             {
                 // Try searching for a compatible replacement
-                std::string id = item.getCellRef().mRefID;
+                std::string id = item.getCellRef().getRefId();
 
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
-                    if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, id))
+                    if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
                     {
                         item = *it;
                         button->getChildAt(0)->setUserData(item);
@@ -408,7 +408,7 @@ namespace MWGui
                 case Type_MagicItem:
                 {
                     MWWorld::Ptr item = *button->getChildAt(0)->getUserData<MWWorld::Ptr>();
-                    key.mId = item.getCellRef().mRefID;
+                    key.mId = item.getCellRef().getRefId();
                     break;
                 }
                 case Type_Magic:
@@ -458,11 +458,12 @@ namespace MWGui
                 MWWorld::Ptr item;
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
-                    if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, id))
+                    if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
                     {
                         if (item.isEmpty() ||
                             // Prefer the stack with the lowest remaining uses
-                            (it->getCellRef().mCharge != -1 && (item.getCellRef().mCharge == -1 || it->getCellRef().mCharge < item.getCellRef().mCharge) ))
+                                !item.getClass().hasItemHealth(*it) ||
+                                it->getClass().getItemHealth(*it) < item.getClass().getItemHealth(item))
                         {
                             item = *it;
                         }

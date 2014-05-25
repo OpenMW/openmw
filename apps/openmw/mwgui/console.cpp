@@ -413,7 +413,7 @@ namespace MWGui
             }
             else
             {
-                setTitle("#{sConsoleTitle} (" + object.getCellRef().mRefID + ")");
+                setTitle("#{sConsoleTitle} (" + object.getCellRef().getRefId() + ")");
                 mPtr = object;
             }
             // User clicked on an object. Restore focus to the console command line.

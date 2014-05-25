@@ -73,11 +73,6 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor,float duration
     return false;
 }
 
-std::string MWMechanics::AiAvoidDoor::getAvoidedDoor()
-{
-    return mDoorPtr.getCellRef().mRefID;
-}
-
 MWMechanics::AiAvoidDoor *MWMechanics::AiAvoidDoor::clone() const
 {
     return new AiAvoidDoor(*this);

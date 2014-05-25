@@ -24,10 +24,10 @@ namespace
     /// @return is \a ptr allowed to take/use \a item or is it a crime?
     bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
     {
-        const std::string& owner = item.getCellRef().mOwner;
+        const std::string& owner = item.getCellRef().getOwner();
         bool isOwned = !owner.empty() && owner != "player";
 
-        const std::string& faction = item.getCellRef().mFaction;
+        const std::string& faction = item.getCellRef().getFaction();
         bool isFactionOwned = false;
         if (!faction.empty() && ptr.getClass().isNpc())
         {
@@ -36,8 +36,8 @@ namespace
                 isFactionOwned = true;
         }
 
-        if (!item.getCellRef().mOwner.empty())
-            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().mOwner, true);
+        if (!item.getCellRef().getOwner().empty())
+            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().getOwner(), true);
 
         return (!isOwned && !isFactionOwned);
     }

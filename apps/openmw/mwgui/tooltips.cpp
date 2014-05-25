@@ -97,7 +97,7 @@ namespace MWGui
                     setCoord(0, 0, 300, 300);
                     mDynamicToolTipBox->setVisible(true);
                     ToolTipInfo info;
-                    info.caption=mFocusObject.getCellRef().mRefID;
+                    info.caption=mFocusObject.getCellRef().getRefId();
                     info.icon="";
                     tooltipSize = createToolTip(info);
                 }
