@@ -93,6 +93,7 @@ namespace MWScript
                         runtime.push (0);
                         return;
                     }
+
                     bool interior =
                         !MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->isExterior();
 
