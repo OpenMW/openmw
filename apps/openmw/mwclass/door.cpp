@@ -101,7 +101,7 @@ namespace MWClass
 
         MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
 
-        bool needKey = ptr.getCellRef().getLockLevel() > 0;
+        bool needKey = ptr.getCellRef().isLocked();
         bool hasKey = false;
         std::string keyName;
 
@@ -227,9 +227,9 @@ namespace MWClass
             text += "\n" + getDestination(*ref);
         }
 
-        if (ptr.getCellRef().getLockLevel() > 0)
+        if (ptr.getCellRef().isLocked())
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
-        else if (ptr.getCellRef().getLockLevel() < 0)
+        else
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";

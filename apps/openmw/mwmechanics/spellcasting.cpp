@@ -471,13 +471,13 @@ namespace MWMechanics
             if (effectId == ESM::MagicEffect::Lock)
             {
                 if (target.getCellRef().getLockLevel() < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
-                    target.getCellRef().setLockLevel(magnitude);
+                    target.getCellRef().lock(magnitude);
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
                 if (target.getCellRef().getLockLevel() <= magnitude)
                 {
-                    if (target.getCellRef().getLockLevel() > 0)
+                    if (target.getCellRef().isLocked())
                     {
                         //Door not already unlocked
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);

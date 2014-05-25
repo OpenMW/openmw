@@ -187,6 +187,11 @@ namespace MWWorld
         setLockLevel(-std::abs(getLockLevel())); //Makes lockLevel negative
     }
 
+    bool CellRef::isLocked()
+    {
+       return (getLockLevel() > 0);
+    }
+
     void CellRef::writeState(ESM::ObjectState &state) const
     {
         state.mRef = mCellRef;
