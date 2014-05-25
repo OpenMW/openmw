@@ -475,19 +475,18 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
-                if (target.getCellRef().getLockLevel() <= magnitude)
+                if (target.getCellRef().isLocked())
                 {
-                    if (target.getCellRef().isLocked())
+                    if (target.getCellRef().getLockLevel() <= magnitude)
                     {
-                        //Door not already unlocked
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
                         if (!caster.isEmpty() && caster.getClass().isActor())
                             MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
+                        target.getCellRef().unlock();
                     }
-                    target.getCellRef().unlock();
+                    else
+                        MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
                 }
-                else
-                    MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
             }
         }
         else
