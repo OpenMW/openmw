@@ -191,6 +191,14 @@ namespace MWMechanics
         
         if (againstPlayer && creatureStats.isHostile()) return; // already fighting against player
 
+        // pure water creatures won't try to fight with the target on the ground
+        // except that creature is already hostile
+        if ((againstPlayer || !creatureStats.isHostile()) 
+                && ((actor1.getClass().canSwim(actor1) && !actor1.getClass().canWalk(actor1) // pure water creature
+                && !MWBase::Environment::get().getWorld()->isSwimming(actor2))
+                || (!actor1.getClass().canSwim(actor1) && MWBase::Environment::get().getWorld()->isSwimming(actor2)))) // creature can't swim to target
+            return;
+
         float fight;
 
         if (againstPlayer) 
