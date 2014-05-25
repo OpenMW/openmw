@@ -1,5 +1,7 @@
 #include "cellref.hpp"
 
+#include <cstdlib>
+
 #include <components/esm/objectstate.hpp>
 
 namespace MWWorld
@@ -170,6 +172,19 @@ namespace MWWorld
             mChanged = true;
             mCellRef.mGoldValue = value;
         }
+    }
+
+    void CellRef::lock(int lockLevel)
+    {
+        if(lockLevel!=0)
+            setLockLevel(std::abs(lockLevel)); //Changes lock to locklevel, in positive
+        else
+            setLockLevel(std::abs(getLockLevel())); //No locklevel given, just flip the origional one
+    }
+
+    void CellRef::unlock()
+    {
+        setLockLevel(-std::abs(getLockLevel())); //Makes lockLevel negative
     }
 
     void CellRef::writeState(ESM::ObjectState &state) const

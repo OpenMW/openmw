@@ -150,7 +150,7 @@ namespace MWClass
         if (needKey && hasKey)
         {
             MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
-            unlock(ptr);
+            ptr.getCellRef().unlock();
             // using a key disarms the trap
             ptr.getCellRef().setTrap("");
         }
@@ -257,20 +257,6 @@ namespace MWClass
     {
         return getContainerStore (ptr).getWeight();
     }
-
-    void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel!=0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
-        else
-            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the original one
-    }
-
-    void Container::unlock (const MWWorld::Ptr& ptr) const
-    {
-        ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
-    }
-
 
     MWWorld::Ptr
     Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const

@@ -142,7 +142,7 @@ namespace MWScript
                         runtime.pop();
                     }
 
-                    ptr.getClass().lock (ptr, lockLevel);
+                    ptr.getCellRef().lock (lockLevel);
                 }
         };
 
@@ -155,7 +155,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ptr.getClass().unlock (ptr);
+                    ptr.getCellRef().unlock();
                 }
         };
 

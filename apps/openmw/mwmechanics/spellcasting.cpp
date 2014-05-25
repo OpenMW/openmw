@@ -484,7 +484,7 @@ namespace MWMechanics
                         if (!caster.isEmpty() && caster.getClass().isActor())
                             MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
                     }
-                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel())); //unlocks the door
+                    target.getCellRef().unlock();
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
