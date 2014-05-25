@@ -330,7 +330,7 @@ namespace MWMechanics
 
         bool isStuck = false;
         float speed = 0.0f;
-        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) / 10.0f)
+        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) * tReaction / 2)
             isStuck = true;
 
         mLastPos = pos;
@@ -397,14 +397,10 @@ namespace MWMechanics
         {
             bool preferShortcut = false;
             bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, target);
-
-            if(mReadyToAttack) isStuck = false;
 			
             // check if shortcut is available
-            if(!isStuck
-                && (!mForceNoShortcut
-                || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
-                && inLOS)
+            if(inLOS && (!isStuck || mReadyToAttack)
+                && (!mForceNoShortcut || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
             {
                 if(speed == 0.0f) speed = actorCls.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
@@ -467,7 +463,7 @@ namespace MWMechanics
             mReadyToAttack = false;
         }
 
-        if(distToTarget > rangeAttack && !distantCombat)
+        if(!isStuck && distToTarget > rangeAttack && !distantCombat)
         {
             //special run attack; it shouldn't affect melee combat tactics
             if(actorCls.getMovementSettings(actor).mPosition[1] == 1)
