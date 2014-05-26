@@ -470,7 +470,11 @@ namespace MWMechanics
         {
             if (effectId == ESM::MagicEffect::Lock)
             {
-                if (target.getCellRef().getLockLevel() < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
+                if (target.getCellRef().isLocked())
+                    //If needed, increase the door's lock level
+                    if (target.getCellRef().getLockLevel() < magnitude)
+                        target.getCellRef().lock(magnitude);
+                else
                     target.getCellRef().lock(magnitude);
             }
             else if (effectId == ESM::MagicEffect::Open)
