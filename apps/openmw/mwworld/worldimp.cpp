@@ -2526,6 +2526,7 @@ namespace MWWorld
                     store.remove(*it, it->getRefData().getCount(), ptr);
                 }
             }
+            //Hardcoded value.  This is what vanilla Morrowind does
             closestChest.getCellRef().lock(50);
         }
     }
