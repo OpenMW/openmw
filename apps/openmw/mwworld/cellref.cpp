@@ -191,7 +191,7 @@ namespace MWWorld
         setLockLevel(-std::abs(getLockLevel())); //Makes lockLevel negative
     }
 
-    bool CellRef::isLocked()
+    bool CellRef::isLocked() const
     {
        return (getLockLevel() > 0);
     }

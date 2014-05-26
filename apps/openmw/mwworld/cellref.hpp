@@ -77,7 +77,7 @@ namespace MWWorld
 
         void lock (int lockLevel = 0);
         void unlock ();
-        bool isLocked ();
+        bool isLocked () const;
 
          // Key and trap ID names, if any
         std::string getKey() const;
