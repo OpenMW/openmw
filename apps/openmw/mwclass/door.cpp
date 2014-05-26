@@ -229,7 +229,7 @@ namespace MWClass
 
         if (ptr.getCellRef().isLocked())
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
-        else
+        else if(ptr.getCellRef().getLockLevel() != 0)
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
