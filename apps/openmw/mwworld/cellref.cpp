@@ -176,10 +176,14 @@ namespace MWWorld
 
     void CellRef::lock(int lockLevel)
     {
-        if(lockLevel!=0)
-            setLockLevel(std::abs(lockLevel)); //Changes lock to locklevel, in positive
-        else
-            setLockLevel(std::abs(getLockLevel())); //No locklevel given, just flip the origional one
+        //If no value was passed in to the function
+        if(lockLevel == 0 )
+            lockLevel = std::abs(getLockLevel()); //Changes lock to locklevel, in positive
+        //If no value was passed in and it was never locked
+        if(lockLevel == 0 )
+            lockLevel = 100;
+        //Lock it
+        setLockLevel(lockLevel);
     }
 
     void CellRef::unlock()

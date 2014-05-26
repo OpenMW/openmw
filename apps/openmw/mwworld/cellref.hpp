@@ -75,7 +75,7 @@ namespace MWWorld
         int getLockLevel() const;
         void setLockLevel(int lockLevel);
 
-        void lock (int lockLevel);
+        void lock (int lockLevel = 0);
         void unlock ();
         bool isLocked ();
 
