@@ -51,7 +51,7 @@ namespace MWMechanics
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {
-                lock.getClass().unlock(lock);
+                lock.getCellRef().unlock();
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
                 mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);

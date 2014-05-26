@@ -165,12 +165,6 @@ namespace MWWorld
             virtual bool hasInventoryStore (const Ptr& ptr) const;
             ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
 
-            virtual void lock (const Ptr& ptr, int lockLevel) const;
-            ///< Lock object (default implementation: throw an exception)
-
-            virtual void unlock (const Ptr& ptr) const;
-            ///< Unlock object (default implementation: throw an exception)
-
             virtual void setRemainingUsageTime (const Ptr& ptr, float duration) const;
             ///< Sets the remaining duration of the object, such as an equippable light
             /// source. (default implementation: throw an exception)
