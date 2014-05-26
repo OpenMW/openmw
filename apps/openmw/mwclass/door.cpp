@@ -192,8 +192,12 @@ namespace MWClass
     {
         if(lockLevel!=0)
             ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
-        else
-            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the origional one
+        else {
+            if(abs(ptr.getCellRef().getLockLevel())!=0)
+                ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the origional one
+            else
+                ptr.getCellRef().setLockLevel(100);
+        }
     }
 
     void Door::unlock (const MWWorld::Ptr& ptr) const
