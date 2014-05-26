@@ -149,7 +149,7 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(actor.getClass().getCreatureStats(actor).isDead()) 
+        if(actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
@@ -157,13 +157,16 @@ namespace MWMechanics
         if(target.getClass().getCreatureStats(target).isDead())
             return true;
 
-        if (!actor.getClass().isNpc() && target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
-            (actor.getClass().canSwim(actor) && !actor.getClass().canWalk(actor) // pure water creature
-            && !MWBase::Environment::get().getWorld()->isSwimming(target)) // Player moved out of water
-            || (!actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(target))) // creature can't swim to Player
+        const MWWorld::Class& actorClass = actor.getClass();
+        MWBase::World& world = *MWBase::Environment::get().getWorld();
+
+        if ((!actorClass.isNpc() && target == world.getPlayerPtr() &&
+            actorClass.canSwim(actor) && !actorClass.canWalk(actor) // pure water creature
+            && !world.isSwimming(target)) // Player moved out of water
+            || (!actorClass.canSwim(actor) && world.isSwimming(target))) // creature can't swim to Player
         {
-            actor.getClass().getCreatureStats(actor).setHostile(false);
-            actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
+            actorClass.getCreatureStats(actor).setHostile(false);
+            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;
         }
 
@@ -360,9 +363,9 @@ namespace MWMechanics
         if(distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck) )
         {
             //Melee and Close-up combat
-            
+
             // if we preserve dir.z then horizontal angle can be inaccurate
-            mMovement.mRotation[2] = getZAngleToDir(Ogre::Vector3(vDirToTarget.x, vDirToTarget.y, 0)); 
+            mMovement.mRotation[2] = getZAngleToDir(Ogre::Vector3(vDirToTarget.x, vDirToTarget.y, 0));
 
             // (not quite strike dist while following)
             if (mFollowTarget && distToTarget > rangeAttack)
@@ -408,7 +411,7 @@ namespace MWMechanics
         {
             bool preferShortcut = false;
             bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, target);
-			
+
             // check if shortcut is available
             if(inLOS && (!isStuck || mReadyToAttack)
                 && (!mForceNoShortcut || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
