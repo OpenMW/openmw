@@ -176,12 +176,9 @@ namespace MWWorld
 
     void CellRef::lock(int lockLevel)
     {
-        //If no value was passed in to the function
-        if(lockLevel == 0 )
+        //If negative value was passed in, then reset to original locklevel from ESM
+        if( lockLevel < 0 )
             lockLevel = std::abs(getLockLevel()); //Changes lock to locklevel, in positive
-        //If no value was passed in and it was never locked
-        if(lockLevel == 0 )
-            lockLevel = 100;
         //Lock it
         setLockLevel(lockLevel);
     }
