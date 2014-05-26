@@ -181,6 +181,7 @@ class CharacterController
 
     void updateVisibility();
 
+    void playDeath(float startpoint, CharacterState death);
     void playRandomDeath(float startpoint = 0.0f);
 
     /// choose a random animation group with \a prefix and numeric suffix

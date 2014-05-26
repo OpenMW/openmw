@@ -46,6 +46,7 @@ namespace ESM
         std::string mLastHitObject;
         bool mRecalcDynamicStats;
         int mDrawState;
+        unsigned char mDeathAnimation;
 
         int mLevel;
 
