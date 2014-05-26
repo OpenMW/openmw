@@ -496,10 +496,10 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
                 mExpelled.insert (iter->first);
 
             if (iter->second.mRank >= 0)
-                mFactionRank.insert (std::make_pair (iter->first, iter->second.mRank));
+                mFactionRank[iter->first] = iter->second.mRank;
 
             if (iter->second.mReputation)
-                mFactionReputation.insert (std::make_pair (iter->first, iter->second.mReputation));
+                mFactionReputation[iter->first] = iter->second.mReputation;
         }
 
     mDisposition = state.mDisposition;

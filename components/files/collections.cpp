@@ -1,5 +1,6 @@
-
 #include "collections.hpp"
+
+#include <components/misc/stringops.hpp>
 
 namespace Files
 {
@@ -36,9 +37,19 @@ namespace Files
         for (Files::PathContainer::const_iterator iter = mDirectories.begin();
              iter != mDirectories.end(); ++iter)
         {
-            const boost::filesystem::path path = *iter / file;
-            if (boost::filesystem::exists(path))
-                return path.string();
+            for (boost::filesystem::directory_iterator iter2 (*iter);
+                iter2!=boost::filesystem::directory_iterator(); ++iter2)
+            {
+                boost::filesystem::path path = *iter2;
+
+                if (mFoldCase)
+                {
+                    if (Misc::StringUtils::ciEqual(file, path.filename().string()))
+                        return path.string();
+                }
+                else if (path.filename().string() == file)
+                    return path.string();
+            }
         }
 
         throw std::runtime_error ("file " + file + " not found");
@@ -49,9 +60,19 @@ namespace Files
         for (Files::PathContainer::const_iterator iter = mDirectories.begin();
              iter != mDirectories.end(); ++iter)
         {
-            const boost::filesystem::path path = *iter / file;
-            if (boost::filesystem::exists(path))
-                return true;
+            for (boost::filesystem::directory_iterator iter2 (*iter);
+                iter2!=boost::filesystem::directory_iterator(); ++iter2)
+            {
+                boost::filesystem::path path = *iter2;
+
+                if (mFoldCase)
+                {
+                    if (Misc::StringUtils::ciEqual(file, path.filename().string()))
+                        return true;
+                }
+                else if (path.filename().string() == file)
+                    return true;
+            }
         }
 
         return false;
