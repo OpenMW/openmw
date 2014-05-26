@@ -137,7 +137,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                 float nearestDist = std::numeric_limits<float>::max();
                 Ogre::Vector3 vActorPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
 
-                for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+                for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
                 {
                     if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
 
@@ -147,7 +147,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                     if (target.isEmpty())
                     {
                         delete *it;
-                        mPackages.erase(it++);
+                        it = mPackages.erase(it);
                     }
                     else
                     {
@@ -159,19 +159,25 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                             nearestDist = distTo;
                             itActualCombat = it;
                         }
+                        ++it;
                     }
                 }
 
-                // all targets disappeared
-                if (nearestDist == std::numeric_limits<float>::max())
+                if (!mPackages.empty())
+                {
+                    if (nearestDist < std::numeric_limits<float>::max() && mPackages.begin() != itActualCombat)
+                    {
+                        // move combat package with nearest target to the front
+                        mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
+                    }
+
+                    package = mPackages.front();
+                    mLastAiPackage = package->getTypeId();
+                }
+                else 
                 {
                     mDone = true;
                     return;
-                }
-                else if (mPackages.begin() != itActualCombat)
-                {
-                    // move combat package with nearest target to the front
-                    mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
                 }
             }
 

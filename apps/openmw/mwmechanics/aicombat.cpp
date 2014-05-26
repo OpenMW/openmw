@@ -53,7 +53,7 @@ namespace
 
     // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
     // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
-    bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offset)
+    bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY)
     {
         if((to - from).length() >= PATHFIND_CAUTION_DIST || abs(from.z - to.z) <= PATHFIND_Z_REACH)
         {
@@ -61,7 +61,7 @@ namespace
             dir.z = 0;
             dir.normalise();
 			float verticalOffset = 200; // instead of '200' here we want the height of the actor
-            Ogre::Vector3 _from = from + dir*offset + Ogre::Vector3::UNIT_Z * verticalOffset;
+            Ogre::Vector3 _from = from + dir*offsetXY + Ogre::Vector3::UNIT_Z * verticalOffset;
 
             // cast up-down ray and find height in world space of hit
             float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
@@ -149,12 +149,23 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(actor.getClass().getCreatureStats(actor).isDead()) return true;
+        if(actor.getClass().getCreatureStats(actor).isDead()) 
+            return true;
 
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
 
         if(target.getClass().getCreatureStats(target).isDead())
             return true;
+
+        if (!actor.getClass().isNpc() && target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+            (actor.getClass().canSwim(actor) && !actor.getClass().canWalk(actor) // pure water creature
+            && !MWBase::Environment::get().getWorld()->isSwimming(target)) // Player moved out of water
+            || (!actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(target))) // creature can't swim to Player
+        {
+            actor.getClass().getCreatureStats(actor).setHostile(false);
+            actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
+            return true;
+        }
 
         //Update every frame
         if(mCombatMove)
@@ -327,10 +338,11 @@ namespace MWMechanics
         Ogre::Vector3 vActorPos(pos.pos);
         Ogre::Vector3 vTargetPos(target.getRefData().getPosition().pos);
         Ogre::Vector3 vDirToTarget = vTargetPos - vActorPos;
+        float distToTarget = vDirToTarget.length();
 
         bool isStuck = false;
         float speed = 0.0f;
-        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) / 10.0f)
+        if(mMovement.mPosition[1] && (Ogre::Vector3(mLastPos.pos) - vActorPos).length() < (speed = actorCls.getSpeed(actor)) * tReaction / 2)
             isStuck = true;
 
         mLastPos = pos;
@@ -342,16 +354,15 @@ namespace MWMechanics
         // determine vertical angle to target
         // if actor can move along z-axis it will control movement dir
         // if can't - it will control correct aiming
-        mMovement.mRotation[0] = getXAngleToDir(vDirToTarget);
-
-        vDirToTarget.z = 0;
-        float distToTarget = vDirToTarget.length();
+        mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
 
         // (within strike dist) || (not quite strike dist while following)
         if(distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck) )
         {
             //Melee and Close-up combat
-            mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
+            
+            // if we preserve dir.z then horizontal angle can be inaccurate
+            mMovement.mRotation[2] = getZAngleToDir(Ogre::Vector3(vDirToTarget.x, vDirToTarget.y, 0)); 
 
             // (not quite strike dist while following)
             if (mFollowTarget && distToTarget > rangeAttack)
@@ -397,19 +408,15 @@ namespace MWMechanics
         {
             bool preferShortcut = false;
             bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, target);
-
-            if(mReadyToAttack) isStuck = false;
 			
             // check if shortcut is available
-            if(!isStuck
-                && (!mForceNoShortcut
-                || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
-                && inLOS)
+            if(inLOS && (!isStuck || mReadyToAttack)
+                && (!mForceNoShortcut || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
             {
                 if(speed == 0.0f) speed = actorCls.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
                 float maxAvoidDist = tReaction * speed + speed / MAX_VEL_ANGULAR.valueRadians() * 2; // *2 - for reliability
-				preferShortcut = checkWayIsClear(vActorPos, vTargetPos, distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
+				preferShortcut = checkWayIsClear(vActorPos, vTargetPos, Ogre::Vector3(vDirToTarget.x, vDirToTarget.y, 0).length() > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
             }
 
             // don't use pathgrid when actor can move in 3 dimensions
@@ -467,7 +474,7 @@ namespace MWMechanics
             mReadyToAttack = false;
         }
 
-        if(distToTarget > rangeAttack && !distantCombat)
+        if(!isStuck && distToTarget > rangeAttack && !distantCombat)
         {
             //special run attack; it shouldn't affect melee combat tactics
             if(actorCls.getMovementSettings(actor).mPosition[1] == 1)
