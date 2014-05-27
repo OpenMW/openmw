@@ -9,6 +9,8 @@
 
 #include <components/esm/loaddial.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include "../world/infocollection.hpp"
 
 #include "document.hpp"
@@ -211,6 +213,42 @@ void CSMDoc::WriteFilterStage::perform (int stage, Messages& messages)
 
     if (record.get().mScope==mScope)
         WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> >::perform (stage, messages);
+}
+
+
+CSMDoc::CollectionReferencesStage::CollectionReferencesStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::CollectionReferencesStage::setup()
+{
+    mState.getSubRecords().clear();
+
+    int size = mDocument.getData().getReferences().getSize();
+
+    int steps = size/100;
+    if (size%100) ++steps;
+
+    return steps;
+}
+
+void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
+{
+    int size = mDocument.getData().getReferences().getSize();
+
+    for (int i=stage*100; i<stage*100+100 && i<size; ++i)
+    {
+        const CSMWorld::Record<CSMWorld::CellRef>& record =
+            mDocument.getData().getReferences().getRecord (i);
+
+        if (record.mState==CSMWorld::RecordBase::State_Deleted ||
+            record.mState==CSMWorld::RecordBase::State_Modified ||
+            record.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+        {
+            mState.getSubRecords()[Misc::StringUtils::lowerCase (record.get().mId)].push_back (i);
+        }
+    }
 }
 
 

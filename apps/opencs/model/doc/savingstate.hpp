@@ -2,6 +2,7 @@
 #define CSM_DOC_SAVINGSTATE_H
 
 #include <fstream>
+#include <map>
 
 #include <boost/filesystem/path.hpp>
 
@@ -24,6 +25,7 @@ namespace CSMDoc
             ESM::ESMWriter mWriter;
             boost::filesystem::path mProjectPath;
             bool mProjectFile;
+            std::map<std::string, std::vector<int> > mSubRecords; // record ID, list of subrecords
 
         public:
 
@@ -45,6 +47,8 @@ namespace CSMDoc
 
             bool isProjectFile() const;
             ///< Currently saving project file? (instead of content file)
+
+            std::map<std::string, std::vector<int> > getSubRecords();
     };
 
 
