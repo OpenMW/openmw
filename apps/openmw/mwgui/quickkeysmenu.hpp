@@ -70,6 +70,7 @@ namespace MWGui
     {
     public:
         QuickKeysMenuAssign(QuickKeysMenu* parent);
+        virtual void exit();
 
     private:
         MyGUI::TextBox* mLabel;
@@ -87,6 +88,7 @@ namespace MWGui
         MagicSelectionDialog(QuickKeysMenu* parent);
 
         virtual void open();
+        virtual void exit();
 
     private:
         MyGUI::Button* mCancelButton;

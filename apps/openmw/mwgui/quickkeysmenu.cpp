@@ -59,7 +59,7 @@ namespace MWGui
 
     void QuickKeysMenu::exit()
     {
-        mAssignDialog->setVisible (false);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
     }
 
     void QuickKeysMenu::clear()
@@ -151,7 +151,7 @@ namespace MWGui
 
     void QuickKeysMenu::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        exit();
+        mAssignDialog->setVisible (false);
     }
 
     void QuickKeysMenu::onAssignItem(MWWorld::Ptr item)
@@ -390,6 +390,11 @@ namespace MWGui
         center();
     }
 
+    void QuickKeysMenuAssign::exit()
+    {
+        setVisible(false);
+    }
+
     void QuickKeysMenu::write(ESM::ESMWriter &writer)
     {
         writer.startRecord(ESM::REC_KEYS);
@@ -513,7 +518,12 @@ namespace MWGui
 
     void MagicSelectionDialog::onCancelButtonClicked (MyGUI::Widget *sender)
     {
-        mParent->onAssignMagicCancel ();
+        exit();
+    }
+
+    void MagicSelectionDialog::exit()
+    {
+        mParent->onAssignMagicCancel();
     }
 
     void MagicSelectionDialog::open ()
