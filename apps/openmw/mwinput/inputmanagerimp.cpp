@@ -113,6 +113,7 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
         , mAlwaysRunActive(false)
+        , mAttemptJump(false)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -171,6 +172,11 @@ namespace MWInput
         if (action == A_Use)
         {
             MWWorld::Class::get(mPlayer->getPlayer()).getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+        }
+
+        if (action == A_Jump)
+        {
+            mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
 
         if (currentValue == 1)
@@ -292,107 +298,107 @@ namespace MWInput
         }
 
         // Disable movement in Gui mode
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
-                return;
-
-
-        // Configure player movement according to keyboard input. Actual movement will
-        // be done in the physics system.
-        if (mControlSwitch["playercontrols"])
+        if (!(MWBase::Environment::get().getWindowManager()->isGuiMode()
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running))
         {
-            bool triedToMove = false;
-            if (actionIsActive(A_MoveLeft))
+            // Configure player movement according to keyboard input. Actual movement will
+            // be done in the physics system.
+            if (mControlSwitch["playercontrols"])
             {
-                triedToMove = true;
-                mPlayer->setLeftRight (-1);
-            }
-            else if (actionIsActive(A_MoveRight))
-            {
-                triedToMove = true;
-                mPlayer->setLeftRight (1);
-            }
-
-            if (actionIsActive(A_MoveForward))
-            {
-                triedToMove = true;
-                mPlayer->setAutoMove (false);
-                mPlayer->setForwardBackward (1);
-            }
-            else if (actionIsActive(A_MoveBackward))
-            {
-                triedToMove = true;
-                mPlayer->setAutoMove (false);
-                mPlayer->setForwardBackward (-1);
-            }
-
-            else if(mPlayer->getAutoMove())
-            {
-                triedToMove = true;
-                mPlayer->setForwardBackward (1);
-            }
-
-            mPlayer->setSneak(actionIsActive(A_Sneak));
-
-            if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
-            {
-                mPlayer->setUpDown (1);
-                triedToMove = true;
-            }
-
-            if (mAlwaysRunActive)
-                mPlayer->setRunState(!actionIsActive(A_Run));
-            else
-                mPlayer->setRunState(actionIsActive(A_Run));
-
-            // if player tried to start moving, but can't (due to being overencumbered), display a notification.
-            if (triedToMove)
-            {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                mOverencumberedMessageDelay -= dt;
-                if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
+                bool triedToMove = false;
+                if (actionIsActive(A_MoveLeft))
                 {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (-1);
+                }
+                else if (actionIsActive(A_MoveRight))
+                {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (1);
+                }
+
+                if (actionIsActive(A_MoveForward))
+                {
+                    triedToMove = true;
                     mPlayer->setAutoMove (false);
-                    if (mOverencumberedMessageDelay <= 0)
+                    mPlayer->setForwardBackward (1);
+                }
+                else if (actionIsActive(A_MoveBackward))
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (-1);
+                }
+
+                else if(mPlayer->getAutoMove())
+                {
+                    triedToMove = true;
+                    mPlayer->setForwardBackward (1);
+                }
+
+                mPlayer->setSneak(actionIsActive(A_Sneak));
+
+                if (mAttemptJump && mControlSwitch["playerjumping"])
+                {
+                    mPlayer->setUpDown (1);
+                    triedToMove = true;
+                }
+
+                if (mAlwaysRunActive)
+                    mPlayer->setRunState(!actionIsActive(A_Run));
+                else
+                    mPlayer->setRunState(actionIsActive(A_Run));
+
+                // if player tried to start moving, but can't (due to being overencumbered), display a notification.
+                if (triedToMove)
+                {
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+                    mOverencumberedMessageDelay -= dt;
+                    if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
                     {
-                        MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
-                        mOverencumberedMessageDelay = 1.0;
+                        mPlayer->setAutoMove (false);
+                        if (mOverencumberedMessageDelay <= 0)
+                        {
+                            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
+                            mOverencumberedMessageDelay = 1.0;
+                        }
+                    }
+                }
+
+                if (mControlSwitch["playerviewswitch"]) {
+
+                    // work around preview mode toggle when pressing Alt+Tab
+                    if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
+                        if (mPreviewPOVDelay <= 0.5 &&
+                            (mPreviewPOVDelay += dt) > 0.5)
+                        {
+                            mPreviewPOVDelay = 1.f;
+                            MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                        }
+                    } else {
+                        //disable preview mode
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                        if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5) {
+                            MWBase::Environment::get().getWorld()->togglePOV();
+                        }
+                        mPreviewPOVDelay = 0.f;
                     }
                 }
             }
-
-            if (mControlSwitch["playerviewswitch"]) {
-
-                // work around preview mode toggle when pressing Alt+Tab
-                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
-                    if (mPreviewPOVDelay <= 0.5 &&
-                        (mPreviewPOVDelay += dt) > 0.5)
-                    {
-                        mPreviewPOVDelay = 1.f;
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
-                    }
-                } else {
-                    //disable preview mode
-                    MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5) {
-                        MWBase::Environment::get().getWorld()->togglePOV();
-                    }
-                    mPreviewPOVDelay = 0.f;
-                }
+            if (actionIsActive(A_MoveForward) ||
+                actionIsActive(A_MoveBackward) ||
+                actionIsActive(A_MoveLeft) ||
+                actionIsActive(A_MoveRight) ||
+                actionIsActive(A_Jump) ||
+                actionIsActive(A_Sneak) ||
+                actionIsActive(A_TogglePOV))
+            {
+                resetIdleTime();
+            } else {
+                updateIdleTime(dt);
             }
         }
-        if (actionIsActive(A_MoveForward) ||
-            actionIsActive(A_MoveBackward) ||
-            actionIsActive(A_MoveLeft) ||
-            actionIsActive(A_MoveRight) ||
-            actionIsActive(A_Jump) ||
-            actionIsActive(A_Sneak) ||
-            actionIsActive(A_TogglePOV))
-        {
-            resetIdleTime();
-        } else {
-            updateIdleTime(dt);
-        }
+        mAttemptJump = false; // Can only jump on first frame input is on
     }
 
     void InputManager::setDragDrop(bool dragDrop)
@@ -502,12 +508,13 @@ namespace MWInput
             }
         }
 
-        mInputBinder->keyPressed (arg);
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
+        bool passToBinder = true;
         if (kc != OIS::KC_UNASSIGNED)
-            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            passToBinder = !MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+        if(passToBinder)
+            mInputBinder->keyPressed (arg);
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
