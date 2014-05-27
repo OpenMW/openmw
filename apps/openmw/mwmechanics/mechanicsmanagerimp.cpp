@@ -498,27 +498,24 @@ namespace MWMechanics
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end(); ++it)
+            if (!playerStats.getExpelled(npcFaction))
             {
-                if(Misc::StringUtils::ciEqual(it->mFaction, npcFaction)
-                        && !playerStats.getExpelled(it->mFaction))
-                    reaction = it->mReaction;
+                reaction = playerStats.getFactionReputation(npcFaction);
+
+                rank = playerStats.getFactionRanks().find(npcFaction)->second;
             }
-            rank = playerStats.getFactionRanks().find(npcFaction)->second;
         }
-        else if (npcFaction != "")
+        else if (!npcFaction.empty())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end();++it)
+            std::map<std::string, int>::const_iterator playerFactionIt = playerStats.getFactionRanks().begin();
+            for (; playerFactionIt != playerStats.getFactionRanks().end(); ++playerFactionIt)
             {
-                if(playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerStats.getFactionRanks().end() )
-                {
-                    if(it->mReaction < reaction)
-                        reaction = it->mReaction;
-                }
+                std::string itFaction = playerFactionIt->first;
+
+                int itReaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, itFaction);
+                if (playerFactionIt == playerStats.getFactionRanks().begin() || itReaction < reaction)
+                    reaction = itReaction;
             }
-            rank = 0;
         }
         else
         {

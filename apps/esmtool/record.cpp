@@ -707,9 +707,9 @@ void Record<ESM::Faction>::print()
             std::cout << "    Faction Reaction: "
                       << mData.mData.mRankData[i].mFactReaction << std::endl;
         }
-    std::vector<ESM::Faction::Reaction>::iterator rit;
+    std::map<std::string, int>::iterator rit;
     for (rit = mData.mReactions.begin(); rit != mData.mReactions.end(); rit++)
-        std::cout << "  Reaction: " << rit->mReaction << " = " << rit->mFaction << std::endl;
+        std::cout << "  Reaction: " << rit->second << " = " << rit->first << std::endl;
 }
 
 template<>

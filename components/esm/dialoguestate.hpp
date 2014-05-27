@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace ESM
 {
@@ -14,6 +15,8 @@ namespace ESM
     struct DialogueState
     {
         std::vector<std::string> mKnownTopics;
+
+        std::map<std::string, std::map<std::string, int> > mModFactionReaction;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
