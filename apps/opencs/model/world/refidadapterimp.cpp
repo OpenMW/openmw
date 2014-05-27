@@ -222,6 +222,66 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
 }
 
+void CSMWorld::ContainerRefIdAdapter::setData(const RefIdColumn *column, RefIdData& data,
+                                              int index,
+                                              const QVariant& value,
+                                              int subRowIndex,
+                                              int subColIndex)
+{
+    using RefIdAdapter::setData;
+    Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    if (column==mContent)
+    {
+        switch (subColIndex)
+        {
+            case 0:
+                record.get().mInventory.mList.at(subRowIndex).mItem.assign(std::string(value.toString().toUtf8().constData()));
+                break;
+
+            case 1:
+                record.get().mInventory.mList.at(subRowIndex).mCount = value.toInt();
+                break;
+        }
+    } else
+    {
+        throw "This column does not hold multiple values.";
+    }
+}
+
+QVariant CSMWorld::ContainerRefIdAdapter::getData (const CSMWorld::RefIdColumn* column,
+                                                   const CSMWorld::RefIdData& data,
+                                                   int index,
+                                                   int subRowIndex,
+                                                   int subColIndex) const
+{
+    using RefIdAdapter::getData;
+    const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    if (column==mContent)
+    {
+        const ESM::ContItem& content = record.get().mInventory.mList.at(subRowIndex);
+
+        switch (subColIndex)
+        {
+            case 0:
+                return QString::fromUtf8(content.mItem.toString().c_str());
+
+            case 1:
+                return content.mCount;
+
+            default:
+                throw "Trying to access non-existing column in the nested table!";
+        }
+    } else
+    {
+        throw "This column does not hold multiple values.";
+    }
+}
+
+
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
 : ActorColumns (actorColumns)
 {}

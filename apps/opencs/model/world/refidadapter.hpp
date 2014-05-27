@@ -30,6 +30,13 @@ namespace CSMWorld
                 const QVariant& value) const = 0;
             ///< If the data type does not match an exception is thrown.
 
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data,
+                                      int idnex, int subRowIndex, int subColIndex) const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data,
+                                  const QVariant& value, int index,
+                                  int subRowIndex, int subColIndex) const;
+
             virtual std::string getId (const RecordBase& record) const = 0;
             virtual void setId(RecordBase& record, const std::string& id) = 0;
     };
