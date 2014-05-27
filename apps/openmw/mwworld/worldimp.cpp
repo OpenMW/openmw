@@ -2526,7 +2526,7 @@ namespace MWWorld
                     store.remove(*it, it->getRefData().getCount(), ptr);
                 }
             }
-            closestChest.getClass().lock(closestChest);
+            closestChest.getClass().unlock(closestChest);
         }
     }
 
