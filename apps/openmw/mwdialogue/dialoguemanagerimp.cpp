@@ -695,11 +695,13 @@ namespace MWDialogue
 
         const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
 
-        std::map<std::string, int>::const_iterator it = faction->mReactions.find(fact2);
-        if (it == faction->mReactions.end())
-            return diff;
-        else
-            return it->second + diff;
+        std::map<std::string, int>::const_iterator it = faction->mReactions.begin();
+        for (; it != faction->mReactions.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(it->first, fact2))
+                    return it->second + diff;
+        }
+        return diff;
     }
 
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)
