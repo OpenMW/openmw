@@ -1635,13 +1635,24 @@ namespace MWWorld
 
     Ptr World::copyObjectToCell(const Ptr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
     {
-        if (object.getClass().isActor() || adjustPos)
+        if (!object.getClass().isActor() && adjustPos)
         {
+            // Adjust position so the location we wanted ends up in the middle of the object bounding box
             Ogre::Vector3 min, max;
             if (mPhysics->getObjectAABB(object, min, max)) {
-                pos.pos[0] -= (min.x + max.x) / 2;
-                pos.pos[1] -= (min.y + max.y) / 2;
-                pos.pos[2] -= min.z;
+                Ogre::Quaternion xr(Ogre::Radian(-pos.rot[0]), Ogre::Vector3::UNIT_X);
+                Ogre::Quaternion yr(Ogre::Radian(-pos.rot[1]), Ogre::Vector3::UNIT_Y);
+                Ogre::Quaternion zr(Ogre::Radian(-pos.rot[2]), Ogre::Vector3::UNIT_Z);
+
+                Ogre::Vector3 adjust (
+                             (min.x + max.x) / 2,
+                            (min.y + max.y) / 2,
+                            min.z
+                            );
+                adjust = (xr*yr*zr) * adjust;
+                pos.pos[0] -= adjust.x;
+                pos.pos[1] -= adjust.y;
+                pos.pos[2] -= adjust.z;
             }
         }
 
