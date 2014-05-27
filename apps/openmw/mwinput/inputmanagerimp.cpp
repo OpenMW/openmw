@@ -492,7 +492,8 @@ namespace MWInput
                 }
                 if (arg.keysym.sym == SDLK_x && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
-                    std::string text = edit->getTextSelection();
+                    // Discard color codes and other escape characters
+                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
                     if (text.length())
                     {
                         SDL_SetClipboardText(text.c_str());
@@ -504,7 +505,8 @@ namespace MWInput
             {
                 if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
-                    std::string text = edit->getTextSelection();
+                    // Discard color codes and other escape characters
+                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
                     if (text.length())
                         SDL_SetClipboardText(text.c_str());
                 }
