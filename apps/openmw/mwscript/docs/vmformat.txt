@@ -391,5 +391,6 @@ op 0x200023f: GetPcTraveling
 op 0x2000240: onKnockout
 op 0x2000241: onKnockoutExplicit
 op 0x2000242: ModFactionReaction
+op 0x2000243: GetFactionReaction
 
-opcodes 0x2000243-0x3ffffff unused
+opcodes 0x2000244-0x3ffffff unused
