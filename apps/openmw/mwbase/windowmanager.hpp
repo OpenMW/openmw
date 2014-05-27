@@ -322,7 +322,12 @@ namespace MWBase
 
             /// Sets the current Modal
             /** Used to send exit command to active Modal when Esc is pressed **/
-            virtual void setCurrentModal(MWGui::WindowModal* input) = 0;
+            virtual void addCurrentModal(MWGui::WindowModal* input) = 0;
+
+            /// Removes the top Modal
+            /** Used when one Modal adds another Modal
+                \param input Pointer to the current modal, to ensure proper modal is removed **/
+            virtual void removeCurrentModal(MWGui::WindowModal* input) = 0;
     };
 }
 

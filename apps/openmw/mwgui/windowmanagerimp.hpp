@@ -305,11 +305,16 @@ namespace MWGui
 
     /// Returns the current Modal
     /** Used to send exit command to active Modal when Esc is pressed **/
-    virtual WindowModal* getCurrentModal() const {return currentModal;}
+    virtual WindowModal* getCurrentModal() const;
 
     /// Sets the current Modal
     /** Used to send exit command to active Modal when Esc is pressed **/
-    virtual void setCurrentModal(WindowModal* input) {currentModal = input;}
+    virtual void addCurrentModal(WindowModal* input) {mCurrentModals.push(input);}
+
+    /// Removes the top Modal
+    /** Used when one Modal adds another Modal
+        \param input Pointer to the current modal, to ensure proper modal is removed **/
+    virtual void removeCurrentModal(WindowModal* input);
 
   private:
     bool mConsoleOnlyScripts;
@@ -320,7 +325,7 @@ namespace MWGui
 
     std::string mSelectedSpell;
 
-    WindowModal* currentModal;
+    std::stack<WindowModal*> mCurrentModals;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;

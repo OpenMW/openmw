@@ -47,13 +47,13 @@ WindowModal::WindowModal(const std::string& parLayout)
 void WindowModal::open()
 {
     MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
-    MWBase::Environment::get().getWindowManager()->setCurrentModal(this); //Set so we can escape it if needed
+    MWBase::Environment::get().getWindowManager()->addCurrentModal(this); //Set so we can escape it if needed
 }
 
 void WindowModal::close()
 {
     MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
-    MWBase::Environment::get().getWindowManager()->setCurrentModal(NULL);
+    MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
 }
 
 void WindowModal::exit()

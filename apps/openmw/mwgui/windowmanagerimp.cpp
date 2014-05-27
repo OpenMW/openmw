@@ -136,7 +136,7 @@ namespace MWGui
       , mFPS(0.0f)
       , mTriangleCount(0)
       , mBatchCount(0)
-      , currentModal(NULL)
+      , mCurrentModals()
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
@@ -1605,5 +1605,22 @@ namespace MWGui
 
         mVideoWidget->setCoord(leftPadding, topPadding,
                                screenWidth - leftPadding*2, screenHeight - topPadding*2);
+    }
+
+    WindowModal* WindowManager::getCurrentModal() const
+    {
+        if(mCurrentModals.size() > 0)
+            return mCurrentModals.top();
+        else
+            return NULL;
+    }
+
+    void WindowManager::removeCurrentModal(WindowModal* input)
+    {
+        // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
+        //so just popping the top would cause massive issues.
+        if(mCurrentModals.size() > 0)
+            if(input == mCurrentModals.top())
+                mCurrentModals.pop();
     }
 }
