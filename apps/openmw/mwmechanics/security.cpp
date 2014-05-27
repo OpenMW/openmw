@@ -29,7 +29,7 @@ namespace MWMechanics
     void Security::pickLock(const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
                             std::string& resultMessage, std::string& resultSound)
     {
-        if (!(lock.getCellRef().getLockLevel() > 0)) //If it's unlocked back out immediately
+        if (!lock.getCellRef().isLocked()) //If it's unlocked back out immediately
             return;
 
         int lockStrength = lock.getCellRef().getLockLevel();
@@ -51,7 +51,7 @@ namespace MWMechanics
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {
-                lock.getClass().unlock(lock);
+                lock.getCellRef().unlock();
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
                 mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);

@@ -74,6 +74,12 @@ namespace MWWorld
         // For an unlocked door, it is set to -(previous locklevel)
         int getLockLevel() const;
         void setLockLevel(int lockLevel);
+
+        //Pass a negative here to reset to the last locked value
+        void lock (int lockLevel);
+        void unlock ();
+        bool isLocked () const;
+
          // Key and trap ID names, if any
         std::string getKey() const;
         std::string getTrap() const;

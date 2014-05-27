@@ -48,12 +48,6 @@ namespace MWClass
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
-            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel = 0) const;
-            ///< Lock object
-
-            virtual void unlock (const MWWorld::Ptr& ptr) const;
-            ///< Unlock object
-
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
                 const;
             ///< Read additional state from \a state into \a ptr.

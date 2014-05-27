@@ -129,20 +129,23 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    Interpreter::Type_Integer lockLevel = ptr.getCellRef().getLockLevel();
-                    if(lockLevel==0) { //no lock level was ever set, set to 100 as default
-                        lockLevel = 100;
-                    }
-
-                    if (arg0==1)
+                    //Lock takes at least one argument, but safely ignores any extras passed to it
+                    if (arg0>=1)
                     {
-                        lockLevel = runtime[0].mInteger;
+                        MWWorld::Ptr ptr = R()(runtime);
+                        ptr.getCellRef().lock (runtime[0].mInteger);
                         runtime.pop();
-                    }
 
-                    ptr.getClass().lock (ptr, lockLevel);
+                        // throw away additional arguments
+                        for (unsigned int i=0; i<arg0; ++i)
+                            runtime.pop();
+                    }
+                    else
+                    {
+                        InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
+                        context.report ("Lock needs at least one argument.");
+                    }
+                    
                 }
         };
 
@@ -155,7 +158,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ptr.getClass().unlock (ptr);
+                    ptr.getCellRef().unlock();
                 }
         };
 
@@ -324,7 +327,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (ptr.getCellRef().getLockLevel() > 0);
+                    runtime.push (ptr.getCellRef().isLocked());
                 }
         };
 

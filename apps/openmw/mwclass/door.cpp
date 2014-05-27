@@ -101,7 +101,7 @@ namespace MWClass
 
         MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
 
-        bool needKey = ptr.getCellRef().getLockLevel() > 0;
+        bool needKey = ptr.getCellRef().isLocked();
         bool hasKey = false;
         std::string keyName;
 
@@ -123,9 +123,9 @@ namespace MWClass
         {
             if(actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
-            unlock(ptr); //Call the function here. because that makes sense.
+            ptr.getCellRef().unlock();
             // using a key disarms the trap
-            ptr.getCellRef().getTrap() = "";
+            ptr.getCellRef().setTrap("");
         }
 
         if (!needKey || hasKey)
@@ -188,19 +188,6 @@ namespace MWClass
         }
     }
 
-    void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel!=0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
-        else
-            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the origional one
-    }
-
-    void Door::unlock (const MWWorld::Ptr& ptr) const
-    {
-        ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
-    }
-
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Door> *ref =
@@ -240,9 +227,9 @@ namespace MWClass
             text += "\n" + getDestination(*ref);
         }
 
-        if (ptr.getCellRef().getLockLevel() > 0)
+        if (ptr.getCellRef().isLocked())
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
-        else if (ptr.getCellRef().getLockLevel() < 0)
+        else if(ptr.getCellRef().getLockLevel() != 0)
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
