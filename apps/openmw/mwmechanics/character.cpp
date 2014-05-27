@@ -407,29 +407,25 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
     return inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 }
 
-void CharacterController::playRandomDeath(float startpoint)
+void CharacterController::playDeath(float startpoint, CharacterState death)
 {
-    if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
+    switch (death)
     {
-        mDeathState = CharState_SwimDeath;
+    case CharState_SwimDeath:
         mCurrentDeath = "swimdeath";
-    }
-    else if (mHitState == CharState_KnockDown)
-    {
-        mDeathState = CharState_DeathKnockDown;
+        break;
+    case CharState_DeathKnockDown:
         mCurrentDeath = "deathknockdown";
-    }
-    else if (mHitState == CharState_KnockOut)
-    {
-        mDeathState = CharState_DeathKnockOut;
+        break;
+    case CharState_DeathKnockOut:
         mCurrentDeath = "deathknockout";
+        break;
+    default:
+        mCurrentDeath = "death" + Ogre::StringConverter::toString(death - CharState_Death1 + 1);
     }
-    else
-    {
-        int selected=0;
-        mCurrentDeath = chooseRandomGroup("death", &selected);
-        mDeathState = static_cast<CharacterState>(CharState_Death1 + (selected-1));
-    }
+    mDeathState = death;
+
+    mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(mDeathState - CharState_Death1);
 
     // For dead actors, refreshCurrentAnims is no longer called, so we need to disable the movement state manually.
     mMovementState = CharState_None;
@@ -438,6 +434,29 @@ void CharacterController::playRandomDeath(float startpoint)
 
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                     false, 1.0f, "start", "stop", startpoint, 0);
+}
+
+void CharacterController::playRandomDeath(float startpoint)
+{
+    if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
+    {
+        mDeathState = CharState_SwimDeath;
+    }
+    else if (mHitState == CharState_KnockDown)
+    {
+        mDeathState = CharState_DeathKnockDown;
+    }
+    else if (mHitState == CharState_KnockOut)
+    {
+        mDeathState = CharState_DeathKnockOut;
+    }
+    else
+    {
+        int selected=0;
+        chooseRandomGroup("death", &selected);
+        mDeathState = static_cast<CharacterState>(CharState_Death1 + (selected-1));
+    }
+    playDeath(startpoint, mDeathState);
 }
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
@@ -497,7 +516,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
     if(mDeathState != CharState_None)
     {
-        playRandomDeath(1.0f);
+        int deathindex = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
+        playDeath(1.0f, CharacterState(CharState_Death1 + deathindex));
     }
     else
         refreshCurrentAnims(mIdleState, mMovementState, true);

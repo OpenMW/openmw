@@ -74,6 +74,9 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mActorId = -1;
     esm.getHNOT (mActorId, "ACID");
 
+    mDeathAnimation = 0;
+    esm.getHNOT (mDeathAnimation, "DANM");
+
     mSpells.load(esm);
     mActiveSpells.load(esm);
 }
@@ -151,6 +154,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mActorId != -1)
         esm.writeHNT ("ACID", mActorId);
+
+    if (mDeathAnimation)
+        esm.writeHNT ("DANM", mDeathAnimation);
 
     mSpells.save(esm);
     mActiveSpells.save(esm);
