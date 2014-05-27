@@ -263,7 +263,7 @@ namespace MWClass
         if(lockLevel!=0)
             ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
         else
-            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the origional one
+            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the original one
     }
 
     void Container::unlock (const MWWorld::Ptr& ptr) const
