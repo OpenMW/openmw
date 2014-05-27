@@ -152,6 +152,7 @@ namespace Compiler
         const int opcodeGetReputationExplicit = 0x20001b2;
         const int opcodeSameFaction = 0x20001b5;
         const int opcodeSameFactionExplicit = 0x20001b6;
+        const int opcodeModFactionReaction = 0x2000242;
     }
 
     namespace Gui

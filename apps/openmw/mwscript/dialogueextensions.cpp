@@ -196,6 +196,24 @@ namespace MWScript
                 }
         };
 
+        class OpModFactionReaction : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                int modReaction = runtime[0].mInteger;
+                runtime.pop();
+
+                MWBase::Environment::get().getDialogueManager()->modFactionReaction(faction1, faction2, modReaction);
+            }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -215,6 +233,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetReputationExplicit, new OpGetReputation<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFaction, new OpSameFaction<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
         }
     }
 
