@@ -264,6 +264,13 @@ namespace MWGui
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
+    void DialogueWindow::exit()
+    {
+        if (!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
+            return;
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+    }
+
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
     {
         mTopicsList->adjustSize();
@@ -281,9 +288,7 @@ namespace MWGui
 
     void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     {
-        if (!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
-            return;
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        exit();
     }
 
     void DialogueWindow::onSelectTopic(const std::string& topic, int id)

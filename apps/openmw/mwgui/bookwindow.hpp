@@ -14,6 +14,8 @@ namespace MWGui
         public:
             BookWindow();
 
+            virtual void exit();
+
             void open(MWWorld::Ptr book);
             void setTakeButtonShow(bool show);
             void nextPage();

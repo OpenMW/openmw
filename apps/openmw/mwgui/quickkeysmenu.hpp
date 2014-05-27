@@ -18,6 +18,7 @@ namespace MWGui
         QuickKeysMenu();
         ~QuickKeysMenu();
 
+        virtual void exit();
 
         void onItemButtonClicked(MyGUI::Widget* sender);
         void onMagicButtonClicked(MyGUI::Widget* sender);

@@ -57,6 +57,11 @@ namespace MWGui
         }
     }
 
+    void QuickKeysMenu::exit()
+    {
+        mAssignDialog->setVisible (false);
+    }
+
     void QuickKeysMenu::clear()
     {
         for (int i=0; i<10; ++i)
@@ -146,7 +151,7 @@ namespace MWGui
 
     void QuickKeysMenu::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        mAssignDialog->setVisible (false);
+        exit();
     }
 
     void QuickKeysMenu::onAssignItem(MWWorld::Ptr item)

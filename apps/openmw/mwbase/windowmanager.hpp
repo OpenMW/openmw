@@ -234,14 +234,19 @@ namespace MWBase
 
             virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
 
+            /// Hides dialog and schedules dialog to be deleted.
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
-            ///< Hides dialog and schedules dialog to be deleted.
+
+            ///Gracefully attempts to exit the topmost GUI mode
+            /** No guarentee of actually closing the window **/
+            virtual void exitCurrentGuiMode() = 0;
 
             virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
+
+            /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
-            ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
             virtual void onFrame (float frameDuration) = 0;
 

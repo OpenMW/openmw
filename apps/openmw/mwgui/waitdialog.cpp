@@ -69,6 +69,11 @@ namespace MWGui
         mProgressBar.setVisible (false);
     }
 
+    void WaitDialog::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+    }
+
     void WaitDialog::open()
     {
         if (!MWBase::Environment::get().getWindowManager ()->getRestEnabled ())
@@ -160,7 +165,7 @@ namespace MWGui
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getWindowManager()->popGuiMode ();
+        exit();
     }
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)

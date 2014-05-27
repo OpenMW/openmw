@@ -38,6 +38,11 @@ void Recharge::open()
     center();
 }
 
+void Recharge::exit()
+{
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
+}
+
 void Recharge::start (const MWWorld::Ptr &item)
 {
     std::string path = std::string("icons\\");
@@ -128,7 +133,7 @@ void Recharge::updateView()
 
 void Recharge::onCancel(MyGUI::Widget *sender)
 {
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
+    exit();
 }
 
 void Recharge::onItemClicked(MyGUI::Widget *sender)

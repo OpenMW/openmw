@@ -21,8 +21,13 @@ namespace MWGui
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
+        ///Unhides the window
         virtual void open() {}
+        ///Hides the window
         virtual void close () {}
+        ///Gracefully exits the window
+        virtual void exit() {}
+        ///Sets the visibility of the window
         virtual void setVisible(bool visible);
         void center();
 

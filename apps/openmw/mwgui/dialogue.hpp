@@ -103,6 +103,8 @@ namespace MWGui
     public:
         DialogueWindow();
 
+        virtual void exit();
+
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 

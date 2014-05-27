@@ -143,6 +143,11 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
     }
 
+    void Console::exit()
+    {
+         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Console);
+    }
+
     void Console::setFont(const std::string &fntName)
     {
         mHistory->setFontName(fntName);
