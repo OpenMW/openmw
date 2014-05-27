@@ -698,9 +698,6 @@ namespace MWGui
             case GM_RestBed:
                 mWaitDialog->exit();
                 break;
-            case GM_Levelup:
-                mLevelupDialog->exit();
-                break;
             case GM_Name:
             case GM_Race:
             case GM_Class:

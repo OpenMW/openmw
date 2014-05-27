@@ -642,6 +642,14 @@ namespace MWInput
             return;
         }
 
+        if(MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Dialogue) { //Give access to the main menu when at a choice in Dialogue
+            if(MWBase::Environment::get().getDialogueManager()->isInChoice()) {
+                MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+                MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
+                return;
+            }
+        }
+
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
