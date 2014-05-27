@@ -226,9 +226,8 @@ void CSMWorld::ContainerRefIdAdapter::setData(const RefIdColumn *column, RefIdDa
                                               int index,
                                               const QVariant& value,
                                               int subRowIndex,
-                                              int subColIndex)
+                                              int subColIndex) const
 {
-    using RefIdAdapter::setData;
     Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
@@ -256,7 +255,6 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const CSMWorld::RefIdColumn* 
                                                    int subRowIndex,
                                                    int subColIndex) const
 {
-    using RefIdAdapter::getData;
     const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
