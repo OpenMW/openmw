@@ -1620,25 +1620,39 @@ namespace MWWorld
 
     bool World::canPlaceObject(float cursorX, float cursorY)
     {
-        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+        Ogre::Vector3 normal(0,0,0);
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY, &normal);
 
-        /// \todo also check if the wanted position is on a flat surface, and not e.g. against a vertical wall!
-
-        if (!result.first)
+        if (result.first)
+        {
+            // check if the wanted position is on a flat surface, and not e.g. against a vertical wall
+            return (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() < 30);
+        }
+        else
             return false;
-        return true;
     }
 
 
     Ptr World::copyObjectToCell(const Ptr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
     {
-        if (object.getClass().isActor() || adjustPos)
+        if (!object.getClass().isActor() && adjustPos)
         {
+            // Adjust position so the location we wanted ends up in the middle of the object bounding box
             Ogre::Vector3 min, max;
             if (mPhysics->getObjectAABB(object, min, max)) {
-                pos.pos[0] -= (min.x + max.x) / 2;
-                pos.pos[1] -= (min.y + max.y) / 2;
-                pos.pos[2] -= min.z;
+                Ogre::Quaternion xr(Ogre::Radian(-pos.rot[0]), Ogre::Vector3::UNIT_X);
+                Ogre::Quaternion yr(Ogre::Radian(-pos.rot[1]), Ogre::Vector3::UNIT_Y);
+                Ogre::Quaternion zr(Ogre::Radian(-pos.rot[2]), Ogre::Vector3::UNIT_Z);
+
+                Ogre::Vector3 adjust (
+                             (min.x + max.x) / 2,
+                            (min.y + max.y) / 2,
+                            min.z
+                            );
+                adjust = (xr*yr*zr) * adjust;
+                pos.pos[0] -= adjust.x;
+                pos.pos[1] -= adjust.y;
+                pos.pos[2] -= adjust.z;
             }
         }
 
