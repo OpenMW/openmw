@@ -34,6 +34,7 @@ namespace MWGui
         PersuasionDialog();
 
         virtual void open();
+        virtual void exit();
 
     private:
         MyGUI::Button* mCancelButton;

@@ -2,6 +2,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 #include "container.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwgui/windowmanagerimp.hpp"
 
 using namespace MWGui;
 
@@ -45,11 +47,18 @@ WindowModal::WindowModal(const std::string& parLayout)
 void WindowModal::open()
 {
     MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
+    MWBase::Environment::get().getWindowManager()->setCurrentModal(this); //Set so we can escape it if needed
 }
 
 void WindowModal::close()
 {
     MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
+    MWBase::Environment::get().getWindowManager()->setCurrentModal(NULL);
+}
+
+void WindowModal::exit()
+{
+    close();
 }
 
 NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)

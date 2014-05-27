@@ -30,6 +30,8 @@
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
+#include "../mwgui/windowbase.hpp"
+
 using namespace ICS;
 
 namespace
@@ -635,9 +637,10 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
-// TODO: Find a way to send an exit command to current Modal Widget
-        if (MyGUI::InputManager::getInstance().isModalAny())
+        if (MyGUI::InputManager::getInstance().isModalAny()) {
+            MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
             return;
+        }
 
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
         {

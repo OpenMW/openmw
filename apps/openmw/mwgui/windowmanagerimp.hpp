@@ -82,6 +82,7 @@ namespace MWGui
   class Recharge;
   class CompanionWindow;
   class VideoWidget;
+  class WindowModal;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -302,6 +303,14 @@ namespace MWGui
     /// Does the current stack of GUI-windows permit saving?
     virtual bool isSavingAllowed() const;
 
+    /// Returns the current Modal
+    /** Used to send exit command to active Modal when Esc is pressed **/
+    virtual WindowModal* getCurrentModal() const {return currentModal;}
+
+    /// Sets the current Modal
+    /** Used to send exit command to active Modal when Esc is pressed **/
+    virtual void setCurrentModal(WindowModal* input) {currentModal = input;}
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -310,6 +319,8 @@ namespace MWGui
     void onWindowChangeCoord(MyGUI::Window* _sender);
 
     std::string mSelectedSpell;
+
+    WindowModal* currentModal;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;

@@ -51,7 +51,7 @@ namespace MWGui
 
     void PersuasionDialog::onCancel(MyGUI::Widget *sender)
     {
-        setVisible(false);
+        exit();
     }
 
     void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
@@ -85,6 +85,11 @@ namespace MWGui
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+    }
+
+    void PersuasionDialog::exit()
+    {
+        setVisible(false);
     }
 
     // --------------------------------------------------------------------------------------------------

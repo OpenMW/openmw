@@ -57,6 +57,7 @@ namespace MWGui
     class InventoryWindow;
     class ContainerWindow;
     class DialogueWindow;
+    class WindowModal;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -314,6 +315,14 @@ namespace MWBase
 
             /// Does the current stack of GUI-windows permit saving?
             virtual bool isSavingAllowed() const = 0;
+
+            /// Returns the current Modal
+            /** Used to send exit command to active Modal when Esc is pressed **/
+            virtual MWGui::WindowModal* getCurrentModal() const = 0;
+
+            /// Sets the current Modal
+            /** Used to send exit command to active Modal when Esc is pressed **/
+            virtual void setCurrentModal(MWGui::WindowModal* input) = 0;
     };
 }
 

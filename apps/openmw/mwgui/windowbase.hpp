@@ -47,6 +47,7 @@ namespace MWGui
         WindowModal(const std::string& parLayout);
         virtual void open();
         virtual void close();
+        virtual void exit();
     };
 
     /// A window that cannot be the target of a drag&drop action.

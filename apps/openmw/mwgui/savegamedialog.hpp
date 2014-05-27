@@ -19,6 +19,8 @@ namespace MWGui
 
         virtual void open();
 
+        virtual void exit();
+
         void setLoadOrSave(bool load);
 
     private:
