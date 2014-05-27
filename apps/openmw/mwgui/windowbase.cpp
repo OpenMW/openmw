@@ -56,11 +56,6 @@ void WindowModal::close()
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
 }
 
-void WindowModal::exit()
-{
-    close();
-}
-
 NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)
     : mDrag(drag), mWidget(widget), mTransparent(false)
 {
