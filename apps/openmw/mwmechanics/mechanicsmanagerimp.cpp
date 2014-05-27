@@ -1022,7 +1022,9 @@ namespace MWMechanics
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
-        MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+        if (ptr.getClass().isNpc())
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
             ptr.getClass().getCreatureStats(ptr).setHostile(true);

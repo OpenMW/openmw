@@ -1375,10 +1375,10 @@ namespace MWWorld
 
         updateWeather(duration);
 
-        mWorldScene->update (duration, paused);
-
         if (!paused)
             doPhysics (duration);
+
+        mWorldScene->update (duration, paused);
 
         performUpdateSceneQueries ();
 
