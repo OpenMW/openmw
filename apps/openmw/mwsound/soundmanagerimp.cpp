@@ -244,7 +244,6 @@ namespace MWSound
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
                                                           20.0f, 1500.0f, Play_Normal|Play_TypeVoice, 0);
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
-	    mSoundPlayTime[sound] = std::make_pair(ptr, 0);
         }
         catch(std::exception &e)
         {
@@ -262,9 +261,7 @@ namespace MWSound
             std::string filePath = "Sound/"+filename;
 
             MWBase::SoundPtr sound = mOutput->playSound(filePath, 1.0f, basevol, 1.0f, Play_Normal|Play_TypeVoice, 0);
-	    MWWorld::Ptr ptr = MWWorld::Ptr();
-            mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
-	    mSoundPlayTime[sound] = std::make_pair(ptr, 0);
+            mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), std::string("_say_sound"));
         }
         catch(std::exception &e)
         {
@@ -290,18 +287,6 @@ namespace MWSound
             else
                 ++snditer;
         }
-    }
-    
-    float SoundManager::getSoundPlayingTime(const MWWorld::Ptr &ptr)
-    {
-	typedef SoundPlayingTimeMap::iterator iter_type;
-	for(iter_type iterator = mSoundPlayTime.begin(); iterator != mSoundPlayTime.end(); iterator++)
-	{
-	    if (iterator->second.first == ptr)
-	      return iterator->second.second;
-	}
-	
-	return 0;
     }
 
 
@@ -617,12 +602,8 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(!snditer->first->isPlaying())
-	    {
-                mActiveSounds.erase(snditer);
-		mSoundPlayTime.erase(snditer->first);
-		snditer++;
-	    }
-	    else
+                mActiveSounds.erase(snditer++);
+            else
             {
                 const MWWorld::Ptr &ptr = snditer->second.first;
                 if(!ptr.isEmpty())
@@ -645,15 +626,6 @@ namespace MWSound
                 ++snditer;
             }
         }
-        
-        // Update the total playing time for all sounds.
-        // This is primarily used for detecting amplitude for NPC mouth animation.
-        
-        typedef SoundPlayingTimeMap::iterator it_type;
-	for(it_type iterator = mSoundPlayTime.begin(); iterator != mSoundPlayTime.end(); iterator++)
-	{
-	    iterator->second.second += duration;
-	}
     }
 
     void SoundManager::update(float duration)

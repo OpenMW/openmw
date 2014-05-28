@@ -43,10 +43,6 @@ namespace MWSound
         typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
         typedef std::map<MWBase::SoundPtr,PtrIDPair> SoundMap;
         SoundMap mActiveSounds;
-	
-	typedef std::pair<MWWorld::Ptr, float> PtrFloatPair;
-	typedef std::map<MWBase::SoundPtr, PtrFloatPair> SoundPlayingTimeMap;
-	SoundPlayingTimeMap mSoundPlayTime;
 
         MWBase::SoundPtr mUnderwaterSound;
 
@@ -108,9 +104,6 @@ namespace MWSound
 
         virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr());
         ///< Stop an actor speaking
-	
-	virtual float getSoundPlayingTime(const MWWorld::Ptr &reference=MWWorld::Ptr());
-	///< Get the amount of time this sound has been playing.
 
         virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
