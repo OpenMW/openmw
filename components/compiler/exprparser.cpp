@@ -98,7 +98,7 @@ namespace Compiler
         else if (t1=='f' || t2=='f')
             mOperands.push_back ('f');
         else
-            std::logic_error ("failed to determine result operand type");
+            throw std::logic_error ("failed to determine result operand type");
     }
 
     void ExprParser::pop()

@@ -387,7 +387,7 @@ std::string magicEffectLabel(int idx)
         "sEffectSummonCreature04",
         "sEffectSummonCreature05"
     };
-    if (idx >= 0 && idx <= 143)
+    if (idx >= 0 && idx <= 142)
         return magicEffectLabels[idx];
     else
         return "Invalid";
@@ -471,7 +471,7 @@ std::string skillLabel(int idx)
         "Speechcraft",
         "Hand-to-hand"
     };
-    if (idx >= 0 && idx <= 27)
+    if (idx >= 0 && idx <= 26)
         return skillLabels[idx];
     else
         return "Invalid";
@@ -498,7 +498,7 @@ std::string rangeTypeLabel(int idx)
         "Touch",
         "Target"
     };
-    if (idx >= 0 && idx <= 3)
+    if (idx >= 0 && idx <= 2)
         return rangeTypeLabels[idx];
     else
         return "Invalid";
