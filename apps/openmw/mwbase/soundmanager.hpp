@@ -100,6 +100,9 @@ namespace MWBase
 
             virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
+	    
+	    virtual float getSoundPlayingTime(const MWWorld::Ptr &reference=MWWorld::Ptr()) = 0;
+	    ///< Get the amount of time this sound has been playing.
 
             virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
             ///< Play a 2D audio track, using a custom decoder
