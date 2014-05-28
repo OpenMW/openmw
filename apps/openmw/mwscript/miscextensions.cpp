@@ -109,6 +109,7 @@ namespace MWScript
                 }
         };
 
+        template <class R>
         class OpActivate : public Interpreter::Opcode0
         {
             public:
@@ -118,7 +119,9 @@ namespace MWScript
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
 
-                    context.executeActivation();
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    context.executeActivation(ptr);
                 }
         };
 
@@ -860,7 +863,8 @@ namespace MWScript
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
             interpreter.installSegment5 (Compiler::Misc::opcodeOnActivate, new OpOnActivate);
-            interpreter.installSegment5 (Compiler::Misc::opcodeActivate, new OpActivate);
+            interpreter.installSegment5 (Compiler::Misc::opcodeActivate, new OpActivate<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeActivateExplicit, new OpActivate<ExplicitRef>);
             interpreter.installSegment3 (Compiler::Misc::opcodeLock, new OpLock<ImplicitRef>);
             interpreter.installSegment3 (Compiler::Misc::opcodeLockExplicit, new OpLock<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeUnlock, new OpUnlock<ImplicitRef>);

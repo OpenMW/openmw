@@ -1019,12 +1019,13 @@ namespace MWMechanics
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
-        if (ptr.getClass().isNpc())
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
-
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
             ptr.getClass().getCreatureStats(ptr).setHostile(true);
+
+        // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
+        if (ptr.getClass().isNpc())
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
     void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
