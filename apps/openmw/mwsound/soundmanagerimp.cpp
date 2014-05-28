@@ -654,13 +654,6 @@ namespace MWSound
 	{
 	    iterator->second.second += duration;
 	}
-	
-	std::cout << mSoundPlayTime.size() << " sounds currently playing." << std::endl;
-	typedef SoundPlayingTimeMap::iterator it_ty;
-	for(it_ty iterator = mSoundPlayTime.begin(); iterator != mSoundPlayTime.end(); iterator++)
-	{
-	    std::cout << iterator->first->getPlayType() << ": " << iterator->second.second << std::endl; 
-	}
     }
 
     void SoundManager::update(float duration)
