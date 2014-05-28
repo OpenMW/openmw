@@ -491,10 +491,7 @@ void OMW::Engine::activate()
 
     MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 
-    boost::shared_ptr<MWWorld::Action> action =
-        ptr.getClass().activate (ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-    interpreterContext.activate (ptr, action);
+    interpreterContext.activate (ptr);
 
     std::string script = ptr.getClass().getScript (ptr);
 
@@ -508,7 +505,7 @@ void OMW::Engine::activate()
 
     if (!interpreterContext.hasActivationBeenHandled())
     {
-        interpreterContext.executeActivation();
+        interpreterContext.executeActivation(ptr);
     }
 }
 
