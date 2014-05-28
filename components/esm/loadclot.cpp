@@ -46,7 +46,6 @@ void Clothing::save(ESMWriter &esm) const
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mIcon.clear();
         mEnchant.clear();
         mScript.clear();
     }
