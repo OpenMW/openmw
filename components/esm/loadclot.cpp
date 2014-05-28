@@ -8,33 +8,34 @@ namespace ESM
 {
     unsigned int Clothing::sRecordId = REC_CLOT;
 
-void Clothing::load(ESMReader &esm)
-{
-    mModel = esm.getHNString("MODL");
-    mName = esm.getHNOString("FNAM");
-    esm.getHNT(mData, "CTDT", 12);
+    void Clothing::load(ESMReader &esm)
+    {
+	mModel = esm.getHNString("MODL");
+	mName = esm.getHNOString("FNAM");
+	esm.getHNT(mData, "CTDT", 12);
 
-    mScript = esm.getHNOString("SCRI");
-    mIcon = esm.getHNOString("ITEX");
+	mScript = esm.getHNOString("SCRI");
+	mIcon = esm.getHNOString("ITEX");
 
-    mParts.load(esm);
+	mParts.load(esm);
 
 
-    mEnchant = esm.getHNOString("ENAM");
-}
-void Clothing::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("MODL", mModel);
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNT("CTDT", mData, 12);
+	mEnchant = esm.getHNOString("ENAM");
+    }
 
-    esm.writeHNOCString("SCRI", mScript);
-    esm.writeHNOCString("ITEX", mIcon);
+    void Clothing::save(ESMWriter &esm) const
+    {
+	esm.writeHNCString("MODL", mModel);
+	esm.writeHNOCString("FNAM", mName);
+	esm.writeHNT("CTDT", mData, 12);
 
-    mParts.save(esm);
+	esm.writeHNOCString("SCRI", mScript);
+	esm.writeHNOCString("ITEX", mIcon);
 
-    esm.writeHNOCString("ENAM", mEnchant);
-}
+	mParts.save(esm);
+
+	esm.writeHNOCString("ENAM", mEnchant);
+    }
 
     void Clothing::blank()
     {
