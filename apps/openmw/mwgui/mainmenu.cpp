@@ -229,7 +229,7 @@ namespace MWGui
         if (state == MWBase::StateManager::State_NoGame)
         {
             // Align with the background image
-            int bottomPadding=48;
+            int bottomPadding=24;
             mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight - curH - bottomPadding, maxwidth, curH);
         }
         else
