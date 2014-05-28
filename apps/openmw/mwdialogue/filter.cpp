@@ -396,16 +396,15 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             int value = 0;
 
-            const ESM::Faction& faction =
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find (factionId);
-
             MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats (player);
 
-            for (std::vector<ESM::Faction::Reaction>::const_iterator iter (faction.mReactions.begin());
-                iter!=faction.mReactions.end(); ++iter)
-                if (playerStats.getFactionRanks().find (iter->mFaction)!=playerStats.getFactionRanks().end())
-                    if (low ? iter->mReaction<value : iter->mReaction>value)
-                        value = iter->mReaction;
+            std::map<std::string, int>::const_iterator playerFactionIt = playerStats.getFactionRanks().begin();
+            for (; playerFactionIt != playerStats.getFactionRanks().end(); ++playerFactionIt)
+            {
+                int reaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(factionId, playerFactionIt->first);
+                if (low ? reaction < value : reaction > value)
+                    value = reaction;
+            }
 
             return value;
         }

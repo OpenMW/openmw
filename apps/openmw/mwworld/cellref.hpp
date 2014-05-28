@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    class ObjectState;
+    struct ObjectState;
 }
 
 namespace MWWorld

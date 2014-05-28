@@ -541,6 +541,9 @@ namespace MWScript
                         runtime.pop();
                     }
                     ::Misc::StringUtils::toLower(factionID);
+                    // Make sure this faction exists
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -572,6 +575,9 @@ namespace MWScript
                         runtime.pop();
                     }
                     ::Misc::StringUtils::toLower(factionID);
+                    // Make sure this faction exists
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -607,6 +613,9 @@ namespace MWScript
                         runtime.pop();
                     }
                     ::Misc::StringUtils::toLower(factionID);
+                    // Make sure this faction exists
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -645,6 +654,9 @@ namespace MWScript
                         }
                     }
                     ::Misc::StringUtils::toLower(factionID);
+                    // Make sure this faction exists
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     if(factionID!="")
                     {

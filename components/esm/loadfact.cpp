@@ -44,10 +44,10 @@ void Faction::load(ESMReader &esm)
     // Read faction response values
     while (esm.hasMoreSubs())
     {
-        Reaction r;
-        r.mFaction = esm.getHNString("ANAM");
-        esm.getHNT(r.mReaction, "INTV");
-        mReactions.push_back(r);
+        std::string faction = esm.getHNString("ANAM");
+        int reaction;
+        esm.getHNT(reaction, "INTV");
+        mReactions[faction] = reaction;
     }
 }
 void Faction::save(ESMWriter &esm) const
@@ -64,10 +64,10 @@ void Faction::save(ESMWriter &esm) const
 
     esm.writeHNT("FADT", mData, 240);
 
-    for (std::vector<Reaction>::const_iterator it = mReactions.begin(); it != mReactions.end(); ++it)
+    for (std::map<std::string, int>::const_iterator it = mReactions.begin(); it != mReactions.end(); ++it)
     {
-        esm.writeHNString("ANAM", it->mFaction);
-        esm.writeHNT("INTV", it->mReaction);
+        esm.writeHNString("ANAM", it->first);
+        esm.writeHNT("INTV", it->second);
     }
 }
 

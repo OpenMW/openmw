@@ -775,11 +775,11 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
     }
 
     /* Look in reverse; last-inserted source has priority. */
+    AnimState state;
     AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
     for(;iter != mAnimSources.rend();++iter)
     {
         const NifOgre::TextKeyMap &textkeys = (*iter)->mTextKeys;
-        AnimState state;
         if(reset(state, textkeys, groupname, start, stop, startpoint))
         {
             state.mSource = *iter;
@@ -821,6 +821,13 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
         std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().getRefId() <<std::endl;
 
     resetActiveGroups();
+
+    if (!state.mPlaying && mNonAccumCtrl)
+    {
+        // If the animation state is not playing, we need to manually apply the accumulation
+        // (see updatePosition, which would be called if the animation was playing)
+        mAccumRoot->setPosition(-mNonAccumCtrl->getTranslation(state.mTime)*mAccumulate);
+    }
 }
 
 bool Animation::isPlaying(const std::string &groupname) const
