@@ -10,6 +10,7 @@ namespace MyGUI
   class OgreDataManager;
   class OgreRenderManager;
   class ShaderBasedRenderManager;
+  class LogFacility;
 }
 
 namespace Ogre
@@ -25,6 +26,7 @@ namespace GUI
     {
         MyGUI::Gui *mGui;
         MyGUI::LogManager* mLogManager;
+        MyGUI::LogFacility* mLogFacility;
         MyGUI::OgreDataManager* mDataManager;
         MyGUI::OgreRenderManager* mRenderManager;
         MyGUI::ShaderBasedRenderManager* mShaderRenderManager;

@@ -386,8 +386,8 @@ namespace MWGui
         mTopicLinks.clear();
         mKeywordSearch.clear();
 
-        bool isCompanion = !MWWorld::Class::get(mPtr).getScript(mPtr).empty()
-                && mPtr.getRefData().getLocals().getIntVar(MWWorld::Class::get(mPtr).getScript(mPtr), "companion");
+        bool isCompanion = !mPtr.getClass().getScript(mPtr).empty()
+                && mPtr.getRefData().getLocals().getIntVar(mPtr.getClass().getScript(mPtr), "companion");
 
         bool anyService = mServices > 0 || isCompanion || mPtr.getTypeName() == typeid(ESM::NPC).name();
 

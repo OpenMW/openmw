@@ -57,7 +57,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader actiontrap cellreflist projectilemanager
+    contentloader esmloader omwloader actiontrap cellreflist projectilemanager cellref
     )
 
 add_openmw_dir (mwclass
@@ -83,6 +83,10 @@ add_openmw_dir (mwbase
 
 # Main executable
 set(BOOST_COMPONENTS system filesystem program_options thread wave)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 IF(OGRE_STATIC)

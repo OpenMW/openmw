@@ -27,7 +27,9 @@ void CSMDoc::OpenSaveStage::perform (int stage, Messages& messages)
 {
     mState.start (mDocument, mProjectFile);
 
-    mState.getStream().open ((mProjectFile ? mState.getPath() : mState.getTmpPath()).string().c_str());
+    mState.getStream().open (
+        mProjectFile ? mState.getPath() : mState.getTmpPath(),
+        std::ios::binary);
 
     if (!mState.getStream().is_open())
         throw std::runtime_error ("failed to open stream for saving");

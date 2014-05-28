@@ -64,6 +64,9 @@ namespace MWMechanics
 
         int mActorId;
 
+        // The index of the death animation that was played
+        unsigned char mDeathAnimation;
+
     protected:
         // These two are only set by NpcStats, but they are declared in CreatureStats to prevent using virtual methods.
         bool mIsWerewolf;
@@ -249,6 +252,9 @@ namespace MWMechanics
 
         void setGoldPool(int pool);
         int getGoldPool() const;
+
+        unsigned char getDeathAnimation() const;
+        void setDeathAnimation(unsigned char index);
 
         int getActorId();
         ///< Will generate an actor ID, if the actor does not have one yet.

@@ -89,7 +89,7 @@ namespace MWGui
                 if (mFocusObject.isEmpty ())
                     return;
 
-                const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
+                const MWWorld::Class& objectclass = mFocusObject.getClass();
 
                 MyGUI::IntSize tooltipSize;
                 if ((!objectclass.hasToolTip(mFocusObject))&&(MWBase::Environment::get().getWindowManager()->getMode() == GM_Console))
@@ -97,7 +97,7 @@ namespace MWGui
                     setCoord(0, 0, 300, 300);
                     mDynamicToolTipBox->setVisible(true);
                     ToolTipInfo info;
-                    info.caption=mFocusObject.getCellRef().mRefID;
+                    info.caption=mFocusObject.getCellRef().getRefId();
                     info.icon="";
                     tooltipSize = createToolTip(info);
                 }
@@ -305,7 +305,7 @@ namespace MWGui
 
         MyGUI::IntSize tooltipSize;
 
-        const MWWorld::Class& object = MWWorld::Class::get (mFocusObject);
+        const MWWorld::Class& object = mFocusObject.getClass();
         if (!object.hasToolTip(mFocusObject))
         {
             mDynamicToolTipBox->setVisible(false);

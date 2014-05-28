@@ -33,16 +33,16 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     // Cache parent esX files by tracking their indices in the global list of
     //  all files/readers used by the engine. This will greaty accelerate
     //  refnumber mangling, as required for handling moved references.
-    int index = ~0;
     const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
     std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
         ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
         std::string fname = mast.name;
+        int index = ~0;
         for (int i = 0; i < esm.getIndex(); i++) {
             const std::string &candidate = allPlugins->at(i).getContext().filename;
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
-            if (fname == fnamecandidate) {
+            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
                 break;
             }

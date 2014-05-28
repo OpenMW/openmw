@@ -102,10 +102,11 @@ namespace MWMechanics
         if (roll < x)
         {
             // Reduce shield durability by incoming damage
-            if (shield->getCellRef().mCharge == -1)
-                shield->getCellRef().mCharge = shield->getClass().getItemMaxHealth(*shield);
-            shield->getCellRef().mCharge -= std::min(shield->getCellRef().mCharge, int(damage));
-            if (!shield->getCellRef().mCharge)
+            int shieldhealth = shield->getClass().getItemHealth(*shield);
+
+            shieldhealth -= std::min(shieldhealth, int(damage));
+            shield->getCellRef().setCharge(shieldhealth);
+            if (shieldhealth == 0)
                 inv.unequipItem(*shield, blocker);
 
             // Reduce blocker fatigue

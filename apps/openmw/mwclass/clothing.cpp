@@ -193,14 +193,14 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
         info.enchant = ref->mBase->mEnchant;
         if (!info.enchant.empty())
-            info.remainingEnchantCharge = ptr.getCellRef().mEnchantmentCharge;
+            info.remainingEnchantCharge = ptr.getCellRef().getEnchantmentCharge();
 
         info.text = text;
 
@@ -215,7 +215,7 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
-    void Clothing::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Clothing::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
@@ -226,14 +226,13 @@ namespace MWClass
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
         const ESM::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-        ref->mBase = record;
-        ref->mRef.mRefID = record->mId;
+        return record->mId;
     }
 
     std::pair<int, std::string> Clothing::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
             return std::make_pair(0, "");

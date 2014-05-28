@@ -85,10 +85,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        if (ptr.getCellRef().mCharge == -1)
-            return ref->mBase->mData.mValue;
-        else
-            return ref->mBase->mData.mValue * (static_cast<float>(ptr.getCellRef().mCharge) / getItemMaxHealth(ptr));
+        return ref->mBase->mData.mValue * (static_cast<float>(getItemHealth(ptr)) / getItemMaxHealth(ptr));
     }
 
     void Probe::registerSelf()
@@ -135,7 +132,7 @@ namespace MWClass
 
         std::string text;
 
-        int remainingUses = (ptr.getCellRef().mCharge != -1) ? ptr.getCellRef().mCharge : ref->mBase->mData.mUses;
+        int remainingUses = getItemHealth(ptr);
 
         text += "\n#{sUses}: " + MWGui::ToolTips::toString(remainingUses);
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
@@ -143,8 +140,8 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 

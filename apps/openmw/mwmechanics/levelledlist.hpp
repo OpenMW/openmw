@@ -53,28 +53,26 @@ namespace MWMechanics
             return std::string();
         std::string item = candidates[std::rand()%candidates.size()];
 
-        // Is this another levelled item or a real item?
-        try
+        // Vanilla doesn't fail on nonexistent items in levelled lists
+        if (!MWBase::Environment::get().getWorld()->getStore().find(Misc::StringUtils::lowerCase(item)))
         {
-            MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item, 1);
-            if (ref.getPtr().getTypeName() != typeid(ESM::ItemLevList).name()
-                    && ref.getPtr().getTypeName() != typeid(ESM::CreatureLevList).name())
-            {
-                return item;
-            }
-            else
-            {
-                if (ref.getPtr().getTypeName() == typeid(ESM::ItemLevList).name())
-                    return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, failChance);
-                else
-                    return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, failChance);
-            }
-        }
-        catch (std::logic_error&)
-        {
-            // Vanilla doesn't fail on nonexistent items in levelled lists
-            std::cerr << "Warning: ignoring nonexistent item '" << item << "'" << std::endl;
+            std::cerr << "Warning: ignoring nonexistent item '" << item << "' in levelled list '" << levItem->mId << "'" << std::endl;
             return std::string();
+        }
+
+        // Is this another levelled item or a real item?
+        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item, 1);
+        if (ref.getPtr().getTypeName() != typeid(ESM::ItemLevList).name()
+                && ref.getPtr().getTypeName() != typeid(ESM::CreatureLevList).name())
+        {
+            return item;
+        }
+        else
+        {
+            if (ref.getPtr().getTypeName() == typeid(ESM::ItemLevList).name())
+                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, failChance);
+            else
+                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, failChance);
         }
     }
 

@@ -47,7 +47,7 @@ namespace MWWorld
         }
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
+        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats (player);
 
         // Skill gain from books
         if (ref->mBase->mData.mSkillID >= 0 && ref->mBase->mData.mSkillID < ESM::Skill::Length

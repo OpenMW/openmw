@@ -21,7 +21,6 @@ namespace MWMechanics
 
             std::string mNewItemName;
             std::string mObjectType;
-            std::string mOldItemId;
 
         public:
             Enchanting();

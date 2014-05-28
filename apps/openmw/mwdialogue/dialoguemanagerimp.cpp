@@ -134,13 +134,13 @@ namespace MWDialogue
 
         mActor = actor;
 
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
+        MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats (actor);
         mTalkedTo = creatureStats.hasTalkedToPlayer();
 
         mActorKnownTopics.clear();
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
+        win->startDialogue(actor, actor.getClass().getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
@@ -194,7 +194,7 @@ namespace MWDialogue
 
             Compiler::Locals locals;
 
-            std::string actorScript = MWWorld::Class::get (mActor).getScript (mActor);
+            std::string actorScript = mActor.getClass().getScript (mActor);
 
             if (!actorScript.empty())
             {
@@ -435,7 +435,7 @@ namespace MWDialogue
         // Apply disposition change to NPC's base disposition
         if (mActor.getClass().isNpc())
         {
-            MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
+            MWMechanics::NpcStats& npcStats = mActor.getClass().getNpcStats(mActor);
             npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
         }
         mPermanentDispositionChange = 0;
@@ -642,6 +642,8 @@ namespace MWDialogue
             if (iter->second)
                 state.mKnownTopics.push_back (iter->first);
 
+        state.mModFactionReaction = mModFactionReaction;
+
         writer.startRecord (ESM::REC_DIAS);
         state.save (writer);
         writer.endRecord (ESM::REC_DIAS);
@@ -661,9 +663,46 @@ namespace MWDialogue
                 iter!=state.mKnownTopics.end(); ++iter)
                 if (store.get<ESM::Dialogue>().search (*iter))
                     mKnownTopics.insert (std::make_pair (*iter, true));
+
+            mModFactionReaction = state.mModFactionReaction;
         }
     }
 
+    void DialogueManager::modFactionReaction(const std::string &faction1, const std::string &faction2, int diff)
+    {
+        std::string fact1 = Misc::StringUtils::lowerCase(faction1);
+        std::string fact2 = Misc::StringUtils::lowerCase(faction2);
+
+        // Make sure the factions exist
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
+
+        std::map<std::string, int>& map = mModFactionReaction[fact1];
+        if (map.find(fact2) == map.end())
+            map[fact2] = 0;
+        map[fact2] += diff;
+    }
+
+    int DialogueManager::getFactionReaction(const std::string &faction1, const std::string &faction2) const
+    {
+        std::string fact1 = Misc::StringUtils::lowerCase(faction1);
+        std::string fact2 = Misc::StringUtils::lowerCase(faction2);
+
+        ModFactionReactionMap::const_iterator map = mModFactionReaction.find(fact1);
+        int diff = 0;
+        if (map != mModFactionReaction.end() && map->second.find(fact2) != map->second.end())
+            diff = map->second.at(fact2);
+
+        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
+
+        std::map<std::string, int>::const_iterator it = faction->mReactions.begin();
+        for (; it != faction->mReactions.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(it->first, fact2))
+                    return it->second + diff;
+        }
+        return diff;
+    }
 
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)
     {

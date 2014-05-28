@@ -40,7 +40,7 @@ namespace MWGui
             else
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
             if (setNewOwner)
-                dropped.getCellRef().mOwner = "";
+                dropped.getCellRef().setOwner("");
 
             return dropped;
         }
@@ -348,7 +348,7 @@ namespace MWGui
     void HUD::onWeaponClicked(MyGUI::Widget* _sender)
     {
         const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
+        if (player.getClass().getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
             return;
@@ -360,7 +360,7 @@ namespace MWGui
     void HUD::onMagicClicked(MyGUI::Widget* _sender)
     {
         const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
+        if (player.getClass().getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
             return;
@@ -443,7 +443,7 @@ namespace MWGui
 
     void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
     {
-        std::string itemName = MWWorld::Class::get(item).getName(item);
+        std::string itemName = item.getClass().getName(item);
         if (itemName != mSpellName && mSpellVisible)
         {
             mWeaponSpellTimer = 5.0f;
@@ -466,7 +466,7 @@ namespace MWGui
             , MyGUI::Align::Stretch);
 
         std::string path = std::string("icons\\");
-        path+=MWWorld::Class::get(item).getInventoryIcon(item);
+        path+=item.getClass().getInventoryIcon(item);
         Widgets::fixTexturePath(path);
         itemBox->setImageTexture(path);
         itemBox->setNeedMouseFocus(false);
@@ -474,7 +474,7 @@ namespace MWGui
 
     void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
     {
-        std::string itemName = MWWorld::Class::get(item).getName(item);
+        std::string itemName = item.getClass().getName(item);
         if (itemName != mWeaponName && mWeaponVisible)
         {
             mWeaponSpellTimer = 5.0f;
@@ -493,10 +493,10 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
 
         std::string path = std::string("icons\\");
-        path+=MWWorld::Class::get(item).getInventoryIcon(item);
+        path+=item.getClass().getInventoryIcon(item);
         Widgets::fixTexturePath(path);
 
-        if (MWWorld::Class::get(item).getEnchantment(item) != "")
+        if (item.getClass().getEnchantment(item) != "")
         {
             mWeapImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
             MyGUI::ImageBox* itemBox = mWeapImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
@@ -545,7 +545,7 @@ namespace MWGui
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-        if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
+        if (player.getClass().getNpcStats(player).isWerewolf())
             mWeapImage->setImageTexture("icons\\k\\tx_werewolf_hand.dds");
         else
             mWeapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
@@ -636,7 +636,7 @@ namespace MWGui
 
     void HUD::updateEnemyHealthBar()
     {
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
+        MWMechanics::CreatureStats& stats = mEnemy.getClass().getCreatureStats(mEnemy);
         mEnemyHealth->setProgressRange(100);
         // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)

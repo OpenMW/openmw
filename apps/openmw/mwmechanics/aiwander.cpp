@@ -572,7 +572,7 @@ namespace MWMechanics
     void AiWander::stopWalking(const MWWorld::Ptr& actor)
     {
         mPathFinder.clearPath();
-        MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     }
 
     void AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)

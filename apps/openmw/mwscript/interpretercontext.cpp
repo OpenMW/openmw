@@ -66,7 +66,7 @@ namespace MWScript
         {
             const MWWorld::Ptr ptr = getReference (id, false);
 
-             id = MWWorld::Class::get (ptr).getScript (ptr);
+             id = ptr.getClass().getScript (ptr);
 
             ptr.getRefData().setLocals (
                 *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
@@ -86,7 +86,7 @@ namespace MWScript
         {
             const MWWorld::Ptr ptr = getReference (id, false);
 
-            id = MWWorld::Class::get (ptr).getScript (ptr);
+            id = ptr.getClass().getScript (ptr);
 
             ptr.getRefData().setLocals (
                 *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
@@ -263,7 +263,7 @@ namespace MWScript
 
     std::string InterpreterContext::getNPCRank() const
     {
-        std::map<std::string, int> ranks = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks();
+        std::map<std::string, int> ranks = mReference.getClass().getNpcStats (mReference).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.begin();
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -299,9 +299,9 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
+        std::string factionId = mReference.getClass().getNpcStats (mReference).getFactionRanks().begin()->first;
 
-        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        std::map<std::string, int> ranks = player.getClass().getNpcStats (player).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.find(factionId);
         int rank = -1;
         if (it != ranks.end())
@@ -326,9 +326,9 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
+        std::string factionId = mReference.getClass().getNpcStats (mReference).getFactionRanks().begin()->first;
 
-        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        std::map<std::string, int> ranks = player.getClass().getNpcStats (player).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.find(factionId);
         int rank = -1;
         if (it != ranks.end())
@@ -353,7 +353,7 @@ namespace MWScript
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-        return MWWorld::Class::get (player).getNpcStats (player).getBounty();
+        return player.getClass().getNpcStats (player).getBounty();
     }
 
     std::string InterpreterContext::getCurrentCellName() const

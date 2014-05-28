@@ -138,7 +138,7 @@ namespace MWGui
 
         int services = 0;
         if (!mMerchant.isEmpty())
-            services = MWWorld::Class::get(mMerchant).getServices(mMerchant);
+            services = mMerchant.getClass().getServices(mMerchant);
 
         mItems.clear();
         // add regular items
@@ -148,14 +148,14 @@ namespace MWGui
             if(!mMerchant.isEmpty())
             {
                 MWWorld::Ptr base = item.mBase;
-                if(Misc::StringUtils::ciEqual(base.getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
+                if(Misc::StringUtils::ciEqual(base.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
                     continue;
-                if(!MWWorld::Class::get(base).canSell(base, services))
+                if(!base.getClass().canSell(base, services))
                     continue;
 
                 // Bound items may not be bought
-                if (item.mBase.getCellRef().mRefID.size() > 6
-                        && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
+                if (item.mBase.getCellRef().getRefId().size() > 6
+                        && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
                 {
                     continue;
                 }
@@ -164,7 +164,7 @@ namespace MWGui
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))
                 {
                     bool isEquipped = false;
-                    MWWorld::InventoryStore& store = MWWorld::Class::get(mMerchant).getInventoryStore(mMerchant);
+                    MWWorld::InventoryStore& store = mMerchant.getClass().getInventoryStore(mMerchant);
                     for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
                     {
                         MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);

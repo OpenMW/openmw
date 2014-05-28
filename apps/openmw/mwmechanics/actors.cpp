@@ -62,17 +62,17 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
         {
             if (!item->getClass().hasItemHealth(*item))
                 return false;
-            if (item->getCellRef().mCharge == -1)
-                item->getCellRef().mCharge = item->getClass().getItemMaxHealth(*item);
+            int charge = item->getClass().getItemHealth(*item);
 
-            if (item->getCellRef().mCharge == 0)
+            if (charge == 0)
                 return false;
 
-            item->getCellRef().mCharge -=
+            charge -=
                     std::min(disintegrate,
-                             static_cast<float>(item->getCellRef().mCharge));
+                             static_cast<float>(charge));
+            item->getCellRef().setCharge(charge);
 
-            if (item->getCellRef().mCharge == 0)
+            if (charge == 0)
             {
                 // Will unequip the broken item and try to find a replacement
                 if (ptr.getRefData().getHandle() != "player")
@@ -147,13 +147,13 @@ namespace MWMechanics
             for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
                  it != container.end(); ++it)
             {
-                const std::string& id = it->getCellRef().mRefID;
+                const std::string& id = it->getCellRef().getRefId();
                 if (id.size() >= soulgemFilter.size()
                         && id.substr(0,soulgemFilter.size()) == soulgemFilter)
                 {
                     float thisGemCapacity = it->get<ESM::Miscellaneous>()->mBase->mData.mValue * fSoulgemMult;
                     if (thisGemCapacity >= creatureSoulValue && thisGemCapacity < gemCapacity
-                            && it->getCellRef().mSoul.empty())
+                            && it->getCellRef().getSoul().empty())
                     {
                         gem = it;
                         gemCapacity = thisGemCapacity;
@@ -166,7 +166,7 @@ namespace MWMechanics
 
             // Set the soul on just one of the gems, not the whole stack
             gem->getContainerStore()->unstack(*gem, caster);
-            gem->getCellRef().mSoul = mCreature.getCellRef().mRefID;
+            gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
             if (caster.getRefData().getHandle() == "player")
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
@@ -187,9 +187,17 @@ namespace MWMechanics
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
     {
-        CreatureStats& creatureStats = MWWorld::Class::get(actor1).getCreatureStats(actor1);
+        CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
         
         if (againstPlayer && creatureStats.isHostile()) return; // already fighting against player
+
+        // pure water creatures won't try to fight with the target on the ground
+        // except that creature is already hostile
+        if ((againstPlayer || !creatureStats.isHostile()) 
+                && ((actor1.getClass().canSwim(actor1) && !actor1.getClass().canWalk(actor1) // pure water creature
+                && !MWBase::Environment::get().getWorld()->isSwimming(actor2))
+                || (!actor1.getClass().canSwim(actor1) && MWBase::Environment::get().getWorld()->isSwimming(actor2)))) // creature can't swim to target
+            return;
 
         float fight;
 
@@ -244,13 +252,13 @@ namespace MWMechanics
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
     {
-        CreatureStats& creatureStats =  MWWorld::Class::get (creature).getCreatureStats (creature);
+        CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
 
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
         if (creature.getTypeName()==typeid (ESM::NPC).name())
         {
-            MWWorld::InventoryStore& store = MWWorld::Class::get (creature).getInventoryStore (creature);
+            MWWorld::InventoryStore& store = creature.getClass().getInventoryStore (creature);
             now += store.getMagicEffects();
         }
 
@@ -265,7 +273,7 @@ namespace MWMechanics
 
     void Actors::calculateDynamicStats (const MWWorld::Ptr& ptr)
     {
-        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+        CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
         int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
@@ -333,7 +341,7 @@ namespace MWMechanics
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
     {
-        CreatureStats &creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+        CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
         const MagicEffects &effects = creatureStats.getMagicEffects();
 
         // attributes
@@ -546,7 +554,7 @@ namespace MWMechanics
                     {
                         MWWorld::CellStore* store = ptr.getCell();
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
-                        ref.getPtr().getCellRef().mPos = ipos;
+                        ref.getPtr().getCellRef().setPosition(ipos);
 
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
@@ -600,7 +608,7 @@ namespace MWMechanics
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)
     {
-        NpcStats &npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        NpcStats &npcStats = ptr.getClass().getNpcStats(ptr);
         const MagicEffects &effects = npcStats.getMagicEffects();
 
         // skills
@@ -656,7 +664,7 @@ namespace MWMechanics
     {
         bool isPlayer = ptr.getRefData().getHandle()=="player";
 
-        MWWorld::InventoryStore &inventoryStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        MWWorld::InventoryStore &inventoryStore = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator heldIter =
                 inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         /**
@@ -678,7 +686,7 @@ namespace MWMechanics
             {
                 if (torch != inventoryStore.end())
                 {
-                    if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isHostile())
+                    if (!ptr.getClass().getCreatureStats (ptr).isHostile())
                     {
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
@@ -755,8 +763,8 @@ namespace MWMechanics
         if (ptr != player && ptr.getClass().isNpc())
         {
             // get stats of witness
-            CreatureStats& creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
-            NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+            CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+            NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
 
             if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.isHostile())
             {
@@ -824,7 +832,7 @@ namespace MWMechanics
     void Actors::addActor (const MWWorld::Ptr& ptr, bool updateImmediately)
     {
         // erase previous death events since we are currently only tracking them while in an active cell
-        MWWorld::Class::get(ptr).getCreatureStats(ptr).clearHasDied();
+        ptr.getClass().getCreatureStats(ptr).clearHasDied();
 
         removeActor(ptr);
 
@@ -964,7 +972,7 @@ namespace MWMechanics
             // Kill dead actors, update some variables
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
-                const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
+                const MWWorld::Class &cls = iter->first.getClass();
                 CreatureStats &stats = cls.getCreatureStats(iter->first);
 
                 //KnockedOutOneFrameLogic
@@ -1137,12 +1145,12 @@ namespace MWMechanics
         std::list<MWWorld::Ptr> list;
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
         {
-            const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
+            const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
             {
                 MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
-                if(package->getFollowedActor() == actor.getCellRef().mRefID)
+                if(package->getFollowedActor() == actor.getCellRef().getRefId())
                     list.push_front(iter->first);
             }
         }
@@ -1158,7 +1166,7 @@ namespace MWMechanics
             neighbors); //only care about those within the alarm disance
         for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();iter++)
         {
-            const MWWorld::Class &cls = MWWorld::Class::get(*iter);
+            const MWWorld::Class &cls = iter->getClass();
             CreatureStats &stats = cls.getCreatureStats(*iter);
             if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
             {

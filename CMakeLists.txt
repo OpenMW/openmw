@@ -119,6 +119,7 @@ set(OENGINE_OGRE
 )
 
 set(OENGINE_GUI
+  ${LIBDIR}/openengine/gui/loglistener.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
   ${LIBDIR}/openengine/gui/layout.hpp
 )
@@ -224,6 +225,9 @@ endif ()
 
 
 set(BOOST_COMPONENTS system filesystem program_options)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)

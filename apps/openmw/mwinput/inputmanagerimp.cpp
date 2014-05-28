@@ -172,7 +172,7 @@ namespace MWInput
 
         if (action == A_Use)
         {
-            MWWorld::Class::get(mPlayer->getPlayer()).getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+            mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
         }
 
         if (currentValue == 1)
@@ -359,7 +359,7 @@ namespace MWInput
             {
                 MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                 mOverencumberedMessageDelay -= dt;
-                if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
+                if (player.getClass().getEncumbrance(player) >= player.getClass().getCapacity(player))
                 {
                     mPlayer->setAutoMove (false);
                     if (mOverencumberedMessageDelay <= 0)
@@ -492,7 +492,8 @@ namespace MWInput
                 }
                 if (arg.keysym.sym == SDLK_x && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
-                    std::string text = edit->getTextSelection();
+                    // Discard color codes and other escape characters
+                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
                     if (text.length())
                     {
                         SDL_SetClipboardText(text.c_str());
@@ -504,7 +505,8 @@ namespace MWInput
             {
                 if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
-                    std::string text = edit->getTextSelection();
+                    // Discard color codes and other escape characters
+                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
                     if (text.length())
                         SDL_SetClipboardText(text.c_str());
                 }
@@ -664,7 +666,7 @@ namespace MWInput
             return;
 
         // Not allowed if no spell selected
-        MWWorld::InventoryStore& inventory = MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer());
+        MWWorld::InventoryStore& inventory = mPlayer->getPlayer().getClass().getInventoryStore(mPlayer->getPlayer());
         if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty() &&
             inventory.getSelectedEnchantItem() == inventory.end())
             return;

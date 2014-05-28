@@ -47,7 +47,7 @@ const boost::filesystem::path& CSMDoc::SavingState::getTmpPath() const
     return mTmpPath;
 }
 
-std::ofstream& CSMDoc::SavingState::getStream()
+boost::filesystem::ofstream& CSMDoc::SavingState::getStream()
 {
     return mStream;
 }

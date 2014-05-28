@@ -24,9 +24,6 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
-            /// Returns the door being avoided
-            std::string getAvoidedDoor();
-
         private:
             float mDuration;
             MWWorld::Ptr mDoorPtr;

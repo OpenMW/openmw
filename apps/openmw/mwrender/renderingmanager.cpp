@@ -249,7 +249,7 @@ void RenderingManager::cellAdded (MWWorld::CellStore *store)
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
     const MWWorld::Class& class_ =
-            MWWorld::Class::get (ptr);
+            ptr.getClass();
     class_.insertObjectRendering(ptr, *this);
 }
 
@@ -279,7 +279,7 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
         mCamera->rotateCamera(-rot, false);
 
     Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(rot.z), Ogre::Vector3::NEGATIVE_UNIT_Z);
-    if(!MWWorld::Class::get(ptr).isActor())
+    if(!ptr.getClass().isActor())
         newo = Ogre::Quaternion(Ogre::Radian(rot.x), Ogre::Vector3::NEGATIVE_UNIT_X) *
                Ogre::Quaternion(Ogre::Radian(rot.y), Ogre::Vector3::NEGATIVE_UNIT_Y) * newo;
     ptr.getRefData().getBaseNode()->setOrientation(newo);
@@ -294,7 +294,7 @@ RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &
     Ogre::SceneNode *parent = child->getParentSceneNode();
     parent->removeChild(child);
 
-    if (MWWorld::Class::get(old).isActor()) {
+    if (old.getClass().isActor()) {
         mActors->updateObjectCell(old, cur);
     } else {
         mObjects->updateObjectCell(old, cur);
@@ -314,7 +314,7 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
     NpcAnimation *anim = NULL;
     if(ptr.getRefData().getHandle() == "player")
         anim = mPlayerAnimation;
-    else if(MWWorld::Class::get(ptr).isActor())
+    else if(ptr.getClass().isActor())
         anim = dynamic_cast<NpcAnimation*>(mActors->getAnimation(ptr));
     if(anim)
     {
@@ -337,7 +337,7 @@ void RenderingManager::update (float duration, bool paused)
 
     MWWorld::Ptr player = world->getPlayerPtr();
 
-    int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
+    int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
     mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
@@ -599,7 +599,7 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     mAmbientColor = colour;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
+    int nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
     Ogre::ColourValue final = colour;
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 

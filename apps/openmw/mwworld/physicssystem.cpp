@@ -492,7 +492,7 @@ namespace MWWorld
         return std::make_pair(true, ray.getPoint(len * test.second));
     }
 
-    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY)
+    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY, Ogre::Vector3* normal)
     {
         Ogre::Ray ray = mRender.getCamera()->getCameraToViewportRay(
             mouseX,
@@ -504,7 +504,7 @@ namespace MWWorld
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to, true, false, normal);
 
         if (result.first == "")
             return std::make_pair(false, Ogre::Vector3());
@@ -538,7 +538,7 @@ namespace MWWorld
 
     void PhysicsSystem::addObject (const Ptr& ptr, bool placeable)
     {
-        std::string mesh = MWWorld::Class::get(ptr).getModel(ptr);
+        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
         OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(
@@ -550,7 +550,7 @@ namespace MWWorld
 
     void PhysicsSystem::addActor (const Ptr& ptr)
     {
-        std::string mesh = MWWorld::Class::get(ptr).getModel(ptr);
+        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
         mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
@@ -651,12 +651,12 @@ namespace MWWorld
 
     bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
     {
-        std::string model = MWWorld::Class::get(ptr).getModel(ptr);
+        std::string model = ptr.getClass().getModel(ptr);
         if (model.empty()) {
             return false;
         }
         btVector3 btMin, btMax;
-        float scale = ptr.getCellRef().mScale;
+        float scale = ptr.getCellRef().getScale();
         mEngine->getObjectAABB(model, scale, btMin, btMax);
 
         min.x = btMin.x();

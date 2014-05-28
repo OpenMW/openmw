@@ -36,7 +36,7 @@ namespace
             MWWorld::Ptr container (&*iter, 0);
 
             MWWorld::Ptr ptr =
-                MWWorld::Class::get (container).getContainerStore (container).search (id);
+                container.getClass().getContainerStore (container).search (id);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -72,8 +72,16 @@ namespace
                 iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
             {
-                if (iter->mData.getCount()==0 && iter->mRef.mRefNum.mContentFile==-1)
-                    continue; // deleted reference that did not come from a content file -> ignore
+                if (!iter->mData.hasChanged() && !iter->mRef.hasChanged() && iter->mRef.getRefNum().mContentFile != -1)
+                {
+                    // Reference that came from a content file and has not been changed -> ignore
+                    continue;
+                }
+                if (iter->mData.getCount()==0 && iter->mRef.getRefNum().mContentFile==-1)
+                {
+                    // Deleted reference that did not come from a content file -> ignore
+                    continue;
+                }
 
                 RecordType state;
                 iter->save (state);
@@ -117,7 +125,7 @@ namespace
         {
             for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
-                if (iter->mRef.mRefNum==state.mRef.mRefNum)
+                if (iter->mRef.getRefNum()==state.mRef.mRefNum)
                 {
                     // overwrite existing reference
                     iter->load (state);

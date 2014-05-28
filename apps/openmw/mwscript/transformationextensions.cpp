@@ -47,7 +47,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    runtime.push(ptr.getCellRef().mScale);
+                    runtime.push(ptr.getCellRef().getScale());
                 }
         };
 
@@ -64,7 +64,7 @@ namespace MWScript
                     runtime.pop();
 
                     // add the parameter to the object's scale.
-                    MWBase::Environment::get().getWorld()->scaleObject(ptr,ptr.getCellRef().mScale + scale);
+                    MWBase::Environment::get().getWorld()->scaleObject(ptr,ptr.getCellRef().getScale() + scale);
                 }
         };
 
@@ -117,15 +117,15 @@ namespace MWScript
 
                     if (axis == "x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[0]).valueDegrees());
                     }
                     else if (axis == "y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[1]).valueDegrees());
                     }
                     else if (axis == "z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
@@ -247,15 +247,15 @@ namespace MWScript
 
                     if(axis == "x")
                     {
-                        runtime.push(ptr.getCellRef().mPos.pos[0]);
+                        runtime.push(ptr.getCellRef().getPosition().pos[0]);
                     }
                     else if(axis == "y")
                     {
-                        runtime.push(ptr.getCellRef().mPos.pos[1]);
+                        runtime.push(ptr.getCellRef().getPosition().pos[1]);
                     }
                     else if(axis == "z")
                     {
-                        runtime.push(ptr.getCellRef().mPos.pos[2]);
+                        runtime.push(ptr.getCellRef().getPosition().pos[2]);
                     }
                     else
                         throw std::runtime_error ("invalid axis: " + axis);
@@ -319,7 +319,7 @@ namespace MWScript
                         }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
 
-                        MWWorld::Class::get(ptr).adjustPosition(ptr);
+                        ptr.getClass().adjustPosition(ptr);
                     }
                     else
                     {
@@ -366,7 +366,7 @@ namespace MWScript
                         zRot = zRot/60.;
                     }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
-                    MWWorld::Class::get(ptr).adjustPosition(ptr);
+                    ptr.getClass().adjustPosition(ptr);
                 }
         };
 
@@ -415,7 +415,7 @@ namespace MWScript
                         pos.rot[0] = pos.rot[1] = 0;
                         pos.rot[2]  = zRot;
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
-                        ref.getPtr().getCellRef().mPos = pos;
+                        ref.getPtr().getCellRef().setPosition(pos);
                         MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                     }
                     else
@@ -456,7 +456,7 @@ namespace MWScript
                         pos.rot[0] = pos.rot[1] = 0;
                         pos.rot[2]  = zRot;
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
-                        ref.getPtr().getCellRef().mPos = pos;
+                        ref.getPtr().getCellRef().setPosition(pos);
                         MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                     }
                     else
@@ -523,7 +523,7 @@ namespace MWScript
                     // create item
                     MWWorld::CellStore* store = actor.getCell();
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, count);
-                    ref.getPtr().getCellRef().mPos = ipos;
+                    ref.getPtr().getCellRef().setPosition(ipos);
 
                     MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
                 }
@@ -617,8 +617,8 @@ namespace MWScript
                     ptr.getRefData().getLocalRotation().rot[1] = 0;
                     ptr.getRefData().getLocalRotation().rot[2] = 0;
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
-                    MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().mPos.pos[0],
-                            ptr.getCellRef().mPos.pos[1], ptr.getCellRef().mPos.pos[2]);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
+                            ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]);
 
                 }
         };

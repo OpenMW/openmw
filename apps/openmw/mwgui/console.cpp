@@ -1,5 +1,8 @@
 #include "console.hpp"
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
 
@@ -194,7 +197,8 @@ namespace MWGui
 
     void Console::executeFile (const std::string& path)
     {
-        std::ifstream stream (path.c_str());
+        namespace bfs = boost::filesystem;
+        bfs::ifstream stream ((bfs::path(path)));
 
         if (!stream.is_open())
             printError ("failed to open file: " + path);
@@ -409,7 +413,7 @@ namespace MWGui
             }
             else
             {
-                setTitle("#{sConsoleTitle} (" + object.getCellRef().mRefID + ")");
+                setTitle("#{sConsoleTitle} (" + object.getCellRef().getRefId() + ")");
                 mPtr = object;
             }
             // User clicked on an object. Restore focus to the console command line.

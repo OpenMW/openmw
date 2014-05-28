@@ -39,8 +39,10 @@ namespace MWWorld
         mCurrentCrimeId(-1),
         mPaidCrimeId(-1)
     {
-        mPlayer.mBase = player;
-        mPlayer.mRef.mRefID = "player";
+        ESM::CellRef cellRef;
+        cellRef.blank();
+        cellRef.mRefID = "player";
+        mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
@@ -75,7 +77,7 @@ namespace MWWorld
     void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
-         MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
+         ptr.getClass().getNpcStats(ptr).setDrawState (state);
     }
 
     bool Player::getAutoMove() const
@@ -94,13 +96,13 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[0] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[0] = value;
     }
 
     void Player::setForwardBackward (int value)
@@ -112,13 +114,13 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[2] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[2] = value;
     }
 
     void Player::setRunState(bool run)
@@ -136,23 +138,23 @@ namespace MWWorld
     void Player::yaw(float yaw)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[2] += yaw;
+        ptr.getClass().getMovementSettings(ptr).mRotation[2] += yaw;
     }
     void Player::pitch(float pitch)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[0] += pitch;
+        ptr.getClass().getMovementSettings(ptr).mRotation[0] += pitch;
     }
     void Player::roll(float roll)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[1] += roll;
+        ptr.getClass().getMovementSettings(ptr).mRotation[1] += roll;
     }
 
     MWMechanics::DrawState_ Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();
-         return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();
+         return ptr.getClass().getNpcStats(ptr).getDrawState();
     }
 
     bool Player::wasTeleported() const

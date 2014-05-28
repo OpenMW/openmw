@@ -179,6 +179,8 @@ namespace Compiler
                 opcodeGetReputationExplicit);
             extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
                 opcodeSameFactionExplicit);
+            extensions.registerInstruction("modfactionreaction", "ccl", opcodeModFactionReaction);
+            extensions.registerFunction("getfactionreaction", 'l', "ccl", opcodeGetFactionReaction);
         }
     }
 

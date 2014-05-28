@@ -1,12 +1,12 @@
 #include "configurationmanager.hpp"
 
 #include <string>
-#include <fstream>
 #include <iostream>
 #include <algorithm>
 
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 /**
  * \namespace Files
@@ -125,7 +125,7 @@ void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
     {
         std::cout << "Loading config file: " << cfgFile.string() << "... ";
 
-        std::ifstream configFileStream(cfgFile.string().c_str());
+        boost::filesystem::ifstream configFileStream(cfgFile);
         if (configFileStream.is_open())
         {
             boost::program_options::store(boost::program_options::parse_config_file(

@@ -4,6 +4,59 @@
 #include <boost/wave/cpplexer/cpp_lex_token.hpp>
 #include <boost/wave/cpplexer/cpp_lex_iterator.hpp>
 
+#include <boost/filesystem/fstream.hpp>
+
+/*
+	Almost exact copy of load_file_to_string policy found in
+	boost::wave headers with the only change that it uses
+	boost::filesystem facility to handle UTF-8 paths used
+	throughout OpenMW (bfs::fstream, bfs::path).
+
+	Original namespace is used due to required bost::wave
+	internal symbols.
+*/
+namespace boost {
+namespace wave {
+namespace iteration_context_policies {
+
+	struct load_utf8_path_to_string
+	{
+		template <typename IterContextT>
+		class inner
+		{
+		public:
+			template <typename PositionT>
+			static void init_iterators(IterContextT &iter_ctx,
+				PositionT const &act_pos, language_support language)
+			{
+				typedef typename IterContextT::iterator_type iterator_type;
+                                namespace bfs = boost::filesystem;
+
+				// read in the file
+				bfs::ifstream instream(bfs::path(iter_ctx.filename.c_str()));
+				if (!instream.is_open()) {
+					BOOST_WAVE_THROW_CTX(iter_ctx.ctx, preprocess_exception,
+						bad_include_file, iter_ctx.filename.c_str(), act_pos);
+					return;
+				}
+				instream.unsetf(std::ios::skipws);
+
+				iter_ctx.instring.assign(
+					std::istreambuf_iterator<char>(instream.rdbuf()),
+					std::istreambuf_iterator<char>());
+
+				iter_ctx.first = iterator_type(
+					iter_ctx.instring.begin(), iter_ctx.instring.end(),
+					PositionT(iter_ctx.filename), language);
+				iter_ctx.last = iterator_type();
+			}
+
+		private:
+			std::string instring;
+		};
+	};
+} } }
+
 namespace sh
 {
 	std::string Preprocessor::preprocess (std::string source, const std::string& includePath, std::vector<std::string> definitions, const std::string& name)
@@ -29,7 +82,7 @@ namespace sh
 			//  match the iterator type used during construction of the context
 			//  instance (see below). It is the type of the underlying input stream.
 			typedef boost::wave::context<std::string::iterator, lex_iterator_type
-					, boost::wave::iteration_context_policies::load_file_to_string,
+					, boost::wave::iteration_context_policies::load_utf8_path_to_string,
 					emit_custom_line_directives_hooks>
 				context_type;
 

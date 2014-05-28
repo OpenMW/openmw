@@ -118,7 +118,7 @@ namespace MWRender
                                       0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         float scale=1.f;
-        MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
+        mCharacter.getClass().adjustScale(mCharacter, scale);
         mNode->setScale(Ogre::Vector3(scale));
 
         mCamera->setPosition(mPosition * mNode->getScale());
