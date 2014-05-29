@@ -23,12 +23,6 @@ void Wizard::ExistingInstallationPage::initializePage()
     emptyItem->setFlags(Qt::NoItemFlags);
     installationsList->addItem(emptyItem);
 
-    // Test
-    if (mWizard->mInstallations.isEmpty()) {
-        qDebug() << "crashy crash";
-        return;
-    }
-
     // Add the available installation paths
     QStringList paths(mWizard->mInstallations.keys());
 
@@ -133,6 +127,8 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         installationsList->setCurrentItem(items.first());
     }
 
+    // Update the button
+    emit completeChanged();
 }
 
 void Wizard::ExistingInstallationPage::textChanged(const QString &text)

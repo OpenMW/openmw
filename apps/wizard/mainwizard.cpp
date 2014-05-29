@@ -279,7 +279,7 @@ void Wizard::MainWizard::runSettingsImporter()
         return qApp->quit();
 
     // Re-read the game settings
-    // setupGameSettings();
+    setupGameSettings();
 }
 
 void Wizard::MainWizard::addInstallation(const QString &path)

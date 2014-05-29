@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>474</width>
-    <height>370</height>
+    <width>472</width>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
    <item>
     <widget class="QLabel" name="textLabel">
      <property name="text">
-      <string>This Wizard will help you install Morrowindand its add-ons for OpenMW to use.</string>
+      <string>This Wizard will help you install Morrowind and its add-ons for OpenMW to use.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -29,8 +29,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../wizard/wizard.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
