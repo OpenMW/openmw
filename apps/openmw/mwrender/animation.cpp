@@ -1262,16 +1262,16 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
     Ogre::Vector3 extents = getWorldBounds().getSize();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
+    bool smallObject = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
                  Settings::Manager::getBool("limit small object distance", "Viewing distance");
     // do not fade out doors. that will cause holes and look stupid
     if(ptr.getTypeName().find("Door") != std::string::npos)
-        small = false;
+        smallObject = false;
 
-    float dist = small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
+    float dist = smallObject ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
     Ogre::Vector3 col = getEnchantmentColor(ptr);
     setRenderProperties(mObjectRoot, (mPtr.getTypeName() == typeid(ESM::Static).name()) ?
-                                     (small ? RV_StaticsSmall : RV_Statics) : RV_Misc,
+                                     (smallObject ? RV_StaticsSmall : RV_Statics) : RV_Misc,
                         RQG_Main, RQG_Alpha, dist, !ptr.getClass().getEnchantment(ptr).empty(), &col);
 }
 
