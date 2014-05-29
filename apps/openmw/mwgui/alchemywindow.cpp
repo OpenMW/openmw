@@ -66,10 +66,7 @@ namespace MWGui
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mAlchemy.clear();
-
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
+        exit();
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -157,6 +154,12 @@ namespace MWGui
         }
 
         update();
+    }
+
+    void AlchemyWindow::exit() {
+        mAlchemy.clear();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)

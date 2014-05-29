@@ -14,6 +14,7 @@ namespace MWGui
             ScrollWindow ();
 
             void open (MWWorld::Ptr scroll);
+            virtual void exit();
             void setTakeButtonShow(bool show);
             void setInventoryAllowed(bool allowed);
 

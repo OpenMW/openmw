@@ -35,6 +35,11 @@ void Repair::open()
     center();
 }
 
+void Repair::exit()
+{
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
+}
+
 void Repair::startRepairItem(const MWWorld::Ptr &item)
 {
     mRepair.setTool(item);
@@ -134,7 +139,7 @@ void Repair::updateRepairView()
 
 void Repair::onCancel(MyGUI::Widget *sender)
 {
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
+    exit();
 }
 
 void Repair::onRepairItem(MyGUI::Widget *sender)

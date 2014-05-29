@@ -16,6 +16,8 @@ public:
 
     virtual void open();
 
+    virtual void exit();
+
     void startRepair(const MWWorld::Ptr& actor);
 
 private:

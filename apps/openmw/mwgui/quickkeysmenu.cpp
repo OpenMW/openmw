@@ -57,6 +57,11 @@ namespace MWGui
         }
     }
 
+    void QuickKeysMenu::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
+    }
+
     void QuickKeysMenu::clear()
     {
         for (int i=0; i<10; ++i)
@@ -385,6 +390,11 @@ namespace MWGui
         center();
     }
 
+    void QuickKeysMenuAssign::exit()
+    {
+        setVisible(false);
+    }
+
     void QuickKeysMenu::write(ESM::ESMWriter &writer)
     {
         writer.startRecord(ESM::REC_KEYS);
@@ -508,7 +518,12 @@ namespace MWGui
 
     void MagicSelectionDialog::onCancelButtonClicked (MyGUI::Widget *sender)
     {
-        mParent->onAssignMagicCancel ();
+        exit();
+    }
+
+    void MagicSelectionDialog::exit()
+    {
+        mParent->onAssignMagicCancel();
     }
 
     void MagicSelectionDialog::open ()

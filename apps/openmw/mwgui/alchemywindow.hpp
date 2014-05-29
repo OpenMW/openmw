@@ -19,6 +19,7 @@ namespace MWGui
         AlchemyWindow();
 
         virtual void open();
+        virtual void exit();
 
     private:
         ItemView* mItemView;

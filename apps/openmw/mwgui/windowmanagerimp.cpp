@@ -23,6 +23,8 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../mwsound/soundmanagerimp.hpp"
+
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "journalviewmodel.hpp"
@@ -134,6 +136,7 @@ namespace MWGui
       , mFPS(0.0f)
       , mTriangleCount(0)
       , mBatchCount(0)
+      , mCurrentModals()
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
@@ -664,6 +667,93 @@ namespace MWGui
             return;
         dialog->setVisible(false);
         mGarbageDialogs.push_back(dialog);
+    }
+
+    void WindowManager::exitCurrentGuiMode() {
+        switch(mGuiModes.back()) {
+            case GM_QuickKeysMenu:
+                mQuickKeysMenu->exit();
+                break;
+            case GM_MainMenu:
+                removeGuiMode(GM_MainMenu); //Simple way to remove it
+                break;
+            case GM_Settings:
+                mSettingsWindow->exit();
+                break;
+            case GM_Console:
+                mConsole->exit();
+                break;
+            case GM_Scroll:
+                mScrollWindow->exit();
+                break;
+            case GM_Book:
+                mBookWindow->exit();
+                break;
+            case GM_Alchemy:
+                mAlchemyWindow->exit();
+                break;
+            case GM_Rest:
+                mWaitDialog->exit();
+                break;
+            case GM_RestBed:
+                mWaitDialog->exit();
+                break;
+            case GM_Name:
+            case GM_Race:
+            case GM_Class:
+            case GM_ClassPick:
+            case GM_ClassCreate:
+            case GM_Birth:
+            case GM_ClassGenerate:
+            case GM_Review:
+                break;
+            case GM_Inventory:
+                removeGuiMode(GM_Inventory); //Simple way to remove it
+                break;
+            case GM_Container:
+                mContainerWindow->exit();
+                break;
+            case GM_Companion:
+                mCompanionWindow->exit();
+                break;
+            case GM_Dialogue:
+                mDialogueWindow->exit();
+                break;
+            case GM_Barter:
+                mTradeWindow->exit();
+                break;
+            case GM_SpellBuying:
+                mSpellBuyingWindow->exit();
+                break;
+            case GM_Travel:
+                mTravelWindow->exit();
+                break;
+            case GM_SpellCreation:
+                mSpellCreationDialog->exit();
+                break;
+            case GM_Recharge:
+                mRecharge->exit();
+                break;
+            case GM_Enchanting:
+                mEnchantingDialog->exit();
+                break;
+            case GM_Training:
+                mTrainingWindow->exit();
+                break;
+            case GM_MerchantRepair:
+                mMerchantRepair->exit();
+                break;
+            case GM_Repair:
+                mRepair->exit();
+                break;
+            case GM_Journal:
+                MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+                removeGuiMode(GM_Journal); //Simple way to remove it
+                break;
+            default:
+                // Unsupported mode, switch back to game
+                break;
+        }
     }
 
     void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
@@ -1512,5 +1602,22 @@ namespace MWGui
 
         mVideoWidget->setCoord(leftPadding, topPadding,
                                screenWidth - leftPadding*2, screenHeight - topPadding*2);
+    }
+
+    WindowModal* WindowManager::getCurrentModal() const
+    {
+        if(mCurrentModals.size() > 0)
+            return mCurrentModals.top();
+        else
+            return NULL;
+    }
+
+    void WindowManager::removeCurrentModal(WindowModal* input)
+    {
+        // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
+        //so just popping the top would cause massive issues.
+        if(mCurrentModals.size() > 0)
+            if(input == mCurrentModals.top())
+                mCurrentModals.pop();
     }
 }

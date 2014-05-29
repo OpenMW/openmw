@@ -28,6 +28,10 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 
+#include "../mwdialogue/dialoguemanagerimp.hpp"
+
+#include "../mwgui/windowbase.hpp"
+
 using namespace ICS;
 
 namespace
@@ -635,18 +639,28 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
-        if (MyGUI::InputManager::getInstance ().isModalAny())
+        if (MyGUI::InputManager::getInstance().isModalAny()) {
+            MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
             return;
-
-        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
-        {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
         }
-        else
+
+        if(MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Dialogue) { //Give access to the main menu when at a choice in dialogue
+            if(MWBase::Environment::get().getDialogueManager()->isInChoice()) {
+                MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+                MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
+                return;
+            }
+        }
+
+        if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
             MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
+        }
+        else //Close current GUI
+        {
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
         }
     }
 
@@ -763,8 +777,7 @@ namespace MWInput
         }
         else if(MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Journal)
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
         }
         // .. but don't touch any other mode.
     }
@@ -780,8 +793,12 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
                 && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
-        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
-            MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
+        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu) {
+            while(MyGUI::InputManager::getInstance().isModalAny()) { //Handle any open Modal windows
+                MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+            }
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
+        }
     }
 
     void InputManager::activate()

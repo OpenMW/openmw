@@ -35,6 +35,8 @@ namespace MWGui
 
             int getMerchantServices();
 
+            virtual void exit();
+
 
         private:
             ItemView* mItemView;

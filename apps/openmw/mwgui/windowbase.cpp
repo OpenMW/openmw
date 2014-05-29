@@ -2,6 +2,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 #include "container.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwgui/windowmanagerimp.hpp"
 
 using namespace MWGui;
 
@@ -19,6 +21,11 @@ void WindowBase::setVisible(bool visible)
         open();
     else if (wasVisible && !visible)
         close();
+}
+
+bool WindowBase::isVisible()
+{
+    return mMainWidget->getVisible();
 }
 
 void WindowBase::center()
@@ -45,11 +52,13 @@ WindowModal::WindowModal(const std::string& parLayout)
 void WindowModal::open()
 {
     MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
+    MWBase::Environment::get().getWindowManager()->addCurrentModal(this); //Set so we can escape it if needed
 }
 
 void WindowModal::close()
 {
     MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
+    MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
 }
 
 NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)

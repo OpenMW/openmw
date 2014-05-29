@@ -159,6 +159,11 @@ namespace MWGui
 
     }
 
+    void SaveGameDialog::exit()
+    {
+        setVisible(false);
+    }
+
     void SaveGameDialog::setLoadOrSave(bool load)
     {
         mSaving = !load;
@@ -177,7 +182,7 @@ namespace MWGui
 
     void SaveGameDialog::onCancelButtonClicked(MyGUI::Widget *sender)
     {
-        setVisible(false);
+        exit();
     }
 
     void SaveGameDialog::onConfirmationGiven()
