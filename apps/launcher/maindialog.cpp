@@ -257,7 +257,7 @@ void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem 
         current = previous;
 
     int currentIndex = iconWidget->row(current);
-    int previousIndex = iconWidget->row(previous);
+//    int previousIndex = iconWidget->row(previous);
 
     pagesWidget->setCurrentIndex(currentIndex);
 

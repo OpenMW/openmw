@@ -271,7 +271,13 @@ void Wizard::MainWizard::runSettingsImporter()
 
     // Now the paths
     arguments.append(QLatin1String("--ini"));
-    arguments.append(path + QDir::separator() + QLatin1String("Morrowind.ini"));
+
+    if (field(QLatin1String("installation.new")).toBool() == true) {
+        arguments.append(path + QDir::separator() + QLatin1String("Morrowind.ini"));
+    } else {
+        arguments.append(mInstallations[path].iniPath);
+    }
+
     arguments.append(QLatin1String("--cfg"));
     arguments.append(userPath + QLatin1String("openmw.cfg"));
 
