@@ -137,6 +137,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         }
 
         // update GUI
+        MWBase::Environment::get().getWindowManager()->onFrame(frametime);
         if (MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
@@ -145,7 +146,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
             MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
-            MWBase::Environment::get().getWindowManager()->onFrame(frametime);
             MWBase::Environment::get().getWindowManager()->update();
         }
     }
