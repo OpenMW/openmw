@@ -172,6 +172,8 @@ void Launcher::SettingsPage::on_browseButton_clicked()
 
 void Launcher::SettingsPage::wizardStarted()
 {
+    mMain->hide(); // Hide the launcher
+
     qDebug() << "wizard started!";
     wizardButton->setEnabled(false);
 }
@@ -180,10 +182,12 @@ void Launcher::SettingsPage::wizardFinished(int exitCode, QProcess::ExitStatus e
 {
     qDebug() << "wizard finished!";
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
-        return;
+        return qApp->quit();
 
     mMain->reloadSettings();
     wizardButton->setEnabled(true);
+
+    mMain->show(); // Show the launcher again
 }
 
 void Launcher::SettingsPage::importerStarted()

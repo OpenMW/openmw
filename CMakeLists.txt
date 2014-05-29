@@ -406,7 +406,7 @@ IF(NOT WIN32 AND NOT APPLE)
           IF(BUILD_WIZARD)
             INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/wizard" DESTINATION "${BINDIR}" )
         ENDIF(BUILD_WIZARD)
-       
+
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
@@ -460,7 +460,7 @@ if(WIN32)
     IF(BUILD_WIZARD)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-wizard.exe" DESTINATION ".")
     ENDIF(BUILD_WIZARD)
-    
+
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
@@ -543,13 +543,6 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (BUILD_LAUNCHER)
-    if(NOT WIN32)
-        find_package(LIBUNSHIELD REQUIRED)
-        if(NOT LIBUNSHIELD_FOUND)
-               message(SEND_ERROR "Failed to find libunshield")
-        endif(NOT LIBUNSHIELD_FOUND)
-    endif(NOT WIN32)
-
    add_subdirectory( apps/launcher )
 endif()
 
@@ -562,6 +555,11 @@ if (BUILD_OPENCS)
 endif()
 
 if (BUILD_WIZARD)
+    find_package(LIBUNSHIELD REQUIRED)
+    if(NOT LIBUNSHIELD_FOUND)
+        message(FATAL_ERROR "Failed to find Unshield library")
+    endif(NOT LIBUNSHIELD_FOUND)
+
    add_subdirectory(apps/wizard)
 endif()
 

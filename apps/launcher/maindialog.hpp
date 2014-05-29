@@ -2,6 +2,8 @@
 #define MAINDIALOG_H
 
 #include <QMainWindow>
+#include <QProcess>
+
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
@@ -51,6 +53,10 @@ namespace Launcher
         void changePage(QListWidgetItem *current, QListWidgetItem *previous);
         void play();
 
+    private slots:
+        void wizardStarted();
+        void wizardFinished(int exitCode, QProcess::ExitStatus exitStatus);
+
     private:
         void createIcons();
         void createPages();
@@ -73,6 +79,7 @@ namespace Launcher
         SettingsPage *mSettingsPage;
 
         Process::ProcessInvoker *mGameInvoker;
+        Process::ProcessInvoker *mWizardInvoker;
 
         Files::ConfigurationManager mCfgMgr;
 

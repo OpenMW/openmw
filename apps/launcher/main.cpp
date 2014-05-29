@@ -52,11 +52,12 @@ int main(int argc, char *argv[])
 
     Launcher::MainDialog mainWin;
 
-    if (mainWin.setup()) {
-        mainWin.show();
-    } else {
+    if (!mainWin.setup()) {
         return 0;
-    }
+        //mainWin.show();
+    }/* else {
+        return 0;
+    }*/
 
     int returnValue = app.exec();
     SDL_Quit();

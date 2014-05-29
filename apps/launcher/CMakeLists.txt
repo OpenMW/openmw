@@ -9,16 +9,12 @@ set(LAUNCHER
 
     settings/graphicssettings.cpp
 
-    utils/checkablemessagebox.cpp
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
     utils/lineedit.cpp
 
     ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
 )
-if(NOT WIN32)
-    LIST(APPEND LAUNCHER unshieldthread.cpp)
-endif(NOT WIN32)
 
 set(LAUNCHER_HEADER
     datafilespage.hpp
@@ -30,15 +26,10 @@ set(LAUNCHER_HEADER
 
     settings/graphicssettings.hpp
 
-    utils/checkablemessagebox.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
     utils/lineedit.hpp
 )
-if(NOT WIN32)
-    LIST(APPEND LAUNCHER_HEADER unshieldthread.hpp)
-endif(NOT WIN32)
-
 
 # Headers that must be pre-processed
 set(LAUNCHER_HEADER_MOC
@@ -50,16 +41,10 @@ set(LAUNCHER_HEADER_MOC
     settingspage.hpp
 
     utils/textinputdialog.hpp
-    utils/checkablemessagebox.hpp
     utils/profilescombobox.hpp
     utils/lineedit.hpp
 
 )
-
-if(NOT WIN32)
-    LIST(APPEND LAUNCHER_HEADER_MOC unshieldthread.hpp)
-endif(NOT WIN32)
-
 
 set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
@@ -119,19 +104,12 @@ target_link_libraries(omwlauncher
     ${QT_LIBRARIES}
     components
 )
-if(NOT WIN32)
-    target_link_libraries(omwlauncher
-        ${LIBUNSHIELD_LIBRARY}
-    )
-endif(NOT WIN32)
-
-
 
 if(DPKG_PROGRAM)
     INSTALL(TARGETS omwlauncher RUNTIME DESTINATION games COMPONENT omwlauncher)
 endif()
 
-if (BUILD_WITH_CODE_COVERAGE)
+if(BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(omwlauncher gcov)
 endif()
