@@ -23,6 +23,11 @@ void WindowBase::setVisible(bool visible)
         close();
 }
 
+bool WindowBase::isVisible()
+{
+    return mMainWidget->getVisible();
+}
+
 void WindowBase::center()
 {
     // Centre dialog

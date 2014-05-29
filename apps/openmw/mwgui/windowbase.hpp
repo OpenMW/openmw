@@ -29,6 +29,8 @@ namespace MWGui
         virtual void exit() {}
         ///Sets the visibility of the window
         virtual void setVisible(bool visible);
+        ///Returns the visibility state of the window
+        virtual bool isVisible();
         void center();
 
         /** Event : Dialog finished, OK button clicked.\n
