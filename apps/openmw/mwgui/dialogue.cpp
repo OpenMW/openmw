@@ -518,11 +518,9 @@ namespace MWGui
         MyGUI::Button* byeButton;
         getWidget(byeButton, "ByeButton");
         if(MWBase::Environment::get().getDialogueManager()->isInChoice()) {
-            byeButton->setAlpha(.2);
             byeButton->setEnabled(false);
         }
         else {
-            byeButton->setAlpha(1);
             byeButton->setEnabled(true);
         }
     }
