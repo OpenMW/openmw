@@ -182,6 +182,22 @@ namespace CSMDoc
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
+    class WriteCellCollectionStage : public Stage
+    {
+            Document& mDocument;
+            SavingState& mState;
+
+        public:
+
+            WriteCellCollectionStage (Document& document, SavingState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
     class CloseSaveStage : public Stage
     {
             SavingState& mState;

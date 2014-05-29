@@ -48,7 +48,7 @@ namespace CSMDoc
             bool isProjectFile() const;
             ///< Currently saving project file? (instead of content file)
 
-            std::map<std::string, std::vector<int> > getSubRecords();
+            std::map<std::string, std::vector<int> >& getSubRecords();
     };
 
 

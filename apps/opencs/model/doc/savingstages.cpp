@@ -246,8 +246,109 @@ void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
             record.mState==CSMWorld::RecordBase::State_Modified ||
             record.mState==CSMWorld::RecordBase::State_ModifiedOnly)
         {
-            mState.getSubRecords()[Misc::StringUtils::lowerCase (record.get().mId)].push_back (i);
+            mState.getSubRecords()[Misc::StringUtils::lowerCase (record.get().mCell)]
+                .push_back (i);
         }
+    }
+}
+
+
+CSMDoc::WriteCellCollectionStage::WriteCellCollectionStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WriteCellCollectionStage::setup()
+{
+    return mDocument.getData().getCells().getSize();
+}
+
+void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
+{
+    const CSMWorld::Record<CSMWorld::Cell>& cell =
+        mDocument.getData().getCells().getRecord (stage);
+
+    std::map<std::string, std::vector<int> >::const_iterator references =
+        mState.getSubRecords().find (Misc::StringUtils::lowerCase (cell.get().mId));
+
+    if (cell.mState==CSMWorld::RecordBase::State_Modified ||
+        cell.mState==CSMWorld::RecordBase::State_ModifiedOnly ||
+        references!=mState.getSubRecords().end())
+    {
+        bool interior = cell.get().mId.substr (0, 1)!="#";
+
+        // write cell data
+        mState.getWriter().startRecord (cell.mModified.sRecordId);
+
+        mState.getWriter().writeHNOCString ("NAME", cell.get().mName);
+
+        ESM::Cell cell2 = cell.get();
+
+        if (interior)
+            cell2.mData.mFlags |= ESM::Cell::Interior;
+        else
+        {
+            cell2.mData.mFlags &= ~ESM::Cell::Interior;
+
+            std::istringstream stream (cell.get().mId.c_str());
+            char ignore;
+            stream >> ignore >> cell2.mData.mX >> cell2.mData.mY;
+        }
+        cell2.save (mState.getWriter());
+
+        // write references
+        if (references!=mState.getSubRecords().end())
+        {
+            // first pass: find highest RefNum
+            int lastRefNum = -1;
+
+            for (std::vector<int>::const_iterator iter (references->second.begin());
+                iter!=references->second.end(); ++iter)
+            {
+                const CSMWorld::Record<CSMWorld::CellRef>& ref =
+                    mDocument.getData().getReferences().getRecord (*iter);
+
+                if (ref.get().mRefNum.mContentFile==0 && ref.get().mRefNum.mIndex>lastRefNum)
+                    lastRefNum = ref.get().mRefNum.mIndex;
+            }
+
+            // second pass: write
+            for (std::vector<int>::const_iterator iter (references->second.begin());
+                iter!=references->second.end(); ++iter)
+            {
+                const CSMWorld::Record<CSMWorld::CellRef>& ref =
+                    mDocument.getData().getReferences().getRecord (*iter);
+
+                if (ref.mState==CSMWorld::RecordBase::State_Modified ||
+                    ref.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+                {
+                    if (ref.get().mRefNum.mContentFile==-2)
+                    {
+                        if (lastRefNum>=0xffffff)
+                            throw std::runtime_error (
+                                "RefNums exhausted in cell: " + cell.get().mId);
+
+                        ESM::CellRef ref2 = ref.get();
+                        ref2.mRefNum.mContentFile = 0;
+                        ref2.mRefNum.mIndex = ++lastRefNum;
+
+                        ref2.save (mState.getWriter());
+                    }
+                    else
+                        ref.get().save (mState.getWriter());
+                }
+                else if (ref.mState==CSMWorld::RecordBase::State_Deleted)
+                {
+                    /// \todo write record with delete flag
+                }
+            }
+        }
+
+        mState.getWriter().endRecord (cell.mModified.sRecordId);
+    }
+    else if (cell.mState==CSMWorld::RecordBase::State_Deleted)
+    {
+        /// \todo write record with delete flag
     }
 }
 
