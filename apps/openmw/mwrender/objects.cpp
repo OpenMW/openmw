@@ -84,11 +84,11 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
     extents *= ptr.getRefData().getBaseNode()->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
+    bool smallObject = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
                  Settings::Manager::getBool("limit small object distance", "Viewing distance");
     // do not fade out doors. that will cause holes and look stupid
     if(ptr.getTypeName().find("Door") != std::string::npos)
-        small = false;
+        smallObject = false;
 
     if (mBounds.find(ptr.getCell()) == mBounds.end())
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
@@ -103,7 +103,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
     {
         Ogre::StaticGeometry* sg = 0;
 
-        if (small)
+        if (smallObject)
         {
             if(mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
             {
@@ -141,7 +141,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
         else
             sg->setRegionDimensions(Ogre::Vector3(1024,1024,1024));
 
-        sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
+        sg->setVisibilityFlags(smallObject ? RV_StaticsSmall : RV_Statics);
 
         sg->setCastShadows(true);
 
