@@ -178,7 +178,7 @@ struct JournalViewModelImpl : JournalViewModel
 
                 KeywordSearchT::Match match;
 
-                while (i != utf8text.end () && mModel->mKeywordSearch.search (i, utf8text.end (), match))
+                while (i != utf8text.end () && mModel->mKeywordSearch.search (i, utf8text.end (), match, utf8text.begin()))
                 {
                     if (i != match.mBeg)
                         visitor (0, i - utf8text.begin (), match.mBeg - utf8text.begin ());

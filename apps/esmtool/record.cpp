@@ -124,7 +124,7 @@ void printEffectList(ESM::EffectList effects)
 {
     int i = 0;
     std::vector<ESM::ENAMstruct>::iterator eit;
-    for (eit = effects.mList.begin(); eit != effects.mList.end(); eit++)
+    for (eit = effects.mList.begin(); eit != effects.mList.end(); ++eit)
     {
         std::cout << "  Effect[" << i << "]: " << magicEffectLabel(eit->mEffectID)
                   << " (" << eit->mEffectID << ")" << std::endl;
@@ -651,7 +651,7 @@ void Record<ESM::Dialogue>::print()
     // Sadly, there are no DialInfos, because the loader dumps as it
     // loads, rather than loading and then dumping. :-( Anyone mind if
     // I change this?
-    std::vector<ESM::DialInfo>::iterator iit;
+    ESM::Dialogue::InfoContainer::iterator iit;
     for (iit = mData.mInfo.begin(); iit != mData.mInfo.end(); iit++)
         std::cout << "INFO!" << iit->mId << std::endl;
 }
@@ -707,9 +707,9 @@ void Record<ESM::Faction>::print()
             std::cout << "    Faction Reaction: "
                       << mData.mData.mRankData[i].mFactReaction << std::endl;
         }
-    std::vector<ESM::Faction::Reaction>::iterator rit;
+    std::map<std::string, int>::iterator rit;
     for (rit = mData.mReactions.begin(); rit != mData.mReactions.end(); rit++)
-        std::cout << "  Reaction: " << rit->mReaction << " = " << rit->mFaction << std::endl;
+        std::cout << "  Reaction: " << rit->second << " = " << rit->first << std::endl;
 }
 
 template<>

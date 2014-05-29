@@ -52,11 +52,11 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     const float *f = ptr.getRefData().getPosition().pos;
 
     insert->setPosition(f[0], f[1], f[2]);
-    insert->setScale(ptr.getCellRef().mScale, ptr.getCellRef().mScale, ptr.getCellRef().mScale);
+    insert->setScale(ptr.getCellRef().getScale(), ptr.getCellRef().getScale(), ptr.getCellRef().getScale());
 
 
     // Convert MW rotation to a quaternion:
-    f = ptr.getCellRef().mPos.rot;
+    f = ptr.getCellRef().getPosition().rot;
 
     // Rotate around X axis
     Ogre::Quaternion xr(Ogre::Radian(-f[0]), Ogre::Vector3::UNIT_X);
@@ -240,25 +240,25 @@ Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
 void Objects::enableLights()
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->enableLights(true);
 }
 
 void Objects::disableLights()
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->enableLights(false);
 }
 
 void Objects::update(float dt, Ogre::Camera* camera)
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->runAnimation(dt);
 
     it = mObjects.begin();
-    for(;it != mObjects.end();it++)
+    for(;it != mObjects.end();++it)
         it->second->preRender(camera);
 
 }

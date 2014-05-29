@@ -4,8 +4,11 @@
 #include <fstream>
 
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <components/esm/esmwriter.hpp>
+
+#include <components/to_utf8/to_utf8.hpp>
 
 namespace CSMDoc
 {
@@ -18,14 +21,15 @@ namespace CSMDoc
             boost::filesystem::path mPath;
             boost::filesystem::path mTmpPath;
             ToUTF8::Utf8Encoder mEncoder;
-            std::ofstream mStream;
+            boost::filesystem::ofstream mStream;
             ESM::ESMWriter mWriter;
             boost::filesystem::path mProjectPath;
             bool mProjectFile;
 
         public:
 
-            SavingState (Operation& operation, const boost::filesystem::path& projectPath);
+            SavingState (Operation& operation, const boost::filesystem::path& projectPath,
+                ToUTF8::FromType encoding);
 
             bool hasError() const;
 
@@ -36,7 +40,7 @@ namespace CSMDoc
 
             const boost::filesystem::path& getTmpPath() const;
 
-            std::ofstream& getStream();
+            boost::filesystem::ofstream& getStream();
 
             ESM::ESMWriter& getWriter();
 

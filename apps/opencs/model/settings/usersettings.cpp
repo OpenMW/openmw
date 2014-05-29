@@ -1,18 +1,14 @@
 #include "usersettings.hpp"
 
-#include <QTextStream>
-#include <QDir>
-#include <QString>
-#include <QRegExp>
-#include <QMap>
-#include <QMessageBox>
-#include <QTextCodec>
-
+#include <QSettings>
 #include <QFile>
 
 #include <components/files/configurationmanager.hpp>
-#include "settingcontainer.hpp"
 #include <boost/version.hpp>
+
+#include "setting.hpp"
+#include "support.hpp"
+#include <QDebug>
 
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
@@ -32,43 +28,250 @@ namespace boost
 
 CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
 
-CSMSettings::UserSettings::UserSettings()
+CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
+: mCfgMgr (configurationManager)
 {
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 
-    mReadWriteMessage = QObject::tr("<br><b>Could not open or create file for writing</b><br><br> \
-            Please make sure you have the right permissions and try again.<br>");
+    mSettingDefinitions = 0;
 
-    mReadOnlyMessage = QObject::tr("<br><b>Could not open file for reading</b><br><br> \
-            Please make sure you have the right permissions and try again.<br>");
-
-    buildEditorSettingDefaults();
+    buildSettingModelDefaults();
 }
 
-void CSMSettings::UserSettings::buildEditorSettingDefaults()
+void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
-    SettingContainer *windowHeight = new SettingContainer("768", this);
-    SettingContainer *windowWidth = new SettingContainer("1024", this);
-    SettingContainer *rsDelegate = new SettingContainer("Icon and Text", this);
-    SettingContainer *refIdTypeDelegate = new SettingContainer("Icon and Text", this);
+    QString section = "Window Size";
+    {
+        Setting *width = createSetting (Type_LineEdit, section, "Width");
+        Setting *height = createSetting (Type_LineEdit, section, "Height");
 
-    windowHeight->setObjectName ("Height");
-    windowWidth->setObjectName ("Width");
-    rsDelegate->setObjectName ("Record Status Display");
-    refIdTypeDelegate->setObjectName ("Referenceable ID Type Display");
+        width->setWidgetWidth (5);
+        height->setWidgetWidth (8);
 
-    SettingMap *displayFormatMap = new SettingMap;
-    SettingMap *windowSizeMap = new SettingMap;
+        width->setDefaultValues (QStringList() << "1024");
+        height->setDefaultValues (QStringList() << "768");
 
-    displayFormatMap->insert (rsDelegate->objectName(), rsDelegate );
-    displayFormatMap->insert (refIdTypeDelegate->objectName(), refIdTypeDelegate);
+        width->setEditorSetting (true);
+        height->setEditorSetting (true);
 
-    windowSizeMap->insert (windowWidth->objectName(), windowWidth );
-    windowSizeMap->insert (windowHeight->objectName(), windowHeight );
+        height->setViewLocation (2,2);
+        width->setViewLocation (2,1);
 
-    mEditorSettingDefaults.insert ("Display Format", displayFormatMap);
-    mEditorSettingDefaults.insert ("Window Size", windowSizeMap);
+        /*
+         *Create the proxy setting for predefined values
+         */
+        Setting *preDefined = createSetting (Type_ComboBox, section,
+                                             "Pre-Defined");
+
+        preDefined->setDeclaredValues (QStringList() << "640 x 480"
+                                << "800 x 600" << "1024 x 768" << "1440 x 900");
+
+        preDefined->setViewLocation (1, 1);
+        preDefined->setWidgetWidth (10);
+        preDefined->setColumnSpan (2);
+
+        preDefined->addProxy (width,
+                             QStringList() << "640" << "800" << "1024" << "1440"
+                             );
+
+        preDefined->addProxy (height,
+                             QStringList() << "480" << "600" << "768" << "900"
+                             );
+    }
+
+    section = "Display Format";
+    {
+        QString defaultValue = "Icon and Text";
+
+        QStringList values = QStringList()
+                            << defaultValue << "Icon Only" << "Text Only";
+
+        Setting *rsd = createSetting (Type_RadioButton,
+                                      section, "Record Status Display");
+
+        Setting *ritd = createSetting (Type_RadioButton,
+                                      section, "Referenceable ID Type Display");
+
+        rsd->setDeclaredValues (values);
+        ritd->setDeclaredValues (values);
+
+        rsd->setEditorSetting (true);
+        ritd->setEditorSetting (true);
+    }
+
+    section = "Proxy Selection Test";
+    {
+        /******************************************************************
+        * There are three types of values:
+        *
+        * Declared values
+        *
+        *       Pre-determined values, typically for
+        *       combobox drop downs and boolean (radiobutton / checkbox) labels.
+        *       These values represent the total possible list of values that
+        *       may define a setting.  No other values are allowed.
+        *
+        * Defined values
+        *
+        *       Values which represent the actual, current value of
+        *       a setting.  For settings with declared values, this must be one
+        *       or several declared values, as appropriate.
+        *
+        * Proxy values
+        *       Values the proxy master updates the proxy slave when
+        *       it's own definition is set / changed.  These are definitions for
+        *       proxy slave settings, but must match any declared values the
+        *       proxy slave has, if any.
+        *******************************************************************/
+/*
+        //create setting objects, specifying the basic widget type,
+        //the page name, and the view name
+
+        Setting *masterBoolean = createSetting (Type_RadioButton, section,
+                                                "Master Proxy");
+
+        Setting *slaveBoolean = createSetting (Type_CheckBox, section,
+                                                "Proxy Checkboxes");
+
+        Setting *slaveSingleText = createSetting (Type_LineEdit, section,
+                                                "Proxy TextBox 1");
+
+        Setting *slaveMultiText = createSetting (Type_LineEdit, section,
+                                                "ProxyTextBox 2");
+
+        Setting *slaveAlphaSpinbox = createSetting (Type_SpinBox, section,
+                                                "Alpha Spinbox");
+
+        Setting *slaveIntegerSpinbox = createSetting (Type_SpinBox, section,
+                                                "Int Spinbox");
+
+        Setting *slaveDoubleSpinbox = createSetting (Type_DoubleSpinBox,
+                                                section, "Double Spinbox");
+
+        Setting *slaveSlider = createSetting (Type_Slider, section, "Slider");
+
+        Setting *slaveDial = createSetting (Type_Dial, section, "Dial");
+
+        //set declared values for selected views
+        masterBoolean->setDeclaredValues (QStringList()
+                                        << "Profile One" << "Profile Two"
+                                        << "Profile Three" << "Profile Four");
+
+        slaveBoolean->setDeclaredValues (QStringList()
+                            << "One" << "Two" << "Three" << "Four" << "Five");
+
+        slaveAlphaSpinbox->setDeclaredValues (QStringList()
+                            << "One" << "Two" << "Three" << "Four");
+
+
+        masterBoolean->addProxy (slaveBoolean, QList <QStringList>()
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three" << "Five")
+                                 << (QStringList() << "Two" << "Four")
+                                 );
+
+        masterBoolean->addProxy (slaveSingleText, QList <QStringList>()
+                                 << (QStringList() << "Text A")
+                                 << (QStringList() << "Text B")
+                                 << (QStringList() << "Text A")
+                                 << (QStringList() << "Text C")
+                                 );
+
+        masterBoolean->addProxy (slaveMultiText, QList <QStringList>()
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three")
+                                 << (QStringList() << "One" << "Three" << "Five")
+                                 << (QStringList() << "Two" << "Four")
+                                 );
+
+        masterBoolean->addProxy (slaveAlphaSpinbox, QList <QStringList>()
+                                 << (QStringList() << "Four")
+                                 << (QStringList() << "Three")
+                                 << (QStringList() << "Two")
+                                 << (QStringList() << "One"));
+
+        masterBoolean->addProxy (slaveIntegerSpinbox, QList <QStringList> ()
+                                 << (QStringList() << "0")
+                                 << (QStringList() << "7")
+                                 << (QStringList() << "14")
+                                 << (QStringList() << "21"));
+
+        masterBoolean->addProxy (slaveDoubleSpinbox, QList <QStringList> ()
+                                 << (QStringList() << "0.17")
+                                 << (QStringList() << "0.34")
+                                 << (QStringList() << "0.51")
+                                 << (QStringList() << "0.68"));
+
+        masterBoolean->addProxy (slaveSlider, QList <QStringList> ()
+                                 << (QStringList() << "25")
+                                 << (QStringList() << "50")
+                                 << (QStringList() << "75")
+                                 << (QStringList() << "100")
+                                 );
+
+        masterBoolean->addProxy (slaveDial, QList <QStringList> ()
+                                 << (QStringList() << "25")
+                                 << (QStringList() << "50")
+                                 << (QStringList() << "75")
+                                 << (QStringList() << "100")
+                                 );
+
+        //settings with proxies are not serialized by default
+        //other settings non-serialized for demo purposes
+        slaveBoolean->setSerializable (false);
+        slaveSingleText->setSerializable (false);
+        slaveMultiText->setSerializable (false);
+        slaveAlphaSpinbox->setSerializable (false);
+        slaveIntegerSpinbox->setSerializable (false);
+        slaveDoubleSpinbox->setSerializable (false);
+        slaveSlider->setSerializable (false);
+        slaveDial->setSerializable (false);
+
+        slaveBoolean->setDefaultValues (QStringList()
+                                        << "One" << "Three" << "Five");
+
+        slaveSingleText->setDefaultValue ("Text A");
+
+        slaveMultiText->setDefaultValues (QStringList()
+                                         << "One" << "Three" << "Five");
+
+        slaveSingleText->setWidgetWidth (24);
+        slaveMultiText->setWidgetWidth (24);
+
+        slaveAlphaSpinbox->setDefaultValue ("Two");
+        slaveAlphaSpinbox->setWidgetWidth (20);
+        //slaveAlphaSpinbox->setPrefix ("No. ");
+        //slaveAlphaSpinbox->setSuffix ("!");
+        slaveAlphaSpinbox->setWrapping (true);
+
+        slaveIntegerSpinbox->setDefaultValue (14);
+        slaveIntegerSpinbox->setMinimum (0);
+        slaveIntegerSpinbox->setMaximum (58);
+        slaveIntegerSpinbox->setPrefix ("$");
+        slaveIntegerSpinbox->setSuffix (".00");
+        slaveIntegerSpinbox->setWidgetWidth (10);
+        slaveIntegerSpinbox->setSpecialValueText ("Nothing!");
+
+        slaveDoubleSpinbox->setDefaultValue (0.51);
+        slaveDoubleSpinbox->setSingleStep(0.17);
+        slaveDoubleSpinbox->setMaximum(4.0);
+
+        slaveSlider->setMinimum (0);
+        slaveSlider->setMaximum (100);
+        slaveSlider->setDefaultValue (75);
+        slaveSlider->setWidgetWidth (100);
+        slaveSlider->setTicksAbove (true);
+        slaveSlider->setTickInterval (25);
+
+        slaveDial->setMinimum (0);
+        slaveDial->setMaximum (100);
+        slaveDial->setSingleStep (5);
+        slaveDial->setDefaultValue (75);
+        slaveDial->setTickInterval (25);
+*/
+        }
 }
 
 CSMSettings::UserSettings::~UserSettings()
@@ -76,230 +279,62 @@ CSMSettings::UserSettings::~UserSettings()
     mUserSettingsInstance = 0;
 }
 
-QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath, bool isReadOnly) const
-{
-    QIODevice::OpenMode openFlags = QIODevice::Text;
-
-    if (isReadOnly)
-        openFlags = QIODevice::ReadOnly | openFlags;
-    else
-        openFlags = QIODevice::ReadWrite | QIODevice::Truncate | openFlags;
-
-    QFile *file = new QFile(filePath);
-    QTextStream *stream = 0;
-
-    if (file->open(openFlags))
-    {
-        stream = new QTextStream(file);
-        stream->setCodec(QTextCodec::codecForName("UTF-8"));
-    }
-
-    return stream;
-
-}
-
-bool CSMSettings::UserSettings::writeSettings(QMap<QString, CSMSettings::SettingList *> &settings)
-{
-    QTextStream *stream = openFileStream(mUserFilePath);
-
-    bool success = (stream);
-
-    if (success)
-    {
-        QList<QString> keyList = settings.keys();
-
-        foreach (QString key, keyList)
-        {
-            SettingList *sectionSettings = settings[key];
-
-            *stream << "[" << key << "]" << '\n';
-
-            foreach (SettingContainer *item, *sectionSettings)
-                *stream << item->objectName() << " = " << item->getValue() << '\n';
-        }
-
-        stream->device()->close();
-        delete stream;
-        stream = 0;
-    }
-    else
-    {
-        displayFileErrorMessage(mReadWriteMessage, false);
-    }
-
-    return (success);
-}
-
-
-const CSMSettings::SectionMap &CSMSettings::UserSettings::getSectionMap() const
-{
-    return mSectionSettings;
-}
-
-const CSMSettings::SettingMap *CSMSettings::UserSettings::getSettings(const QString &sectionName) const
-{
-    return getValidSettings(sectionName);
-}
-
-bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
-{
-    if (filePath.isEmpty())
-        return false;
-
-    SectionMap loadedSettings;
-
-    QTextStream *stream = openFileStream (filePath, true);
-
-    bool success = (stream);
-
-    if (success)
-    {
-        //looks for a square bracket, "'\\["
-        //that has one or more "not nothing" in it, "([^]]+)"
-        //and is closed with a square bracket, "\\]"
-
-        QRegExp sectionRe("^\\[([^]]+)\\]");
-
-        //Find any character(s) that is/are not equal sign(s), "[^=]+"
-        //followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
-        //and one or more periods, "(.+)"
-
-        QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
-
-        CSMSettings::SettingMap *settings = 0;
-        QString section = "none";
-
-        while (!stream->atEnd())
-        {
-            QString line = stream->readLine().simplified();
-
-            if (line.isEmpty() || line.startsWith("#"))
-                continue;
-
-            //if a section is found, push it onto a new QStringList
-            //and push the QStringList onto
-            if (sectionRe.exactMatch(line))
-            {
-                //add the previous section's settings to the member map
-                if (settings)
-                    loadedSettings.insert(section, settings);
-
-                //save new section and create a new list
-                section = sectionRe.cap(1);
-                settings = new SettingMap;
-                continue;
-            }
-
-            if (keyRe.indexIn(line) != -1)
-            {
-                SettingContainer *sc  = new SettingContainer (keyRe.cap(2).simplified());
-                sc->setObjectName(keyRe.cap(1).simplified());
-                (*settings)[keyRe.cap(1).simplified()]  = sc;
-            }
-
-        }
-
-        loadedSettings.insert(section, settings);
-
-        stream->device()->close();
-        delete stream;
-        stream = 0;
-    }
-
-    mergeMap (loadedSettings);
-
-    return success;
-}
-
-void CSMSettings::UserSettings::mergeMap (const CSMSettings::SectionMap &sectionSettings)
-{
-    foreach (QString key, sectionSettings.uniqueKeys())
-    {
-        // insert entire section if it does not already exist in the loaded files
-        if (mSectionSettings.find(key) == mSectionSettings.end())
-            mSectionSettings.insert(key, sectionSettings.value(key));
-        else
-        {
-            SettingMap *passedSettings = sectionSettings.value(key);
-            SettingMap *settings = mSectionSettings.value(key);
-
-            foreach (QString key2, passedSettings->uniqueKeys())
-            {
-                //insert section settings individially if they do not already exist
-                if (settings->find(key2) == settings->end())
-                    settings->insert(key2, passedSettings->value(key2));
-                else
-                {
-                    settings->value(key2)->update(passedSettings->value(key2)->getValue());
-                }
-            }
-        }
-    }
-}
-
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
-    mSectionSettings.clear();
+    QString userFilePath = QString::fromUtf8
+                                (mCfgMgr.getUserConfigPath().string().c_str());
 
-    //global
-    QString globalFilePath = QString::fromStdString(mCfgMgr.getGlobalPath().string()) + fileName;
-    bool globalOk = loadFromFile(globalFilePath);
+    QString globalFilePath = QString::fromUtf8
+                                (mCfgMgr.getGlobalPath().string().c_str());
 
+    QString otherFilePath = globalFilePath;
 
-    //local
-    QString localFilePath = QString::fromStdString(mCfgMgr.getLocalPath().string()) + fileName;
-    bool localOk = loadFromFile(localFilePath);
-
-    //user
-    mUserFilePath = QString::fromStdString(mCfgMgr.getUserConfigPath().string()) + fileName;
-    loadFromFile(mUserFilePath);
-
-    if (!(localOk || globalOk))
+    //test for local only if global fails (uninstalled copy)
+    if (!QFile (globalFilePath + fileName).exists())
     {
-        QString message = QObject::tr("<br><b>Could not open user settings files for reading</b><br><br> \
-                Global and local settings files could not be read.\
-                You may have incorrect file permissions or the OpenCS installation may be corrupted.<br>");
-
-        message += QObject::tr("<br>Global filepath: ") + globalFilePath;
-        message += QObject::tr("<br>Local filepath: ") + localFilePath;
-
-        displayFileErrorMessage ( message, true);
+        //if global is invalid, use the local path
+        otherFilePath = QString::fromUtf8
+                                    (mCfgMgr.getLocalPath().string().c_str());
     }
+
+    QSettings::setPath
+                (QSettings::IniFormat, QSettings::UserScope, userFilePath);
+
+    QSettings::setPath
+                (QSettings::IniFormat, QSettings::SystemScope, otherFilePath);
+
+    mSettingDefinitions = new QSettings
+        (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
 }
 
-void CSMSettings::UserSettings::updateSettings (const QString &sectionName, const QString &settingName)
+bool CSMSettings::UserSettings::hasSettingDefinitions
+                                                (const QString &viewKey) const
 {
-
-    SettingMap *settings = getValidSettings(sectionName);
-
-    if (!settings)
-        return;
-
-    if (settingName.isEmpty())
-    {
-        foreach (const SettingContainer *setting, *settings)
-            emit signalUpdateEditorSetting (setting->objectName(), setting->getValue());
-    }
-    else
-    {
-        if (settings->find(settingName) != settings->end())
-        {
-            const SettingContainer *setting = settings->value(settingName);
-            emit signalUpdateEditorSetting (setting->objectName(), setting->getValue());
-        }
-    }
+    return (mSettingDefinitions->contains (viewKey));
 }
 
-QString CSMSettings::UserSettings::getSetting (const QString &section, const QString &setting) const
+void CSMSettings::UserSettings::setDefinitions
+                                (const QString &key, const QStringList &list)
 {
-    SettingMap *settings = getValidSettings(section);
+    mSettingDefinitions->setValue (key, list);
+}
 
-    QString retVal = "";
+void CSMSettings::UserSettings::saveDefinitions() const
+{
+    mSettingDefinitions->sync();
+}
 
-    if (settings->find(setting) != settings->end())
-        retVal = settings->value(setting)->getValue();
+QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
+{
+    if (!mSettingDefinitions->contains (settingKey))
+        return QString();
 
-    return retVal;
+    QStringList defs = mSettingDefinitions->value (settingKey).toStringList();
+
+    if (defs.isEmpty())
+        return QString();
+
+    return defs.at(0);
 }
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
@@ -308,48 +343,85 @@ CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
     return *mUserSettingsInstance;
 }
 
-void CSMSettings::UserSettings::displayFileErrorMessage(const QString &message, bool isReadOnly)
+void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
+                                                    const QStringList &list)
 {
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(QObject::tr("OpenCS configuration file I/O error"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
+    mSettingDefinitions->setValue (settingKey ,list);
 
-        if (!isReadOnly)
-            msgBox.setText (mReadWriteMessage + message);
-        else
-            msgBox.setText (message);
-
-        msgBox.exec();
+    emit userSettingUpdated (settingKey, list);
 }
 
-CSMSettings::SettingMap *
-CSMSettings::UserSettings::getValidSettings (const QString &sectionName) const
+CSMSettings::Setting *CSMSettings::UserSettings::findSetting
+                        (const QString &pageName, const QString &settingName)
 {
-    SettingMap *settings = 0;
-
-    //copy the default values for the entire section if it's not found
-    if (mSectionSettings.find(sectionName) == mSectionSettings.end())
+    foreach (Setting *setting, mSettings)
     {
-        if (mEditorSettingDefaults.find(sectionName) != mEditorSettingDefaults.end())
-            settings = mEditorSettingDefaults.value (sectionName);
-    }
-    //otherwise, iterate the section's settings, looking for missing values and replacing them with defaults.
-    else
-    {
-        SettingMap *loadedSettings = mSectionSettings[sectionName];
-        SettingMap *defaultSettings = mEditorSettingDefaults[sectionName];
-
-        foreach (QString key, defaultSettings->uniqueKeys())
+        if (setting->name() == settingName)
         {
-            //write the default value to the loaded settings
-            if (loadedSettings->find((key))==loadedSettings->end())
-                loadedSettings->insert(key, defaultSettings->value(key));
+            if (setting->page() == pageName)
+                return setting;
         }
+    }
+    return 0;
+}
 
-        settings = mSectionSettings.value (sectionName);
+void CSMSettings::UserSettings::removeSetting
+                        (const QString &pageName, const QString &settingName)
+{
+    if (mSettings.isEmpty())
+        return;
+
+    QList <Setting *>::iterator removeIterator = mSettings.begin();
+
+    while (removeIterator != mSettings.end())
+    {
+        if ((*removeIterator)->name() == settingName)
+        {
+            if ((*removeIterator)->page() == pageName)
+            {
+                mSettings.erase (removeIterator);
+                break;
+            }
+        }
+        removeIterator++;
+    }
+}
+
+
+CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
+{
+    SettingPageMap pageMap;
+
+    foreach (Setting *setting, mSettings)
+        pageMap[setting->page()].append (setting);
+
+    return pageMap;
+}
+
+CSMSettings::Setting *CSMSettings::UserSettings::createSetting
+        (CSMSettings::SettingType typ, const QString &page, const QString &name)
+{
+    //get list of all settings for the current setting name
+    if (findSetting (page, name))
+    {
+        qWarning() << "Duplicate declaration encountered: "
+                   << (name + '/' + page);
+        return 0;
     }
 
-    return settings;
+    Setting *setting = new Setting (typ, name, page);
+
+
+    //add declaration to the model
+    mSettings.append (setting);
+
+    return setting;
+}
+
+QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const
+{
+    if (mSettingDefinitions->contains (viewKey))
+        return mSettingDefinitions->value (viewKey).toStringList();
+
+    return QStringList();
 }

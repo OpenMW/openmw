@@ -26,7 +26,7 @@ namespace MWGui
             if (mClient == 0)
                 mClient = this;
 
-            mScrollView = mClient->createWidgetReal<MWGui::Widgets::MWScrollView>(
+            mScrollView = mClient->createWidgetReal<MyGUI::ScrollView>(
                 "MW_ScrollView", MyGUI::FloatCoord(0.0, 0.0, 1.0, 1.0),
                 MyGUI::Align::Top | MyGUI::Align::Left | MyGUI::Align::Stretch, getName() + "_ScrollView");
         }
@@ -48,10 +48,10 @@ namespace MWGui
 
         void MWList::redraw(bool scrollbarShown)
         {
-            const int _scrollBarWidth = 24; // fetch this from skin?
+            const int _scrollBarWidth = 20; // fetch this from skin?
             const int scrollBarWidth = scrollbarShown ? _scrollBarWidth : 0;
             const int spacing = 3;
-            size_t scrollbarPosition = mScrollView->getScrollPosition();
+            size_t viewPosition = -mScrollView->getViewOffset().top;
 
             while (mScrollView->getChildCount())
             {
@@ -83,7 +83,7 @@ namespace MWGui
                 else
                 {
                     MyGUI::ImageBox* separator = mScrollView->createWidget<MyGUI::ImageBox>("MW_HLine",
-                        MyGUI::IntCoord(2, mItemHeight, mScrollView->getWidth()-4, 18),
+                        MyGUI::IntCoord(2, mItemHeight, mScrollView->getWidth() - scrollBarWidth - 4, 18),
                         MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
                     separator->setNeedMouseFocus(false);
 
@@ -91,15 +91,15 @@ namespace MWGui
                 }
                 ++i;
             }
-            mScrollView->setCanvasSize(mClient->getSize().width + (_scrollBarWidth-scrollBarWidth), std::max(mItemHeight, mClient->getSize().height));
+            mScrollView->setCanvasSize(mClient->getSize().width, std::max(mItemHeight, mClient->getSize().height));
 
             if (!scrollbarShown && mItemHeight > mClient->getSize().height)
                 redraw(true);
 
-            size_t scrollbarRange = mScrollView->getScrollRange();
-            if(scrollbarPosition > scrollbarRange)
-                scrollbarPosition = scrollbarRange;
-            mScrollView->setScrollPosition(scrollbarPosition);
+            size_t viewRange = mScrollView->getCanvasSize().height;
+            if(viewPosition > viewRange)
+                viewPosition = viewRange;
+            mScrollView->setViewOffset(MyGUI::IntPoint(0, -viewPosition));
         }
 
         bool MWList::hasItem(const std::string& name)
@@ -149,20 +149,6 @@ namespace MWGui
         MyGUI::Widget* MWList::getItemWidget(const std::string& name)
         {
             return mScrollView->findWidget (getName() + "_item_" + name);
-        }
-
-        size_t MWScrollView::getScrollPosition()
-        {
-            return getVScroll()->getScrollPosition();
-        }
-
-        void MWScrollView::setScrollPosition(size_t position)
-        {
-            getVScroll()->setScrollPosition(position);
-        }
-        size_t MWScrollView::getScrollRange()
-        {
-            return getVScroll()->getScrollRange();
         }
 
     }

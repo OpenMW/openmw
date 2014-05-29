@@ -12,6 +12,8 @@
 
 #include <OgreImage.h>
 
+#include <boost/filesystem/fstream.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -28,6 +30,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -46,6 +49,8 @@ void MWState::StateManager::cleanup (bool force)
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
         mTimePlayed = 0;
+
+        MWMechanics::CreatureStats::cleanup();
     }
 }
 
@@ -133,8 +138,6 @@ void MWState::StateManager::newGame (bool bypass)
     else
         MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
 
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-
     mState = State_Running;
 }
 
@@ -184,7 +187,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     else
         slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
 
-    std::ofstream stream (slot->mPath.string().c_str(), std::ios::binary);
+    boost::filesystem::ofstream stream (slot->mPath, std::ios::binary);
 
     ESM::ESMWriter writer;
 
@@ -196,31 +199,65 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.addMaster (*iter, 0); // not using the size information anyway -> use value of 0
 
     writer.setFormat (ESM::Header::CurrentFormat);
-    writer.setRecordCount (
-        1 // saved game header
-        +MWBase::Environment::get().getJournal()->countSavedGameRecords()
-        +MWBase::Environment::get().getWorld()->countSavedGameRecords()
-        +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
-        +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
-        +1 // global map
-        );
+    int recordCount =         1 // saved game header
+            +MWBase::Environment::get().getJournal()->countSavedGameRecords()
+            +MWBase::Environment::get().getWorld()->countSavedGameRecords()
+            +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
+            +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
+            +MWBase::Environment::get().getWindowManager()->countSavedGameRecords();
+    writer.setRecordCount (recordCount);
 
     writer.save (stream);
+
+    Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+    listener.setProgressRange(recordCount);
+    listener.setLabel("#{sNotifyMessage4}");
+
+    Loading::ScopedLoad load(&listener);
 
     writer.startRecord (ESM::REC_SAVE);
     slot->mProfile.save (writer);
     writer.endRecord (ESM::REC_SAVE);
+    listener.increaseProgress();
 
-    MWBase::Environment::get().getJournal()->write (writer);
-    MWBase::Environment::get().getDialogueManager()->write (writer);
-    MWBase::Environment::get().getWorld()->write (writer);
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer);
-    MWBase::Environment::get().getWindowManager()->write(writer);
+    MWBase::Environment::get().getJournal()->write (writer, listener);
+    MWBase::Environment::get().getDialogueManager()->write (writer, listener);
+    MWBase::Environment::get().getWorld()->write (writer, listener);
+    MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer, listener);
+    MWBase::Environment::get().getWindowManager()->write(writer, listener);
+
+    // Ensure we have written the number of records that was estimated
+    if (writer.getRecordCount() != recordCount+1) // 1 extra for TES3 record
+        std::cerr << "Warning: number of written savegame records does not match. Estimated: " << recordCount+1 << ", written: " << writer.getRecordCount() << std::endl;
 
     writer.close();
 
     Settings::Manager::setString ("character", "Saves",
         slot->mPath.parent_path().filename().string());
+}
+
+void MWState::StateManager::quickSave (std::string name)
+{
+    if (!(mState==State_Running &&
+        MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1 // char gen
+            && MWBase::Environment::get().getWindowManager()->isSavingAllowed()))
+    {
+        //You can not save your game right now
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sSaveGameDenied}");
+        return;
+    }
+
+    const Slot* slot = NULL;
+    Character* mCurrentCharacter = getCurrentCharacter(true); //Get current character
+
+    //Find quicksave slot
+    for (Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
+    {
+        if (it->mProfile.mDescription == name)
+            slot = &*it;
+    }
+
+    saveGame(name, slot);
 }
 
 void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
@@ -235,6 +272,13 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         reader.open (slot->mPath.string());
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
+
+        Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+
+        listener.setProgressRange(reader.getRecordCount());
+        listener.setLabel("#{sLoadingMessage14}");
+
+        Loading::ScopedLoad load(&listener);
 
         while (reader.hasMoreRecs())
         {
@@ -273,6 +317,10 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_PLAY:
                 case ESM::REC_CSTA:
                 case ESM::REC_WTHR:
+                case ESM::REC_DYNA:
+                case ESM::REC_ACTC:
+                case ESM::REC_PROJ:
+                case ESM::REC_MPRJ:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -283,6 +331,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                     break;
 
                 case ESM::REC_GMAP:
+                case ESM::REC_KEYS:
+                case ESM::REC_ASPL:
 
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
                     break;
@@ -293,6 +343,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                     /// \todo log error
                     reader.skipRecord();
             }
+            listener.increaseProgress();
         }
 
         mCharacterManager.setCurrentCharacter(character);
@@ -309,23 +360,34 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
 
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        
-        //Update the weapon icon in the hud with whatever the player is currently holding.
-        MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator item = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        
-        if (item != invStore.end())
-            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*item);
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
-        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition());
+        // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
+        MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
+
+        // Do not trigger erroneous cellChanged events
+        MWBase::Environment::get().getWorld()->markCellAsUnchanged();
     }
     catch (const std::exception& e)
     {
         std::cerr << "failed to load saved game: " << e.what() << std::endl;
         cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
     }
+}
+
+void MWState::StateManager::quickLoad()
+{
+    if (Character* mCurrentCharacter = getCurrentCharacter (false))
+        if (const MWState::Slot* slot = &*mCurrentCharacter->begin()) //Get newest save
+            loadGame (mCurrentCharacter, slot);
+}
+
+void MWState::StateManager::deleteGame(const MWState::Character *character, const MWState::Slot *slot)
+{
+    mCharacterManager.deleteSlot(character, slot);
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)

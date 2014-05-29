@@ -179,6 +179,8 @@ namespace Compiler
                 opcodeGetReputationExplicit);
             extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
                 opcodeSameFactionExplicit);
+            extensions.registerInstruction("modfactionreaction", "ccl", opcodeModFactionReaction);
+            extensions.registerFunction("getfactionreaction", 'l', "ccl", opcodeGetFactionReaction);
         }
     }
 
@@ -222,7 +224,7 @@ namespace Compiler
         {
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
             extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate);
-            extensions.registerInstruction ("activate", "", opcodeActivate);
+            extensions.registerInstruction ("activate", "", opcodeActivate, opcodeActivateExplicit);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);
             extensions.registerInstruction ("cast", "SS", opcodeCast, opcodeCastExplicit);
@@ -409,9 +411,9 @@ namespace Compiler
                 opcodeResurrectExplicit);
             extensions.registerFunction ("getspell", 'l', "c", opcodeGetSpell, opcodeGetSpellExplicit);
 
-            extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
-            extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
-            extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
+            extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank, opcodePCRaiseRankExplicit);
+            extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank, opcodePCLowerRankExplicit);
+            extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction, opcodePCJoinFactionExplicit);
             extensions.registerInstruction ("moddisposition","l",opcodeModDisposition,
                 opcodeModDispositionExplicit);
             extensions.registerInstruction ("setdisposition","l",opcodeSetDisposition,
@@ -444,6 +446,7 @@ namespace Compiler
             extensions.registerInstruction ("lowerrank", "", opcodeLowerRank, opcodeLowerRankExplicit);
 
             extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath, opcodeOnDeathExplicit);
+            extensions.registerFunction ("onknockout", 'l', "", opcodeOnKnockout, opcodeOnKnockoutExplicit);
 
             extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
 

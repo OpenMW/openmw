@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 300 130" name="_Main">
         <Property key="Visible" value="false"/>
 
-        <Widget type="EditBox" skin="MW_TextEditClient" position="8 8 284 400" name="Message" align="Left Top Stretch">
+        <Widget type="EditBox" skin="MW_TextEditClient" position="16 8 268 130" name="Message" align="Center Top">
             <Property key="FontName" value="Default"/>
             <Property key="TextAlign" value="Top HCenter"/>
             <Property key="TextColour" value="0.75 0.6 0.35"/>
@@ -13,18 +13,19 @@
             <Property key="MultiLine" value="true"/>
         </Widget>
 
-        <Widget type="HBox" position="0 89 272 24" align="Right Bottom">
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
-            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Bottom">
-                <Property key="Caption" value="#{sCancel}"/>
-            </Widget>
-            <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Right Bottom">
-                <Property key="Caption" value="#{sOk}"/>
-            </Widget>
-        </Widget>
+        <Widget type="VBox" position="0 89 292 24" align="Right Bottom">
+            <Widget type="HBox">
+                <Property key="Spacing" value="8"/>
 
+                <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Right Bottom">
+                    <Property key="Caption" value="#{sYes}"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Bottom">
+                    <Property key="Caption" value="#{sNo}"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="Widget"/>
+        </Widget>
     </Widget>
 </MyGUI>
-

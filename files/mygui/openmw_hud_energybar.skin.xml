@@ -19,24 +19,28 @@
     </Skin>
 
     <!-- Progress bar track, various colors -->
-    <Skin name="MW_BarTrack_Red" size="4 8" texture="smallbars.png" >
-        <BasisSkin type="MainSkin" offset="0 0 4 8" align="Stretch">
-            <State name="normal" offset="0 0 4 8"/>
+    <Skin name="MW_BarTrack_Red" size="4 8" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="0.8274 0.2431 0.129"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Skin>
-    <Skin name="MW_BarTrack_Green" size="4 8" texture="smallbars.png" >
-        <BasisSkin type="MainSkin" offset="0 0 4 8" align="Stretch">
-            <State name="normal" offset="0 16 4 8"/>
+    <Skin name="MW_BarTrack_Green" size="4 8" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="0 0.6823 0.2745"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Skin>
-    <Skin name="MW_BarTrack_Blue" size="4 8" texture="smallbars.png" >
-        <BasisSkin type="MainSkin" offset="0 0 4 8" align="Stretch">
-            <State name="normal" offset="0 8 4 8"/>
+    <Skin name="MW_BarTrack_Blue" size="4 8" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="0.2470 0.3176 0.7411"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Skin>
-    <Skin name="MW_BarTrack_Yellow" size="4 8" texture="smallbars.png" >
-        <BasisSkin type="MainSkin" offset="0 0 4 8" align="Stretch">
-            <State name="normal" offset="0 32 4 8"/>
+    <Skin name="MW_BarTrack_Yellow" size="4 8" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="1 1 0"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Skin>
 

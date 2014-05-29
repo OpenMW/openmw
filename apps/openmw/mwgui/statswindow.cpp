@@ -228,7 +228,7 @@ namespace MWGui
         NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
+        const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
 
         // level progress
         MyGUI::Widget* levelWidget;
@@ -459,7 +459,7 @@ namespace MWGui
                 addSeparator(coord1, coord2);
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
+            const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
             const std::set<std::string> &expelled = PCstats.getExpelled();
 
             addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFaction", "Faction"), coord1, coord2);
@@ -475,7 +475,7 @@ namespace MWGui
                 text += std::string("#DDC79E") + faction->mName;
 
                 if (expelled.find(it->first) != expelled.end())
-                    text += "\n#{sExpelled}";
+                    text += "\n#BF9959#{sExpelled}";
                 else
                 {
                     text += std::string("\n#BF9959") + faction->mRanks[it->second];

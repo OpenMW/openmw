@@ -4,7 +4,6 @@ set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
-    bigbars.png
     black.png
     core.skin
     core.xml
@@ -81,7 +80,6 @@ set(MYGUI_FILES
     openmw_companion_window.layout
     openmw_savegame_dialog.layout
     openmw_recharge_dialog.layout
-    smallbars.png
     DejaVuLGCSansMono.ttf
     markers.png
     ../launcher/images/openmw.png

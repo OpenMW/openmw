@@ -6,26 +6,32 @@
 #include "pathfinding.hpp"
 
 #include "movement.hpp"
+#include "obstacle.hpp"
+
+#include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
 
 namespace MWMechanics
 {
+    /// \brief Causes the actor to fight another actor
     class AiCombat : public AiPackage
     {
         public:
+            ///Constructor
+            /** \param actor Actor to fight **/
             AiCombat(const MWWorld::Ptr& actor);
 
             virtual AiCombat *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
-            ///< \return Package completed?
 
             virtual int getTypeId() const;
 
             virtual unsigned int getPriority() const;
 
-            const std::string &getTargetId() const;
+            ///Returns target ID
+            MWWorld::Ptr getTarget() const;
 
         private:
             PathFinder mPathFinder;
@@ -36,19 +42,28 @@ namespace MWMechanics
             // when mCombatMove is true
             float mTimerCombatMove;
 
-            // the z rotation angle (degrees) we want to reach
-            // used every frame when mRotate is true
-            float mTargetAngle;
-
-            bool mReadyToAttack, mStrike;
+            // AiCombat states
+            bool mReadyToAttack, mAttack;
             bool mFollowTarget;
             bool mCombatMove;
-            bool mRotate;
+            bool mBackOffDoor;
 
+            bool mForceNoShortcut;
+            ESM::Position mShortcutFailPos;
+
+            ESM::Position mLastPos;
             MWMechanics::Movement mMovement;
-            MWWorld::Ptr mTarget;
+            int mTargetActorId;
 
-            void buildNewPath(const MWWorld::Ptr& actor);
+            const MWWorld::CellStore* mCell;
+            ObstacleCheck mObstacleCheck;
+            float mDoorCheckDuration;
+            // TODO: for some reason mDoors.searchViaHandle() returns
+            // null pointers, workaround by keeping an iterator
+            MWWorld::CellRefList<ESM::Door>::List::iterator mDoorIter;
+            MWWorld::CellRefList<ESM::Door>& mDoors;
+
+            void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
     };
 }
 

@@ -8,6 +8,7 @@
 
 #include "steering.hpp"
 #include "movement.hpp"
+#include "creaturestats.hpp"
 
 namespace MWMechanics
 {
@@ -29,6 +30,8 @@ namespace MWMechanics
         ESM::Position pos = actor.getRefData().getPosition();
         Movement &movement = actor.getClass().getMovementSettings(actor);
         const ESM::Cell *cell = actor.getCell()->getCell();
+
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
         MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->getCell()->mData.mX)

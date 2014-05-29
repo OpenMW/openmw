@@ -51,16 +51,11 @@ bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& p
     return true;
 }
 
-void CSMTools::ReportModel::add (const std::string& row)
+void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::string& message)
 {
-    std::string::size_type index = row.find ('|');
-
-    if (index==std::string::npos)
-        throw std::logic_error ("invalid report message");
-
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
 
-    mRows.push_back (std::make_pair (row.substr (0, index), row.substr (index+1)));
+    mRows.push_back (std::make_pair (id, message));
 
     endInsertRows();
 }

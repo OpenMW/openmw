@@ -48,7 +48,7 @@ namespace MWClass
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
-            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel) const;
+            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel = 0) const;
             ///< Lock object
 
             virtual void unlock (const MWWorld::Ptr& ptr) const;
@@ -63,6 +63,10 @@ namespace MWClass
             ///< Write additional state from \a ptr into \a state.
 
             static void registerSelf();
+
+            virtual void respawn (const MWWorld::Ptr& ptr) const;
+
+            virtual void restock (const MWWorld::Ptr &ptr) const;
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };

@@ -68,7 +68,8 @@ namespace MWRender
 
 float HeadAnimationTime::getValue() const
 {
-    // TODO: Handle eye blinking (time is in the text keys)
+    // TODO use time from text keys (Talk Start/Stop, Blink Start/Stop)
+    // TODO: Handle eye blinking
     if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
         return 0;
     else
@@ -236,7 +237,7 @@ void NpcAnimation::updateNpcBase()
 void NpcAnimation::updateParts()
 {    
     mAlpha = 1.f;
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
 
     NpcType curType = Type_Normal;
@@ -667,12 +668,12 @@ void NpcAnimation::showWeapons(bool showWeapon)
     mShowWeapons = showWeapon;
     if(showWeapon)
     {
-        MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+        MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(weapon != inv.end())
         {
             Ogre::Vector3 glowColor = getEnchantmentColor(*weapon);
-            std::string mesh = MWWorld::Class::get(*weapon).getModel(*weapon);
+            std::string mesh = weapon->getClass().getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
@@ -700,13 +701,13 @@ void NpcAnimation::showWeapons(bool showWeapon)
 void NpcAnimation::showCarriedLeft(bool show)
 {
     mShowCarriedLeft = show;
-    MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+    MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
     if(show && iter != inv.end())
     {
         Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
-        std::string mesh = MWWorld::Class::get(*iter).getModel(*iter);
+        std::string mesh = iter->getClass().getModel(*iter);
         if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {

@@ -59,7 +59,8 @@ namespace MWClass
             virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
 
-            virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+            virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+            ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
             virtual std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.

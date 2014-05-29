@@ -29,7 +29,12 @@ class ESMWriter
         void setEncoder(ToUTF8::Utf8Encoder *encoding);
         void setAuthor(const std::string& author);
         void setDescription(const std::string& desc);
+        // Set the record count for writing it in the file header
         void setRecordCount (int count);
+        // Counts how many records we have actually written.
+        // It is a good idea to compare this with the value you wrote into the header (setRecordCount)
+        // It should be the record count you set + 1 (1 additional record for the TES3 header)
+        int getRecordCount() { return mRecordCount; }
         void setFormat (int format);
 
         void clearMaster();
@@ -69,6 +74,18 @@ class ESMWriter
             endRecord(name);
         }
 
+private:
+        // Prevent using writeHNT with strings. This already happened by accident and results in
+        // state being discarded without any error on writing or reading it. :(
+        // writeHNString and friends must be used instead.
+        void writeHNT(const std::string &name, std::string data)
+        {
+        }
+        void writeT(const std::string& data)
+        {
+        }
+public:
+
         template<typename T>
         void writeHNT(const std::string& name, const T& data, int size)
         {
@@ -91,6 +108,7 @@ class ESMWriter
 
         void startRecord(const std::string& name, uint32_t flags = 0);
         void startRecord(uint32_t name, uint32_t flags = 0);
+        /// @note Sub-record hierarchies are not properly supported in ESMReader. This should be fixed later.
         void startSubRecord(const std::string& name);
         void endRecord(const std::string& name);
         void endRecord(uint32_t name);

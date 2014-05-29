@@ -216,13 +216,14 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
- MWRender::Camera* RenderingManager::getCamera() const
+MWRender::Camera* RenderingManager::getCamera() const
 {
     return mCamera;
 }
 
 void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
+    mLocalMap->saveFogOfWar(store);
     mObjects->removeCell(store);
     mActors->removeCell(store);
     mDebugging->cellRemoved(store);
@@ -233,9 +234,9 @@ void RenderingManager::removeWater ()
     mWater->setActive(false);
 }
 
-void RenderingManager::toggleWater()
+bool RenderingManager::toggleWater()
 {
-    mWater->toggle();
+    return mWater->toggle();
 }
 
 void RenderingManager::cellAdded (MWWorld::CellStore *store)
@@ -248,7 +249,7 @@ void RenderingManager::cellAdded (MWWorld::CellStore *store)
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
     const MWWorld::Class& class_ =
-            MWWorld::Class::get (ptr);
+            ptr.getClass();
     class_.insertObjectRendering(ptr, *this);
 }
 
@@ -278,7 +279,7 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
         mCamera->rotateCamera(-rot, false);
 
     Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(rot.z), Ogre::Vector3::NEGATIVE_UNIT_Z);
-    if(!MWWorld::Class::get(ptr).isActor())
+    if(!ptr.getClass().isActor())
         newo = Ogre::Quaternion(Ogre::Radian(rot.x), Ogre::Vector3::NEGATIVE_UNIT_X) *
                Ogre::Quaternion(Ogre::Radian(rot.y), Ogre::Vector3::NEGATIVE_UNIT_Y) * newo;
     ptr.getRefData().getBaseNode()->setOrientation(newo);
@@ -293,7 +294,7 @@ RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &
     Ogre::SceneNode *parent = child->getParentSceneNode();
     parent->removeChild(child);
 
-    if (MWWorld::Class::get(old).isActor()) {
+    if (old.getClass().isActor()) {
         mActors->updateObjectCell(old, cur);
     } else {
         mObjects->updateObjectCell(old, cur);
@@ -313,7 +314,7 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
     NpcAnimation *anim = NULL;
     if(ptr.getRefData().getHandle() == "player")
         anim = mPlayerAnimation;
-    else if(MWWorld::Class::get(ptr).isActor())
+    else if(ptr.getClass().isActor())
         anim = dynamic_cast<NpcAnimation*>(mActors->getAnimation(ptr));
     if(anim)
     {
@@ -336,7 +337,7 @@ void RenderingManager::update (float duration, bool paused)
 
     MWWorld::Ptr player = world->getPlayerPtr();
 
-    int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
+    int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
     mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
@@ -379,6 +380,10 @@ void RenderingManager::update (float duration, bool paused)
 
     mCamera->update(duration, paused);
 
+    Ogre::SceneNode *node = data.getBaseNode();
+    Ogre::Quaternion orient = node->_getDerivedOrientation();
+    mLocalMap->updatePlayer(playerPos, orient);
+
     if(paused)
         return;
 
@@ -392,10 +397,6 @@ void RenderingManager::update (float duration, bool paused)
 
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
 
-    Ogre::SceneNode *node = data.getBaseNode();
-    Ogre::Quaternion orient = node->_getDerivedOrientation();
-
-    mLocalMap->updatePlayer(playerPos, orient);
 
     mWater->updateUnderwater(world->isUnderwater(player.getCell(), cam));
 
@@ -563,7 +564,8 @@ void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
         Ogre::ColourValue colour;
         colour.setAsABGR (mCell.getCell()->mAmbi.mSunlight);
         mSun->setDiffuseColour (colour);
-        mSun->setDirection(0,-1,0);
+        mSun->setDirection(1,-1,-1);
+        sunEnable(false);
     }
 }
 // Switch through lighting modes.
@@ -597,7 +599,7 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     mAmbientColor = colour;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
+    int nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
     Ogre::ColourValue final = colour;
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 
@@ -670,7 +672,7 @@ void RenderingManager::requestMap(MWWorld::CellStore* cell)
         mLocalMap->requestMap(cell, mObjects->getDimensions(cell));
 }
 
-void RenderingManager::preCellChange(MWWorld::CellStore* cell)
+void RenderingManager::writeFog(MWWorld::CellStore* cell)
 {
     mLocalMap->saveFogOfWar(cell);
 }
@@ -692,15 +694,8 @@ Shadows* RenderingManager::getShadows()
     return mShadows;
 }
 
-void RenderingManager::switchToInterior()
+void RenderingManager::notifyWorldSpaceChanged()
 {
-    // TODO: also do this when switching worldspace
-    mEffectManager->clear();
-}
-
-void RenderingManager::switchToExterior()
-{
-    // TODO: also do this when switching worldspace
     mEffectManager->clear();
 }
 
@@ -1054,6 +1049,12 @@ float RenderingManager::getCameraDistance() const
 void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const Vector3 &worldPosition, float scale)
 {
     mEffectManager->addEffect(model, texture, worldPosition, scale);
+}
+
+void RenderingManager::clear()
+{
+    mLocalMap->clear();
+    notifyWorldSpaceChanged();
 }
 
 } // namespace

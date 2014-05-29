@@ -60,6 +60,7 @@ namespace CSMWorld
                 Type_Spell,
                 Type_Cells,
                 Type_Cell,
+                Type_Cell_Missing, //For cells that does not exist yet.
                 Type_Referenceables,
                 Type_Referenceable,
                 Type_Activator,
@@ -96,10 +97,11 @@ namespace CSMWorld
                 Type_JournalInfos,
                 Type_JournalInfo,
                 Type_Scene,
-                Type_Preview
+                Type_Preview,
+                Type_LoadErrorLog
             };
 
-            enum { NumberOfTypes = Type_Scene+1 };
+            enum { NumberOfTypes = Type_LoadErrorLog+1 };
 
         private:
 

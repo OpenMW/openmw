@@ -11,7 +11,7 @@ namespace MWWorld
         cast.mHitPosition = Ogre::Vector3(actor.getRefData().getPosition().pos);
         cast.cast(mSpellId);
 
-        mTrapSource.getCellRef().mTrap = "";
+        mTrapSource.getCellRef().setTrap("");
     }
 
 }

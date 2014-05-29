@@ -39,19 +39,19 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-    MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+    MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
     for (MWWorld::ContainerStoreIterator iter (store.begin(categories));
          iter!=store.end(); ++iter)
     {
-        if (MWWorld::Class::get(*iter).hasItemHealth(*iter))
+        if (iter->getClass().hasItemHealth(*iter))
         {
-            int maxDurability = MWWorld::Class::get(*iter).getItemMaxHealth(*iter);
-            int durability = (iter->getCellRef().mCharge == -1) ? maxDurability : iter->getCellRef().mCharge;
+            int maxDurability = iter->getClass().getItemMaxHealth(*iter);
+            int durability = iter->getClass().getItemHealth(*iter);
             if (maxDurability == durability)
                 continue;
 
-            int basePrice = MWWorld::Class::get(*iter).getValue(*iter);
+            int basePrice = iter->getClass().getValue(*iter);
             float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("fRepairMult")->getFloat();
 
@@ -64,7 +64,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
 
-            std::string name = MWWorld::Class::get(*iter).getName(*iter)
+            std::string name = iter->getClass().getName(*iter)
                     + " - " + boost::lexical_cast<std::string>(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("sgp")->getString();;
@@ -114,7 +114,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
     // repair
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
-    item.getCellRef().mCharge = MWWorld::Class::get(item).getItemMaxHealth(item);
+    item.getCellRef().setCharge(item.getClass().getItemMaxHealth(item));
 
     MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
 

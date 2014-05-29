@@ -34,7 +34,15 @@ namespace MWScript
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWBase::Environment::get().getJournal()->addEntry (quest, index);
+                    // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
+                    try
+                    {
+                        MWBase::Environment::get().getJournal()->addEntry (quest, index);
+                    }
+                    catch (...)
+                    {
+                        MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
+                    }
                 }
         };
 
@@ -141,7 +149,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get(ptr).getNpcStats (ptr).setReputation (MWWorld::Class::get(ptr).getNpcStats (ptr).getReputation () + value);
+                    ptr.getClass().getNpcStats (ptr).setReputation (ptr.getClass().getNpcStats (ptr).getReputation () + value);
                 }
         };
 
@@ -156,7 +164,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get(ptr).getNpcStats (ptr).setReputation (value);
+                    ptr.getClass().getNpcStats (ptr).setReputation (value);
                 }
         };
 
@@ -169,7 +177,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).getReputation ());
+                    runtime.push (ptr.getClass().getNpcStats (ptr).getReputation ());
                 }
         };
 
@@ -184,8 +192,47 @@ namespace MWScript
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).isSameFaction (MWWorld::Class::get(player).getNpcStats (player)));
+                    runtime.push (ptr.getClass().getNpcStats (ptr).isSameFaction (player.getClass().getNpcStats (player)));
                 }
+        };
+
+        class OpModFactionReaction : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                int modReaction = runtime[0].mInteger;
+                runtime.pop();
+
+                MWBase::Environment::get().getDialogueManager()->modFactionReaction(faction1, faction2, modReaction);
+            }
+        };
+
+        class OpGetFactionReaction : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                // ignore extra garbage argument
+                runtime.pop();
+
+                runtime.push(MWBase::Environment::get().getDialogueManager()
+                             ->getFactionReaction(faction1, faction2));
+            }
         };
 
 
@@ -207,6 +254,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetReputationExplicit, new OpGetReputation<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFaction, new OpSameFaction<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetFactionReaction, new OpGetFactionReaction);
         }
     }
 

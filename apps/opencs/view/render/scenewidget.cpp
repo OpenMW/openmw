@@ -86,8 +86,11 @@ namespace CSVRender
         }
 
         std::stringstream windowHandle;
+#ifdef WIN32
+        windowHandle << Ogre::StringConverter::toString((unsigned long)(this->winId()));
+#else
         windowHandle << this->winId();
-
+#endif
         std::stringstream windowTitle;
         static int count=0;
         windowTitle << ++count;
@@ -320,7 +323,7 @@ namespace CSVRender
 
         }
 
-        if (mUpdate)
+        if (mUpdate && mWindow)
         {
             mUpdate = false;
             mWindow->update();

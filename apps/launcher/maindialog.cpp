@@ -34,6 +34,25 @@ using namespace Process;
 Launcher::MainDialog::MainDialog(QWidget *parent)
     : mGameSettings(mCfgMgr), QMainWindow (parent)
 {
+    // Install the stylesheet font
+    QFile file;
+    QFontDatabase fontDatabase;
+
+    const QStringList fonts = fontDatabase.families();
+
+    // Check if the font is installed
+    if (!fonts.contains("EB Garamond")) {
+
+        QString font = QString::fromUtf8(mCfgMgr.getGlobalDataPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+        file.setFileName(font);
+
+        if (!file.exists()) {
+            font = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+        }
+
+        fontDatabase.addApplicationFont(font);
+    }
+
     setupUi(this);
 
     mGameInvoker = new ProcessInvoker();
@@ -74,25 +93,6 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
                                                                                         QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
                                                              QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
                                                                                         QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
-    }
-
-    // Install the stylesheet font
-    QFile file;
-    QFontDatabase fontDatabase;
-
-    const QStringList fonts = fontDatabase.families();
-
-    // Check if the font is installed
-    if (!fonts.contains("EB Garamond")) {
-
-        QString font = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        file.setFileName(font);
-
-        if (!file.exists()) {
-            font = QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        }
-
-        fontDatabase.addApplicationFont(font);
     }
 
     createIcons();
@@ -167,8 +167,6 @@ void Launcher::MainDialog::createPages()
 
 bool Launcher::MainDialog::showFirstRunDialog()
 {
-
-
 
 //    CheckableMessageBox msgBox(this);
 //    msgBox.setWindowTitle(tr("Morrowind installation detected"));
@@ -350,7 +348,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
 
     QStringList paths;
     paths.append(QString("launcher.cfg"));
@@ -456,8 +454,8 @@ bool Launcher::expansions(Launcher::UnshieldThread& cd)
 
 bool Launcher::MainDialog::setupGameSettings()
 {
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
-    QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
@@ -586,7 +584,7 @@ bool Launcher::MainDialog::setupGameSettings()
 
             while(expansions(cd));
 
-            selectedFile = QString::fromStdString(cd.GetMWEsmPath());
+            selectedFile = QString::fromUtf8(cd.GetMWEsmPath().c_str());
         }
         #endif // WIN32
 
@@ -607,8 +605,8 @@ bool Launcher::MainDialog::setupGraphicsSettings()
 {
     mGraphicsSettings.setMultiValueEnabled(false);
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
-    QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
+    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
     QFile localDefault(QString("settings-default.cfg"));
     QFile globalDefault(globalPath + QString("settings-default.cfg"));
@@ -695,7 +693,7 @@ bool Launcher::MainDialog::writeSettings()
     mGraphicsPage->saveSettings();
     mSettingsPage->saveSettings();
 
-    QString userPath = QString::fromStdString(mCfgMgr.getUserConfigPath().string());
+    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QDir dir(userPath);
 
     if (!dir.exists()) {
@@ -800,7 +798,7 @@ void Launcher::MainDialog::play()
             msgBox.setWindowTitle(tr("No game file selected"));
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>You do not have no game file selected.</b><br><br> \
+            msgBox.setText(tr("<br><b>You do not have a game file selected.</b><br><br> \
                               OpenMW will not start without a game file selected.<br>"));
             msgBox.exec();
             return;

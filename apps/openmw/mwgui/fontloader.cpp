@@ -196,6 +196,16 @@ namespace MWGui
         bitmapFile->read(&textureData[0], width*height*4);
         bitmapFile->close();
 
+        std::string resourceName;
+        if (name.size() >= 5 && Misc::StringUtils::ciEqual(name.substr(0, 5), "magic"))
+            resourceName = "Magic Cards";
+        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "century"))
+            resourceName = "Century Gothic";
+        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
+            resourceName = "Daedric";
+        else
+            return; // no point in loading it, since there is no way of using additional fonts
+
         std::string textureName = name;
         Ogre::Image image;
         image.loadDynamicImage(&textureData[0], width, height, Ogre::PF_BYTE_RGBA);
@@ -208,18 +218,11 @@ namespace MWGui
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
+
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0
         MyGUI::xml::Document xmlDocument;
         MyGUI::xml::ElementPtr root = xmlDocument.createRoot("ResourceManualFont");
-
-        if (name.size() >= 5 && Misc::StringUtils::ciEqual(name.substr(0, 5), "magic"))
-            root->addAttribute("name", "Magic Cards");
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "century"))
-            root->addAttribute("name", "Century Gothic");
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
-            root->addAttribute("name", "Daedric");
-        else
-            return; // no point in loading it, since there is no way of using additional fonts
+        root->addAttribute("name", resourceName);
 
         MyGUI::xml::ElementPtr defaultHeight = root->createChild("Property");
         defaultHeight->addAttribute("key", "DefaultHeight");
@@ -285,6 +288,7 @@ namespace MWGui
 
         font->deserialization(root, MyGUI::Version(3,2,0));
 
+        MyGUI::ResourceManager::getInstance().removeByName(font->getResourceName());
         MyGUI::ResourceManager::getInstance().addResource(font);
     }
 

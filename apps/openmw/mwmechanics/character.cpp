@@ -407,32 +407,56 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
     return inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 }
 
+void CharacterController::playDeath(float startpoint, CharacterState death)
+{
+    switch (death)
+    {
+    case CharState_SwimDeath:
+        mCurrentDeath = "swimdeath";
+        break;
+    case CharState_DeathKnockDown:
+        mCurrentDeath = "deathknockdown";
+        break;
+    case CharState_DeathKnockOut:
+        mCurrentDeath = "deathknockout";
+        break;
+    default:
+        mCurrentDeath = "death" + Ogre::StringConverter::toString(death - CharState_Death1 + 1);
+    }
+    mDeathState = death;
+
+    mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(mDeathState - CharState_Death1);
+
+    // For dead actors, refreshCurrentAnims is no longer called, so we need to disable the movement state manually.
+    mMovementState = CharState_None;
+    mAnimation->disable(mCurrentMovement);
+    mCurrentMovement = "";
+
+    mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
+                    false, 1.0f, "start", "stop", startpoint, 0);
+}
+
 void CharacterController::playRandomDeath(float startpoint)
 {
     if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
     {
         mDeathState = CharState_SwimDeath;
-        mCurrentDeath = "swimdeath";
     }
     else if (mHitState == CharState_KnockDown)
     {
         mDeathState = CharState_DeathKnockDown;
-        mCurrentDeath = "deathknockdown";
     }
     else if (mHitState == CharState_KnockOut)
     {
         mDeathState = CharState_DeathKnockOut;
-        mCurrentDeath = "deathknockout";
     }
     else
     {
         int selected=0;
-        mCurrentDeath = chooseRandomGroup("death", &selected);
+        chooseRandomGroup("death", &selected);
         mDeathState = static_cast<CharacterState>(CharState_Death1 + (selected-1));
     }
-
-    mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                    false, 1.0f, "start", "stop", startpoint, 0);
+    playDeath(startpoint, mDeathState);
 }
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
@@ -454,7 +478,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     if(cls.isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
@@ -489,12 +513,14 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         mIdleState = CharState_Idle;
     }
 
-    refreshCurrentAnims(mIdleState, mMovementState, true);
 
     if(mDeathState != CharState_None)
     {
-        playRandomDeath(1.0f);
+        int deathindex = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
+        playDeath(1.0f, CharacterState(CharState_Death1 + deathindex));
     }
+    else
+        refreshCurrentAnims(mIdleState, mMovementState, true);
 }
 
 CharacterController::~CharacterController()
@@ -543,7 +569,7 @@ bool CharacterController::updateCreatureState()
 
 bool CharacterController::updateWeaponState()
 {
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
@@ -595,8 +621,8 @@ bool CharacterController::updateWeaponState()
         if(weapon != inv.end() && !(weaptype == WeapType_None && mWeaponType == WeapType_Spell))
         {
             std::string soundid = (weaptype == WeapType_None) ?
-                                   MWWorld::Class::get(*weapon).getDownSoundId(*weapon) :
-                                   MWWorld::Class::get(*weapon).getUpSoundId(*weapon);
+                                   weapon->getClass().getDownSoundId(*weapon) :
+                                   weapon->getClass().getUpSoundId(*weapon);
             if(!soundid.empty())
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -740,10 +766,6 @@ bool CharacterController::updateWeaponState()
                     MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
                 if(!resultSound.empty())
                     MWBase::Environment::get().getSoundManager()->playSound(resultSound, 1.0f, 1.0f);
-
-                // Set again, just to update the charge bar
-                if(item.getRefData().getCount())
-                    MWBase::Environment::get().getWindowManager()->setSelectedWeapon(item);
             }
             else if (ammunition)
             {
@@ -981,7 +1003,7 @@ bool CharacterController::updateWeaponState()
 void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     Ogre::Vector3 movement(0.0f);
 
     updateVisibility();
@@ -1010,10 +1032,20 @@ void CharacterController::update(float duration)
         bool flying = world->isFlying(mPtr);
         //Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
-        vec.normalise();
+        if(vec.z > 0.0f) // to avoid slow-down when jumping
+        {
+            Ogre::Vector2 vecXY = Ogre::Vector2(vec.x, vec.y);
+            vecXY.normalise();
+            vec.x = vecXY.x;
+            vec.y = vecXY.y;
+        }
+        else 
+            vec.normalise();
+
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
+
         mMovementSpeed = cls.getSpeed(mPtr);
 
         vec.x *= mMovementSpeed;
@@ -1110,9 +1142,12 @@ void CharacterController::update(float duration)
             if(cls.isNpc())
             {
                 const NpcStats &stats = cls.getNpcStats(mPtr);
-                mult = gmst.find("fJumpMoveBase")->getFloat() +
+                static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
+                static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
+
+                mult = fJumpMoveBase +
                        (stats.getSkill(ESM::Skill::Acrobatics).getModified()/100.0f *
-                        gmst.find("fJumpMoveMult")->getFloat());
+                        fJumpMoveMult);
             }
 
             vec.x *= mult;
@@ -1122,14 +1157,7 @@ void CharacterController::update(float duration)
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
             // Started a jump.
-            float z = cls.getJump(mPtr);
-            if(vec.x == 0 && vec.y == 0)
-                vec = Ogre::Vector3(0.0f, 0.0f, z);
-            else
-            {
-                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
-            }
+            vec.z = cls.getJump(mPtr);
 
             // advance acrobatics
             if (mPtr.getRefData().getHandle() == "player")
@@ -1179,7 +1207,7 @@ void CharacterController::update(float duration)
         }
         else
         {
-           if(!(vec.z > 0.0f))
+            if(!(vec.z > 0.0f))
                 mJumpState = JumpState_None;
             vec.z = 0.0f;
 
@@ -1369,9 +1397,9 @@ bool CharacterController::kill()
 {
     if( isDead() )
     {
-        //player's death animation is over
         if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) )
         {
+            //player's death animation is over
             MWBase::Environment::get().getStateManager()->askLoadRecent();
         }
         return false;
@@ -1441,14 +1469,14 @@ void CharacterController::updateVisibility()
 
 void CharacterController::determineAttackType()
 {
-    float * move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
+    float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
 
     if(mPtr.getClass().hasInventoryStore(mPtr))
     {
-        if (move[0] && !move[1]) //sideway
-            mAttackType = "slash";
-        else if (move[1]) //forward
+        if (move[1]) // forward-backward
             mAttackType = "thrust";
+        else if (move[0]) //sideway
+            mAttackType = "slash";
         else
             mAttackType = "chop";
     }

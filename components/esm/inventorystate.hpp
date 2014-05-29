@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESM_INVENTORYSTATE_H
 #define OPENMW_ESM_INVENTORYSTATE_H
 
+#include <map>
+
 #include "objectstate.hpp"
 #include "lightstate.hpp"
 
@@ -19,6 +21,10 @@ namespace ESM
 
         // lights (slot)
         std::vector<std::pair<LightState, int> > mLights;
+
+        std::map<std::string, int> mLevelledItemMap;
+
+        virtual ~InventoryState() {}
 
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm) const;

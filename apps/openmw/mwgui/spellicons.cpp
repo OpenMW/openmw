@@ -21,7 +21,7 @@ namespace MWGui
 {
 
     void EffectSourceVisitor::visit (MWMechanics::EffectKey key,
-                                           const std::string& sourceName, const std::string& casterHandle,
+                                           const std::string& sourceName, int casterActorId,
                                      float magnitude, float remainingTime)
     {
         MagicEffectInfo newEffectSource;
@@ -40,14 +40,14 @@ namespace MWGui
         // TODO: Tracking add/remove/expire would be better than force updating every frame
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
 
         EffectSourceVisitor visitor;
 
         // permanent item enchantments & permanent spells
         visitor.mIsPermanent = true;
-        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
         store.visitEffectSources(visitor);
         stats.getSpells().visitEffectSources(visitor);
 

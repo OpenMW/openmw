@@ -23,6 +23,7 @@ namespace MWGui
         : WindowModal("openmw_savegame_dialog.layout")
         , mSaving(true)
         , mCurrentCharacter(NULL)
+        , mCurrentSlot(NULL)
     {
         getWidget(mScreenshot, "Screenshot");
         getWidget(mCharacterSelection, "SelectCharacter");
@@ -36,6 +37,7 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onCancelButtonClicked);
         mCharacterSelection->eventComboChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
         mSaveList->eventListChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onSlotSelected);
+        mSaveList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SaveGameDialog::onSlotMouseClick);
         mSaveList->eventListSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onSlotActivated);
         mSaveNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onEditSelectAccept);
         mSaveNameEdit->eventEditTextChange += MyGUI::newDelegate(this, &SaveGameDialog::onSaveNameChanged);
@@ -45,6 +47,37 @@ namespace MWGui
     {
         onSlotSelected(sender, pos);
         accept();
+    }
+
+    void SaveGameDialog::onSlotMouseClick(MyGUI::ListBox* sender, size_t pos)
+    {
+        onSlotSelected(sender, pos);
+
+        if (pos != MyGUI::ITEM_NONE && MyGUI::InputManager::getInstance().isShiftPressed())
+        {
+            ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+            dialog->open("#{sMessage3}");
+            dialog->eventOkClicked.clear();
+            dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotConfirmed);
+            dialog->eventCancelClicked.clear();
+        }
+    }
+
+    void SaveGameDialog::onDeleteSlotConfirmed()
+    {
+        MWBase::Environment::get().getStateManager()->deleteGame (mCurrentCharacter, mCurrentSlot);
+        mSaveList->removeItemAt(mSaveList->getIndexSelected());
+        onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
+
+        // The character might be deleted now
+        size_t previousIndex = mCharacterSelection->getIndexSelected();
+        open();
+        if (mCharacterSelection->getItemCount())
+        {
+            size_t nextCharacter = std::min(previousIndex, mCharacterSelection->getItemCount()-1);
+            mCharacterSelection->setIndexSelected(nextCharacter);
+            onCharacterSelected(mCharacterSelection, nextCharacter);
+        }
     }
 
     void SaveGameDialog::onSaveNameChanged(MyGUI::EditBox *sender)
@@ -69,6 +102,12 @@ namespace MWGui
 
         center();
 
+        mCharacterSelection->setCaption("");
+        mCharacterSelection->removeAllItems();
+        mCurrentCharacter = NULL;
+        mCurrentSlot = NULL;
+        mSaveList->removeAllItems();
+
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
         if (mgr->characterBegin() == mgr->characterEnd())
             return;
@@ -77,8 +116,6 @@ namespace MWGui
 
         std::string directory =
             Misc::StringUtils::lowerCase (Settings::Manager::getString ("character", "Saves"));
-
-        mCharacterSelection->removeAllItems();
 
         int selectedIndex = MyGUI::ITEM_NONE;
 
@@ -152,23 +189,10 @@ namespace MWGui
     {
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
 
-        // Get the selected slot, if any
-        unsigned int i=0;
-        const MWState::Slot* slot = NULL;
-
-        if (mCurrentCharacter)
-        {
-            for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it,++i)
-            {
-                if (i == mSaveList->getIndexSelected())
-                    slot = &*it;
-            }
-        }
-
         if (mSaving)
         {
             // If overwriting an existing slot, ask for confirmation first
-            if (slot != NULL && !reallySure)
+            if (mCurrentSlot != NULL && !reallySure)
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
                 dialog->open("#{sMessage4}");
@@ -182,23 +206,21 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage65}");
                 return;
             }
-            MWBase::Environment::get().getStateManager()->saveGame (mSaveNameEdit->getCaption(), slot);
-        }
-        else
-        {
-            if (mCurrentCharacter && slot)
-            {
-                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot);
-                MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
-            }
         }
 
         setVisible(false);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
 
-        if (MWBase::Environment::get().getStateManager()->getState()==
-            MWBase::StateManager::State_NoGame)
+        if (mSaving)
         {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+            MWBase::Environment::get().getStateManager()->saveGame (mSaveNameEdit->getCaption(), mCurrentSlot);
+        }
+        else
+        {
+            if (mCurrentCharacter && mCurrentSlot)
+            {
+                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
+            }
         }
     }
 
@@ -221,6 +243,7 @@ namespace MWGui
         assert(character && "Can't find selected character");
 
         mCurrentCharacter = character;
+        mCurrentSlot = NULL;
         fillSaveList();
     }
 
@@ -233,13 +256,23 @@ namespace MWGui
         {
             mSaveList->addItem(it->mProfile.mDescription);
         }
-        onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
+        // When loading, Auto-select the first save, if there is one
+        if (mSaveList->getItemCount() && !mSaving)
+        {
+            mSaveList->setIndexSelected(0);
+            onSlotSelected(mSaveList, 0);
+            // Give key focus to save list so we can confirm the selection with Enter
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
+        }
+        else
+            onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }
 
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox *sender, size_t pos)
     {
         if (pos == MyGUI::ITEM_NONE)
         {
+            mCurrentSlot = NULL;
             mInfoText->setCaption("");
             mScreenshot->setImageTexture("");
             return;
@@ -248,17 +281,17 @@ namespace MWGui
         if (mSaving)
             mSaveNameEdit->setCaption(sender->getItemNameAt(pos));
 
-        const MWState::Slot* slot = NULL;
+        mCurrentSlot = NULL;
         unsigned int i=0;
         for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it, ++i)
         {
             if (i == pos)
-                slot = &*it;
+                mCurrentSlot = &*it;
         }
-        assert(slot && "Can't find selected slot");
+        assert(mCurrentSlot && "Can't find selected slot");
 
         std::stringstream text;
-        time_t time = slot->mTimeStamp;
+        time_t time = mCurrentSlot->mTimeStamp;
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 
@@ -269,24 +302,24 @@ namespace MWGui
         char buffer[size];
         if (std::strftime(buffer, size, "%x %X", timeinfo) > 0)
             text << buffer << "\n";
-        text << "Level " << slot->mProfile.mPlayerLevel << "\n";
-        text << slot->mProfile.mPlayerCell << "\n";
+        text << "Level " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
+        text << mCurrentSlot->mProfile.mPlayerCell << "\n";
         // text << "Time played: " << slot->mProfile.mTimePlayed << "\n";
 
-        int hour = int(slot->mProfile.mInGameTime.mGameHour);
+        int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
         if (hour == 0) hour = 12;
 
         text
-            << slot->mProfile.mInGameTime.mDay << " "
-            << MWBase::Environment::get().getWorld()->getMonthName(slot->mProfile.mInGameTime.mMonth)
+            << mCurrentSlot->mProfile.mInGameTime.mDay << " "
+            << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth)
             <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mInfoText->setCaptionWithReplacing(text.str());
 
         // Decode screenshot
-        std::vector<char> data = slot->mProfile.mScreenshot; // MemoryDataStream doesn't work with const data :(
+        std::vector<char> data = mCurrentSlot->mProfile.mScreenshot; // MemoryDataStream doesn't work with const data :(
         Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
         Ogre::Image image;
         image.load(stream, "jpg");

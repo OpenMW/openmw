@@ -78,6 +78,7 @@ void MWWorld::Cells::writeCell (ESM::ESMWriter& writer, CellStore& cell) const
     writer.startRecord (ESM::REC_CSTA);
     cellState.mId.save (writer);
     cellState.save (writer);
+    cell.writeFog(writer);
     cell.writeReferences (writer);
     writer.endRecord (ESM::REC_CSTA);
 }
@@ -277,17 +278,23 @@ int MWWorld::Cells::countSavedGameRecords() const
     return count;
 }
 
-void MWWorld::Cells::write (ESM::ESMWriter& writer) const
+void MWWorld::Cells::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
 {
     for (std::map<std::pair<int, int>, CellStore>::iterator iter (mExteriors.begin());
         iter!=mExteriors.end(); ++iter)
         if (iter->second.hasState())
+        {
             writeCell (writer, iter->second);
+            progress.increaseProgress(); // Assumes that each cell writes one record
+        }
 
     for (std::map<std::string, CellStore>::iterator iter (mInteriors.begin());
         iter!=mInteriors.end(); ++iter)
         if (iter->second.hasState())
+        {
             writeCell (writer, iter->second);
+            progress.increaseProgress(); // Assumes that each cell writes one record
+        }
 }
 
 bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -312,6 +319,9 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
 
         state.load (reader);
         cellStore->loadState (state);
+
+        if (state.mHasFogOfWar)
+            cellStore->readFog(reader);
 
         if (cellStore->getState()!=CellStore::State_Loaded)
             cellStore->load (mStore, mReader);

@@ -204,7 +204,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
 
         mFrame = avcodec_alloc_frame();
     }
-    catch(std::exception &e)
+    catch(std::exception&)
     {
         if (mFormatCtx->pb->buffer != NULL)
         {

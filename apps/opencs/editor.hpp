@@ -24,7 +24,7 @@
 #include "view/doc/filedialog.hpp"
 #include "view/doc/newgame.hpp"
 
-#include "view/settings/usersettingsdialog.hpp"
+#include "view/settings/dialog.hpp"
 
 namespace OgreInit
 {
@@ -43,7 +43,7 @@ namespace CS
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
             CSVDoc::NewGameDialogue mNewGame;
-            CSVSettings::UserSettingsDialog mSettings;
+            CSVSettings::Dialog mSettings;
             CSVDoc::FileDialog mFileDialog;
             boost::filesystem::path mLocal;
             boost::filesystem::path mResources;
@@ -84,6 +84,10 @@ namespace CS
             void showStartup();
 
             void showSettings();
+
+            void documentAdded (CSMDoc::Document *document);
+
+            void lastDocumentDeleted();
 
         private:
 

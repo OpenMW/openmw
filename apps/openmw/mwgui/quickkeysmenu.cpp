@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/esm/quickkeys.hpp>
+
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -52,6 +54,14 @@ namespace MWGui
             unassign(button, i);
 
             mQuickKeyButtons.push_back(button);
+        }
+    }
+
+    void QuickKeysMenu::clear()
+    {
+        for (int i=0; i<10; ++i)
+        {
+            unassign(mQuickKeyButtons[i], i);
         }
     }
 
@@ -154,18 +164,17 @@ namespace MWGui
         frame->setUserString ("ToolTipType", "ItemPtr");
         frame->setUserData(item);
         frame->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
-
-
         MyGUI::ImageBox* image = frame->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
+        path += item.getClass().getInventoryIcon(item);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
         image->setImageTexture (path);
         image->setNeedMouseFocus (false);
 
-        mItemSelectionDialog->setVisible(false);
+        if (mItemSelectionDialog)
+            mItemSelectionDialog->setVisible(false);
     }
 
     void QuickKeysMenu::onAssignItemCancel()
@@ -191,14 +200,15 @@ namespace MWGui
 
         MyGUI::ImageBox* image = frame->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
+        path += item.getClass().getInventoryIcon(item);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
         image->setImageTexture (path);
         image->setNeedMouseFocus (false);
 
-        mMagicSelectionDialog->setVisible(false);
+        if (mMagicSelectionDialog)
+            mMagicSelectionDialog->setVisible(false);
     }
 
     void QuickKeysMenu::onAssignMagic (const std::string& spellId)
@@ -239,7 +249,8 @@ namespace MWGui
         image->setImageTexture (path);
         image->setNeedMouseFocus (false);
 
-        mMagicSelectionDialog->setVisible(false);
+        if (mMagicSelectionDialog)
+            mMagicSelectionDialog->setVisible(false);
     }
 
     void QuickKeysMenu::onAssignMagicCancel ()
@@ -254,7 +265,7 @@ namespace MWGui
         QuickKeyType type = *button->getUserData<QuickKeyType>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
         if (type == Type_Item || type == Type_MagicItem)
         {
@@ -263,11 +274,11 @@ namespace MWGui
             if (item.getRefData ().getCount() < 1)
             {
                 // Try searching for a compatible replacement
-                std::string id = item.getCellRef().mRefID;
+                std::string id = item.getCellRef().getRefId();
 
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
-                    if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, id))
+                    if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
                     {
                         item = *it;
                         button->getChildAt(0)->setUserData(item);
@@ -279,7 +290,7 @@ namespace MWGui
                 {
                     // No replacement was found
                     MWBase::Environment::get().getWindowManager ()->messageBox (
-                                "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item));
+                                "#{sQuickMenu5} " + item.getClass().getName(item));
                     return;
                 }
             }
@@ -319,13 +330,12 @@ namespace MWGui
             assert(it != store.end());
 
             // equip, if it can be equipped
-            if (!MWWorld::Class::get(item).getEquipmentSlots(item).first.empty())
+            if (!item.getClass().getEquipmentSlots(item).first.empty())
             {
                 MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
             }
 
             store.setSelectedEnchantItem(it);
-            MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item);
         }
     }
 
@@ -375,6 +385,111 @@ namespace MWGui
         center();
     }
 
+    void QuickKeysMenu::write(ESM::ESMWriter &writer)
+    {
+        writer.startRecord(ESM::REC_KEYS);
+
+        ESM::QuickKeys keys;
+
+        for (int i=0; i<10; ++i)
+        {
+            MyGUI::Button* button = mQuickKeyButtons[i];
+
+            int type = *button->getUserData<QuickKeyType>();
+
+            ESM::QuickKeys::QuickKey key;
+            key.mType = type;
+
+            switch (type)
+            {
+                case Type_Unassigned:
+                    break;
+                case Type_Item:
+                case Type_MagicItem:
+                {
+                    MWWorld::Ptr item = *button->getChildAt(0)->getUserData<MWWorld::Ptr>();
+                    key.mId = item.getCellRef().getRefId();
+                    break;
+                }
+                case Type_Magic:
+                    std::string spellId = button->getChildAt(0)->getUserString("Spell");
+                    key.mId = spellId;
+                    break;
+            }
+
+            keys.mKeys.push_back(key);
+        }
+
+        keys.save(writer);
+
+        writer.endRecord(ESM::REC_KEYS);
+    }
+
+    void QuickKeysMenu::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        if (type != ESM::REC_KEYS)
+            return;
+
+        ESM::QuickKeys keys;
+        keys.load(reader);
+
+        int i=0;
+        for (std::vector<ESM::QuickKeys::QuickKey>::const_iterator it = keys.mKeys.begin(); it != keys.mKeys.end(); ++it)
+        {
+            if (i >= 10)
+                return;
+
+            mSelectedIndex = i;
+            int keyType = it->mType;
+            std::string id = it->mId;
+            MyGUI::Button* button = mQuickKeyButtons[i];
+
+            switch (keyType)
+            {
+            case Type_Magic:
+                onAssignMagic(id);
+                break;
+            case Type_Item:
+            case Type_MagicItem:
+            {
+                // Find the item by id
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+                MWWorld::Ptr item;
+                for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                {
+                    if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
+                    {
+                        if (item.isEmpty() ||
+                            // Prefer the stack with the lowest remaining uses
+                                !item.getClass().hasItemHealth(*it) ||
+                                it->getClass().getItemHealth(*it) < item.getClass().getItemHealth(item))
+                        {
+                            item = *it;
+                        }
+                    }
+                }
+
+                if (item.isEmpty())
+                    unassign(button, i);
+                else
+                {
+                    if (keyType == Type_Item)
+                        onAssignItem(item);
+                    else if (keyType == Type_MagicItem)
+                        onAssignMagicItem(item);
+                }
+
+                break;
+            }
+            case Type_Unassigned:
+                unassign(button, i);
+                break;
+            }
+
+            ++i;
+        }
+    }
 
     // ---------------------------------------------------------------------------------------------------------
 
@@ -408,8 +523,8 @@ namespace MWGui
         const int spellHeight = 18;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
         /// \todo lots of copy&pasted code from SpellWindow
@@ -452,7 +567,7 @@ namespace MWGui
         std::vector<MWWorld::Ptr> items;
         for (MWWorld::ContainerStoreIterator it(store.begin()); it != store.end(); ++it)
         {
-            std::string enchantId = MWWorld::Class::get(*it).getEnchantment(*it);
+            std::string enchantId = it->getClass().getEnchantment(*it);
             if (enchantId != "")
             {
                 // only add items with "Cast once" or "Cast on use"
@@ -531,7 +646,7 @@ namespace MWGui
 
             MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
-            t->setCaption(MWWorld::Class::get(item).getName(item));
+            t->setCaption(item.getClass().getName(item));
             t->setTextAlign(MyGUI::Align::Left);
             t->setUserData(item);
             t->setUserString("ToolTipType", "ItemPtr");

@@ -49,22 +49,17 @@ void Actors::insertBegin(const MWWorld::Ptr &ptr)
     Ogre::SceneNode* insert = cellnode->createChildSceneNode();
     const float *f = ptr.getRefData().getPosition().pos;
     insert->setPosition(f[0], f[1], f[2]);
-    insert->setScale(ptr.getCellRef().mScale, ptr.getCellRef().mScale, ptr.getCellRef().mScale);
+    insert->setScale(ptr.getCellRef().getScale(), ptr.getCellRef().getScale(), ptr.getCellRef().getScale());
 
     // Convert MW rotation to a quaternion:
-    f = ptr.getCellRef().mPos.rot;
+    f = ptr.getCellRef().getPosition().rot;
 
-    // Rotate around X axis
-    Ogre::Quaternion xr(Ogre::Radian(-f[0]), Ogre::Vector3::UNIT_X);
-
-    // Rotate around Y axis
-    Ogre::Quaternion yr(Ogre::Radian(-f[1]), Ogre::Vector3::UNIT_Y);
-
-    // Rotate around Z axis
+    // For rendering purposes, actors should only rotate around the Z axis.
+    // X rotation is used for camera rotation (for the player) and for
+    // ranged magic / ranged weapon aiming.
     Ogre::Quaternion zr(Ogre::Radian(-f[2]), Ogre::Vector3::UNIT_Z);
 
-   // Rotates first around z, then y, then x
-    insert->setOrientation(xr*yr*zr);
+    insert->setOrientation(zr);
     ptr.getRefData().setBaseNode(insert);
 }
 

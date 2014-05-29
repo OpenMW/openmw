@@ -34,10 +34,6 @@ add_component_dir (to_utf8
     to_utf8
     )
 
-add_component_dir (file_finder
-    file_finder filename_less search
-    )
-
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
@@ -45,11 +41,11 @@ add_component_dir (esm
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate dialoguestate statstate
-    npcstats creaturestats weatherstate
+    npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate
     )
 
 add_component_dir (misc
-    slice_array stringops
+    utf8stream stringops
     )
 
 add_component_dir (files

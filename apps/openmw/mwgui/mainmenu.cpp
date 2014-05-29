@@ -28,7 +28,7 @@ namespace MWGui
     {
         getWidget(mVersionText, "VersionText");
         std::stringstream sstream;
-        sstream << "OpenMW version: " << OPENMW_VERSION;
+        sstream << "OpenMW Version: " << OPENMW_VERSION;
 
         // adding info about git hash if available
         std::string rev = OPENMW_VERSION_COMMITHASH;
@@ -36,7 +36,7 @@ namespace MWGui
         if (!rev.empty() && !tag.empty())
         {
                 rev = rev.substr(0,10);
-                sstream << "\nrevision: " <<  rev;
+                sstream << "\nRevision: " <<  rev;
         }
         
         std::string output = sstream.str();
@@ -165,13 +165,14 @@ namespace MWGui
 
         buttons.push_back("newgame");
 
+        if (state==MWBase::StateManager::State_Running &&
+            MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1 &&
+                MWBase::Environment::get().getWindowManager()->isSavingAllowed())
+            buttons.push_back("savegame");
+
         if (MWBase::Environment::get().getStateManager()->characterBegin()!=
             MWBase::Environment::get().getStateManager()->characterEnd())
             buttons.push_back("loadgame");
-
-        if (state==MWBase::StateManager::State_Running &&
-            MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1)
-            buttons.push_back("savegame");
 
         buttons.push_back("options");
 

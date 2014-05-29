@@ -115,6 +115,13 @@ namespace MWSound
         virtual MWBase::SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                              float volume, float pitch, PlayType type=Play_TypeSfx,
                                              PlayMode mode=Play_Normal, float offset=0);
+        ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
+        ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
+
+        virtual MWBase::SoundPtr playManualSound3D(const Ogre::Vector3& initialPos, const std::string& soundId,
+                                                         float volume, float pitch, PlayType type, PlayMode mode, float offset=0);
+        ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated manually using Sound::setPosition.
+
         ///< Play a sound from an object
         ///< @param offset value from [0,1], when to start playback. 0 is beginning, 1 is end.
 
@@ -123,6 +130,9 @@ namespace MWSound
 
         virtual void stopSound3D(const MWWorld::Ptr &reference);
         ///< Stop the given object from playing all sounds.
+
+        virtual void stopSound(MWBase::SoundPtr sound);
+        ///< Stop the given sound handle
 
         virtual void stopSound(const MWWorld::CellStore *cell);
         ///< Stop all sounds for the given cell.
