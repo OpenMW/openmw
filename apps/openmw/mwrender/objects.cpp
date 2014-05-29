@@ -79,79 +79,82 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
 
     std::auto_ptr<ObjectAnimation> anim(new ObjectAnimation(ptr, mesh));
 
-    Ogre::AxisAlignedBox bounds = anim->getWorldBounds();
-    Ogre::Vector3 extents = bounds.getSize();
-    extents *= ptr.getRefData().getBaseNode()->getScale();
-    float size = std::max(std::max(extents.x, extents.y), extents.z);
-
-    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
-                 Settings::Manager::getBool("limit small object distance", "Viewing distance");
-    // do not fade out doors. that will cause holes and look stupid
-    if(ptr.getTypeName().find("Door") != std::string::npos)
-        small = false;
-
-    if (mBounds.find(ptr.getCell()) == mBounds.end())
-        mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
-    mBounds[ptr.getCell()].merge(bounds);
-
     if(ptr.getTypeName() == typeid(ESM::Light).name())
         anim->addLight(ptr.get<ESM::Light>()->mBase);
 
-    if(ptr.getTypeName() == typeid(ESM::Static).name() &&
-       Settings::Manager::getBool("use static geometry", "Objects") &&
-       anim->canBatch())
+    if (!mesh.empty())
     {
-        Ogre::StaticGeometry* sg = 0;
+        Ogre::AxisAlignedBox bounds = anim->getWorldBounds();
+        Ogre::Vector3 extents = bounds.getSize();
+        extents *= ptr.getRefData().getBaseNode()->getScale();
+        float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-        if (small)
+        bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
+                     Settings::Manager::getBool("limit small object distance", "Viewing distance");
+        // do not fade out doors. that will cause holes and look stupid
+        if(ptr.getTypeName().find("Door") != std::string::npos)
+            small = false;
+
+        if (mBounds.find(ptr.getCell()) == mBounds.end())
+            mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
+        mBounds[ptr.getCell()].merge(bounds);
+
+        if(ptr.getTypeName() == typeid(ESM::Static).name() &&
+           Settings::Manager::getBool("use static geometry", "Objects") &&
+           anim->canBatch())
         {
-            if(mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
-            {
-                uniqueID = uniqueID+1;
-                sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
-                sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
-                mStaticGeometrySmall[ptr.getCell()] = sg;
+            Ogre::StaticGeometry* sg = 0;
 
-                sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
+            if (small)
+            {
+                if(mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
+                {
+                    uniqueID = uniqueID+1;
+                    sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
+                    sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
+                    mStaticGeometrySmall[ptr.getCell()] = sg;
+
+                    sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
+                }
+                else
+                    sg = mStaticGeometrySmall[ptr.getCell()];
             }
             else
-                sg = mStaticGeometrySmall[ptr.getCell()];
-        }
-        else
-        {
-            if(mStaticGeometry.find(ptr.getCell()) == mStaticGeometry.end())
             {
-                uniqueID = uniqueID+1;
-                sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
-                sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
-                mStaticGeometry[ptr.getCell()] = sg;
+                if(mStaticGeometry.find(ptr.getCell()) == mStaticGeometry.end())
+                {
+                    uniqueID = uniqueID+1;
+                    sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
+                    sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
+                    mStaticGeometry[ptr.getCell()] = sg;
+                }
+                else
+                    sg = mStaticGeometry[ptr.getCell()];
             }
+
+            // This specifies the size of a single batch region.
+            // If it is set too high:
+            //  - there will be problems choosing the correct lights
+            //  - the culling will be more inefficient
+            // If it is set too low:
+            //  - there will be too many batches.
+            if(ptr.getCell()->isExterior())
+                sg->setRegionDimensions(Ogre::Vector3(2048,2048,2048));
             else
-                sg = mStaticGeometry[ptr.getCell()];
+                sg->setRegionDimensions(Ogre::Vector3(1024,1024,1024));
+
+            sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
+
+            sg->setCastShadows(true);
+
+            sg->setRenderQueueGroup(RQG_Main);
+
+            anim->fillBatch(sg);
+            /* TODO: We could hold on to this and just detach it from the scene graph, so if the Ptr
+             * ever needs to modify we can reattach it and rebuild the StaticGeometry object without
+             * it. Would require associating the Ptr with the StaticGeometry. */
+            anim.reset();
         }
-
-        // This specifies the size of a single batch region.
-        // If it is set too high:
-        //  - there will be problems choosing the correct lights
-        //  - the culling will be more inefficient
-        // If it is set too low:
-        //  - there will be too many batches.
-        if(ptr.getCell()->isExterior())
-            sg->setRegionDimensions(Ogre::Vector3(2048,2048,2048));
-        else
-            sg->setRegionDimensions(Ogre::Vector3(1024,1024,1024));
-
-        sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
-
-        sg->setCastShadows(true);
-
-        sg->setRenderQueueGroup(RQG_Main);
-
-        anim->fillBatch(sg);
-        /* TODO: We could hold on to this and just detach it from the scene graph, so if the Ptr
-         * ever needs to modify we can reattach it and rebuild the StaticGeometry object without
-         * it. Would require associating the Ptr with the StaticGeometry. */
-        anim.reset();
     }
 
     if(anim.get() != NULL)
