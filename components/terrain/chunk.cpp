@@ -55,6 +55,9 @@ namespace Terrain
         mVertexData->vertexBufferBinding->setBinding(2, uvBuffer);
         mVertexData->vertexBufferBinding->setBinding(3, colourBuffer);
 
+        // Assign a default material in case terrain material fails to be created
+        mMaterial = Ogre::MaterialManager::getSingleton().getByName("BaseWhite");
+
         mIndexData = OGRE_NEW Ogre::IndexData();
         mIndexData->indexStart = 0;
     }
@@ -67,11 +70,13 @@ namespace Terrain
 
     Chunk::~Chunk()
     {
+        if (!mMaterial.isNull())
+        {
 #if TERRAIN_USE_SHADER
-        sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
+            sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
 #endif
-        Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
-
+            Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
+        }
         OGRE_DELETE mVertexData;
         OGRE_DELETE mIndexData;
     }
