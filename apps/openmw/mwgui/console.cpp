@@ -61,7 +61,7 @@ namespace MWGui
         }
         catch (const std::exception& error)
         {
-            printError (std::string ("An exception has been thrown: ") + error.what());
+            printError (std::string ("Error: ") + error.what());
         }
 
         return false;
@@ -195,7 +195,7 @@ namespace MWGui
             }
             catch (const std::exception& error)
             {
-                printError (std::string ("An exception has been thrown: ") + error.what());
+                printError (std::string ("Error: ") + error.what());
             }
         }
     }

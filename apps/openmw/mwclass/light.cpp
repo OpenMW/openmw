@@ -50,9 +50,9 @@ namespace MWClass
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
-        if(!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model);
-        }
+
+        // Insert even if model is empty, so that the light is added
+        renderingInterface.getObjects().insertModel(ptr, model);
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const

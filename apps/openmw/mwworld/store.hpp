@@ -685,12 +685,14 @@ namespace MWWorld
             typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
 
             //std::sort(mInt.begin(), mInt.end(), RecordCmp());
+            mSharedInt.clear();
             mSharedInt.reserve(mInt.size());
             for (IntIterator it = mInt.begin(); it != mInt.end(); ++it) {
                 mSharedInt.push_back(&(it->second));
             }
 
             //std::sort(mExt.begin(), mExt.end(), ExtCmp());
+            mSharedExt.clear();
             mSharedExt.reserve(mExt.size());
             for (ExtIterator it = mExt.begin(); it != mExt.end(); ++it) {
                 mSharedExt.push_back(&(it->second));

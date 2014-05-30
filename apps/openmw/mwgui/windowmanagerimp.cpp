@@ -803,6 +803,8 @@ namespace MWGui
 
         mToolTips->onFrame(frameDuration);
 
+        mMenu->update(frameDuration);
+
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_NoGame)
             return;
