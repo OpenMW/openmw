@@ -626,6 +626,9 @@ void Launcher::MainDialog::wizardFinished(int exitCode, QProcess::ExitStatus exi
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return qApp->quit();
 
+    // HACK: Ensure the pages are created, else segfault
+    setup();
+
     if (reloadSettings())
         show();
 }
