@@ -200,7 +200,13 @@ namespace MWGui
     void MainMenu::update(float dt)
     {
         if (mVideo)
-            mVideo->update();
+        {
+            if (!mVideo->update())
+            {
+                // If finished playing, start again
+                mVideo->playVideo("video\\menu_background.bik", 0);
+            }
+        }
     }
 
     void MainMenu::updateMenu()
