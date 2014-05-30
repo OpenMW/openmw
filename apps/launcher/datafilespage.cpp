@@ -36,7 +36,7 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
             this, SLOT(updateOkButton(QString)));
 
     buildView();
-    setupDataFiles();
+    loadSettings();
 }
 
 void Launcher::DataFilesPage::buildView()
@@ -67,7 +67,7 @@ void Launcher::DataFilesPage::buildView()
              this, SLOT (slotProfileChangedByUser(QString, QString)));
 }
 
-void Launcher::DataFilesPage::setupDataFiles()
+bool Launcher::DataFilesPage::loadSettings()
 {
     QStringList paths = mGameSettings.getDataDirs();
 
@@ -79,12 +79,6 @@ void Launcher::DataFilesPage::setupDataFiles()
     if (!mDataLocal.isEmpty())
         mSelector->addFiles(mDataLocal);
 
-    loadSettings();
-}
-
-bool Launcher::DataFilesPage::loadSettings()
-{
-    QStringList paths = mGameSettings.getDataDirs();
     paths.insert (0, mDataLocal);
     PathIterator pathIterator (paths);
 

@@ -165,40 +165,44 @@ void Launcher::MainDialog::createPages()
 
 bool Launcher::MainDialog::showFirstRunDialog()
 {
-    QMessageBox msgBox;
-    msgBox.setWindowTitle(tr("First run"));
-    msgBox.setIcon(QMessageBox::Question);
-    msgBox.setStandardButtons(QMessageBox::NoButton);
-    msgBox.setText(tr("<html><head/><body><p><b>Welcome to OpenMW!</b></p> \
-                      <p>It is recommended to run the Installation Wizard.</p> \
-                      <p>The Wizard will let you select an existing Morrowind installation, \
-                      or install Morrowind for OpenMW to use.</p></body></html>"));
-    QAbstractButton *wizardButton =
-            msgBox.addButton(tr("Run &Installation Wizard"), QMessageBox::AcceptRole); // ActionRole doesn't work?!
-    QAbstractButton *skipButton =
-            msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
-    Q_UNUSED(skipButton); // Surpress compiler unused warning
+    if (!setupLauncherSettings())
+        return false;
 
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == wizardButton)
+    if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
     {
-        if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
-            return false;
-        } else {
-            return true;
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("First run"));
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::NoButton);
+        msgBox.setText(tr("<html><head/><body><p><b>Welcome to OpenMW!</b></p> \
+                          <p>It is recommended to run the Installation Wizard.</p> \
+                          <p>The Wizard will let you select an existing Morrowind installation, \
+                          or install Morrowind for OpenMW to use.</p></body></html>"));
+
+        QAbstractButton *wizardButton =
+                msgBox.addButton(tr("Run &Installation Wizard"), QMessageBox::AcceptRole); // ActionRole doesn't work?!
+        QAbstractButton *skipButton =
+                msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
+
+        Q_UNUSED(skipButton); // Surpress compiler unused warning
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == wizardButton)
+        {
+            if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
-    show();
-    return true;
+    return setup();
 }
 
 bool Launcher::MainDialog::setup()
 {
-    if (!setupLauncherSettings())
-        return false;
-
     if (!setupGameSettings())
         return false;
 
@@ -214,17 +218,7 @@ bool Launcher::MainDialog::setup()
 
     loadSettings();
 
-    // Check if we need to run the wizard
-    if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
-    {
-        if (!showFirstRunDialog()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    show(); // Show ourselves if the wizard is not being run
+    show();
     return true;
 }
 
@@ -628,6 +622,9 @@ void Launcher::MainDialog::wizardFinished(int exitCode, QProcess::ExitStatus exi
 {
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return qApp->quit();
+
+    if (!setup())
+        return;
 
     reloadSettings();
     show();

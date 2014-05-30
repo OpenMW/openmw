@@ -15,14 +15,16 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(QWidget *parent) :
 
     setupUi(this);
 
+    // Add a placeholder item to the list of installations
+    QListWidgetItem *emptyItem = new QListWidgetItem(tr("No existing installations detected"));
+    emptyItem->setFlags(Qt::NoItemFlags);
+
+    installationsList->insertItem(0, emptyItem);
+
 }
 
 void Wizard::ExistingInstallationPage::initializePage()
 {
-    QListWidgetItem *emptyItem = new QListWidgetItem(tr("No existing installations detected"));
-    emptyItem->setFlags(Qt::NoItemFlags);
-    installationsList->addItem(emptyItem);
-
     // Add the available installation paths
     QStringList paths(mWizard->mInstallations.keys());
 
@@ -35,7 +37,9 @@ void Wizard::ExistingInstallationPage::initializePage()
 
     foreach (const QString &path, paths) {
         QListWidgetItem *item = new QListWidgetItem(path);
-        installationsList->addItem(item);
+
+        if (installationsList->findItems(path, Qt::MatchExactly).isEmpty())
+            installationsList->addItem(item);
     }
 
     connect(installationsList, SIGNAL(currentTextChanged(QString)),

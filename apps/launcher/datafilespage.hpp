@@ -41,8 +41,6 @@ namespace Launcher
         void saveSettings(const QString &profile = "");
         bool loadSettings();
 
-        void setupDataFiles();
-
     signals:
         void signalProfileChanged (int index);
 

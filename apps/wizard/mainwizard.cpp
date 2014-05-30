@@ -37,9 +37,6 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setWindowIcon(QIcon(QLatin1String(":/images/openmw-wizard.png")));
     setMinimumWidth(550);
 
-    // This prevents initializePage() being called multiple times
-    setOption(QWizard::IndependentPages);
-
     // Set the property for comboboxes to the text instead of index
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
 
@@ -283,9 +280,6 @@ void Wizard::MainWizard::runSettingsImporter()
 
     if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
         return qApp->quit();
-
-    // Re-read the game settings
-    setupGameSettings();
 }
 
 void Wizard::MainWizard::addInstallation(const QString &path)
