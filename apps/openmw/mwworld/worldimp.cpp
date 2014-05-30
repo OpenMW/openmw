@@ -252,7 +252,6 @@ namespace MWWorld
         mProjectileManager->clear();
 
         mLocalScripts.clear();
-        mPlayer->clear();
 
         mWorldScene->changeToVoid();
 
@@ -261,9 +260,10 @@ namespace MWWorld
 
         if (mPlayer)
         {
-            mPlayer->setCell (0);
+	    mPlayer->clear();
+            mPlayer->setCell(0);
             mPlayer->getPlayer().getRefData() = RefData();
-            mPlayer->set (mStore.get<ESM::NPC>().find ("player"));
+            mPlayer->set(mStore.get<ESM::NPC>().find ("player"));
         }
 
         mCells.clear();
