@@ -142,7 +142,8 @@ namespace MWGui
     {
         if (mVideo && !show)
         {
-            MyGUI::Gui::getInstance().destroyWidget(mVideo);
+            MyGUI::Gui::getInstance().destroyWidget(mVideoBackground);
+            mVideoBackground = NULL;
             mVideo = NULL;
         }
         if (mBackground && !show)
