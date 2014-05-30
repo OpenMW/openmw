@@ -510,11 +510,9 @@ namespace MWInput
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        bool passToBinder = true;
         if (kc != OIS::KC_UNASSIGNED)
-            passToBinder = !MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-        if(passToBinder)
-            mInputBinder->keyPressed (arg);
+            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+        mInputBinder->keyPressed (arg);
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
