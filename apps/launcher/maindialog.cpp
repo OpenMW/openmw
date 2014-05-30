@@ -51,6 +51,9 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     mGameInvoker = new ProcessInvoker();
     mWizardInvoker = new ProcessInvoker();
 
+    connect(mWizardInvoker->getProcess(), SIGNAL(started()),
+            this, SLOT(wizardStarted()));
+
     connect(mWizardInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
             this, SLOT(wizardFinished(int,QProcess::ExitStatus)));
 
@@ -218,7 +221,6 @@ bool Launcher::MainDialog::setup()
 
     loadSettings();
 
-    show();
     return true;
 }
 
@@ -416,7 +418,7 @@ bool Launcher::MainDialog::setupGameSettings()
         }
 
         if (selectedFile.isEmpty())
-            return false; // Cancel was clicked;
+            return false; // Cancel was clicked
 
         QFileInfo info(selectedFile);
 
@@ -616,6 +618,7 @@ void Launcher::MainDialog::closeEvent(QCloseEvent *event)
 void Launcher::MainDialog::wizardStarted()
 {
     qDebug() << "wizard started!";
+    hide();
 }
 
 void Launcher::MainDialog::wizardFinished(int exitCode, QProcess::ExitStatus exitStatus)
@@ -623,11 +626,8 @@ void Launcher::MainDialog::wizardFinished(int exitCode, QProcess::ExitStatus exi
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return qApp->quit();
 
-    if (!setup())
-        return;
-
-    reloadSettings();
-    show();
+    if (reloadSettings())
+        show();
 }
 
 void Launcher::MainDialog::play()

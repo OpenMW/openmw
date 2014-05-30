@@ -55,9 +55,11 @@ int main(int argc, char *argv[])
     if (!mainWin.showFirstRunDialog())
         return 0;
 
-//    if (!mainWin.setup())
+//    if (!mainWin.setup()) {
 //        return 0;
+//    }
 
+    mainWin.show();
 
     int returnValue = app.exec();
     SDL_Quit();
