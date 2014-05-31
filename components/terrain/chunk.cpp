@@ -4,6 +4,7 @@
 #include <OgreHardwareBufferManager.h>
 #include <OgreRenderQueue.h>
 #include <OgreMaterialManager.h>
+#include <OgreStringConverter.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 
@@ -56,7 +57,11 @@ namespace Terrain
         mVertexData->vertexBufferBinding->setBinding(3, colourBuffer);
 
         // Assign a default material in case terrain material fails to be created
-        mMaterial = Ogre::MaterialManager::getSingleton().getByName("BaseWhite");
+        // Since we are removing this material in the destructor, it must be cloned from BaseWhite
+        // so the original always stays available.
+        static int materialCount=0;
+        mMaterial = Ogre::MaterialManager::getSingleton().getByName("BaseWhite")
+                ->clone("BaseWhite"+Ogre::StringConverter::toString(++materialCount));
 
         mIndexData = OGRE_NEW Ogre::IndexData();
         mIndexData->indexStart = 0;
