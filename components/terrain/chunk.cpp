@@ -16,6 +16,7 @@ namespace Terrain
 
     Chunk::Chunk(Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds, const LoadResponseData& data)
         : mBounds(bounds)
+        , mOwnMaterial(false)
     {
         mVertexData = OGRE_NEW Ogre::VertexData;
         mVertexData->vertexStart = 0;
@@ -57,11 +58,7 @@ namespace Terrain
         mVertexData->vertexBufferBinding->setBinding(3, colourBuffer);
 
         // Assign a default material in case terrain material fails to be created
-        // Since we are removing this material in the destructor, it must be cloned from BaseWhite
-        // so the original always stays available.
-        static int materialCount=0;
-        mMaterial = Ogre::MaterialManager::getSingleton().getByName("BaseWhite")
-                ->clone("BaseWhite"+Ogre::StringConverter::toString(++materialCount));
+        mMaterial = Ogre::MaterialManager::getSingleton().getByName("BaseWhite");
 
         mIndexData = OGRE_NEW Ogre::IndexData();
         mIndexData->indexStart = 0;
@@ -75,7 +72,7 @@ namespace Terrain
 
     Chunk::~Chunk()
     {
-        if (!mMaterial.isNull())
+        if (!mMaterial.isNull() && mOwnMaterial)
         {
 #if TERRAIN_USE_SHADER
             sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
@@ -86,9 +83,19 @@ namespace Terrain
         OGRE_DELETE mIndexData;
     }
 
-    void Chunk::setMaterial(const Ogre::MaterialPtr &material)
+    void Chunk::setMaterial(const Ogre::MaterialPtr &material, bool own)
     {
+        // Clean up the previous material, if we own it
+        if (!mMaterial.isNull() && mOwnMaterial)
+        {
+#if TERRAIN_USE_SHADER
+            sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
+#endif
+            Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
+        }
+
         mMaterial = material;
+        mOwnMaterial = own;
     }
 
     const Ogre::AxisAlignedBox& Chunk::getBoundingBox(void) const
