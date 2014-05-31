@@ -61,6 +61,8 @@ namespace MWBase
 
             virtual void persuade (int type) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
+
+            /// @note This change is temporary and gets discarded when dialogue ends.
             virtual void applyDispositionChange (int delta) = 0;
 
             virtual int countSavedGameRecords() const = 0;

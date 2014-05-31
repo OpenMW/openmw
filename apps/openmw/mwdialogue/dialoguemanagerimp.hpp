@@ -84,6 +84,8 @@ namespace MWDialogue
 
             virtual void persuade (int type);
             virtual int getTemporaryDispositionChange () const;
+
+            /// @note This change is temporary and gets discarded when dialogue ends.
             virtual void applyDispositionChange (int delta);
 
             virtual int countSavedGameRecords() const;
