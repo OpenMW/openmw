@@ -170,6 +170,18 @@ namespace MWClass
             virtual int getBaseGold(const MWWorld::Ptr& ptr) const;
 
             virtual bool isClass(const MWWorld::Ptr& ptr, const std::string &className) const;
+
+            virtual bool canSwim (const MWWorld::Ptr &ptr) const {
+                return true;
+            }
+
+            virtual bool canWalk (const MWWorld::Ptr &ptr) const {
+                return true;
+            }
+
+            virtual void respawn (const MWWorld::Ptr& ptr) const;
+
+            virtual void restock (const MWWorld::Ptr& ptr) const;
     };
 }
 

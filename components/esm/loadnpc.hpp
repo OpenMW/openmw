@@ -82,7 +82,7 @@ struct NPC
 
         char mSkills[Skill::Length];
         char mReputation;
-        short mHealth, mMana, mFatigue;
+        unsigned short mHealth, mMana, mFatigue;
         char mDisposition, mFactionID, mRank;
         char mUnknown;
         int mGold;

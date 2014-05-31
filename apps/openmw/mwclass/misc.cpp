@@ -28,11 +28,11 @@ namespace
 {
 bool isGold (const MWWorld::Ptr& ptr)
 {
-    return Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_001")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_005")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_010")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100");
+    return Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100");
 }
 }
 
@@ -94,12 +94,12 @@ namespace MWClass
             ptr.get<ESM::Miscellaneous>();
 
         int value = ref->mBase->mData.mValue;
-        if (ptr.getCellRef().mGoldValue > 1 && ptr.getRefData().getCount() == 1)
-            value = ptr.getCellRef().mGoldValue;
+        if (ptr.getCellRef().getGoldValue() > 1 && ptr.getRefData().getCount() == 1)
+            value = ptr.getCellRef().getGoldValue();
 
-        if (ptr.getCellRef().mSoul != "")
+        if (ptr.getCellRef().getSoul() != "")
         {
-            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(ref->mRef.mSoul);
+            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(ref->mRef.getSoul());
             value *= creature->mData.mSoul;
         }
 
@@ -167,9 +167,9 @@ namespace MWClass
         info.caption = ref->mBase->mName + countString;
         info.icon = ref->mBase->mIcon;
 
-        if (ref->mRef.mSoul != "")
+        if (ref->mRef.getSoul() != "")
         {
-            const ESM::Creature *creature = store.get<ESM::Creature>().find(ref->mRef.mSoul);
+            const ESM::Creature *creature = store.get<ESM::Creature>().find(ref->mRef.getSoul());
             info.caption += " (" + creature->mName + ")";
         }
 
@@ -182,8 +182,8 @@ namespace MWClass
         }
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -219,7 +219,7 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 newRef.getPtr().get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(&cell.get<ESM::Miscellaneous>().insert(*ref), &cell);
-            newPtr.getCellRef().mGoldValue = goldAmount;
+            newPtr.getCellRef().setGoldValue(goldAmount);
             newPtr.getRefData().setCount(1);
         } else {
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
@@ -231,7 +231,7 @@ namespace MWClass
 
     boost::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr) const
     {
-        if (ptr.getCellRef().mSoul == "")
+        if (ptr.getCellRef().getSoul().empty())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
         else
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
@@ -242,12 +242,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             item.get<ESM::Miscellaneous>();
 
-        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc)
-                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_001")
-                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_005")
-                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_010")
-                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_025")
-                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_100");
+        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc) && !isGold(item);
     }
 
     float Miscellaneous::getWeight(const MWWorld::Ptr &ptr) const

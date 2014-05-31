@@ -48,7 +48,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
+    soundmanagerimp openal_output ffmpeg_decoder sound
     )
 
 add_openmw_dir (mwworld
@@ -57,7 +57,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader actiontrap cellreflist
+    contentloader esmloader omwloader actiontrap cellreflist projectilemanager cellref
     )
 
 add_openmw_dir (mwclass
@@ -67,9 +67,9 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
-    drawstate spells activespells npcstats aipackage aisequence aipersue alchemy aiwander aitravel aifollow
+    drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
-    disease pickpocket levelledlist combat steering
+    disease pickpocket levelledlist combat steering obstacle
     )
 
 add_openmw_dir (mwstate
@@ -83,6 +83,10 @@ add_openmw_dir (mwbase
 
 # Main executable
 set(BOOST_COMPONENTS system filesystem program_options thread wave)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 IF(OGRE_STATIC)

@@ -16,6 +16,11 @@ namespace ESM
     class ESMReader;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace MWWorld
 {
     class ESMStore;
@@ -46,7 +51,7 @@ namespace MWWorld
 
             int countSavedGameRecords() const;
 
-            void write (ESM::ESMWriter& writer) const;
+            void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
             bool readRecord (ESM::ESMReader& reader, int32_t type);
             ///< Records for variables that do not exist are dropped silently.

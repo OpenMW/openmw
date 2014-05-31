@@ -28,11 +28,16 @@ namespace MWGui
         center();
     }
 
-    void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void ConfirmationDialog::exit()
     {
         eventCancelClicked();
 
         setVisible(false);
+    }
+
+    void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    {
+        exit();
     }
 
     void ConfirmationDialog::onOkButtonClicked(MyGUI::Widget* _sender)

@@ -73,17 +73,6 @@ namespace
         return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos) ? "glsl" : "hlsl";
     }
 
-    bool cgAvailable ()
-    {
-        Ogre::Root::PluginInstanceList list = Ogre::Root::getSingleton ().getInstalledPlugins ();
-        for (Ogre::Root::PluginInstanceList::const_iterator it = list.begin(); it != list.end(); ++it)
-        {
-            if ((*it)->getName() == "Cg Program Manager")
-                return true;
-        }
-        return false;
-    }
-
     const char* checkButtonType = "CheckButton";
     const char* sliderType = "Slider";
 
@@ -242,7 +231,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+        exit();
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -366,12 +355,7 @@ namespace MWGui
     void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
     {
         std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
-        if (val == "cg")
-        {
-            val = hlslGlsl();
-        }
-        else if (cgAvailable ())
-            val = "cg";
+        val = hlslGlsl();
 
         static_cast<MyGUI::Button*>(_sender)->setCaption(val);
 
@@ -509,5 +493,10 @@ namespace MWGui
     void SettingsWindow::open()
     {
         updateControlsBox ();
+    }
+
+    void SettingsWindow::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 }

@@ -35,6 +35,8 @@ namespace MWGui
 
             int getMerchantServices();
 
+            virtual void exit();
+
 
         private:
             ItemView* mItemView;
@@ -101,9 +103,7 @@ namespace MWGui
 
             int getMerchantGold();
 
-            // Relates to NPC gold reset delay
-            void checkTradeTime();
-            void updateTradeTime(); 
+            void restock();
     };
 }
 

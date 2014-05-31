@@ -3,11 +3,6 @@
 
 #include <components/esm/cellref.hpp>
 
-namespace ESM
-{
-    class ESMReader;
-}
-
 namespace CSMWorld
 {
     class Cell;
@@ -18,8 +13,7 @@ namespace CSMWorld
         std::string mId;
         std::string mCell;
 
-        void load (ESM::ESMReader &esm, Cell& cell, const std::string& id);
-        ///< Load cell ref and register it with \a cell.
+        CellRef();
     };
 }
 

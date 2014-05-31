@@ -115,7 +115,7 @@ namespace SFO
                         mWindowListener->windowClosed();
                     break;
                 default:
-                    std::cerr << "Unhandled SDL event of type " << evt.type << std::endl;
+                    std::cerr << "Unhandled SDL event of type 0x" << std::hex << evt.type << std::endl;
                     break;
             }
         }
@@ -241,8 +241,8 @@ namespace SFO
 
         //eep, wrap the pointer manually if the input driver doesn't support
         //relative positioning natively
-        int success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
-        if(relative && success != 0)
+        bool success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
+        if(relative && !success)
             mWrapPointer = true;
 
         //now remove all mouse events using the old setting from the queue
@@ -443,5 +443,10 @@ namespace SFO
         mKeyMap.insert( KeyMap::value_type(SDLK_PAGEDOWN, OIS::KC_PGDOWN) );
         mKeyMap.insert( KeyMap::value_type(SDLK_INSERT, OIS::KC_INSERT) );
         mKeyMap.insert( KeyMap::value_type(SDLK_DELETE, OIS::KC_DELETE) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_KP_ENTER, OIS::KC_NUMPADENTER) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_RCTRL, OIS::KC_RCONTROL) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_LGUI, OIS::KC_LWIN) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_RGUI, OIS::KC_RWIN) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_APPLICATION, OIS::KC_APPS) );
     }
 }

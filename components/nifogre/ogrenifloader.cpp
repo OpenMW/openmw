@@ -863,7 +863,8 @@ class NIFObjectLoader
         Nif::ControllerPtr ctrl = partnode->controller;
         while(!ctrl.empty())
         {
-            if(ctrl->recType == Nif::RC_NiParticleSystemController && ctrl->flags & Nif::NiNode::ControllerFlag_Active)
+            if((ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
+                    && ctrl->flags & Nif::NiNode::ControllerFlag_Active)
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
 

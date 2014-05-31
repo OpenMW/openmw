@@ -123,9 +123,6 @@ namespace MWClass
             else
                 data->mContainerStore = new MWWorld::ContainerStore();
 
-            // Relates to NPC gold reset delay
-            data->mCreatureStats.setTradeTime(MWWorld::TimeStamp(0.0, 0));
-
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
             // store
@@ -164,7 +161,11 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
+        {
             physics.addActor(ptr);
+            if (getCreatureStats(ptr).isDead())
+                MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
+        }
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
@@ -276,7 +277,7 @@ namespace MWClass
 
         if (!weapon.isEmpty())
         {
-            const bool weaphashealth = get(weapon).hasItemHealth(weapon);
+            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -290,19 +291,23 @@ namespace MWClass
                 weaponDamage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
                 if(weaphashealth)
                 {
-                    int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
-                    if(weapon.getCellRef().mCharge == -1)
-                        weapon.getCellRef().mCharge = weapmaxhealth;
-                    weaponDamage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
+                    int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
+                    int weaphealth = weapon.getClass().getItemHealth(weapon);
+                    weaponDamage *= float(weaphealth) / weapmaxhealth;
+
+                    if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                    {
+                        // Reduce weapon charge by at least one, but cap at 0
+                        weaphealth -= std::min(std::max(1,
+                                    (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weaphealth);
+
+                        weapon.getCellRef().setCharge(weaphealth);
+                    }
+
+                    // Weapon broken? unequip it
+                    if (weapon.getCellRef().getCharge() == 0)
+                        weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
                 }
-
-                if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                    weapon.getCellRef().mCharge -= std::min(std::max(1,
-                        (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
-
-                // Weapon broken? unequip it
-                if (weapon.getCellRef().mCharge == 0)
-                    weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
 
                 damage += weaponDamage;
             }
@@ -337,6 +342,12 @@ namespace MWClass
     {
         // NOTE: 'object' and/or 'attacker' may be empty.
 
+        getCreatureStats(ptr).setAttacked(true);
+
+        // Self defense
+        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
+            MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
+
         if(!successful)
         {
             // TODO: Handle HitAttemptOnMe script function
@@ -347,7 +358,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(MWWorld::Class::get(object).getId(object));
+            getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
         if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
@@ -437,7 +448,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfCreature");
@@ -810,6 +821,34 @@ namespace MWClass
     int Creature::getBaseGold(const MWWorld::Ptr& ptr) const
     {
         return ptr.get<ESM::Creature>()->mBase->mData.mGold;
+    }
+
+    void Creature::respawn(const MWWorld::Ptr &ptr) const
+    {
+        if (ptr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Respawn)
+        {
+            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
+            // This also means we cannot respawn dynamically placed references with no content file connection.
+            if (ptr.getCellRef().getRefNum().mContentFile != -1)
+            {
+                if (ptr.getRefData().getCount() == 0)
+                    ptr.getRefData().setCount(1);
+
+                // Reset to original position
+                ESM::Position& pos = ptr.getRefData().getPosition();
+                pos = ptr.getCellRef().getPosition();
+
+                ptr.getRefData().setCustomData(NULL);
+            }
+        }
+    }
+
+    void Creature::restock(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const ESM::InventoryList& list = ref->mBase->mInventory;
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;

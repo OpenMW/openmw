@@ -15,6 +15,8 @@ public:
 
     virtual void open();
 
+    virtual void exit();
+
     void start (const MWWorld::Ptr& gem);
 
 protected:

@@ -2,6 +2,7 @@
 #define GAME_MWWORLD_CONTAINERSTORE_H
 
 #include <iterator>
+#include <map>
 
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
@@ -65,10 +66,15 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Probe>             probes;
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
+
+            std::map<std::string, int> mLevelledItemMap;
+            ///< Stores result of levelled item spawns. <refId, count>
+            /// This is used to remove the spawned item(s) if the levelled item is restocked.
+
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true);
+            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -144,6 +150,8 @@ namespace MWWorld
 
             void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
+
+            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction);
 
             virtual void clear();
             ///< Empty container.

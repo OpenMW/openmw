@@ -1,8 +1,13 @@
 #include "manager.hpp"
+#include "loglistener.hpp"
 
 #include <MyGUI_Gui.h>
 #include <MyGUI_OgrePlatform.h>
 #include <MyGUI_Timer.h>
+
+#include <MyGUI_LevelLogFilter.h>
+#include <MyGUI_LogSource.h>
+#include <MyGUI_ConsoleLogListener.h>
 
 #include <cassert>
 
@@ -554,8 +559,34 @@ public:
     }
 };
 
-}
+/// \brief Helper class holding data that required during
+/// MyGUI log creation
+class LogFacility
+{
+    ConsoleLogListener  mConsole;
+    CustomLogListener   mFile;
+    LevelLogFilter      mFilter;
+    LogSource           mSource;
 
+public:
+
+    LogFacility(const std::string &output, bool console)
+      : mFile(output)
+    {
+        mConsole.setEnabled(console);
+        mFilter.setLoggingLevel(LogLevel::Info);
+
+        mSource.addLogListener(&mFile);
+        mSource.addLogListener(&mConsole);
+        mSource.setLogFilter(&mFilter);
+
+        mSource.open();
+    }
+
+    LogSource *getSource() { return &mSource; }
+};
+
+}
 
 void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging, const std::string& logDir)
 {
@@ -586,10 +617,10 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
         mRenderManager = new MyGUI::OgreRenderManager();
     mDataManager = new MyGUI::FixedOgreDataManager();
 
-    LogManager::getInstance().setSTDOutputEnabled(logging);
-
-    if (!theLogFile.empty())
-        LogManager::getInstance().createDefaultSource(theLogFile);
+    // Do not use default log since it don't support Unicode path on Windows.
+    // Instead, manually create log source using LogFacility and pass it.
+    mLogFacility = new MyGUI::LogFacility(theLogFile, logging);
+    LogManager::getInstance().addLogSource(mLogFacility->getSource());
 
     if (mShaderRenderManager)
         mShaderRenderManager->initialise(wnd, mgr);
@@ -648,5 +679,7 @@ void MyGUIManager::shutdown()
         delete mLogManager;
         mLogManager = NULL;
     }
+    delete mLogFacility;
+
     mGui = NULL;
 }

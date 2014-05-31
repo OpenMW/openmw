@@ -206,6 +206,8 @@ size_t LowLevelFile::read (void * data, size_t size)
 }
 
 #elif FILE_API == FILE_API_WIN32
+
+#include <boost/locale.hpp>
 /*
  *
  *	Implementation of LowLevelFile methods using Win32 API calls
@@ -227,9 +229,10 @@ void LowLevelFile::open (char const * filename)
 {
 	assert (mHandle == INVALID_HANDLE_VALUE);
 
-	HANDLE handle = CreateFileA (filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+	std::wstring wname = boost::locale::conv::utf_to_utf<wchar_t>(filename);
+	HANDLE handle = CreateFileW (wname.c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 
-	if (handle == NULL)
+	if (handle == INVALID_HANDLE_VALUE)
 	{
 		std::ostringstream os;
 		os << "Failed to open '" << filename << "' for reading.";

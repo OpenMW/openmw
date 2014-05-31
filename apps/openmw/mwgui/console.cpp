@@ -1,5 +1,8 @@
 #include "console.hpp"
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
 
@@ -58,7 +61,7 @@ namespace MWGui
         }
         catch (const std::exception& error)
         {
-            printError (std::string ("An exception has been thrown: ") + error.what());
+            printError (std::string ("Error: ") + error.what());
         }
 
         return false;
@@ -140,6 +143,11 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
     }
 
+    void Console::exit()
+    {
+         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Console);
+    }
+
     void Console::setFont(const std::string &fntName)
     {
         mHistory->setFontName(fntName);
@@ -187,14 +195,15 @@ namespace MWGui
             }
             catch (const std::exception& error)
             {
-                printError (std::string ("An exception has been thrown: ") + error.what());
+                printError (std::string ("Error: ") + error.what());
             }
         }
     }
 
     void Console::executeFile (const std::string& path)
     {
-        std::ifstream stream (path.c_str());
+        namespace bfs = boost::filesystem;
+        bfs::ifstream stream ((bfs::path(path)));
 
         if (!stream.is_open())
             printError ("failed to open file: " + path);
@@ -215,16 +224,22 @@ namespace MWGui
         {
             std::vector<std::string> matches;
             listNames();
-            mCommandLine->setCaption(complete( mCommandLine->getOnlyText(), matches ));
-#if 0
-            int i = 0;
-            for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); ++it,++i )
+            std::string oldCaption = mCommandLine->getCaption();
+            std::string newCaption = complete( mCommandLine->getOnlyText(), matches );
+            mCommandLine->setCaption(newCaption);
+
+            // List candidates if repeatedly pressing tab
+            if (oldCaption == newCaption && matches.size())
             {
-                printOK( *it );
-                if( i == 50 )
-                    break;
+                int i = 0;
+                printOK("");
+                for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); ++it,++i )
+                {
+                    printOK( *it );
+                    if( i == 50 )
+                        break;
+                }
             }
-#endif
         }
 
         if(mCommandHistory.empty()) return;
@@ -403,7 +418,7 @@ namespace MWGui
             }
             else
             {
-                setTitle("#{sConsoleTitle} (" + object.getCellRef().mRefID + ")");
+                setTitle("#{sConsoleTitle} (" + object.getCellRef().getRefId() + ")");
                 mPtr = object;
             }
             // User clicked on an object. Restore focus to the console command line.

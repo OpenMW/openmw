@@ -54,6 +54,8 @@ namespace MWGui
         void open(const MWWorld::Ptr& container, bool loot=false);
         virtual void close();
 
+        virtual void exit();
+
     private:
         DragAndDrop* mDragAndDrop;
 
@@ -62,7 +64,7 @@ namespace MWGui
         MWGui::ItemView* mItemView;
         SortFilterItemModel* mSortModel;
         ItemModel* mModel;
-        size_t mSelectedItem;
+        int mSelectedItem;
 
         MyGUI::Button* mDisposeCorpseButton;
         MyGUI::Button* mTakeButton;

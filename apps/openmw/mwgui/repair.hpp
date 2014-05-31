@@ -15,6 +15,8 @@ public:
 
     virtual void open();
 
+    virtual void exit();
+
     void startRepairItem (const MWWorld::Ptr& item);
 
 protected:

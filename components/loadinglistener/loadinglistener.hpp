@@ -17,7 +17,7 @@ namespace Loading
 
         virtual void setProgressRange (size_t range) = 0;
         virtual void setProgress (size_t value) = 0;
-        virtual void increaseProgress (size_t increase) = 0;
+        virtual void increaseProgress (size_t increase = 1) = 0;
 
         /// Indicate the scene is now ready to be shown
         virtual void removeWallpaper() = 0;

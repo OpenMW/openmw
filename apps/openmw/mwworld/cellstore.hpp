@@ -3,21 +3,29 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <boost/shared_ptr.hpp>
 
 #include "livecellref.hpp"
 #include "esmstore.hpp"
 #include "cellreflist.hpp"
 
-#include "../mwmechanics/pathgrid.hpp"
+#include <components/esm/fogstate.hpp>
+
+#include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
+
+#include "timestamp.hpp"
 
 namespace ESM
 {
     struct CellState;
+    struct FogState;
 }
 
 namespace MWWorld
 {
     class Ptr;
+
+
 
     /// \brief Mutable state of a cell
     class CellStore
@@ -31,11 +39,18 @@ namespace MWWorld
 
         private:
 
+            // Even though fog actually belongs to the player and not cells,
+            // it makes sense to store it here since we need it once for each cell.
+            // Note this is NULL until the cell is explored to save some memory
+            boost::shared_ptr<ESM::FogState> mFogState;
+
             const ESM::Cell *mCell;
             State mState;
             bool mHasState;
             std::vector<std::string> mIds;
             float mWaterLevel;
+
+            MWWorld::TimeStamp mLastRespawn;
 
             CellRefList<ESM::Activator>         mActivators;
             CellRefList<ESM::Potion>            mPotions;
@@ -80,9 +95,17 @@ namespace MWWorld
             Ptr searchViaHandle (const std::string& handle);
             ///< Will return an empty Ptr if cell is not loaded.
 
+            Ptr searchViaActorId (int id);
+            ///< Will return an empty Ptr if cell is not loaded.
+
             float getWaterLevel() const;
 
             void setWaterLevel (float level);
+
+            void setFog (ESM::FogState* fog);
+            ///< \note Takes ownership of the pointer
+
+            ESM::FogState* getFog () const;
 
             int count() const;
             ///< Return total number of references, including deleted ones.
@@ -134,9 +157,16 @@ namespace MWWorld
 
             void saveState (ESM::CellState& state) const;
 
+            void writeFog (ESM::ESMWriter& writer) const;
+
+            void readFog (ESM::ESMReader& reader);
+
             void writeReferences (ESM::ESMWriter& writer) const;
 
             void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap);
+
+            void respawn ();
+            ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
 
             template <class T>
             CellRefList<T>& get() {

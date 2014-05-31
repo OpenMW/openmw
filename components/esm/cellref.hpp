@@ -10,6 +10,13 @@ namespace ESM
     class ESMWriter;
     class ESMReader;
 
+
+    struct RefNum
+    {
+        int mIndex;
+        int mContentFile; // -1 no content file
+    };
+
     /* Cell reference. This represents ONE object (of many) inside the
     cell. The cell references are not loaded as part of the normal
     loading process, but are rather loaded later on demand when we are
@@ -20,13 +27,10 @@ namespace ESM
     {
         public:
 
-            struct RefNum
-            {
-                int mIndex;
-                int mContentFile; // -1 no content file
-            };
+            // Reference number
+            // Note: Currently unused for items in containers
+            RefNum mRefNum;
 
-            RefNum mRefNum;        // Reference number
             std::string mRefID;    // ID of object being referenced
 
             float mScale;          // Scale applied to mesh
@@ -38,7 +42,7 @@ namespace ESM
             // I have no idea, looks like a link to a global variable?
             std::string mGlob;
 
-            // ID of creature trapped in this soul gem (?)
+            // ID of creature trapped in this soul gem
             std::string mSoul;
 
             // The faction that owns this object (and will get angry if
@@ -53,7 +57,7 @@ namespace ESM
             // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
             int mCharge;
 
-            // Remaining enchantment charge
+            // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
             float mEnchantmentCharge;
 
             // This is 5 for Gold_005 references, 100 for Gold_100 and so on.
@@ -94,7 +98,8 @@ namespace ESM
             void blank();
     };
 
-    bool operator== (const CellRef::RefNum& left, const CellRef::RefNum& right);
+    bool operator== (const RefNum& left, const RefNum& right);
+    bool operator< (const RefNum& left, const RefNum& right);
 }
 
 #endif

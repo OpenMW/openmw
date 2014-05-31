@@ -56,7 +56,7 @@ namespace MWMechanics
     struct EffectSourceVisitor
     {
         virtual void visit (MWMechanics::EffectKey key,
-                                 const std::string& sourceName, const std::string& casterHandle,
+                                 const std::string& sourceName, int casterActorId,
                             float magnitude, float remainingTime = -1) = 0;
     };
 

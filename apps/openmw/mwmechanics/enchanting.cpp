@@ -20,12 +20,10 @@ namespace MWMechanics
         if(!itemEmpty())
         {
             mObjectType = mOldItemPtr.getTypeName();
-            mOldItemId = mOldItemPtr.getCellRef().mRefID;
         }
         else
         {
             mObjectType="";
-            mOldItemId="";
         }
     }
 
@@ -52,7 +50,7 @@ namespace MWMechanics
     bool Enchanting::create()
     {
         const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
 
@@ -67,7 +65,7 @@ namespace MWMechanics
             if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
                 return false;
 
-            MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
+            mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
         }
 
         if(mCastStyle==ESM::Enchantment::ConstantEffect)
@@ -78,17 +76,13 @@ namespace MWMechanics
         enchantment.mData.mCost = getEnchantPoints();
         enchantment.mEffects = mEffectList;
 
-        // Create a new item
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId, 1);
-        const MWWorld::Ptr& newItemPtr = ref.getPtr();
-
         // Apply the enchantment
         const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
-        MWWorld::Class::get(newItemPtr).applyEnchantment(newItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
+        std::string newItemId = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
         store.remove(mOldItemPtr, 1, player);
-        store.add(newItemPtr, 1, player);
+        store.add(newItemId, 1, player);
 
         if(!mSelfEnchanting)
             payForEnchantment();
@@ -212,7 +206,7 @@ namespace MWMechanics
 
         const float enchantCost = getEnchantPoints();
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::NpcStats &stats = MWWorld::Class::get(player).getNpcStats(player);
+        MWMechanics::NpcStats &stats = player.getClass().getNpcStats(player);
         int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
 
         /*
@@ -240,9 +234,9 @@ namespace MWMechanics
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         if(soulEmpty())
             return 0;
-        if(mSoulGemPtr.getCellRef().mSoul=="")
+        if(mSoulGemPtr.getCellRef().getSoul()=="")
             return 0;
-        const ESM::Creature* soul = store.get<ESM::Creature>().find(mSoulGemPtr.getCellRef().mSoul);
+        const ESM::Creature* soul = store.get<ESM::Creature>().find(mSoulGemPtr.getCellRef().getSoul());
         return soul->mData.mSoul;
     }
 
@@ -277,7 +271,7 @@ namespace MWMechanics
 
     float Enchanting::getEnchantChance() const
     {
-        const NpcStats& npcStats = MWWorld::Class::get (mEnchanter).getNpcStats (mEnchanter);
+        const NpcStats& npcStats = mEnchanter.getClass().getNpcStats (mEnchanter);
 
         float chance1 = (npcStats.getSkill (ESM::Skill::Enchant).getModified() + 
         (0.25 * npcStats.getAttribute (ESM::Attribute::Intelligence).getModified())
@@ -295,7 +289,7 @@ namespace MWMechanics
     void Enchanting::payForEnchantment() const
     {
         const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
     }

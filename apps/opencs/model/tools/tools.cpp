@@ -45,8 +45,9 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
 
         connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
         connect (mVerifier, SIGNAL (done (int)), this, SIGNAL (done (int)));
-        connect (mVerifier, SIGNAL (reportMessage (const QString&, int)),
-            this, SLOT (verifierMessage (const QString&, int)));
+        connect (mVerifier,
+            SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
+            this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, int)));
 
         std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
         mandatoryIds.push_back ("Day");
@@ -87,13 +88,17 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
 
 CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0), mNextReportNumber (0)
 {
-    for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
-        delete iter->second;
+    // index 0: load error log
+    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
+    mActiveReports.insert (std::make_pair (CSMDoc::State_Loading, 0));
 }
 
 CSMTools::Tools::~Tools()
 {
     delete mVerifier;
+
+    for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
+        delete iter->second;
 }
 
 CSMWorld::UniversalId CSMTools::Tools::runVerifier()
@@ -132,17 +137,19 @@ int CSMTools::Tools::getRunningOperations() const
 
 CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& id)
 {
-    if (id.getType()!=CSMWorld::UniversalId::Type_VerificationResults)
+    if (id.getType()!=CSMWorld::UniversalId::Type_VerificationResults &&
+        id.getType()!=CSMWorld::UniversalId::Type_LoadErrorLog)
         throw std::logic_error ("invalid request for report model: " + id.toString());
 
     return mReports.at (id.getIndex());
 }
 
-void CSMTools::Tools::verifierMessage (const QString& message, int type)
+void CSMTools::Tools::verifierMessage (const CSMWorld::UniversalId& id, const std::string& message,
+    int type)
 {
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (message.toUtf8().constData());
+        mReports[iter->second]->add (id, message);
 }
 

@@ -18,6 +18,7 @@ namespace MWGui
         QuickKeysMenu();
         ~QuickKeysMenu();
 
+        virtual void exit();
 
         void onItemButtonClicked(MyGUI::Widget* sender);
         void onMagicButtonClicked(MyGUI::Widget* sender);
@@ -39,6 +40,11 @@ namespace MWGui
             Type_MagicItem,
             Type_Unassigned
         };
+
+
+        void write (ESM::ESMWriter& writer);
+        void readRecord (ESM::ESMReader& reader, int32_t type);
+        void clear();
 
 
     private:
@@ -64,6 +70,7 @@ namespace MWGui
     {
     public:
         QuickKeysMenuAssign(QuickKeysMenu* parent);
+        virtual void exit();
 
     private:
         MyGUI::TextBox* mLabel;
@@ -81,6 +88,7 @@ namespace MWGui
         MagicSelectionDialog(QuickKeysMenu* parent);
 
         virtual void open();
+        virtual void exit();
 
     private:
         MyGUI::Button* mCancelButton;

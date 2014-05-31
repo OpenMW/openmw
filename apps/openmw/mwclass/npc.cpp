@@ -357,9 +357,6 @@ namespace MWClass
             data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "",
                                        MWBase::Environment::get().getWorld()->getStore());
 
-            // Relates to NPC gold reset delay
-            data->mNpcStats.setTradeTime(MWWorld::TimeStamp(0.0, 0));
-
             data->mNpcStats.setGoldPool(gold);
 
             // store
@@ -391,6 +388,8 @@ namespace MWClass
     {
         physics.addActor(ptr);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
+        if (getCreatureStats(ptr).isDead())
+            MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
     }
 
     bool Npc::isPersistent(const MWWorld::Ptr &actor) const
@@ -485,10 +484,10 @@ namespace MWClass
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
-        const MWWorld::Class &othercls = MWWorld::Class::get(victim);
+        const MWWorld::Class &othercls = victim.getClass();
         if(!othercls.isActor()) // Can't hit non-actors
             return;
-        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
+        MWMechanics::CreatureStats &otherstats = othercls.getCreatureStats(victim);
         if(otherstats.isDead()) // Can't hit dead actors
             return;
 
@@ -497,7 +496,7 @@ namespace MWClass
 
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
-            weapskill = get(weapon).getEquipmentSkill(weapon);
+            weapskill = weapon.getClass().getEquipmentSkill(weapon);
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
@@ -512,7 +511,7 @@ namespace MWClass
         MWMechanics::NpcStats &stats = getNpcStats(ptr);
         if(!weapon.isEmpty())
         {
-            const bool weaphashealth = get(weapon).hasItemHealth(weapon);
+            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -527,20 +526,24 @@ namespace MWClass
                         (stats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult->getFloat() * 0.1);
                 if(weaphashealth)
                 {
-                    int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
-                    if(weapon.getCellRef().mCharge == -1)
-                        weapon.getCellRef().mCharge = weapmaxhealth;
-                    damage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
+                    int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
+                    int weaphealth = weapon.getClass().getItemHealth(weapon);
+
+                    damage *= float(weaphealth) / weapmaxhealth;
+
+                    if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                    {
+                        // Reduce weapon charge by at least one, but cap at 0
+                        weaphealth -= std::min(std::max(1,
+                                    (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weaphealth);
+
+                        weapon.getCellRef().setCharge(weaphealth);
+                    }
+
+                    // Weapon broken? unequip it
+                    if (weaphealth == 0)
+                        weapon = *inv.unequipItem(weapon, ptr);
                 }
-
-                if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                    weapon.getCellRef().mCharge -= std::min(std::max(1,
-                        (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
-
-                // Weapon broken? unequip it
-                if (weapon.getCellRef().mCharge == 0)
-                    weapon = *inv.unequipItem(weapon, ptr);
-
             }
             healthdmg = true;
         }
@@ -621,8 +624,12 @@ namespace MWClass
         // NOTE: 'object' and/or 'attacker' may be empty.
 
         // Attacking peaceful NPCs is a crime
-        if (!attacker.isEmpty() && ptr.getClass().isNpc() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() <= 30)
+        // anything below 80 is considered peaceful (see Actors::updateActor)
+        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).isHostile() &&
+                ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+
+        getCreatureStats(ptr).setAttacked(true);
 
         if(!successful)
         {
@@ -634,7 +641,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(get(object).getId(object));
+            getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
         if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
@@ -659,7 +666,6 @@ namespace MWClass
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
             }
-            getCreatureStats(ptr).setAttacked(true);
 
             // Check for knockdown
             float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
@@ -703,20 +709,19 @@ namespace MWClass
                 MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
-                    ESM::CellRef &armorref = armor.getCellRef();
-                    if(armorref.mCharge == -1)
-                        armorref.mCharge = armor.get<ESM::Armor>()->mBase->mData.mHealth;
-                    armorref.mCharge -= std::min(std::max(1, (int)damagediff),
-                                                 armorref.mCharge);
+                    int armorhealth = armor.getClass().getItemHealth(armor);
+                    armorhealth -= std::min(std::max(1, (int)damagediff),
+                                                 armorhealth);
+                    armor.getCellRef().setCharge(armorhealth);
 
                     // Armor broken? unequip it
-                    if (armorref.mCharge == 0)
+                    if (armorhealth == 0)
                         inv.unequipItem(armor, ptr);
 
                     if (ptr.getRefData().getHandle() == "player")
-                        skillUsageSucceeded(ptr, get(armor).getEquipmentSkill(armor), 0);
+                        skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
 
-                    switch(get(armor).getEquipmentSkill(armor))
+                    switch(armor.getClass().getEquipmentSkill(armor))
                     {
                         case ESM::Skill::LightArmor:
                             sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
@@ -796,7 +801,11 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        // player got activated by another NPC
+        if(ptr.getRefData().getHandle() == "player")
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
+
+        if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfNPC");
@@ -808,15 +817,11 @@ namespace MWClass
         }
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(get(ptr).getCreatureStats(ptr).isHostile())
+        if(ptr.getClass().getCreatureStats(ptr).isHostile())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         
-        // player got activated by another NPC
-        if(ptr.getRefData().getHandle() == "player")
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
-
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
 
     }
@@ -941,7 +946,7 @@ namespace MWClass
 
         if (fallHeight >= fallDistanceMin)
         {
-            const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
+            const float acrobaticsSkill = ptr.getClass().getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
             const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
             const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).mMagnitude;
             const float fallAcroBase = gmst.find("fFallAcroBase")->getFloat();
@@ -1105,7 +1110,7 @@ namespace MWClass
             {
                 MWWorld::LiveCellRef<ESM::Armor> *ref = it->get<ESM::Armor>();
 
-                int armorSkillType = MWWorld::Class::get(*it).getEquipmentSkill(*it);
+                int armorSkillType = it->getClass().getEquipmentSkill(*it);
                 int armorSkill = stats.getSkill(armorSkillType).getModified();
 
                 if(ref->mBase->mData.mWeight == 0)
@@ -1175,7 +1180,7 @@ namespace MWClass
                 if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
                     return "FootBareLeft";
 
-                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                switch(boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
                         return "FootLightLeft";
@@ -1202,7 +1207,7 @@ namespace MWClass
                 if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
                     return "FootBareRight";
 
-                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                switch(boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
                         return "FootLightRight";
@@ -1305,7 +1310,35 @@ namespace MWClass
 
     bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
     {
-        return ptr.get<ESM::NPC>()->mBase->mClass == className;
+        return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
+    }
+
+    void Npc::respawn(const MWWorld::Ptr &ptr) const
+    {
+        if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn)
+        {
+            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
+            // This also means we cannot respawn dynamically placed references with no content file connection.
+            if (ptr.getCellRef().getRefNum().mContentFile != -1)
+            {
+                if (ptr.getRefData().getCount() == 0)
+                    ptr.getRefData().setCount(1);
+
+                // Reset to original position
+                ESM::Position& pos = ptr.getRefData().getPosition();
+                pos = ptr.getCellRef().getPosition();
+
+                ptr.getRefData().setCustomData(NULL);
+            }
+        }
+    }
+
+    void Npc::restock(const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const ESM::InventoryList& list = ref->mBase->mInventory;
+        MWWorld::ContainerStore& store = getContainerStore(ptr);
+        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
     }
 
     const ESM::GameSetting *Npc::fMinWalkSpeed;

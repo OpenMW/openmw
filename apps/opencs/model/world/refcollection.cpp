@@ -3,12 +3,15 @@
 
 #include <sstream>
 
+#include <components/misc/stringops.hpp>
+
 #include "ref.hpp"
 #include "cell.hpp"
 #include "universalid.hpp"
 #include "record.hpp"
 
-void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base)
+void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
+    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Stage::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
@@ -17,19 +20,79 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     CellRef ref;
 
     bool deleted = false;
-    while (cell2.getNextRef (reader, ref, deleted))
+
+    while (ESM::Cell::getNextRef (reader, ref, deleted))
     {
-        /// \todo handle deleted and moved references
-        ref.load (reader, cell2, getNewId());
+        ref.mCell = cell2.mId;
 
-        Record<CellRef> record2;
-        record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-        (base ? record2.mBase : record2.mModified) = ref;
+        /// \todo handle moved references
 
-        appendRecord (record2);
+        std::map<ESM::RefNum, std::string>::iterator iter = cache.find (ref.mRefNum);
+
+        if (deleted)
+        {
+            if (iter==cache.end())
+            {
+                CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
+                    mCells.getId (cellIndex));
+
+                messages.push_back (std::make_pair (id,
+                    "Attempt to delete a non-existing reference"));
+
+                continue;
+            }
+
+            int index = getIndex (iter->second);
+
+            Record<CellRef> record = getRecord (index);
+
+            if (record.mState==RecordBase::State_BaseOnly)
+            {
+                removeRows (index, 1);
+                cache.erase (iter);
+            }
+            else
+            {
+                cell.mModified.mTouchedRefs.insert (Misc::StringUtils::lowerCase (
+                    mCells.getId (cellIndex)));
+                record.mState = RecordBase::State_Deleted;
+                setRecord (index, record);
+            }
+
+            continue;
+        }
+
+        if (!base)
+            cell.mModified.mTouchedRefs.insert (Misc::StringUtils::lowerCase (
+                mCells.getId (cellIndex)));
+
+        if (iter==cache.end())
+        {
+            // new reference
+            ref.mId = getNewId();
+
+            Record<CellRef> record;
+            record.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+            (base ? record.mBase : record.mModified) = ref;
+
+            appendRecord (record);
+
+            cache.insert (std::make_pair (ref.mRefNum, ref.mId));
+        }
+        else
+        {
+            // old reference -> merge
+            ref.mId = iter->second;
+
+            int index = getIndex (ref.mId);
+
+            Record<CellRef> record = getRecord (index);
+            record.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_Modified;
+            (base ? record.mBase : record.mModified) = ref;
+
+            setRecord (index, record);
+        }
     }
-
-    mCells.setRecord (cellIndex, cell);
 }
 
 std::string CSMWorld::RefCollection::getNewId()
@@ -37,15 +100,4 @@ std::string CSMWorld::RefCollection::getNewId()
     std::ostringstream stream;
     stream << "ref#" << mNextId++;
     return stream.str();
-}
-
-void CSMWorld::RefCollection::cloneRecord(const std::string& origin, 
-                         const std::string& destination,
-                         const CSMWorld::UniversalId::Type type,
-                         const CSMWorld::UniversalId::ArgumentType argumentType)
-{
-       Record<CSMWorld::CellRef> clone(getRecord(origin));
-       clone.mState = CSMWorld::RecordBase::State_ModifiedOnly;
-       clone.get().mId = destination;
-       insertRecord(clone, getAppendIndex(destination, type), type);
 }

@@ -19,6 +19,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -26,6 +27,10 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+
+#include "../mwdialogue/dialoguemanagerimp.hpp"
+
+#include "../mwgui/windowbase.hpp"
 
 using namespace ICS;
 
@@ -114,6 +119,7 @@ namespace MWInput
         , mOverencumberedMessageDelay(0.f)
         , mAlwaysRunActive(false)
         , mAttemptJump(false)
+        , mControlsDisabled(false)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -185,7 +191,7 @@ namespace MWInput
 
         if (action == A_Use)
         {
-            MWWorld::Class::get(mPlayer->getPlayer()).getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+            mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
         }
 
         if (action == A_Jump)
@@ -272,24 +278,31 @@ namespace MWInput
             case A_ToggleHUD:
                 MWBase::Environment::get().getWindowManager()->toggleHud();
                 break;
+            case A_QuickSave:
+                quickSave();
+                break;
+            case A_QuickLoad:
+                quickLoad();
+                break;
             }
         }
     }
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
+        mControlsDisabled = disableControls;
+
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
         mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
-        // update values of channels (as a result of pressed keys)
-        if (!disableControls)
-            mInputBinder->update(dt);
-
-        if (disableControls)
+        if (mControlsDisabled)
             return;
+
+        // update values of channels (as a result of pressed keys)
+        mInputBinder->update(dt);
 
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
@@ -368,7 +381,7 @@ namespace MWInput
                 {
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                     mOverencumberedMessageDelay -= dt;
-                    if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
+                    if (player.getClass().getEncumbrance(player) >= player.getClass().getCapacity(player))
                     {
                         mPlayer->setAutoMove (false);
                         if (mOverencumberedMessageDelay <= 0)
@@ -497,13 +510,14 @@ namespace MWInput
 
                     if (text)
                     {
-                        edit->addText(MyGUI::UString(text));
+                        edit->insertText(MyGUI::UString(text), edit->getTextCursor());
                         SDL_free(text);
                     }
                 }
                 if (arg.keysym.sym == SDLK_x && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
-                    std::string text = edit->getTextSelection();
+                    // Discard color codes and other escape characters
+                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
                     if (text.length())
                     {
                         SDL_SetClipboardText(text.c_str());
@@ -515,7 +529,8 @@ namespace MWInput
             {
                 if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
                 {
-                    std::string text = edit->getTextSelection();
+                    // Discard color codes and other escape characters
+                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
                     if (text.length())
                         SDL_SetClipboardText(text.c_str());
                 }
@@ -529,7 +544,8 @@ namespace MWInput
             bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
             setPlayerControlsEnabled(!guiFocus);
         }
-        mInputBinder->keyPressed (arg);
+        if (!mControlsDisabled)
+            mInputBinder->keyPressed (arg);
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
@@ -645,21 +661,38 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
-        if (MyGUI::InputManager::getInstance ().isModalAny())
+        if (MyGUI::InputManager::getInstance().isModalAny()) {
+            MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
             return;
-
-        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
-        {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
         }
-        else
+
+        if(MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Dialogue) { //Give access to the main menu when at a choice in dialogue
+            if(MWBase::Environment::get().getDialogueManager()->isInChoice()) {
+                MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+                MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
+                return;
+            }
+        }
+
+        if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
             MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
         }
+        else //Close current GUI
+        {
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
+        }
     }
 
+    void InputManager::quickLoad() {
+        MWBase::Environment::get().getStateManager()->quickLoad();
+    }
+
+    void InputManager::quickSave() {
+        MWBase::Environment::get().getStateManager()->quickSave();
+    }
     void InputManager::toggleSpell()
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
@@ -669,7 +702,7 @@ namespace MWInput
             return;
 
         // Not allowed if no spell selected
-        MWWorld::InventoryStore& inventory = MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer());
+        MWWorld::InventoryStore& inventory = mPlayer->getPlayer().getClass().getInventoryStore(mPlayer->getPlayer());
         if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty() &&
             inventory.getSelectedEnchantItem() == inventory.end())
             return;
@@ -701,8 +734,12 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
             return;
 
-        /// \todo check if resting is currently allowed (enemies nearby?)
-        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest);
+        if(mPlayer->isInCombat()) {//Check if in combat
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}"); //Nope,
+            return;
+        }
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest); //Open rest GUI
+
     }
 
     void InputManager::screenshot()
@@ -762,8 +799,7 @@ namespace MWInput
         }
         else if(MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Journal)
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
         }
         // .. but don't touch any other mode.
     }
@@ -779,8 +815,12 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
                 && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
-        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
-            MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
+        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu) {
+            while(MyGUI::InputManager::getInstance().isModalAny()) { //Handle any open Modal windows
+                MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+            }
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
+        }
     }
 
     void InputManager::activate()
@@ -833,36 +873,39 @@ namespace MWInput
         // across different versions of OpenMW (in the case where another input action is added)
         std::map<int, int> defaultKeyBindings;
 
-        defaultKeyBindings[A_Activate] = SDLK_SPACE;
-        defaultKeyBindings[A_MoveBackward] = SDLK_s;
-        defaultKeyBindings[A_MoveForward] = SDLK_w;
-        defaultKeyBindings[A_MoveLeft] = SDLK_a;
-        defaultKeyBindings[A_MoveRight] = SDLK_d;
-        defaultKeyBindings[A_ToggleWeapon] = SDLK_f;
-        defaultKeyBindings[A_ToggleSpell] = SDLK_r;
-        defaultKeyBindings[A_QuickKeysMenu] = SDLK_F1;
-        defaultKeyBindings[A_Console] = SDLK_F2;
-        defaultKeyBindings[A_Run] = SDLK_LSHIFT;
-        defaultKeyBindings[A_Sneak] = SDLK_LCTRL;
-        defaultKeyBindings[A_AutoMove] = SDLK_q;
-        defaultKeyBindings[A_Jump] = SDLK_e;
-        defaultKeyBindings[A_Journal] = SDLK_j;
-        defaultKeyBindings[A_Rest] = SDLK_t;
-        defaultKeyBindings[A_GameMenu] = SDLK_ESCAPE;
-        defaultKeyBindings[A_TogglePOV] = SDLK_TAB;
-        defaultKeyBindings[A_QuickKey1] = SDLK_1;
-        defaultKeyBindings[A_QuickKey2] = SDLK_2;
-        defaultKeyBindings[A_QuickKey3] = SDLK_3;
-        defaultKeyBindings[A_QuickKey4] = SDLK_4;
-        defaultKeyBindings[A_QuickKey5] = SDLK_5;
-        defaultKeyBindings[A_QuickKey6] = SDLK_6;
-        defaultKeyBindings[A_QuickKey7] = SDLK_7;
-        defaultKeyBindings[A_QuickKey8] = SDLK_8;
-        defaultKeyBindings[A_QuickKey9] = SDLK_9;
-        defaultKeyBindings[A_QuickKey10] = SDLK_0;
-        defaultKeyBindings[A_Screenshot] = SDLK_F12;
-        defaultKeyBindings[A_ToggleHUD] = SDLK_F11;
-        defaultKeyBindings[A_AlwaysRun] = SDLK_y;
+        //Gets the Keyvalue from the Scancode; gives the button in the same place reguardless of keyboard format
+        defaultKeyBindings[A_Activate] = SDL_GetKeyFromScancode(SDL_SCANCODE_SPACE);
+        defaultKeyBindings[A_MoveBackward] = SDL_GetKeyFromScancode(SDL_SCANCODE_S);
+        defaultKeyBindings[A_MoveForward] = SDL_GetKeyFromScancode(SDL_SCANCODE_W);
+        defaultKeyBindings[A_MoveLeft] = SDL_GetKeyFromScancode(SDL_SCANCODE_A);
+        defaultKeyBindings[A_MoveRight] = SDL_GetKeyFromScancode(SDL_SCANCODE_D);
+        defaultKeyBindings[A_ToggleWeapon] = SDL_GetKeyFromScancode(SDL_SCANCODE_F);
+        defaultKeyBindings[A_ToggleSpell] = SDL_GetKeyFromScancode(SDL_SCANCODE_R);
+        defaultKeyBindings[A_QuickKeysMenu] = SDL_GetKeyFromScancode(SDL_SCANCODE_F1);
+        defaultKeyBindings[A_Console] = SDL_GetKeyFromScancode(SDL_SCANCODE_F2);
+        defaultKeyBindings[A_Run] = SDL_GetKeyFromScancode(SDL_SCANCODE_LSHIFT);
+        defaultKeyBindings[A_Sneak] = SDL_GetKeyFromScancode(SDL_SCANCODE_LCTRL);
+        defaultKeyBindings[A_AutoMove] = SDL_GetKeyFromScancode(SDL_SCANCODE_Q);
+        defaultKeyBindings[A_Jump] = SDL_GetKeyFromScancode(SDL_SCANCODE_E);
+        defaultKeyBindings[A_Journal] = SDL_GetKeyFromScancode(SDL_SCANCODE_J);
+        defaultKeyBindings[A_Rest] = SDL_GetKeyFromScancode(SDL_SCANCODE_T);
+        defaultKeyBindings[A_GameMenu] = SDL_GetKeyFromScancode(SDL_SCANCODE_ESCAPE);
+        defaultKeyBindings[A_TogglePOV] = SDL_GetKeyFromScancode(SDL_SCANCODE_TAB);
+        defaultKeyBindings[A_QuickKey1] = SDL_GetKeyFromScancode(SDL_SCANCODE_1);
+        defaultKeyBindings[A_QuickKey2] = SDL_GetKeyFromScancode(SDL_SCANCODE_2);
+        defaultKeyBindings[A_QuickKey3] = SDL_GetKeyFromScancode(SDL_SCANCODE_3);
+        defaultKeyBindings[A_QuickKey4] = SDL_GetKeyFromScancode(SDL_SCANCODE_4);
+        defaultKeyBindings[A_QuickKey5] = SDL_GetKeyFromScancode(SDL_SCANCODE_5);
+        defaultKeyBindings[A_QuickKey6] = SDL_GetKeyFromScancode(SDL_SCANCODE_6);
+        defaultKeyBindings[A_QuickKey7] = SDL_GetKeyFromScancode(SDL_SCANCODE_7);
+        defaultKeyBindings[A_QuickKey8] = SDL_GetKeyFromScancode(SDL_SCANCODE_8);
+        defaultKeyBindings[A_QuickKey9] = SDL_GetKeyFromScancode(SDL_SCANCODE_9);
+        defaultKeyBindings[A_QuickKey10] = SDL_GetKeyFromScancode(SDL_SCANCODE_0);
+        defaultKeyBindings[A_Screenshot] = SDL_GetKeyFromScancode(SDL_SCANCODE_F12);
+        defaultKeyBindings[A_ToggleHUD] = SDL_GetKeyFromScancode(SDL_SCANCODE_F11);
+        defaultKeyBindings[A_AlwaysRun] = SDL_GetKeyFromScancode(SDL_SCANCODE_Y);
+        defaultKeyBindings[A_QuickSave] = SDL_GetKeyFromScancode(SDL_SCANCODE_F5);
+        defaultKeyBindings[A_QuickLoad] = SDL_GetKeyFromScancode(SDL_SCANCODE_F9);
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
@@ -939,6 +982,8 @@ namespace MWInput
         descriptions[A_QuickKey9] = "sQuick9Cmd";
         descriptions[A_QuickKey10] = "sQuick10Cmd";
         descriptions[A_AlwaysRun] = "sAlways_Run";
+        descriptions[A_QuickSave] = "sQuickSaveCmd";
+        descriptions[A_QuickLoad] = "sQuickLoadCmd";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -982,6 +1027,8 @@ namespace MWInput
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
         ret.push_back(A_Console);
+        ret.push_back(A_QuickSave);
+        ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);

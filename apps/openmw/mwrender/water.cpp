@@ -326,10 +326,11 @@ void Water::setHeight(const float height)
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
 }
 
-void Water::toggle()
+bool Water::toggle()
 {
     mToggled = !mToggled;
     updateVisible();
+    return mToggled;
 }
 
 void

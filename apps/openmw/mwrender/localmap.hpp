@@ -11,6 +11,11 @@ namespace MWWorld
     class CellStore;
 }
 
+namespace ESM
+{
+    class FogTexture;
+}
+
 namespace MWRender
 {
     class RenderingManager;
@@ -23,6 +28,11 @@ namespace MWRender
     public:
         LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering);
         ~LocalMap();
+
+        /**
+         * Clear all savegame-specific data (i.e. fog of war textures)
+         */
+        void clear();
 
         /**
          * Request the local map for an exterior cell.
@@ -54,10 +64,8 @@ namespace MWRender
         void updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation);
 
         /**
-         * Save the fog of war for the current cell to disk.
-         * @remarks This should be called before loading a
-         * new cell, as well as when the game is quit.
-         * @param current cell
+         * Save the fog of war for this cell to its CellStore.
+         * @remarks This should be called when unloading a cell, and for all active cells prior to saving the game.
          */
         void saveFogOfWar(MWWorld::CellStore* cell);
 
@@ -76,7 +84,6 @@ namespace MWRender
         OEngine::Render::OgreRenderer* mRendering;
         MWRender::RenderingManager* mRenderingManager;
 
-        // 1024*1024 pixels for a cell
         static const int sMapResolution = 512;
 
         // the dynamic texture is a bottleneck, so don't set this too high
@@ -99,21 +106,29 @@ namespace MWRender
         float mAngle;
         const Ogre::Vector2 rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle);
 
+        /// @param force Always render, even if we already have a cached map
         void render(const float x, const float y,
                     const float zlow, const float zhigh,
                     const float xw, const float yw,
-                    const std::string& texture);
+                    const std::string& texture, bool force=false);
 
-        void saveTexture(const std::string& texname, const std::string& filename);
+        // Creates a fog of war texture and initializes it to full black
+        void createFogOfWar(const std::string& texturePrefix);
+
+        // Loads a fog of war texture from its ESM struct
+        void loadFogOfWar(const std::string& texturePrefix, ESM::FogTexture& esm); // FogTexture not const because MemoryDataStream doesn't accept it
+
+        Ogre::TexturePtr createFogOfWarTexture(const std::string& name);
 
         std::string coordStr(const int x, const int y);
 
-        // a buffer for the "fog of war" texture of the current cell.
-        // interior cells could be divided into multiple textures,
-        // so we store in a map.
+        // A buffer for the "fog of war" textures of the current cell.
+        // Both interior and exterior maps are possibly divided into multiple textures.
         std::map <std::string, std::vector<Ogre::uint32> > mBuffers;
 
-        void deleteBuffers();
+        // The render texture we will use to create the map images
+        Ogre::TexturePtr mRenderTexture;
+        Ogre::RenderTarget* mRenderTarget;
 
         bool mInterior;
         int mCellX, mCellY;

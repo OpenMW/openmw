@@ -36,10 +36,18 @@ namespace MWState
 
             Character (const boost::filesystem::path& saves, const std::string& game);
 
+            void cleanup();
+            ///< Delete the directory we used, if it is empty
+
             const Slot *createSlot (const ESM::SavedGame& profile);
             ///< Create new slot.
             ///
             /// \attention The ownership of the slot is not transferred.
+
+            /// \note Slot must belong to this character.
+            ///
+            /// \attention The \a slot pointer will be invalidated by this call.
+            void deleteSlot (const Slot *slot);
 
             const Slot *updateSlot (const Slot *slot, const ESM::SavedGame& profile);
             /// \note Slot must belong to this character.

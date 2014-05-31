@@ -93,7 +93,10 @@ struct TypesetBookImpl : TypesetBook
 
     typedef std::vector <Section> Sections;
 
+    // Holds "top" and "bottom" vertical coordinates in the source text.
+    // A page is basically a "window" into a portion of the source text, similar to a ScrollView.
     typedef std::pair <int, int> Page;
+
     typedef std::vector <Page> Pages;
 
     Pages mPages;
@@ -374,6 +377,29 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             else
             {
                 //split section
+                int sectionHeightLeft = sectionHeight;
+                while (sectionHeightLeft > mPageHeight)
+                {
+                    spaceLeft = mPageHeight - (curPageStop - curPageStart);
+
+                    // Adjust to the top of the first line that does not fit on the current page anymore
+                    int splitPos = curPageStop;
+                    for (Lines::iterator j = i->mLines.begin (); j != i->mLines.end (); ++j)
+                    {
+                        if (j->mRect.bottom > curPageStart + mPageHeight)
+                        {
+                            splitPos = j->mRect.top;
+                            break;
+                        }
+                    }
+
+                    mBook->mPages.push_back (Page (curPageStart, splitPos));
+                    curPageStart = splitPos;
+                    curPageStop = splitPos;
+
+                    sectionHeightLeft = (i->mRect.bottom - splitPos);
+                }
+                curPageStop = i->mRect.bottom;
             }
         }
 
@@ -695,6 +721,8 @@ protected:
     typedef TypesetBookImpl::Section Section;
     typedef TypesetBookImpl::Line    Line;
     typedef TypesetBookImpl::Run     Run;
+    bool mIsPageReset;
+    size_t mPage;
 
     struct TextFormat : ISubWidget
     {
@@ -745,6 +773,23 @@ protected:
         void destroyDrawItem() {};
     };
 
+    void resetPage()
+    {
+       mIsPageReset = true;
+       mPage = 0;
+    }
+
+    void setPage(size_t page)
+    {
+       mIsPageReset = false;
+       mPage = page;
+    }
+
+    bool isPageDifferent(size_t page)
+    {
+       return mIsPageReset || (mPage != page);
+    }
+
 public:
 
     typedef TypesetBookImpl::StyleImpl Style;
@@ -760,14 +805,13 @@ public:
 
 
     boost::shared_ptr <TypesetBookImpl> mBook;
-    size_t mPage;
 
     MyGUI::ILayerNode* mNode;
     ActiveTextFormats mActiveTextFormats;
 
     PageDisplay ()
     {
-        mPage = -1;
+        resetPage ();
         mViewTop = 0;
         mViewBottom = 0;
         mFocusItem = NULL;
@@ -783,7 +827,8 @@ public:
 
             ActiveTextFormats::iterator i = mActiveTextFormats.find (Font);
 
-            mNode->outOfDate (i->second->mRenderItem);
+            if (mNode)
+                mNode->outOfDate (i->second->mRenderItem);
         }
     }
 
@@ -901,7 +946,7 @@ public:
                 createActiveFormats (newBook);
 
                 mBook = newBook;
-                mPage = newPage;
+                setPage (newPage);
 
                 if (newPage < mBook->mPages.size ())
                 {
@@ -917,19 +962,19 @@ public:
             else
             {
                 mBook.reset ();
-                mPage = -1;
+                resetPage ();
                 mViewTop = 0;
                 mViewBottom = 0;
             }
         }
         else
-        if (mBook && mPage != newPage)
+        if (mBook && isPageDifferent (newPage))
         {
             if (mNode != NULL)
                 for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
                     mNode->outOfDate(i->second->mRenderItem);
 
-            mPage = newPage;
+            setPage (newPage);
 
             if (newPage < mBook->mPages.size ())
             {
@@ -1125,6 +1170,8 @@ public:
 protected:
     void onMouseLostFocus(Widget* _new)
     {
+        // NOTE: MyGUI also fires eventMouseLostFocus for widgets that are about to be destroyed (if they had focus).
+        // Child widgets may already be destroyed! So be careful.
         if (PageDisplay* pd = dynamic_cast <PageDisplay*> (getSubWidgetText ()))
         {
             pd->onMouseLostFocus ();

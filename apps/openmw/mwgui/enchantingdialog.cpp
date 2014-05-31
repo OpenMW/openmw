@@ -61,6 +61,11 @@ namespace MWGui
         onRemoveSoul(NULL);
     }
 
+    void EnchantingDialog::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+    }
+
     void EnchantingDialog::updateLabels()
     {
         std::stringstream enchantCost;
@@ -119,7 +124,7 @@ namespace MWGui
 
         MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(soulgem).getInventoryIcon(soulgem);
+        path += soulgem.getClass().getInventoryIcon(soulgem);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
@@ -141,7 +146,7 @@ namespace MWGui
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+        exit();
     }
 
     void EnchantingDialog::onSelectItem(MyGUI::Widget *sender)
@@ -164,7 +169,7 @@ namespace MWGui
 
         MyGUI::ImageBox* image = mItemBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
+        path += item.getClass().getInventoryIcon(item);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
@@ -207,7 +212,7 @@ namespace MWGui
 
         MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
+        path += item.getClass().getInventoryIcon(item);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
@@ -306,7 +311,7 @@ namespace MWGui
             for (int i=0; i<2; ++i)
             {
                 MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
-                if (Misc::StringUtils::ciEqual(item.getCellRef().mOwner, mPtr.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), mPtr.getCellRef().getRefId()))
                 {
                     std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->getString();
                     if (msg.find("%s") != std::string::npos)

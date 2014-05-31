@@ -1,13 +1,12 @@
 #ifndef USERSETTINGS_HPP
 #define USERSETTINGS_HPP
 
-#include <QTextStream>
+#include <QList>
 #include <QStringList>
 #include <QString>
 #include <QMap>
 
 #include <boost/filesystem/path.hpp>
-
 #include "support.hpp"
 
 #ifndef Q_MOC_RUN
@@ -18,77 +17,79 @@ namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
                   struct ConfigurationManager;}
 
 class QFile;
+class QSettings;
 
 namespace CSMSettings {
 
-    struct UserSettings: public QObject
+    class Setting;
+    typedef QMap <QString, QList <Setting *> > SettingPageMap;
+
+    class UserSettings: public QObject
     {
 
         Q_OBJECT
 
-        SectionMap mSectionSettings;
-        SectionMap mEditorSettingDefaults;
-
         static UserSettings *mUserSettingsInstance;
-        QString mUserFilePath;
-        Files::ConfigurationManager mCfgMgr;
-        QString mReadOnlyMessage;
-        QString mReadWriteMessage;
+        const Files::ConfigurationManager& mCfgMgr;
+
+        QSettings *mSettingDefinitions;
+        QList <Setting *> mSettings;
 
     public:
 
         /// Singleton implementation
         static UserSettings& instance();
 
-        UserSettings();
+        UserSettings (const Files::ConfigurationManager& configurationManager);
         ~UserSettings();
 
-        UserSettings (UserSettings const &);        //not implemented
-        void operator= (UserSettings const &);      //not implemented
-
-        /// Writes settings to the last loaded settings file
-        bool writeSettings(QMap<QString, SettingList *> &sections);
-
-        /// Called from editor to trigger signal to update the specified setting.
-        /// If no setting name is specified, all settings found in the specified section are updated.
-        void updateSettings (const QString &sectionName, const QString &settingName = "");
+        UserSettings (UserSettings const &); //not implemented
+        UserSettings& operator= (UserSettings const &); //not implemented
 
         /// Retrieves the settings file at all three levels (global, local and user).
-
-        /// \todo Multi-valued settings are not fully implemented.  Setting values
-        /// \todo loaded in later files will always overwrite previously loaded values.
         void loadSettings (const QString &fileName);
 
-        /// Returns the entire map of settings across all sections
-        const SectionMap &getSectionMap () const;
+        /// Updates QSettings and syncs with the ini file
+        void setDefinitions (const QString &key, const QStringList &defs);
 
-        const SettingMap *getSettings (const QString &sectionName) const;
+        QString settingValue (const QString &settingKey);
 
-        /// Retrieves the value as a QString of the specified setting in the specified section
-        QString getSetting(const QString &section, const QString &setting) const;
+        ///retrieve a setting object from a given page and setting name
+        Setting *findSetting
+            (const QString &pageName, const QString &settingName = QString());
+
+        ///remove a setting from the list
+        void removeSetting
+                        (const QString &pageName, const QString &settingName);
+
+        ///Retreive a map of the settings, keyed by page name
+        SettingPageMap settingPageMap() const;
+
+        ///Returns a string list of defined vlaues for the specified setting
+        ///in "page/name" format.
+        QStringList definitions (const QString &viewKey) const;
+
+        ///Test to indicate whether or not a setting has any definitions
+        bool hasSettingDefinitions (const QString &viewKey) const;
+
+        ///Save any unsaved changes in the QSettings object
+        void saveDefinitions() const;
 
     private:
 
+        void buildSettingModelDefaults();
 
-        /// Opens a QTextStream from the provided path as read-only or read-write.
-        QTextStream *openFileStream (const QString &filePath, bool isReadOnly = false) const;
-
-        ///  Parses a setting file specified in filePath from the provided text stream.
-        bool loadFromFile (const QString &filePath = "");
-
-        /// merge the passed map into mSectionSettings
-        void mergeMap (const SectionMap &);
-
-        void displayFileErrorMessage(const QString &message, bool isReadOnly);
-
-        void buildEditorSettingDefaults();
-
-        SettingMap *getValidSettings (const QString &sectionName) const;
+        ///add a new setting to the model and return it
+        Setting *createSetting (CSMSettings::SettingType typ,
+                            const QString &page, const QString &name);
 
     signals:
 
-        void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);
+        void userSettingUpdated (const QString &, const QStringList &);
 
+    public slots:
+
+        void updateUserSetting (const QString &, const QStringList &);
     };
 }
 #endif // USERSETTINGS_HPP

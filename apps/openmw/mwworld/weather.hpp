@@ -18,6 +18,11 @@ namespace MWRender
     class RenderingManager;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace MWWorld
 {
     class Fallback;
@@ -158,7 +163,7 @@ namespace MWWorld
         /// @see World::isDark
         bool isDark() const;
 
-        void write(ESM::ESMWriter& writer);
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
         bool readRecord(ESM::ESMReader& reader, int32_t type);
 

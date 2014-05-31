@@ -47,10 +47,10 @@ namespace
     {
         if (mRescale)
         {
-            if (ptr.getCellRef().mScale<0.5)
-                ptr.getCellRef().mScale = 0.5;
-            else if (ptr.getCellRef().mScale>2)
-                ptr.getCellRef().mScale = 2;
+            if (ptr.getCellRef().getScale()<0.5)
+                ptr.getCellRef().setScale(0.5);
+            else if (ptr.getCellRef().getScale()>2)
+                ptr.getCellRef().setScale(2);
         }
 
         if (ptr.getRefData().getCount() && ptr.getRefData().isEnabled())
@@ -65,7 +65,7 @@ namespace
                 float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
                 MWBase::Environment::get().getWorld()->localRotateObject (ptr, ax, ay, az);
 
-                MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().mScale);
+                MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().getScale());
                 ptr.getClass().adjustPosition (ptr);
             }
             catch (const std::exception& e)
@@ -85,7 +85,17 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::update (float duration, bool paused){
+    void Scene::update (float duration, bool paused)
+    {
+        if (mNeedMapUpdate)
+        {
+            // Note: exterior cell maps must be updated, even if they were visited before, because the set of surrounding cells might be different
+            // (and objects in a different cell can "bleed" into another cells map if they cross the border)
+            for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
+                mRendering.requestMap(*active);
+            mNeedMapUpdate = false;
+        }
+
         mRendering.update (duration, paused);
     }
 
@@ -155,6 +165,8 @@ namespace MWWorld
                 }
             }
 
+            cell->respawn();
+
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true, loadingListener);
@@ -186,7 +198,7 @@ namespace MWWorld
             float z = Ogre::Radian(pos.rot[2]).valueDegrees();
             world->rotateObject(player, x, y, z);
 
-            MWWorld::Class::get(player).adjustPosition(player);
+            player.getClass().adjustPosition(player);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -197,8 +209,9 @@ namespace MWWorld
 
         mRendering.updateTerrain();
 
-        for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
-            mRendering.requestMap(*active);
+        // Delay the map update until scripts have been given a chance to run.
+        // If we don't do this, objects that should be disabled will still appear on the map.
+        mNeedMapUpdate = true;
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
     }
@@ -333,8 +346,6 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mRendering.switchToExterior();
-
         mCellChanged = true;
 
         loadingListener->removeWallpaper();
@@ -342,7 +353,7 @@ namespace MWWorld
 
     //We need the ogre renderer and a scene node.
     Scene::Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
+    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNeedMapUpdate(false)
     {
     }
 
@@ -388,7 +399,7 @@ namespace MWWorld
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            MWWorld::Class::get(world->getPlayerPtr()).adjustPosition(world->getPlayerPtr());
+            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr());
             world->getFader()->fadeIn(0.5f);
             return;
         }
@@ -428,7 +439,6 @@ namespace MWWorld
         mCurrentCell = cell;
 
         // adjust fog
-        mRendering.switchToInterior();
         mRendering.configureFog(*mCurrentCell);
 
         // adjust player
@@ -472,9 +482,9 @@ namespace MWWorld
     void Scene::addObjectToScene (const Ptr& ptr)
     {
         mRendering.addObject(ptr);
-        MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
+        ptr.getClass().insertObject(ptr, *mPhysics);
         MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
-        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
+        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
     }
 
     void Scene::removeObjectFromScene (const Ptr& ptr)
@@ -495,5 +505,25 @@ namespace MWWorld
             ++active;
         }
         return false;
+    }
+
+    Ptr Scene::searchPtrViaHandle (const std::string& handle)
+    {
+        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
+            iter!=mActiveCells.end(); ++iter)
+            if (Ptr ptr = (*iter)->searchViaHandle (handle))
+                return ptr;
+
+        return Ptr();
+    }
+
+    Ptr Scene::searchPtrViaActorId (int actorId)
+    {
+        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
+            iter!=mActiveCells.end(); ++iter)
+            if (Ptr ptr = (*iter)->searchViaActorId (actorId))
+                return ptr;
+
+        return Ptr();
     }
 }

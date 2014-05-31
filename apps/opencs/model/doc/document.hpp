@@ -9,6 +9,8 @@
 #include <QObject>
 #include <QTimer>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "../world/data.hpp"
 
 #include "../tools/tools.hpp"
@@ -39,6 +41,7 @@ namespace CSMDoc
 
             boost::filesystem::path mSavePath;
             std::vector<boost::filesystem::path> mContentFiles;
+            bool mNew;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
             boost::filesystem::path mProjectPath;
@@ -52,10 +55,6 @@ namespace CSMDoc
             // not implemented
             Document (const Document&);
             Document& operator= (const Document&);
-
-            void load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-                const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified);
-            ///< \param lastAsModified Store the last file in Modified instead of merging it into Base.
 
             void createBase();
 
@@ -72,9 +71,9 @@ namespace CSMDoc
         public:
 
             Document (const Files::ConfigurationManager& configuration,
-                      const std::vector< boost::filesystem::path >& files,
-                      const boost::filesystem::path& savePath,
-                      const boost::filesystem::path& resDir, bool new_);
+                const std::vector< boost::filesystem::path >& files, bool new_,
+                const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+                ToUTF8::FromType encoding);
 
             ~Document();
 
@@ -84,9 +83,14 @@ namespace CSMDoc
 
             const boost::filesystem::path& getSavePath() const;
 
+            const boost::filesystem::path& getProjectPath() const;
+
             const std::vector<boost::filesystem::path>& getContentFiles() const;
             ///< \attention The last element in this collection is the file that is being edited,
             /// but with its original path instead of the save path.
+
+            bool isNew() const;
+            ///< Is this a newly created content file?
 
             void save();
 
@@ -111,7 +115,8 @@ namespace CSMDoc
 
             void modificationStateChanged (bool clean);
 
-            void reportMessage (const QString& message, int type);
+            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
+                int type);
 
             void operationDone (int type);
 
