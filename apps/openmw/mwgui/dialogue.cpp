@@ -271,7 +271,8 @@ namespace MWGui
 
     void DialogueWindow::exit()
     {
-        if (!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
+        if ((!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
+                && !mGoodbye)
             return;
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
     }
@@ -517,7 +518,7 @@ namespace MWGui
 
         MyGUI::Button* byeButton;
         getWidget(byeButton, "ByeButton");
-        if(MWBase::Environment::get().getDialogueManager()->isInChoice()) {
+        if(MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye) {
             byeButton->setEnabled(false);
         }
         else {
