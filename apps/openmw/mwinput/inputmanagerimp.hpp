@@ -172,6 +172,8 @@ namespace MWInput
         void resetIdleTime();
         void updateIdleTime(float dt);
 
+        void setPlayerControlsEnabled(bool enabled);
+
     private:
         void toggleMainMenu();
         void toggleSpell();
