@@ -35,7 +35,7 @@ namespace MWGui
         bool found = false;
         for (; it != out.end(); ++it)
         {
-            if (it->stacks(item))
+            if (it->mBase == item.mBase)
             {
                 it->mCount += item.mCount;
                 found = true;
@@ -52,7 +52,7 @@ namespace MWGui
         bool found = false;
         for (; it != out.end(); ++it)
         {
-            if (it->stacks(item))
+            if (it->mBase == item.mBase)
             {
                 if (it->mCount < count)
                     throw std::runtime_error("Not enough borrowed items to return");
@@ -114,7 +114,7 @@ namespace MWGui
             size_t i=0;
             for (; i<sourceModel->getItemCount(); ++i)
             {
-                if (it->stacks(sourceModel->getItem(i)))
+                if (it->mBase == sourceModel->getItem(i).mBase)
                     break;
             }
             if (i == sourceModel->getItemCount())
@@ -182,7 +182,7 @@ namespace MWGui
             std::vector<ItemStack>::iterator it = mBorrowedFromUs.begin();
             for (; it != mBorrowedFromUs.end(); ++it)
             {
-                if (it->stacks(item))
+                if (it->mBase == item.mBase)
                 {
                     if (item.mCount < it->mCount)
                         throw std::runtime_error("Lent more items than present");
