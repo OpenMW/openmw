@@ -74,6 +74,8 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &TradeWindow::onDecreaseButtonPressed);
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
+        mTotalBalance->eventEditTextChange += MyGUI::newDelegate(this, &TradeWindow::onBalanceEdited);
+
         setCoord(400, 0, 400, 300);
     }
 
@@ -408,6 +410,19 @@ namespace MWGui
     void TradeWindow::onBalanceButtonReleased(MyGUI::Widget *_sender, int _left, int _top, MyGUI::MouseButton _id)
     {
         mBalanceButtonsState = BBS_None;
+    }
+
+    void TradeWindow::onBalanceEdited(MyGUI::EditBox *_sender)
+    {
+        try
+        {
+            unsigned int count = boost::lexical_cast<unsigned int>(_sender->getCaption());
+            mCurrentBalance = count * (mCurrentBalance >= 0 ? 1 : -1);
+            updateLabels();
+        }
+        catch (std::bad_cast&)
+        {
+        }
     }
 
     void TradeWindow::onIncreaseButtonTriggered()
