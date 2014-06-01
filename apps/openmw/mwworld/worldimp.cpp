@@ -2057,8 +2057,8 @@ namespace MWWorld
             // door to exterior
             if (it->mRef.getDestCell().empty()) {
                 int x, y;
-                const float *pos = it->mRef.getDoorDest().pos;
-                positionToIndex(pos[0], pos[1], x, y);
+                ESM::Position doorDest = it->mRef.getDoorDest();
+                positionToIndex(doorDest.pos[0], doorDest.pos[1], x, y);
                 source = getExterior(x, y);
             }
             // door to interior
