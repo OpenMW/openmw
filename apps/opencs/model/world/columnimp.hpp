@@ -102,10 +102,10 @@ namespace CSMWorld
                 return static_cast<int> (Record<Cell>::State_Deleted);
 
             if (!record.mModified.mTouchedRefs.empty() &&
-                !record.mState==Record<Cell>::State_Deleted &&
-                !record.mState==Record<Cell>::State_ModifiedOnly)
+                record.mState!=Record<Cell>::State_Deleted &&
+                record.mState!=Record<Cell>::State_ModifiedOnly)
             {
-                static_cast<int> (Record<Cell>::State_Modified);
+                return static_cast<int> (Record<Cell>::State_Modified);
             }
 
             return static_cast<int> (record.mState);
