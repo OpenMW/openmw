@@ -560,17 +560,7 @@ namespace MWDialogue
 
     void DialogueManager::applyDispositionChange(int delta)
     {
-        int oldTemp = mTemporaryDispositionChange;
         mTemporaryDispositionChange += delta;
-        // don't allow increasing beyond 100 or decreasing below 0
-        int curDisp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
-        if (curDisp + mTemporaryDispositionChange < 0)
-            mTemporaryDispositionChange = -curDisp;
-        else if (curDisp + mTemporaryDispositionChange > 100)
-            mTemporaryDispositionChange = 100 - curDisp;
-
-        int diff = mTemporaryDispositionChange - oldTemp;
-        mPermanentDispositionChange += diff;
     }
 
     bool DialogueManager::checkServiceRefused()

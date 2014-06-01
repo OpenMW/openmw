@@ -4,6 +4,7 @@
 #include <OgreHardwareBufferManager.h>
 #include <OgreRenderQueue.h>
 #include <OgreMaterialManager.h>
+#include <OgreStringConverter.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 
@@ -15,6 +16,7 @@ namespace Terrain
 
     Chunk::Chunk(Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds, const LoadResponseData& data)
         : mBounds(bounds)
+        , mOwnMaterial(false)
     {
         mVertexData = OGRE_NEW Ogre::VertexData;
         mVertexData->vertexStart = 0;
@@ -70,7 +72,7 @@ namespace Terrain
 
     Chunk::~Chunk()
     {
-        if (!mMaterial.isNull())
+        if (!mMaterial.isNull() && mOwnMaterial)
         {
 #if TERRAIN_USE_SHADER
             sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
@@ -81,9 +83,19 @@ namespace Terrain
         OGRE_DELETE mIndexData;
     }
 
-    void Chunk::setMaterial(const Ogre::MaterialPtr &material)
+    void Chunk::setMaterial(const Ogre::MaterialPtr &material, bool own)
     {
+        // Clean up the previous material, if we own it
+        if (!mMaterial.isNull() && mOwnMaterial)
+        {
+#if TERRAIN_USE_SHADER
+            sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
+#endif
+            Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
+        }
+
         mMaterial = material;
+        mOwnMaterial = own;
     }
 
     const Ogre::AxisAlignedBox& Chunk::getBoundingBox(void) const
