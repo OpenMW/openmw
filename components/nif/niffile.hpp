@@ -36,6 +36,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cassert>
+#include <typeinfo>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -137,8 +138,8 @@ template<typename T>
 struct KeyT {
     float mTime;
     T mValue;
-    T mForwardValue;  // Only for Quadratic interpolation
-    T mBackwardValue; // Only for Quadratic interpolation
+    T mForwardValue;  // Only for Quadratic interpolation, and never for QuaternionKeyList
+    T mBackwardValue; // Only for Quadratic interpolation, and never for QuaternionKeyList
     float mTension;    // Only for TBC interpolation
     float mBias;       // Only for TBC interpolation
     float mContinuity; // Only for TBC interpolation
@@ -184,8 +185,11 @@ struct KeyListT {
                 KeyT<T> &key = mKeys[i];
                 key.mTime = nif->getFloat();
                 key.mValue = (nif->*getValue)();
-                key.mForwardValue = (nif->*getValue)();
-                key.mBackwardValue = (nif->*getValue)();
+                if( typeid(Ogre::Quaternion) != typeid(T) )
+                {
+                    key.mForwardValue = (nif->*getValue)();
+                    key.mBackwardValue = (nif->*getValue)();
+                }
             }
         }
         else if(mInterpolationType == sTBCInterpolation)
