@@ -368,6 +368,9 @@ namespace MWWorld
 
     World::~World()
     {
+        // Must be cleared before mRendering is destroyed
+        mProjectileManager->clear();
+
         delete mWeatherManager;
         delete mWorldScene;
         delete mRendering;
