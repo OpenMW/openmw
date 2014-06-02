@@ -70,11 +70,12 @@ namespace MWGui
         /// provides access to the name of the quest with the specified identifier
         virtual void visitQuestName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const = 0;
 
-        /// walks the active and optionally completed, quests providing the quest id and name
-        virtual void visitQuestNames (bool active_only, boost::function <void (QuestId, Utf8Span)> visitor) const = 0;
+        /// walks the active and optionally completed, quests providing the name
+        virtual void visitQuestNames (bool active_only, boost::function <void (const std::string&)> visitor) const = 0;
 
-        /// walks over the journal entries related to the specified quest identified by its id
-        virtual void visitJournalEntries (QuestId questId, boost::function <void (JournalEntry const &)> visitor) const = 0;
+        /// walks over the journal entries related to all quests with the given name
+        /// If \a questName is empty, simply visits all journal entries
+        virtual void visitJournalEntries (const std::string& questName, boost::function <void (JournalEntry const &)> visitor) const = 0;
 
         /// provides the name of the topic specified by its id
         virtual void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const = 0;

@@ -19,6 +19,7 @@
 #include "imagebutton.hpp"
 #include "journalviewmodel.hpp"
 #include "journalbooks.hpp"
+#include "list.hpp"
 
 namespace
 {
@@ -38,7 +39,6 @@ namespace
     static char const TopicsList [] = "TopicsList";
     static char const TopicsPage [] = "TopicsPage";
     static char const QuestsList [] = "QuestsList";
-    static char const QuestsPage [] = "QuestsPage";
     static char const LeftBookPage [] = "LeftBookPage";
     static char const RightBookPage [] = "RightBookPage";
     static char const LeftTopicIndex [] = "LeftTopicIndex";
@@ -110,6 +110,9 @@ namespace
             adviseButtonClick (ShowAllBTN,    &JournalWindowImpl::notifyShowAll   );
             adviseButtonClick (ShowActiveBTN, &JournalWindowImpl::notifyShowActive);
 
+            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
+            list->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyQuestClicked);
+
             {
                 MWGui::BookPage::ClickCallback callback;
                 
@@ -127,14 +130,6 @@ namespace
 
                 getPage (LeftTopicIndex)->adviseLinkClicked (callback);
                 getPage (RightTopicIndex)->adviseLinkClicked (callback);
-            }
-
-            {
-                MWGui::BookPage::ClickCallback callback;
-                
-                callback = boost::bind (&JournalWindowImpl::notifyQuestClicked, this, _1);
-
-                getPage (QuestsPage)->adviseLinkClicked (callback);
             }
 
             adjustButton(OptionsBTN, true);
@@ -271,6 +266,10 @@ namespace
             //TODO: figure out how to make "options" page overlay book page
             //      correctly, so that text may show underneath
             getPage (RightBookPage)->showPage (Book (), 0);
+
+            // If in quest mode, ensure the quest list is updated
+            if (mQuestMode)
+                notifyQuests(getWidget<MyGUI::Widget>(QuestsList));
         }
 
         void pushBook (Book book, unsigned int page)
@@ -349,9 +348,9 @@ namespace
             setVisible (JournalBTN, true);
         }
 
-        void notifyQuestClicked (intptr_t questId)
+        void notifyQuestClicked (const std::string& name, int id)
         {
-            Book book = createQuestBook (questId);
+            Book book = createQuestBook (name);
 
             if (mStates.size () > 1)
                 replaceBook (book, 0);
@@ -409,9 +408,21 @@ namespace
             setVisible (ShowActiveBTN, false);
         }
 
+        struct AddQuestNamesToList
+        {
+            AddQuestNamesToList(MWGui::Widgets::MWList* list) : mList(list) {}
+
+            MWGui::Widgets::MWList* mList;
+            void operator () (const std::string& name)
+            {
+                mList->addItem(name);
+            }
+        };
+
         void notifyQuests(MyGUI::Widget* _sender)
         {
             mQuestMode = true;
+
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, false);
@@ -419,23 +430,26 @@ namespace
             setVisible (ShowAllBTN, !mAllQuests);
             setVisible (ShowActiveBTN, mAllQuests);
 
-            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
+            list->clear();
+
+            AddQuestNamesToList add(list);
+
+            mModel->visitQuestNames(!mAllQuests, add);
+
+            list->adjustSize();
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
         {
             mAllQuests = true;
-            setVisible (ShowAllBTN, !mAllQuests);
-            setVisible (ShowActiveBTN, mAllQuests);
-            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+            notifyQuests(_sender);
         }
 
         void notifyShowActive(MyGUI::Widget* _sender)
         {
             mAllQuests = false;
-            setVisible (ShowAllBTN, !mAllQuests);
-            setVisible (ShowActiveBTN, mAllQuests);
-            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+            notifyQuests(_sender);
         }
 
         void notifyCancel(MyGUI::Widget* _sender)

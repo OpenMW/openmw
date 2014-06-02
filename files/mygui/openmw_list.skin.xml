@@ -157,6 +157,7 @@
     </Skin>
 
     <Skin name="MW_SimpleList" size="516 516" align="Left Top">
+        <Property key="ListItemSkin" value="MW_ListLine"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
