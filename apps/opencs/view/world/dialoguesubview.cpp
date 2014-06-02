@@ -295,7 +295,7 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
             skip = true;
-        }
+        } //lisp cond pairs would be nice in the C++
 
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
         mProxys.push_back(proxy); //deleted in the destructor
@@ -361,6 +361,7 @@ void CSVWorld::EditWidget::remake(int row)
     int unlocked = 0;
     int locked = 0;
     const int columns = mTable->columnCount();
+
     for (int i=0; i<columns; ++i)
     {
         int flags = mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
@@ -368,28 +369,35 @@ void CSVWorld::EditWidget::remake(int row)
         if (flags & CSMWorld::ColumnBase::Flag_Dialogue)
         {
             CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-                (mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+                                                    (mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-            mDispatcher.makeDelegate(display);
-            QWidget *editor = mDispatcher.makeEditor(display, (mTable->index (row, i)));
-
-            if (editor)
+            if (display != CSMWorld::ColumnBase::Display_Nested)
             {
-                mWidgetMapper->addMapping (editor, i);
-                QLabel* label = new QLabel(mTable->headerData (i, Qt::Horizontal).toString(), mMainWidget);
-                label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-                editor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-                if (! (mTable->flags (mTable->index (row, i)) & Qt::ItemIsEditable))
+                mDispatcher.makeDelegate (display);
+                QWidget* editor = mDispatcher.makeEditor (display, (mTable->index (row, i)));
+
+                if (editor)
                 {
-                    lockedLayout->addWidget (label, locked, 0);
-                    lockedLayout->addWidget (editor, locked, 1);
-                    ++locked;
-                } else
-                {
-                    unlockedLayout->addWidget (label, unlocked, 0);
-                    unlockedLayout->addWidget (editor, unlocked, 1);
-                    ++unlocked;
+                    mWidgetMapper->addMapping (editor, i);
+                    QLabel* label = new QLabel (mTable->headerData (i, Qt::Horizontal).toString(), mMainWidget);
+                    label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
+                    editor->setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+
+                    if (! (mTable->flags (mTable->index (row, i)) & Qt::ItemIsEditable))
+                    {
+                        lockedLayout->addWidget (label, locked, 0);
+                        lockedLayout->addWidget (editor, locked, 1);
+                        ++locked;
+                    } else
+                    {
+                        unlockedLayout->addWidget (label, unlocked, 0);
+                        unlockedLayout->addWidget (editor, unlocked, 1);
+                        ++unlocked;
+                    }
                 }
+            } else
+            {
+                //TODO
             }
         }
     }

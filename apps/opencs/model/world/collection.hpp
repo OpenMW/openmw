@@ -82,6 +82,8 @@ namespace CSMWorld
 
             virtual QVariant getData (int index, int column) const;
 
+            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+
             virtual void setData (int index, int column, const QVariant& data);
 
             virtual const ColumnBase& getColumn (int column) const;
@@ -275,6 +277,12 @@ namespace CSMWorld
     QVariant Collection<ESXRecordT, IdAccessorT>::getData (int index, int column) const
     {
         return mColumns.at (column)->get (mRecords.at (index));
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    QVariant Collection<ESXRecordT, IdAccessorT>::getNestedData(int row, int column, int subRow, int subColumn) const
+    {
+        return 10; //TODO
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

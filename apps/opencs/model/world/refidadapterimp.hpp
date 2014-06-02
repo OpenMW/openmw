@@ -617,15 +617,13 @@ namespace CSMWorld
             ContainerRefIdAdapter (const NameColumns& columns, const RefIdColumn *weight,
                 const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content);
 
-            using RefIdAdapter::getData;
-            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index,
+            virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data, int index,
                 int subRowIndex, int subColIndex) const;
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;
 
-            using RefIdAdapter::setData;
-            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+            virtual void setNestedData (const RefIdColumn *column, RefIdData& data, int index,
                 const QVariant& value, int subRowIndex, int subColIndex) const;
 
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,

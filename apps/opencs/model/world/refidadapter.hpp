@@ -30,10 +30,10 @@ namespace CSMWorld
                 const QVariant& value) const = 0;
             ///< If the data type does not match an exception is thrown.
 
-            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data,
+            virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data,
                                       int idnex, int subRowIndex, int subColIndex) const;
 
-            virtual void setData (const RefIdColumn *column, RefIdData& data,
+            virtual void setNestedData (const RefIdColumn *column, RefIdData& data,
                                   const QVariant& value, int index,
                                   int subRowIndex, int subColIndex) const;
 

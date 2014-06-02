@@ -44,6 +44,8 @@ namespace CSMWorld
 
             virtual QVariant getData (int index, int column) const = 0;
 
+            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const = 0;
+
             virtual void setData (int index, int column, const QVariant& data) = 0;
 
 // Not in use. Temporarily removed so that the implementation of RefIdCollection can continue without

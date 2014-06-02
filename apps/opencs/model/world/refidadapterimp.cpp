@@ -222,7 +222,7 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
 }
 
-void CSMWorld::ContainerRefIdAdapter::setData(const RefIdColumn *column, RefIdData& data,
+void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column, RefIdData& data,
                                               int index,
                                               const QVariant& value,
                                               int subRowIndex,
@@ -242,6 +242,9 @@ void CSMWorld::ContainerRefIdAdapter::setData(const RefIdColumn *column, RefIdDa
             case 1:
                 record.get().mInventory.mList.at(subRowIndex).mCount = value.toInt();
                 break;
+
+            default:
+                throw "Trying to access non-existing column in the nested table!";
         }
     } else
     {
@@ -249,7 +252,7 @@ void CSMWorld::ContainerRefIdAdapter::setData(const RefIdColumn *column, RefIdDa
     }
 }
 
-QVariant CSMWorld::ContainerRefIdAdapter::getData (const CSMWorld::RefIdColumn* column,
+QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdColumn* column,
                                                    const CSMWorld::RefIdData& data,
                                                    int index,
                                                    int subRowIndex,

@@ -36,7 +36,13 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
         return QVariant();
 
-    return mIdCollection->getData (index.row(), index.column());
+    if (index.internalId() != 0)
+    {
+        std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
+        return mIdCollection->getNestedData(index.row(), index.column(), parentAdress.first, parentAdress.second);
+    } else {
+        return mIdCollection->getData (index.row(), index.column());
+    }
 }
 
 QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation, int role) const
@@ -97,8 +103,11 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
 
 QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const
 {
+    unsigned int encodedId = 0;
     if (parent.isValid())
-        return QModelIndex();
+    {
+        encodedId = this->foldIndexAdress(parent);
+    }
 
     if (row<0 || row>=mIdCollection->getSize())
         return QModelIndex();
@@ -106,12 +115,24 @@ QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& pa
     if (column<0 || column>=mIdCollection->getColumns())
         return QModelIndex();
 
-    return createIndex (row, column);
+    return createIndex(row, column, encodedId);
 }
 
 QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
 {
-    return QModelIndex();
+    if (index.internalId() == 0) //0 is used for indexs with invalid parent (top level data)
+    {
+        return QModelIndex();
+    }
+
+    unsigned int id = index.internalId();
+    const std::pair<int, int>& adress(unfoldIndexAdress(id));
+
+    if (adress.first >= this->rowCount() || adress.second >= this->columnCount())
+    {
+        throw "Parent index is not present in the model";
+    }
+    return createIndex(adress.first, adress.second);
 }
 
 void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type)
@@ -136,10 +157,10 @@ void CSMWorld::IdTable::cloneRecord(const std::string& origin,
     endInsertRows();
 }
 
-
+///This method can return only indexes to the top level table cells
 QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
 {
-    return index (mIdCollection->getIndex (id), column);
+    return index(mIdCollection->getIndex (id), column);
 }
 
 void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& record)
@@ -238,7 +259,28 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
     return std::make_pair (UniversalId (UniversalId::Type_Scene, id), hint);
 }
 
+///For top level data/columns
 int CSMWorld::IdTable::getColumnId(int column) const
 {
     return mIdCollection->getColumn(column).getId();
+}
+
+unsigned int CSMWorld::IdTable::foldIndexAdress (const QModelIndex& index) const
+{
+    unsigned int out = index.row() * this->columnCount();
+    out += index.column();
+    return ++out;
+}
+
+std::pair< int, int > CSMWorld::IdTable::unfoldIndexAdress (unsigned int id) const
+{
+    if (id == 0)
+    {
+        throw "Attempt to unfold index id of the top level data cell";
+    }
+
+    --id;
+    int row = id / this->columnCount();
+    int column = id - row * this->columnCount();
+    return std::make_pair<int, int>(row, column);
 }

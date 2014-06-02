@@ -165,7 +165,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Respawn, ColumnBase::Display_Boolean));
     const RefIdColumn *respawn = &mColumns.back();
 
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_None, ColumnBase::Flag_Dialogue, false, false));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_Nested, ColumnBase::Flag_Dialogue, false, false));
     const RefIdColumn *content = &mColumns.back();
 
     CreatureColumns creatureColumns (actorsColumns);
@@ -417,6 +417,16 @@ QVariant CSMWorld::RefIdCollection::getData (int index, int column) const
     const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
 
     return adaptor.getData (&mColumns.at (column), mData, localIndex.first);
+}
+
+QVariant CSMWorld::RefIdCollection::getNestedData (int row, int column, int subRow, int subColumn) const
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex(row);
+
+    const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
+
+    //if this overloaded, base class method was not overriden, crash will happen (assert(false)) Don't try to use this method for non-nested columns!
+    return adaptor.getNestedData(&mColumns.at(column), mData, localIndex.first, subRow, subColumn);
 }
 
 void CSMWorld::RefIdCollection::setData (int index, int column, const QVariant& data)
