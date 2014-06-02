@@ -493,14 +493,18 @@ ogre_find_plugin(RenderSystem_Direct3D11 OgreD3D11RenderSystem.h RenderSystems/D
 
 if (OGRE_STATIC)
   # check if dependencies for plugins are met
-  if (NOT DirectX_FOUND)
+  if (NOT DirectX9_FOUND)
     set(OGRE_RenderSystem_Direct3D9_FOUND FALSE)
+ else ()
+    set(OGRE_INCLUDE_DIRS ${OGRE_INCLUDE_DIRS} ${DirectX9_INCLUDE_DIR})
   endif ()
   if (NOT DirectX_D3D10_FOUND)
     set(OGRE_RenderSystem_Direct3D10_FOUND FALSE)
   endif ()
   if (NOT DirectX_D3D11_FOUND)
     set(OGRE_RenderSystem_Direct3D11_FOUND FALSE)
+  else ()
+    set(OGRE_INCLUDE_DIRS ${OGRE_INCLUDE_DIRS} ${DirectX_D3D11_INCLUDE_DIR})
   endif ()
   if (NOT OPENGL_FOUND)
     set(OGRE_RenderSystem_GL_FOUND FALSE)
@@ -513,7 +517,7 @@ if (OGRE_STATIC)
   endif ()
   
   set(OGRE_RenderSystem_Direct3D9_LIBRARIES ${OGRE_RenderSystem_Direct3D9_LIBRARIES}
-    ${DirectX_LIBRARIES}
+    ${DirectX9_LIBRARIES}
   )
   set(OGRE_RenderSystem_Direct3D10_LIBRARIES ${OGRE_RenderSystem_Direct3D10_LIBRARIES}
     ${DirectX_D3D10_LIBRARIES}
