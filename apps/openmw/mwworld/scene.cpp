@@ -347,8 +347,6 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
-
-        loadingListener->removeWallpaper();
     }
 
     //We need the ogre renderer and a scene node.
@@ -449,8 +447,6 @@ namespace MWWorld
 
         mCellChanged = true;
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
-
-        loadingListener->removeWallpaper();
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)
