@@ -3,6 +3,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/journal.hpp"
 #include "list.hpp"
 
 #include <sstream>
@@ -37,7 +38,6 @@ namespace
     static char const PageOneNum [] = "PageOneNum";
     static char const PageTwoNum [] = "PageTwoNum";
     static char const TopicsList [] = "TopicsList";
-    static char const TopicsPage [] = "TopicsPage";
     static char const QuestsList [] = "QuestsList";
     static char const LeftBookPage [] = "LeftBookPage";
     static char const RightBookPage [] = "RightBookPage";
@@ -113,12 +113,14 @@ namespace
             MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
             list->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyQuestClicked);
 
+            MWGui::Widgets::MWList* topicsList = getWidget<MWGui::Widgets::MWList>(TopicsList);
+            topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
+
             {
                 MWGui::BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
 
-                getPage (TopicsPage)->adviseLinkClicked (callback);
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
                 getPage (RightBookPage)->adviseLinkClicked (callback);
             }
@@ -348,6 +350,19 @@ namespace
             setVisible (JournalBTN, true);
         }
 
+        void notifyTopicSelected (const std::string& topic, int id)
+        {
+            const MWBase::Journal* journal = MWBase::Environment::get().getJournal();
+            intptr_t topicId = 0; /// \todo get rid of intptr ids
+            for(MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd (); ++i)
+            {
+                if (Misc::StringUtils::ciEqual(i->first, topic))
+                    topicId = intptr_t (&i->second);
+            }
+
+            notifyTopicClicked(topicId);
+        }
+
         void notifyQuestClicked (const std::string& name, int id)
         {
             Book book = createQuestBook (name);
@@ -394,7 +409,14 @@ namespace
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, true);
 
-            showList (TopicsList, TopicsPage, createTopicIndexBook ((char)character));
+            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(TopicsList);
+            list->clear();
+
+            AddNamesToList add(list);
+
+            mModel->visitTopicNamesStartingWith((char) character, add);
+
+            list->adjustSize();
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
@@ -408,9 +430,9 @@ namespace
             setVisible (ShowActiveBTN, false);
         }
 
-        struct AddQuestNamesToList
+        struct AddNamesToList
         {
-            AddQuestNamesToList(MWGui::Widgets::MWList* list) : mList(list) {}
+            AddNamesToList(MWGui::Widgets::MWList* list) : mList(list) {}
 
             MWGui::Widgets::MWList* mList;
             void operator () (const std::string& name)
@@ -433,7 +455,7 @@ namespace
             MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
             list->clear();
 
-            AddQuestNamesToList add(list);
+            AddNamesToList add(list);
 
             mModel->visitQuestNames(!mAllQuests, add);
 

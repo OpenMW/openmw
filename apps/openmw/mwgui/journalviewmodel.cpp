@@ -312,7 +312,7 @@ struct JournalViewModelImpl : JournalViewModel
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (char character, boost::function < void (TopicId , Utf8Span) > visitor) const
+    void visitTopicNamesStartingWith (char character, boost::function < void (const std::string&) > visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -321,7 +321,7 @@ struct JournalViewModelImpl : JournalViewModel
             if (i->first [0] != std::tolower (character, mLocale))
                 continue;
 
-            visitor (TopicId (&i->second), toUtf8Span (i->second.getName()));
+            visitor (i->second.getName());
         }
 
     }

@@ -80,8 +80,8 @@ namespace MWGui
         /// provides the name of the topic specified by its id
         virtual void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const = 0;
 
-        /// walks over the topics whose names start with the specified character providing the topics id and name
-        virtual void visitTopicNamesStartingWith (char character, boost::function < void (TopicId , Utf8Span) > visitor) const = 0;
+        /// walks over the topics whose names start with the specified character providing the topics name
+        virtual void visitTopicNamesStartingWith (char character, boost::function < void (const std::string&) > visitor) const = 0;
 
         /// walks over the topic entries for the topic specified by its identifier
         virtual void visitTopicEntries (TopicId topicId, boost::function <void (TopicEntry const &)> visitor) const = 0;

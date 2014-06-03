@@ -254,16 +254,6 @@ book JournalBooks::createTopicIndexBook ()
     return typesetter->complete ();
 }
 
-book JournalBooks::createTopicIndexBook (char character)
-{
-    BookTypesetter::Ptr typesetter = BookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
-    BookTypesetter::Style* style = typesetter->createStyle ("", MyGUI::Colour::Black);
-
-    mModel->visitTopicNamesStartingWith (character, AddTopicLink (typesetter, style));
-
-    return typesetter->complete ();
-}
-
 BookTypesetter::Ptr JournalBooks::createTypesetter ()
 {
     //TODO: determine page size from layout...
