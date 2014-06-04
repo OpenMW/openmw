@@ -50,6 +50,7 @@ MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create)
 void MWState::CharacterManager::deleteSlot(const MWState::Character *character, const MWState::Slot *slot)
 {
     int index = character - &mCharacters[0];
+    int indexcurr = mCurrent - &mCharacters[0];
 
     if (index<0 || index>=static_cast<int> (mCharacters.size()))
         throw std::logic_error ("invalid character");
@@ -63,6 +64,13 @@ void MWState::CharacterManager::deleteSlot(const MWState::Character *character, 
         if (character == mCurrent)
             mCurrent = NULL;
         mCharacters.erase(mCharacters.begin() + index);
+        if (indexcurr > index)
+        {
+            //erasing an item from a vector invalidates all
+            //pointers past it. mCurrent needs to be reset
+            //if deleting a character with a lower index.
+            mCurrent = &mCharacters[indexcurr - 1];
+        }
     }
 }
 
