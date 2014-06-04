@@ -105,7 +105,7 @@ namespace CSMWorld
                 !record.mState==Record<Cell>::State_Deleted &&
                 !record.mState==Record<Cell>::State_ModifiedOnly)
             {
-                static_cast<int> (Record<Cell>::State_Modified);
+                return static_cast<int> (Record<Cell>::State_Modified);
             }
 
             return static_cast<int> (record.mState);
