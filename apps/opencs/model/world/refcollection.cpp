@@ -53,18 +53,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             }
             else
             {
-                cell.mModified.mTouchedRefs.insert (Misc::StringUtils::lowerCase (
-                    mCells.getId (cellIndex)));
                 record.mState = RecordBase::State_Deleted;
                 setRecord (index, record);
             }
 
             continue;
         }
-
-        if (!base)
-            cell.mModified.mTouchedRefs.insert (Misc::StringUtils::lowerCase (
-                mCells.getId (cellIndex)));
 
         if (iter==cache.end())
         {

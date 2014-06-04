@@ -10,7 +10,6 @@
 #include "columnbase.hpp"
 #include "columns.hpp"
 #include "info.hpp"
-#include "cell.hpp"
 
 namespace CSMWorld
 {
@@ -73,45 +72,6 @@ namespace CSMWorld
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
-            record.mState = static_cast<RecordBase::State> (data.toInt());
-        }
-
-        virtual bool isEditable() const
-        {
-            return true;
-        }
-
-        virtual bool isUserEditable() const
-        {
-            return false;
-        }
-    };
-
-    /// \brief Specialisation that takes care of the modified reference tracking
-    template<>
-    struct RecordStateColumn<Cell> : public Column<Cell>
-    {
-        RecordStateColumn<Cell>()
-        : Column<Cell> (Columns::ColumnId_Modification, ColumnBase::Display_RecordState)
-        {}
-
-        virtual QVariant get (const Record<Cell>& record) const
-        {
-            if (record.mState==Record<Cell>::State_Erased)
-                return static_cast<int> (Record<Cell>::State_Deleted);
-
-            if (!record.mModified.mTouchedRefs.empty() &&
-                !record.mState==Record<Cell>::State_Deleted &&
-                !record.mState==Record<Cell>::State_ModifiedOnly)
-            {
-                static_cast<int> (Record<Cell>::State_Modified);
-            }
-
-            return static_cast<int> (record.mState);
-        }
-
-        virtual void set (Record<Cell>& record, const QVariant& data)
         {
             record.mState = static_cast<RecordBase::State> (data.toInt());
         }
