@@ -29,8 +29,6 @@ namespace MWGui
 
         virtual void setVisible(bool visible);
 
-        virtual void removeWallpaper();
-
         LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw);
         virtual ~LoadingScreen();
 
@@ -42,8 +40,6 @@ namespace MWGui
         void updateWindow(Ogre::RenderWindow* rw) { mWindow = rw; }
 
     private:
-        bool mFirstLoad;
-
         Ogre::SceneManager* mSceneMgr;
         Ogre::RenderWindow* mWindow;
 

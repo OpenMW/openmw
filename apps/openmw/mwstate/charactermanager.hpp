@@ -11,7 +11,10 @@ namespace MWState
     {
             boost::filesystem::path mPath;
             int mNext;
-            std::vector<Character> mCharacters;
+
+            // Uses std::list, so that mCurrent stays valid when characters are deleted
+            std::list<Character> mCharacters;
+
             Character *mCurrent;
             std::string mGame;
 
@@ -22,6 +25,8 @@ namespace MWState
 
             CharacterManager& operator= (const CharacterManager&);
             ///< Not implemented
+
+            std::list<Character>::iterator findCharacter(const MWState::Character* character);
 
         public:
 
@@ -39,9 +44,9 @@ namespace MWState
 
             void clearCurrentCharacter();
 
-            std::vector<Character>::const_iterator begin() const;
+            std::list<Character>::const_iterator begin() const;
 
-            std::vector<Character>::const_iterator end() const;
+            std::list<Character>::const_iterator end() const;
     };
 }
 

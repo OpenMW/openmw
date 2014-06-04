@@ -12,4 +12,28 @@
         <Skin name="MW_BookPage" size="0 0 50 50">
                 <BasisSkin type="PageDisplay"/>
         </Skin>
+
+        <Skin name="MW_QuestList" size="516 516" align="Left Top">
+
+            <Property key="ListItemSkin" value="MW_QuestLink"/>
+
+            <Child type="Widget" skin="" offset="3 3 510 510" align="Top Left Stretch" name="Client"/>
+
+        </Skin>
+
+    <Skin name="MW_QuestLink" size="5 5">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+
+        <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
+            <State name="disabled" colour="0 0 0" shift="0"/>
+            <State name="normal" colour="0 0 0" shift="0"/>
+            <State name="highlighted" colour="0.4 0.4 0.8" shift="0"/>
+            <State name="pushed" colour="0.5 0.5 1" shift="0"/>
+            <State name="disabled_checked" colour="0 0 0" shift="0"/>
+            <State name="normal_checked" colour="0 0 0" shift="0"/>
+            <State name="highlighted_checked" colour="0.4 0.4 0.8" shift="0"/>
+            <State name="pushed_checked" colour="0.5 0.5 1" shift="0"/>
+        </BasisSkin>
+    </Skin>
 </MyGUI>

@@ -12,10 +12,26 @@ void Region::load(ESMReader &esm)
 {
     mName = esm.getHNOString("FNAM");
 
+    esm.getSubNameIs("WEAT");
+    esm.getSubHeader();
     if (esm.getVer() == VER_12)
-        esm.getHNExact(&mData, sizeof(mData) - 2, "WEAT");
+    {
+        mData.mA = 0;
+        mData.mB = 0;
+        esm.getExact(&mData, sizeof(mData) - 2);
+    }
     else if (esm.getVer() == VER_13)
-        esm.getHNExact(&mData, sizeof(mData), "WEAT");
+    {
+        // May include the additional two bytes (but not necessarily)
+        if (esm.getSubSize() == sizeof(mData))
+            esm.getExact(&mData, sizeof(mData));
+        else
+        {
+            mData.mA = 0;
+            mData.mB = 0;
+            esm.getExact(&mData, sizeof(mData)-2);
+        }
+    }
     else
         esm.fail("Don't know what to do in this version");
 

@@ -6,6 +6,15 @@
 #include "esmreader.hpp"
 #include "variantimp.hpp"
 
+#include "defs.hpp"
+
+namespace
+{
+    const uint32_t STRV = ESM::FourCC<'S','T','R','V'>::value;
+    const uint32_t INTV = ESM::FourCC<'I','N','T','V'>::value;
+    const uint32_t FLTV = ESM::FourCC<'F','L','T','V'>::value;
+}
+
 ESM::Variant::Variant() : mType (VT_None), mData (0) {}
 
 ESM::Variant::~Variant()
@@ -90,15 +99,17 @@ void ESM::Variant::read (ESMReader& esm, Format format)
             esm.getSubName();
             NAME name = esm.retSubName();
 
-            if (name=="STRV")
+
+
+            if (name==STRV)
             {
                 type = VT_String;
             }
-            else if (name=="INTV")
+            else if (name==INTV)
             {
                 type = VT_Int;
             }
-            else if (name=="FLTV")
+            else if (name==FLTV)
             {
                 type = VT_Float;
             }
@@ -111,11 +122,11 @@ void ESM::Variant::read (ESMReader& esm, Format format)
         esm.getSubName();
         NAME name = esm.retSubName();
 
-        if (name=="INTV")
+        if (name==INTV)
         {
             type = VT_Int;
         }
-        else if (name=="FLTV")
+        else if (name==FLTV)
         {
             type = VT_Float;
         }

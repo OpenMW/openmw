@@ -989,7 +989,11 @@ namespace MWMechanics
                 if(!stats.isDead())
                 {
                     if(iter->second->isDead())
+                    {
+                        // Actor has been resurrected. Notify the CharacterController and re-enable collision.
+                        MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
                         iter->second->resurrect();
+                    }
 
                     if(!stats.isDead())
                         continue;

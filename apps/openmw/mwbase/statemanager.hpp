@@ -1,7 +1,7 @@
 #ifndef GAME_MWSTATE_STATEMANAGER_H
 #define GAME_MWSTATE_STATEMANAGER_H
 
-#include <vector>
+#include <list>
 #include <string>
 
 namespace MWState
@@ -24,7 +24,7 @@ namespace MWBase
                 State_Running
             };
 
-            typedef std::vector<MWState::Character>::const_iterator CharacterIterator;
+            typedef std::list<MWState::Character>::const_iterator CharacterIterator;
 
         private:
 
