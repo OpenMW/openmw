@@ -512,7 +512,11 @@ namespace MWGui
     std::string ToolTips::toString(const float value)
     {
         std::ostringstream stream;
-        stream << std::setprecision(3) << value;
+
+        if (value != int(value))
+            stream << std::setprecision(3);
+
+        stream << value;
         return stream.str();
     }
 
