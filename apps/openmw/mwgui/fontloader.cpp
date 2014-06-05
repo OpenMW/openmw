@@ -64,10 +64,15 @@ namespace
         return unicode;
     }
 
+    // getUtf8, aka the worst function ever written.
+    // This includes various hacks for dealing with Morrowind's .fnt files that are *mostly*
+    // in the expected win12XX encoding, but also have randomly swapped characters sometimes.
+    // Looks like the Morrowind developers found standard encodings too boring and threw in some twists for fun.
     std::string getUtf8 (unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
     {
         if (encoding == ToUTF8::WINDOWS_1250)
         {
+            // Hacks for polish font
             unsigned char win1250;
             std::map<unsigned char, unsigned char> conv;
             conv[0x80] = 0xc6;
@@ -101,7 +106,8 @@ namespace
             conv[0xa3] = 0xbf;
             conv[0xa4] = 0x0; // not contained in win1250
             conv[0xe1] = 0x8c;
-            conv[0xe1] = 0x8c;
+            // Can't remember if this was supposed to read 0xe2, or is it just an extraneous copypaste?
+            //conv[0xe1] = 0x8c;
             conv[0xe3] = 0x0; // not contained in win1250
             conv[0xf5] = 0x0; // not contained in win1250
 
@@ -251,6 +257,21 @@ namespace MWGui
             code->addAttribute("advance", data[i].width);
             code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                + MyGUI::utility::toString((fontSize-data[i].ascent)));
+
+            // More hacks! The french game uses U+2019, which is nowhere to be found in
+            // the CP437 encoding of the font. Fall back to 39 (regular apostrophe)
+            if (i == 39 && mEncoding == ToUTF8::CP437)
+            {
+                MyGUI::xml::ElementPtr code = codes->createChild("Code");
+                code->addAttribute("index", 0x2019);
+                code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
+                                            + MyGUI::utility::toString(y1) + " "
+                                            + MyGUI::utility::toString(w) + " "
+                                            + MyGUI::utility::toString(h));
+                code->addAttribute("advance", data[i].width);
+                code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
+                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
+            }
 
             // ASCII vertical bar, use this as text input cursor
             if (i == 124)
