@@ -1851,7 +1851,12 @@ namespace MWWorld
         if (!mPlayer)
             mPlayer = new MWWorld::Player(player, *this);
         else
+        {
+            // Remove the old CharacterController
+            MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+
             mPlayer->set(player);
+        }
 
         Ptr ptr = mPlayer->getPlayer();
         mRendering->setupPlayer(ptr);
