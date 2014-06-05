@@ -75,7 +75,8 @@ namespace MWRender
         /// Attach camera to object
         void attachTo(const MWWorld::Ptr &);
 
-        void toggleViewMode();
+        /// @param Force view mode switch, even if currently not allowed by the animation.
+        void toggleViewMode(bool force=false);
 
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);

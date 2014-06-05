@@ -409,6 +409,13 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
 
 void CharacterController::playDeath(float startpoint, CharacterState death)
 {
+    if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    {
+        // The first-person animations do not include death, so we need to
+        // force-switch to third person before playing the death animation.
+        MWBase::Environment::get().getWorld()->useDeathCamera();
+    }
+
     switch (death)
     {
     case CharState_SwimDeath:

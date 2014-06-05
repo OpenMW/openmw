@@ -144,7 +144,6 @@ void MWState::StateManager::newGame (bool bypass)
 void MWState::StateManager::endGame()
 {
     mState = State_Ended;
-    MWBase::Environment::get().getWorld()->useDeathCamera();
 }
 
 void MWState::StateManager::saveGame (const std::string& description, const Slot *slot)

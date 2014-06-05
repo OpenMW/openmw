@@ -432,7 +432,7 @@ namespace MWWorld
             mRendering->getCamera()->toggleVanityMode(false);
         }
         if(mRendering->getCamera()->isFirstPerson())
-            togglePOV();
+            mRendering->getCamera()->toggleViewMode(true);
     }
 
     MWWorld::Player& World::getPlayer()
