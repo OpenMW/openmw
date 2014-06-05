@@ -113,24 +113,24 @@ public:
     };
 
     /// Get a given record
-    Record *getRecord(size_t index)
+    Record *getRecord(size_t index) const
     {
         Record *res = records.at(index);
         assert(res != NULL);
         return res;
     }
     /// Number of records
-    size_t numRecords() { return records.size(); }
+    size_t numRecords() const { return records.size(); }
 
     /// Get a given root
-    Record *getRoot(size_t index=0)
+    Record *getRoot(size_t index=0) const
     {
         Record *res = roots.at(index);
         assert(res != NULL);
         return res;
     }
     /// Number of roots
-    size_t numRoots() { return roots.size(); }
+    size_t numRoots() const { return roots.size(); }
 };
 
 
@@ -163,45 +163,33 @@ struct KeyListT {
 
     void read(NIFStream *nif, bool force=false)
     {
+        assert(nif);
         size_t count = nif->getInt();
         if(count == 0 && !force)
             return;
 
         mInterpolationType = nif->getInt();
         mKeys.resize(count);
+        NIFStream &nifReference = *nif;
         if(mInterpolationType == sLinearInterpolation)
         {
             for(size_t i = 0;i < count;i++)
             {
-                KeyT<T> &key = mKeys[i];
-                key.mTime = nif->getFloat();
-                key.mValue = (nif->*getValue)();
+                readTimeAndValue(nifReference, mKeys[i]);
             }
         }
         else if(mInterpolationType == sQuadraticInterpolation)
         {
             for(size_t i = 0;i < count;i++)
             {
-                KeyT<T> &key = mKeys[i];
-                key.mTime = nif->getFloat();
-                key.mValue = (nif->*getValue)();
-                if( typeid(Ogre::Quaternion) != typeid(T) )
-                {
-                    key.mForwardValue = (nif->*getValue)();
-                    key.mBackwardValue = (nif->*getValue)();
-                }
+                readQuadratic(nifReference, mKeys[i]);
             }
         }
         else if(mInterpolationType == sTBCInterpolation)
         {
             for(size_t i = 0;i < count;i++)
             {
-                KeyT<T> &key = mKeys[i];
-                key.mTime = nif->getFloat();
-                key.mValue = (nif->*getValue)();
-                key.mTension = nif->getFloat();
-                key.mBias = nif->getFloat();
-                key.mContinuity = nif->getFloat();
+                readTBC(nifReference, mKeys[i]);
             }
         }
         //\FIXME This now reads the correct amount of data in the file, but doesn't actually do anything with it.
@@ -212,30 +200,8 @@ struct KeyListT {
                 nif->file->fail("count should always be '1' for XYZ_ROTATION_KEY.  Retrieved Value: "+Ogre::StringConverter::toString(count));
                 return;
             }
-            //KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
-            //Chomp unknown and possibly unused float
-            nif->getFloat();
-            for(size_t i=0;i<3;++i)
-            {
-                unsigned int numKeys = nif->getInt();
-                if(numKeys != 0)
-                {
-                    int interpolationTypeAgain = nif->getInt();
-                    if( interpolationTypeAgain != sLinearInterpolation)
-                    {
-                        nif->file->fail("XYZ_ROTATION_KEY's KeyGroup keyType must be '1' (Linear Interpolation).  Retrieved Value: "+Ogre::StringConverter::toString(interpolationTypeAgain));
-                        return;
-                    }
-                    for(size_t j = 0;j < numKeys;j++)
-                    {
-                        //For now just chomp these
-                        nif->getFloat();
-                        nif->getFloat();
-                    }
-                }
-                nif->file->warn("XYZ_ROTATION_KEY read, but not used!");
-            }
-    }
+            readXYZ(nifReference);
+        }
         else if (mInterpolationType == 0)
         {
             if (count != 0)
@@ -243,6 +209,61 @@ struct KeyListT {
         }
         else
             nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+    }
+
+private:
+    static void readTimeAndValue(NIFStream &nif, KeyT<T> &key)
+    {
+        key.mTime = nif.getFloat();
+        key.mValue = (nif.*getValue)();
+    }
+
+    static void readQuadratic(NIFStream &nif, KeyT<Ogre::Quaternion> &key)
+    {
+        readTimeAndValue(nif, key);
+    }
+
+    template <typename U>
+    static void readQuadratic(NIFStream &nif, KeyT<U> &key)
+    {
+        readTimeAndValue(nif, key);
+        key.mForwardValue = (nif.*getValue)();
+        key.mBackwardValue = (nif.*getValue)();
+    }
+
+    static void readTBC(NIFStream &nif, KeyT<T> &key)
+    {
+        readTimeAndValue(nif, key);
+        key.mTension = nif.getFloat();
+        key.mBias = nif.getFloat();
+        key.mContinuity = nif.getFloat();
+    }
+
+    static void readXYZ(NIFStream &nif)
+    {
+        //KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
+        //Chomp unknown and possibly unused float
+        nif.getFloat();
+        for(size_t i=0;i<3;++i)
+        {
+            const unsigned int numKeys = nif.getInt();
+            if(numKeys != 0)
+            {
+                const int interpolationTypeAgain = nif.getInt();
+                if( interpolationTypeAgain != sLinearInterpolation)
+                {
+                    nif.file->fail("XYZ_ROTATION_KEY's KeyGroup keyType must be '1' (Linear Interpolation).  Retrieved Value: "+Ogre::StringConverter::toString(interpolationTypeAgain));
+                    return;
+                }
+                for(size_t j = 0;j < numKeys;++j)
+                {
+                    //For now just chomp these
+                    nif.getFloat();
+                    nif.getFloat();
+                }
+            }
+            nif.file->warn("XYZ_ROTATION_KEY read, but not used!");
+        }
     }
 };
 typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;
