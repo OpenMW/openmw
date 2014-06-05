@@ -265,18 +265,30 @@ namespace MWGui
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
             }
+
+            // Question mark, use for NotDefined marker (used for glyphs not existing in the font)
+            if (i == 63)
+            {
+                MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
+                cursorCode->addAttribute("index", MyGUI::FontCodeType::NotDefined);
+                cursorCode->addAttribute("coord", MyGUI::utility::toString(x1) + " "
+                                            + MyGUI::utility::toString(y1) + " "
+                                            + MyGUI::utility::toString(w) + " "
+                                            + MyGUI::utility::toString(h));
+                cursorCode->addAttribute("advance", data[i].width);
+                cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
+                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
+            }
         }
 
         // These are required as well, but the fonts don't provide them
-        for (int i=0; i<3; ++i)
+        for (int i=0; i<2; ++i)
         {
             MyGUI::FontCodeType::Enum type;
             if(i == 0)
                 type = MyGUI::FontCodeType::Selected;
             else if (i == 1)
                 type = MyGUI::FontCodeType::SelectedBack;
-            else if (i == 2)
-                type = MyGUI::FontCodeType::NotDefined;
 
             MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
             cursorCode->addAttribute("index", type);
