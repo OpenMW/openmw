@@ -64,6 +64,7 @@
 #include "fontloader.hpp"
 #include "videowidget.hpp"
 #include "backgroundimage.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -166,6 +167,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
+        ItemWidget::registerComponents();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatClick>("Controller");
 

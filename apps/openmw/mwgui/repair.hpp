@@ -8,6 +8,8 @@
 namespace MWGui
 {
 
+class ItemWidget;
+
 class Repair : public WindowBase
 {
 public:
@@ -25,7 +27,7 @@ protected:
 
     MyGUI::Widget* mToolBox;
 
-    MyGUI::ImageBox* mToolIcon;
+    ItemWidget* mToolIcon;
 
     MyGUI::TextBox* mUsesLabel;
     MyGUI::TextBox* mQualityLabel;

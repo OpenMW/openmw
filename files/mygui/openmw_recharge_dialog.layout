@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 329 253" name="_Main">
 
         <Widget type="Widget" skin="" position="4 4 321 42" name="GemBox">
-            <Widget type="ImageBox" skin="ImageBox" position="5 6 32 32" name="GemIcon"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconSmall" position="5 6 32 32" name="GemIcon"/>
 
             <Widget type="TextBox" skin="SandText" position="55 13 250 18" name="ChargeLabel">
                 <Property key="Caption" value="#{sQuality}"/>

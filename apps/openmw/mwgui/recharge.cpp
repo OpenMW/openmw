@@ -14,6 +14,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "widgets.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -45,12 +46,7 @@ void Recharge::exit()
 
 void Recharge::start (const MWWorld::Ptr &item)
 {
-    std::string path = std::string("icons\\");
-    path += item.getClass().getInventoryIcon(item);
-    int pos = path.rfind(".");
-    path.erase(pos);
-    path.append(".dds");
-    mGemIcon->setImageTexture (path);
+    mGemIcon->setItem(item);
     mGemIcon->setUserString("ToolTipType", "ItemPtr");
     mGemIcon->setUserData(item);
 
@@ -108,14 +104,9 @@ void Recharge::updateView()
         text->setNeedMouseFocus(false);
         currentY += 19;
 
-        MyGUI::ImageBox* icon = mView->createWidget<MyGUI::ImageBox> (
-                    "ImageBox", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
-        std::string path = std::string("icons\\");
-        path += iter->getClass().getInventoryIcon(*iter);
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
-        icon->setImageTexture (path);
+        ItemWidget* icon = mView->createWidget<ItemWidget> (
+                    "MW_ItemIconSmall", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
+        icon->setItem(*iter);
         icon->setUserString("ToolTipType", "ItemPtr");
         icon->setUserData(*iter);
         icon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onItemClicked);
