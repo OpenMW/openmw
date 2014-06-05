@@ -400,7 +400,7 @@ namespace MWGui
         if (!info.effects.empty())
         {
             MyGUI::Widget* effectArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
-                MyGUI::IntCoord(0, totalSize.height, 300, 300-totalSize.height),
+                MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
                 MyGUI::Align::Stretch, "ToolTipEffectArea");
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
@@ -419,7 +419,7 @@ namespace MWGui
         {
             assert(enchant);
             MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
-                MyGUI::IntCoord(0, totalSize.height, 300, 300-totalSize.height),
+                MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
                 MyGUI::Align::Stretch, "ToolTipEnchantArea");
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
