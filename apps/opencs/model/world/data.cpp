@@ -248,12 +248,12 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
     addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
     addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
-    addModel (new IdTable (&mTopicInfos, IdTable::Reordering_WithinTopic), UniversalId::Type_TopicInfos, UniversalId::Type_TopicInfo);
-    addModel (new IdTable (&mJournalInfos, IdTable::Reordering_WithinTopic), UniversalId::Type_JournalInfos, UniversalId::Type_JournalInfo);
-    addModel (new IdTable (&mCells, IdTable::Reordering_None, IdTable::Viewing_Id), UniversalId::Type_Cells, UniversalId::Type_Cell);
-    addModel (new IdTable (&mReferenceables, IdTable::Reordering_None, IdTable::Viewing_None, true),
+    addModel (new IdTable (&mTopicInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_TopicInfos, UniversalId::Type_TopicInfo);
+    addModel (new IdTable (&mJournalInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_JournalInfos, UniversalId::Type_JournalInfo);
+    addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cells, UniversalId::Type_Cell);
+    addModel (new IdTable (&mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceables, UniversalId::Type_Referenceable);
-    addModel (new IdTable (&mRefs, IdTable::Reordering_None, IdTable::Viewing_Cell, true), UniversalId::Type_References, UniversalId::Type_Reference, false);
+    addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_References, UniversalId::Type_Reference, false);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter, false);
 }
 

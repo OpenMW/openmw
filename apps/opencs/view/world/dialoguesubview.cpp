@@ -440,7 +440,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     QToolButton* revertButton = new QToolButton(mainWidget);
     revertButton->setIcon(QIcon(":/edit-undo.png"));
 
-    if (mTable->hasPreview())
+    if (mTable->getFeatures() & CSMWorld::IdTable::Feature_Preview)
     {
         QToolButton* previewButton = new QToolButton(mainWidget);
         previewButton->setIcon(QIcon(":/edit-preview.png"));
@@ -448,7 +448,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
         connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
     }
 
-    if (mTable->getViewing()!=CSMWorld::IdTable::Viewing_None)
+    if (mTable->getFeatures() & CSMWorld::IdTable::Feature_View)
     {
         QToolButton* viewButton = new QToolButton(mainWidget);
         viewButton->setIcon(QIcon(":/cell.png"));
@@ -671,7 +671,8 @@ void CSVWorld::DialogueSubView::cloneRequest ()
 
 void CSVWorld::DialogueSubView::showPreview ()
 {
-    if (mTable->hasPreview() && mRow < mTable->rowCount())
+    if ((mTable->getFeatures() & CSMWorld::IdTable::Feature_Preview) &&
+        mRow < mTable->rowCount())
     {
        emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, mTable->data(mTable->index (mRow, 0)).toString().toUtf8().constData()), "");
     }

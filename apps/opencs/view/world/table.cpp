@@ -46,14 +46,14 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
         /// \todo Reverting temporarily disabled on tables that support reordering, because
         /// revert logic currently can not handle reordering.
-        if (mModel->getReordering()==CSMWorld::IdTable::Reordering_None)
+        if (!(mModel->getFeatures() & CSMWorld::IdTable::Feature_ReorderWithinTopic))
             if (listRevertableSelectedIds().size()>0)
                 menu.addAction (mRevertAction);
 
         if (listDeletableSelectedIds().size()>0)
             menu.addAction (mDeleteAction);
 
-        if (mModel->getReordering()==CSMWorld::IdTable::Reordering_WithinTopic)
+        if (mModel->getFeatures() & CSMWorld::IdTable::Feature_ReorderWithinTopic)
         {
             /// \todo allow reordering of multiple rows
             if (selectedRows.size()==1)
@@ -85,7 +85,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     if (selectedRows.size()==1)
     {
-        if (mModel->getViewing()!=CSMWorld::IdTable::Viewing_None)
+        if (mModel->getFeatures() & CSMWorld::IdTable::Feature_View)
         {
             int row = selectedRows.begin()->row();
 
@@ -101,7 +101,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 menu.addAction (mViewAction);
         }
 
-        if (mModel->hasPreview())
+        if (mModel->getFeatures() & CSMWorld::IdTable::Feature_Preview)
             menu.addAction (mPreviewAction);
     }
 
