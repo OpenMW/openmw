@@ -1624,12 +1624,20 @@ namespace MWWorld
     bool World::canPlaceObject(float cursorX, float cursorY)
     {
         Ogre::Vector3 normal(0,0,0);
-        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY, &normal);
+        std::string handle;
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY, &normal, &handle);
 
         if (result.first)
         {
             // check if the wanted position is on a flat surface, and not e.g. against a vertical wall
-            return (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() < 30);
+            if (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() >= 30)
+                return false;
+
+            MWWorld::Ptr hitObject = searchPtrViaHandle(handle);
+            if (!hitObject.isEmpty() && hitObject.getClass().isActor())
+                return false;
+
+            return true;
         }
         else
             return false;
