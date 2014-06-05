@@ -37,6 +37,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <list>
 #include <limits>
 
+#if defined(_WIN32) && _MSC_VER >= 1800
+#include <algorithm> /* std::min and std::max */
+#endif
+
 #include "tinyxml.h"
 
 #include "SDL_keyboard.h"

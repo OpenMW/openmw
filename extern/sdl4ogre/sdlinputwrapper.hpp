@@ -1,6 +1,11 @@
 #ifndef SDL4OGRE_SDLINPUTWRAPPER_H
 #define SDL4OGRE_SDLINPUTWRAPPER_H
 
+#if defined(_WIN32) && _MSC_VER >= 1800
+#include <algorithm>
+#define NOMINMAX
+#endif
+
 #include <SDL_events.h>
 
 #include <OgreRenderWindow.h>
