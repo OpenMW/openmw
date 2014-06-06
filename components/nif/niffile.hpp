@@ -153,14 +153,15 @@ template<typename T, T (NIFStream::*getValue)()>
 struct KeyListT {
     typedef std::vector< KeyT<T> > VecType;
 
-    static const int sLinearInterpolation = 1;
-    static const int sQuadraticInterpolation = 2;
-    static const int sTBCInterpolation = 3;
-    static const int sXYZInterpolation = 4;
+    static const unsigned int sLinearInterpolation = 1;
+    static const unsigned int sQuadraticInterpolation = 2;
+    static const unsigned int sTBCInterpolation = 3;
+    static const unsigned int sXYZInterpolation = 4;
 
     unsigned int mInterpolationType;
     VecType mKeys;
 
+    //Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
     void read(NIFStream *nif, bool force=false)
     {
         assert(nif);
@@ -193,20 +194,22 @@ struct KeyListT {
                 readTBC(nifReference, key);
                 mKeys.push_back(key);
             }
+            //XYZ keys aren't actually read here.
+            //data.hpp sees that the last type read was sXYZInterpolation and:
+            //    Eats a floating point number, then
+            //    Re-runs the read function 3 more times, with force enabled so that the previous values aren't cleared.
+            //        When it does that it's reading in a bunch of sLinearInterpolation keys, not sXYZInterpolation.
             else if(mInterpolationType == sXYZInterpolation)
             {
                 //Don't try to read XYZ keys into the wrong part
-                if(force)
-                {
-                    readTimeAndValue(nifReference, key);
-                    mKeys.push_back(key);
-                }
-                else if ( count != 1 )
+                if ( count != 1 )
                     nif->file->fail("XYZ_ROTATION_KEY count should always be '1' .  Retrieved Value: "+Ogre::StringConverter::toString(count));
             }
-            else if ((0 == mInterpolationType))
+            else if (0 == mInterpolationType)
+            {
                 if (count != 0)
                     nif->file->fail("Interpolation type 0 doesn't work with keys");
+            }
             else
                 nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
         }

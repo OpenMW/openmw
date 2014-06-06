@@ -428,7 +428,7 @@ struct NiKeyframeData : public Record
             for(size_t i=0;i<3;++i)
             {
                 //Read concatenates items together. 
-                mXYZ_keys.read(nif,true);
+                mXYZ_Keys.read(nif,true);
             }
             nif->file->warn("XYZ_ROTATION_KEY read, but not used!");
         }
