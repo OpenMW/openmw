@@ -179,7 +179,6 @@ namespace MWGui
     {
         WindowModal::open();
 
-        int fixedWidth = 500;
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 20; // padding between the text-widget und the button-widget
         int buttonLeftPadding = 10; // padding between the buttons if horizontal
