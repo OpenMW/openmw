@@ -492,7 +492,7 @@ namespace MWWorld
         return std::make_pair(true, ray.getPoint(len * test.second));
     }
 
-    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY, Ogre::Vector3* normal)
+    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY, Ogre::Vector3* normal, std::string* hit)
     {
         Ogre::Ray ray = mRender.getCamera()->getCameraToViewportRay(
             mouseX,
@@ -510,6 +510,8 @@ namespace MWWorld
             return std::make_pair(false, Ogre::Vector3());
         else
         {
+            if (hit != NULL)
+                *hit = result.first;
             return std::make_pair(true, ray.getPoint(200*result.second));  /// \todo make this distance (ray length) configurable
         }
     }

@@ -308,7 +308,7 @@ void NpcAnimation::updateParts()
             ESM::PartReferenceType parts[] = {
                 ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
                 ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
-                ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron
+                ESM::PRT_RForearm, ESM::PRT_LForearm
             };
             size_t parts_size = sizeof(parts)/sizeof(parts[0]);
             for(size_t p = 0;p < parts_size;++p)
@@ -350,8 +350,6 @@ void NpcAnimation::updateParts()
 
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
-
-    static std::map <std::pair<std::string,int>, std::vector<const ESM::BodyPart*> > sVampireMapping;
 
     static const int Flag_Female      = 1<<0;
     static const int Flag_FirstPerson = 1<<1;
@@ -408,8 +406,6 @@ void NpcAnimation::updateParts()
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
                 continue;
 
-            if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
-                continue;
             if (!Misc::StringUtils::ciEqual(bodypart.mRace, mNpc->mRace))
                 continue;
 
@@ -435,6 +431,20 @@ void NpcAnimation::updateParts()
                 }
                 continue;
             }
+
+            if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            {
+                // Allow opposite gender's parts as fallback if parts for our gender are missing
+                BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+                {
+                    if(!parts[bIt->second])
+                        parts[bIt->second] = &*it;
+                    ++bIt;
+                }
+                continue;
+            }
+
             BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
             while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
             {

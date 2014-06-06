@@ -26,6 +26,9 @@ namespace MWGui
         /// @return Is the video still playing?
         bool update();
 
+        /// Free video player resources (done automatically on destruction)
+        void cleanup();
+
     private:
         bool mAllowSkipping;
 

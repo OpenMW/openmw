@@ -26,8 +26,7 @@
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sItem}"/>
             </Widget>
-            <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="ItemBox"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 50 50" name="ItemBox">
             </Widget>
 
             <Widget type="Widget" position="0 0 8 0"/>
@@ -35,8 +34,7 @@
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sSoulGem}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Box" position="0 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="SoulBox"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 50 50" name="SoulBox">
             </Widget>
 
         </Widget>

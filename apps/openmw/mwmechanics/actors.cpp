@@ -932,7 +932,7 @@ namespace MWMechanics
                             
                             for (std::list<MWWorld::Ptr>::iterator it = listGuards.begin(); it != listGuards.end(); ++it)
                             {
-                                engageCombat(iter->first, *it, false);
+                                engageCombat(iter->first, *it, *it == player);
                             }
                         }
 
