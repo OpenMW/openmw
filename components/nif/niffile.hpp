@@ -158,57 +158,58 @@ struct KeyListT {
     static const int sTBCInterpolation = 3;
     static const int sXYZInterpolation = 4;
 
-    int mInterpolationType;
+    unsigned int mInterpolationType;
     VecType mKeys;
 
     void read(NIFStream *nif, bool force=false)
     {
         assert(nif);
-        size_t count = nif->getInt();
+        size_t count = nif->getUInt();
         if(count == 0 && !force)
             return;
 
-        mInterpolationType = nif->getInt();
-        mKeys.resize(count);
+        //If we aren't forcing things, make sure that read clears any previous keys
+        if(!force)
+            mKeys.clear();
+
+        mInterpolationType = nif->getUInt();
+
+        KeyT<T> key;
         NIFStream &nifReference = *nif;
-        if(mInterpolationType == sLinearInterpolation)
+        for(size_t i = 0;i < count;i++)
         {
-            for(size_t i = 0;i < count;i++)
+            if(mInterpolationType == sLinearInterpolation)
             {
-                readTimeAndValue(nifReference, mKeys[i]);
+                readTimeAndValue(nifReference, key);
+                mKeys.push_back(key);
             }
-        }
-        else if(mInterpolationType == sQuadraticInterpolation)
-        {
-            for(size_t i = 0;i < count;i++)
+            else if(mInterpolationType == sQuadraticInterpolation)
             {
-                readQuadratic(nifReference, mKeys[i]);
+                readQuadratic(nifReference, key);
+                mKeys.push_back(key);
             }
-        }
-        else if(mInterpolationType == sTBCInterpolation)
-        {
-            for(size_t i = 0;i < count;i++)
+            else if(mInterpolationType == sTBCInterpolation)
             {
-                readTBC(nifReference, mKeys[i]);
+                readTBC(nifReference, key);
+                mKeys.push_back(key);
             }
-        }
-        //\FIXME This now reads the correct amount of data in the file, but doesn't actually do anything with it.
-        else if(mInterpolationType == sXYZInterpolation)
-        {
-            if (count != 1)
+            else if(mInterpolationType == sXYZInterpolation)
             {
-                nif->file->fail("count should always be '1' for XYZ_ROTATION_KEY.  Retrieved Value: "+Ogre::StringConverter::toString(count));
-                return;
+                //Don't try to read XYZ keys into the wrong part
+                if(force)
+                {
+                    readTimeAndValue(nifReference, key);
+                    mKeys.push_back(key);
+                }
+                else if ( count != 1 )
+                    nif->file->fail("XYZ_ROTATION_KEY count should always be '1' .  Retrieved Value: "+Ogre::StringConverter::toString(count));
             }
-            readXYZ(nifReference);
+            else if ((0 == mInterpolationType))
+                if (count != 0)
+                    nif->file->fail("Interpolation type 0 doesn't work with keys");
+            else
+                nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
         }
-        else if (mInterpolationType == 0)
-        {
-            if (count != 0)
-                nif->file->fail("Interpolation type 0 doesn't work with keys");
-        }
-        else
-            nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
     }
 
 private:
@@ -237,33 +238,6 @@ private:
         key.mTension = nif.getFloat();
         key.mBias = nif.getFloat();
         key.mContinuity = nif.getFloat();
-    }
-
-    static void readXYZ(NIFStream &nif)
-    {
-        //KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
-        //Chomp unknown and possibly unused float
-        nif.getFloat();
-        for(size_t i=0;i<3;++i)
-        {
-            const unsigned int numKeys = nif.getInt();
-            if(numKeys != 0)
-            {
-                const int interpolationTypeAgain = nif.getInt();
-                if( interpolationTypeAgain != sLinearInterpolation)
-                {
-                    nif.file->fail("XYZ_ROTATION_KEY's KeyGroup keyType must be '1' (Linear Interpolation).  Retrieved Value: "+Ogre::StringConverter::toString(interpolationTypeAgain));
-                    return;
-                }
-                for(size_t j = 0;j < numKeys;++j)
-                {
-                    //For now just chomp these
-                    nif.getFloat();
-                    nif.getFloat();
-                }
-            }
-            nif.file->warn("XYZ_ROTATION_KEY read, but not used!");
-        }
     }
 };
 typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;
