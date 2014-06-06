@@ -24,6 +24,7 @@ namespace CSMWorld
     class UniversalId;
     class IdTableProxyModel;
     class IdTable;
+    class CommandDispatcher;
 }
 
 namespace CSVWorld
@@ -48,14 +49,11 @@ namespace CSVWorld
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
             int mRecordStatusDisplay;
+            CSMWorld::CommandDispatcher *mDispatcher;
 
         private:
 
             void contextMenuEvent (QContextMenuEvent *event);
-
-            std::vector<std::string> listRevertableSelectedIds() const;
-
-            std::vector<std::string> listDeletableSelectedIds() const;
 
             void mouseMoveEvent(QMouseEvent *event);
 
@@ -92,10 +90,6 @@ namespace CSVWorld
             void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:
-
-            void revertRecord();
-
-            void deleteRecord();
 
             void editRecord();
 

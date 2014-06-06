@@ -19,14 +19,28 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/commanddispatcher.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
+    // configure dispatcher
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
+    std::vector<int> rows;
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+        ++iter)
+    {
+        QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
+        rows.push_back (index.row());
+    }
+
+    mDispatcher->setSelection (rows);
+
+    // create context menu
     QMenu menu (this);
 
     ///  \todo add menu items for select all and clear selection
@@ -44,13 +58,10 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
         if (mCreateAction)
             menu.addAction (mCreateAction);
 
-        /// \todo Reverting temporarily disabled on tables that support reordering, because
-        /// revert logic currently can not handle reordering.
-        if (!(mModel->getFeatures() & CSMWorld::IdTable::Feature_ReorderWithinTopic))
-            if (listRevertableSelectedIds().size()>0)
-                menu.addAction (mRevertAction);
+        if (mDispatcher->canRevert())
+            menu.addAction (mRevertAction);
 
-        if (listDeletableSelectedIds().size()>0)
+        if (mDispatcher->canDelete())
             menu.addAction (mDeleteAction);
 
         if (mModel->getFeatures() & CSMWorld::IdTable::Feature_ReorderWithinTopic)
@@ -108,84 +119,6 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
     menu.exec (event->globalPos());
 }
 
-std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
-{
-    std::vector<std::string> revertableIds;
-
-    if (mProxyModel->columnCount()>0)
-    {
-        QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-        for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
-            ++iter)
-        {
-            QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
-
-            CSMWorld::RecordBase::State state =
-                static_cast<CSMWorld::RecordBase::State> (
-                mModel->data (mModel->index (index.row(), 1)).toInt());
-
-            if (state!=CSMWorld::RecordBase::State_BaseOnly)
-            {
-                int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
-
-                std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
-                    toString().toUtf8().constData();
-
-                revertableIds.push_back (id);
-            }
-        }
-    }
-
-    return revertableIds;
-}
-
-std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
-{
-    std::vector<std::string> deletableIds;
-
-    if (mProxyModel->columnCount()>0)
-    {
-        QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-        for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
-            ++iter)
-        {
-            QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
-
-            // check record state
-            CSMWorld::RecordBase::State state =
-                static_cast<CSMWorld::RecordBase::State> (
-                mModel->data (mModel->index (index.row(), 1)).toInt());
-
-            if (state==CSMWorld::RecordBase::State_Deleted)
-                continue;
-
-            // check other columns (only relevant for a subset of the tables)
-            int dialogueTypeIndex =
-                mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_DialogueType);
-
-            if (dialogueTypeIndex!=-1)
-            {
-                int type = mModel->data (mModel->index (index.row(), dialogueTypeIndex)).toInt();
-
-                if (type!=ESM::Dialogue::Topic && type!=ESM::Dialogue::Journal)
-                    continue;
-            }
-
-            // add the id to the collection
-            int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
-
-            std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
-                toString().toUtf8().constData();
-
-            deletableIds.push_back (id);
-        }
-    }
-
-    return deletableIds;
-}
-
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
 : mCreateAction (0), mCloneAction(0), mRecordStatusDisplay (0),
@@ -195,6 +128,8 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     mProxyModel = new CSMWorld::IdTableProxyModel (this);
     mProxyModel->setSourceModel (mModel);
+
+    mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
 
     setModel (mProxyModel);
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
@@ -240,11 +175,11 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     }
 
     mRevertAction = new QAction (tr ("Revert Record"), this);
-    connect (mRevertAction, SIGNAL (triggered()), this, SLOT (revertRecord()));
+    connect (mRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeRevert()));
     addAction (mRevertAction);
 
     mDeleteAction = new QAction (tr ("Delete Record"), this);
-    connect (mDeleteAction, SIGNAL (triggered()), this, SLOT (deleteRecord()));
+    connect (mDeleteAction, SIGNAL (triggered()), mDispatcher, SLOT (executeDelete()));
     addAction (mDeleteAction);
 
     mMoveUpAction = new QAction (tr ("Move Up"), this);
@@ -283,6 +218,7 @@ void CSVWorld::Table::setEditLock (bool locked)
         (*iter)->setEditLock (locked);
 
     DragRecordTable::setEditLock(locked);
+    mDispatcher->setEditLock (locked);
 }
 
 CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
@@ -290,46 +226,6 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
     return CSMWorld::UniversalId (
         static_cast<CSMWorld::UniversalId::Type> (mProxyModel->data (mProxyModel->index (row, 2)).toInt()),
         mProxyModel->data (mProxyModel->index (row, 0)).toString().toUtf8().constData());
-}
-
-void CSVWorld::Table::revertRecord()
-{
-    if (!mEditLock)
-    {
-        std::vector<std::string> revertableIds = listRevertableSelectedIds();
-
-        if (!revertableIds.empty())
-        {
-            if (revertableIds.size()>1)
-                mDocument.getUndoStack().beginMacro (tr ("Revert multiple records"));
-
-            for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
-                mDocument.getUndoStack().push (new CSMWorld::RevertCommand (*mModel, *iter));
-
-            if (revertableIds.size()>1)
-                mDocument.getUndoStack().endMacro();
-        }
-    }
-}
-
-void CSVWorld::Table::deleteRecord()
-{
-    if (!mEditLock)
-    {
-        std::vector<std::string> deletableIds = listDeletableSelectedIds();
-
-        if (!deletableIds.empty())
-        {
-            if (deletableIds.size()>1)
-                mDocument.getUndoStack().beginMacro (tr ("Delete multiple records"));
-
-            for (std::vector<std::string>::const_iterator iter (deletableIds.begin()); iter!=deletableIds.end(); ++iter)
-                mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (*mModel, *iter));
-
-            if (deletableIds.size()>1)
-                mDocument.getUndoStack().endMacro();
-        }
-    }
 }
 
 void CSVWorld::Table::editRecord()
