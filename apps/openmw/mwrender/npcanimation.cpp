@@ -308,7 +308,7 @@ void NpcAnimation::updateParts()
             ESM::PartReferenceType parts[] = {
                 ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
                 ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
-                ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron
+                ESM::PRT_RForearm, ESM::PRT_LForearm
             };
             size_t parts_size = sizeof(parts)/sizeof(parts[0]);
             for(size_t p = 0;p < parts_size;++p)
