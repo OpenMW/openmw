@@ -351,8 +351,6 @@ void NpcAnimation::updateParts()
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
 
-    static std::map <std::pair<std::string,int>, std::vector<const ESM::BodyPart*> > sVampireMapping;
-
     static const int Flag_Female      = 1<<0;
     static const int Flag_FirstPerson = 1<<1;
 
