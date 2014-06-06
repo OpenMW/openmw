@@ -168,11 +168,12 @@ namespace MWInput
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
     {
-        int nPlayerChannels = 15;
+        int nPlayerChannels = 17;
         int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
                                 A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
                                 A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
-                                A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10};
+                                A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
+                               A_Use};
 
         for(int i = 0; i < nPlayerChannels; i++) {
             int pc = playerChannels[i];
@@ -558,41 +559,49 @@ namespace MWInput
 
     void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
-        mInputBinder->keyReleased (arg);
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
+        if (kc != OIS::KC_UNASSIGNED)
+        {
+            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
+            setPlayerControlsEnabled(!guiFocus);
+        }
+        mInputBinder->keyReleased (arg);
+
     }
 
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
-        mInputBinder->mousePressed (arg, id);
+        bool guiFocus = false;
 
-        if (id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)
-            return; // MyGUI has no use for these events
-
-        MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-        if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+        if (!(id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)) // MyGUI has no use for these events
         {
-            MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-            if (b && b->getEnabled())
+            guiFocus = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+            if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
-                MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
+                if (b && b->getEnabled())
+                {
+                    MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                }
             }
         }
+        setPlayerControlsEnabled(!guiFocus);
+
+        mInputBinder->mousePressed (arg, id);
     }
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
+        bool guiFocus = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+        setPlayerControlsEnabled(!guiFocus);
         mInputBinder->mouseReleased (arg, id);
 
-        MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
     }
 
     void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
     {
-        mInputBinder->mouseMoved (arg);
+        bool guiFocus = false;
 
         resetIdleTime ();
 
@@ -610,7 +619,7 @@ namespace MWInput
 
             mMouseWheel = int(arg.z);
 
-            MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+            guiFocus = MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
         }
 
         if (mMouseLookEnabled)
@@ -638,6 +647,9 @@ namespace MWInput
                 MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
             }
         }
+
+        setPlayerControlsEnabled(!guiFocus);
+        mInputBinder->mouseMoved (arg);
     }
 
     void InputManager::windowFocusChange(bool have_focus)
