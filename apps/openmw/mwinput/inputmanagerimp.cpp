@@ -558,36 +558,51 @@ namespace MWInput
 
     void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
-        mInputBinder->keyReleased (arg);
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
+        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+        mInputBinder->keyReleased (arg);
     }
 
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
-        mInputBinder->mousePressed (arg, id);
+        bool guiMode = false;
 
-        if (id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)
-            return; // MyGUI has no use for these events
-
-        MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-        if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+        if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI has no use for these events
         {
-            MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-            if (b && b->getEnabled())
+            MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+            guiMode = guiMode && MWBase::Environment::get().getWindowManager()->isGuiMode();
+            if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
-                MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
+                if (b && b->getEnabled())
+                {
+                    MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                }
             }
         }
+
+        setPlayerControlsEnabled(!guiMode);
+        mInputBinder->mousePressed (arg, id);
+
+
     }
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
-    {
-        mInputBinder->mouseReleased (arg, id);
+    {      
 
-        MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+        if(mInputBinder->detectingBindingState())
+        {
+            mInputBinder->mouseReleased (arg, id);
+        } else {
+            bool guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+            guiMode = guiMode && MWBase::Environment::get().getWindowManager()->isGuiMode();
+
+            if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
+
+            setPlayerControlsEnabled(!guiMode);
+            mInputBinder->mouseReleased (arg, id);
+        }
     }
 
     void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )

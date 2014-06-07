@@ -146,6 +146,7 @@ namespace ICS
 
 		void enableDetectingBindingState(Control* control, Control::ControlChangingDirection direction);
 		void cancelDetectingBindingState();
+        bool detectingBindingState();
 
 		bool save(std::string fileName = "");
 
