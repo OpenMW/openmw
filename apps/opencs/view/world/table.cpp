@@ -230,9 +230,12 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
 {
     row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
 
+    int idColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+    int typeColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+
     return CSMWorld::UniversalId (
-        static_cast<CSMWorld::UniversalId::Type> (mModel->data (mModel->index (row, 2)).toInt()),
-        mModel->data (mModel->index (row, 0)).toString().toUtf8().constData());
+        static_cast<CSMWorld::UniversalId::Type> (mModel->data (mModel->index (row, typeColumn)).toInt()),
+        mModel->data (mModel->index (row, idColumn)).toString().toUtf8().constData());
 }
 
 void CSVWorld::Table::editRecord()
