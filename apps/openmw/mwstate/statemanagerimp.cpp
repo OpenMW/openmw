@@ -233,6 +233,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         writer.close();
 
+        if (stream.fail())
+            throw std::runtime_error("Write operation failed");
+
         Settings::Manager::setString ("character", "Saves",
             slot->mPath.parent_path().filename().string());
     }
@@ -246,6 +249,10 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         std::vector<std::string> buttons;
         buttons.push_back("#{sOk}");
         MWBase::Environment::get().getWindowManager()->messageBox(error.str(), buttons);
+
+        // If no file was written, clean up the slot
+        if (slot && !boost::filesystem::exists(slot->mPath))
+            mCharacterManager.getCurrentCharacter()->deleteSlot(slot);
     }
 }
 
