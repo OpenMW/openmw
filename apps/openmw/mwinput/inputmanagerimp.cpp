@@ -168,11 +168,12 @@ namespace MWInput
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
     {
-        int nPlayerChannels = 15;
+        int nPlayerChannels = 17;
         int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
                                 A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
                                 A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
-                                A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10};
+                                A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
+                               A_Use};
 
         for(int i = 0; i < nPlayerChannels; i++) {
             int pc = playerChannels[i];
