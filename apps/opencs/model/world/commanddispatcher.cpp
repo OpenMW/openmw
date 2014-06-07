@@ -13,14 +13,16 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() cons
 
     IdTable& model = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
 
+    int stateColumnIndex = model.findColumnIndex (Columns::ColumnId_Modification);
+
     for (std::vector<std::string>::const_iterator iter (mSelection.begin());
         iter!=mSelection.end(); ++iter)
     {
         int row = model.getModelIndex (*iter, 0).row();
 
         // check record state
-        RecordBase::State state =
-            static_cast<RecordBase::State> (model.data (model.index (row, 1)).toInt());
+        RecordBase::State state = static_cast<RecordBase::State> (
+            model.data (model.index (row, stateColumnIndex)).toInt());
 
         if (state==RecordBase::State_Deleted)
             continue;
@@ -53,14 +55,16 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getRevertableRecords() con
     if (model.getFeatures() & IdTable::Feature_ReorderWithinTopic)
         return result;
 
+    int stateColumnIndex = model.findColumnIndex (Columns::ColumnId_Modification);
+
     for (std::vector<std::string>::const_iterator iter (mSelection.begin());
         iter!=mSelection.end(); ++iter)
     {
         int row = model.getModelIndex (*iter, 0).row();
 
         // check record state
-        RecordBase::State state =
-            static_cast<RecordBase::State> (model.data (model.index (row, 1)).toInt());
+        RecordBase::State state = static_cast<RecordBase::State> (
+            model.data (model.index (row, stateColumnIndex)).toInt());
 
         if (state==RecordBase::State_BaseOnly)
             continue;
