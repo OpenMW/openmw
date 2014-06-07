@@ -168,12 +168,11 @@ namespace MWInput
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
     {
-        int nPlayerChannels = 17;
+        int nPlayerChannels = 15;
         int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
                                 A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
                                 A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
-                                A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
-                               A_Use};
+                                A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10};
 
         for(int i = 0; i < nPlayerChannels; i++) {
             int pc = playerChannels[i];
@@ -561,22 +560,18 @@ namespace MWInput
     {
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        if (kc != OIS::KC_UNASSIGNED)
-        {
-            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
-            setPlayerControlsEnabled(!guiFocus);
-        }
+        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
         mInputBinder->keyReleased (arg);
-
     }
 
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
-        bool guiFocus = false;
+        bool guiMode = false;
 
-        if (!(id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)) // MyGUI has no use for these events
+        if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI has no use for these events
         {
-            guiFocus = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+            MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+            guiMode = guiMode && MWBase::Environment::get().getWindowManager()->isGuiMode();
             if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
@@ -586,22 +581,33 @@ namespace MWInput
                 }
             }
         }
-        setPlayerControlsEnabled(!guiFocus);
 
+        setPlayerControlsEnabled(!guiMode);
         mInputBinder->mousePressed (arg, id);
+
+
     }
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
-    {
-        bool guiFocus = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-        setPlayerControlsEnabled(!guiFocus);
-        mInputBinder->mouseReleased (arg, id);
+    {      
 
+        if(mInputBinder->detectingBindingState())
+        {
+            mInputBinder->mouseReleased (arg, id);
+        } else {
+            bool guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+            guiMode = guiMode && MWBase::Environment::get().getWindowManager()->isGuiMode();
+
+            if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
+
+            setPlayerControlsEnabled(!guiMode);
+            mInputBinder->mouseReleased (arg, id);
+        }
     }
 
     void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
     {
-        bool guiFocus = false;
+        mInputBinder->mouseMoved (arg);
 
         resetIdleTime ();
 
@@ -619,7 +625,7 @@ namespace MWInput
 
             mMouseWheel = int(arg.z);
 
-            guiFocus = MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+            MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
         }
 
         if (mMouseLookEnabled)
@@ -647,9 +653,6 @@ namespace MWInput
                 MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
             }
         }
-
-        setPlayerControlsEnabled(!guiFocus);
-        mInputBinder->mouseMoved (arg);
     }
 
     void InputManager::windowFocusChange(bool have_focus)
