@@ -164,20 +164,19 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 
         if (SDL_GL_LoadLibrary(NULL) != 0)
             throw std::runtime_error("OpenGL version check: Failed to load GL library");
-
         wglCreateContextPtr = (WGL_CreateContext_Func) SDL_GL_GetProcAddress("wglCreateContext");
         wglMakeCurrentPtr = (WGL_MakeCurrent_Func) SDL_GL_GetProcAddress("wglMakeCurrent");
-        if (!wglCreateContextPtr)
-            throw std::runtime_error("OpenGL version check: Null wglCreateContext function");
+        wglDeleteContextPtr = (WGL_DeleteContext_Func) SDL_GL_GetProcAddress("wglDeleteContext");
+        glGetStringPtr = (GL_GetString_Func) SDL_GL_GetProcAddress("glGetString");
+        if (!wglCreateContextPtr || !wglMakeCurrentPtr || !wglDeleteContextPtr || !glGetStringPtr)
+            throw std::runtime_error("OpenGL version check: Null GL functions");
+
         // Create temporary context and make sure we have support
         HGLRC tempContext = wglCreateContextPtr(hdc);
-        if (!wglMakeCurrentPtr || !tempContext || !wglMakeCurrentPtr(hdc, tempContext))
+        if (!tempContext || !wglMakeCurrentPtr(hdc, tempContext))
             throw std::runtime_error("OpenGL version check: Failed to create or activate temp context");
 
         // Some of the code below copied from OgreGLSupport.cpp
-        glGetStringPtr = (GL_GetString_Func) SDL_GL_GetProcAddress("glGetString");
-        if (!glGetStringPtr)
-            throw std::runtime_error("OpenGL version check: Null glGetString function");
         const GLubyte* pcVer = glGetStringPtr(GL_VERSION);
         if (!pcVer)
             throw std::runtime_error("OpenGL version check: Failed to get GL version string");
@@ -195,19 +194,6 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
         else
         {
             unsigned int cardFirst = ::atoi(glVersion.substr(0, pos).c_str());
-#if 0 /* FIXME: delete after testing completed */
-            Ogre::String::size_type pos1 = glVersion.rfind(".");
-            if (pos1 == Ogre::String::npos)
-                throw std::runtime_error("OpenGL version check: Failed to parse parse GL Version string");
-            else
-            {
-                unsigned int cardSecond = ::atoi(glVersion.substr(pos + 1, pos1 - (pos + 1)).c_str());
-                unsigned int cardThird = ::atoi(glVersion.substr(pos1 + 1, glVersion.length()).c_str());
-                std::cout << std::to_string(cardFirst)
-                       +"."+ std::to_string(cardSecond)
-                       +"."+ std::to_string(cardThird) << std::endl;
-            }
-#endif
             if (cardFirst < 3)
             {
                 std::stringstream error;
@@ -218,9 +204,6 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
         }
 
         // Remove temporary context, device context and dummy window
-        wglDeleteContextPtr = (WGL_DeleteContext_Func) SDL_GL_GetProcAddress("wglDeleteContext");
-        if (!wglDeleteContextPtr)
-            throw std::runtime_error("OpenGL version check: Null wglDeleteContext function");
         wglMakeCurrentPtr(NULL, NULL);
         wglDeleteContextPtr(tempContext);
         ReleaseDC(hwnd, hdc);
