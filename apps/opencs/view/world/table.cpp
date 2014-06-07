@@ -36,8 +36,10 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
     for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
         ++iter)
     {
-        records.push_back (mProxyModel->data (
-            mProxyModel->index (iter->row(), columnIndex)).toString().toUtf8().constData());
+        int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
+
+        records.push_back (mModel->data (
+            mModel->index (row, columnIndex)).toString().toUtf8().constData());
     }
 
     mDispatcher->setSelection (records);
@@ -71,8 +73,6 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
             /// \todo allow reordering of multiple rows
             if (selectedRows.size()==1)
             {
-                int row =selectedRows.begin()->row();
-
                 int column = mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_Topic);
 
                 if (column==-1)
@@ -80,14 +80,17 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
                 if (column!=-1)
                 {
-                    if (row>0 && mProxyModel->data (mProxyModel->index (row, column))==
-                        mProxyModel->data (mProxyModel->index (row-1, column)))
+                    int row = mProxyModel->mapToSource (
+                        mProxyModel->index (selectedRows.begin()->row(), 0)).row();
+
+                    if (row>0 && mModel->data (mModel->index (row, column))==
+                        mModel->data (mModel->index (row-1, column)))
                     {
                         menu.addAction (mMoveUpAction);
                     }
 
-                    if (row<mProxyModel->rowCount()-1 && mProxyModel->data (mProxyModel->index (row, column))==
-                        mProxyModel->data (mProxyModel->index (row+1, column)))
+                    if (row<mModel->rowCount()-1 && mModel->data (mModel->index (row, column))==
+                        mModel->data (mModel->index (row+1, column)))
                     {
                         menu.addAction (mMoveDownAction);
                     }
@@ -225,9 +228,11 @@ void CSVWorld::Table::setEditLock (bool locked)
 
 CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
 {
+    row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
+
     return CSMWorld::UniversalId (
-        static_cast<CSMWorld::UniversalId::Type> (mProxyModel->data (mProxyModel->index (row, 2)).toInt()),
-        mProxyModel->data (mProxyModel->index (row, 0)).toString().toUtf8().constData());
+        static_cast<CSMWorld::UniversalId::Type> (mModel->data (mModel->index (row, 2)).toInt()),
+        mModel->data (mModel->index (row, 0)).toString().toUtf8().constData());
 }
 
 void CSVWorld::Table::editRecord()
