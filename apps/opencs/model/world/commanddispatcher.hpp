@@ -21,11 +21,11 @@ namespace CSMWorld
             bool mLocked;
             CSMDoc::Document& mDocument;
             UniversalId mId;
-            std::vector<int> mSelection;
+            std::vector<std::string> mSelection;
 
-            std::vector<int> getDeletableRecords() const;
+            std::vector<std::string> getDeletableRecords() const;
 
-            std::vector<int> getRevertableRecords() const;
+            std::vector<std::string> getRevertableRecords() const;
 
         public:
 
@@ -35,7 +35,7 @@ namespace CSMWorld
 
             void setEditLock (bool locked);
 
-            void setSelection (const std::vector<int>& selection);
+            void setSelection (const std::vector<std::string>& selection);
 
             bool canDelete() const;
 

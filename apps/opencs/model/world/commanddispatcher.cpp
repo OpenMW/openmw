@@ -7,18 +7,20 @@
 #include "record.hpp"
 #include "commands.hpp"
 
-std::vector<int> CSMWorld::CommandDispatcher::getDeletableRecords() const
+std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() const
 {
-    std::vector<int> result;
+    std::vector<std::string> result;
 
     IdTable& model = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
 
-    for (std::vector<int>::const_iterator iter (mSelection.begin());
+    for (std::vector<std::string>::const_iterator iter (mSelection.begin());
         iter!=mSelection.end(); ++iter)
     {
+        int row = model.getModelIndex (*iter, 0).row();
+
         // check record state
         RecordBase::State state =
-            static_cast<RecordBase::State> (model.data (model.index (*iter, 1)).toInt());
+            static_cast<RecordBase::State> (model.data (model.index (row, 1)).toInt());
 
         if (state==RecordBase::State_Deleted)
             continue;
@@ -28,7 +30,7 @@ std::vector<int> CSMWorld::CommandDispatcher::getDeletableRecords() const
 
         if (dialogueTypeIndex!=-1)
         {
-            int type = model.data (model.index (*iter, dialogueTypeIndex)).toInt();
+            int type = model.data (model.index (row, dialogueTypeIndex)).toInt();
 
             if (type!=ESM::Dialogue::Topic && type!=ESM::Dialogue::Journal)
                 continue;
@@ -40,9 +42,9 @@ std::vector<int> CSMWorld::CommandDispatcher::getDeletableRecords() const
     return result;
 }
 
-std::vector<int> CSMWorld::CommandDispatcher::getRevertableRecords() const
+std::vector<std::string> CSMWorld::CommandDispatcher::getRevertableRecords() const
 {
-    std::vector<int> result;
+    std::vector<std::string> result;
 
     IdTable& model = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
 
@@ -51,12 +53,14 @@ std::vector<int> CSMWorld::CommandDispatcher::getRevertableRecords() const
     if (model.getFeatures() & IdTable::Feature_ReorderWithinTopic)
         return result;
 
-    for (std::vector<int>::const_iterator iter (mSelection.begin());
+    for (std::vector<std::string>::const_iterator iter (mSelection.begin());
         iter!=mSelection.end(); ++iter)
     {
+        int row = model.getModelIndex (*iter, 0).row();
+
         // check record state
         RecordBase::State state =
-            static_cast<RecordBase::State> (model.data (model.index (*iter, 1)).toInt());
+            static_cast<RecordBase::State> (model.data (model.index (row, 1)).toInt());
 
         if (state==RecordBase::State_BaseOnly)
             continue;
@@ -77,7 +81,7 @@ void CSMWorld::CommandDispatcher::setEditLock (bool locked)
     mLocked = locked;
 }
 
-void CSMWorld::CommandDispatcher::setSelection (const std::vector<int>& selection)
+void CSMWorld::CommandDispatcher::setSelection (const std::vector<std::string>& selection)
 {
     mSelection = selection;
 }
@@ -103,7 +107,7 @@ void CSMWorld::CommandDispatcher::executeDelete()
     if (mLocked)
         return;
 
-    std::vector<int> rows = getDeletableRecords();
+    std::vector<std::string> rows = getDeletableRecords();
 
     if (rows.empty())
         return;
@@ -115,9 +119,9 @@ void CSMWorld::CommandDispatcher::executeDelete()
     if (rows.size()>1)
         mDocument.getUndoStack().beginMacro (tr ("Delete multiple records"));
 
-    for (std::vector<int>::const_iterator iter (rows.begin()); iter!=rows.end(); ++iter)
+    for (std::vector<std::string>::const_iterator iter (rows.begin()); iter!=rows.end(); ++iter)
     {
-        std::string id = model.data (model.index (*iter, columnIndex)).
+        std::string id = model.data (model.getModelIndex (*iter, columnIndex)).
             toString().toUtf8().constData();
 
         mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (model, id));
@@ -132,7 +136,7 @@ void CSMWorld::CommandDispatcher::executeRevert()
     if (mLocked)
         return;
 
-    std::vector<int> rows = getRevertableRecords();
+    std::vector<std::string> rows = getRevertableRecords();
 
     if (rows.empty())
         return;
@@ -144,9 +148,9 @@ void CSMWorld::CommandDispatcher::executeRevert()
     if (rows.size()>1)
         mDocument.getUndoStack().beginMacro (tr ("Revert multiple records"));
 
-    for (std::vector<int>::const_iterator iter (rows.begin()); iter!=rows.end(); ++iter)
+    for (std::vector<std::string>::const_iterator iter (rows.begin()); iter!=rows.end(); ++iter)
     {
-        std::string id = model.data (model.index (*iter, columnIndex)).
+        std::string id = model.data (model.getModelIndex (*iter, columnIndex)).
             toString().toUtf8().constData();
 
         mDocument.getUndoStack().push (new CSMWorld::RevertCommand (model, id));

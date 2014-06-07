@@ -29,16 +29,18 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
     // configure dispatcher
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
-    std::vector<int> rows;
+    std::vector<std::string> records;
+
+    int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
 
     for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
         ++iter)
     {
-        QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
-        rows.push_back (index.row());
+        records.push_back (mProxyModel->data (
+            mProxyModel->index (iter->row(), columnIndex)).toString().toUtf8().constData());
     }
 
-    mDispatcher->setSelection (rows);
+    mDispatcher->setSelection (records);
 
     // create context menu
     QMenu menu (this);
