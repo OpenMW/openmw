@@ -13,51 +13,11 @@
 #include "osx_utils.h"
 #endif
 
-namespace SFO
+namespace
 {
 
-SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
-        const std::string& title, bool fullscreen, Ogre::NameValuePairList params)
-    : mSDLWindow(window)
+bool checkMinGLVersion(std::ostream& error)
 {
-    //get the native whnd
-    struct SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version);
-
-    if (SDL_GetWindowWMInfo(mSDLWindow, &wmInfo) == SDL_FALSE)
-        throw std::runtime_error("Couldn't get WM Info!");
-
-    Ogre::String winHandle;
-
-    switch (wmInfo.subsystem)
-    {
-#ifdef WIN32
-	case SDL_SYSWM_WINDOWS:
-		// Windows code
-		winHandle = Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
-		break;
-#elif __MACOSX__
-    case SDL_SYSWM_COCOA:
-        //required to make OGRE play nice with our window
-        params.insert(std::make_pair("macAPI", "cocoa"));
-        params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
-
-        winHandle  = Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
-        break;
-#else
-    case SDL_SYSWM_X11:
-        winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
-        break;
-#endif
-    default:
-        throw std::runtime_error("Unexpected WM!");
-        break;
-    }
-
-    /// \todo externalWindowHandle is deprecated according to the source code. Figure out a way to get parentWindowHandle
-    /// to work properly. On Linux/X11 it causes an occasional GLXBadDrawable error.
-    params.insert(std::make_pair("externalWindowHandle",  winHandle));
-
 #ifdef WIN32 /* FIXME: Windows only until linux and mac calls to GetDC() are tested */
 
     // If using OpenGL we must ensure version 3.0 or higher for Ogre 1.9.
@@ -109,108 +69,185 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
     WGL_DeleteContext_Func wglDeleteContextPtr = 0;
     GL_GetString_Func glGetStringPtr = 0;
 
+    SDL_Window* sdlWin = SDL_CreateWindow(
+        "temp",           // window title
+        0,                // initial x position
+        0,                // initial y position
+        100,              // width, in pixels
+        100,              // height, in pixels
+        SDL_WINDOW_HIDDEN
+        );
+    struct SDL_SysWMinfo swmInfo;
+    SDL_VERSION(&swmInfo.version);
+
+    if (!sdlWin || (SDL_GetWindowWMInfo(sdlWin, &swmInfo) == SDL_FALSE))
+    {
+        error << "OpenGL version check: Couldn't get WM Info!";
+        return false;
+    }
+
+    PIXELFORMATDESCRIPTOR pfd =
+    {
+        sizeof(PIXELFORMATDESCRIPTOR),
+        1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, //Flags
+        PFD_TYPE_RGBA,    //The kind of framebuffer. RGBA or palette.
+        32,               //Colordepth of the framebuffer.
+        0, 0, 0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0, 0, 0, 0,
+        24,               //Number of bits for the depthbuffer
+        8,                //Number of bits for the stencilbuffer
+        0,                //Number of Aux buffers in the framebuffer.
+        PFD_MAIN_PLANE,
+        0,
+        0, 0, 0
+    };
+
+    HWND hwnd;
+#ifdef WIN32
+    hwnd = swmInfo.info.win.window;
+#elif __MACOSX__
+    hwnd = WindowContentViewHandle(swmInfo); // FIXME: not tested
+#else
+    hwnd = swmInfo.info.x11.window; // FIXME: not tested
+#endif
+    HDC hdc = GetDC(hwnd);
+    if (!hdc)
+    {
+        error << "OpenGL version check: Failed to get device context";
+        return false;
+    }
+    int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+    if (!pixelFormat || !SetPixelFormat(hdc, pixelFormat, &pfd))
+    {
+        error << "OpenGL version check: Failed to choose or set pixel format for temp context";
+        return false;
+    }
+
+    if (SDL_GL_LoadLibrary(NULL) != 0)
+    {
+        error << "OpenGL version check: Failed to load GL library";
+        return false;
+    }
+    wglCreateContextPtr = (WGL_CreateContext_Func) SDL_GL_GetProcAddress("wglCreateContext");
+    wglMakeCurrentPtr = (WGL_MakeCurrent_Func) SDL_GL_GetProcAddress("wglMakeCurrent");
+    wglDeleteContextPtr = (WGL_DeleteContext_Func) SDL_GL_GetProcAddress("wglDeleteContext");
+    glGetStringPtr = (GL_GetString_Func) SDL_GL_GetProcAddress("glGetString");
+    if (!wglCreateContextPtr || !wglMakeCurrentPtr || !wglDeleteContextPtr || !glGetStringPtr)
+    {
+        error << "OpenGL version check: Null GL functions";
+        return false;
+    }
+
+    // Create temporary context and make sure we have support
+    HGLRC tempContext = wglCreateContextPtr(hdc);
+    if (!tempContext || !wglMakeCurrentPtr(hdc, tempContext))
+    {
+        error << "OpenGL version check: Failed to create or activate temp context";
+        return false;
+    }
+
+    // Some of the code below copied from OgreGLSupport.cpp
+    const GLubyte* pcVer = glGetStringPtr(GL_VERSION);
+    if (!pcVer)
+    {
+        error << "OpenGL version check: Failed to get GL version string";
+        return false;
+    }
+
+    Ogre::String tmpStr = (const char*)pcVer;
+    std::cout << "OpenGL GL_VERSION: " + tmpStr << std::endl;
+
+    // FIXME: Does not work, returns "0.0.0.0"
+    //Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
+    //std::cout << "OpenGL Driver Version: " + rs->getDriverVersion().toString() << std::endl;
+
+    Ogre::String glVersion = tmpStr.substr(0, tmpStr.find(" "));
+    Ogre::String::size_type pos = glVersion.find(".");
+    if (pos == Ogre::String::npos)
+    {
+        error << "OpenGL version check: Failed to parse parse GL version string";
+        return false;
+    }
+    else
+    {
+        unsigned int cardFirst = ::atoi(glVersion.substr(0, pos).c_str());
+        if (cardFirst < 3)
+        {
+            error << "OpenGL: Version " << glVersion.c_str()
+                  << " detected. Version 3.0 or higer required for Ogre 1.9";
+            return false;
+        }
+    }
+
+    // Remove temporary context, device context and dummy window
+    wglMakeCurrentPtr(NULL, NULL);
+    wglDeleteContextPtr(tempContext);
+    ReleaseDC(hwnd, hdc);
+    SDL_DestroyWindow(sdlWin);
+    SDL_GL_UnloadLibrary();
+#endif
+    return true;
+}
+
+}
+
+namespace SFO
+{
+
+SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
+        const std::string& title, bool fullscreen, Ogre::NameValuePairList params)
+    : mSDLWindow(window)
+{
+    //get the native whnd
+    struct SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+
+    if (SDL_GetWindowWMInfo(mSDLWindow, &wmInfo) == SDL_FALSE)
+        throw std::runtime_error("Couldn't get WM Info!");
+
+    Ogre::String winHandle;
+
+    switch (wmInfo.subsystem)
+    {
+#ifdef WIN32
+    case SDL_SYSWM_WINDOWS:
+        // Windows code
+        winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.win.window);
+        break;
+#elif __MACOSX__
+    case SDL_SYSWM_COCOA:
+        //required to make OGRE play nice with our window
+        params.insert(std::make_pair("macAPI", "cocoa"));
+        params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
+
+        winHandle  = Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
+        break;
+#else
+    case SDL_SYSWM_X11:
+        winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
+        break;
+#endif
+    default:
+        throw std::runtime_error("Unexpected WM!");
+        break;
+    }
+
+    /// \todo externalWindowHandle is deprecated according to the source code. Figure out a way to get parentWindowHandle
+    /// to work properly. On Linux/X11 it causes an occasional GLXBadDrawable error.
+    params.insert(std::make_pair("externalWindowHandle",  winHandle));
+
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
     if (rs && (rs->getName() == "OpenGL Rendering Subsystem")
            && (OGRE_VERSION_MAJOR >= 1) && (OGRE_VERSION_MINOR >= 9))
     {
-        SDL_Window* sdlWin = SDL_CreateWindow(
-            "temp",           // window title
-            0,                // initial x position
-            0,                // initial y position
-            100,              // width, in pixels
-            100,              // height, in pixels
-            SDL_WINDOW_HIDDEN
-            );
-        struct SDL_SysWMinfo swmInfo;
-        SDL_VERSION(&swmInfo.version);
-
-        if (!sdlWin || (SDL_GetWindowWMInfo(sdlWin, &swmInfo) == SDL_FALSE))
-            throw std::runtime_error("OpenGL: Couldn't get WM Info!");
-
-        PIXELFORMATDESCRIPTOR pfd =
-        {
-            sizeof(PIXELFORMATDESCRIPTOR),
-            1,
-            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, //Flags
-            PFD_TYPE_RGBA,    //The kind of framebuffer. RGBA or palette.
-            32,               //Colordepth of the framebuffer.
-            0, 0, 0, 0, 0, 0,
-            0,
-            0,
-            0,
-            0, 0, 0, 0,
-            24,               //Number of bits for the depthbuffer
-            8,                //Number of bits for the stencilbuffer
-            0,                //Number of Aux buffers in the framebuffer.
-            PFD_MAIN_PLANE,
-            0,
-            0, 0, 0
-        };
-
-        HWND hwnd;
-#ifdef WIN32
-        hwnd = swmInfo.info.win.window;
-#elif __MACOSX__
-        hwnd = WindowContentViewHandle(swmInfo); // FIXME: not tested
-#else
-        hwnd = swmInfo.info.x11.window; // FIXME: not tested
-#endif
-        HDC hdc = GetDC(hwnd);
-        if (!hdc)
-            throw std::runtime_error("OpenGL version check: Failed to get device context");
-        int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-        if (!pixelFormat || !SetPixelFormat(hdc, pixelFormat, &pfd))
-            throw std::runtime_error("OpenGL version check: Failed to choose or set pixel format for temp context");
-
-        if (SDL_GL_LoadLibrary(NULL) != 0)
-            throw std::runtime_error("OpenGL version check: Failed to load GL library");
-        wglCreateContextPtr = (WGL_CreateContext_Func) SDL_GL_GetProcAddress("wglCreateContext");
-        wglMakeCurrentPtr = (WGL_MakeCurrent_Func) SDL_GL_GetProcAddress("wglMakeCurrent");
-        wglDeleteContextPtr = (WGL_DeleteContext_Func) SDL_GL_GetProcAddress("wglDeleteContext");
-        glGetStringPtr = (GL_GetString_Func) SDL_GL_GetProcAddress("glGetString");
-        if (!wglCreateContextPtr || !wglMakeCurrentPtr || !wglDeleteContextPtr || !glGetStringPtr)
-            throw std::runtime_error("OpenGL version check: Null GL functions");
-
-        // Create temporary context and make sure we have support
-        HGLRC tempContext = wglCreateContextPtr(hdc);
-        if (!tempContext || !wglMakeCurrentPtr(hdc, tempContext))
-            throw std::runtime_error("OpenGL version check: Failed to create or activate temp context");
-
-        // Some of the code below copied from OgreGLSupport.cpp
-        const GLubyte* pcVer = glGetStringPtr(GL_VERSION);
-        if (!pcVer)
-            throw std::runtime_error("OpenGL version check: Failed to get GL version string");
-
-        Ogre::String tmpStr = (const char*)pcVer;
-        std::cout << "OpenGL GL_VERSION: " + tmpStr << std::endl;
-
-        // FIXME: Does not work...
-        //std::cout << "OpenGL Driver Version: " + rs->getDriverVersion().toString() << std::endl;
-
-        Ogre::String glVersion = tmpStr.substr(0, tmpStr.find(" "));
-        Ogre::String::size_type pos = glVersion.find(".");
-        if (pos == Ogre::String::npos)
-            throw std::runtime_error("OpenGL version check: Failed to parse parse GL Version string");
-        else
-        {
-            unsigned int cardFirst = ::atoi(glVersion.substr(0, pos).c_str());
-            if (cardFirst < 3)
-            {
-                std::stringstream error;
-                error << "OpenGL: Version " << glVersion.c_str()
-                      << " detected. Version 3.0 or higer required for Ogre 1.9";
-                throw std::runtime_error(error.str());
-            }
-        }
-
-        // Remove temporary context, device context and dummy window
-        wglMakeCurrentPtr(NULL, NULL);
-        wglDeleteContextPtr(tempContext);
-        ReleaseDC(hwnd, hdc);
-        SDL_DestroyWindow(sdlWin);
-        SDL_GL_UnloadLibrary();
+        std::stringstream error;
+        if (!checkMinGLVersion(error))
+            throw std::runtime_error(error.str());
     }
-#endif
 
     mWindow = Ogre::Root::getSingleton().createRenderWindow(title, w, h, fullscreen, &params);
 }
