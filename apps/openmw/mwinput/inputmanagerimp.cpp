@@ -569,10 +569,10 @@ namespace MWInput
     {
         bool guiMode = false;
 
-        if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI has no use for these events
+        if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
-            MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-            guiMode = guiMode && MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id)) && guiMode;
             if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
@@ -596,8 +596,8 @@ namespace MWInput
         {
             mInputBinder->mouseReleased (arg, id);
         } else {
-            bool guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-            guiMode = guiMode && MWBase::Environment::get().getWindowManager()->isGuiMode();
+            bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id)) && guiMode;
 
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 

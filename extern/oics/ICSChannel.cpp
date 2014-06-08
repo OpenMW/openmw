@@ -84,7 +84,7 @@ namespace ICS
     
         mValue = value;
 
-        if(previousValue != value)
+        if(previousValue != value && mEnabled)
         {
             notifyListeners(previousValue);
         }
@@ -130,9 +130,6 @@ namespace ICS
 
 	void Channel::update()
 	{
-        if(!mEnabled)
-            return;
-
         if(this->getControlsCount() == 1)
 		{
 			ControlChannelBinderItem ccBinderItem = mAttachedControls.back();
