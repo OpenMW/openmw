@@ -92,11 +92,20 @@ set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
 find_package(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
-   add_component_qt_dir (contentselector
+    add_component_qt_dir (contentselector
         model/modelitem model/esmfile
         model/naturalsort model/contentmodel
         view/combobox view/contentselector
-       )
+        )
+    add_component_qt_dir (config
+        gamesettings
+        launchersettings
+        settingsbase
+        )
+        
+    add_component_qt_dir (process
+        processinvoker
+    )
 
    include(${QT_USE_FILE})
     QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})

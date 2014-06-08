@@ -3,25 +3,16 @@
 #include <QDir>
 #include <QDebug>
 
+#include "mainwizard.hpp"
+
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
 // We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-#include <SDL.h>
-
-#include "maindialog.hpp"
-
 int main(int argc, char *argv[])
 {
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-    SDL_SetMainReady();
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        qDebug() << "SDL_Init failed: " << QString::fromStdString(SDL_GetError());
-        return 0;
-    }
 
     QApplication app(argc, argv);
 
@@ -50,18 +41,8 @@ int main(int argc, char *argv[])
     // Support non-latin characters
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    Launcher::MainDialog mainWin;
+    Wizard::MainWizard wizard;
 
-    if (!mainWin.showFirstRunDialog())
-        return 0;
-
-//    if (!mainWin.setup()) {
-//        return 0;
-//    }
-
-    mainWin.show();
-
-    int returnValue = app.exec();
-    SDL_Quit();
-    return returnValue;
+    wizard.show();
+    return app.exec();
 }

@@ -27,16 +27,16 @@ namespace boost
 #endif /* (BOOST_VERSION <= 104600) */
 
 
-Launcher::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
+Config::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)
 {
 }
 
-Launcher::GameSettings::~GameSettings()
+Config::GameSettings::~GameSettings()
 {
 }
 
-void Launcher::GameSettings::validatePaths()
+void Config::GameSettings::validatePaths()
 {
     if (mSettings.isEmpty() || !mDataDirs.isEmpty())
         return; // Don't re-validate paths if they are already parsed
@@ -84,24 +84,24 @@ void Launcher::GameSettings::validatePaths()
     }
 }
 
-QStringList Launcher::GameSettings::values(const QString &key, const QStringList &defaultValues)
+QStringList Config::GameSettings::values(const QString &key, const QStringList &defaultValues)
 {
     if (!mSettings.values(key).isEmpty())
         return mSettings.values(key);
     return defaultValues;
 }
 
-bool Launcher::GameSettings::readFile(QTextStream &stream)
+bool Config::GameSettings::readFile(QTextStream &stream)
 {
     return readFile(stream, mSettings);
 }
 
-bool Launcher::GameSettings::readUserFile(QTextStream &stream)
+bool Config::GameSettings::readUserFile(QTextStream &stream)
 {
     return readFile(stream, mUserSettings);
 }
 
-bool Launcher::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> &settings)
+bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> &settings)
 {
     QMap<QString, QString> cache;
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
@@ -143,8 +143,7 @@ bool Launcher::GameSettings::readFile(QTextStream &stream, QMap<QString, QString
     return true;
 }
 
-
-bool Launcher::GameSettings::writeFile(QTextStream &stream)
+bool Config::GameSettings::writeFile(QTextStream &stream)
 {
     // Iterate in reverse order to preserve insertion order
     QMapIterator<QString, QString> i(mUserSettings);
@@ -183,7 +182,7 @@ bool Launcher::GameSettings::writeFile(QTextStream &stream)
     return true;
 }
 
-bool Launcher::GameSettings::hasMaster()
+bool Config::GameSettings::hasMaster()
 {
     bool result = false;
     QStringList content = mSettings.values(QString("content"));

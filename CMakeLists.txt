@@ -71,6 +71,7 @@ option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 option(BUILD_OPENCS "build OpenMW Construction Set" ON)
+option(BUILD_WIZARD "build Installation Wizard" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
@@ -430,6 +431,10 @@ IF(NOT WIN32 AND NOT APPLE)
         IF(BUILD_OPENCS)
             INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
         ENDIF(BUILD_OPENCS)
+          IF(BUILD_WIZARD)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/wizard" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_WIZARD)
+
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
@@ -480,6 +485,10 @@ if(WIN32)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
         INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
+    IF(BUILD_WIZARD)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-wizard.exe" DESTINATION ".")
+    ENDIF(BUILD_WIZARD)
+
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
@@ -497,6 +506,9 @@ if(WIN32)
     IF(BUILD_OPENCS)
         SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};opencs;OpenMW Construction Set")
     ENDIF(BUILD_OPENCS)
+    IF(BUILD_WIZARD)
+        SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};openmw-wizard;OpenMW Wizard")
+    ENDIF(BUILD_WIZARD)
     SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
     SET(CPACK_NSIS_DELETE_ICONS_EXTRA "
         !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
@@ -559,13 +571,6 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (BUILD_LAUNCHER)
-    if(NOT WIN32)
-        find_package(LIBUNSHIELD REQUIRED)
-        if(NOT LIBUNSHIELD_FOUND)
-               message(SEND_ERROR "Failed to find libunshield")
-        endif(NOT LIBUNSHIELD_FOUND)
-    endif(NOT WIN32)
-
    add_subdirectory( apps/launcher )
 endif()
 
@@ -575,6 +580,15 @@ endif()
 
 if (BUILD_OPENCS)
    add_subdirectory (apps/opencs)
+endif()
+
+if (BUILD_WIZARD)
+    find_package(LIBUNSHIELD REQUIRED)
+    if(NOT LIBUNSHIELD_FOUND)
+        message(FATAL_ERROR "Failed to find Unshield library")
+    endif(NOT LIBUNSHIELD_FOUND)
+
+   add_subdirectory(apps/wizard)
 endif()
 
 # UnitTests
@@ -662,6 +676,9 @@ if (WIN32)
     if (BUILD_ESMTOOL)
         set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_ESMTOOL)
+    if (BUILD_WIZARD)
+        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_WIZARD)
     if (BUILD_OPENCS)
         set_target_properties(opencs PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_OPENCS)
