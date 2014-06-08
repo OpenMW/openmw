@@ -162,7 +162,7 @@ namespace MWGui
 
     void QuickKeysMenu::onAssignItem(MWWorld::Ptr item)
     {
-        assert (mSelectedIndex > 0);
+        assert (mSelectedIndex >= 0);
         ItemWidget* button = mQuickKeyButtons[mSelectedIndex];
         while (button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(button->getChildAt(0));
@@ -184,7 +184,7 @@ namespace MWGui
 
     void QuickKeysMenu::onAssignMagicItem (MWWorld::Ptr item)
     {
-        assert (mSelectedIndex > 0);
+        assert (mSelectedIndex >= 0);
         ItemWidget* button = mQuickKeyButtons[mSelectedIndex];
         while (button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(button->getChildAt(0));
@@ -203,7 +203,7 @@ namespace MWGui
 
     void QuickKeysMenu::onAssignMagic (const std::string& spellId)
     {
-        assert (mSelectedIndex > 0);
+        assert (mSelectedIndex >= 0);
         ItemWidget* button = mQuickKeyButtons[mSelectedIndex];
         while (button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(button->getChildAt(0));
