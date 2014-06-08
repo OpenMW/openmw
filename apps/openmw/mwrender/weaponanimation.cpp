@@ -32,7 +32,7 @@ float WeaponAnimationTime::getValue() const
 void WeaponAnimationTime::setGroup(const std::string &group)
 {
     mWeaponGroup = group;
-    mStartTime = mAnimation->getStartTime(mWeaponGroup);
+    mStartTime = mAnimation->getStartTime(mWeaponGroup, true);
 }
 
 void WeaponAnimationTime::updateStartTime()
