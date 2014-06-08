@@ -36,6 +36,7 @@ Eli2
 Emanuel Guével (potatoesmaster)
 Fil Krynicki (filkry)
 gugus/gus
+Hallfaer Tuilinn
 Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
