@@ -117,7 +117,7 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
-        , mAlwaysRunActive(false)
+        , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mControlsDisabled(false)
     {
 
@@ -819,6 +819,8 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
         mAlwaysRunActive = !mAlwaysRunActive;
+
+        Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
     }
 
     void InputManager::resetIdleTime()
