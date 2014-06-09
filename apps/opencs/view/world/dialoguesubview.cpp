@@ -660,11 +660,11 @@ void CSVWorld::DialogueSubView::deleteRecord()
     const int rows = mTable->rowCount();
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
-    //easier than disabling the button
     CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
     bool deledetedOrErased = (state == CSMWorld::RecordBase::State_Deleted);
 
     if (!mLocked &&
+	currentIndex.isValid() &&
         mTable->columnCount() > 0 &&
         !deledetedOrErased &&
         currentIndex.row() < rows &&
