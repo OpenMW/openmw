@@ -26,7 +26,6 @@ namespace MWState
 
             boost::filesystem::path mPath;
             std::vector<Slot> mSlots;
-            int mNext;
 
             void addSlot (const boost::filesystem::path& path, const std::string& game);
 
