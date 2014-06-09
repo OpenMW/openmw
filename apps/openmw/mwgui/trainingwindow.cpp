@@ -16,6 +16,24 @@
 
 #include "tooltips.hpp"
 
+namespace
+{
+// Sorts a container descending by skill value. If skill value is equal, sorts ascending by skill ID.
+// pair <skill ID, skill value>
+bool sortSkills (const std::pair<int, int>& left, const std::pair<int, int>& right)
+{
+    if (left == right)
+        return false;
+
+    if (left.second > right.second)
+        return true;
+    else if (left.second < right.second)
+        return false;
+
+    return left.first < right.first;
+}
+}
+
 namespace MWGui
 {
 
@@ -52,28 +70,16 @@ namespace MWGui
         MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 
         // NPC can train you in his best 3 skills
-        std::vector< std::pair<int, int> > bestSkills;
-        bestSkills.push_back (std::make_pair(-1, -1));
-        bestSkills.push_back (std::make_pair(-1, -1));
-        bestSkills.push_back (std::make_pair(-1, -1));
+        std::vector< std::pair<int, int> > skills;
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
             int value = npcStats.getSkill (i).getBase ();
 
-            for (int j=0; j<3; ++j)
-            {
-                if (value > bestSkills[j].second)
-                {
-                    if (j<2)
-                    {
-                        bestSkills[j+1] = bestSkills[j];
-                    }
-                    bestSkills[j] = std::make_pair(i, value);
-                    break;
-                }
-            }
+            skills.push_back(std::make_pair(i, value));
         }
+
+        std::sort(skills.begin(), skills.end(), sortSkills);
 
         MyGUI::EnumeratorWidgetPtr widgets = mTrainingOptions->getEnumerator ();
         MyGUI::Gui::getInstance ().destroyWidgets (widgets);
@@ -86,20 +92,20 @@ namespace MWGui
         for (int i=0; i<3; ++i)
         {
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
-                    (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
+                    (mPtr,pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
 
             button->setEnabled(price <= playerGold);
-            button->setUserData(bestSkills[i].first);
+            button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
-            button->setCaptionWithReplacing("#{" + ESM::Skill::sSkillNameIds[bestSkills[i].first] + "} - " + boost::lexical_cast<std::string>(price));
+            button->setCaptionWithReplacing("#{" + ESM::Skill::sSkillNameIds[skills[i].first] + "} - " + boost::lexical_cast<std::string>(price));
 
             button->setSize(button->getTextSize ().width+12, button->getSize().height);
 
-            ToolTips::createSkillToolTip (button, bestSkills[i].first);
+            ToolTips::createSkillToolTip (button, skills[i].first);
         }
 
         center();
