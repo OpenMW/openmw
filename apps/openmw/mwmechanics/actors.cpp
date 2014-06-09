@@ -928,7 +928,7 @@ namespace MWMechanics
                         if (timerUpdateAITargets == 0 && iter->first.getTypeName() == typeid(ESM::Creature).name() && !listGuards.empty())
                         {
                             sBasePoint = Ogre::Vector3(iter->first.getRefData().getPosition().pos);
-                            listGuards.sort(comparePtrDist); // try to engage combat starting from the nearest creature
+                            listGuards.sort(comparePtrDist); // try to engage combat starting from the nearest guard
                             
                             for (std::list<MWWorld::Ptr>::iterator it = listGuards.begin(); it != listGuards.end(); ++it)
                             {
