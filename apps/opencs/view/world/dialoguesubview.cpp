@@ -133,25 +133,25 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
         if (mDisplay == CSMWorld::ColumnBase::Display_Referenceable)
         {
             if (  type == CSMWorld::UniversalId::Type_Activator
-                || type == CSMWorld::UniversalId::Type_Potion
-                || type == CSMWorld::UniversalId::Type_Apparatus
-                || type == CSMWorld::UniversalId::Type_Armor
-                || type == CSMWorld::UniversalId::Type_Book
-                || type == CSMWorld::UniversalId::Type_Clothing
-                || type == CSMWorld::UniversalId::Type_Container
-                || type == CSMWorld::UniversalId::Type_Creature
-                || type == CSMWorld::UniversalId::Type_Door
-                || type == CSMWorld::UniversalId::Type_Ingredient
-                || type == CSMWorld::UniversalId::Type_CreatureLevelledList
-                || type == CSMWorld::UniversalId::Type_ItemLevelledList
-                || type == CSMWorld::UniversalId::Type_Light
-                || type == CSMWorld::UniversalId::Type_Lockpick
-                || type == CSMWorld::UniversalId::Type_Miscellaneous
-                || type == CSMWorld::UniversalId::Type_Npc
-                || type == CSMWorld::UniversalId::Type_Probe
-                || type == CSMWorld::UniversalId::Type_Repair
-                || type == CSMWorld::UniversalId::Type_Static
-                || type == CSMWorld::UniversalId::Type_Weapon)
+		  || type == CSMWorld::UniversalId::Type_Potion
+		  || type == CSMWorld::UniversalId::Type_Apparatus
+		  || type == CSMWorld::UniversalId::Type_Armor
+		  || type == CSMWorld::UniversalId::Type_Book
+		  || type == CSMWorld::UniversalId::Type_Clothing
+		  || type == CSMWorld::UniversalId::Type_Container
+		  || type == CSMWorld::UniversalId::Type_Creature
+		  || type == CSMWorld::UniversalId::Type_Door
+		  || type == CSMWorld::UniversalId::Type_Ingredient
+		  || type == CSMWorld::UniversalId::Type_CreatureLevelledList
+		  || type == CSMWorld::UniversalId::Type_ItemLevelledList
+		  || type == CSMWorld::UniversalId::Type_Light
+		  || type == CSMWorld::UniversalId::Type_Lockpick
+		  || type == CSMWorld::UniversalId::Type_Miscellaneous
+		  || type == CSMWorld::UniversalId::Type_Npc
+		  || type == CSMWorld::UniversalId::Type_Probe
+		  || type == CSMWorld::UniversalId::Type_Repair
+		  || type == CSMWorld::UniversalId::Type_Static
+		  || type == CSMWorld::UniversalId::Type_Weapon)
             {
                 type = CSMWorld::UniversalId::Type_Referenceable;
             }
@@ -266,16 +266,20 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
     if (delegateIt != mDelegates.end())
     {
         editor = delegateIt->second->createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
+
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
 
         bool skip = false;
         if (qobject_cast<DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+
             connect(editor, SIGNAL(tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>&, const CSMDoc::Document*)),
                     proxy, SLOT(tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>&, const CSMDoc::Document*)));
+
             connect(proxy, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
                     this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
+
             skip = true;
         }
         if(!skip && qobject_cast<QCheckBox*>(editor))
@@ -299,7 +303,9 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
             skip = true;
         } //lisp cond pairs would be nice in the C++
 
-        connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
+        connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)),
+		this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
+
         mProxys.push_back(proxy); //deleted in the destructor
     }
     return editor;
@@ -326,7 +332,9 @@ mUndoStack(undoStack),
 mTable(table)
 {
     remake (row);
-    connect(&mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)), this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
+
+    connect(&mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)), 
+	    this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 }
 
 void CSVWorld::EditWidget::remake(int row)
@@ -345,6 +353,7 @@ void CSVWorld::EditWidget::remake(int row)
         mWidgetMapper = 0;
     }
     mWidgetMapper = new QDataWidgetMapper (this);
+
     mWidgetMapper->setModel(mTable);
     mWidgetMapper->setItemDelegate(&mDispatcher);
 
@@ -536,10 +545,14 @@ void CSVWorld::DialogueSubView::prevId()
         if (!(state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased))
         {
                 mEditWidget->remake(newRow);
+
                 setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
                                         mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
+
 		mCurrentId = std::string(mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData());
+
                 mEditWidget->setDisabled(mLocked);
+
                 return;
         }
         --newRow;
@@ -568,10 +581,14 @@ void CSVWorld::DialogueSubView::nextId()
         if (!(state == CSMWorld::RecordBase::State_Deleted))
         {
                 mEditWidget->remake(newRow);
+
                 setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
 						      mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
+
 		mCurrentId = std::string(mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData());
+
                 mEditWidget->setDisabled(mLocked);
+
                 return;
         }
         ++newRow;
@@ -620,6 +637,7 @@ void CSVWorld::DialogueSubView::tableMimeDataDropped(QWidget* editor,
 void CSVWorld::DialogueSubView::revertRecord()
 {
     const int rows = mTable->rowCount();
+
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
     if (!currentIndex.isValid())
@@ -643,6 +661,7 @@ void CSVWorld::DialogueSubView::revertRecord()
             if (mTable->rowCount() == 0)
             {
                 mEditWidget->setDisabled(true); //closing the editor is other option
+
                 return;
             }
 	    if (currentIndex.row() >= mTable->rowCount())
@@ -676,6 +695,7 @@ void CSVWorld::DialogueSubView::deleteRecord()
             if (mTable->rowCount() == 0)
             {
                 mEditWidget->setDisabled(true); //closing the editor is other option
+
                 return;
             }
             if (currentIndex.row() >= mTable->rowCount())
@@ -691,6 +711,7 @@ void CSVWorld::DialogueSubView::deleteRecord()
 void CSVWorld::DialogueSubView::requestFocus (const std::string& id)
 {
     mCurrentId = std::string(id);
+
     mEditWidget->remake(mTable->getModelIndex (id, 0).row());
 }
 
