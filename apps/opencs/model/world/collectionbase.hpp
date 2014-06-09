@@ -33,6 +33,10 @@ namespace CSMWorld
             virtual ~CollectionBase();
 
             virtual int getSize() const = 0;
+	    
+	    virtual int getNestedRowsCount(int row, int column) const;
+
+	    virtual int getNestedColumnsCount(int row, int column) const;
 
             virtual std::string getId (int index) const = 0;
 
@@ -45,6 +49,8 @@ namespace CSMWorld
             virtual QVariant getData (int index, int column) const = 0;
 
             virtual void setData (int index, int column, const QVariant& data) = 0;
+
+            virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
 
 // Not in use. Temporarily removed so that the implementation of RefIdCollection can continue without
 // these functions for now.

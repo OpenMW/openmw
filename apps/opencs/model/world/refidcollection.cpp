@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <memory>
+#include <QDebug>
 
 #include <components/esm/esmreader.hpp>
 
@@ -416,6 +417,19 @@ QVariant CSMWorld::RefIdCollection::getData (int index, int column) const
     return adaptor.getData (&mColumns.at (column), mData, localIndex.first);
 }
 
+<<<<<<< Updated upstream
+=======
+QVariant CSMWorld::RefIdCollection::getNestedData (int row, int column, int subRow, int subColumn) const
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex(row);
+
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+
+    //if this overloaded, base class method was not overriden, crash will happen (assert(false)) Don't try to use this method for non-nested columns!
+    return adaptor.getNestedData (&mColumns.at (column), mData, localIndex.first, subRow, subColumn);
+}
+
+>>>>>>> Stashed changes
 void CSMWorld::RefIdCollection::setData (int index, int column, const QVariant& data)
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
@@ -423,6 +437,15 @@ void CSMWorld::RefIdCollection::setData (int index, int column, const QVariant& 
     const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
 
     adaptor.setData (&mColumns.at (column), mData, localIndex.first, data);
+}
+
+void CSMWorld::RefIdCollection::setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn)
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
+
+    dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(adaptor).setNestedData (&mColumns.at (column), mData, localIndex.first, data, subRow, subColumn);
 }
 
 void CSMWorld::RefIdCollection::removeRows (int index, int count)
@@ -566,3 +589,21 @@ const CSMWorld::RefIdData& CSMWorld::RefIdCollection::getDataSet() const
     return mData;
 }
 
+int CSMWorld::RefIdCollection::getNestedRowsCount(int row, int column) const
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+
+    const int count = adaptor.getNestedRowsCount(&mColumns.at(column), mData, localIndex.first);
+    return count;
+}
+
+int CSMWorld::RefIdCollection::getNestedColumnsCount(int row, int column) const
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+
+    return adaptor.getNestedColumnsCount(&mColumns.at(column), mData);
+}

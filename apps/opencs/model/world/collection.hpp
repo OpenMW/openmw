@@ -73,6 +73,10 @@ namespace CSMWorld
             ///< Add a new record (modified)
 
             virtual int getSize() const;
+	    
+	    virtual int getNestedColumnsCount(int column) const;
+
+	    virtual int getNestedRowsCount(int row, int column) const;
 
             virtual std::string getId (int index) const;
 
@@ -92,7 +96,7 @@ namespace CSMWorld
             virtual void purge();
             ///< Remove records that are flagged as erased.
 
-            virtual void removeRows (int index, int count) ;
+            virtual void removeRows (int index, int count);
 
             virtual void appendBlankRecord (const std::string& id,
                 UniversalId::Type type = UniversalId::Type_None);
@@ -246,6 +250,20 @@ namespace CSMWorld
     int Collection<ESXRecordT, IdAccessorT>::getSize() const
     {
         return mRecords.size();
+    }
+    
+    template<typename ESXRecordT, typename IdAccessorT>
+    int Collection<ESXRecordT, IdAccessorT>::getNestedRowsCount(int row, int column) const
+    {
+	//TODO
+	return 0;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    int Collection<ESXRecordT, IdAccessorT>::getNestedColumnsCount(int column) const
+    {
+	//TODO
+	return 0;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

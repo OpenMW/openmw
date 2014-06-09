@@ -8,6 +8,19 @@
 #include "universalid.hpp"
 #include "columns.hpp"
 
+<<<<<<< Updated upstream
+=======
+/*! \brief
+ * Clas for holding the model. Uses typical qt table abstraction/interface for granting access to the individiual fields of the records,
+ * Some records are holding nested data (for instance inventory list of the npc). In casses like this, table model offers interface
+ * to access nested data in the qt way – that is specify parent. The parent is encoded in the internalid of the index model
+ * See methods fold and unfold adress to see why. This approach has some serious limitations: it allows only
+ * a single level of the nesting. At the point of creating this code this seemed to be a good enough solution.
+ * If for some reason it turned out that in fact multiple levels of nesting are needed, change in the addressing of the
+ * index is most likely the very first to be considered.
+ */
+
+>>>>>>> Stashed changes
 namespace CSMWorld
 {
     class CollectionBase;
@@ -44,6 +57,13 @@ namespace CSMWorld
             // not implemented
             IdTable (const IdTable&);
             IdTable& operator= (const IdTable&);
+<<<<<<< Updated upstream
+=======
+
+            unsigned int foldIndexAdress(const QModelIndex& index) const;
+
+            std::pair<int, int> unfoldIndexAdress(unsigned int id) const;
+>>>>>>> Stashed changes
 
         public:
 
@@ -71,6 +91,8 @@ namespace CSMWorld
                 const;
 
             virtual QModelIndex parent (const QModelIndex& index) const;
+	
+	    virtual bool hasChildren (const QModelIndex& index) const;
 
             void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types

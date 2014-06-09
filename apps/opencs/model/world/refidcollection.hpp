@@ -55,6 +55,10 @@ namespace CSMWorld
 
             virtual int getSize() const;
 
+	    virtual int getNestedRowsCount(int row, int column) const;
+
+	    virtual int getNestedColumnsCount(int row, int column) const;
+
             virtual std::string getId (int index) const;
 
             virtual int getIndex (const std::string& id) const;
@@ -66,6 +70,8 @@ namespace CSMWorld
             virtual QVariant getData (int index, int column) const;
 
             virtual void setData (int index, int column, const QVariant& data);
+
+            virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
 
             virtual void removeRows (int index, int count);
 

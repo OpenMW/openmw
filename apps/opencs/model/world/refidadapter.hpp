@@ -31,7 +31,27 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
 
             virtual std::string getId (const RecordBase& record) const = 0;
+
             virtual void setId(RecordBase& record, const std::string& id) = 0;
+    };
+
+    class NestedRefIdAdapter
+    {
+        public:
+            NestedRefIdAdapter();
+
+            virtual ~NestedRefIdAdapter();
+ 
+            virtual void setNestedData (const RefIdColumn *column, RefIdData& data, int row,
+					const QVariant& value, int subRowIndex, int subColIndex) const = 0;
+
+	    virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data,
+					    int index, int subRowIndex, int subColIndex) const = 0;
+      
+      
+	    virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const = 0;
+
+	    virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const = 0;
     };
 }
 

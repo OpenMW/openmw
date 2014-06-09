@@ -1,6 +1,8 @@
 
 #include "idtable.hpp"
 
+#include <QDebug>
+
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
@@ -14,16 +16,21 @@ CSMWorld::IdTable::~IdTable()
 
 int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 {
-    if (parent.isValid())
-        return 0;
-
+    if (hasChildren(parent))
+    {
+	int nestedRows = mIdCollection->getNestedRowsCount(parent.row(), parent.column());
+	return nestedRows;
+    }
+      
     return mIdCollection->getSize();
 }
 
 int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
 {
     if (parent.isValid())
-        return 0;
+    {
+	return mIdCollection->getNestedColumnsCount(parent.row(), parent.column());
+    }
 
     return mIdCollection->getColumns();
 }
@@ -36,7 +43,17 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
         return QVariant();
 
+<<<<<<< Updated upstream
     return mIdCollection->getData (index.row(), index.column());
+=======
+    if (index.internalId() != 0)
+    {
+        std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
+        return mIdCollection->getNestedData(parentAdress.first, parentAdress.second, index.row(), index.column());
+    } else {
+        return mIdCollection->getData (index.row(), index.column());
+    }
+>>>>>>> Stashed changes
 }
 
 QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation, int role) const
@@ -60,11 +77,18 @@ bool CSMWorld::IdTable::setData ( const QModelIndex &index, const QVariant &valu
 {
     if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
     {
-        mIdCollection->setData (index.row(), index.column(), value);
+        if (index.internalId() == 0)
+        {
+            mIdCollection->setData (index.row(), index.column(), value);
 
-        emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
-            CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
+            emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
+                CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
+        } else
+        {
+            const std::pair<int, int>& parentAdress(unfoldIndexAdress(index.internalId()));
 
+            mIdCollection->setNestedData(parentAdress.first, parentAdress.second, value, index.row(), index.column());
+        }
         return true;
     }
 
@@ -111,7 +135,23 @@ QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& pa
 
 QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
 {
+<<<<<<< Updated upstream
     return QModelIndex();
+=======
+    if (index.internalId() == 0) //0 is used for indexs with invalid parent (top level data)
+    {
+        return QModelIndex();
+    }
+
+    const std::pair<int, int>& adress(unfoldIndexAdress(index.internalId()));
+
+    if (adress.first >= this->rowCount() || adress.second >= this->columnCount())
+    {
+	qDebug()<<"Parent index is not present in the model";
+        throw "Parent index is not present in the model";
+    }
+    return createIndex(adress.first, adress.second, 0);
+>>>>>>> Stashed changes
 }
 
 void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type)
@@ -240,4 +280,37 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
 int CSMWorld::IdTable::getColumnId(int column) const
 {
     return mIdCollection->getColumn(column).getId();
+<<<<<<< Updated upstream
 }
+=======
+}
+
+bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
+{
+    return (index.isValid() &&
+	    mIdCollection->getColumn (index.column()).mDisplayType == ColumnBase::Display_Nested && 
+	    index.data().isValid());
+}
+
+unsigned int CSMWorld::IdTable::foldIndexAdress (const QModelIndex& index) const
+{
+    unsigned int out = index.row() * this->columnCount();
+    out += index.column();
+    ++out;
+    return out;
+}
+
+std::pair< int, int > CSMWorld::IdTable::unfoldIndexAdress (unsigned int id) const
+{
+    if (id == 0)
+    {
+	qDebug()<<"Attempt to unfold index id of the top level data cell";
+        throw "Attempt to unfold index id of the top level data cell";
+    }
+
+    --id;
+    int row = id / this->columnCount();
+    int column = id - row * this->columnCount();
+    return std::make_pair<int, int>(row, column);
+}
+>>>>>>> Stashed changes

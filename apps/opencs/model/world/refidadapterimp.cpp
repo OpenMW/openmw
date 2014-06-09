@@ -1,6 +1,8 @@
 
 #include "refidadapterimp.hpp"
 
+#include <QDebug>
+
 CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const InventoryColumns& columns,
     const RefIdColumn *autoCalc)
 : InventoryRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, columns),
@@ -178,6 +180,32 @@ CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& colum
   mOrganic (organic), mRespawn (respawn)
 {}
 
+int CSMWorld::ContainerRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    qDebug()<<"getting nested columns count";
+    if (column==mContent)
+    {
+	return 2;
+    } else {
+	throw "Trying to obtain nested columns count, but column does not have nested columns!";
+    }
+}
+
+int CSMWorld::ContainerRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    qDebug()<<"getting nested rows count";
+    const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
+        data.getRecord(RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    qDebug() <<  "exception above";
+    if (column==mContent)
+    {
+	qDebug() <<  record.get().mInventory.mList.size();
+	return record.get().mInventory.mList.size();
+    } else {
+	throw "Trying to obtain nested rows count, but column does not have nested columns!";
+    }
+}
 QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
     int index) const
 {
@@ -192,6 +220,9 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, co
 
     if (column==mRespawn)
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
+    
+    if (column==mContent)
+	return true;
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
@@ -222,6 +253,71 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
 }
 
+<<<<<<< Updated upstream
+=======
+void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column, RefIdData& data,
+                                              int row,
+                                              const QVariant& value,
+                                              int subRowIndex,
+                                              int subColIndex) const
+{
+    Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Container)));
+
+    if (column==mContent)
+    {
+        switch (subColIndex)
+        {
+            case 0:
+                record.get().mInventory.mList.at(subRowIndex).mItem.assign(std::string(value.toString().toUtf8().constData()));
+                break;
+
+            case 1:
+                record.get().mInventory.mList.at(subRowIndex).mCount = value.toInt();
+                break;
+
+            default:
+                throw "Trying to access non-existing column in the nested table!";
+        }
+    } else
+    {
+        throw "This column does not hold multiple values.";
+    }
+}
+
+QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdColumn* column,
+							 const CSMWorld::RefIdData& data,
+							 int index,
+							 int subRowIndex,
+							 int subColIndex) const
+{
+    qDebug()<<"Accessing content column";
+    const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    if (column==mContent)
+    {
+        const ESM::ContItem& content = record.get().mInventory.mList.at(subRowIndex);
+
+        switch (subColIndex)
+        {
+            case 0:
+                return QString::fromUtf8(content.mItem.toString().c_str());
+
+            case 1:
+                return content.mCount;
+
+            default:
+                throw "Trying to access non-existing column in the nested table!";
+        }
+    } else
+    {
+        throw "This column does not hold multiple values.";
+    }
+}
+
+
+>>>>>>> Stashed changes
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
 : ActorColumns (actorColumns)
 {}
