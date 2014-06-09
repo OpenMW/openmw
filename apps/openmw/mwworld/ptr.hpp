@@ -60,7 +60,7 @@ namespace MWWorld
 
             MWWorld::LiveCellRefBase *getBase() const;
 
-            ESM::CellRef& getCellRef() const;
+            MWWorld::CellRef& getCellRef() const;
 
             RefData& getRefData() const;
 

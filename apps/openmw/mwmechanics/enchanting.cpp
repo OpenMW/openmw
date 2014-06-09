@@ -20,12 +20,10 @@ namespace MWMechanics
         if(!itemEmpty())
         {
             mObjectType = mOldItemPtr.getTypeName();
-            mOldItemId = mOldItemPtr.getCellRef().mRefID;
         }
         else
         {
             mObjectType="";
-            mOldItemId="";
         }
     }
 
@@ -78,17 +76,13 @@ namespace MWMechanics
         enchantment.mData.mCost = getEnchantPoints();
         enchantment.mEffects = mEffectList;
 
-        // Create a new item
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId, 1);
-        const MWWorld::Ptr& newItemPtr = ref.getPtr();
-
         // Apply the enchantment
         const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
-        newItemPtr.getClass().applyEnchantment(newItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
+        std::string newItemId = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
         store.remove(mOldItemPtr, 1, player);
-        store.add(newItemPtr, 1, player);
+        store.add(newItemId, 1, player);
 
         if(!mSelfEnchanting)
             payForEnchantment();
@@ -240,9 +234,9 @@ namespace MWMechanics
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         if(soulEmpty())
             return 0;
-        if(mSoulGemPtr.getCellRef().mSoul=="")
+        if(mSoulGemPtr.getCellRef().getSoul()=="")
             return 0;
-        const ESM::Creature* soul = store.get<ESM::Creature>().find(mSoulGemPtr.getCellRef().mSoul);
+        const ESM::Creature* soul = store.get<ESM::Creature>().find(mSoulGemPtr.getCellRef().getSoul());
         return soul->mData.mSoul;
     }
 

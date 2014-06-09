@@ -49,20 +49,17 @@ MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create)
 
 void MWState::CharacterManager::deleteSlot(const MWState::Character *character, const MWState::Slot *slot)
 {
-    int index = character - &mCharacters[0];
+    std::list<Character>::iterator it = findCharacter(character);
 
-    if (index<0 || index>=static_cast<int> (mCharacters.size()))
-        throw std::logic_error ("invalid character");
+    it->deleteSlot(slot);
 
-    mCharacters[index].deleteSlot(slot);
-
-    if (mCharacters[index].begin() == mCharacters[index].end())
+    if (character->begin() == character->end())
     {
         // All slots deleted, cleanup and remove this character
-        mCharacters[index].cleanup();
+        it->cleanup();
         if (character == mCurrent)
             mCurrent = NULL;
-        mCharacters.erase(mCharacters.begin() + index);
+        mCharacters.erase(it);
     }
 }
 
@@ -78,14 +75,24 @@ void MWState::CharacterManager::createCharacter()
     mCurrent = &mCharacters.back();
 }
 
+std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter(const MWState::Character* character)
+{
+    std::list<Character>::iterator it = mCharacters.begin();
+    for (; it != mCharacters.end(); ++it)
+    {
+        if (&*it == character)
+            break;
+    }
+    if (it == mCharacters.end())
+        throw std::logic_error ("invalid character");
+    return it;
+}
+
 void MWState::CharacterManager::setCurrentCharacter (const Character *character)
 {
-    int index = character - &mCharacters[0];
+    std::list<Character>::iterator it = findCharacter(character);
 
-    if (index<0 || index>=static_cast<int> (mCharacters.size()))
-        throw std::logic_error ("invalid character");
-
-    mCurrent = &mCharacters[index];
+    mCurrent = &*it;
 }
 
 void MWState::CharacterManager::clearCurrentCharacter()
@@ -93,12 +100,12 @@ void MWState::CharacterManager::clearCurrentCharacter()
     mCurrent = 0;
 }
 
-std::vector<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
+std::list<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
 {
     return mCharacters.begin();
 }
 
-std::vector<MWState::Character>::const_iterator MWState::CharacterManager::end() const
+std::list<MWState::Character>::const_iterator MWState::CharacterManager::end() const
 {
     return mCharacters.end();
 }

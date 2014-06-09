@@ -168,8 +168,8 @@ namespace MWGui
         int count = item.mCount;
 
         // Bound items may not be moved
-        if (item.mBase.getCellRef().mRefID.size() > 6
-                && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
+        if (item.mBase.getCellRef().getRefId().size() > 6
+                && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
         {
             MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
             MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
@@ -454,7 +454,7 @@ namespace MWGui
             // NOTE: Don't allow users to select WerewolfRobe objects in the inventory. Vanilla
             // likely uses a hack like this since there's no other way to prevent it from being
             // taken.
-            if(item.getCellRef().mRefID == "werewolfrobe")
+            if(item.getCellRef().getRefId() == "werewolfrobe")
                 return MWWorld::Ptr();
             return item;
         }

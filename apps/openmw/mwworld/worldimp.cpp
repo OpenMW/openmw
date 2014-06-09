@@ -252,7 +252,6 @@ namespace MWWorld
         mProjectileManager->clear();
 
         mLocalScripts.clear();
-        mPlayer->clear();
 
         mWorldScene->changeToVoid();
 
@@ -261,9 +260,10 @@ namespace MWWorld
 
         if (mPlayer)
         {
-            mPlayer->setCell (0);
+	    mPlayer->clear();
+            mPlayer->setCell(0);
             mPlayer->getPlayer().getRefData() = RefData();
-            mPlayer->set (mStore.get<ESM::NPC>().find ("player"));
+            mPlayer->set(mStore.get<ESM::NPC>().find ("player"));
         }
 
         mCells.clear();
@@ -368,6 +368,9 @@ namespace MWWorld
 
     World::~World()
     {
+        // Must be cleared before mRendering is destroyed
+        mProjectileManager->clear();
+
         delete mWeatherManager;
         delete mWorldScene;
         delete mRendering;
@@ -429,7 +432,7 @@ namespace MWWorld
             mRendering->getCamera()->toggleVanityMode(false);
         }
         if(mRendering->getCamera()->isFirstPerson())
-            togglePOV();
+            mRendering->getCamera()->toggleViewMode(true);
     }
 
     MWWorld::Player& World::getPlayer()
@@ -1034,7 +1037,7 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
-        ptr.getCellRef().mScale = scale;
+        ptr.getCellRef().setScale(scale);
         ptr.getClass().adjustScale(ptr,scale);
 
         if(ptr.getRefData().getBaseNode() == 0)
@@ -1116,13 +1119,15 @@ namespace MWWorld
             while(ptr.getRefData().getLocalRotation().rot[2]<=-fullRotateRad)
                 ptr.getRefData().getLocalRotation().rot[2]+=fullRotateRad;
 
-            Ogre::Quaternion worldRotQuat(Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)*
-            Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y)*
-            Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z));
+            Ogre::Quaternion worldRotQuat(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z);
+            if (!ptr.getClass().isActor())
+                worldRotQuat = Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)*
+                        Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y)* worldRotQuat;
 
-            Ogre::Quaternion rot(Ogre::Quaternion(Ogre::Degree(x), Ogre::Vector3::NEGATIVE_UNIT_X)*
-            Ogre::Quaternion(Ogre::Degree(y), Ogre::Vector3::NEGATIVE_UNIT_Y)*
-            Ogre::Quaternion(Ogre::Degree(z), Ogre::Vector3::NEGATIVE_UNIT_Z));
+            Ogre::Quaternion rot(Ogre::Degree(z), Ogre::Vector3::NEGATIVE_UNIT_Z);
+            if (!ptr.getClass().isActor())
+                rot = Ogre::Quaternion(Ogre::Degree(x), Ogre::Vector3::NEGATIVE_UNIT_X)*
+                Ogre::Quaternion(Ogre::Degree(y), Ogre::Vector3::NEGATIVE_UNIT_Y)*rot;
 
             ptr.getRefData().getBaseNode()->setOrientation(worldRotQuat*rot);
             mPhysics->rotateObject(ptr);
@@ -1375,10 +1380,10 @@ namespace MWWorld
 
         updateWeather(duration);
 
-        mWorldScene->update (duration, paused);
-
         if (!paused)
             doPhysics (duration);
+
+        mWorldScene->update (duration, paused);
 
         performUpdateSceneQueries ();
 
@@ -1544,7 +1549,7 @@ namespace MWWorld
             if (!ref.mData.isEnabled())
                 continue;
 
-            if (ref.mRef.mTeleport)
+            if (ref.mRef.getTeleport())
             {
                 World::DoorMarker newMarker;
                 newMarker.name = MWClass::Door::getDestination(ref);
@@ -1618,25 +1623,47 @@ namespace MWWorld
 
     bool World::canPlaceObject(float cursorX, float cursorY)
     {
-        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+        Ogre::Vector3 normal(0,0,0);
+        std::string handle;
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY, &normal, &handle);
 
-        /// \todo also check if the wanted position is on a flat surface, and not e.g. against a vertical wall!
+        if (result.first)
+        {
+            // check if the wanted position is on a flat surface, and not e.g. against a vertical wall
+            if (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() >= 30)
+                return false;
 
-        if (!result.first)
+            MWWorld::Ptr hitObject = searchPtrViaHandle(handle);
+            if (!hitObject.isEmpty() && hitObject.getClass().isActor())
+                return false;
+
+            return true;
+        }
+        else
             return false;
-        return true;
     }
 
 
     Ptr World::copyObjectToCell(const Ptr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
     {
-        if (object.getClass().isActor() || adjustPos)
+        if (!object.getClass().isActor() && adjustPos)
         {
+            // Adjust position so the location we wanted ends up in the middle of the object bounding box
             Ogre::Vector3 min, max;
             if (mPhysics->getObjectAABB(object, min, max)) {
-                pos.pos[0] -= (min.x + max.x) / 2;
-                pos.pos[1] -= (min.y + max.y) / 2;
-                pos.pos[2] -= min.z;
+                Ogre::Quaternion xr(Ogre::Radian(-pos.rot[0]), Ogre::Vector3::UNIT_X);
+                Ogre::Quaternion yr(Ogre::Radian(-pos.rot[1]), Ogre::Vector3::UNIT_Y);
+                Ogre::Quaternion zr(Ogre::Radian(-pos.rot[2]), Ogre::Vector3::UNIT_Z);
+
+                Ogre::Vector3 adjust (
+                             (min.x + max.x) / 2,
+                            (min.y + max.y) / 2,
+                            min.z
+                            );
+                adjust = (xr*yr*zr) * adjust;
+                pos.pos[0] -= adjust.x;
+                pos.pos[1] -= adjust.y;
+                pos.pos[2] -= adjust.z;
             }
         }
 
@@ -1832,7 +1859,12 @@ namespace MWWorld
         if (!mPlayer)
             mPlayer = new MWWorld::Player(player, *this);
         else
+        {
+            // Remove the old CharacterController
+            MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+
             mPlayer->set(player);
+        }
 
         Ptr ptr = mPlayer->getPlayer();
         mRendering->setupPlayer(ptr);
@@ -1948,7 +1980,7 @@ namespace MWWorld
             for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
             {
                 MWWorld::Ptr ptr (&*container, *cellIt);
-                if (Misc::StringUtils::ciEqual(ptr.getCellRef().mOwner, npc.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(ptr);
             }
         }
@@ -1976,7 +2008,7 @@ namespace MWWorld
             (*cellIt)->forEach<ListHandlesFunctor>(functor);
 
             for (std::vector<std::string>::iterator it = functor.mHandles.begin(); it != functor.mHandles.end(); ++it)
-                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).getCellRef().mOwner, npc.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
@@ -2032,34 +2064,34 @@ namespace MWWorld
         }
         const DoorList &doors = cellStore->get<ESM::Door>().mList;
         for (DoorList::const_iterator it = doors.begin(); it != doors.end(); ++it) {
-            if (!it->mRef.mTeleport) {
+            if (!it->mRef.getTeleport()) {
                 continue;
             }
 
             MWWorld::CellStore *source = 0;
 
             // door to exterior
-            if (it->mRef.mDestCell.empty()) {
+            if (it->mRef.getDestCell().empty()) {
                 int x, y;
-                const float *pos = it->mRef.mDoorDest.pos;
-                positionToIndex(pos[0], pos[1], x, y);
+                ESM::Position doorDest = it->mRef.getDoorDest();
+                positionToIndex(doorDest.pos[0], doorDest.pos[1], x, y);
                 source = getExterior(x, y);
             }
             // door to interior
             else {
-                source = getInterior(it->mRef.mDestCell);
+                source = getInterior(it->mRef.getDestCell());
             }
             if (0 != source) {
                 // Find door leading to our current teleport door
                 // and use it destination to position inside cell.
                 const DoorList &doors = source->get<ESM::Door>().mList;
                 for (DoorList::const_iterator jt = doors.begin(); jt != doors.end(); ++jt) {
-                    if (it->mRef.mTeleport &&
-                        Misc::StringUtils::ciEqual(name, jt->mRef.mDestCell))
+                    if (it->mRef.getTeleport() &&
+                        Misc::StringUtils::ciEqual(name, jt->mRef.getDestCell()))
                     {
                         /// \note Using _any_ door pointed to the interior,
                         /// not the one pointed to current door.
-                        pos = jt->mRef.mDoorDest;
+                        pos = jt->mRef.getDoorDest();
                         return true;
                     }
                 }
@@ -2322,9 +2354,9 @@ namespace MWWorld
         for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if (ref.mRef.mTeleport && ref.mRef.mDestCell.empty())
+            if (ref.mRef.getTeleport() && ref.mRef.getDestCell().empty())
             {
-                ESM::Position pos = ref.mRef.mDoorDest;
+                ESM::Position pos = ref.mRef.getDoorDest();
                 result = Ogre::Vector3(pos.pos);
                 return true;
             }
@@ -2520,13 +2552,13 @@ namespace MWWorld
             ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it) //Move all stolen stuff into chest
             {
-                if (!it->getCellRef().mOwner.empty() && it->getCellRef().mOwner != "player") //Not owned by no one/player?
+                if (!it->getCellRef().getOwner().empty() && it->getCellRef().getOwner() != "player") //Not owned by no one/player?
                 {
                     closestChest.getClass().getContainerStore(closestChest).add(*it, it->getRefData().getCount(), closestChest);
                     store.remove(*it, it->getRefData().getCount(), ptr);
                 }
             }
-            closestChest.getCellRef().mLockLevel = abs(closestChest.getCellRef().mLockLevel);
+            closestChest.getClass().lock(closestChest,50);
         }
     }
 
@@ -2630,7 +2662,7 @@ namespace MWWorld
 
             MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
             MWWorld::ManualRef ref(getStore(), selectedCreature, 1);
-            ref.getPtr().getCellRef().mPos = ipos;
+            ref.getPtr().getCellRef().setPosition(ipos);
 
             safePlaceObject(ref.getPtr(), cell, ipos);
         }

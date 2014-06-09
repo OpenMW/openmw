@@ -83,8 +83,8 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        if (ref->mRef.mTeleport && !ref->mRef.mDestCell.empty()) // TODO doors that lead to exteriors
-            return ref->mRef.mDestCell;
+        if (ptr.getCellRef().getTeleport() && !ptr.getCellRef().getDestCell().empty()) // TODO doors that lead to exteriors
+            return ptr.getCellRef().getDestCell();
 
         return ref->mBase->mName;
     }
@@ -101,16 +101,16 @@ namespace MWClass
 
         MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
 
-        bool needKey = ptr.getCellRef().mLockLevel > 0;
+        bool needKey = ptr.getCellRef().getLockLevel() > 0;
         bool hasKey = false;
         std::string keyName;
 
         // make key id lowercase
-        std::string keyId = ptr.getCellRef().mKey;
+        std::string keyId = ptr.getCellRef().getKey();
         Misc::StringUtils::toLower(keyId);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            std::string refId = it->getCellRef().mRefID;
+            std::string refId = it->getCellRef().getRefId();
             Misc::StringUtils::toLower(refId);
             if (refId == keyId)
             {
@@ -125,22 +125,22 @@ namespace MWClass
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap
-            ptr.getCellRef().mTrap = "";
+            ptr.getCellRef().getTrap() = "";
         }
 
         if (!needKey || hasKey)
         {
-            if(!ptr.getCellRef().mTrap.empty())
+            if(!ptr.getCellRef().getTrap().empty())
             {
                 // Trap activation
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().mTrap, ptr));
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().getTrap(), ptr));
                 action->setSound(trapActivationSound);
                 return action;
             }
 
-            if (ref->mRef.mTeleport)
+            if (ptr.getCellRef().getTeleport())
             {
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->mRef.mDestCell, ref->mRef.mDoorDest));
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest()));
 
                 action->setSound(openSound);
 
@@ -191,14 +191,14 @@ namespace MWClass
     void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
         if(lockLevel!=0)
-            ptr.getCellRef().mLockLevel = abs(lockLevel); //Changes lock to locklevel, in positive
+            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
         else
-            ptr.getCellRef().mLockLevel = abs(ptr.getCellRef().mLockLevel); //No locklevel given, just flip the origional one
+            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the origional one
     }
 
     void Door::unlock (const MWWorld::Ptr& ptr) const
     {
-        ptr.getCellRef().mLockLevel = -abs(ptr.getCellRef().mLockLevel); //Makes lockLevel negative
+        ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
     }
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
@@ -234,17 +234,17 @@ namespace MWClass
 
         std::string text;
 
-        if (ref->mRef.mTeleport)
+        if (ptr.getCellRef().getTeleport())
         {
             text += "\n#{sTo}";
             text += "\n" + getDestination(*ref);
         }
 
-        if (ref->mRef.mLockLevel > 0)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
-        else if (ref->mRef.mLockLevel < 0)
+        if (ptr.getCellRef().getLockLevel() > 0)
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
+        else if (ptr.getCellRef().getLockLevel() < 0)
             text += "\n#{sUnlocked}";
-        if (ref->mRef.mTrap != "")
+        if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
@@ -260,16 +260,16 @@ namespace MWClass
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         std::string dest;
-        if (door.mRef.mDestCell != "")
+        if (door.mRef.getDestCell() != "")
         {
             // door leads to an interior, use interior name as tooltip
-            dest = door.mRef.mDestCell;
+            dest = door.mRef.getDestCell();
         }
         else
         {
             // door leads to exterior, use cell name (if any), otherwise translated region name
             int x,y;
-            MWBase::Environment::get().getWorld()->positionToIndex (door.mRef.mDoorDest.pos[0], door.mRef.mDoorDest.pos[1], x, y);
+            MWBase::Environment::get().getWorld()->positionToIndex (door.mRef.getDoorDest().pos[0], door.mRef.getDoorDest().pos[1], x, y);
             const ESM::Cell* cell = store.get<ESM::Cell>().find(x,y);
             if (cell->mName != "")
                 dest = cell->mName;

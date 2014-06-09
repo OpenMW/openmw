@@ -61,7 +61,7 @@ namespace MWGui
         }
         catch (const std::exception& error)
         {
-            printError (std::string ("An exception has been thrown: ") + error.what());
+            printError (std::string ("Error: ") + error.what());
         }
 
         return false;
@@ -143,6 +143,11 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
     }
 
+    void Console::exit()
+    {
+         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Console);
+    }
+
     void Console::setFont(const std::string &fntName)
     {
         mHistory->setFontName(fntName);
@@ -190,7 +195,7 @@ namespace MWGui
             }
             catch (const std::exception& error)
             {
-                printError (std::string ("An exception has been thrown: ") + error.what());
+                printError (std::string ("Error: ") + error.what());
             }
         }
     }
@@ -413,7 +418,7 @@ namespace MWGui
             }
             else
             {
-                setTitle("#{sConsoleTitle} (" + object.getCellRef().mRefID + ")");
+                setTitle("#{sConsoleTitle} (" + object.getCellRef().getRefId() + ")");
                 mPtr = object;
             }
             // User clicked on an object. Restore focus to the console command line.

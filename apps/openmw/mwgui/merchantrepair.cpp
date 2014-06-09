@@ -47,7 +47,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
         if (iter->getClass().hasItemHealth(*iter))
         {
             int maxDurability = iter->getClass().getItemMaxHealth(*iter);
-            int durability = (iter->getCellRef().mCharge == -1) ? maxDurability : iter->getCellRef().mCharge;
+            int durability = iter->getClass().getItemHealth(*iter);
             if (maxDurability == durability)
                 continue;
 
@@ -110,11 +110,16 @@ void MerchantRepair::open()
     center();
 }
 
+void MerchantRepair::exit()
+{
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
+}
+
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
     // repair
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
-    item.getCellRef().mCharge = item.getClass().getItemMaxHealth(item);
+    item.getCellRef().setCharge(item.getClass().getItemMaxHealth(item));
 
     MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
 
@@ -128,7 +133,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 
 void MerchantRepair::onOkButtonClick(MyGUI::Widget *sender)
 {
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
+    exit();
 }
 
 }

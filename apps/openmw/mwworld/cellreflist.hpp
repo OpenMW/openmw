@@ -27,7 +27,7 @@ namespace MWWorld
         LiveRef *find (const std::string& name)
         {
             for (typename List::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
-                if (iter->mData.getCount() > 0 && iter->mRef.mRefID == name)
+                if (iter->mData.getCount() > 0 && iter->mRef.getRefId() == name)
                     return &*iter;
 
             return 0;

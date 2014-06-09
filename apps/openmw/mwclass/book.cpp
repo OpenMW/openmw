@@ -139,8 +139,8 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -159,7 +159,7 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
-    void Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
@@ -171,8 +171,7 @@ namespace MWClass
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
         const ESM::Book *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-        ref->mBase = record;
-        ref->mRef.mRefID = record->mId;
+        return record->mId;
     }
 
     boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const

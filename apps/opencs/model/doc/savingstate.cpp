@@ -25,6 +25,8 @@ void CSMDoc::SavingState::start (Document& document, bool project)
 
     mStream.clear();
 
+    mSubRecords.clear();
+
     if (project)
         mPath = mProjectPath;
     else
@@ -60,4 +62,9 @@ ESM::ESMWriter& CSMDoc::SavingState::getWriter()
 bool CSMDoc::SavingState::isProjectFile() const
 {
     return mProjectFile;
+}
+
+std::map<std::string, std::vector<int> >& CSMDoc::SavingState::getSubRecords()
+{
+    return mSubRecords;
 }

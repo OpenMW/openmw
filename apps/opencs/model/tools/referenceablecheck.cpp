@@ -621,12 +621,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     }
     else
     {
-        if (npc.mNpdt52.mMana < 0)
-            messages.push_back (std::make_pair (id, npc.mId + " mana has negative value"));
-
-        if (npc.mNpdt52.mFatigue < 0)
-            messages.push_back (std::make_pair (id, npc.mId + " fatigue has negative value"));
-
         if (npc.mNpdt52.mAgility == 0)
             messages.push_back (std::make_pair (id, npc.mId + " agility has zero value"));
 

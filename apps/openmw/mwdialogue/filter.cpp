@@ -264,15 +264,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         {
             MWWorld::ContainerStore& store = player.getClass().getContainerStore (player);
 
-            int sum = 0;
-
-            std::string name = select.getName();
-
-            for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, name))
-                    sum += iter->getRefData().getCount();
-
-            return sum;
+            return store.count(select.getName());
         }
 
         case SelectWrapper::Function_Dead:
@@ -404,16 +396,15 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             int value = 0;
 
-            const ESM::Faction& faction =
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find (factionId);
-
             MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats (player);
 
-            for (std::vector<ESM::Faction::Reaction>::const_iterator iter (faction.mReactions.begin());
-                iter!=faction.mReactions.end(); ++iter)
-                if (playerStats.getFactionRanks().find (iter->mFaction)!=playerStats.getFactionRanks().end())
-                    if (low ? iter->mReaction<value : iter->mReaction>value)
-                        value = iter->mReaction;
+            std::map<std::string, int>::const_iterator playerFactionIt = playerStats.getFactionRanks().begin();
+            for (; playerFactionIt != playerStats.getFactionRanks().end(); ++playerFactionIt)
+            {
+                int reaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(factionId, playerFactionIt->first);
+                if (low ? reaction < value : reaction > value)
+                    value = reaction;
+            }
 
             return value;
         }
@@ -539,7 +530,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_ShouldAttack:
 
-            return mActor.getClass().getCreatureStats (mActor).isHostile();
+            return mActor.getClass().getCreatureStats(mActor).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() >= 80;
 
         case SelectWrapper::Function_CreatureTargetted:
 

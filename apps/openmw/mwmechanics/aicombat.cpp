@@ -156,7 +156,7 @@ namespace MWMechanics
     bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         //General description
-        if(actor.getClass().getCreatureStats(actor).isDead()) 
+        if(actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
@@ -164,13 +164,16 @@ namespace MWMechanics
         if(target.getClass().getCreatureStats(target).isDead())
             return true;
 
-        if (!actor.getClass().isNpc() && target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
-            (actor.getClass().canSwim(actor) && !actor.getClass().canWalk(actor) // 1. pure water creature and Player moved out of water
-            && !MWBase::Environment::get().getWorld()->isSwimming(target))
-            || (!actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(target))) // 2. creature can't swim to Player
+        const MWWorld::Class& actorClass = actor.getClass();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        if (!actorClass.isNpc() && target == world->getPlayerPtr() &&
+            (actorClass.canSwim(actor) && !actor.getClass().canWalk(actor) // 1. pure water creature and Player moved out of water
+            && !world->isSwimming(target))
+            || (!actorClass.canSwim(actor) && world->isSwimming(target))) // 2. creature can't swim to Player
         {
-            actor.getClass().getCreatureStats(actor).setHostile(false);
-            actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
+            actorClass.getCreatureStats(actor).setHostile(false);
+            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;
         }
 
@@ -186,9 +189,9 @@ namespace MWMechanics
             }
         }
 
-        actor.getClass().getMovementSettings(actor) = mMovement;
-        actor.getClass().getMovementSettings(actor).mRotation[0] = 0;
-        actor.getClass().getMovementSettings(actor).mRotation[2] = 0;
+        actorClass.getMovementSettings(actor) = mMovement;
+        actorClass.getMovementSettings(actor).mRotation[0] = 0;
+        actorClass.getMovementSettings(actor).mRotation[2] = 0;
 
         if(mMovement.mRotation[2] != 0)
         {
@@ -222,7 +225,7 @@ namespace MWMechanics
             mAttack = false;
         }
 
-        actor.getClass().getCreatureStats(actor).setAttackingOrSpell(mAttack);
+        actorClass.getCreatureStats(actor).setAttackingOrSpell(mAttack);
 
         float tReaction = 0.25f;
         if(mTimerReact < tReaction)
@@ -241,31 +244,30 @@ namespace MWMechanics
             mCell = actor.getCell();
         }
 
-        const MWWorld::Class &actorCls = actor.getClass();
         const ESM::Weapon *weapon = NULL;
         MWMechanics::WeaponType weaptype;
         float weapRange, weapSpeed = 1.0f;
 
-        actorCls.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+        actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         // Get weapon characteristics
-        if (actorCls.hasInventoryStore(actor))
+        if (actorClass.hasInventoryStore(actor))
         {
-            MWMechanics::DrawState_ state = actorCls.getCreatureStats(actor).getDrawState();
+            MWMechanics::DrawState_ state = actorClass.getCreatureStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                actorCls.getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
+                actorClass.getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
 
             // TODO: Check equipped weapon and equip a different one if we can't attack with it
             // (e.g. no ammunition, or wrong type of ammunition equipped, etc. autoEquip is not very smart in this regard))
 
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot =
-                MWMechanics::getActiveWeapon(actorCls.getCreatureStats(actor), actorCls.getInventoryStore(actor), &weaptype);
+                MWMechanics::getActiveWeapon(actorClass.getCreatureStats(actor), actorClass.getInventoryStore(actor), &weaptype);
 
             if (weaptype == WeapType_HandToHand)
             {
                 static float fHandToHandReach = 
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+                    world->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
                 weapRange = fHandToHandReach;
             }
             else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell)
@@ -315,7 +317,7 @@ namespace MWMechanics
                 //say a provoking combat phrase
                 if (actor.getClass().isNpc())
                 {
-                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const MWWorld::ESMStore &store = world->getStore();
                     int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
                     if (roll < chance)
@@ -364,14 +366,14 @@ namespace MWMechanics
 
         bool isStuck = false;
         float speed = 0.0f;
-        if(mMovement.mPosition[1] && (mLastActorPos - vActorPos).length() < (speed = actorCls.getSpeed(actor)) * tReaction / 2)
+        if(mMovement.mPosition[1] && (mLastActorPos - vActorPos).length() < (speed = actorClass.getSpeed(actor)) * tReaction / 2)
             isStuck = true;
 
         mLastActorPos = vActorPos;
 
         // check if actor can move along z-axis
-        bool canMoveByZ = (actorCls.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-            || MWBase::Environment::get().getWorld()->isFlying(actor);
+        bool canMoveByZ = (actorClass.canSwim(actor) && world->isSwimming(actor))
+            || world->isFlying(actor);
 
         // (within attack dist) || (not quite attack dist while following)
         if(distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck) )
@@ -411,7 +413,7 @@ namespace MWMechanics
                     mCombatMove = true;
                 }
                 // only NPCs are smart enough to use dodge movements
-                else if(actorCls.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
+                else if(actorClass.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
                 {
                     //apply sideway movement (kind of dodging) with some probability
                     if(static_cast<float>(rand())/RAND_MAX < 0.25)
@@ -435,13 +437,13 @@ namespace MWMechanics
         else // remote pathfinding
         {
             bool preferShortcut = false;
-            bool inLOS = MWBase::Environment::get().getWorld()->getLOS(actor, target);
-			
+            bool inLOS = world->getLOS(actor, target);
+
             // check if shortcut is available
             if(inLOS && (!isStuck || mReadyToAttack)
                 && (!mForceNoShortcut || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
             {
-                if(speed == 0.0f) speed = actorCls.getSpeed(actor);
+                if(speed == 0.0f) speed = actorClass.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
                 float maxAvoidDist = tReaction * speed + speed / MAX_VEL_ANGULAR.valueRadians() * 2; // *2 - for reliability
 				preferShortcut = checkWayIsClear(vActorPos, vTargetPos, Ogre::Vector3(vDirToTarget.x, vDirToTarget.y, 0).length() > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
@@ -505,12 +507,12 @@ namespace MWMechanics
         if(!isStuck && distToTarget > rangeAttack && !distantCombat)
         {
             //special run attack; it shouldn't affect melee combat tactics
-            if(actorCls.getMovementSettings(actor).mPosition[1] == 1)
+            if(actorClass.getMovementSettings(actor).mPosition[1] == 1)
             {
                 /*  check if actor can overcome the distance = distToTarget - attackerWeapRange
                     less than in time of swinging with weapon (t_swing), then start attacking 
                 */
-                float speed1 = actorCls.getSpeed(actor);
+                float speed1 = actorClass.getSpeed(actor);
                 float speed2 = target.getClass().getSpeed(target);
                 if(target.getClass().getMovementSettings(target).mPosition[0] == 0
                         && target.getClass().getMovementSettings(target).mPosition[1] == 0)
@@ -555,7 +557,7 @@ namespace MWMechanics
                 {
                     MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
                     float minSqr = 1.3*1.3*MIN_DIST_TO_DOOR_SQUARED; // for legibility
-                    if(vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr &&
+                    if(vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.getPosition().pos)) < minSqr &&
                        ref.mData.getLocalRotation().rot[2] < 0.4f) // even small opening
                     {
                         //std::cout<<"closed door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
@@ -590,7 +592,7 @@ namespace MWMechanics
             float minSqr = 1.6 * 1.6 * MIN_DIST_TO_DOOR_SQUARED; // for legibility
             // TODO: add reaction to checking open doors
             if(mBackOffDoor &&
-               vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr)
+               vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.getPosition().pos)) < minSqr)
             {
                 mMovement.mPosition[1] = -0.2; // back off, but slowly
             }

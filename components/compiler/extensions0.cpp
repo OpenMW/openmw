@@ -179,6 +179,8 @@ namespace Compiler
                 opcodeGetReputationExplicit);
             extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
                 opcodeSameFactionExplicit);
+            extensions.registerInstruction("modfactionreaction", "ccl", opcodeModFactionReaction);
+            extensions.registerFunction("getfactionreaction", 'l', "ccl", opcodeGetFactionReaction);
         }
     }
 
@@ -222,7 +224,7 @@ namespace Compiler
         {
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
             extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate);
-            extensions.registerInstruction ("activate", "", opcodeActivate);
+            extensions.registerInstruction ("activate", "", opcodeActivate, opcodeActivateExplicit);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);
             extensions.registerInstruction ("cast", "SS", opcodeCast, opcodeCastExplicit);

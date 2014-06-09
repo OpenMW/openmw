@@ -1,6 +1,7 @@
 #include "projectilemanager.hpp"
 
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 
 #include <libs/openengine/bullet/physic.hpp>
 
@@ -101,11 +102,11 @@ namespace MWWorld
     {
         ProjectileState state;
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
-        state.mBowId = bow.getCellRef().mRefID;
+        state.mBowId = bow.getCellRef().getRefId();
         state.mVelocity = orient.yAxis() * speed;
-        state.mId = projectile.getCellRef().mRefID;
+        state.mId = projectile.getCellRef().getRefId();
 
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().mRefID);
+        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
         state.mNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(pos, orient);
@@ -152,6 +153,10 @@ namespace MWWorld
                 MWWorld::Ptr obstacle = MWBase::Environment::get().getWorld()->searchPtrViaHandle(cIt->second);
 
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
+
+                if (!obstacle.isEmpty() && obstacle == caster)
+                    continue;
+
                 if (caster.isEmpty())
                     caster = obstacle;
 
@@ -236,7 +241,7 @@ namespace MWWorld
                     {
                         MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
                         MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().mRefID, it->mBowId))
+                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
                             bow = *invIt;
                     }
 

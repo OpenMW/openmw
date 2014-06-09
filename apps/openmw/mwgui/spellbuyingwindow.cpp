@@ -33,6 +33,11 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
     }
 
+    void SpellBuyingWindow::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
+    }
+
     void SpellBuyingWindow::addSpell(const std::string& spellId)
     {
         const MWWorld::ESMStore &store =
@@ -132,7 +137,7 @@ namespace MWGui
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
+        exit();
     }
 
     void SpellBuyingWindow::updateLabels()

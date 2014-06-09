@@ -148,22 +148,6 @@ namespace
             mTypesetter->lineBreak ();
         }
     };
-
-    struct AddQuestLink : AddContent
-    {
-        AddQuestLink (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style) :
-            AddContent (typesetter, style)
-        {
-        }
-
-        void operator () (MWGui::JournalViewModel::QuestId id, MWGui::JournalViewModel::Utf8Span name)
-        {
-            MWGui::BookTypesetter::Style* style = mTypesetter->createHotStyle (mBodyStyle, MyGUI::Colour::Black, linkHot, linkActive, id);
-
-            mTypesetter->write (style, name);
-            mTypesetter->lineBreak ();
-        }
-    };
 }
 
 namespace MWGui
@@ -206,7 +190,7 @@ book JournalBooks::createJournalBook ()
     BookTypesetter::Style* header = typesetter->createStyle ("", MyGUI::Colour (0.60f, 0.00f, 0.00f));
     BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
-    mModel->visitJournalEntries (0, AddJournalEntry (typesetter, body, header, true));
+    mModel->visitJournalEntries ("", AddJournalEntry (typesetter, body, header, true));
 
     return typesetter->complete ();
 }
@@ -227,16 +211,17 @@ book JournalBooks::createTopicBook (uintptr_t topicId)
     return typesetter->complete ();
 }
 
-book JournalBooks::createQuestBook (uintptr_t questId)
+book JournalBooks::createQuestBook (const std::string& questName)
 {
     BookTypesetter::Ptr typesetter = createTypesetter ();
 
     BookTypesetter::Style* header = typesetter->createStyle ("", MyGUI::Colour (0.60f, 0.00f, 0.00f));
     BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
-    mModel->visitQuestName (questId, AddQuestName (typesetter, header));
+    AddQuestName addName (typesetter, header);
+    addName(to_utf8_span(questName.c_str()));
 
-    mModel->visitJournalEntries (questId, AddJournalEntry (typesetter, body, header, false));
+    mModel->visitJournalEntries (questName, AddJournalEntry (typesetter, body, header, false));
 
     return typesetter->complete ();
 }
@@ -265,26 +250,6 @@ book JournalBooks::createTopicIndexBook ()
         typesetter->write (style, to_utf8_span (buffer));
         typesetter->lineBreak ();
     }
-
-    return typesetter->complete ();
-}
-
-book JournalBooks::createTopicIndexBook (char character)
-{
-    BookTypesetter::Ptr typesetter = BookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
-    BookTypesetter::Style* style = typesetter->createStyle ("", MyGUI::Colour::Black);
-
-    mModel->visitTopicNamesStartingWith (character, AddTopicLink (typesetter, style));
-
-    return typesetter->complete ();
-}
-
-book JournalBooks::createQuestIndexBook (bool activeOnly)
-{
-    BookTypesetter::Ptr typesetter = BookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
-    BookTypesetter::Style* base = typesetter->createStyle ("", MyGUI::Colour::Black);
-
-    mModel->visitQuestNames (activeOnly, AddQuestLink (typesetter, base));
 
     return typesetter->complete ();
 }

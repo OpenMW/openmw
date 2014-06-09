@@ -47,10 +47,10 @@ namespace
     {
         if (mRescale)
         {
-            if (ptr.getCellRef().mScale<0.5)
-                ptr.getCellRef().mScale = 0.5;
-            else if (ptr.getCellRef().mScale>2)
-                ptr.getCellRef().mScale = 2;
+            if (ptr.getCellRef().getScale()<0.5)
+                ptr.getCellRef().setScale(0.5);
+            else if (ptr.getCellRef().getScale()>2)
+                ptr.getCellRef().setScale(2);
         }
 
         if (ptr.getRefData().getCount() && ptr.getRefData().isEnabled())
@@ -65,7 +65,7 @@ namespace
                 float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
                 MWBase::Environment::get().getWorld()->localRotateObject (ptr, ax, ay, az);
 
-                MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().mScale);
+                MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().getScale());
                 ptr.getClass().adjustPosition (ptr);
             }
             catch (const std::exception& e)
@@ -347,8 +347,6 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
-
-        loadingListener->removeWallpaper();
     }
 
     //We need the ogre renderer and a scene node.
@@ -449,8 +447,6 @@ namespace MWWorld
 
         mCellChanged = true;
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
-
-        loadingListener->removeWallpaper();
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)
@@ -484,7 +480,7 @@ namespace MWWorld
         mRendering.addObject(ptr);
         ptr.getClass().insertObject(ptr, *mPhysics);
         MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
-        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
+        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
     }
 
     void Scene::removeObjectFromScene (const Ptr& ptr)

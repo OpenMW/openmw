@@ -195,9 +195,11 @@ struct JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitQuestNames (bool active_only, boost::function <void (QuestId, Utf8Span)> visitor) const
+    void visitQuestNames (bool active_only, boost::function <void (const std::string&)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get ().getJournal ();
+
+        std::set<std::string> visitedQuests;
 
         for (MWBase::Journal::TQuestIter i = journal->questBegin (); i != journal->questEnd (); ++i)
         {
@@ -209,7 +211,15 @@ struct JournalViewModelImpl : JournalViewModel
             // Note that even with Tribunal, some quests still don't have quest names. I'm assuming those are not supposed
             // to appear in the quest book.
             if (!quest.getName().empty())
-                visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (quest.getName()));
+            {
+                // Don't list the same quest name twice
+                if (visitedQuests.find(quest.getName()) != visitedQuests.end())
+                    continue;
+
+                visitor (quest.getName());
+
+                visitedQuests.insert(quest.getName());
+            }
         }
     }
 
@@ -258,20 +268,29 @@ struct JournalViewModelImpl : JournalViewModel
         }
     };
 
-    void visitJournalEntries (QuestId questId, boost::function <void (JournalEntry const &)> visitor) const
+    void visitJournalEntries (const std::string& questName, boost::function <void (JournalEntry const &)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
-        if (questId != 0)
+        if (!questName.empty())
         {
-            MWDialogue::Quest const * quest = reinterpret_cast <MWDialogue::Quest const *> (questId);
+            std::vector<MWDialogue::Quest const*> quests;
+            for (MWBase::Journal::TQuestIter questIt = journal->questBegin(); questIt != journal->questEnd(); ++questIt)
+            {
+                if (Misc::StringUtils::ciEqual(questIt->second.getName(), questName))
+                    quests.push_back(&questIt->second);
+            }
 
             for(MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end (); ++i)
             {
-                for (MWDialogue::Topic::TEntryIter j = quest->begin (); j != quest->end (); ++j)
+                for (std::vector<MWDialogue::Quest const*>::iterator questIt = quests.begin(); questIt != quests.end(); ++questIt)
                 {
-                    if (i->mInfoId == j->mInfoId)
-                        visitor (JournalEntryImpl <MWBase::Journal::TEntryIter> (this, i));
+                    MWDialogue::Quest const* quest = *questIt;
+                    for (MWDialogue::Topic::TEntryIter j = quest->begin (); j != quest->end (); ++j)
+                    {
+                        if (i->mInfoId == j->mInfoId)
+                            visitor (JournalEntryImpl <MWBase::Journal::TEntryIter> (this, i));
+                    }
                 }
             }
         }
@@ -293,7 +312,7 @@ struct JournalViewModelImpl : JournalViewModel
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (char character, boost::function < void (TopicId , Utf8Span) > visitor) const
+    void visitTopicNamesStartingWith (char character, boost::function < void (const std::string&) > visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -302,7 +321,7 @@ struct JournalViewModelImpl : JournalViewModel
             if (i->first [0] != std::tolower (character, mLocale))
                 continue;
 
-            visitor (TopicId (&i->second), toUtf8Span (i->second.getName()));
+            visitor (i->second.getName());
         }
 
     }

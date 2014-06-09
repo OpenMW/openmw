@@ -314,6 +314,8 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
         catch (...)
         {
             // silently drop cells that don't exist anymore
+            reader.skipRecord();
+            return true;
             /// \todo log
         }
 

@@ -615,6 +615,7 @@ namespace Physic
                                                                            btCollisionObject *object)
     {
         DeepestNotMeContactTestResultCallback callback(filter, origin);
+        callback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap | CollisionType_Actor;
         dynamicsWorld->contactTest(object, callback);
         return std::make_pair(callback.mObject, callback.mContactPoint);
     }
@@ -677,7 +678,7 @@ namespace Physic
     {
     }
 
-    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap)
+    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap, Ogre::Vector3* normal)
     {
         std::string name = "";
         float d = -1;
@@ -694,7 +695,11 @@ namespace Physic
         if (resultCallback1.hasHit())
         {
             name = static_cast<const RigidBody&>(*resultCallback1.m_collisionObject).mName;
-            d = resultCallback1.m_closestHitFraction;;
+            d = resultCallback1.m_closestHitFraction;
+            if (normal)
+                *normal = Ogre::Vector3(resultCallback1.m_hitNormalWorld.x(),
+                                        resultCallback1.m_hitNormalWorld.y(),
+                                        resultCallback1.m_hitNormalWorld.z());
         }
 
         return std::pair<std::string,float>(name,d);

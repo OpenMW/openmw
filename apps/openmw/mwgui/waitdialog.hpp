@@ -28,6 +28,8 @@ namespace MWGui
 
         virtual void open();
 
+        virtual void exit();
+
         void onFrame(float dt);
 
         void bedActivated() { setCanRest(true); }

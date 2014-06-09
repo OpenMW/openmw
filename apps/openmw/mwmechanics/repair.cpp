@@ -28,8 +28,8 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     player.getClass().getContainerStore(player).unstack(mTool, player);
 
     // reduce number of uses left
-    int uses = (mTool.getCellRef().mCharge != -1) ? mTool.getCellRef().mCharge : ref->mBase->mData.mUses;
-    mTool.getCellRef().mCharge = uses-1;
+    int uses = mTool.getClass().getItemHealth(mTool);
+    mTool.getCellRef().setCharge(uses-1);
 
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
     MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
@@ -53,9 +53,9 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         y = std::max(1, y);
 
         // repair by 'y' points
-        itemToRepair.getCellRef().mCharge += y;
-        itemToRepair.getCellRef().mCharge = std::min(itemToRepair.getCellRef().mCharge,
-                                                     itemToRepair.getClass().getItemMaxHealth(itemToRepair));
+        int charge = itemToRepair.getClass().getItemHealth(itemToRepair);
+        charge = std::min(charge + y, itemToRepair.getClass().getItemMaxHealth(itemToRepair));
+        itemToRepair.getCellRef().setCharge(charge);
 
         // set the OnPCRepair variable on the item's script
         std::string script = itemToRepair.getClass().getScript(itemToRepair);
@@ -75,7 +75,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     }
 
     // tool used up?
-    if (mTool.getCellRef().mCharge == 0)
+    if (mTool.getCellRef().getCharge() == 0)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
@@ -91,7 +91,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         for (MWWorld::ContainerStoreIterator iter (store.begin());
              iter!=store.end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, mTool.getCellRef().mRefID))
+            if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), mTool.getCellRef().getRefId()))
             {
                 mTool = *iter;
                 break;

@@ -29,10 +29,10 @@ namespace MWMechanics
     void Security::pickLock(const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
                             std::string& resultMessage, std::string& resultSound)
     {
-        if (!(lock.getCellRef().mLockLevel > 0)) //If it's unlocked back out immediately
+        if (!(lock.getCellRef().getLockLevel() > 0)) //If it's unlocked back out immediately
             return;
 
-        int lockStrength = lock.getCellRef().mLockLevel;
+        int lockStrength = lock.getCellRef().getLockLevel();
 
         float pickQuality = lockpick.get<ESM::Lockpick>()->mBase->mData.mQuality;
 
@@ -60,22 +60,22 @@ namespace MWMechanics
                 resultMessage = "#{sLockFail}";
         }
 
-        if (lockpick.getCellRef().mCharge == -1)
-            lockpick.getCellRef().mCharge = lockpick.get<ESM::Lockpick>()->mBase->mData.mUses;
-        --lockpick.getCellRef().mCharge;
-        if (!lockpick.getCellRef().mCharge)
+        int uses = lockpick.getClass().getItemHealth(lockpick);
+        --uses;
+        lockpick.getCellRef().setCharge(uses);
+        if (!uses)
             lockpick.getContainerStore()->remove(lockpick, 1, mActor);
     }
 
     void Security::probeTrap(const MWWorld::Ptr &trap, const MWWorld::Ptr &probe,
                              std::string& resultMessage, std::string& resultSound)
     {
-        if (trap.getCellRef().mTrap  == "")
+        if (trap.getCellRef().getTrap()  == "")
             return;
 
         float probeQuality = probe.get<ESM::Probe>()->mBase->mData.mQuality;
 
-        const ESM::Spell* trapSpell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(trap.getCellRef().mTrap);
+        const ESM::Spell* trapSpell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(trap.getCellRef().getTrap());
         float trapSpellPoints = trapSpell->mData.mCost;
 
         float fTrapCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTrapCostMult")->getFloat();
@@ -93,7 +93,7 @@ namespace MWMechanics
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {
-                trap.getCellRef().mTrap = "";
+                trap.getCellRef().setTrap("");
 
                 resultSound = "Disarm Trap";
                 resultMessage = "#{sTrapSuccess}";
@@ -103,10 +103,10 @@ namespace MWMechanics
                 resultMessage = "#{sTrapFail}";
         }
 
-        if (probe.getCellRef().mCharge == -1)
-            probe.getCellRef().mCharge = probe.get<ESM::Probe>()->mBase->mData.mUses;
-        --probe.getCellRef().mCharge;
-        if (!probe.getCellRef().mCharge)
+        int uses = probe.getClass().getItemHealth(probe);
+        --uses;
+        probe.getCellRef().setCharge(uses);
+        if (!uses)
             probe.getContainerStore()->remove(probe, 1, mActor);
     }
 

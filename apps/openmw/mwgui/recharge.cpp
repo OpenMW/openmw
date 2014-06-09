@@ -14,6 +14,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "widgets.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -38,14 +39,14 @@ void Recharge::open()
     center();
 }
 
+void Recharge::exit()
+{
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
+}
+
 void Recharge::start (const MWWorld::Ptr &item)
 {
-    std::string path = std::string("icons\\");
-    path += item.getClass().getInventoryIcon(item);
-    int pos = path.rfind(".");
-    path.erase(pos);
-    path.append(".dds");
-    mGemIcon->setImageTexture (path);
+    mGemIcon->setItem(item);
     mGemIcon->setUserString("ToolTipType", "ItemPtr");
     mGemIcon->setUserData(item);
 
@@ -56,7 +57,7 @@ void Recharge::updateView()
 {
     MWWorld::Ptr gem = *mGemIcon->getUserData<MWWorld::Ptr>();
 
-    std::string soul = gem.getCellRef().mSoul;
+    std::string soul = gem.getCellRef().getSoul();
     const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
     mChargeLabel->setCaptionWithReplacing("#{sCharges} " + boost::lexical_cast<std::string>(creature->mData.mSoul));
@@ -93,8 +94,8 @@ void Recharge::updateView()
         if (enchantmentName.empty())
             continue;
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantmentName);
-        if (iter->getCellRef().mEnchantmentCharge >= enchantment->mData.mCharge
-                || iter->getCellRef().mEnchantmentCharge == -1)
+        if (iter->getCellRef().getEnchantmentCharge() >= enchantment->mData.mCharge
+                || iter->getCellRef().getEnchantmentCharge() == -1)
             continue;
 
         MyGUI::TextBox* text = mView->createWidget<MyGUI::TextBox> (
@@ -103,14 +104,9 @@ void Recharge::updateView()
         text->setNeedMouseFocus(false);
         currentY += 19;
 
-        MyGUI::ImageBox* icon = mView->createWidget<MyGUI::ImageBox> (
-                    "ImageBox", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
-        std::string path = std::string("icons\\");
-        path += iter->getClass().getInventoryIcon(*iter);
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
-        icon->setImageTexture (path);
+        ItemWidget* icon = mView->createWidget<ItemWidget> (
+                    "MW_ItemIconSmall", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
+        icon->setItem(*iter);
         icon->setUserString("ToolTipType", "ItemPtr");
         icon->setUserData(*iter);
         icon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onItemClicked);
@@ -118,7 +114,7 @@ void Recharge::updateView()
 
         Widgets::MWDynamicStatPtr chargeWidget = mView->createWidget<Widgets::MWDynamicStat>
                 ("MW_ChargeBar", MyGUI::IntCoord(72, currentY+2, 199, 20), MyGUI::Align::Default);
-        chargeWidget->setValue(iter->getCellRef().mEnchantmentCharge, enchantment->mData.mCharge);
+        chargeWidget->setValue(iter->getCellRef().getEnchantmentCharge(), enchantment->mData.mCharge);
         chargeWidget->setNeedMouseFocus(false);
 
         currentY += 32 + 4;
@@ -128,7 +124,7 @@ void Recharge::updateView()
 
 void Recharge::onCancel(MyGUI::Widget *sender)
 {
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
+    exit();
 }
 
 void Recharge::onItemClicked(MyGUI::Widget *sender)
@@ -159,15 +155,15 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
     if (roll < x)
     {
-        std::string soul = gem.getCellRef().mSoul;
+        std::string soul = gem.getCellRef().getSoul();
         const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
         float restored = creature->mData.mSoul * (roll / x);
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
                     item.getClass().getEnchantment(item));
-        item.getCellRef().mEnchantmentCharge =
-            std::min(item.getCellRef().mEnchantmentCharge + restored, static_cast<float>(enchantment->mData.mCharge));
+        item.getCellRef().setEnchantmentCharge(
+            std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
 
         player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     }

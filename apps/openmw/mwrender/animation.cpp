@@ -290,7 +290,7 @@ void Animation::addAnimSource(const std::string &model)
             mAccumRoot = mNonAccumRoot->getParent();
             if(!mAccumRoot)
             {
-                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().getRefId()<<" is skeleton root??" <<std::endl;
                 mNonAccumRoot = NULL;
             }
         }
@@ -301,7 +301,7 @@ void Animation::addAnimSource(const std::string &model)
             mAccumRoot = mNonAccumRoot->getParent();
             if(!mAccumRoot)
             {
-                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().getRefId()<<" is skeleton root??" <<std::endl;
                 mNonAccumRoot = NULL;
             }
         }
@@ -775,11 +775,11 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
     }
 
     /* Look in reverse; last-inserted source has priority. */
+    AnimState state;
     AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
     for(;iter != mAnimSources.rend();++iter)
     {
         const NifOgre::TextKeyMap &textkeys = (*iter)->mTextKeys;
-        AnimState state;
         if(reset(state, textkeys, groupname, start, stop, startpoint))
         {
             state.mSource = *iter;
@@ -818,9 +818,16 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
         }
     }
     if(iter == mAnimSources.rend())
-        std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().mRefID <<std::endl;
+        std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().getRefId() <<std::endl;
 
     resetActiveGroups();
+
+    if (!state.mPlaying && mNonAccumCtrl)
+    {
+        // If the animation state is not playing, we need to manually apply the accumulation
+        // (see updatePosition, which would be called if the animation was playing)
+        mAccumRoot->setPosition(-mNonAccumCtrl->getTranslation(state.mTime)*mAccumulate);
+    }
 }
 
 bool Animation::isPlaying(const std::string &groupname) const
@@ -1261,22 +1268,30 @@ Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
 ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model)
   : Animation(ptr, ptr.getRefData().getBaseNode())
 {
-    setObjectRoot(model, false);
+    if (!model.empty())
+    {
+        setObjectRoot(model, false);
 
-    Ogre::Vector3 extents = getWorldBounds().getSize();
-    float size = std::max(std::max(extents.x, extents.y), extents.z);
+        Ogre::Vector3 extents = getWorldBounds().getSize();
+        float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
-                 Settings::Manager::getBool("limit small object distance", "Viewing distance");
-    // do not fade out doors. that will cause holes and look stupid
-    if(ptr.getTypeName().find("Door") != std::string::npos)
-        small = false;
+        bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
+                     Settings::Manager::getBool("limit small object distance", "Viewing distance");
+        // do not fade out doors. that will cause holes and look stupid
+        if(ptr.getTypeName().find("Door") != std::string::npos)
+            small = false;
 
-    float dist = small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
-    Ogre::Vector3 col = getEnchantmentColor(ptr);
-    setRenderProperties(mObjectRoot, (mPtr.getTypeName() == typeid(ESM::Static).name()) ?
-                                     (small ? RV_StaticsSmall : RV_Statics) : RV_Misc,
-                        RQG_Main, RQG_Alpha, dist, !ptr.getClass().getEnchantment(ptr).empty(), &col);
+        float dist = small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
+        Ogre::Vector3 col = getEnchantmentColor(ptr);
+        setRenderProperties(mObjectRoot, (mPtr.getTypeName() == typeid(ESM::Static).name()) ?
+                                         (small ? RV_StaticsSmall : RV_Statics) : RV_Misc,
+                            RQG_Main, RQG_Alpha, dist, !ptr.getClass().getEnchantment(ptr).empty(), &col);
+    }
+    else
+    {
+        // No model given. Create an object root anyway, so that lights can be added to it if needed.
+        mObjectRoot = NifOgre::ObjectScenePtr (new NifOgre::ObjectScene(mInsert->getCreator()));
+    }
 }
 
 void ObjectAnimation::addLight(const ESM::Light *light)

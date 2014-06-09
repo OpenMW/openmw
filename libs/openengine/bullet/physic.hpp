@@ -308,8 +308,10 @@ namespace Physic
 
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
+         * If \a normal is non-NULL, the hit normal will be written there (if there is a hit)
          */
-        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true,bool ignoreHeightMap = false);
+        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true,
+                                             bool ignoreHeightMap = false, Ogre::Vector3* normal = NULL);
 
         /**
          * Return all objects hit by a ray.

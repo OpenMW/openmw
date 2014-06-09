@@ -61,6 +61,8 @@ namespace MWBase
 
             virtual void persuade (int type) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
+
+            /// @note This change is temporary and gets discarded when dialogue ends.
             virtual void applyDispositionChange (int delta) = 0;
 
             virtual int countSavedGameRecords() const = 0;
@@ -68,6 +70,12 @@ namespace MWBase
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+
+            /// Changes faction1's opinion of faction2 by \a diff.
+            virtual void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff) = 0;
+
+            /// @return faction1's opinion of faction2
+            virtual int getFactionReaction (const std::string& faction1, const std::string& faction2) const = 0;
     };
 }
 

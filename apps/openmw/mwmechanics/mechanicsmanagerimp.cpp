@@ -24,10 +24,10 @@ namespace
     /// @return is \a ptr allowed to take/use \a item or is it a crime?
     bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
     {
-        const std::string& owner = item.getCellRef().mOwner;
+        const std::string& owner = item.getCellRef().getOwner();
         bool isOwned = !owner.empty() && owner != "player";
 
-        const std::string& faction = item.getCellRef().mFaction;
+        const std::string& faction = item.getCellRef().getFaction();
         bool isFactionOwned = false;
         if (!faction.empty() && ptr.getClass().isNpc())
         {
@@ -36,8 +36,8 @@ namespace
                 isFactionOwned = true;
         }
 
-        if (!item.getCellRef().mOwner.empty())
-            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().mOwner, true);
+        if (!item.getCellRef().getOwner().empty())
+            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().getOwner(), true);
 
         return (!isOwned && !isFactionOwned);
     }
@@ -498,27 +498,24 @@ namespace MWMechanics
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end(); ++it)
+            if (!playerStats.getExpelled(npcFaction))
             {
-                if(Misc::StringUtils::ciEqual(it->mFaction, npcFaction)
-                        && !playerStats.getExpelled(it->mFaction))
-                    reaction = it->mReaction;
+                reaction = playerStats.getFactionReputation(npcFaction);
+
+                rank = playerStats.getFactionRanks().find(npcFaction)->second;
             }
-            rank = playerStats.getFactionRanks().find(npcFaction)->second;
         }
-        else if (npcFaction != "")
+        else if (!npcFaction.empty())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npcFaction)->mReactions.end();++it)
+            std::map<std::string, int>::const_iterator playerFactionIt = playerStats.getFactionRanks().begin();
+            for (; playerFactionIt != playerStats.getFactionRanks().end(); ++playerFactionIt)
             {
-                if(playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerStats.getFactionRanks().end() )
-                {
-                    if(it->mReaction < reaction)
-                        reaction = it->mReaction;
-                }
+                std::string itFaction = playerFactionIt->first;
+
+                int itReaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, itFaction);
+                if (playerFactionIt == playerStats.getFactionRanks().begin() || itReaction < reaction)
+                    reaction = itReaction;
             }
-            rank = 0;
         }
         else
         {
@@ -666,8 +663,6 @@ namespace MWMechanics
                 int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee,
                                        std::max(0, std::min(100, flee + int(std::max(iPerMinChange, s)))));
-                // TODO: initiate combat and quit dialogue if fight rating is too high
-                // or should setAiSetting handle this?
                 npcStats.setAiSetting (MWMechanics::CreatureStats::AI_Fight,
                                        std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
             }
@@ -1024,12 +1019,13 @@ namespace MWMechanics
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
-        if (ptr.getClass().isNpc())
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
-
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
             ptr.getClass().getCreatureStats(ptr).setHostile(true);
+
+        // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
+        if (ptr.getClass().isNpc())
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
     void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)

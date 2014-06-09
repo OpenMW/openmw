@@ -15,12 +15,9 @@ namespace CSMWorld
     struct Cell : public ESM::Cell
     {
         std::string mId;
-        std::vector<std::pair<std::string, bool> > mRefs; // ID, modified
-        std::vector<std::string> mDeletedRefs;
 
         void load (ESM::ESMReader &esm);
 
-        void addRef (const std::string& id);
     };
 }
 

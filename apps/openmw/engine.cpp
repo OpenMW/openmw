@@ -137,6 +137,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         }
 
         // update GUI
+        MWBase::Environment::get().getWindowManager()->onFrame(frametime);
         if (MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
@@ -145,7 +146,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
             MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
-            MWBase::Environment::get().getWindowManager()->onFrame(frametime);
             MWBase::Environment::get().getWindowManager()->update();
         }
     }
@@ -491,10 +491,7 @@ void OMW::Engine::activate()
 
     MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 
-    boost::shared_ptr<MWWorld::Action> action =
-        ptr.getClass().activate (ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-    interpreterContext.activate (ptr, action);
+    interpreterContext.activate (ptr);
 
     std::string script = ptr.getClass().getScript (ptr);
 
@@ -508,7 +505,7 @@ void OMW::Engine::activate()
 
     if (!interpreterContext.hasActivationBeenHandled())
     {
-        interpreterContext.executeActivation();
+        interpreterContext.executeActivation(ptr);
     }
 }
 

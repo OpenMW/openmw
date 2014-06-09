@@ -53,7 +53,7 @@ namespace MWClass
                 ptr.get<ESM::Container>();
 
             data->mContainerStore.fill(
-                ref->mBase->mInventory, ptr.getCellRef().mOwner, ptr.getCellRef().mFaction, MWBase::Environment::get().getWorld()->getStore());
+                ref->mBase->mInventory, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -75,7 +75,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().mOwner, ptr.getCellRef().mFaction);
+        store.restock(list, ptr, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction());
     }
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -129,16 +129,16 @@ namespace MWClass
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
-        bool needKey = ptr.getCellRef().mLockLevel > 0;
+        bool needKey = ptr.getCellRef().getLockLevel() > 0;
         bool hasKey = false;
         std::string keyName;
 
         // make key id lowercase
-        std::string keyId = ptr.getCellRef().mKey;
+        std::string keyId = ptr.getCellRef().getKey();
         Misc::StringUtils::toLower(keyId);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            std::string refId = it->getCellRef().mRefID;
+            std::string refId = it->getCellRef().getRefId();
             Misc::StringUtils::toLower(refId);
             if (refId == keyId)
             {
@@ -152,13 +152,13 @@ namespace MWClass
             MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
             unlock(ptr);
             // using a key disarms the trap
-            ptr.getCellRef().mTrap = "";
+            ptr.getCellRef().setTrap("");
         }
 
 
         if (!needKey || hasKey)
         {
-            if(ptr.getCellRef().mTrap.empty())
+            if(ptr.getCellRef().getTrap().empty())
             {
                 boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
                 return action;
@@ -166,7 +166,7 @@ namespace MWClass
             else
             {
                 // Activate trap
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().mTrap, ptr));
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().getTrap(), ptr));
                 action->setSound(trapActivationSound);
                 return action;
             }
@@ -227,16 +227,16 @@ namespace MWClass
         info.caption = ref->mBase->mName;
 
         std::string text;
-        if (ref->mRef.mLockLevel > 0)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
-        else if (ref->mRef.mLockLevel < 0)
+        if (ptr.getCellRef().getLockLevel() > 0)
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
+        else if (ptr.getCellRef().getLockLevel() < 0)
             text += "\n#{sUnlocked}";
-        if (ref->mRef.mTrap != "")
+        if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->mRef.mFaction, "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -261,14 +261,14 @@ namespace MWClass
     void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
         if(lockLevel!=0)
-            ptr.getCellRef().mLockLevel = abs(lockLevel); //Changes lock to locklevel, in positive
+            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
         else
-            ptr.getCellRef().mLockLevel = abs(ptr.getCellRef().mLockLevel); //No locklevel given, just flip the oriional one
+            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the original one
     }
 
     void Container::unlock (const MWWorld::Ptr& ptr) const
     {
-        ptr.getCellRef().mLockLevel = -abs(ptr.getCellRef().mLockLevel); //Makes lockLevel negative
+        ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
     }
 
 

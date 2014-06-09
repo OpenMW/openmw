@@ -22,7 +22,7 @@ MWWorld::LiveCellRefBase *MWWorld::Ptr::getBase() const
     return mRef;
 }
 
-ESM::CellRef& MWWorld::Ptr::getCellRef() const
+MWWorld::CellRef& MWWorld::Ptr::getCellRef() const
 {
     assert(mRef);
 

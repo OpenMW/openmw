@@ -12,6 +12,7 @@
 #include "../mwworld/class.hpp"
 
 #include "itemmodel.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -80,53 +81,24 @@ void ItemView::update()
         const ItemStack& item = mModel->getItem(i);
 
         /// \todo performance improvement: don't create/destroy all the widgets everytime the container window changes size, only reposition them
-        std::string path = std::string("icons\\");
-        path += item.mBase.getClass().getInventoryIcon(item.mBase);
-
-        // background widget (for the "equipped" frame and magic item background image)
-        bool isMagic = (item.mFlags & ItemStack::Flag_Enchanted);
-        MyGUI::ImageBox* backgroundWidget = dragArea->createWidget<MyGUI::ImageBox>("ImageBox",
+        ItemWidget* itemWidget = dragArea->createWidget<ItemWidget>("MW_ItemIcon",
             MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
-        backgroundWidget->setUserString("ToolTipType", "ItemModelIndex");
-        backgroundWidget->setUserData(std::make_pair(i, mModel));
+        itemWidget->setUserString("ToolTipType", "ItemModelIndex");
+        itemWidget->setUserData(std::make_pair(i, mModel));
+        ItemWidget::ItemState state = ItemWidget::None;
+        if (item.mType == ItemStack::Type_Barter)
+            state = ItemWidget::Barter;
+        if (item.mType == ItemStack::Type_Equipped)
+            state = ItemWidget::Equip;
+        itemWidget->setItem(item.mBase, state);
 
-        std::string backgroundTex = "textures\\menu_icon";
-        if (isMagic)
-            backgroundTex += "_magic";
-        if (item.mType == ItemStack::Type_Normal)
-        {
-            if (!isMagic)
-                backgroundTex = "";
-        }
-        else if (item.mType == ItemStack::Type_Equipped)
-            backgroundTex += "_equip";
-        else if (item.mType == ItemStack::Type_Barter)
-            backgroundTex += "_barter";
-
-        if (backgroundTex != "")
-            backgroundTex += ".dds";
-
-        backgroundWidget->setImageTexture(backgroundTex);
-        if ((item.mType == ItemStack::Type_Barter) && !isMagic)
-            backgroundWidget->setProperty("ImageCoord", "2 2 42 42");
-        else
-            backgroundWidget->setProperty("ImageCoord", "0 0 42 42");
-        backgroundWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedItem);
-        backgroundWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheel);
-
-        // image
-        MyGUI::ImageBox* image = backgroundWidget->createWidget<MyGUI::ImageBox>("ImageBox",
-            MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
-        std::string::size_type pos = path.rfind(".");
-        if(pos != std::string::npos)
-            path.erase(pos);
-        path.append(".dds");
-        image->setImageTexture(path);
-        image->setNeedMouseFocus(false);
+        itemWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedItem);
+        itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheel);
 
         // text widget that shows item count
-        MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText",
-            MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
+        // TODO: move to ItemWidget
+        MyGUI::TextBox* text = itemWidget->createWidget<MyGUI::TextBox>("SandBrightText",
+            MyGUI::IntCoord(5, 19, 32, 18), MyGUI::Align::Default, std::string("Label"));
         text->setTextAlign(MyGUI::Align::Right);
         text->setNeedMouseFocus(false);
         text->setTextShadow(true);

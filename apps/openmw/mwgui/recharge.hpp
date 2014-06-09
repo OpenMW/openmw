@@ -8,12 +8,16 @@
 namespace MWGui
 {
 
+class ItemWidget;
+
 class Recharge : public WindowBase
 {
 public:
     Recharge();
 
     virtual void open();
+
+    virtual void exit();
 
     void start (const MWWorld::Ptr& gem);
 
@@ -23,7 +27,7 @@ protected:
 
     MyGUI::Widget* mGemBox;
 
-    MyGUI::ImageBox* mGemIcon;
+    ItemWidget* mGemIcon;
 
     MyGUI::TextBox* mChargeLabel;
 

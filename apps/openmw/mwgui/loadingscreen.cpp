@@ -11,6 +11,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -26,7 +27,6 @@ namespace MWGui
         , WindowBase("openmw_loading_screen.layout")
         , mLastRenderTime(0.f)
         , mLastWallpaperChangeTime(0.f)
-        , mFirstLoad(true)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
@@ -77,7 +77,11 @@ namespace MWGui
         mWindow->setVSyncEnabled(false);
         #endif
 
-        if (!mFirstLoad)
+        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                == MWBase::StateManager::State_NoGame);
+
+
+        if (!showWallpaper)
         {
             mBackgroundImage->setImageTexture("");
             int width = mWindow->getWidth();
@@ -103,12 +107,12 @@ namespace MWGui
 
         setVisible(true);
 
-        if (mFirstLoad)
+        if (showWallpaper)
         {
             changeWallpaper();
         }
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(mFirstLoad ? GM_LoadingWallpaper : GM_Loading);
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(showWallpaper ? GM_LoadingWallpaper : GM_Loading);
     }
 
     void LoadingScreen::loadingOff()
@@ -188,11 +192,6 @@ namespace MWGui
         draw();
     }
 
-    void LoadingScreen::removeWallpaper()
-    {
-        mFirstLoad = false;
-    }
-
     void LoadingScreen::draw()
     {
         const float loadingScreenFps = 20.f;
@@ -201,7 +200,10 @@ namespace MWGui
         {
             mLastRenderTime = mTimer.getMilliseconds ();
 
-            if (mFirstLoad && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 5000*1)
+            bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                    == MWBase::StateManager::State_NoGame);
+
+            if (showWallpaper && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 5000*1)
             {
                 mLastWallpaperChangeTime = mTimer.getMilliseconds ();
                 changeWallpaper();

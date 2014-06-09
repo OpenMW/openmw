@@ -36,6 +36,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cassert>
+#include <typeinfo>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -112,24 +113,24 @@ public:
     };
 
     /// Get a given record
-    Record *getRecord(size_t index)
+    Record *getRecord(size_t index) const
     {
         Record *res = records.at(index);
         assert(res != NULL);
         return res;
     }
     /// Number of records
-    size_t numRecords() { return records.size(); }
+    size_t numRecords() const { return records.size(); }
 
     /// Get a given root
-    Record *getRoot(size_t index=0)
+    Record *getRoot(size_t index=0) const
     {
         Record *res = roots.at(index);
         assert(res != NULL);
         return res;
     }
     /// Number of roots
-    size_t numRoots() { return roots.size(); }
+    size_t numRoots() const { return roots.size(); }
 };
 
 
@@ -137,8 +138,8 @@ template<typename T>
 struct KeyT {
     float mTime;
     T mValue;
-    T mForwardValue;  // Only for Quadratic interpolation
-    T mBackwardValue; // Only for Quadratic interpolation
+    T mForwardValue;  // Only for Quadratic interpolation, and never for QuaternionKeyList
+    T mBackwardValue; // Only for Quadratic interpolation, and never for QuaternionKeyList
     float mTension;    // Only for TBC interpolation
     float mBias;       // Only for TBC interpolation
     float mContinuity; // Only for TBC interpolation
@@ -152,60 +153,94 @@ template<typename T, T (NIFStream::*getValue)()>
 struct KeyListT {
     typedef std::vector< KeyT<T> > VecType;
 
-    static const int sLinearInterpolation = 1;
-    static const int sQuadraticInterpolation = 2;
-    static const int sTBCInterpolation = 3;
+    static const unsigned int sLinearInterpolation = 1;
+    static const unsigned int sQuadraticInterpolation = 2;
+    static const unsigned int sTBCInterpolation = 3;
+    static const unsigned int sXYZInterpolation = 4;
 
-    int mInterpolationType;
+    unsigned int mInterpolationType;
     VecType mKeys;
 
+    //Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
     void read(NIFStream *nif, bool force=false)
     {
-        size_t count = nif->getInt();
+        assert(nif);
+        size_t count = nif->getUInt();
         if(count == 0 && !force)
             return;
 
-        mInterpolationType = nif->getInt();
-        mKeys.resize(count);
-        if(mInterpolationType == sLinearInterpolation)
+        //If we aren't forcing things, make sure that read clears any previous keys
+        if(!force)
+            mKeys.clear();
+
+        mInterpolationType = nif->getUInt();
+
+        KeyT<T> key;
+        NIFStream &nifReference = *nif;
+        for(size_t i = 0;i < count;i++)
         {
-            for(size_t i = 0;i < count;i++)
+            if(mInterpolationType == sLinearInterpolation)
             {
-                KeyT<T> &key = mKeys[i];
-                key.mTime = nif->getFloat();
-                key.mValue = (nif->*getValue)();
+                readTimeAndValue(nifReference, key);
+                mKeys.push_back(key);
             }
-        }
-        else if(mInterpolationType == sQuadraticInterpolation)
-        {
-            for(size_t i = 0;i < count;i++)
+            else if(mInterpolationType == sQuadraticInterpolation)
             {
-                KeyT<T> &key = mKeys[i];
-                key.mTime = nif->getFloat();
-                key.mValue = (nif->*getValue)();
-                key.mForwardValue = (nif->*getValue)();
-                key.mBackwardValue = (nif->*getValue)();
+                readQuadratic(nifReference, key);
+                mKeys.push_back(key);
             }
-        }
-        else if(mInterpolationType == sTBCInterpolation)
-        {
-            for(size_t i = 0;i < count;i++)
+            else if(mInterpolationType == sTBCInterpolation)
             {
-                KeyT<T> &key = mKeys[i];
-                key.mTime = nif->getFloat();
-                key.mValue = (nif->*getValue)();
-                key.mTension = nif->getFloat();
-                key.mBias = nif->getFloat();
-                key.mContinuity = nif->getFloat();
+                readTBC(nifReference, key);
+                mKeys.push_back(key);
             }
+            //XYZ keys aren't actually read here.
+            //data.hpp sees that the last type read was sXYZInterpolation and:
+            //    Eats a floating point number, then
+            //    Re-runs the read function 3 more times, with force enabled so that the previous values aren't cleared.
+            //        When it does that it's reading in a bunch of sLinearInterpolation keys, not sXYZInterpolation.
+            else if(mInterpolationType == sXYZInterpolation)
+            {
+                //Don't try to read XYZ keys into the wrong part
+                if ( count != 1 )
+                    nif->file->fail("XYZ_ROTATION_KEY count should always be '1' .  Retrieved Value: "+Ogre::StringConverter::toString(count));
+            }
+            else if (0 == mInterpolationType)
+            {
+                if (count != 0)
+                    nif->file->fail("Interpolation type 0 doesn't work with keys");
+            }
+            else
+                nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
         }
-        else if (mInterpolationType == 0)
-        {
-            if (count != 0)
-                nif->file->fail("Interpolation type 0 doesn't work with keys");
-        }
-        else
-            nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+    }
+
+private:
+    static void readTimeAndValue(NIFStream &nif, KeyT<T> &key)
+    {
+        key.mTime = nif.getFloat();
+        key.mValue = (nif.*getValue)();
+    }
+
+    static void readQuadratic(NIFStream &nif, KeyT<Ogre::Quaternion> &key)
+    {
+        readTimeAndValue(nif, key);
+    }
+
+    template <typename U>
+    static void readQuadratic(NIFStream &nif, KeyT<U> &key)
+    {
+        readTimeAndValue(nif, key);
+        key.mForwardValue = (nif.*getValue)();
+        key.mBackwardValue = (nif.*getValue)();
+    }
+
+    static void readTBC(NIFStream &nif, KeyT<T> &key)
+    {
+        readTimeAndValue(nif, key);
+        key.mTension = nif.getFloat();
+        key.mBias = nif.getFloat();
+        key.mContinuity = nif.getFloat();
     }
 };
 typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;

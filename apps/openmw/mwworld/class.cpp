@@ -82,6 +82,14 @@ namespace MWWorld
         return false;
     }
 
+    int Class::getItemHealth(const Ptr &ptr) const
+    {
+        if (ptr.getCellRef().getCharge() == -1)
+            return getItemMaxHealth(ptr);
+        else
+            return ptr.getCellRef().getCharge();
+    }
+
     int Class::getItemMaxHealth (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
@@ -304,7 +312,7 @@ namespace MWWorld
         return "";
     }
 
-    void Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error ("class can't be enchanted");
     }

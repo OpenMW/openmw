@@ -50,7 +50,7 @@ namespace MWMechanics
         for (; it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if(pos.squaredDistance(Ogre::Vector3(ref.mRef.mPos.pos)) < minSqr)
+            if(pos.squaredDistance(Ogre::Vector3(ref.mData.getPosition().pos)) < minSqr)
                 if((closed && ref.mData.getLocalRotation().rot[2] == 0) ||
                    (!closed && ref.mData.getLocalRotation().rot[2] >= 1))
                 {

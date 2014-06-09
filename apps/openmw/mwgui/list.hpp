@@ -22,7 +22,7 @@ namespace MWGui
 
             /**
              * Event: Item selected with the mouse.
-             * signature: void method(std::string itemName)
+             * signature: void method(std::string itemName, int index)
              */
             EventHandle_StringInt eventItemSelected;
 
@@ -49,6 +49,8 @@ namespace MWGui
             MyGUI::Widget* getItemWidget(const std::string& name);
             ///< get widget for an item name, useful to set up tooltip
 
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+
         protected:
             void initialiseOverride();
 
@@ -60,6 +62,7 @@ namespace MWGui
         private:
             MyGUI::ScrollView* mScrollView;
             MyGUI::Widget* mClient;
+            std::string mListItemSkin;
 
             std::vector<std::string> mItems;
 

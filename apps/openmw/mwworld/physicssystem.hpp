@@ -70,8 +70,10 @@ namespace MWWorld
             std::pair<bool, Ogre::Vector3>
             castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len);
 
-            std::pair<bool, Ogre::Vector3> castRay(float mouseX, float mouseY);
-            ///< cast ray from the mouse, return true if it hit something and the first result (in OGRE coordinates)
+            std::pair<bool, Ogre::Vector3> castRay(float mouseX, float mouseY, Ogre::Vector3* normal = NULL, std::string* hit = NULL);
+            ///< cast ray from the mouse, return true if it hit something and the first result
+            /// @param normal if non-NULL, the hit normal will be written there (if there is a hit)
+            /// @param hit if non-NULL, the string handle of the hit object will be written there (if there is a hit)
 
             OEngine::Physic::PhysicEngine* getEngine();
 

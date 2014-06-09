@@ -3,6 +3,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/journal.hpp"
 #include "list.hpp"
 
 #include <sstream>
@@ -19,6 +20,7 @@
 #include "imagebutton.hpp"
 #include "journalviewmodel.hpp"
 #include "journalbooks.hpp"
+#include "list.hpp"
 
 namespace
 {
@@ -36,9 +38,7 @@ namespace
     static char const PageOneNum [] = "PageOneNum";
     static char const PageTwoNum [] = "PageTwoNum";
     static char const TopicsList [] = "TopicsList";
-    static char const TopicsPage [] = "TopicsPage";
     static char const QuestsList [] = "QuestsList";
-    static char const QuestsPage [] = "QuestsPage";
     static char const LeftBookPage [] = "LeftBookPage";
     static char const RightBookPage [] = "RightBookPage";
     static char const LeftTopicIndex [] = "LeftTopicIndex";
@@ -110,12 +110,17 @@ namespace
             adviseButtonClick (ShowAllBTN,    &JournalWindowImpl::notifyShowAll   );
             adviseButtonClick (ShowActiveBTN, &JournalWindowImpl::notifyShowActive);
 
+            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
+            list->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyQuestClicked);
+
+            MWGui::Widgets::MWList* topicsList = getWidget<MWGui::Widgets::MWList>(TopicsList);
+            topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
+
             {
                 MWGui::BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
 
-                getPage (TopicsPage)->adviseLinkClicked (callback);
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
                 getPage (RightBookPage)->adviseLinkClicked (callback);
             }
@@ -127,14 +132,6 @@ namespace
 
                 getPage (LeftTopicIndex)->adviseLinkClicked (callback);
                 getPage (RightTopicIndex)->adviseLinkClicked (callback);
-            }
-
-            {
-                MWGui::BookPage::ClickCallback callback;
-                
-                callback = boost::bind (&JournalWindowImpl::notifyQuestClicked, this, _1);
-
-                getPage (QuestsPage)->adviseLinkClicked (callback);
             }
 
             adjustButton(OptionsBTN, true);
@@ -271,6 +268,10 @@ namespace
             //TODO: figure out how to make "options" page overlay book page
             //      correctly, so that text may show underneath
             getPage (RightBookPage)->showPage (Book (), 0);
+
+            // If in quest mode, ensure the quest list is updated
+            if (mQuestMode)
+                notifyQuests(getWidget<MyGUI::Widget>(QuestsList));
         }
 
         void pushBook (Book book, unsigned int page)
@@ -349,9 +350,22 @@ namespace
             setVisible (JournalBTN, true);
         }
 
-        void notifyQuestClicked (intptr_t questId)
+        void notifyTopicSelected (const std::string& topic, int id)
         {
-            Book book = createQuestBook (questId);
+            const MWBase::Journal* journal = MWBase::Environment::get().getJournal();
+            intptr_t topicId = 0; /// \todo get rid of intptr ids
+            for(MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd (); ++i)
+            {
+                if (Misc::StringUtils::ciEqual(i->first, topic))
+                    topicId = intptr_t (&i->second);
+            }
+
+            notifyTopicClicked(topicId);
+        }
+
+        void notifyQuestClicked (const std::string& name, int id)
+        {
+            Book book = createQuestBook (name);
 
             if (mStates.size () > 1)
                 replaceBook (book, 0);
@@ -395,7 +409,14 @@ namespace
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, true);
 
-            showList (TopicsList, TopicsPage, createTopicIndexBook ((char)character));
+            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(TopicsList);
+            list->clear();
+
+            AddNamesToList add(list);
+
+            mModel->visitTopicNamesStartingWith((char) character, add);
+
+            list->adjustSize();
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
@@ -409,9 +430,21 @@ namespace
             setVisible (ShowActiveBTN, false);
         }
 
+        struct AddNamesToList
+        {
+            AddNamesToList(MWGui::Widgets::MWList* list) : mList(list) {}
+
+            MWGui::Widgets::MWList* mList;
+            void operator () (const std::string& name)
+            {
+                mList->addItem(name);
+            }
+        };
+
         void notifyQuests(MyGUI::Widget* _sender)
         {
             mQuestMode = true;
+
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, false);
@@ -419,23 +452,26 @@ namespace
             setVisible (ShowAllBTN, !mAllQuests);
             setVisible (ShowActiveBTN, mAllQuests);
 
-            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
+            list->clear();
+
+            AddNamesToList add(list);
+
+            mModel->visitQuestNames(!mAllQuests, add);
+
+            list->adjustSize();
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
         {
             mAllQuests = true;
-            setVisible (ShowAllBTN, !mAllQuests);
-            setVisible (ShowActiveBTN, mAllQuests);
-            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+            notifyQuests(_sender);
         }
 
         void notifyShowActive(MyGUI::Widget* _sender)
         {
             mAllQuests = false;
-            setVisible (ShowAllBTN, !mAllQuests);
-            setVisible (ShowActiveBTN, mAllQuests);
-            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+            notifyQuests(_sender);
         }
 
         void notifyCancel(MyGUI::Widget* _sender)

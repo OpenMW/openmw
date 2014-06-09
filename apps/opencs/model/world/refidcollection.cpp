@@ -304,10 +304,17 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponReach, ColumnBase::Display_Float));
     weaponColumns.mReach = &mColumns.back();
 
-    for (int i=0; i<6; ++i)
+    for (int i=0; i<3; ++i)
     {
-        mColumns.push_back (RefIdColumn (Columns::ColumnId_MinChop + i, ColumnBase::Display_Integer));
-        weaponColumns.mChop[i] = &mColumns.back();
+        const RefIdColumn **column =
+            i==0 ? weaponColumns.mChop : (i==1 ? weaponColumns.mSlash : weaponColumns.mThrust);
+
+        for (int j=0; j<2; ++j)
+        {
+            mColumns.push_back (
+                RefIdColumn (Columns::ColumnId_MinChop+i*2+j, ColumnBase::Display_Integer));
+            column[j] = &mColumns.back();
+        }
     }
 
     static const struct

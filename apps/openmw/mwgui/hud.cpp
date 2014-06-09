@@ -18,6 +18,7 @@
 #include "container.hpp"
 
 #include "itemmodel.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -40,7 +41,7 @@ namespace MWGui
             else
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
             if (setNewOwner)
-                dropped.getCellRef().mOwner = "";
+                dropped.getCellRef().setOwner("");
 
             return dropped;
         }
@@ -423,9 +424,6 @@ namespace MWGui
         mSpellStatus->setProgressRange(100);
         mSpellStatus->setProgressPosition(successChancePercent);
 
-        if (mSpellImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
-
         mSpellBox->setUserString("ToolTipType", "Spell");
         mSpellBox->setUserString("Spell", spellId);
 
@@ -438,7 +436,9 @@ namespace MWGui
         icon.insert(slashPos+1, "b_");
         icon = std::string("icons\\") + icon;
         Widgets::fixTexturePath(icon);
-        mSpellImage->setImageTexture(icon);
+
+        mSpellImage->setItem(MWWorld::Ptr());
+        mSpellImage->setIcon(icon);
     }
 
     void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
@@ -455,21 +455,10 @@ namespace MWGui
         mSpellStatus->setProgressRange(100);
         mSpellStatus->setProgressPosition(chargePercent);
 
-        if (mSpellImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
-
         mSpellBox->setUserString("ToolTipType", "ItemPtr");
         mSpellBox->setUserData(item);
 
-        mSpellImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
-        MyGUI::ImageBox* itemBox = mSpellImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
-            , MyGUI::Align::Stretch);
-
-        std::string path = std::string("icons\\");
-        path+=item.getClass().getInventoryIcon(item);
-        Widgets::fixTexturePath(path);
-        itemBox->setImageTexture(path);
-        itemBox->setNeedMouseFocus(false);
+        mSpellImage->setItem(item);
     }
 
     void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
@@ -489,23 +478,7 @@ namespace MWGui
         mWeapStatus->setProgressRange(100);
         mWeapStatus->setProgressPosition(durabilityPercent);
 
-        if (mWeapImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
-
-        std::string path = std::string("icons\\");
-        path+=item.getClass().getInventoryIcon(item);
-        Widgets::fixTexturePath(path);
-
-        if (item.getClass().getEnchantment(item) != "")
-        {
-            mWeapImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
-            MyGUI::ImageBox* itemBox = mWeapImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
-                , MyGUI::Align::Stretch);
-            itemBox->setImageTexture(path);
-            itemBox->setNeedMouseFocus(false);
-        }
-        else
-            mWeapImage->setImageTexture(path);
+        mWeapImage->setItem(item);
     }
 
     void HUD::unsetSelectedSpell()
@@ -519,11 +492,9 @@ namespace MWGui
             mWeaponSpellBox->setVisible(true);
         }
 
-        if (mSpellImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
         mSpellStatus->setProgressRange(100);
         mSpellStatus->setProgressPosition(0);
-        mSpellImage->setImageTexture("");
+        mSpellImage->setItem(MWWorld::Ptr());
         mSpellBox->clearUserStrings();
     }
 
@@ -538,17 +509,17 @@ namespace MWGui
             mWeaponSpellBox->setVisible(true);
         }
 
-        if (mWeapImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
         mWeapStatus->setProgressRange(100);
         mWeapStatus->setProgressPosition(0);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
+
+        mWeapImage->setItem(MWWorld::Ptr());
         if (player.getClass().getNpcStats(player).isWerewolf())
-            mWeapImage->setImageTexture("icons\\k\\tx_werewolf_hand.dds");
+            mWeapImage->setIcon("icons\\k\\tx_werewolf_hand.dds");
         else
-            mWeapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
+            mWeapImage->setIcon("icons\\k\\stealth_handtohand.dds");
 
         mWeapBox->clearUserStrings();
     }

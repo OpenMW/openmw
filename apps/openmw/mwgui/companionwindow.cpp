@@ -119,6 +119,11 @@ void CompanionWindow::updateEncumbranceBar()
 
 void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
+    exit();
+}
+
+void CompanionWindow::exit()
+{
     if (mPtr.getTypeName() == typeid(ESM::NPC).name() && mPtr.getClass().getNpcStats(mPtr).getProfit() < 0)
     {
         std::vector<std::string> buttons;

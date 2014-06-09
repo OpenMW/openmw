@@ -1,6 +1,10 @@
 #ifndef CSM_WOLRD_REFCOLLECTION_H
 #define CSM_WOLRD_REFCOLLECTION_H
 
+#include <map>
+
+#include "../doc/stage.hpp"
+
 #include "collection.hpp"
 #include "ref.hpp"
 #include "record.hpp"
@@ -22,7 +26,9 @@ namespace CSMWorld
               : mCells (cells), mNextId (0)
             {}
 
-            void load (ESM::ESMReader& reader, int cellIndex, bool base);
+            void load (ESM::ESMReader& reader, int cellIndex, bool base,
+                std::map<ESM::RefNum, std::string>& cache,
+                CSMDoc::Stage::Messages& messages);
             ///< Load a sequence of references.
 
             std::string getNewId();

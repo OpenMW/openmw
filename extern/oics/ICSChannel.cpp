@@ -38,12 +38,18 @@ namespace ICS
             , mValue(initialValue)
 			, mSymmetricAt(symmetricAt)
 			, mBezierStep(bezierStep)
+            , mEnabled(true)
     { 
 		mBezierMidPoint.x = bezierMidPointX;
 		mBezierMidPoint.y = bezierMidPointY;
 
 		setBezierFunction(bezierMidPointY, bezierMidPointX, symmetricAt, bezierStep);
 	} 
+
+    void Channel::setEnabled(bool enabled)
+    {
+        mEnabled = enabled;
+    }
 
 	float Channel::getValue()
 	{
@@ -78,7 +84,7 @@ namespace ICS
     
         mValue = value;
 
-        if(previousValue != value)
+        if(previousValue != value && mEnabled)
         {
             notifyListeners(previousValue);
         }
@@ -124,7 +130,7 @@ namespace ICS
 
 	void Channel::update()
 	{
-		if(this->getControlsCount() == 1)
+        if(this->getControlsCount() == 1)
 		{
 			ControlChannelBinderItem ccBinderItem = mAttachedControls.back();
 			float diff = ccBinderItem.control->getValue() - ccBinderItem.control->getInitialValue();

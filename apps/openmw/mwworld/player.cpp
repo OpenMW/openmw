@@ -39,8 +39,10 @@ namespace MWWorld
         mCurrentCrimeId(-1),
         mPaidCrimeId(-1)
     {
-        mPlayer.mBase = player;
-        mPlayer.mRef.mRefID = "player";
+        ESM::CellRef cellRef;
+        cellRef.blank();
+        cellRef.mRefID = "player";
+        mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;

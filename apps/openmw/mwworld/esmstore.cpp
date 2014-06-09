@@ -33,16 +33,16 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     // Cache parent esX files by tracking their indices in the global list of
     //  all files/readers used by the engine. This will greaty accelerate
     //  refnumber mangling, as required for handling moved references.
-    int index = ~0;
     const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
     std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
         ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
         std::string fname = mast.name;
+        int index = ~0;
         for (int i = 0; i < esm.getIndex(); i++) {
             const std::string &candidate = allPlugins->at(i).getContext().filename;
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
-            if (fname == fnamecandidate) {
+            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
                 break;
             }
@@ -68,13 +68,12 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
         if (it == mStores.end()) {
             if (n.val == ESM::REC_INFO) {
-                std::string id = esm.getHNOString("INAM");
-                if (dialogue) {
-                    ESM::DialInfo info;
-                    info.mId = id;
-                    info.load(esm);
-                    dialogue->addInfo(info, esm.getIndex() != 0);
-                } else {
+                if (dialogue)
+                {
+                    dialogue->readInfo(esm, esm.getIndex() != 0);
+                }
+                else
+                {
                     std::cerr << "error: info record without dialog" << std::endl;
                     esm.skipRecord();
                 }

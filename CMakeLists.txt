@@ -90,13 +90,13 @@ endif(UNIX AND NOT APPLE)
 # Location of morrowind data files
 if (APPLE)
     set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
+    set(OPENMW_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
 elseif(UNIX)
-    set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
+    set(MORROWIND_DATA_FILES "${CMAKE_INSTALL_PREFIX}/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
+    set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_PREFIX}/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
 else()
     set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
+    set(OPENMW_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
 endif(APPLE)
 
 if (WIN32)
@@ -239,16 +239,40 @@ find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
-IF(OGRE_STATIC)
-find_package(Cg)
-IF(WIN32)
-set(OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_Plugin_CgProgramManager_INCLUDE_DIRS} ${OGRE_Plugin_OctreeSceneManager_INCLUDE_DIRS} ${OGRE_Plugin_ParticleFX_INCLUDE_DIRS} ${OGRE_RenderSystem_Direct3D9_INCLUDE_DIRS} ${OGRE_RenderSystem_GL_INCLUDE_DIRS})
-ELSE(WIN32)
-set(OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_Plugin_CgProgramManager_INCLUDE_DIRS} ${OGRE_Plugin_OctreeSceneManager_INCLUDE_DIRS} ${OGRE_Plugin_ParticleFX_INCLUDE_DIRS} ${OGRE_RenderSystem_GL_INCLUDE_DIRS})
-ENDIF(WIN32)
-ENDIF(OGRE_STATIC)
+
+set(OGRE_PLUGIN_INCLUDE_DIRS "")
+set(OGRE_STATIC_PLUGINS "")
+
+macro(add_static_ogre_plugin PLUGIN)
+    if(OGRE_${PLUGIN}_FOUND)
+        # strip RenderSystem_ or Plugin_ prefix from plugin name
+        string(REPLACE "RenderSystem_" "" PLUGIN_TEMP ${PLUGIN})
+        string(REPLACE "Plugin_" "" PLUGIN_NAME ${PLUGIN_TEMP})
+        add_definitions(-DENABLE_PLUGIN_${PLUGIN_NAME})
+
+        list(APPEND OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_${PLUGIN}_INCLUDE_DIRS})
+        list(APPEND OGRE_STATIC_PLUGINS ${OGRE_${PLUGIN}_LIBRARIES})
+    endif(OGRE_${PLUGIN}_FOUND)
+endmacro(add_static_ogre_plugin)
+
+if(OGRE_STATIC)
+    # set up OGRE_PLUGIN_INCLUDE_DIRS and OGRE_STATIC_PLUGINS
+    add_static_ogre_plugin(Plugin_OctreeSceneManager)
+    add_static_ogre_plugin(Plugin_ParticleFX)
+    find_package(Cg)
+    if(Cg_FOUND)
+        add_static_ogre_plugin(Plugin_CgProgramManager)
+        list(APPEND OGRE_STATIC_PLUGINS ${Cg_LIBRARIES})
+    endif(Cg_FOUND)
+
+    add_static_ogre_plugin(RenderSystem_GL)
+    if(WIN32)
+        add_static_ogre_plugin(RenderSystem_Direct3D9)
+    endif(WIN32)
+endif(OGRE_STATIC)
+
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
@@ -259,6 +283,10 @@ include_directories("."
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+
+if(MYGUI_STATIC)
+   add_definitions(-DMYGUI_STATIC)
+endif (MYGUI_STATIC)
 
 if (APPLE)
     # List used Ogre plugins

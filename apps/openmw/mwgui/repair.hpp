@@ -8,12 +8,16 @@
 namespace MWGui
 {
 
+class ItemWidget;
+
 class Repair : public WindowBase
 {
 public:
     Repair();
 
     virtual void open();
+
+    virtual void exit();
 
     void startRepairItem (const MWWorld::Ptr& item);
 
@@ -23,7 +27,7 @@ protected:
 
     MyGUI::Widget* mToolBox;
 
-    MyGUI::ImageBox* mToolIcon;
+    ItemWidget* mToolIcon;
 
     MyGUI::TextBox* mUsesLabel;
     MyGUI::TextBox* mQualityLabel;

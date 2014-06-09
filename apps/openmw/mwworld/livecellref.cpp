@@ -11,7 +11,7 @@
 #include "esmstore.hpp"
 
 MWWorld::LiveCellRefBase::LiveCellRefBase(std::string type, const ESM::CellRef &cref)
-  : mClass(&Class::get(type)), mRef(cref), mData(mRef)
+  : mClass(&Class::get(type)), mRef(cref), mData(cref)
 {
 }
 
@@ -41,7 +41,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
 
 void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
 {
-    state.mRef = mRef;
+    mRef.writeState(state);
 
     /// \todo get rid of this cast once const-correct Ptr are available
     Ptr ptr (const_cast<LiveCellRefBase *> (this));

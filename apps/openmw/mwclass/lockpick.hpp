@@ -64,6 +64,9 @@ namespace MWClass
 
             virtual int getItemMaxHealth (const MWWorld::Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
+
+            virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const { return true; }
+            ///< \return Item health data available? (default implementation: false)
     };
 }
 

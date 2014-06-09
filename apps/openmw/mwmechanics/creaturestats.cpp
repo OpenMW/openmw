@@ -22,7 +22,8 @@ namespace MWMechanics
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
           mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
-          mLastRestock(0,0), mGoldPool(0), mActorId(-1)
+          mLastRestock(0,0), mGoldPool(0), mActorId(-1),
+          mDeathAnimation(0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -102,7 +103,6 @@ namespace MWMechanics
 
     Stat<int> CreatureStats::getAiSetting (AiSetting index) const
     {
-        assert (index>=0 && index<4);
         return mAiSettings[index];
     }
 
@@ -220,7 +220,6 @@ namespace MWMechanics
 
     void CreatureStats::setAiSetting (AiSetting index, Stat<int> value)
     {
-        assert (index>=0 && index<4);
         mAiSettings[index] = value;
     }
 
@@ -500,6 +499,7 @@ namespace MWMechanics
         state.mDrawState = mDrawState;
         state.mLevel = mLevel;
         state.mActorId = mActorId;
+        state.mDeathAnimation = mDeathAnimation;
 
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
@@ -539,6 +539,7 @@ namespace MWMechanics
         mDrawState = DrawState_(state.mDrawState);
         mLevel = state.mLevel;
         mActorId = state.mActorId;
+        mDeathAnimation = state.mDeathAnimation;
 
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
@@ -591,5 +592,15 @@ namespace MWMechanics
     void CreatureStats::readActorIdCounter (ESM::ESMReader& esm)
     {
         esm.getHNT(sActorId, "COUN");
+    }
+
+    unsigned char CreatureStats::getDeathAnimation() const
+    {
+        return mDeathAnimation;
+    }
+
+    void CreatureStats::setDeathAnimation(unsigned char index)
+    {
+        mDeathAnimation = index;
     }
 }
