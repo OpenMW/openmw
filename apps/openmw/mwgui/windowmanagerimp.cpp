@@ -202,8 +202,12 @@ namespace MWGui
             MyGUI::Align::Default, "Overlay");
         mVideoBackground->setImageTexture("black.png");
         mVideoBackground->setVisible(false);
+        mVideoBackground->setNeedMouseFocus(true);
+        mVideoBackground->setNeedKeyFocus(true);
 
         mVideoWidget = mVideoBackground->createWidgetReal<VideoWidget>("ImageBox", 0,0,1,1, MyGUI::Align::Default);
+        mVideoWidget->setNeedMouseFocus(true);
+        mVideoWidget->setNeedKeyFocus(true);
     }
 
     void WindowManager::initUI()
@@ -263,7 +267,7 @@ namespace MWGui
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
 
-        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
+        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows");
 
         mHud->setVisible(mHudEnabled);
 
@@ -1559,7 +1563,15 @@ namespace MWGui
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)
     {
-        mVideoWidget->playVideo("video\\" + name, allowSkipping);
+        mVideoWidget->playVideo("video\\" + name);
+
+        mVideoWidget->eventKeyButtonPressed.clear();
+        mVideoBackground->eventKeyButtonPressed.clear();
+        if (allowSkipping)
+        {
+            mVideoWidget->eventKeyButtonPressed += MyGUI::newDelegate(this, &WindowManager::onVideoKeyPressed);
+            mVideoBackground->eventKeyButtonPressed += MyGUI::newDelegate(this, &WindowManager::onVideoKeyPressed);
+        }
 
         // Turn off all rendering except for the GUI
         mRendering->getScene()->clearSpecialCaseRenderQueues();
@@ -1587,7 +1599,7 @@ namespace MWGui
 
             mRendering->getWindow()->update();
         }
-        mVideoWidget->cleanup();
+        mVideoWidget->stop();
 
         setCursorVisible(cursorWasVisible);
 
@@ -1627,5 +1639,11 @@ namespace MWGui
         if(mCurrentModals.size() > 0)
             if(input == mCurrentModals.top())
                 mCurrentModals.pop();
+    }
+
+    void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    {
+        if (_key == MyGUI::KeyCode::Escape)
+            mVideoWidget->stop();
     }
 }

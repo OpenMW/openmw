@@ -167,7 +167,7 @@ namespace MWGui
                 mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Stretch, "Menu");
 
-                mVideo->playVideo("video\\menu_background.bik", false);
+                mVideo->playVideo("video\\menu_background.bik");
             }
 
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
@@ -204,7 +204,7 @@ namespace MWGui
             if (!mVideo->update())
             {
                 // If finished playing, start again
-                mVideo->playVideo("video\\menu_background.bik", 0);
+                mVideo->playVideo("video\\menu_background.bik");
             }
         }
     }
