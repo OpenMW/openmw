@@ -165,7 +165,7 @@ namespace CSVWorld
         QVBoxLayout* mMainLayout;
         CSMWorld::IdTable* mTable;
         QUndoStack& mUndoStack;
-        int mRow;
+	std::string mCurrentId;
         bool mLocked;
         const CSMDoc::Document& mDocument;
         TableBottomBox* mBottom;
