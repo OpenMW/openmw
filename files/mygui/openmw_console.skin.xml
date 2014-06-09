@@ -13,8 +13,8 @@
     </Skin>
 
     <Skin name="MW_ConsoleCommand" size="29 28">
-        <Child type="TextBox" skin="MW_EditClient" offset="4 2 19 22" align="Bottom Stretch" name="Client"/>
         <Child type="Widget" skin="MW_Box" offset="0 0 29 26" align="Bottom Stretch"/>
+        <Child type="TextBox" skin="MW_EditClient" offset="4 2 19 22" align="Bottom Stretch" name="Client"/>
     </Skin>
 
 </MyGUI>

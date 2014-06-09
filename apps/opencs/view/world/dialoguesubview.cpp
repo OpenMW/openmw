@@ -185,7 +185,7 @@ CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CS
     {
         delegate = CommandDelegateFactoryCollection::get().makeDelegate (
                                     display, mUndoStack, mParent);
-        mDelegates.insert(std::make_pair<int, CommandDelegate*>(display, delegate));
+        mDelegates.insert(std::make_pair(display, delegate));
     } else
     {
         delegate = delegateIt->second;
@@ -335,6 +335,7 @@ void CSVWorld::EditWidget::remake(int row)
     if (mMainWidget)
     {
         delete mMainWidget;
+        mMainWidget = 0;
     }
     mMainWidget = new QWidget (this);
 
@@ -342,6 +343,7 @@ void CSVWorld::EditWidget::remake(int row)
     if (mWidgetMapper)
     {
         delete mWidgetMapper;
+        mWidgetMapper = 0;
     }
     mWidgetMapper = new QDataWidgetMapper (this);
     mWidgetMapper->setModel(mTable);
@@ -418,7 +420,7 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    this->setMinimumWidth(325); //TODO find better way to set the width or make it customizable
+    this->setMinimumWidth(325); /// \todo replace hardcoded value with a user setting
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }
@@ -429,15 +431,14 @@ void CSVWorld::EditWidget::remake(int row)
 
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     const CreatorFactoryBase& creatorFactory, bool sorting) :
-
     SubView (id),
     mEditWidget(0),
     mMainLayout(NULL),
     mUndoStack(document.getUndoStack()),
     mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
     mLocked(false),
-    mDocument(document)
-
+    mDocument(document),
+    mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
     connect(mTable, SIGNAL(dataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT(dataChanged(const QModelIndex&)));
     mCurrentId = id.getId();
@@ -461,7 +462,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     QToolButton* revertButton = new QToolButton(mainWidget);
     revertButton->setIcon(QIcon(":/edit-undo.png"));
 
-    if (mTable->hasPreview())
+    if (mTable->getFeatures() & CSMWorld::IdTable::Feature_Preview)
     {
         QToolButton* previewButton = new QToolButton(mainWidget);
         previewButton->setIcon(QIcon(":/edit-preview.png"));
@@ -469,7 +470,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
         connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
     }
 
-    if (mTable->getViewing()!=CSMWorld::IdTable::Viewing_None)
+    if (mTable->getFeatures() & CSMWorld::IdTable::Feature_View)
     {
         QToolButton* viewButton = new QToolButton(mainWidget);
         viewButton->setIcon(QIcon(":/cell.png"));
@@ -592,6 +593,12 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
     {
         mEditWidget->setDisabled(mLocked);
     }
+
+    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
+
+    mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || locked);
+
+    mCommandDispatcher.setEditLock (locked);
 }
 
 void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
@@ -608,6 +615,8 @@ void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
         {
             mEditWidget->setDisabled(mLocked);
         }
+
+        mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
     }
 }
 
@@ -709,6 +718,7 @@ void CSVWorld::DialogueSubView::showPreview ()
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
     if (currentIndex.isValid() &&
+	mTable->getFeatures() & CSMWorld::IdTable::Feature_Preview &&
 	mTable->hasPreview() && 
 	currentIndex.row() < mTable->rowCount())
     {

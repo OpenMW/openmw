@@ -47,8 +47,8 @@ namespace
 
         if (left.mBase.getTypeName() == right.mBase.getTypeName())
         {
-            int cmp = MWWorld::Class::get(left.mBase).getName(left.mBase).compare(
-                        MWWorld::Class::get(right.mBase).getName(right.mBase));
+            int cmp = left.mBase.getClass().getName(left.mBase).compare(
+                        right.mBase.getClass().getName(right.mBase));
             return cmp < 0;
         }
         else
@@ -114,7 +114,7 @@ namespace MWGui
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
         if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM::Miscellaneous).name()
-                                                     || base.getCellRef().mSoul == ""))
+                                                     || base.getCellRef().getSoul() == ""))
             return false;
         if ((mFilter & Filter_OnlyEnchantable) && (item.mFlags & ItemStack::Flag_Enchanted
                                                || (base.getTypeName() != typeid(ESM::Armor).name()

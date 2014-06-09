@@ -29,23 +29,17 @@ namespace Terrain
         void enableSplitShadows(bool splitShadows) { mSplitShadows = splitShadows; }
 
         /// Creates a material suitable for displaying a chunk of terrain using alpha-blending.
-        /// @param mat Material that will be replaced by the generated material. May be empty as well, in which case
-        ///            a new material is created.
-        Ogre::MaterialPtr generate (Ogre::MaterialPtr mat);
+        Ogre::MaterialPtr generate ();
 
         /// Creates a material suitable for displaying a chunk of terrain using a ready-made composite map.
-        /// @param mat Material that will be replaced by the generated material. May be empty as well, in which case
-        ///            a new material is created.
-        Ogre::MaterialPtr generateForCompositeMap (Ogre::MaterialPtr mat);
+        Ogre::MaterialPtr generateForCompositeMap ();
 
         /// Creates a material suitable for rendering composite maps, i.e. for "baking" several layer textures
         /// into one. The main difference compared to a normal material is that no shading is applied at this point.
-        /// @param mat Material that will be replaced by the generated material. May be empty as well, in which case
-        ///            a new material is created.
-        Ogre::MaterialPtr generateForCompositeMapRTT (Ogre::MaterialPtr mat);
+        Ogre::MaterialPtr generateForCompositeMapRTT ();
 
     private:
-        Ogre::MaterialPtr create (Ogre::MaterialPtr mat, bool renderCompositeMap, bool displayCompositeMap);
+        Ogre::MaterialPtr create (bool renderCompositeMap, bool displayCompositeMap);
 
         std::vector<LayerInfo> mLayerList;
         std::vector<Ogre::TexturePtr> mBlendmapList;

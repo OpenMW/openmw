@@ -36,6 +36,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cassert>
+#include <typeinfo>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -137,8 +138,8 @@ template<typename T>
 struct KeyT {
     float mTime;
     T mValue;
-    T mForwardValue;  // Only for Quadratic interpolation
-    T mBackwardValue; // Only for Quadratic interpolation
+    T mForwardValue;  // Only for Quadratic interpolation, and never for QuaternionKeyList
+    T mBackwardValue; // Only for Quadratic interpolation, and never for QuaternionKeyList
     float mTension;    // Only for TBC interpolation
     float mBias;       // Only for TBC interpolation
     float mContinuity; // Only for TBC interpolation
@@ -155,6 +156,7 @@ struct KeyListT {
     static const int sLinearInterpolation = 1;
     static const int sQuadraticInterpolation = 2;
     static const int sTBCInterpolation = 3;
+    static const int sXYZInterpolation = 4;
 
     int mInterpolationType;
     VecType mKeys;
@@ -183,8 +185,11 @@ struct KeyListT {
                 KeyT<T> &key = mKeys[i];
                 key.mTime = nif->getFloat();
                 key.mValue = (nif->*getValue)();
-                key.mForwardValue = (nif->*getValue)();
-                key.mBackwardValue = (nif->*getValue)();
+                if( typeid(Ogre::Quaternion) != typeid(T) )
+                {
+                    key.mForwardValue = (nif->*getValue)();
+                    key.mBackwardValue = (nif->*getValue)();
+                }
             }
         }
         else if(mInterpolationType == sTBCInterpolation)
@@ -198,6 +203,43 @@ struct KeyListT {
                 key.mBias = nif->getFloat();
                 key.mContinuity = nif->getFloat();
             }
+        }
+        //\FIXME This now reads the correct amount of data in the file, but doesn't actually do anything with it.
+        else if(mInterpolationType == sXYZInterpolation)
+        {
+            if (count != 1)
+            {
+                nif->file->fail("count should always be '1' for XYZ_ROTATION_KEY.  Retrieved Value: "+Ogre::StringConverter::toString(count));
+                return;
+            }
+            //KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
+            //Chomp unknown and possibly unused float
+            nif->getFloat();
+            for(size_t i=0;i<3;++i)
+            {
+                unsigned int numKeys = nif->getInt();
+                if(numKeys != 0)
+                {
+                    int interpolationTypeAgain = nif->getInt();
+                    if( interpolationTypeAgain != sLinearInterpolation)
+                    {
+                        nif->file->fail("XYZ_ROTATION_KEY's KeyGroup keyType must be '1' (Linear Interpolation).  Retrieved Value: "+Ogre::StringConverter::toString(interpolationTypeAgain));
+                        return;
+                    }
+                    for(size_t j = 0;j < numKeys;j++)
+                    {
+                        //For now just chomp these
+                        nif->getFloat();
+                        nif->getFloat();
+                    }
+                }
+                nif->file->warn("XYZ_ROTATION_KEY read, but not used!");
+            }
+    }
+        else if (mInterpolationType == 0)
+        {
+            if (count != 0)
+                nif->file->fail("Interpolation type 0 doesn't work with keys");
         }
         else
             nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));

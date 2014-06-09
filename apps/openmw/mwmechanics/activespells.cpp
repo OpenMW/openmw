@@ -53,9 +53,9 @@ namespace MWMechanics
         {
             const MWWorld::TimeStamp& start = iter->second.mTimeStamp;
 
-            const std::vector<Effect>& effects = iter->second.mEffects;
+            const std::vector<ActiveEffect>& effects = iter->second.mEffects;
 
-            for (std::vector<Effect>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
+            for (std::vector<ActiveEffect>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
             {
                 int duration = effectIt->mDuration;
                 MWWorld::TimeStamp end = start;
@@ -63,7 +63,7 @@ namespace MWMechanics
                     MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
 
                 if (end>now)
-                    mEffects.add(effectIt->mKey, MWMechanics::EffectParam(effectIt->mMagnitude));
+                    mEffects.add(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), MWMechanics::EffectParam(effectIt->mMagnitude));
             }
         }
     }
@@ -91,11 +91,11 @@ namespace MWMechanics
 
     double ActiveSpells::timeToExpire (const TIterator& iterator) const
     {
-        const std::vector<Effect>& effects = iterator->second.mEffects;
+        const std::vector<ActiveEffect>& effects = iterator->second.mEffects;
 
         int duration = 0;
 
-        for (std::vector<Effect>::const_iterator iter (effects.begin());
+        for (std::vector<ActiveEffect>::const_iterator iter (effects.begin());
             iter!=effects.end(); ++iter)
         {
             if (iter->mDuration > duration)
@@ -132,8 +132,8 @@ namespace MWMechanics
         return mSpells;
     }
 
-    void ActiveSpells::addSpell(const std::string &id, bool stack, std::vector<Effect> effects,
-                                const std::string &displayName, const std::string& casterHandle)
+    void ActiveSpells::addSpell(const std::string &id, bool stack, std::vector<ActiveEffect> effects,
+                                const std::string &displayName, int casterActorId)
     {
         bool exists = false;
         for (TContainer::const_iterator it = begin(); it != end(); ++it)
@@ -146,7 +146,7 @@ namespace MWMechanics
         params.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp();
         params.mEffects = effects;
         params.mDisplayName = displayName;
-        params.mCasterHandle = casterHandle;
+        params.mCasterActorId = casterActorId;
 
         if (!exists || stack)
             mSpells.insert (std::make_pair(id, params));
@@ -168,7 +168,7 @@ namespace MWMechanics
         {
             float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
 
-            for (std::vector<Effect>::const_iterator effectIt = it->second.mEffects.begin();
+            for (std::vector<ActiveEffect>::const_iterator effectIt = it->second.mEffects.begin();
                  effectIt != it->second.mEffects.end(); ++effectIt)
             {
                 std::string name = it->second.mDisplayName;
@@ -178,7 +178,7 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnitude;
 
                 if (magnitude)
-                    visitor.visit(effectIt->mKey, name, it->second.mCasterHandle, magnitude, remainingTime);
+                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->second.mCasterActorId, magnitude, remainingTime);
             }
         }
     }
@@ -200,33 +200,70 @@ namespace MWMechanics
     {
         for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); ++it)
         {
-            for (std::vector<Effect>::iterator effectIt = it->second.mEffects.begin();
+            for (std::vector<ActiveEffect>::iterator effectIt = it->second.mEffects.begin();
                  effectIt != it->second.mEffects.end();)
             {
-                if (effectIt->mKey.mId == effectId)
+                if (effectIt->mEffectId == effectId)
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
-                    effectIt++;
+                    ++effectIt;
             }
         }
         mSpellsChanged = true;
     }
 
-    void ActiveSpells::purge(const std::string &actorHandle)
+    void ActiveSpells::purge(int casterActorId)
     {
         for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); ++it)
         {
-            for (std::vector<Effect>::iterator effectIt = it->second.mEffects.begin();
+            for (std::vector<ActiveEffect>::iterator effectIt = it->second.mEffects.begin();
                  effectIt != it->second.mEffects.end();)
             {
-                const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mKey.mId);
+                const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectId);
                 if (effect->mData.mFlags & ESM::MagicEffect::CasterLinked
-                        && it->second.mCasterHandle == actorHandle)
+                        && it->second.mCasterActorId == casterActorId)
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
-                    effectIt++;
+                    ++effectIt;
             }
         }
         mSpellsChanged = true;
+    }
+
+    void ActiveSpells::clear()
+    {
+        mSpells.clear();
+        mSpellsChanged = true;
+    }
+
+    void ActiveSpells::writeState(ESM::ActiveSpells &state) const
+    {
+        for (TContainer::const_iterator it = mSpells.begin(); it != mSpells.end(); ++it)
+        {
+            // Stupid copying of almost identical structures. ESM::TimeStamp <-> MWWorld::TimeStamp
+            ESM::ActiveSpells::ActiveSpellParams params;
+            params.mEffects = it->second.mEffects;
+            params.mCasterActorId = it->second.mCasterActorId;
+            params.mDisplayName = it->second.mDisplayName;
+            params.mTimeStamp = it->second.mTimeStamp.toEsm();
+
+            state.mSpells.insert (std::make_pair(it->first, params));
+        }
+    }
+
+    void ActiveSpells::readState(const ESM::ActiveSpells &state)
+    {
+        for (ESM::ActiveSpells::TContainer::const_iterator it = state.mSpells.begin(); it != state.mSpells.end(); ++it)
+        {
+            // Stupid copying of almost identical structures. ESM::TimeStamp <-> MWWorld::TimeStamp
+            ActiveSpellParams params;
+            params.mEffects = it->second.mEffects;
+            params.mCasterActorId = it->second.mCasterActorId;
+            params.mDisplayName = it->second.mDisplayName;
+            params.mTimeStamp = MWWorld::TimeStamp(it->second.mTimeStamp);
+
+            mSpells.insert (std::make_pair(it->first, params));
+            mSpellsChanged = true;
+        }
     }
 }

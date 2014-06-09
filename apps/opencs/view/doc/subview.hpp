@@ -37,7 +37,6 @@ namespace CSVDoc
             CSMWorld::UniversalId getUniversalId() const;
 
             virtual void setEditLock (bool locked) = 0;
-            virtual void updateEditorSetting (const QString &, const QString &);
 
             virtual void setStatusBar (bool show);
             ///< Default implementation: ignored
@@ -48,6 +47,10 @@ namespace CSVDoc
         signals:
 
             void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
+
+        public slots:
+            virtual void updateUserSetting
+                                    (const QString &, const QStringList &);
     };
 }
 

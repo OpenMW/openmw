@@ -102,10 +102,11 @@ namespace MWMechanics
         if (roll < x)
         {
             // Reduce shield durability by incoming damage
-            if (shield->getCellRef().mCharge == -1)
-                shield->getCellRef().mCharge = shield->getClass().getItemMaxHealth(*shield);
-            shield->getCellRef().mCharge -= std::min(shield->getCellRef().mCharge, int(damage));
-            if (!shield->getCellRef().mCharge)
+            int shieldhealth = shield->getClass().getItemHealth(*shield);
+
+            shieldhealth -= std::min(shieldhealth, int(damage));
+            shield->getCellRef().setCharge(shieldhealth);
+            if (shieldhealth == 0)
                 inv.unequipItem(*shield, blocker);
 
             // Reduce blocker fatigue
@@ -146,8 +147,8 @@ namespace MWMechanics
               || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
             damage *= multiplier;
 
-        if (weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
-                & actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+        if ((weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver)
+                && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
 
         if (damage == 0 && attacker.getRefData().getHandle() == "player")

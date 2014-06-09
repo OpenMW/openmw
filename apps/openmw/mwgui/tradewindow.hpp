@@ -35,6 +35,8 @@ namespace MWGui
 
             int getMerchantServices();
 
+            virtual void exit();
+
 
         private:
             ItemView* mItemView;
@@ -53,7 +55,7 @@ namespace MWGui
             MyGUI::Button* mIncreaseButton;
             MyGUI::Button* mDecreaseButton;
             MyGUI::TextBox* mTotalBalanceLabel;
-            MyGUI::TextBox* mTotalBalance;
+            MyGUI::EditBox* mTotalBalance;
 
             MyGUI::Widget* mBottomPane;
 
@@ -89,6 +91,7 @@ namespace MWGui
             void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onBalanceEdited(MyGUI::EditBox* _sender);
 
             void onIncreaseButtonTriggered();
             void onDecreaseButtonTriggered();
@@ -101,9 +104,7 @@ namespace MWGui
 
             int getMerchantGold();
 
-            // Relates to NPC gold reset delay
-            void checkTradeTime();
-            void updateTradeTime(); 
+            void restock();
     };
 }
 

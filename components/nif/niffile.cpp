@@ -318,6 +318,8 @@ void NIFFile::parse()
       Record *r = NULL;
 
       std::string rec = nif.getString();
+      if(rec.empty())
+        fail("Record number " + Ogre::StringConverter::toString(i) + " out of " + Ogre::StringConverter::toString(recNum) + " is blank.");
 
       RecordFactoryEntry const * entry = lookupRecordFactory (rec.c_str ());
 

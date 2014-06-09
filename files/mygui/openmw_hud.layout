@@ -3,10 +3,8 @@
 <MyGUI type="Layout">
     <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main">
         <!-- Energy bars -->
-        <Widget type="Widget" skin="" position="13 131 65 12" align="Left Bottom" name="EnemyHealthFrame">
-            <Widget type="ProgressBar" skin="MW_EnergyBar_Yellow" position="0 0 65 12" align="Left Bottom" name="EnemyHealth">
-                <Property key="Visible" value="false"/>
-            </Widget>
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Yellow" position="13 131 65 12" align="Left Bottom" name="EnemyHealth">
+            <Property key="Visible" value="false"/>
         </Widget>
         <Widget type="Button" skin="" position="13 146 65 12" align="Left Bottom" name="HealthFrame">
             <UserString key="ToolTipType" value="Layout"/>
@@ -42,7 +40,7 @@
                 <Property key="TextShadow" value="true"/>
                 <Property key="TextShadowColour" value="0 0 0"/>
             </Widget>
-            <Widget type="ProgressBar" skin="MW_Progress_Loading" position="12 36 196 8" align="Center Top" name="Drowning">
+            <Widget type="ProgressBar" skin="MW_Progress_LightBlue" position="12 36 196 8" align="Center Top" name="Drowning">
                 <Property key="NeedMouse" value="false"/>
             </Widget>
             <Widget type="Widget" skin="MW_Progress_Drowning" position="14 38 192 4" align="Center Top" name="Flash"/>
@@ -54,6 +52,7 @@
             <Property key="TextAlign" value="Left"/>
             <Property key="TextShadow" value="true"/>
             <Property key="TextShadowColour" value="0 0 0"/>
+            <Property key="NeedMouse" value="false"/>
         </Widget>
 
         <!-- Equipped weapon box -->
@@ -101,6 +100,7 @@
             <Property key="TextAlign" value="Right"/>
             <Property key="TextShadow" value="true"/>
             <Property key="TextShadowColour" value="0 0 0"/>
+            <Property key="NeedMouse" value="false"/>
         </Widget>
 
         <!-- Map box -->

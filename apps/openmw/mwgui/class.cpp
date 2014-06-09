@@ -719,6 +719,11 @@ namespace MWGui
 
     void SelectSpecializationDialog::onCancelClicked(MyGUI::Widget* _sender)
     {
+        exit();
+    }
+
+    void SelectSpecializationDialog::exit()
+    {
         eventCancel();
     }
 
@@ -764,6 +769,11 @@ namespace MWGui
     }
 
     void SelectAttributeDialog::onCancelClicked(MyGUI::Widget* _sender)
+    {
+        exit();
+    }
+
+    void SelectAttributeDialog::exit()
     {
         eventCancel();
     }
@@ -855,6 +865,11 @@ namespace MWGui
     }
 
     void SelectSkillDialog::onCancelClicked(MyGUI::Widget* _sender)
+    {
+        exit();
+    }
+
+    void SelectSkillDialog::exit()
     {
         eventCancel();
     }

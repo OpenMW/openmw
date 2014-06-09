@@ -38,6 +38,8 @@ void Script::load(ESMReader &esm)
         char* str = &tmp[0];
         for (size_t i = 0; i < mVarNames.size(); i++)
         {
+            char *termsym = strchr(str, '\r');
+            if(termsym) *termsym = '\0';
             mVarNames[i] = std::string(str);
             str += mVarNames[i].size() + 1;
 

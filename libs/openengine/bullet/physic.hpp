@@ -99,7 +99,15 @@ namespace Physic
          */
         void setRotation(const Ogre::Quaternion &quat);
 
-        void enableCollisions(bool collision);
+        /**
+         * Sets the collisionMode for this actor. If disabled, the actor can fly and clip geometry.
+         */
+        void enableCollisionMode(bool collision);
+
+        /**
+         * Enables or disables the *external* collision body. If disabled, other actors will not collide with this actor.
+         */
+        void enableCollisionBody(bool collision);
 
         bool getCollisionMode() const
         {
@@ -167,6 +175,7 @@ namespace Physic
         Ogre::Vector3 mForce;
         bool mOnGround;
         bool mCollisionMode;
+        bool mCollisionBody;
 
         std::string mMesh;
         std::string mName;
@@ -299,8 +308,10 @@ namespace Physic
 
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
+         * If \a normal is non-NULL, the hit normal will be written there (if there is a hit)
          */
-        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true,bool ignoreHeightMap = false);
+        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true,
+                                             bool ignoreHeightMap = false, Ogre::Vector3* normal = NULL);
 
         /**
          * Return all objects hit by a ray.

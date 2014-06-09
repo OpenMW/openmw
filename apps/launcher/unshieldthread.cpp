@@ -1,6 +1,6 @@
 #include "unshieldthread.hpp"
 
-#include <fstream>
+#include <boost/filesystem/fstream.hpp>
 #include <components/misc/stringops.hpp>
    
 namespace bfs = boost::filesystem;
@@ -49,7 +49,7 @@ namespace
 
     std::string read_to_string(const bfs::path& path)
     {
-        std::ifstream strstream(path.c_str(), std::ios::in | std::ios::binary);
+        bfs::ifstream strstream(path, std::ios::in | std::ios::binary);
         std::string str;
 
         strstream.seekg(0, std::ios::end);
@@ -201,7 +201,7 @@ namespace
             add_setting("Archives", "Archive 1", "Bloodmoon.bsa", ini);
         }
 
-        std::ofstream inistream(ini_path.c_str());
+        bfs::ofstream inistream((ini_path));
         inistream << ini;
         inistream.close();
     }

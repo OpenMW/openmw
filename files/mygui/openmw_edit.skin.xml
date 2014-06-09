@@ -10,13 +10,11 @@
 
     </Skin>
 
-    <Skin name="MW_TextBoxEditClient" size="10 10">
-
-        <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
-
-    </Skin>
-
     <Skin name="MW_TextEdit" size="512 20">
+
+        <!-- Borders -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 512 20" align="Stretch"/>
 
         <!-- Input -->
 
@@ -25,11 +23,6 @@
         <Property key="TextColour" value="0.75 0.6 0.35"/>
 
         <Child type="TextBox" skin="MW_TextEditClient" offset="4 1 502 18" align="Stretch" name="Client"/>
-
-
-        <!-- Borders -->
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 512 20" align="Stretch" name="Client"/>
 
     </Skin>
 
@@ -41,7 +34,7 @@
 
         <Property key="TextColour" value="0.75 0.6 0.35"/>
 
-        <Child type="TextBox" skin="MW_TextBoxEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
+        <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
 
         <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
 

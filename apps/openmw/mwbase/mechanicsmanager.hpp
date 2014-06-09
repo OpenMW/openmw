@@ -96,6 +96,9 @@ namespace MWBase
             /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
             virtual bool awarenessCheck (const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
 
+            /// Makes \a ptr fight \a target. Also shouts a combat taunt.
+            virtual void startCombat (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
+
             enum OffenseType
             {
                 OT_Theft, // Taking items owned by an NPC or a faction you are not a member of
@@ -160,9 +163,15 @@ namespace MWBase
             virtual bool isAIActive() = 0;
 
             virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
+            virtual void getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects) = 0;
 
-            ///return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
+            ///return the list of actors which are following the given actor
+            /**ie AiFollow is active and the target is the actor**/
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
+
+            ///Returns a list of actors who are fighting the given actor within the fAlarmDistance
+            /** ie AiCombat is active and the target is the actor **/
+            virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
 
             virtual void playerLoaded() = 0;
     };

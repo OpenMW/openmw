@@ -1,21 +1,32 @@
 #include "datadisplaydelegate.hpp"
+#include "../../model/settings/usersettings.hpp"
+
 #include <QApplication>
 #include <QPainter>
 
 CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
                                                    const IconList &icons,
-                                                   QUndoStack &undoStack, QObject *parent)
-    : EnumDelegate (values, undoStack, parent), mDisplayMode (Mode_TextOnly), mIcons (icons)
-    , mIconSize (QSize(16, 16)), mIconLeftOffset(3), mTextLeftOffset(8)
+                                                   QUndoStack &undoStack,
+                                                   const QString &pageName,
+                                                   const QString &settingName,
+                                                   QObject *parent)
+    : EnumDelegate (values, undoStack, parent), mDisplayMode (Mode_TextOnly),
+      mIcons (icons), mIconSize (QSize(16, 16)), mIconLeftOffset(3),
+      mTextLeftOffset(8), mSettingKey (pageName + '/' + settingName)
 {
     mTextAlignment.setAlignment (Qt::AlignLeft | Qt::AlignVCenter );
 
     buildPixmaps();
+
+    QString value =
+            CSMSettings::UserSettings::instance().settingValue (mSettingKey);
+
+    updateDisplayMode(value);
 }
 
 void CSVWorld::DataDisplayDelegate::buildPixmaps ()
 {
-    if (mPixmaps.size() > 0)
+    if (!mPixmaps.empty())
         mPixmaps.clear();
 
     IconList::iterator it = mIcons.begin();
@@ -23,7 +34,7 @@ void CSVWorld::DataDisplayDelegate::buildPixmaps ()
     while (it != mIcons.end())
     {
         mPixmaps.push_back (std::make_pair (it->first, it->second.pixmap (mIconSize) ) );
-        it++;
+        ++it;
     }
 }
 
@@ -89,6 +100,30 @@ void CSVWorld::DataDisplayDelegate::paintIcon (QPainter *painter, const QStyleOp
     painter->drawPixmap (iconRect, mPixmaps.at(index).second);
 }
 
+void CSVWorld::DataDisplayDelegate::updateUserSetting (const QString &name,
+                                                        const QStringList &list)
+{
+    if (list.isEmpty())
+        return;
+
+    QString value = list.at(0);
+
+    if (name == mSettingKey)
+        updateDisplayMode (value);
+}
+
+void CSVWorld::DataDisplayDelegate::updateDisplayMode (const QString &mode)
+{
+    if (mode == "Icon and Text")
+        mDisplayMode = Mode_IconAndText;
+
+    else if (mode == "Icon Only")
+        mDisplayMode = Mode_IconOnly;
+
+    else if (mode == "Text Only")
+        mDisplayMode = Mode_TextOnly;
+}
+
 CSVWorld::DataDisplayDelegate::~DataDisplayDelegate()
 {
     mIcons.clear();
@@ -106,5 +141,7 @@ CSVWorld::CommandDelegate *CSVWorld::DataDisplayDelegateFactory::makeDelegate (Q
     QObject *parent) const
 {
 
-    return new DataDisplayDelegate (mValues, mIcons, undoStack, parent);
+    return new DataDisplayDelegate (mValues, mIcons, undoStack, "", "", parent);
 }
+
+

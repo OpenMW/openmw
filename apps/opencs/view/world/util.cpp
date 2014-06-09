@@ -197,12 +197,6 @@ bool CSVWorld::CommandDelegate::isEditLocked() const
     return mEditLock;
 }
 
-bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
-    const QString &settingValue)
-{
-    return false;
-}
-
 void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
     QVariant v = index.data(Qt::EditRole);

@@ -19,7 +19,7 @@ namespace
     std::string getIconPath(MWWorld::Ptr ptr)
     {
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(ptr).getInventoryIcon(ptr);
+        path += ptr.getClass().getInventoryIcon(ptr);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
@@ -66,10 +66,7 @@ namespace MWGui
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mAlchemy.clear();
-
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
+        exit();
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -159,6 +156,12 @@ namespace MWGui
         update();
     }
 
+    void AlchemyWindow::exit() {
+        mAlchemy.clear();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
+    }
+
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
     {
         removeIngredient(_sender);
@@ -174,7 +177,7 @@ namespace MWGui
         {
             update();
 
-            std::string sound = MWWorld::Class::get(item).getUpSoundId(item);
+            std::string sound = item.getClass().getUpSoundId(item);
             MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
         }
     }

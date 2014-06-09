@@ -1,12 +1,10 @@
 
 #include "ref.hpp"
 
-#include "cell.hpp"
-
-void CSMWorld::CellRef::load (ESM::ESMReader &esm, Cell& cell, const std::string& id)
+CSMWorld::CellRef::CellRef()
 {
-    mId = id;
-    mCell = cell.mId;
+    mRefNum.mIndex = 0;
 
-    cell.addRef (mId);
+    // special marker: This reference does not have a RefNum assign to it yet.
+    mRefNum.mContentFile = -2;
 }

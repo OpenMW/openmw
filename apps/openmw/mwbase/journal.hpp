@@ -11,6 +11,11 @@
 #include "../mwdialogue/topic.hpp"
 #include "../mwdialogue/quest.hpp"
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace ESM
 {
     class ESMReader;
@@ -32,7 +37,7 @@ namespace MWBase
 
             typedef std::deque<MWDialogue::StampedJournalEntry> TEntryContainer;
             typedef TEntryContainer::const_iterator TEntryIter;
-            typedef std::map<std::string, MWDialogue::Quest> TQuestContainer; // topc, quest
+            typedef std::map<std::string, MWDialogue::Quest> TQuestContainer; // topic, quest
             typedef TQuestContainer::const_iterator TQuestIter;
             typedef std::map<std::string, MWDialogue::Topic> TTopicContainer; // topic-id, topic-content
             typedef TTopicContainer::const_iterator TTopicIter;
@@ -80,7 +85,7 @@ namespace MWBase
 
             virtual int countSavedGameRecords() const = 0;
 
-            virtual void write (ESM::ESMWriter& writer) const = 0;
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
     };

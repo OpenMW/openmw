@@ -15,8 +15,11 @@ namespace MWGui
         virtual ModelIndex getIndex (ItemStack item);
         virtual size_t getItemCount();
 
-        virtual void copyItem (const ItemStack& item, size_t count);
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
         virtual void removeItem (const ItemStack& item, size_t count);
+
+        /// Move items from this model to \a otherModel.
+        virtual MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
 
         virtual void update();
 

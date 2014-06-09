@@ -8,7 +8,9 @@
 #include <QScrollArea>
 
 #include "../doc/subview.hpp"
+
 #include "../../model/world/columnbase.hpp"
+#include "../../model/world/commanddispatcher.hpp"
 
 class QDataWidgetMapper;
 class QSize;
@@ -169,6 +171,7 @@ namespace CSVWorld
         bool mLocked;
         const CSMDoc::Document& mDocument;
         TableBottomBox* mBottom;
+        CSMWorld::CommandDispatcher mCommandDispatcher;
 
         public:
 

@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 29)
+set(OPENMW_VERSION_MINOR 30)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -36,6 +36,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
                 string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_MINOR "${VERSION}")
                 string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_RELEASE "${VERSION}")
 
+<<<<<<< HEAD
                 set(GIT_VERSION "${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_RELEASE}")
 
                     set(OPENMW_VERSION_MAJOR ${GIT_VERSION_MAJOR})
@@ -44,6 +45,10 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
                     set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
                     set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+=======
+                set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
+                set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
+>>>>>>> master/refs
 
                 message(STATUS "OpenMW version ${OPENMW_VERSION}")
             else(MATCH)
@@ -82,8 +87,6 @@ option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock fram
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" ON)
-option(USE_AUDIERE "use audiere for sound" ON)
-option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
@@ -98,13 +101,13 @@ endif(UNIX AND NOT APPLE)
 # Location of morrowind data files
 if (APPLE)
     set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
+    set(OPENMW_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
 elseif(UNIX)
-    set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
+    set(MORROWIND_DATA_FILES "${CMAKE_INSTALL_PREFIX}/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
+    set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_PREFIX}/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
 else()
     set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
-    set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
+    set(OPENMW_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
 endif(APPLE)
 
 if (WIN32)
@@ -127,6 +130,7 @@ set(OENGINE_OGRE
 )
 
 set(OENGINE_GUI
+  ${LIBDIR}/openengine/gui/loglistener.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
   ${LIBDIR}/openengine/gui/layout.hpp
 )
@@ -166,27 +170,6 @@ if (USE_FFMPEG)
         set(GOT_SOUND_INPUT 1)
     endif (FFMPEG_FOUND)
 endif (USE_FFMPEG)
-
-if (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
-    find_package(Audiere)
-    if (AUDIERE_FOUND)
-        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
-        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
-        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
-        set(GOT_SOUND_INPUT 1)
-    endif (AUDIERE_FOUND)
-endif (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
-
-if (USE_MPG123 AND NOT GOT_SOUND_INPUT)
-    find_package(MPG123 REQUIRED)
-    find_package(SNDFILE REQUIRED)
-    if (MPG123_FOUND AND SNDFILE_FOUND)
-        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
-        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
-        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_MPG123)
-        set(GOT_SOUND_INPUT 1)
-    endif (MPG123_FOUND AND SNDFILE_FOUND)
-endif (USE_MPG123 AND NOT GOT_SOUND_INPUT)
 
 if (NOT GOT_SOUND_INPUT)
     message(WARNING "--------------------")
@@ -253,6 +236,9 @@ endif ()
 
 
 set(BOOST_COMPONENTS system filesystem program_options)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
@@ -264,16 +250,40 @@ find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
-IF(OGRE_STATIC)
-find_package(Cg)
-IF(WIN32)
-set(OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_Plugin_CgProgramManager_INCLUDE_DIRS} ${OGRE_Plugin_OctreeSceneManager_INCLUDE_DIRS} ${OGRE_Plugin_ParticleFX_INCLUDE_DIRS} ${OGRE_RenderSystem_Direct3D9_INCLUDE_DIRS} ${OGRE_RenderSystem_GL_INCLUDE_DIRS})
-ELSE(WIN32)
-set(OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_Plugin_CgProgramManager_INCLUDE_DIRS} ${OGRE_Plugin_OctreeSceneManager_INCLUDE_DIRS} ${OGRE_Plugin_ParticleFX_INCLUDE_DIRS} ${OGRE_RenderSystem_GL_INCLUDE_DIRS})
-ENDIF(WIN32)
-ENDIF(OGRE_STATIC)
+
+set(OGRE_PLUGIN_INCLUDE_DIRS "")
+set(OGRE_STATIC_PLUGINS "")
+
+macro(add_static_ogre_plugin PLUGIN)
+    if(OGRE_${PLUGIN}_FOUND)
+        # strip RenderSystem_ or Plugin_ prefix from plugin name
+        string(REPLACE "RenderSystem_" "" PLUGIN_TEMP ${PLUGIN})
+        string(REPLACE "Plugin_" "" PLUGIN_NAME ${PLUGIN_TEMP})
+        add_definitions(-DENABLE_PLUGIN_${PLUGIN_NAME})
+
+        list(APPEND OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_${PLUGIN}_INCLUDE_DIRS})
+        list(APPEND OGRE_STATIC_PLUGINS ${OGRE_${PLUGIN}_LIBRARIES})
+    endif(OGRE_${PLUGIN}_FOUND)
+endmacro(add_static_ogre_plugin)
+
+if(OGRE_STATIC)
+    # set up OGRE_PLUGIN_INCLUDE_DIRS and OGRE_STATIC_PLUGINS
+    add_static_ogre_plugin(Plugin_OctreeSceneManager)
+    add_static_ogre_plugin(Plugin_ParticleFX)
+    find_package(Cg)
+    if(Cg_FOUND)
+        add_static_ogre_plugin(Plugin_CgProgramManager)
+        list(APPEND OGRE_STATIC_PLUGINS ${Cg_LIBRARIES})
+    endif(Cg_FOUND)
+
+    add_static_ogre_plugin(RenderSystem_GL)
+    if(WIN32)
+        add_static_ogre_plugin(RenderSystem_Direct3D9)
+    endif(WIN32)
+endif(OGRE_STATIC)
+
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
@@ -284,6 +294,10 @@ include_directories("."
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+
+if(MYGUI_STATIC)
+   add_definitions(-DMYGUI_STATIC)
+endif (MYGUI_STATIC)
 
 if (APPLE)
     # List used Ogre plugins
@@ -364,8 +378,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
-    "${OpenMW_BINARY_DIR}/opencs.cfg")
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs.ini
+    "${OpenMW_BINARY_DIR}/opencs.ini")
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
@@ -430,7 +444,6 @@ IF(NOT WIN32 AND NOT APPLE)
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-        INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
         INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
     ENDIF (DPKG_PROGRAM)
 
@@ -447,7 +460,7 @@ IF(NOT WIN32 AND NOT APPLE)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     IF(BUILD_OPENCS)
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
     ENDIF(BUILD_OPENCS)
 
     # Install resources
@@ -476,7 +489,7 @@ if(WIN32)
     ENDIF(BUILD_MWINIIMPORTER)
     IF(BUILD_OPENCS)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION ".")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
@@ -614,6 +627,7 @@ if (WIN32)
         4706 # Assignment in conditional expression
         4738 # Storing 32-bit float result in memory, possible loss of performance
         4986 # Undocumented warning that occurs in the crtdbg.h file
+        4987 # nonstandard extension used (triggered by setjmp.h)
         4996 # Function was declared deprecated
 
         # cause by ogre extensivly
@@ -630,7 +644,9 @@ if (WIN32)
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
+        4505 # Unreferenced local function has been removed
         4701 # Potentially uninitialized local variable used
+        4702 # Unreachable code
         4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )
 
@@ -638,19 +654,31 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${WARNINGS})
-    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
+    set(SHINY_WARNINGS "${WARNINGS} /wd4245")
+    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${SHINY_WARNINGS})
+    # there's an unreferenced local variable in the ogre platform, suppress it
+    set(SHINY_OGRE_WARNINGS "${WARNINGS} /wd4101")
+    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${SHINY_OGRE_WARNINGS})
+    set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${WARNINGS})
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
     if (BUILD_LAUNCHER)
         set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_LAUNCHER)
     set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
-        if (BUILD_BSATOOL)
+    if (BUILD_BSATOOL)
         set_target_properties(bsatool PROPERTIES COMPILE_FLAGS ${WARNINGS})
-            endif (BUILD_BSATOOL)
+    endif (BUILD_BSATOOL)
     if (BUILD_ESMTOOL)
         set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_ESMTOOL)
+    if (BUILD_OPENCS)
+        set_target_properties(opencs PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_OPENCS)
+    if (BUILD_MWINIIMPORTER)
+        set_target_properties(mwiniimport PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_MWINIIMPORTER)
   endif(MSVC)
 
   # Same for MinGW
@@ -683,7 +711,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})

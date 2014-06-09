@@ -14,6 +14,8 @@ namespace MWGui
 
         virtual void open();
 
+        virtual void exit();
+
         void startTraining(MWWorld::Ptr actor);
 
         void onFrame(float dt);

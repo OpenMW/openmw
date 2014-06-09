@@ -94,15 +94,6 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 # Main executable
-IF(OGRE_STATIC)
-IF(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_Direct3D9 -DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_Direct3D9_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
-ELSE(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_GL_LIBRARIES})
-ENDIF(WIN32)
-ENDIF(OGRE_STATIC)
 add_executable(omwlauncher
     ${GUI_TYPE}
     ${LAUNCHER}
@@ -116,7 +107,7 @@ target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
-    ${SDL2_LIBRARY}
+    ${SDL2_LIBRARY_ONLY}
     ${QT_LIBRARIES}
     components
 )

@@ -2,7 +2,7 @@
 #define OPENMW_ESM_FACT_H
 
 #include <string>
-#include <vector>
+#include <map>
 
 namespace ESM
 {
@@ -53,13 +53,8 @@ struct Faction
 
     FADTstruct mData;
 
-    struct Reaction
-    {
-        std::string mFaction;
-        int mReaction;
-    };
-
-    std::vector<Reaction> mReactions;
+    // <Faction ID, Reaction>
+    std::map<std::string, int> mReactions;
 
     // Name of faction ranks (may be empty for NPC factions)
     std::string mRanks[10];

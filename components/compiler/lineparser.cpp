@@ -166,7 +166,7 @@ namespace Compiler
             if (!arguments.empty())
             {
                 mExprParser.reset();
-                mExprParser.parseArguments (arguments, scanner, mCode, true);
+                mExprParser.parseArguments (arguments, scanner, mCode);
             }
 
             mName = name;
@@ -278,7 +278,7 @@ namespace Compiler
                         mExplicit.clear();
                     }
 
-                    int optionals = mExprParser.parseArguments (argumentType, scanner, mCode, true);
+                    int optionals = mExprParser.parseArguments (argumentType, scanner, mCode);
 
                     extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit, optionals);
                     mState = EndState;
@@ -363,14 +363,14 @@ namespace Compiler
 
                 case Scanner::K_startscript:
 
-                    mExprParser.parseArguments ("c", scanner, mCode, true);
+                    mExprParser.parseArguments ("c", scanner, mCode);
                     Generator::startScript (mCode);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_stopscript:
 
-                    mExprParser.parseArguments ("c", scanner, mCode, true);
+                    mExprParser.parseArguments ("c", scanner, mCode);
                     Generator::stopScript (mCode);
                     mState = EndState;
                     return true;

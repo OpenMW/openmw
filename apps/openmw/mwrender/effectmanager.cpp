@@ -11,18 +11,6 @@
 namespace MWRender
 {
 
-class EffectAnimationTime : public Ogre::ControllerValue<Ogre::Real>
-{
-private:
-    float mTime;
-public:
-    EffectAnimationTime() : mTime(0) {  }
-    void addTime(float time) { mTime += time; }
-
-    virtual Ogre::Real getValue() const { return mTime; }
-    virtual void setValue(Ogre::Real value) {}
-};
-
 EffectManager::EffectManager(Ogre::SceneManager *sceneMgr)
     : mSceneMgr(sceneMgr)
 {

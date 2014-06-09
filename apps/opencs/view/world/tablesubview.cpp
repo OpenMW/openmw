@@ -82,9 +82,10 @@ void CSVWorld::TableSubView::editRequest (const CSMWorld::UniversalId& id, const
     focusId (id, hint);
 }
 
-void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
+void CSVWorld::TableSubView::updateUserSetting
+                                (const QString &name, const QStringList &list)
 {
-    mTable->updateEditorSetting(settingName, settingValue);
+    mTable->updateUserSetting(name, list);
 }
 
 void CSVWorld::TableSubView::setStatusBar (bool show)
@@ -110,13 +111,17 @@ void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::Univers
 {
     std::vector<std::pair<std::string, std::vector<std::string> > > filterSource;
 
-    for (std::vector<CSMWorld::UniversalId>::iterator it = types.begin(); it != types.end(); ++it)
+    for (std::vector<CSMWorld::UniversalId>::iterator it(types.begin()); it != types.end(); ++it)
     {
         std::pair<std::string, std::vector<std::string> > pair(                         //splited long line
-        std::make_pair(it->getId(), mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(it->getType()))));
+            std::make_pair(it->getId(), mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(it->getType()))));
 
-        filterSource.push_back(pair);
+        if(!pair.second.empty())
+        {
+            filterSource.push_back(pair);
+        }
     }
+
     mFilterBox->createFilterRequest(filterSource, action);
 }
 

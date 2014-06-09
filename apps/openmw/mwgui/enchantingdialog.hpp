@@ -19,6 +19,9 @@ namespace MWGui
         virtual ~EnchantingDialog();
 
         virtual void open();
+
+        virtual void exit();
+
         void startEnchanting(MWWorld::Ptr actor);
         void startSelfEnchanting(MWWorld::Ptr soulgem);
 

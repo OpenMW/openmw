@@ -8,6 +8,20 @@ namespace ESM
 {
     unsigned int Pathgrid::sRecordId = REC_PGRD;
 
+    Pathgrid::Point& Pathgrid::Point::operator=(const float rhs[3]) {
+        mX = rhs[0];
+        mY = rhs[1];
+        mZ = rhs[2];
+        return *this;
+    }
+    Pathgrid::Point::Point(const float rhs[3]) {
+        mX = rhs[0];
+        mY = rhs[1];
+        mZ = rhs[2];
+    }
+    Pathgrid::Point::Point():mX(0),mY(0),mZ(0) {
+    }
+
 void Pathgrid::load(ESMReader &esm)
 {
     esm.getHNT(mData, "DATA", 12);
