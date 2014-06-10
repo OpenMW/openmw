@@ -919,11 +919,6 @@ namespace MWInput
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
         }
-
-        // Printscreen key should not be allowed because it's captured by system screenshot function
-        // We check this explicitely here to fix up pre-0.26 config files. Can be removed after a few versions
-        if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Screenshot), ICS::Control::INCREASE) == SDLK_PRINTSCREEN)
-            mInputBinder->addKeyBinding(mInputBinder->getControl(A_Screenshot), SDLK_F12, ICS::Control::INCREASE);
     }
 
     std::string InputManager::getActionDescription (int action)
