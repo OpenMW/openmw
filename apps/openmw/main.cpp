@@ -7,16 +7,15 @@
 #include <SDL.h>
 #include "engine.hpp"
 
-#if defined(_WIN32) && !defined(_CONSOLE)
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 
+#if defined(_WIN32)
 // For OutputDebugString
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
-
 #endif
 
 
@@ -253,29 +252,92 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     return true;
 }
 
+#if defined(_WIN32) && defined(_DEBUG)
+class DebugOutput : public boost::iostreams::sink
+{
+public:
+    std::streamsize write(const char *str, std::streamsize size)
+    {
+        // Make a copy for null termination
+        std::string tmp (str, size);
+        // Write string to Visual Studio Debug output
+        OutputDebugString (tmp.c_str ());
+        return size;
+    }
+};
+#else
+class Tee : public boost::iostreams::sink
+{
+public:
+    Tee(std::ostream &stream, std::ostream &stream2)
+        : out(stream), out2(stream2)
+    {
+    }
+
+    std::streamsize write(const char *str, std::streamsize size)
+    {
+        out.write (str, size);
+        out.flush();
+        out2.write (str, size);
+        out2.flush();
+        return size;
+    }
+
+private:
+    std::ostream &out;
+    std::ostream &out2;
+};
+#endif
+
 int main(int argc, char**argv)
 {
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-    // Unix crash catcher
-    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
-    {
-        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-        cc_install_handlers(argc, argv, 5, s, "crash.log", NULL);
-        std::cout << "Installing crash catcher" << std::endl;
-    }
-    else
-        std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
-#endif
+    std::streambuf* cout_rdbuf = std::cout.rdbuf ();
+    std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-    // set current dir to bundle path
-    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
-    boost::filesystem::current_path(bundlePath);
-#endif
-
+    int ret = 0;
     try
     {
         Files::ConfigurationManager cfgMgr;
+
+#if defined(_WIN32) && defined(_DEBUG)
+        // Redirect cout and cerr to VS debug output when running in debug mode
+        boost::iostreams::stream_buffer<DebugOutput> sb;
+        sb.open(DebugOutput());
+        std::cout.rdbuf (&sb);
+        std::cerr.rdbuf (&sb);
+#else
+        // Redirect cout and cerr to openmw.log
+        std::ofstream logfile (std::string(cfgMgr.getLogPath().string() + "/openmw.log").c_str());
+
+        boost::iostreams::stream_buffer<Tee> coutsb;
+        std::ostream oldcout(cout_rdbuf);
+        coutsb.open (Tee(logfile, oldcout));
+        std::cout.rdbuf (&coutsb);
+
+        boost::iostreams::stream_buffer<Tee> cerrsb;
+        std::ostream oldcerr(cerr_rdbuf);
+        cerrsb.open (Tee(logfile, oldcerr));
+        std::cerr.rdbuf (&cerrsb);
+#endif
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        // Unix crash catcher
+        if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
+        {
+            int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+            cc_install_handlers(argc, argv, 5, s, std::string(cfgMgr.getLogPath().string() + "/crash.log").c_str(), NULL);
+            std::cout << "Installing crash catcher" << std::endl;
+        }
+        else
+            std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
+#endif
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        // set current dir to bundle path
+        boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
+        boost::filesystem::current_path(bundlePath);
+#endif
+
         OMW::Engine engine(cfgMgr);
 
         if (parseOptions(argc, argv, engine, cfgMgr))
@@ -292,76 +354,22 @@ int main(int argc, char**argv)
 #endif
             SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
 
-        return 1;
+        ret = 1;
     }
 
-    return 0;
+    // Restore cout and cerr
+    std::cout.rdbuf(cout_rdbuf);
+    std::cerr.rdbuf(cerr_rdbuf);
+
+    return ret;
 }
 
 // Platform specific for Windows when there is no console built into the executable.
 // Windows will call the WinMain function instead of main in this case, the normal
 // main function is then called with the __argc and __argv parameters.
-// In addition if it is a debug build it will redirect cout to the debug console in Visual Studio
 #if defined(_WIN32) && !defined(_CONSOLE)
-
-#if defined(_DEBUG)
-class DebugOutput : public boost::iostreams::sink
-{
-public:
-    std::streamsize write(const char *str, std::streamsize size)
-    {
-        // Make a copy for null termination
-        std::string tmp (str, size);
-        // Write string to Visual Studio Debug output
-        OutputDebugString (tmp.c_str ());
-        return size;
-    }
-};
-#else
-class Logger : public boost::iostreams::sink
-{
-public:
-    Logger(std::ofstream &stream)
-        : out(stream)
-    {
-    }
-
-    std::streamsize write(const char *str, std::streamsize size)
-    {
-        out.write (str, size);
-        out.flush();
-        return size;
-    }
-
-private:
-    std::ofstream &out;
-};
-#endif
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-    std::streambuf* old_rdbuf = std::cout.rdbuf ();
-
-    int ret = 0;
-#if defined(_DEBUG)
-    // Redirect cout to VS debug output when running in debug mode
-    {
-        boost::iostreams::stream_buffer<DebugOutput> sb;
-        sb.open(DebugOutput());
-#else
-    // Redirect cout to openmw.log
-    std::ofstream logfile ("openmw.log");
-    {
-        boost::iostreams::stream_buffer<Logger> sb;
-        sb.open (Logger (logfile));
-#endif
-        std::cout.rdbuf (&sb);
-
-        ret = main (__argc, __argv);
-
-        std::cout.rdbuf(old_rdbuf);
-    }
-    return ret;
+    return main(__argc, __argv);
 }
-
 #endif
