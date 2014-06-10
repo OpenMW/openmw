@@ -405,8 +405,6 @@ namespace MWMechanics
             }
             else // (within attack dist)
             {
-                if (!mAttack) mMovement.mPosition[1] = 0;
-
                 if(mMovement.mPosition[0] || mMovement.mPosition[1])
                 {
                     mTimerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
@@ -501,6 +499,12 @@ namespace MWMechanics
             }
 
             mMovement.mPosition[1] = 1;
+            if (mReadyToAttack)
+            {
+                // to stop possible sideway moving after target moved out of attack range
+                mCombatMove = true;
+                mTimerCombatMove = 0;
+            }
             mReadyToAttack = false;
         }
 

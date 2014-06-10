@@ -970,6 +970,9 @@ namespace MWMechanics
             }
 
             // Kill dead actors, update some variables
+
+            int hostilesCount = 0; // need to know this to play Battle music
+
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 const MWWorld::Class &cls = iter->first.getClass();
@@ -988,6 +991,8 @@ namespace MWMechanics
 
                 if(!stats.isDead())
                 {
+                    if (stats.isHostile()) hostilesCount++;
+
                     if(iter->second->isDead())
                     {
                         // Actor has been resurrected. Notify the CharacterController and re-enable collision.
@@ -1043,6 +1048,20 @@ namespace MWMechanics
                     if (cls.isEssential(iter->first))
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
                 }
+            }
+
+            // check if we still have any player enemies to switch music
+            static bool isBattleMusic = false;
+
+            if (isBattleMusic && hostilesCount == 0) 
+            {
+                MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
+                isBattleMusic = false;
+            }
+            else if (!isBattleMusic && hostilesCount > 0) 
+            {
+                MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
+                isBattleMusic = true;
             }
 
             // if player is in sneak state see if anyone detects him
