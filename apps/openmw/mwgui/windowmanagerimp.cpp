@@ -1646,4 +1646,27 @@ namespace MWGui
         if (_key == MyGUI::KeyCode::Escape)
             mVideoWidget->stop();
     }
+
+    void WindowManager::pinWindow(GuiWindow window)
+    {
+        switch (window)
+        {
+        case GW_Inventory:
+            mInventoryWindow->setPinned(true);
+            break;
+        case GW_Map:
+            mMap->setPinned(true);
+            break;
+        case GW_Magic:
+            mSpellWindow->setPinned(true);
+            break;
+        case GW_Stats:
+            mStatsWindow->setPinned(true);
+            break;
+        default:
+            break;
+        }
+
+        updateVisible();
+    }
 }

@@ -319,6 +319,8 @@ namespace MWGui
         \param input Pointer to the current modal, to ensure proper modal is removed **/
     virtual void removeCurrentModal(WindowModal* input);
 
+    virtual void pinWindow (MWGui::GuiWindow window);
+
   private:
     bool mConsoleOnlyScripts;
 

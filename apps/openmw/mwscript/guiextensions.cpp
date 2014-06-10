@@ -162,6 +162,47 @@ namespace MWScript
             }
         };
 
+        class OpMenuTest : public Interpreter::Opcode1
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+            {
+                int arg=0;
+                if(arg0>0)
+                {
+                    arg = runtime[0].mInteger;
+                    runtime.pop();
+                }
+
+
+                if (arg == 0)
+                {
+                    MWGui::GuiMode modes[] = { MWGui::GM_Inventory, MWGui::GM_Container };
+
+                    for (int i=0; i<2; ++i)
+                    {
+                        if (MWBase::Environment::get().getWindowManager()->containsMode(modes[i]))
+                            MWBase::Environment::get().getWindowManager()->removeGuiMode(modes[i]);
+                    }
+                }
+                else
+                {
+                    MWGui::GuiWindow gw = MWGui::GW_None;
+                    if (arg == 3)
+                        gw = MWGui::GW_Stats;
+                    if (arg == 4)
+                        gw = MWGui::GW_Inventory;
+                    if (arg == 5)
+                        gw = MWGui::GW_Magic;
+                    if (arg == 6)
+                        gw = MWGui::GW_Map;
+
+                    MWBase::Environment::get().getWindowManager()->pinWindow(gw);
+                }
+            }
+        };
+
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -200,6 +241,7 @@ namespace MWScript
 
             interpreter.installSegment5 (Compiler::Gui::opcodeShowMap, new OpShowMap);
             interpreter.installSegment5 (Compiler::Gui::opcodeFillMap, new OpFillMap);
+            interpreter.installSegment3 (Compiler::Gui::opcodeMenuTest, new OpMenuTest);
         }
     }
 }

@@ -216,6 +216,7 @@ namespace Compiler
 
             extensions.registerInstruction ("showmap", "S", opcodeShowMap);
             extensions.registerInstruction ("fillmap", "", opcodeFillMap);
+            extensions.registerInstruction ("menutest", "/l", opcodeMenuTest);
         }
     }
 

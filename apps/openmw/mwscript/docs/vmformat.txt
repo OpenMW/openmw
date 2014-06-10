@@ -57,7 +57,8 @@ op 0x20028: RemoveSoulGem, explicit reference
 op 0x20029: PCRaiseRank, explicit reference
 op 0x2002a: PCLowerRank, explicit reference
 op 0x2002b: PCJoinFaction, explicit reference
-opcodes 0x2002c-0x3ffff unused
+op 0x2002c: MenuTest
+opcodes 0x2002d-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
