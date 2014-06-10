@@ -416,7 +416,7 @@ IF(NOT WIN32 AND NOT APPLE)
     ENDIF(BUILD_OPENCS)
 
     # Install licenses
-    INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
     INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
 
     # Install icon and desktop file
