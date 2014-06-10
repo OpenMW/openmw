@@ -903,27 +903,32 @@ bool Animation::getInfo(const std::string &groupname, float *complete, float *sp
     return true;
 }
 
-float Animation::getStartTime(const std::string &groupname, bool onlyGroup) const
+float Animation::getStartTime(const std::string &groupname) const
 {
-    AnimSourceList::const_iterator iter(mAnimSources.begin());
-    for(;iter != mAnimSources.end();iter++)
+    for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
     {
         const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
-        if (onlyGroup)
+
+        NifOgre::TextKeyMap::const_iterator found = findGroupStart(keys, groupname);
+        if(found != keys.end())
+            return found->first;
+    }
+    return -1.f;
+}
+
+float Animation::getTextKeyTime(const std::string &textKey) const
+{
+    for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
+    {
+        const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
+
+        for(NifOgre::TextKeyMap::const_iterator iterKey(keys.begin()); iterKey != keys.end(); ++iterKey)
         {
-            NifOgre::TextKeyMap::const_iterator found = findGroupStart(keys, groupname);
-            if(found != keys.end())
-                return found->first;
-        }
-        else
-        {
-            for(NifOgre::TextKeyMap::const_iterator iter(keys.begin()); iter != keys.end(); ++iter)
-            {
-                if(iter->second.compare(0, groupname.size(), groupname) == 0)
-                    return iter->first;
-            }
+            if(iterKey->second.compare(0, textKey.size(), textKey) == 0)
+                return iterKey->first;
         }
     }
+
     return -1.f;
 }
 

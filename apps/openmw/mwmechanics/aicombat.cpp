@@ -785,15 +785,21 @@ void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations
     // get durations for each attack type
     for (int i = 0; i < (bRangedWeap ? 1 : 3); i++)
     {
-        float start1 = anim->getStartTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey, false);
+        float start1 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey);
+
+        if (start1 < 0) 
+        {
+            fMinMaxDurations[i][0] = fMinMaxDurations[i][1] = 0.1f;
+            continue;
+        }
 
         textKey2 = "min attack";
-        float start2 = anim->getStartTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2, false);
+        float start2 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2);
 
         fMinMaxDurations[i][0] = (start2 - start1) / weapSpeed;
 
         textKey2 = "max attack";
-        start1 = anim->getStartTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2, false);
+        start1 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2);
 
         fMinMaxDurations[i][1] = fMinMaxDurations[i][0] + (start1 - start2) / weapSpeed;
     }

@@ -275,7 +275,10 @@ public:
     bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
 
     /// Get the absolute position in the animation track of the first text key with the given group.
-    float getStartTime(const std::string &groupname, bool onlyGroup) const;
+    float getStartTime(const std::string &groupname) const;
+
+    /// Get the absolute position in the animation track of the text key
+    float getTextKeyTime(const std::string &textKey) const;
 
     /// Get the current absolute position in the animation track for the animation that is currently playing from the given group.
     float getCurrentTime(const std::string& groupname) const;
