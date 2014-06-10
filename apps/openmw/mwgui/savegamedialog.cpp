@@ -163,6 +163,8 @@ namespace MWGui
         }
 
         mCharacterSelection->setIndexSelected(selectedIndex);
+        if (selectedIndex == MyGUI::ITEM_NONE)
+            mCharacterSelection->setCaption("Select Character ...");
 
         fillSaveList();
 
