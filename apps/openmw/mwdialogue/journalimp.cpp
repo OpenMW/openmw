@@ -113,6 +113,16 @@ namespace MWDialogue
         topic.addEntry (entry);
     }
 
+    void Journal::removeLastAddedTopicResponse(const std::string &topicId, const std::string &actorName)
+    {
+        Topic& topic = getTopic (topicId);
+
+        topic.removeLastAddedResponse(actorName);
+
+        if (topic.begin() == topic.end())
+            mTopics.erase(mTopics.find(topicId)); // All responses removed -> remove topic
+    }
+
     int Journal::getJournalIndex (const std::string& id) const
     {
         TQuestContainer::const_iterator iter = mQuests.find (id);

@@ -393,5 +393,7 @@ op 0x2000241: onKnockoutExplicit
 op 0x2000242: ModFactionReaction
 op 0x2000243: GetFactionReaction
 op 0x2000244: Activate, explicit
+op 0x2000245: ClearInfoActor
+op 0x2000246: ClearInfoActor, explicit
 
-opcodes 0x2000245-0x3ffffff unused
+opcodes 0x2000247-0x3ffffff unused

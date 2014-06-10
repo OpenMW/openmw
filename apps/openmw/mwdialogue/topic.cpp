@@ -58,4 +58,17 @@ namespace MWDialogue
     {
         return mEntries.end();
     }
+
+    void Topic::removeLastAddedResponse (const std::string& actorName)
+    {
+        for (std::vector<MWDialogue::Entry>::reverse_iterator it = mEntries.rbegin();
+             it != mEntries.rend(); ++it)
+        {
+            if (it->mActorName == actorName)
+            {
+                mEntries.erase( (++it).base() ); // erase doesn't take a reverse_iterator
+                return;
+            }
+        }
+    }
 }

@@ -698,6 +698,15 @@ namespace MWDialogue
         return diff;
     }
 
+    void DialogueManager::clearInfoActor(const MWWorld::Ptr &actor) const
+    {
+        if (actor == mActor && !mLastTopic.empty())
+        {
+            MWBase::Environment::get().getJournal()->removeLastAddedTopicResponse(
+                        mLastTopic, actor.getClass().getName(actor));
+        }
+    }
+
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)
     {
         std::vector<HyperTextToken> result;
