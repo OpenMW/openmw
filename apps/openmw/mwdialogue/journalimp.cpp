@@ -9,6 +9,7 @@
 #include <components/esm/journalentry.hpp>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -103,12 +104,12 @@ namespace MWDialogue
         quest.setIndex (index);
     }
 
-    void Journal::addTopic (const std::string& topicId, const std::string& infoId, const std::string& actorName)
+    void Journal::addTopic (const std::string& topicId, const std::string& infoId, const MWWorld::Ptr& actor)
     {
         Topic& topic = getTopic (topicId);
 
-        JournalEntry entry(topicId, infoId);
-        entry.mActorName = actorName;
+        JournalEntry entry(topicId, infoId, actor);
+        entry.mActorName = actor.getClass().getName(actor);
         topic.addEntry (entry);
     }
 

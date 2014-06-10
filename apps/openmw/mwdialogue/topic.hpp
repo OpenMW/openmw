@@ -53,8 +53,6 @@ namespace MWDialogue
 
             TEntryIter end() const;
             ///< Iterator pointing past the end of the journal for this topic.
-
-            JournalEntry getEntry (const std::string& infoId) const;
     };
 }
 

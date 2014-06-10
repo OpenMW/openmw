@@ -58,9 +58,4 @@ namespace MWDialogue
     {
         return mEntries.end();
     }
-
-    JournalEntry Topic::getEntry (const std::string& infoId) const
-    {
-        return JournalEntry (mTopic, infoId);
-    }
 }

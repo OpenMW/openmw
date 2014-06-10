@@ -294,7 +294,7 @@ namespace MWDialogue
             {
                 if (iter->mId == info->mId)
                 {
-                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor.getClass().getName(mActor));
+                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor);
                     break;
                 }
             }
@@ -472,7 +472,7 @@ namespace MWDialogue
                     {
                         if (iter->mId == info->mId)
                         {
-                            MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor.getClass().getName(mActor));
+                            MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor);
                             break;
                         }
                     }
