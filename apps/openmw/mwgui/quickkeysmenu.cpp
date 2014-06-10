@@ -24,6 +24,7 @@
 #include "spellwindow.hpp"
 
 #include "itemwidget.hpp"
+#include "sortfilteritemmodel.hpp"
 
 
 namespace MWGui
@@ -134,6 +135,7 @@ namespace MWGui
         }
         mItemSelectionDialog->setVisible(true);
         mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyUsableItems);
 
         mAssignDialog->setVisible (false);
     }
