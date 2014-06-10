@@ -80,13 +80,6 @@ option(USE_FFMPEG "use ffmpeg for sound" ON)
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
-if(UNIX AND NOT APPLE)
-    option(BUILD_WITH_DPKG "enable dpkg-based install for debian and debian derivatives" OFF)
-    if(BUILD_WITH_DPKG)
-        find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
-    endif(BUILD_WITH_DPKG)
-endif(UNIX AND NOT APPLE)
-
 # Location of morrowind data files
 if (APPLE)
     set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
@@ -395,46 +388,36 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 IF(NOT WIN32 AND NOT APPLE)
-    ## Debian and non debian Linux building
+    # Linux building
     # Paths
-    IF (DPKG_PROGRAM)
-        ## Debian specific
-        SET(CMAKE_INSTALL_PREFIX "/usr")
-        SET(DATAROOTDIR "share" CACHE PATH "Sets the root of data directories to a non-default location")
-        SET(DATADIR "share/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-        SET(ICONDIR "share/pixmaps" CACHE PATH "Set icon dir")
-        SET(SYSCONFDIR "../etc/openmw" CACHE PATH "Set config dir")
-    ELSE ()
-        ## Non debian specific
-        SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
-        SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
-        SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-        SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-        SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-        SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
+    SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+    SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
+    SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+    SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+    SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+    SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
 
-        # Install binaries
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
-        IF(BUILD_LAUNCHER)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_LAUNCHER)
-        IF(BUILD_BSATOOL)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_BSATOOL)
-        IF(BUILD_ESMTOOL)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_ESMTOOL)
-        IF(BUILD_MWINIIMPORTER)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_MWINIIMPORTER)
-        IF(BUILD_OPENCS)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_OPENCS)
+    # Install binaries
+    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+    IF(BUILD_LAUNCHER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_LAUNCHER)
+    IF(BUILD_BSATOOL)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_BSATOOL)
+    IF(BUILD_ESMTOOL)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_MWINIIMPORTER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_MWINIIMPORTER)
+    IF(BUILD_OPENCS)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_OPENCS)
 
-        # Install licenses
-        INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-        INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
-    ENDIF (DPKG_PROGRAM)
+    # Install licenses
+    INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
 
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
