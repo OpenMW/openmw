@@ -112,6 +112,7 @@ namespace MWGui
         mCurrentCharacter = NULL;
         mCurrentSlot = NULL;
         mSaveList->removeAllItems();
+        onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
 
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
         if (mgr->characterBegin() == mgr->characterEnd())
@@ -239,10 +240,8 @@ namespace MWGui
         }
         else
         {
-            if (mCurrentCharacter && mCurrentSlot)
-            {
-                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
-            }
+            assert (mCurrentCharacter && mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
         }
     }
 
@@ -292,6 +291,9 @@ namespace MWGui
 
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox *sender, size_t pos)
     {
+        mOkButton->setEnabled(pos != MyGUI::ITEM_NONE || mSaving);
+        mDeleteButton->setEnabled(pos != MyGUI::ITEM_NONE);
+
         if (pos == MyGUI::ITEM_NONE)
         {
             mCurrentSlot = NULL;
