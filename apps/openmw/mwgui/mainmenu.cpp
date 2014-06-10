@@ -68,10 +68,10 @@ namespace MWGui
     {
         if (visible)
             updateMenu();
-        else
-            showBackground(
-                        MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
-                        MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame);
+
+        showBackground(
+            MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
+            MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame);
 
         OEngine::GUI::Layout::setVisible (visible);
     }
@@ -220,7 +220,6 @@ namespace MWGui
 
         MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
 
-        showBackground(state == MWBase::StateManager::State_NoGame);
         mVersionText->setVisible(state == MWBase::StateManager::State_NoGame);
 
         std::vector<std::string> buttons;
