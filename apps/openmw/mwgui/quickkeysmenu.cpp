@@ -247,7 +247,7 @@ namespace MWGui
 
     void QuickKeysMenu::activateQuickKey(int index)
     {
-        assert (index-1 > 0);
+        assert (index-1 >= 0);
         ItemWidget* button = mQuickKeyButtons[index-1];
 
         QuickKeyType type = mAssigned[index-1];
