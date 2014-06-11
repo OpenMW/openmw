@@ -73,7 +73,14 @@ namespace MWMechanics
             return false;
 
         MWMechanics::CreatureStats& blockerStats = blocker.getClass().getCreatureStats(blocker);
+
+        // Don't block when in spellcasting state (shield is equipped, but not visible)
         if (blockerStats.getDrawState() == DrawState_Spell)
+            return false;
+
+        // Don't block when in hand-to-hand combat (shield is equipped, but not visible)
+        if (blockerStats.getDrawState() == DrawState_Weapon &&
+                inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight) == inv.end())
             return false;
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);

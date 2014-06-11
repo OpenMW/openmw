@@ -33,7 +33,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
-    recharge mode videowidget backgroundimage
+    recharge mode videowidget backgroundimage itemwidget
     )
 
 add_openmw_dir (mwdialogue
@@ -141,10 +141,6 @@ if(APPLE)
         target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
     endif()
 endif(APPLE)
-
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS openmw RUNTIME DESTINATION games COMPONENT openmw)
-endif(DPKG_PROGRAM)
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)

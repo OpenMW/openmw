@@ -11,6 +11,7 @@ namespace MWGui
 {
 
     class ItemSelectionDialog;
+    class ItemWidget;
 
     class EnchantingDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
@@ -22,6 +23,9 @@ namespace MWGui
 
         virtual void exit();
 
+        void setSoulGem (const MWWorld::Ptr& gem);
+        void setItem (const MWWorld::Ptr& item);
+
         void startEnchanting(MWWorld::Ptr actor);
         void startSelfEnchanting(MWWorld::Ptr soulgem);
 
@@ -32,8 +36,6 @@ namespace MWGui
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onSelectItem (MyGUI::Widget* sender);
         void onSelectSoul (MyGUI::Widget* sender);
-        void onRemoveItem (MyGUI::Widget* sender);
-        void onRemoveSoul (MyGUI::Widget* sender);
 
         void onItemSelected(MWWorld::Ptr item);
         void onItemCancel();
@@ -46,8 +48,8 @@ namespace MWGui
         ItemSelectionDialog* mItemSelectionDialog;
 
         MyGUI::Button* mCancelButton;
-        MyGUI::ImageBox* mItemBox;
-        MyGUI::ImageBox* mSoulBox;
+        ItemWidget* mItemBox;
+        ItemWidget* mSoulBox;
 
         MyGUI::Button* mTypeButton;
         MyGUI::Button* mBuyButton;

@@ -140,7 +140,11 @@ namespace MWDialogue
         mActorKnownTopics.clear();
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->startDialogue(actor, actor.getClass().getName (actor));
+
+        // If the dialogue window was already open, keep the existing history
+        bool resetHistory = (!MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue));
+
+        win->startDialogue(actor, actor.getClass().getName (actor), resetHistory);
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
@@ -294,7 +298,7 @@ namespace MWDialogue
             {
                 if (iter->mId == info->mId)
                 {
-                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor.getClass().getName(mActor));
+                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor);
                     break;
                 }
             }
@@ -472,7 +476,7 @@ namespace MWDialogue
                     {
                         if (iter->mId == info->mId)
                         {
-                            MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor.getClass().getName(mActor));
+                            MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor);
                             break;
                         }
                     }
@@ -692,6 +696,15 @@ namespace MWDialogue
                     return it->second + diff;
         }
         return diff;
+    }
+
+    void DialogueManager::clearInfoActor(const MWWorld::Ptr &actor) const
+    {
+        if (actor == mActor && !mLastTopic.empty())
+        {
+            MWBase::Environment::get().getJournal()->removeLastAddedTopicResponse(
+                        mLastTopic, actor.getClass().getName(actor));
+        }
     }
 
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)

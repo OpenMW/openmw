@@ -64,6 +64,7 @@
 #include "fontloader.hpp"
 #include "videowidget.hpp"
 #include "backgroundimage.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -166,6 +167,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
+        ItemWidget::registerComponents();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatClick>("Controller");
 
@@ -200,8 +202,12 @@ namespace MWGui
             MyGUI::Align::Default, "Overlay");
         mVideoBackground->setImageTexture("black.png");
         mVideoBackground->setVisible(false);
+        mVideoBackground->setNeedMouseFocus(true);
+        mVideoBackground->setNeedKeyFocus(true);
 
         mVideoWidget = mVideoBackground->createWidgetReal<VideoWidget>("ImageBox", 0,0,1,1, MyGUI::Align::Default);
+        mVideoWidget->setNeedMouseFocus(true);
+        mVideoWidget->setNeedKeyFocus(true);
     }
 
     void WindowManager::initUI()
@@ -261,7 +267,7 @@ namespace MWGui
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
 
-        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
+        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows");
 
         mHud->setVisible(mHudEnabled);
 
@@ -1557,7 +1563,15 @@ namespace MWGui
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)
     {
-        mVideoWidget->playVideo("video\\" + name, allowSkipping);
+        mVideoWidget->playVideo("video\\" + name);
+
+        mVideoWidget->eventKeyButtonPressed.clear();
+        mVideoBackground->eventKeyButtonPressed.clear();
+        if (allowSkipping)
+        {
+            mVideoWidget->eventKeyButtonPressed += MyGUI::newDelegate(this, &WindowManager::onVideoKeyPressed);
+            mVideoBackground->eventKeyButtonPressed += MyGUI::newDelegate(this, &WindowManager::onVideoKeyPressed);
+        }
 
         // Turn off all rendering except for the GUI
         mRendering->getScene()->clearSpecialCaseRenderQueues();
@@ -1579,12 +1593,13 @@ namespace MWGui
         bool cursorWasVisible = mCursorVisible;
         setCursorVisible(false);
 
-        while (mVideoWidget->update())
+        while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
 
             mRendering->getWindow()->update();
         }
+        mVideoWidget->stop();
 
         setCursorVisible(cursorWasVisible);
 
@@ -1624,5 +1639,34 @@ namespace MWGui
         if(mCurrentModals.size() > 0)
             if(input == mCurrentModals.top())
                 mCurrentModals.pop();
+    }
+
+    void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    {
+        if (_key == MyGUI::KeyCode::Escape)
+            mVideoWidget->stop();
+    }
+
+    void WindowManager::pinWindow(GuiWindow window)
+    {
+        switch (window)
+        {
+        case GW_Inventory:
+            mInventoryWindow->setPinned(true);
+            break;
+        case GW_Map:
+            mMap->setPinned(true);
+            break;
+        case GW_Magic:
+            mSpellWindow->setPinned(true);
+            break;
+        case GW_Stats:
+            mStatsWindow->setPinned(true);
+            break;
+        default:
+            break;
+        }
+
+        updateVisible();
     }
 }

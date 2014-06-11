@@ -73,7 +73,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     ptr.getRefData().setBaseNode(insert);
 }
 
-void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
+void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool batch)
 {
     insertBegin(ptr);
 
@@ -99,7 +99,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
             mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
         mBounds[ptr.getCell()].merge(bounds);
 
-        if(ptr.getTypeName() == typeid(ESM::Static).name() &&
+        if(batch &&
            Settings::Manager::getBool("use static geometry", "Objects") &&
            anim->canBatch())
         {

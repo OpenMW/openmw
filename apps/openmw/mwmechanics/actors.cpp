@@ -932,7 +932,7 @@ namespace MWMechanics
                             
                             for (std::list<MWWorld::Ptr>::iterator it = listGuards.begin(); it != listGuards.end(); ++it)
                             {
-                                engageCombat(iter->first, *it, false);
+                                engageCombat(iter->first, *it, *it == player);
                             }
                         }
 
@@ -1088,10 +1088,10 @@ namespace MWMechanics
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-        float healthHours  = healthPerHour >= 0
+        float healthHours  = healthPerHour > 0
                              ? (stats.getHealth().getModified() - stats.getHealth().getCurrent()) / healthPerHour
                              : 1.0f;
-        float magickaHours = magickaPerHour >= 0
+        float magickaHours = magickaPerHour > 0
                               ? (stats.getMagicka().getModified() - stats.getMagicka().getCurrent()) / magickaPerHour
                               : 1.0f;
 

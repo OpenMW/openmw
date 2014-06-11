@@ -9,7 +9,7 @@ namespace MWGui
 {
 
     /**
-     * Widget that plays a video. Can be skipped by pressing Esc.
+     * Widget that plays a video.
      */
     class VideoWidget : public MyGUI::ImageBox
     {
@@ -18,7 +18,7 @@ namespace MWGui
 
         VideoWidget();
 
-        void playVideo (const std::string& video, bool allowSkipping);
+        void playVideo (const std::string& video);
 
         int getVideoWidth();
         int getVideoHeight();
@@ -26,12 +26,11 @@ namespace MWGui
         /// @return Is the video still playing?
         bool update();
 
+        /// Stop video and free resources (done automatically on destruction)
+        void stop();
+
     private:
-        bool mAllowSkipping;
-
         MWRender::VideoPlayer mPlayer;
-
-        void onKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char);
     };
 
 }

@@ -23,21 +23,13 @@
 
         <Widget type="Widget" skin="" position="10 66 260 50">
 
-            <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus1"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 50 50" name="Apparatus1"/>
 
-            <Widget type="Widget" skin="MW_Box" position="60 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus2"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="60 0 50 50" name="Apparatus2"/>
 
-            <Widget type="Widget" skin="MW_Box" position="120 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus3"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="120 0 50 50" name="Apparatus3"/>
 
-            <Widget type="Widget" skin="MW_Box" position="180 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus4"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="180 0 50 50" name="Apparatus4"/>
 
         </Widget>
 
@@ -51,21 +43,13 @@
 
         <Widget type="Widget" skin="" position="10 146 260 50">
 
-            <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient1"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 50 50" name="Ingredient1"/>
 
-            <Widget type="Widget" skin="MW_Box" position="60 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient2"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="60 0 50 50" name="Ingredient2"/>
 
-            <Widget type="Widget" skin="MW_Box" position="120 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient3"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="120 0 50 50" name="Ingredient3"/>
 
-            <Widget type="Widget" skin="MW_Box" position="180 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient4"/>
-            </Widget>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="180 0 50 50" name="Ingredient4"/>
 
         </Widget>
 

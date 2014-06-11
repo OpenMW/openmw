@@ -16,11 +16,12 @@
 #include "regionmap.hpp"
 #include "columns.hpp"
 
-void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,
-    UniversalId::Type type2, bool update)
+void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
     mModels.push_back (model);
-    mModelIndex.insert (std::make_pair (type1, model));
+    mModelIndex.insert (std::make_pair (type, model));
+
+    UniversalId::Type type2 = UniversalId::getParentType (type);
 
     if (type2!=UniversalId::Type_None)
         mModelIndex.insert (std::make_pair (type2, model));
@@ -235,26 +236,26 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
     mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
     mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
 
-    addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
-    addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
-    addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill, false);
-    addModel (new IdTable (&mClasses), UniversalId::Type_Classes, UniversalId::Type_Class);
-    addModel (new IdTable (&mFactions), UniversalId::Type_Factions, UniversalId::Type_Faction);
-    addModel (new IdTable (&mRaces), UniversalId::Type_Races, UniversalId::Type_Race);
-    addModel (new IdTable (&mSounds), UniversalId::Type_Sounds, UniversalId::Type_Sound);
-    addModel (new IdTable (&mScripts), UniversalId::Type_Scripts, UniversalId::Type_Script);
-    addModel (new IdTable (&mRegions), UniversalId::Type_Regions, UniversalId::Type_Region);
-    addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
-    addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
-    addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
-    addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
-    addModel (new IdTable (&mTopicInfos, IdTable::Reordering_WithinTopic), UniversalId::Type_TopicInfos, UniversalId::Type_TopicInfo);
-    addModel (new IdTable (&mJournalInfos, IdTable::Reordering_WithinTopic), UniversalId::Type_JournalInfos, UniversalId::Type_JournalInfo);
-    addModel (new IdTable (&mCells, IdTable::Reordering_None, IdTable::Viewing_Id), UniversalId::Type_Cells, UniversalId::Type_Cell);
-    addModel (new IdTable (&mReferenceables, IdTable::Reordering_None, IdTable::Viewing_None, true),
-        UniversalId::Type_Referenceables, UniversalId::Type_Referenceable);
-    addModel (new IdTable (&mRefs, IdTable::Reordering_None, IdTable::Viewing_Cell, true), UniversalId::Type_References, UniversalId::Type_Reference, false);
-    addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter, false);
+    addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
+    addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
+    addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
+    addModel (new IdTable (&mClasses), UniversalId::Type_Class);
+    addModel (new IdTable (&mFactions), UniversalId::Type_Faction);
+    addModel (new IdTable (&mRaces), UniversalId::Type_Race);
+    addModel (new IdTable (&mSounds), UniversalId::Type_Sound);
+    addModel (new IdTable (&mScripts), UniversalId::Type_Script);
+    addModel (new IdTable (&mRegions), UniversalId::Type_Region);
+    addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsign);
+    addModel (new IdTable (&mSpells), UniversalId::Type_Spell);
+    addModel (new IdTable (&mTopics), UniversalId::Type_Topic);
+    addModel (new IdTable (&mJournals), UniversalId::Type_Journal);
+    addModel (new IdTable (&mTopicInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_TopicInfo);
+    addModel (new IdTable (&mJournalInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_JournalInfo);
+    addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
+    addModel (new IdTable (&mReferenceables, IdTable::Feature_Preview),
+        UniversalId::Type_Referenceable);
+    addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
+    addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
 }
 
 CSMWorld::Data::~Data()
@@ -469,8 +470,7 @@ QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& 
         if (id.getType()==UniversalId::Type_RegionMap)
         {
             RegionMap *table = 0;
-            addModel (table = new RegionMap (*this), UniversalId::Type_RegionMap,
-                UniversalId::Type_None, false);
+            addModel (table = new RegionMap (*this), UniversalId::Type_RegionMap, false);
             return table;
         }
         throw std::logic_error ("No table model available for " + id.toString());

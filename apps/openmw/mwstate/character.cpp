@@ -54,9 +54,28 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     Slot slot;
 
     std::ostringstream stream;
-    stream << mNext++;
+
+    // The profile description is user-supplied, so we need to escape the path
+    for (std::string::const_iterator it = profile.mDescription.begin(); it != profile.mDescription.end(); ++it)
+    {
+        if (std::isalnum(*it))  // Ignores multibyte characters and non alphanumeric characters
+            stream << *it;
+        else
+            stream << "_";
+    }
 
     slot.mPath = mPath / stream.str();
+
+    // Append an index if necessary to ensure a unique file
+    int i=0;
+    while (boost::filesystem::exists(slot.mPath))
+    {
+           std::ostringstream test;
+           test << stream.str();
+           test << " - " << ++i;
+           slot.mPath = mPath / test.str();
+    }
+
     slot.mProfile = profile;
     slot.mTimeStamp = std::time (0);
 
@@ -64,7 +83,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
 }
 
 MWState::Character::Character (const boost::filesystem::path& saves, const std::string& game)
-: mPath (saves), mNext (0)
+: mPath (saves)
 {
     if (!boost::filesystem::is_directory (mPath))
     {
@@ -82,13 +101,6 @@ MWState::Character::Character (const boost::filesystem::path& saves, const std::
                 addSlot (slotPath, game);
             }
             catch (...) {} // ignoring bad saved game files for now
-
-            std::istringstream stream (slotPath.filename().string());
-
-            int index = 0;
-
-            if ((stream >> index) && index>=mNext)
-                mNext = index+1;
         }
 
         std::sort (mSlots.begin(), mSlots.end());

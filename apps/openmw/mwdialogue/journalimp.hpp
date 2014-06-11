@@ -38,7 +38,12 @@ namespace MWDialogue
             virtual int getJournalIndex (const std::string& id) const;
             ///< Get the journal index.
 
-            virtual void addTopic (const std::string& topicId, const std::string& infoId, const std::string& actorName);
+            virtual void addTopic (const std::string& topicId, const std::string& infoId, const MWWorld::Ptr& actor);
+            /// \note topicId must be lowercase
+
+            virtual void removeLastAddedTopicResponse (const std::string& topicId, const std::string& actorName);
+            ///< Removes the last topic response added for the given topicId and actor name.
+            /// \note topicId must be lowercase
 
             virtual TEntryIter begin() const;
             ///< Iterator pointing to the begin of the main journal.

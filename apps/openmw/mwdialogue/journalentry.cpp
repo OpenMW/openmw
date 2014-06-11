@@ -5,16 +5,21 @@
 
 #include <components/esm/journalentry.hpp>
 
+#include <components/interpreter/defines.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
 
+#include "../mwscript/interpretercontext.hpp"
+
+
 namespace MWDialogue
 {
     Entry::Entry() {}
 
-    Entry::Entry (const std::string& topic, const std::string& infoId)
+    Entry::Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor)
     : mInfoId (infoId)
     {
         const ESM::Dialogue *dialogue =
@@ -24,8 +29,17 @@ namespace MWDialogue
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mId == mInfoId)
             {
-                /// \todo text replacement
-                mText = iter->mResponse;
+                if (actor.isEmpty())
+                {
+                    MWScript::InterpreterContext interpreterContext(NULL,MWWorld::Ptr());
+                    mText = Interpreter::fixDefinesDialog(iter->mResponse, interpreterContext);
+                }
+                else
+                {
+                    MWScript::InterpreterContext interpreterContext(&actor.getRefData().getLocals(),actor);
+                    mText = Interpreter::fixDefinesDialog(iter->mResponse, interpreterContext);
+                }
+
                 return;
             }
 
@@ -49,8 +63,8 @@ namespace MWDialogue
 
     JournalEntry::JournalEntry() {}
 
-    JournalEntry::JournalEntry (const std::string& topic, const std::string& infoId)
-    : Entry (topic, infoId), mTopic (topic)
+    JournalEntry::JournalEntry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor)
+        : Entry (topic, infoId, actor), mTopic (topic)
     {}
 
     JournalEntry::JournalEntry (const ESM::JournalEntry& record)
@@ -65,7 +79,7 @@ namespace MWDialogue
 
     JournalEntry JournalEntry::makeFromQuest (const std::string& topic, int index)
     {
-        return JournalEntry (topic, idFromIndex (topic, index));
+        return JournalEntry (topic, idFromIndex (topic, index), MWWorld::Ptr());
     }
 
     std::string JournalEntry::idFromIndex (const std::string& topic, int index)
@@ -90,7 +104,7 @@ namespace MWDialogue
 
     StampedJournalEntry::StampedJournalEntry (const std::string& topic, const std::string& infoId,
         int day, int month, int dayOfMonth)
-    : JournalEntry (topic, infoId), mDay (day), mMonth (month), mDayOfMonth (dayOfMonth)
+    : JournalEntry (topic, infoId, MWWorld::Ptr()), mDay (day), mMonth (month), mDayOfMonth (dayOfMonth)
     {}
 
     StampedJournalEntry::StampedJournalEntry (const ESM::JournalEntry& record)

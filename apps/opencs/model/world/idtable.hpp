@@ -19,26 +19,27 @@ namespace CSMWorld
 
         public:
 
-            enum Reordering
+            enum Features
             {
-                Reordering_None,
-                Reordering_WithinTopic
-            };
+                Feature_ReorderWithinTopic = 1,
 
-            enum Viewing
-            {
-                Viewing_None,
-                Viewing_Id, // use ID column to generate view request (ID is transformed into
-                            // worldspace and original ID is passed as hint with c: prefix)
-                Viewing_Cell // use cell column to generate view request (cell ID is transformed
-                             // into worldspace and record ID is passed as hint with r: prefix)
+                /// Use ID column to generate view request (ID is transformed into
+                /// worldspace and original ID is passed as hint with c: prefix).
+                Feature_ViewId = 2,
+
+                /// Use cell column to generate view request (cell ID is transformed
+                /// into worldspace and record ID is passed as hint with r: prefix).
+                Feature_ViewCell = 4,
+
+                Feature_View = Feature_ViewId | Feature_ViewCell,
+
+                Feature_Preview = 8
             };
 
         private:
 
             CollectionBase *mIdCollection;
-            Reordering mReordering;
-            Viewing mViewing;
+            unsigned int mFeatures;
             bool mPreview;
 
             // not implemented
@@ -47,8 +48,7 @@ namespace CSMWorld
 
         public:
 
-            IdTable (CollectionBase *idCollection, Reordering reordering = Reordering_None,
-                Viewing viewing = Viewing_None, bool preview = false);
+            IdTable (CollectionBase *idCollection, unsigned int features = 0);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();
@@ -97,11 +97,7 @@ namespace CSMWorld
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
 
-            Reordering getReordering() const;
-
-            Viewing getViewing() const;
-
-            bool hasPreview() const;
+            unsigned int getFeatures() const;
 
             std::pair<UniversalId, std::string> view (int row) const;
             ///< Return the UniversalId and the hint for viewing \a row. If viewing is not

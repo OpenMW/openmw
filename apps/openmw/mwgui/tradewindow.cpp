@@ -345,7 +345,7 @@ namespace MWGui
                 x += abs(int(npcTerm - pcTerm));
 
             int roll = std::rand()%100 + 1;
-            if(roll > x) //trade refused
+            if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->
                     messageBox("#{sNotifyMessage9}");

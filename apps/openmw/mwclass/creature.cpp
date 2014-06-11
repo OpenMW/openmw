@@ -345,7 +345,9 @@ namespace MWClass
         getCreatureStats(ptr).setAttacked(true);
 
         // Self defense
-        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80)
+        if (!attacker.isEmpty() && ptr.getClass().getCreatureStats(ptr).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() < 80
+                && (canWalk(ptr) || canFly(ptr) || canSwim(ptr))) // No retaliation for totally static creatures
+                                                                  // (they have no movement or attacks anyway)
             MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
 
         if(!successful)

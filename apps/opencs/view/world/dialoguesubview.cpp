@@ -332,6 +332,7 @@ void CSVWorld::EditWidget::remake(int row)
     if (mMainWidget)
     {
         delete mMainWidget;
+        mMainWidget = 0;
     }
     mMainWidget = new QWidget (this);
 
@@ -339,6 +340,7 @@ void CSVWorld::EditWidget::remake(int row)
     if (mWidgetMapper)
     {
         delete mWidgetMapper;
+        mWidgetMapper = 0;
     }
     mWidgetMapper = new QDataWidgetMapper (this);
     mWidgetMapper->setModel(mTable);
@@ -396,7 +398,7 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    this->setMinimumWidth(325); //TODO find better way to set the width or make it customizable
+    this->setMinimumWidth(325); /// \todo replace hardcoded value with a user setting
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }
@@ -407,7 +409,6 @@ void CSVWorld::EditWidget::remake(int row)
 
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     const CreatorFactoryBase& creatorFactory, bool sorting) :
-
     SubView (id),
     mEditWidget(0),
     mMainLayout(NULL),
@@ -415,8 +416,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
     mRow (-1),
     mLocked(false),
-    mDocument(document)
-
+    mDocument(document),
+    mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
     connect(mTable, SIGNAL(dataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT(dataChanged(const QModelIndex&)));
     mRow = mTable->getModelIndex (id.getId(), 0).row();
@@ -440,7 +441,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     QToolButton* revertButton = new QToolButton(mainWidget);
     revertButton->setIcon(QIcon(":/edit-undo.png"));
 
-    if (mTable->hasPreview())
+    if (mTable->getFeatures() & CSMWorld::IdTable::Feature_Preview)
     {
         QToolButton* previewButton = new QToolButton(mainWidget);
         previewButton->setIcon(QIcon(":/edit-preview.png"));
@@ -448,7 +449,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
         connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
     }
 
-    if (mTable->getViewing()!=CSMWorld::IdTable::Viewing_None)
+    if (mTable->getFeatures() & CSMWorld::IdTable::Feature_View)
     {
         QToolButton* viewButton = new QToolButton(mainWidget);
         viewButton->setIcon(QIcon(":/cell.png"));
@@ -560,14 +561,12 @@ void CSVWorld::DialogueSubView::nextId()
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
 {
     mLocked = locked;
+
     CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
-    if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
-    {
-        mEditWidget->setDisabled(true);
-    } else
-    {
-        mEditWidget->setDisabled(mLocked);
-    }
+
+    mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || locked);
+
+    mCommandDispatcher.setEditLock (locked);
 }
 
 void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
@@ -575,13 +574,8 @@ void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
     if (index.row() == mRow)
     {
         CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (mRow, 1)).toInt());
-        if (state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased)
-        {
-            mEditWidget->setDisabled(true);
-        } else
-        {
-            mEditWidget->setDisabled(mLocked);
-        }
+
+        mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
     }
 }
 
@@ -671,7 +665,8 @@ void CSVWorld::DialogueSubView::cloneRequest ()
 
 void CSVWorld::DialogueSubView::showPreview ()
 {
-    if (mTable->hasPreview() && mRow < mTable->rowCount())
+    if ((mTable->getFeatures() & CSMWorld::IdTable::Feature_Preview) &&
+        mRow < mTable->rowCount())
     {
        emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, mTable->data(mTable->index (mRow, 0)).toString().toUtf8().constData()), "");
     }

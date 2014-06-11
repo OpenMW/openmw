@@ -356,27 +356,39 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
     objlist->mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
 
     bool interior = !(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior());
-    bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
-                     !interior : fallback->getFallbackBool("LightAttenuation_UseQuadratic");
+
+    static bool outQuadInLin = fallback->getFallbackBool("LightAttenuation_OutQuadInLin");
+    static bool useQuadratic = fallback->getFallbackBool("LightAttenuation_UseQuadratic");
+    static float quadraticValue = fallback->getFallbackFloat("LightAttenuation_QuadraticValue");
+    static float quadraticRadiusMult = fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+    static bool useLinear = fallback->getFallbackBool("LightAttenuation_UseLinear");
+    static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+    static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
+
+    bool quadratic = useQuadratic && (!outQuadInLin || !interior);
+
 
     // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
     // so we ignore lights if their attenuation falls below this factor.
     const float threshold = 0.03;
 
-    if (!quadratic)
+    float quadraticAttenuation = 0;
+    float linearAttenuation = 0;
+    float activationRange = 0;
+    if (quadratic)
     {
-        float r = radius * fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
-        float attenuation = fallback->getFallbackFloat("LightAttenuation_LinearValue") / r;
-        float activationRange = 1.0f / (threshold * attenuation);
-        olight->setAttenuation(activationRange, 0, attenuation, 0);
+        float r = radius * quadraticRadiusMult;
+        quadraticAttenuation = quadraticValue / std::pow(r, 2);
+        activationRange = std::sqrt(1.0f / (threshold * quadraticAttenuation));
     }
-    else
+    if (useLinear)
     {
-        float r = radius * fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
-        float attenuation = fallback->getFallbackFloat("LightAttenuation_QuadraticValue") / std::pow(r, 2);
-        float activationRange = std::sqrt(1.0f / (threshold * attenuation));
-        olight->setAttenuation(activationRange, 0, 0, attenuation);
+        float r = radius * linearRadiusMult;
+        linearAttenuation = linearValue / r;
+        activationRange = std::max(activationRange, 1.0f / (threshold * linearAttenuation));
     }
+
+    olight->setAttenuation(activationRange, 0, linearAttenuation, quadraticAttenuation);
 
     // If there's an AttachLight bone, attach the light to that, otherwise put it in the center,
     if(objlist->mSkelBase && objlist->mSkelBase->getSkeleton()->hasBone("AttachLight"))

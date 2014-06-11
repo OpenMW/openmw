@@ -19,8 +19,8 @@ Alexander Olofsson (Ace)
 Artem Kotsynyak (greye)
 Arthur Moore (EmperorArthur)
 athile
+Bret Curtis (psi29a)
 Britt Mathis (galdor557)
-BrotherBrick
 cc9cii
 Chris Boyce (slothlife)
 Chris Robinson (KittyCat)
@@ -36,6 +36,7 @@ Eli2
 Emanuel Guével (potatoesmaster)
 Fil Krynicki (filkry)
 gugus/gus
+Hallfaer Tuilinn
 Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
@@ -78,7 +79,7 @@ Torben Leif Carrington (TorbenC)
 
 Packagers:
 Alexander Olofsson (Ace) - Windows
-BrotherBrick - Ubuntu Linux
+Bret Curtis (psi29a) - Ubuntu Linux
 Edmondo Tommasina (edmondo) - Gentoo Linux
 Julian Ospald (hasufell) - Gentoo Linux
 Karl-Felix Glatzer (k1ll) - Linux Binaries

@@ -8,6 +8,8 @@
 namespace MWGui
 {
 
+class ItemWidget;
+
 class Recharge : public WindowBase
 {
 public:
@@ -25,7 +27,7 @@ protected:
 
     MyGUI::Widget* mGemBox;
 
-    MyGUI::ImageBox* mGemIcon;
+    ItemWidget* mGemIcon;
 
     MyGUI::TextBox* mChargeLabel;
 
