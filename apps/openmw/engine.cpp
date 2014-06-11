@@ -357,7 +357,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v1.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
     MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
