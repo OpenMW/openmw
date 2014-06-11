@@ -70,12 +70,14 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
         ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(cell.getGridX(), cell.getGridY()));
         if (oldcell) {
             // merge new cell into old cell
-            // push the new references on the list of references to manage (saveContext = true)
             oldcell->mData = cell.mData;
-            oldcell->loadCell(esm, true);
+            oldcell->loadCell(esm, false);
 
             // handle moved ref (MVRF) subrecords
             handleMovedCellRefs (esm, &cell);
+
+            // push the new references on the list of references to manage
+            oldcell->postLoad(esm);
 
             // merge lists of leased references, use newer data in case of conflict
             for (ESM::MovedCellRefTracker::const_iterator it = cell.mMovedRefs.begin(); it != cell.mMovedRefs.end(); ++it) {
@@ -96,10 +98,13 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
         } else
         {
             // spawn a new cell
-            cell.loadCell(esm, true);
+            cell.loadCell(esm, false);
 
             // handle moved ref (MVRF) subrecords
             handleMovedCellRefs (esm, &cell);
+
+            // push the new references on the list of references to manage
+            cell.postLoad(esm);
 
             mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
         }
