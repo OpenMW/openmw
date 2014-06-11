@@ -832,6 +832,8 @@ bool CharacterController::updateWeaponState()
                              MWRender::Animation::Group_UpperBody, false,
                              weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
                              1.0f-complete, 0);
+
+            complete = 0.f;
             mUpperBodyState = UpperCharState_MaxAttackToMinHit;
         }
         else if (mHitState == CharState_KnockDown)
@@ -975,7 +977,8 @@ bool CharacterController::updateWeaponState()
     }
 
      //if playing combat animation and lowerbody is not busy switch to whole body animation
-    if((weaptype != WeapType_None || UpperCharState_UnEquipingWeap) && animPlaying)
+    if((weaptype != WeapType_None || mUpperBodyState == UpperCharState_UnEquipingWeap
+        || mUpperBodyState == UpperCharState_EquipingWeap) && animPlaying)
     {
         if( mMovementState != CharState_None ||
              mJumpState != JumpState_None ||

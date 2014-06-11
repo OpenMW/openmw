@@ -8,6 +8,11 @@ namespace ESM
     struct JournalEntry;
 }
 
+namespace MWWorld
+{
+    class Ptr;
+}
+
 namespace MWDialogue
 {
     /// \brief Basic quest/dialogue/topic entry
@@ -19,7 +24,8 @@ namespace MWDialogue
 
         Entry();
 
-        Entry (const std::string& topic, const std::string& infoId);
+        /// actor is optional
+        Entry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
 
         Entry (const ESM::JournalEntry& record);
 
@@ -37,7 +43,7 @@ namespace MWDialogue
 
         JournalEntry();
 
-        JournalEntry (const std::string& topic, const std::string& infoId);
+        JournalEntry (const std::string& topic, const std::string& infoId, const MWWorld::Ptr& actor);
 
         JournalEntry (const ESM::JournalEntry& record);
 

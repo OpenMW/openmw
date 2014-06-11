@@ -10,7 +10,6 @@ namespace MWState
     class CharacterManager
     {
             boost::filesystem::path mPath;
-            int mNext;
 
             // Uses std::list, so that mCurrent stays valid when characters are deleted
             std::list<Character> mCharacters;
@@ -32,13 +31,15 @@ namespace MWState
 
             CharacterManager (const boost::filesystem::path& saves, const std::string& game);
 
-            Character *getCurrentCharacter (bool create = true);
+            Character *getCurrentCharacter (bool create, const std::string& name);
             ///< \param create Create a new character, if there is no current character.
+            /// \param name The character name to use in case a new character is created.
 
             void deleteSlot(const MWState::Character *character, const MWState::Slot *slot);
 
-            void createCharacter();
+            void createCharacter(const std::string& name);
             ///< Create new character within saved game management
+            /// \param name Name for the character (does not need to be unique)
 
             void setCurrentCharacter (const Character *character);
 

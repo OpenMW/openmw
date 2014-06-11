@@ -184,9 +184,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         encoded->read(&profile.mScreenshot[0], encoded->size());
 
         if (!slot)
-            slot = mCharacterManager.getCurrentCharacter()->createSlot (profile);
+            slot = getCurrentCharacter()->createSlot (profile);
         else
-            slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
+            slot = getCurrentCharacter()->updateSlot (slot, profile);
 
         boost::filesystem::ofstream stream (slot->mPath, std::ios::binary);
 
@@ -233,6 +233,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         writer.close();
 
+        if (stream.fail())
+            throw std::runtime_error("Write operation failed");
+
         Settings::Manager::setString ("character", "Saves",
             slot->mPath.parent_path().filename().string());
     }
@@ -246,6 +249,10 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         std::vector<std::string> buttons;
         buttons.push_back("#{sOk}");
         MWBase::Environment::get().getWindowManager()->messageBox(error.str(), buttons);
+
+        // If no file was written, clean up the slot
+        if (slot && !boost::filesystem::exists(slot->mPath))
+            getCurrentCharacter()->deleteSlot(slot);
     }
 }
 
@@ -412,7 +419,10 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
-    return mCharacterManager.getCurrentCharacter (create);
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    std::string name = player.getClass().getName(player);
+
+    return mCharacterManager.getCurrentCharacter (create, name);
 }
 
 MWState::StateManager::CharacterIterator MWState::StateManager::characterBegin()
@@ -433,11 +443,12 @@ void MWState::StateManager::update (float duration)
     if (mAskLoadRecent)
     {
         int iButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
-        if(iButton==0)
+        MWState::Character *curCharacter = getCurrentCharacter(false);
+        if(iButton==0 && curCharacter)
         {
             mAskLoadRecent = false;
             //Load last saved game for current character
-            MWState::Character *curCharacter = getCurrentCharacter();
+
             MWState::Slot lastSave = *curCharacter->begin();
             loadGame(curCharacter, &lastSave);
         }

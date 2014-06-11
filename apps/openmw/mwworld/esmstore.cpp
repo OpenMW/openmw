@@ -99,6 +99,13 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             }
             it->second->load(esm, id);
 
+            // DELE can also occur after the usual subrecords
+            if (esm.isNextSub("DELE")) {
+              esm.skipRecord();
+              it->second->eraseStatic(id);
+              continue;
+            }
+
             if (n.val==ESM::REC_DIAL) {
                 dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
             } else {

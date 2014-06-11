@@ -136,7 +136,7 @@ namespace MWGui
             Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
             for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
             {
-                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash_*.tga");
+                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash/*.tga");
                 mResources.insert(mResources.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
             }
         }

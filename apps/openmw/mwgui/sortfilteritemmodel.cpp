@@ -14,6 +14,7 @@
 #include <components/esm/loadweap.hpp>
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/nullaction.hpp"
 
 namespace
 {
@@ -124,6 +125,10 @@ namespace MWGui
             return false;
         if ((mFilter & Filter_OnlyEnchantable) && base.getTypeName() == typeid(ESM::Book).name()
                 && !base.get<ESM::Book>()->mBase->mData.mIsScroll)
+            return false;
+
+        if ((mFilter & Filter_OnlyUsableItems) && typeid(*base.getClass().use(base)) == typeid(MWWorld::NullAction)
+                && base.getClass().getScript(base).empty())
             return false;
 
         return true;

@@ -199,10 +199,6 @@ target_link_libraries(opencs
     components
 )
 
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS opencs RUNTIME DESTINATION games COMPONENT opencs)
-endif()
-
 if(APPLE)
     INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
 endif()

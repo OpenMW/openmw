@@ -235,6 +235,18 @@ namespace MWScript
             }
         };
 
+        template <class R>
+        class OpClearInfoActor : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                MWBase::Environment::get().getDialogueManager()->clearInfoActor(ptr);
+            }
+        };
+
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -256,6 +268,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetFactionReaction, new OpGetFactionReaction);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActor, new OpClearInfoActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActorExplicit, new OpClearInfoActor<ExplicitRef>);
         }
     }
 

@@ -30,11 +30,13 @@ namespace MWGui
         getWidget(mInfoText, "InfoText");
         getWidget(mOkButton, "OkButton");
         getWidget(mCancelButton, "CancelButton");
+        getWidget(mDeleteButton, "DeleteButton");
         getWidget(mSaveList, "SaveList");
         getWidget(mSaveNameEdit, "SaveNameEdit");
         getWidget(mSpacer, "Spacer");
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onOkButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onCancelButtonClicked);
+        mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteButtonClicked);
         mCharacterSelection->eventComboChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
         mSaveList->eventListChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onSlotSelected);
         mSaveList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SaveGameDialog::onSlotMouseClick);
@@ -54,13 +56,16 @@ namespace MWGui
         onSlotSelected(sender, pos);
 
         if (pos != MyGUI::ITEM_NONE && MyGUI::InputManager::getInstance().isShiftPressed())
-        {
-            ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-            dialog->open("#{sMessage3}");
-            dialog->eventOkClicked.clear();
-            dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotConfirmed);
-            dialog->eventCancelClicked.clear();
-        }
+            confirmDeleteSave();
+    }
+
+    void SaveGameDialog::confirmDeleteSave()
+    {
+        ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+        dialog->open("#{sMessage3}");
+        dialog->eventOkClicked.clear();
+        dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotConfirmed);
+        dialog->eventCancelClicked.clear();
     }
 
     void SaveGameDialog::onDeleteSlotConfirmed()
@@ -107,6 +112,7 @@ namespace MWGui
         mCurrentCharacter = NULL;
         mCurrentSlot = NULL;
         mSaveList->removeAllItems();
+        onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
 
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
         if (mgr->characterBegin() == mgr->characterEnd())
@@ -157,6 +163,8 @@ namespace MWGui
         }
 
         mCharacterSelection->setIndexSelected(selectedIndex);
+        if (selectedIndex == MyGUI::ITEM_NONE)
+            mCharacterSelection->setCaption("Select Character ...");
 
         fillSaveList();
 
@@ -175,6 +183,9 @@ namespace MWGui
         mCharacterSelection->setVisible(load);
         mSpacer->setUserString("Hidden", load ? "false" : "true");
 
+        mDeleteButton->setUserString("Hidden", load ? "false" : "true");
+        mDeleteButton->setVisible(load);
+
         if (!load)
         {
             mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter (false);
@@ -186,6 +197,12 @@ namespace MWGui
     void SaveGameDialog::onCancelButtonClicked(MyGUI::Widget *sender)
     {
         exit();
+    }
+
+    void SaveGameDialog::onDeleteButtonClicked(MyGUI::Widget *sender)
+    {
+        if (mCurrentSlot)
+            confirmDeleteSave();
     }
 
     void SaveGameDialog::onConfirmationGiven()
@@ -225,10 +242,8 @@ namespace MWGui
         }
         else
         {
-            if (mCurrentCharacter && mCurrentSlot)
-            {
-                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
-            }
+            assert (mCurrentCharacter && mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
         }
     }
 
@@ -278,6 +293,9 @@ namespace MWGui
 
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox *sender, size_t pos)
     {
+        mOkButton->setEnabled(pos != MyGUI::ITEM_NONE || mSaving);
+        mDeleteButton->setEnabled(pos != MyGUI::ITEM_NONE);
+
         if (pos == MyGUI::ITEM_NONE)
         {
             mCurrentSlot = NULL;

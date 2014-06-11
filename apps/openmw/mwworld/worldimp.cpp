@@ -1703,14 +1703,15 @@ namespace MWWorld
 
         Ogre::Vector3 orig =
             Ogre::Vector3(pos.pos);
+        orig.z += 20;
         Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
 
-        float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
-        len += 100.0;
+        float len = 100.0;
 
         std::pair<bool, Ogre::Vector3> hit =
             mPhysics->castRay(orig, dir, len);
-        pos.pos[2] = hit.second.z;
+        if (hit.first)
+            pos.pos[2] = hit.second.z;
 
         // copy the object and set its count
         int origCount = object.getRefData().getCount();

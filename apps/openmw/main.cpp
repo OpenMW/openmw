@@ -4,7 +4,8 @@
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
 
-#include <SDL.h>
+#include <SDL_messagebox.h>
+#include <SDL_main.h>
 #include "engine.hpp"
 
 #include <boost/iostreams/concepts.hpp>
@@ -253,6 +254,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 }
 
 #if defined(_WIN32) && defined(_DEBUG)
+
 class DebugOutput : public boost::iostreams::sink
 {
 public:
@@ -348,7 +350,7 @@ int main(int argc, char**argv)
     catch (std::exception &e)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        if (isatty(fileno(stdin)) || !SDL_WasInit(SDL_INIT_VIDEO))
+        if (isatty(fileno(stdin)))
             std::cerr << "\nERROR: " << e.what() << std::endl;
         else
 #endif

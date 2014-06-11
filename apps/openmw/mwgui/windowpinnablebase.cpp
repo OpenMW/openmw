@@ -25,6 +25,12 @@ namespace MWGui
         onPinToggled();
     }
 
+    void WindowPinnableBase::setPinned(bool pinned)
+    {
+        if (pinned != mPinned)
+            onPinButtonClicked(mPinButton);
+    }
+
     void WindowPinnableBase::setPinButtonVisible(bool visible)
     {
         mPinButton->setVisible(visible);
