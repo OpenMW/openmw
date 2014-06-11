@@ -304,7 +304,7 @@ namespace MWWorld
                     continue; // velocity updated, calculate nextpos again
                 }
 
-                if(!newPosition.positionCloses(nextpos, 0.00000001))
+                if(newPosition.squaredDistance(nextpos) > 0.00000001*0.00000001)
                 {
                     // trace to where character would go if there were no obstructions
                     tracer.doTrace(colobj, newPosition, nextpos, engine);
