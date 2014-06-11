@@ -44,6 +44,10 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     mDispatcher->setSelection (records);
 
+    std::vector<CSMWorld::UniversalId> extendedTypes = mDispatcher->getExtendedTypes();
+
+    mDispatcher->setExtendedTypes (extendedTypes);
+
     // create context menu
     QMenu menu (this);
 
@@ -63,10 +67,20 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
             menu.addAction (mCreateAction);
 
         if (mDispatcher->canRevert())
+        {
             menu.addAction (mRevertAction);
 
+            if (!extendedTypes.empty())
+                menu.addAction (mExtendedRevertAction);
+        }
+
         if (mDispatcher->canDelete())
+        {
             menu.addAction (mDeleteAction);
+
+            if (!extendedTypes.empty())
+                menu.addAction (mExtendedDeleteAction);
+        }
 
         if (mModel->getFeatures() & CSMWorld::IdTable::Feature_ReorderWithinTopic)
         {
@@ -202,6 +216,18 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mPreviewAction = new QAction (tr ("Preview"), this);
     connect (mPreviewAction, SIGNAL (triggered()), this, SLOT (previewRecord()));
     addAction (mPreviewAction);
+
+    /// \todo add a user option, that redirects the extended action to an input panel (in
+    /// the bottom bar) that lets the user select which record collections should be
+    /// modified.
+
+    mExtendedDeleteAction = new QAction (tr ("Extended Delete Record"), this);
+    connect (mExtendedDeleteAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedDelete()));
+    addAction (mExtendedDeleteAction);
+
+    mExtendedRevertAction = new QAction (tr ("Extended Revert Record"), this);
+    connect (mExtendedRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedRevert()));
+    addAction (mExtendedRevertAction);
 
     connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));

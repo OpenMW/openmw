@@ -46,6 +46,8 @@ namespace CSVWorld
             QAction *mMoveDownAction;
             QAction *mViewAction;
             QAction *mPreviewAction;
+            QAction *mExtendedDeleteAction;
+            QAction *mExtendedRevertAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
             int mRecordStatusDisplay;
