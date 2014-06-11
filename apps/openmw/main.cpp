@@ -10,6 +10,7 @@
 
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #if defined(_WIN32)
 // For OutputDebugString
@@ -309,7 +310,8 @@ int main(int argc, char**argv)
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to openmw.log
-        std::ofstream logfile (std::string(cfgMgr.getLogPath().string() + "/openmw.log").c_str());
+        boost::filesystem::ofstream logfile (boost::filesystem::path(
+                                                 cfgMgr.getLogPath() / "/openmw.log"));
 
         boost::iostreams::stream_buffer<Tee> coutsb;
         std::ostream oldcout(cout_rdbuf);
