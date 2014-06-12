@@ -165,6 +165,9 @@ struct KeyListT {
     void read(NIFStream *nif, bool force=false)
     {
         assert(nif);
+
+        mInterpolationType = 0;
+
         size_t count = nif->getUInt();
         if(count == 0 && !force)
             return;
