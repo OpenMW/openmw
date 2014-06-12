@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <cctype> // std::isalnum
 
 #include <boost/filesystem.hpp>
 
