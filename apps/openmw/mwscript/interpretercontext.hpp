@@ -129,7 +129,7 @@ namespace MWScript
             ///< Store reference acted upon. The actual execution of the action does not
             /// take place here.
 
-            void executeActivation(MWWorld::Ptr ptr);
+            void executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor);
             ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
 
             void clearActivation();

@@ -489,24 +489,7 @@ void OMW::Engine::activate()
     if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
         return;
 
-    MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
-
-    interpreterContext.activate (ptr);
-
-    std::string script = ptr.getClass().getScript (ptr);
-
-    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-    if (!script.empty())
-    {
-        MWBase::Environment::get().getWorld()->getLocalScripts().setIgnore (ptr);
-        MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
-    }
-
-    if (!interpreterContext.hasActivationBeenHandled())
-    {
-        interpreterContext.executeActivation(ptr);
-    }
+    MWBase::Environment::get().getWorld()->activate(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 }
 
 void OMW::Engine::screenshot()

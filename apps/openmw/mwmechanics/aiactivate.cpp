@@ -6,7 +6,6 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "steering.hpp"
@@ -34,7 +33,9 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 200) { //Stop when you get close
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);
-        target.getClass().activate(target,actor).get()->execute(actor); //Arrest player
+
+        MWBase::Environment::get().getWorld()->activate(target, actor);
+
         return true;
     }
     else {

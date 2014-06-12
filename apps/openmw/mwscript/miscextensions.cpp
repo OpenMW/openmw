@@ -121,7 +121,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    context.executeActivation(ptr);
+                    context.executeActivation(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
                 }
         };
 

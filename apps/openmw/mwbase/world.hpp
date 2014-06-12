@@ -517,6 +517,8 @@ namespace MWBase
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
+
+            virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
     };
 }
 

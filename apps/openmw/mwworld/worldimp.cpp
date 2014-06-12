@@ -36,6 +36,8 @@
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
 
+#include "../mwscript/interpretercontext.hpp"
+
 #include "../mwclass/door.hpp"
 
 #include "player.hpp"
@@ -2758,5 +2760,23 @@ namespace MWWorld
             effects.mList = apply->second;
             cast.inflict(apply->first, caster, effects, ESM::RT_Target, false, true);
         }
+    }
+
+    void World::activate(const Ptr &object, const Ptr &actor)
+    {
+        MWScript::InterpreterContext interpreterContext (&object.getRefData().getLocals(), object);
+        interpreterContext.activate (object);
+
+        std::string script = object.getClass().getScript (object);
+
+        breakInvisibility(actor);
+
+        if (!script.empty())
+        {
+            getLocalScripts().setIgnore (object);
+            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+        }
+        if (!interpreterContext.hasActivationBeenHandled())
+            interpreterContext.executeActivation(object, actor);
     }
 }

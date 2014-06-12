@@ -419,11 +419,10 @@ namespace MWScript
         mActivationHandled = false;
     }
 
-    void InterpreterContext::executeActivation(MWWorld::Ptr ptr)
+    void InterpreterContext::executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, player));
-        action->execute (player);
+        boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
+        action->execute (actor);
         if (mActivated == ptr)
             mActivationHandled = true;
     }
