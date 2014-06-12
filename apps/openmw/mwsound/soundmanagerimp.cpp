@@ -226,10 +226,7 @@ namespace MWSound
         // Don't play the same music track twice in a row
         if (filelist[i] == mLastPlayedMusic)
         {
-            if (i-1 == int(filelist.size()))
-                i = 0;
-            else
-                ++i;
+            i = (i+1) % filelist.size();
         }
 
         streamMusicFull(filelist[i]);
