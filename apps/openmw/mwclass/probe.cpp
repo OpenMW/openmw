@@ -137,7 +137,7 @@ namespace MWClass
         text += "\n#{sUses}: " + MWGui::ToolTips::toString(remainingUses);
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
