@@ -503,6 +503,7 @@ namespace MWMechanics
 
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
+        mAiSequence.writeState(state.mAiSequence);
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
@@ -543,6 +544,7 @@ namespace MWMechanics
 
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
+        mAiSequence.readState(state.mAiSequence);
     }
 
     void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)

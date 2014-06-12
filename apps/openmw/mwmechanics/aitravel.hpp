@@ -5,6 +5,14 @@
 
 #include "pathfinding.hpp"
 
+namespace ESM
+{
+namespace AiSequence
+{
+    struct AiTravel;
+}
+}
+
 namespace MWMechanics
 {
     /// \brief Causes the AI to travel to the specified point
@@ -13,6 +21,10 @@ namespace MWMechanics
         public:
             /// Default constructor
             AiTravel(float x, float y, float z);
+            AiTravel(const ESM::AiSequence::AiTravel* travel);
+
+            void writeState(ESM::AiSequence::AiSequence &sequence) const;
+
             virtual AiTravel *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor,float duration);

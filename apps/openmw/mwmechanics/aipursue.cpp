@@ -1,5 +1,7 @@
 #include "aipursue.hpp"
 
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
@@ -18,6 +20,12 @@ AiPursue::AiPursue(const MWWorld::Ptr& actor)
     : mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
 {
 }
+
+AiPursue::AiPursue(const ESM::AiSequence::AiPursue *pursue)
+    : mTargetActorId(pursue->mTargetActorId)
+{
+}
+
 AiPursue *MWMechanics::AiPursue::clone() const
 {
     return new AiPursue(*this);
@@ -55,6 +63,17 @@ int AiPursue::getTypeId() const
 MWWorld::Ptr AiPursue::getTarget() const
 {
     return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+}
+
+void AiPursue::writeState(ESM::AiSequence::AiSequence &sequence) const
+{
+    std::auto_ptr<ESM::AiSequence::AiPursue> pursue(new ESM::AiSequence::AiPursue());
+    pursue->mTargetActorId = mTargetActorId;
+
+    ESM::AiSequence::AiPackageContainer package;
+    package.mType = ESM::AiSequence::Ai_Pursue;
+    package.mPackage = pursue.release();
+    sequence.mPackages.push_back(package);
 }
 
 } // namespace MWMechanics

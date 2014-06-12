@@ -3,6 +3,7 @@
 #include <OgreMath.h>
 #include <OgreVector3.h>
 
+#include <components/esm/aisequence.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
@@ -81,23 +82,22 @@ namespace MWMechanics
     // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
 
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
-        mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId()),
-        mTimerAttack(0),
-        mTimerReact(0),
-        mTimerCombatMove(0),
-        mFollowTarget(false),
-        mReadyToAttack(false),
-        mAttack(false),
-        mCombatMove(false),
-        mMovement(),
-        mForceNoShortcut(false),
-        mShortcutFailPos(),
-        mBackOffDoor(false),
-        mCell(NULL),
-        mDoorIter(actor.getCell()->get<ESM::Door>().mList.end()),
-        mDoors(actor.getCell()->get<ESM::Door>()),
-        mDoorCheckDuration(0)
+        mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
     {
+        init();
+    }
+
+    void AiCombat::init()
+    {
+        mTimerAttack = 0;
+        mTimerReact = 0;
+        mTimerCombatMove = 0;
+        mFollowTarget = false;
+        mReadyToAttack = false;
+        mAttack = false;
+        mCombatMove = false;
+        mForceNoShortcut = false;
+        mCell = NULL;
     }
 
     /*
@@ -511,70 +511,22 @@ namespace MWMechanics
         //       coded at 250ms or 1/4 second
         //
         // TODO: Add a parameter to vary DURATION_SAME_SPOT?
-        MWWorld::CellStore *cell = actor.getCell();
         if((distToTarget > rangeAttack || mFollowTarget) &&
             mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
         {
-            // first check if we're walking into a door
-            mDoorCheckDuration += 1.0f; // add time taken for obstacle check
-            if(mDoorCheckDuration >= DOOR_CHECK_INTERVAL && !cell->getCell()->isExterior())
-            {
-                mDoorCheckDuration = 0;
-                // Check all the doors in this cell
-                mDoors = cell->get<ESM::Door>(); // update
-                mDoorIter = mDoors.mList.begin();
-                for (; mDoorIter != mDoors.mList.end(); ++mDoorIter)
-                {
-                    MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
-                    float minSqr = 1.3*1.3*MIN_DIST_TO_DOOR_SQUARED; // for legibility
-                    if(vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.getPosition().pos)) < minSqr &&
-                       ref.mData.getLocalRotation().rot[2] < 0.4f) // even small opening
-                    {
-                        //std::cout<<"closed door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
-                        mBackOffDoor = true;
-                        mObstacleCheck.clear();
-                        if(mFollowTarget)
-                            mFollowTarget = false;
-                        break;
-                    }
-                }
-            }
-            else // probably walking into another NPC TODO: untested in combat situation
-            {
-                // TODO: diagonal should have same animation as walk forward
-                //       but doesn't seem to do that?
-                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
-                // change the angle a bit, too
-                if(mPathFinder.isPathConstructed())
-                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+            // probably walking into another NPC TODO: untested in combat situation
+            // TODO: diagonal should have same animation as walk forward
+            //       but doesn't seem to do that?
+            actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+            // change the angle a bit, too
+            if(mPathFinder.isPathConstructed())
+                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
 
-                if(mFollowTarget)
-                    mFollowTarget = false;
-                // FIXME: can fool actors to stay behind doors, etc.
-                // Related to Bug#1102 and to some degree #1155 as well
-            }
-        }
-
-        if(!cell->getCell()->isExterior() && !mDoors.mList.empty())
-        {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *mDoorIter;
-            float minSqr = 1.6 * 1.6 * MIN_DIST_TO_DOOR_SQUARED; // for legibility
-            // TODO: add reaction to checking open doors
-            if(mBackOffDoor &&
-               vActorPos.squaredDistance(Ogre::Vector3(ref.mRef.getPosition().pos)) < minSqr)
-            {
-                mMovement.mPosition[1] = -0.2; // back off, but slowly
-            }
-            else if(mBackOffDoor &&
-                    mDoorIter != mDoors.mList.end() &&
-                    ref.mData.getLocalRotation().rot[2] >= 1)
-            {
-                mDoorIter = mDoors.mList.end();
-                mBackOffDoor = false;
-                //std::cout<<"open door id \""<<ref.mRef.mRefID<<"\""<<std::endl;
-                mMovement.mPosition[1] = 1;
-            }
+            if(mFollowTarget)
+                mFollowTarget = false;
+            // FIXME: can fool actors to stay behind doors, etc.
+            // Related to Bug#1102 and to some degree #1155 as well
         }
 
         return false;
@@ -646,6 +598,23 @@ namespace MWMechanics
     AiCombat *MWMechanics::AiCombat::clone() const
     {
         return new AiCombat(*this);
+    }
+
+    AiCombat::AiCombat(const ESM::AiSequence::AiCombat *combat)
+    {
+        mTargetActorId = combat->mTargetActorId;
+        init();
+    }
+
+    void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
+    {
+        std::auto_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
+        combat->mTargetActorId = mTargetActorId;
+
+        ESM::AiSequence::AiPackageContainer package;
+        package.mType = ESM::AiSequence::Ai_Combat;
+        package.mPackage = combat.release();
+        sequence.mPackages.push_back(package);
     }
 }
 

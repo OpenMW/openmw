@@ -11,6 +11,7 @@
 
 #include "spellstate.hpp"
 #include "activespells.hpp"
+#include "aisequence.hpp"
 
 namespace ESM
 {
@@ -22,6 +23,8 @@ namespace ESM
     {
         StatState<int> mAttributes[8];
         StatState<float> mDynamic[3];
+
+        AiSequence::AiSequence mAiSequence;
 
         ESM::TimeStamp mTradeTime;
         int mGoldPool;

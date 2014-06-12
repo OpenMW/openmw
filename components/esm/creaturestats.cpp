@@ -79,6 +79,7 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
     mSpells.load(esm);
     mActiveSpells.load(esm);
+    mAiSequence.load(esm);
 }
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
@@ -160,4 +161,5 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     mSpells.save(esm);
     mActiveSpells.save(esm);
+    mAiSequence.save(esm);
 }

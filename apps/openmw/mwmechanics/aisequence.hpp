@@ -10,6 +10,14 @@ namespace MWWorld
     class Ptr;
 }
 
+namespace ESM
+{
+    namespace AiSequence
+    {
+        class AiSequence;
+    }
+}
+
 namespace MWMechanics
 {
     class AiPackage;
@@ -90,6 +98,9 @@ namespace MWMechanics
             /** Typically used for loading from the ESM
                 \see ESM::AIPackageList **/
             void fill (const ESM::AIPackageList& list);
+
+            void writeState (ESM::AiSequence::AiSequence& sequence) const;
+            void readState (const ESM::AiSequence::AiSequence& sequence);
     };
 }
 

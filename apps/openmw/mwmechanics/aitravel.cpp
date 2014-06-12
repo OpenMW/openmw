@@ -1,5 +1,7 @@
 #include "aitravel.hpp"
 
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -17,6 +19,15 @@ namespace MWMechanics
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
+    }
+
+    AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
+        : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ)
+        , mPathFinder()
+        , mCellX(std::numeric_limits<int>::max())
+        , mCellY(std::numeric_limits<int>::max())
+    {
+
     }
 
     AiTravel *MWMechanics::AiTravel::clone() const
@@ -91,6 +102,19 @@ namespace MWMechanics
     int AiTravel::getTypeId() const
     {
         return TypeIdTravel;
+    }
+
+    void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const
+    {
+        std::auto_ptr<ESM::AiSequence::AiTravel> travel(new ESM::AiSequence::AiTravel());
+        travel->mData.mX = mX;
+        travel->mData.mY = mY;
+        travel->mData.mZ = mZ;
+
+        ESM::AiSequence::AiPackageContainer package;
+        package.mType = ESM::AiSequence::Ai_Travel;
+        package.mPackage = travel.release();
+        sequence.mPackages.push_back(package);
     }
 }
 

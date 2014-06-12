@@ -1,5 +1,7 @@
 #include "aiactivate.hpp"
 
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -45,4 +47,21 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
 int MWMechanics::AiActivate::getTypeId() const
 {
     return TypeIdActivate;
+}
+
+void MWMechanics::AiActivate::writeState(ESM::AiSequence::AiSequence &sequence) const
+{
+    std::auto_ptr<ESM::AiSequence::AiActivate> activate(new ESM::AiSequence::AiActivate());
+    activate->mTargetId = mObjectId;
+
+    ESM::AiSequence::AiPackageContainer package;
+    package.mType = ESM::AiSequence::Ai_Activate;
+    package.mPackage = activate.release();
+    sequence.mPackages.push_back(package);
+}
+
+MWMechanics::AiActivate::AiActivate(const ESM::AiSequence::AiActivate *activate)
+    : mObjectId(activate->mTargetId)
+{
+
 }

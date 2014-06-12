@@ -1,12 +1,13 @@
 #include "aiescort.hpp"
 
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
 
 #include "steering.hpp"
 #include "movement.hpp"
@@ -20,7 +21,7 @@
 namespace MWMechanics
 {
     AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
-    : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration)
+    : mActorId(actorId), mX(x), mY(y), mZ(z), mRemainingDuration(duration)
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
@@ -29,32 +30,29 @@ namespace MWMechanics
         // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
         if(mX != 0 || mY != 0 || mZ != 0)
-            mDuration = 0;
-
-        else
-        {
-            MWWorld::TimeStamp startTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-            mStartingSecond = ((startTime.getHour() - int(startTime.getHour())) * 100);
-        }
+            mRemainingDuration = 0;
     }
 
     AiEscort::AiEscort(const std::string &actorId, const std::string &cellId,int duration, float x, float y, float z)
-    : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration)
+    : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mRemainingDuration(duration)
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 470;
 
         // The CS Help File states that if a duration is given, the AI package will run for that long
-        // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
+        // BUT if a location is given, it "trumps" the duration so it will simply escort to that location.
         if(mX != 0 || mY != 0 || mZ != 0)
-            mDuration = 0;
+            mRemainingDuration = 0;
+    }
 
-        else
-        {
-            MWWorld::TimeStamp startTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-            mStartingSecond = ((startTime.getHour() - int(startTime.getHour())) * 100);
-        }
+    AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)
+        : mActorId(escort->mTargetId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
+        , mCellX(std::numeric_limits<int>::max())
+        , mCellY(std::numeric_limits<int>::max())
+        , mCellId(escort->mCellId)
+        , mRemainingDuration(escort->mRemainingDuration)
+    {
     }
 
 
@@ -67,11 +65,10 @@ namespace MWMechanics
     {
         // If AiEscort has ran for as long or longer then the duration specified
         // and the duration is not infinite, the package is complete.
-        if(mDuration != 0)
+        if(mRemainingDuration != 0)
         {
-            MWWorld::TimeStamp current = MWBase::Environment::get().getWorld()->getTimeStamp();
-            unsigned int currentSecond = ((current.getHour() - int(current.getHour())) * 100);
-            if(currentSecond - mStartingSecond >= mDuration)
+            mRemainingDuration -= duration;
+            if (duration <= 0)
                 return true;
         }
 
@@ -107,6 +104,22 @@ namespace MWMechanics
     int AiEscort::getTypeId() const
     {
         return TypeIdEscort;
+    }
+
+    void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const
+    {
+        std::auto_ptr<ESM::AiSequence::AiEscort> escort(new ESM::AiSequence::AiEscort());
+        escort->mData.mX = mX;
+        escort->mData.mY = mY;
+        escort->mData.mZ = mZ;
+        escort->mTargetId = mActorId;
+        escort->mRemainingDuration = mRemainingDuration;
+        escort->mCellId = mCellId;
+
+        ESM::AiSequence::AiPackageContainer package;
+        package.mType = ESM::AiSequence::Ai_Escort;
+        package.mPackage = escort.release();
+        sequence.mPackages.push_back(package);
     }
 }
 

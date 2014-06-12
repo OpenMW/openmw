@@ -12,6 +12,14 @@
 
 #include "../mwworld/timestamp.hpp"
 
+namespace ESM
+{
+    namespace AiSequence
+    {
+        struct AiWander;
+    }
+}
+
 namespace MWMechanics
 {
     /// \brief Causes the Actor to wander within a specified range
@@ -24,7 +32,11 @@ namespace MWMechanics
                 \param timeOfDay Start time of the package, if it has a duration. Currently unimplemented
                 \param idle Chances of each idle to play (9 in total)
                 \param repeat Repeat wander or not **/
-            AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat);
+            AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat);
+
+            AiWander (const ESM::AiSequence::AiWander* wander);
+
+            void init();
 
             virtual AiPackage *clone() const;
 
@@ -36,6 +48,8 @@ namespace MWMechanics
             /** In case another AI package moved the actor elsewhere **/
             void setReturnPosition (const Ogre::Vector3& position);
 
+            virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
+
         private:
             void stopWalking(const MWWorld::Ptr& actor);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
@@ -45,13 +59,10 @@ namespace MWMechanics
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
             int mTimeOfDay;
-            std::vector<int> mIdle;
+            std::vector<unsigned char> mIdle;
             bool mRepeat;
 
             bool mSaidGreeting;
-            int mGreetDistanceMultiplier;
-            float mGreetDistanceReset;
-            float mChance;
 
             bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
                                     // if we had the actor in the AiWander constructor...
@@ -74,7 +85,6 @@ namespace MWMechanics
             bool mMoveNow;
             bool mWalking;
 
-            float mIdleChanceMultiplier;
             unsigned short mPlayedIdle;
 
             MWWorld::TimeStamp mStartTime;

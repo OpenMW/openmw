@@ -11,6 +11,8 @@
 #include "aicombat.hpp"
 #include "aipursue.hpp"
 
+#include <components/esm/aisequence.hpp>
+
 #include "../mwworld/class.hpp"
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
@@ -258,7 +260,8 @@ void AiSequence::fill(const ESM::AIPackageList &list)
         if (it->mType == ESM::AI_Wander)
         {
             ESM::AIWander data = it->mWander;
-            std::vector<int> idles;
+            std::vector<unsigned char> idles;
+            idles.reserve(8);
             for (int i=0; i<8; ++i)
                 idles.push_back(data.mIdle[i]);
             package = new MWMechanics::AiWander(data.mDistance, data.mDuration, data.mTimeOfDay, idles, data.mShouldRepeat);
@@ -284,6 +287,78 @@ void AiSequence::fill(const ESM::AIPackageList &list)
             package = new MWMechanics::AiFollow(data.mId.toString(), data.mDuration, data.mX, data.mY, data.mZ);
         }
         mPackages.push_back(package);
+    }
+}
+
+void AiSequence::writeState(ESM::AiSequence::AiSequence &sequence) const
+{
+    for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
+    {
+        (*iter)->writeState(sequence);
+    }
+}
+
+void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
+{
+    clear();
+
+    for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
+         it != sequence.mPackages.end(); ++it)
+    {
+        switch (it->mType)
+        {
+        case ESM::AiSequence::Ai_Wander:
+        {
+            MWMechanics::AiWander* wander = new AiWander(
+                        dynamic_cast<ESM::AiSequence::AiWander*>(it->mPackage));
+            mPackages.push_back(wander);
+            break;
+        }
+        case ESM::AiSequence::Ai_Travel:
+        {
+            MWMechanics::AiTravel* travel = new AiTravel(
+                        dynamic_cast<ESM::AiSequence::AiTravel*>(it->mPackage));
+            mPackages.push_back(travel);
+            break;
+        }
+        case ESM::AiSequence::Ai_Escort:
+        {
+            MWMechanics::AiEscort* escort = new AiEscort(
+                        dynamic_cast<ESM::AiSequence::AiEscort*>(it->mPackage));
+            mPackages.push_back(escort);
+            break;
+        }
+        case ESM::AiSequence::Ai_Follow:
+        {
+            MWMechanics::AiFollow* follow = new AiFollow(
+                        dynamic_cast<ESM::AiSequence::AiFollow*>(it->mPackage));
+            mPackages.push_back(follow);
+            break;
+        }
+        case ESM::AiSequence::Ai_Activate:
+        {
+            MWMechanics::AiActivate* activate = new AiActivate(
+                        dynamic_cast<ESM::AiSequence::AiActivate*>(it->mPackage));
+            mPackages.push_back(activate);
+            break;
+        }
+        case ESM::AiSequence::Ai_Combat:
+        {
+            MWMechanics::AiCombat* combat = new AiCombat(
+                        dynamic_cast<ESM::AiSequence::AiCombat*>(it->mPackage));
+            mPackages.push_back(combat);
+            break;
+        }
+        case ESM::AiSequence::Ai_Pursue:
+        {
+            MWMechanics::AiPursue* pursue = new AiPursue(
+                        dynamic_cast<ESM::AiSequence::AiPursue*>(it->mPackage));
+            mPackages.push_back(pursue);
+            break;
+        }
+        default:
+            break;
+        }
     }
 }
 

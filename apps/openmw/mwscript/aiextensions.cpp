@@ -186,7 +186,7 @@ namespace MWScript
                     Interpreter::Type_Integer time = runtime[0].mFloat;
                     runtime.pop();
 
-                    std::vector<int> idleList;
+                    std::vector<unsigned char> idleList;
                     bool repeat = false;
 
                     for(int i=1; i < 10 && arg0; ++i)
@@ -194,6 +194,7 @@ namespace MWScript
                         if(!repeat)
                             repeat = true;
                         Interpreter::Type_Integer idleValue = runtime[0].mInteger;
+                        idleValue = std::min(255, std::max(0, idleValue));
                         idleList.push_back(idleValue);
                         runtime.pop();
                         --arg0;
