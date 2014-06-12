@@ -177,42 +177,49 @@ struct KeyListT {
 
         KeyT<T> key;
         NIFStream &nifReference = *nif;
-        for(size_t i = 0;i < count;i++)
+
+        if(mInterpolationType == sLinearInterpolation)
         {
-            if(mInterpolationType == sLinearInterpolation)
+            for(size_t i = 0;i < count;i++)
             {
                 readTimeAndValue(nifReference, key);
                 mKeys.push_back(key);
             }
-            else if(mInterpolationType == sQuadraticInterpolation)
+        }
+        else if(mInterpolationType == sQuadraticInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
             {
                 readQuadratic(nifReference, key);
                 mKeys.push_back(key);
             }
-            else if(mInterpolationType == sTBCInterpolation)
+        }
+        else if(mInterpolationType == sTBCInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
             {
                 readTBC(nifReference, key);
                 mKeys.push_back(key);
             }
-            //XYZ keys aren't actually read here.
-            //data.hpp sees that the last type read was sXYZInterpolation and:
-            //    Eats a floating point number, then
-            //    Re-runs the read function 3 more times, with force enabled so that the previous values aren't cleared.
-            //        When it does that it's reading in a bunch of sLinearInterpolation keys, not sXYZInterpolation.
-            else if(mInterpolationType == sXYZInterpolation)
-            {
-                //Don't try to read XYZ keys into the wrong part
-                if ( count != 1 )
-                    nif->file->fail("XYZ_ROTATION_KEY count should always be '1' .  Retrieved Value: "+Ogre::StringConverter::toString(count));
-            }
-            else if (0 == mInterpolationType)
-            {
-                if (count != 0)
-                    nif->file->fail("Interpolation type 0 doesn't work with keys");
-            }
-            else
-                nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
         }
+        //XYZ keys aren't actually read here.
+        //data.hpp sees that the last type read was sXYZInterpolation and:
+        //    Eats a floating point number, then
+        //    Re-runs the read function 3 more times, with force enabled so that the previous values aren't cleared.
+        //        When it does that it's reading in a bunch of sLinearInterpolation keys, not sXYZInterpolation.
+        else if(mInterpolationType == sXYZInterpolation)
+        {
+            //Don't try to read XYZ keys into the wrong part
+            if ( count != 1 )
+                nif->file->fail("XYZ_ROTATION_KEY count should always be '1' .  Retrieved Value: "+Ogre::StringConverter::toString(count));
+        }
+        else if (0 == mInterpolationType)
+        {
+            if (count != 0)
+                nif->file->fail("Interpolation type 0 doesn't work with keys");
+        }
+        else
+            nif->file->fail("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
     }
 
 private:
