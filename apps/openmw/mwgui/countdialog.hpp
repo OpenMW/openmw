@@ -11,6 +11,7 @@ namespace MWGui
             CountDialog();
             void open(const std::string& item, const std::string& message, const int maxCount);
             void cancel();
+            virtual void exit();
 
             typedef MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, int> EventHandle_WidgetInt;
 

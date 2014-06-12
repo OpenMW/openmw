@@ -928,11 +928,11 @@ namespace MWMechanics
                         if (timerUpdateAITargets == 0 && iter->first.getTypeName() == typeid(ESM::Creature).name() && !listGuards.empty())
                         {
                             sBasePoint = Ogre::Vector3(iter->first.getRefData().getPosition().pos);
-                            listGuards.sort(comparePtrDist); // try to engage combat starting from the nearest creature
+                            listGuards.sort(comparePtrDist); // try to engage combat starting from the nearest guard
                             
                             for (std::list<MWWorld::Ptr>::iterator it = listGuards.begin(); it != listGuards.end(); ++it)
                             {
-                                engageCombat(iter->first, *it, false);
+                                engageCombat(iter->first, *it, *it == player);
                             }
                         }
 
@@ -970,6 +970,9 @@ namespace MWMechanics
             }
 
             // Kill dead actors, update some variables
+
+            int hostilesCount = 0; // need to know this to play Battle music
+
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 const MWWorld::Class &cls = iter->first.getClass();
@@ -988,8 +991,14 @@ namespace MWMechanics
 
                 if(!stats.isDead())
                 {
+                    if (stats.isHostile()) hostilesCount++;
+
                     if(iter->second->isDead())
+                    {
+                        // Actor has been resurrected. Notify the CharacterController and re-enable collision.
+                        MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
                         iter->second->resurrect();
+                    }
 
                     if(!stats.isDead())
                         continue;
@@ -1041,6 +1050,20 @@ namespace MWMechanics
                 }
             }
 
+            // check if we still have any player enemies to switch music
+            static bool isBattleMusic = false;
+
+            if (isBattleMusic && hostilesCount == 0) 
+            {
+                MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
+                isBattleMusic = false;
+            }
+            else if (!isBattleMusic && hostilesCount > 0) 
+            {
+                MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
+                isBattleMusic = true;
+            }
+
             // if player is in sneak state see if anyone detects him
             if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak))
             {
@@ -1084,10 +1107,10 @@ namespace MWMechanics
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-        float healthHours  = healthPerHour >= 0
+        float healthHours  = healthPerHour > 0
                              ? (stats.getHealth().getModified() - stats.getHealth().getCurrent()) / healthPerHour
                              : 1.0f;
-        float magickaHours = magickaPerHour >= 0
+        float magickaHours = magickaPerHour > 0
                               ? (stats.getMagicka().getModified() - stats.getMagicka().getCurrent()) / magickaPerHour
                               : 1.0f;
 

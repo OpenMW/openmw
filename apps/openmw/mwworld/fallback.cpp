@@ -41,8 +41,9 @@ namespace MWWorld
             unsigned int j=0;
             for(unsigned int i=0;i<sum.length();++i){
                 if(sum[i]==',') j++;
-                else ret[j]+=sum[i];
+                else if (sum[i] != ' ') ret[j]+=sum[i];
             }
+
             return Ogre::ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
         }
     }

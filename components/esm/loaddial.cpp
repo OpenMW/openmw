@@ -40,21 +40,21 @@ void Dialogue::save(ESMWriter &esm) const
     }
 }
 
-    void Dialogue::blank()
-    {
-        mInfo.clear();
-    }
-
-void Dialogue::addInfo(const ESM::DialInfo& info, bool merge)
+void Dialogue::blank()
 {
-    if (!merge || mInfo.empty() || info.mNext.empty())
+    mInfo.clear();
+}
+
+void Dialogue::readInfo(ESMReader &esm, bool merge)
+{
+    const std::string& id = esm.getHNOString("INAM");
+
+    if (!merge || mInfo.empty())
     {
-        mLookup[info.mId] = mInfo.insert(mInfo.end(), info);
-        return;
-    }
-    if (info.mPrev.empty())
-    {
-        mLookup[info.mId] = mInfo.insert(mInfo.begin(), info);
+        ESM::DialInfo info;
+        info.mId = id;
+        info.load(esm);
+        mLookup[id] = mInfo.insert(mInfo.end(), info);
         return;
     }
 
@@ -62,11 +62,30 @@ void Dialogue::addInfo(const ESM::DialInfo& info, bool merge)
 
     std::map<std::string, ESM::Dialogue::InfoContainer::iterator>::iterator lookup;
 
-    lookup = mLookup.find(info.mId);
+    lookup = mLookup.find(id);
     if (lookup != mLookup.end())
     {
         it = lookup->second;
-        *it = info;
+
+        // Merge with existing record. Only the subrecords that are present in
+        // the new record will be overwritten.
+        it->load(esm);
+        return;
+    }
+
+    // New record
+    ESM::DialInfo info;
+    info.mId = id;
+    info.load(esm);
+
+    if (info.mNext.empty())
+    {
+        mLookup[id] = mInfo.insert(mInfo.end(), info);
+        return;
+    }
+    if (info.mPrev.empty())
+    {
+        mLookup[id] = mInfo.insert(mInfo.begin(), info);
         return;
     }
 
@@ -75,7 +94,7 @@ void Dialogue::addInfo(const ESM::DialInfo& info, bool merge)
     {
         it = lookup->second;
 
-        mLookup[info.mId] = mInfo.insert(++it, info);
+        mLookup[id] = mInfo.insert(++it, info);
         return;
     }
 
@@ -84,11 +103,11 @@ void Dialogue::addInfo(const ESM::DialInfo& info, bool merge)
     {
         it = lookup->second;
 
-        mLookup[info.mId] = mInfo.insert(it, info);
+        mLookup[id] = mInfo.insert(it, info);
         return;
     }
 
-    std::cerr << "Failed to insert info " << info.mId << std::endl;
+    std::cerr << "Failed to insert info " << id << std::endl;
 }
 
 }

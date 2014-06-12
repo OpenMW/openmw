@@ -99,6 +99,7 @@ namespace ESM
     };
 
     bool operator== (const RefNum& left, const RefNum& right);
+    bool operator< (const RefNum& left, const RefNum& right);
 }
 
 #endif

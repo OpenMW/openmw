@@ -14,6 +14,8 @@ namespace MWGui
     public:
         ItemSelectionDialog(const std::string& label);
 
+        virtual void exit();
+
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         typedef MyGUI::delegates::CMultiDelegate1<MWWorld::Ptr> EventHandle_Item;
 

@@ -9,11 +9,14 @@ namespace MWGui
     class ImageButton;
     class BackgroundImage;
     class SaveGameDialog;
+    class VideoWidget;
 
     class MainMenu : public OEngine::GUI::Layout
     {
             int mWidth;
             int mHeight;
+
+            bool mHasAnimatedMenu;
 
         public:
 
@@ -24,12 +27,17 @@ namespace MWGui
 
             virtual void setVisible (bool visible);
 
+            void update(float dt);
+
         private:
 
             MyGUI::Widget* mButtonBox;
             MyGUI::TextBox* mVersionText;
 
             BackgroundImage* mBackground;
+
+            MyGUI::ImageBox* mVideoBackground;
+            VideoWidget* mVideo; // For animated main menus
 
             std::map<std::string, MWGui::ImageButton*> mButtons;
 

@@ -751,7 +751,8 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         }
         else if (it->second == "max viewing distance" && it->first == "Viewing distance")
         {
-            if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
+            if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior()
+                && MWBase::Environment::get().getWorld()->getPlayerPtr().mCell)
                 configureFog(*MWBase::Environment::get().getWorld()->getPlayerPtr().getCell());
         }
         else if (it->first == "Video" && (

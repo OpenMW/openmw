@@ -413,28 +413,25 @@ namespace MWScript
         return mActivationHandled;
     }
 
-    void InterpreterContext::activate (const MWWorld::Ptr& ptr,
-        boost::shared_ptr<MWWorld::Action> action)
+    void InterpreterContext::activate (const MWWorld::Ptr& ptr)
     {
         mActivated = ptr;
         mActivationHandled = false;
-        mAction = action;
     }
 
-    void InterpreterContext::executeActivation()
+    void InterpreterContext::executeActivation(MWWorld::Ptr ptr)
     {
-        if (!mAction.get())
-            throw std::runtime_error ("activation failed, because no action to perform");
-
-        mAction->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
-        mActivationHandled = true;
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, player));
+        action->execute (player);
+        if (mActivated == ptr)
+            mActivationHandled = true;
     }
 
     void InterpreterContext::clearActivation()
     {
         mActivated = MWWorld::Ptr();
         mActivationHandled = false;
-        mAction.reset();
     }
 
     float InterpreterContext::getSecondsPassed() const

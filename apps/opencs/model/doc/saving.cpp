@@ -65,7 +65,11 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WriteRefIdCollectionStage (mDocument, mState));
 
+    appendStage (new CollectionReferencesStage (mDocument, mState));
 
+    appendStage (new WriteCellCollectionStage (mDocument, mState));
+
+    // close file and clean up
     appendStage (new CloseSaveStage (mState));
 
     appendStage (new FinalSavingStage (mDocument, mState));

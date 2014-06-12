@@ -140,11 +140,11 @@ namespace MWRender
         }
     }
 
-    void Camera::toggleViewMode()
+    void Camera::toggleViewMode(bool force)
     {
         // Changing the view will stop all playing animations, so if we are playing
         // anything important, queue the view change for later
-        if (!mAnimation->allowSwitchViewMode())
+        if (!mAnimation->allowSwitchViewMode() && !force)
         {
             mViewModeToggleQueued = true;
             return;

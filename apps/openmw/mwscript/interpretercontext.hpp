@@ -31,7 +31,6 @@ namespace MWScript
 
             MWWorld::Ptr mActivated;
             bool mActivationHandled;
-            boost::shared_ptr<MWWorld::Action> mAction;
 
             MWWorld::Ptr getReference (const std::string& id, bool activeOnly, bool doThrow=true);
 
@@ -126,12 +125,12 @@ namespace MWScript
 
             bool hasActivationBeenHandled() const;
 
-            void activate (const MWWorld::Ptr& ptr, boost::shared_ptr<MWWorld::Action> action);
-            ///< Store reference acted upon and action. The actual execution of the action does not
+            void activate (const MWWorld::Ptr& ptr);
+            ///< Store reference acted upon. The actual execution of the action does not
             /// take place here.
 
-            void executeActivation();
-            ///< Execute the action defined by the last activate call.
+            void executeActivation(MWWorld::Ptr ptr);
+            ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
 
             void clearActivation();
             ///< Discard the action defined by the last activate call.

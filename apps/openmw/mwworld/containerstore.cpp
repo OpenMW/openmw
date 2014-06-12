@@ -229,22 +229,26 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     std::string script = item.getClass().getScript(item);
     if(script != "")
     {
-        CellStore *cell;
+        if (actorPtr == player)
+        {
+            // Items in player's inventory have cell set to 0, so their scripts will never be removed
+            item.mCell = 0;
+        }
+        else
+        {
+            // Set mCell to the cell of the container/actor, so that the scripts are removed properly when
+            // the cell of the container/actor goes inactive
+            item.mCell = actorPtr.getCell();
+        }
+
+        item.mContainerStore = 0;
 
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
 
-        if(&(player.getClass().getContainerStore (player)) == this)
-        {
-            cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
-
-            // Set OnPCAdd special variable, if it is declared
+        // Set OnPCAdd special variable, if it is declared
+        // Make sure to do this *after* we have added the script to LocalScripts
+        if (actorPtr == player)
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
-        }
-        else
-            cell = player.getCell();
-
-        item.mCell = cell;
-        item.mContainerStore = 0;
     }
 
     return it;

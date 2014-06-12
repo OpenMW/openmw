@@ -18,6 +18,8 @@ namespace MWGui
     public:
         CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager);
 
+        virtual void exit();
+
         void open(const MWWorld::Ptr& npc);
         void onFrame ();
 

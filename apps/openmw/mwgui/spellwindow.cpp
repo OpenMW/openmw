@@ -190,6 +190,7 @@ namespace MWGui
             costChance->setNeedMouseFocus(false);
             costChance->setStateSelected(*it == MWBase::Environment::get().getWindowManager()->getSelectedSpell());
 
+            t->setSize(mWidth-12-costChance->getTextSize().width, t->getHeight());
 
             mHeight += spellHeight;
         }
@@ -255,6 +256,8 @@ namespace MWGui
             if (store.getSelectedEnchantItem() != store.end())
                 costCharge->setStateSelected(item == *store.getSelectedEnchantItem());
 
+            t->setSize(mWidth-12-costCharge->getTextSize().width, t->getHeight());
+
             mHeight += spellHeight;
         }
 
@@ -287,6 +290,8 @@ namespace MWGui
             groupWidget2->setCaptionWithReplacing(label2);
             groupWidget2->setTextAlign(MyGUI::Align::Right);
             groupWidget2->setNeedMouseFocus(false);
+
+            groupWidget->setSize(mWidth-8-groupWidget2->getTextSize().width, groupWidget->getHeight());
         }
 
         mHeight += 24;

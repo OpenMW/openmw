@@ -100,7 +100,7 @@ namespace MWGui
         for (size_t i=0; i<mSourceModel->getItemCount(); ++i)
         {
             const ItemStack& item = mSourceModel->getItem(i);
-            if (item == itemToSearch)
+            if (item.mBase == itemToSearch.mBase)
                 return i;
         }
         return -1;
@@ -112,7 +112,7 @@ namespace MWGui
         for (size_t i=0; i<getItemCount(); ++i)
         {
             const ItemStack& item = getItem(i);
-            if (item == itemToSearch)
+            if (item.mBase == itemToSearch.mBase)
                 return i;
         }
         return -1;

@@ -110,6 +110,11 @@ void MerchantRepair::open()
     center();
 }
 
+void MerchantRepair::exit()
+{
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
+}
+
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
     // repair
@@ -128,7 +133,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 
 void MerchantRepair::onOkButtonClick(MyGUI::Widget *sender)
 {
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
+    exit();
 }
 
 }

@@ -117,7 +117,7 @@ namespace MWGui
         std::string directory =
             Misc::StringUtils::lowerCase (Settings::Manager::getString ("character", "Saves"));
 
-        int selectedIndex = MyGUI::ITEM_NONE;
+        size_t selectedIndex = MyGUI::ITEM_NONE;
 
         for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it)
         {
@@ -134,9 +134,12 @@ namespace MWGui
                 else
                 {
                     // Find the localised name for this class from the store
-                    const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(
+                    const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().search(
                                 it->getSignature().mPlayerClassId);
-                    className = class_->mName;
+                    if (class_)
+                        className = class_->mName;
+                    else
+                        className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
                 title << " (Level " << it->getSignature().mPlayerLevel << " " << className << ")";
@@ -159,6 +162,11 @@ namespace MWGui
 
     }
 
+    void SaveGameDialog::exit()
+    {
+        setVisible(false);
+    }
+
     void SaveGameDialog::setLoadOrSave(bool load)
     {
         mSaving = !load;
@@ -177,7 +185,7 @@ namespace MWGui
 
     void SaveGameDialog::onCancelButtonClicked(MyGUI::Widget *sender)
     {
-        setVisible(false);
+        exit();
     }
 
     void SaveGameDialog::onConfirmationGiven()

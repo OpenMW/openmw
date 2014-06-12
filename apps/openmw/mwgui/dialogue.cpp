@@ -51,7 +51,7 @@ namespace MWGui
 
     void PersuasionDialog::onCancel(MyGUI::Widget *sender)
     {
-        setVisible(false);
+        exit();
     }
 
     void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
@@ -85,6 +85,11 @@ namespace MWGui
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+    }
+
+    void PersuasionDialog::exit()
+    {
+        setVisible(false);
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -264,6 +269,14 @@ namespace MWGui
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
+    void DialogueWindow::exit()
+    {
+        if ((!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
+                && !mGoodbye)
+            return;
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+    }
+
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
     {
         mTopicsList->adjustSize();
@@ -281,9 +294,7 @@ namespace MWGui
 
     void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     {
-        if (!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
-            return;
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        exit();
     }
 
     void DialogueWindow::onSelectTopic(const std::string& topic, int id)
@@ -503,6 +514,15 @@ namespace MWGui
         {
             // no scrollbar
             onScrollbarMoved(mScrollBar, 0);
+        }
+
+        MyGUI::Button* byeButton;
+        getWidget(byeButton, "ByeButton");
+        if(MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye) {
+            byeButton->setEnabled(false);
+        }
+        else {
+            byeButton->setEnabled(true);
         }
     }
 

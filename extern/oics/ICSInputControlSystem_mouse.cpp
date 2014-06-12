@@ -333,11 +333,6 @@ namespace ICS
 					}
 				}
 			}
-			else if(mDetectingBindingListener)
-			{
-				mDetectingBindingListener->mouseButtonBindingDetected(this,
-					mDetectingBindingControl, btn, mDetectingBindingDirection);
-			}
 		}
 	}
 
@@ -345,11 +340,19 @@ namespace ICS
 	{		
 		if(mActive)
 		{
-			ControlsButtonBinderMapType::const_iterator it = mControlsMouseButtonBinderMap.find((int)btn);
-			if(it != mControlsMouseButtonBinderMap.end())
-			{
-				it->second.control->setChangingDirection(Control::STOP);
-			}
+            if (!mDetectingBindingControl)
+            {
+                ControlsButtonBinderMapType::const_iterator it = mControlsMouseButtonBinderMap.find((int)btn);
+                if(it != mControlsMouseButtonBinderMap.end())
+                {
+                    it->second.control->setChangingDirection(Control::STOP);
+                }
+            }
+            else if(mDetectingBindingListener)
+            {
+                mDetectingBindingListener->mouseButtonBindingDetected(this,
+                    mDetectingBindingControl, btn, mDetectingBindingDirection);
+            }
 		}
 	}
 

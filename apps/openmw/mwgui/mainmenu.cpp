@@ -1,5 +1,7 @@
 #include "mainmenu.hpp"
 
+#include <OgreResourceGroupManager.h>
+
 #include <components/version/version.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -16,6 +18,7 @@
 #include "confirmationdialog.hpp"
 #include "imagebutton.hpp"
 #include "backgroundimage.hpp"
+#include "videowidget.hpp"
 
 namespace MWGui
 {
@@ -25,6 +28,7 @@ namespace MWGui
         , mButtonBox(0), mWidth (w), mHeight (h)
         , mSaveGameDialog(NULL)
         , mBackground(NULL)
+        , mVideo(NULL)
     {
         getWidget(mVersionText, "VersionText");
         std::stringstream sstream;
@@ -41,6 +45,8 @@ namespace MWGui
         
         std::string output = sstream.str();
         mVersionText->setCaption(output);
+
+        mHasAnimatedMenu = (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("video\\menu_background.bik"));
 
         updateMenu();
     }
@@ -134,14 +140,73 @@ namespace MWGui
 
     void MainMenu::showBackground(bool show)
     {
-        if (show && !mBackground)
+        if (mVideo && !show)
         {
-            mBackground = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
-                MyGUI::Align::Stretch, "Menu");
-            mBackground->setBackgroundImage("textures\\menu_morrowind.dds");
+            MyGUI::Gui::getInstance().destroyWidget(mVideoBackground);
+            mVideoBackground = NULL;
+            mVideo = NULL;
         }
-        if (mBackground)
-            mBackground->setVisible(show);
+        if (mBackground && !show)
+        {
+            MyGUI::Gui::getInstance().destroyWidget(mBackground);
+            mBackground = NULL;
+        }
+
+        if (!show)
+            return;
+
+        if (mHasAnimatedMenu)
+        {
+            if (!mVideo)
+            {
+                // Use black background to correct aspect ratio
+                mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
+                    MyGUI::Align::Default, "Menu");
+                mVideoBackground->setImageTexture("black.png");
+
+                mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
+                    MyGUI::Align::Stretch, "Menu");
+
+                mVideo->playVideo("video\\menu_background.bik", false);
+            }
+
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int screenWidth = viewSize.width;
+            int screenHeight = viewSize.height;
+            mVideoBackground->setSize(screenWidth, screenHeight);
+
+            double imageaspect = static_cast<double>(mVideo->getVideoWidth())/mVideo->getVideoHeight();
+
+            int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
+            int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
+
+            mVideo->setCoord(leftPadding, topPadding,
+                                   screenWidth - leftPadding*2, screenHeight - topPadding*2);
+
+            mVideo->setVisible(true);
+        }
+        else
+        {
+            if (!mBackground)
+            {
+                mBackground = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
+                    MyGUI::Align::Stretch, "Menu");
+                mBackground->setBackgroundImage("textures\\menu_morrowind.dds");
+            }
+            mBackground->setVisible(true);
+        }
+    }
+
+    void MainMenu::update(float dt)
+    {
+        if (mVideo)
+        {
+            if (!mVideo->update())
+            {
+                // If finished playing, start again
+                mVideo->playVideo("video\\menu_background.bik", 0);
+            }
+        }
     }
 
     void MainMenu::updateMenu()
@@ -229,7 +294,7 @@ namespace MWGui
         if (state == MWBase::StateManager::State_NoGame)
         {
             // Align with the background image
-            int bottomPadding=48;
+            int bottomPadding=24;
             mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight - curH - bottomPadding, maxwidth, curH);
         }
         else

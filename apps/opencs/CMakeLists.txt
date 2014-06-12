@@ -192,6 +192,7 @@ endif(APPLE)
 
 target_link_libraries(opencs
     ${OGRE_LIBRARIES}
+    ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}

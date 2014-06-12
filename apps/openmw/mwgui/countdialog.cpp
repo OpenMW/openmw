@@ -49,7 +49,12 @@ namespace MWGui
         mItemEdit->setCaption(boost::lexical_cast<std::string>(maxCount));
     }
 
-    void CountDialog::cancel()
+    void CountDialog::cancel() //Keeping this here as I don't know if anything else relies on it.
+    {
+        exit();
+    }
+
+    void CountDialog::exit()
     {
         setVisible(false);
     }
@@ -65,16 +70,16 @@ namespace MWGui
 
         setVisible(false);
     }
-    
+
     // essentially duplicating what the OK button does if user presses
     // Enter key
     void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
     {
         eventOkClicked(NULL, mSlider->getScrollPosition()+1);
-	
+
         setVisible(false);
     }
-    
+
     void CountDialog::onEditTextChange(MyGUI::EditBox* _sender)
     {
         if (_sender->getCaption() == "")

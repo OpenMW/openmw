@@ -42,4 +42,9 @@ bool VideoWidget::update()
     return mPlayer.isPlaying();
 }
 
+void VideoWidget::cleanup()
+{
+    mPlayer.close();
+}
+
 }

@@ -392,5 +392,6 @@ op 0x2000240: onKnockout
 op 0x2000241: onKnockoutExplicit
 op 0x2000242: ModFactionReaction
 op 0x2000243: GetFactionReaction
+op 0x2000244: Activate, explicit
 
-opcodes 0x2000244-0x3ffffff unused
+opcodes 0x2000245-0x3ffffff unused

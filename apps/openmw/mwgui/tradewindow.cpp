@@ -74,6 +74,8 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &TradeWindow::onDecreaseButtonPressed);
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
+        mTotalBalance->eventEditTextChange += MyGUI::newDelegate(this, &TradeWindow::onBalanceEdited);
+
         setCoord(400, 0, 400, 300);
     }
 
@@ -134,6 +136,13 @@ namespace MWGui
     int TradeWindow::getMerchantServices()
     {
         return mPtr.getClass().getServices(mPtr);
+    }
+
+    void TradeWindow::exit()
+    {
+        mTradeModel->abort();
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->abort();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
     void TradeWindow::onItemSelected (int index)
@@ -293,6 +302,9 @@ namespace MWGui
             }
         }
 
+        // Is the player buying?
+        bool buying = (mCurrentMerchantOffer < 0);
+
         if(mCurrentBalance > mCurrentMerchantOffer)
         {
             //if npc is a creature: reject (no haggle)
@@ -306,7 +318,7 @@ namespace MWGui
             int a = abs(mCurrentMerchantOffer);
             int b = abs(mCurrentBalance);
             int d = 0;
-            if (mCurrentBalance<0)
+            if (buying)
                 d = int(100 * (a - b) / a);
             else
                 d = int(100 * (b - a) / a);
@@ -327,13 +339,13 @@ namespace MWGui
             float pcTerm = (clampedDisposition - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
             float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
             float x = gmst.find("fBargainOfferMulti")->getFloat() * d + gmst.find("fBargainOfferBase")->getFloat();
-            if (mCurrentBalance<0)
+            if (buying)
                 x += abs(int(pcTerm - npcTerm));
             else
                 x += abs(int(npcTerm - pcTerm));
 
             int roll = std::rand()%100 + 1;
-            if(roll > x) //trade refused
+            if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->
                     messageBox("#{sNotifyMessage9}");
@@ -375,9 +387,7 @@ namespace MWGui
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mTradeModel->abort();
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->abort();
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+        exit();
     }
 
     void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* _sender)
@@ -403,6 +413,19 @@ namespace MWGui
     void TradeWindow::onBalanceButtonReleased(MyGUI::Widget *_sender, int _left, int _top, MyGUI::MouseButton _id)
     {
         mBalanceButtonsState = BBS_None;
+    }
+
+    void TradeWindow::onBalanceEdited(MyGUI::EditBox *_sender)
+    {
+        try
+        {
+            unsigned int count = boost::lexical_cast<unsigned int>(_sender->getCaption());
+            mCurrentBalance = count * (mCurrentBalance >= 0 ? 1 : -1);
+            updateLabels();
+        }
+        catch (std::bad_cast&)
+        {
+        }
     }
 
     void TradeWindow::onIncreaseButtonTriggered()

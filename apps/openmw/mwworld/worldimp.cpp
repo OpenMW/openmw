@@ -252,7 +252,6 @@ namespace MWWorld
         mProjectileManager->clear();
 
         mLocalScripts.clear();
-        mPlayer->clear();
 
         mWorldScene->changeToVoid();
 
@@ -261,9 +260,10 @@ namespace MWWorld
 
         if (mPlayer)
         {
-            mPlayer->setCell (0);
+	    mPlayer->clear();
+            mPlayer->setCell(0);
             mPlayer->getPlayer().getRefData() = RefData();
-            mPlayer->set (mStore.get<ESM::NPC>().find ("player"));
+            mPlayer->set(mStore.get<ESM::NPC>().find ("player"));
         }
 
         mCells.clear();
@@ -368,6 +368,9 @@ namespace MWWorld
 
     World::~World()
     {
+        // Must be cleared before mRendering is destroyed
+        mProjectileManager->clear();
+
         delete mWeatherManager;
         delete mWorldScene;
         delete mRendering;
@@ -429,7 +432,7 @@ namespace MWWorld
             mRendering->getCamera()->toggleVanityMode(false);
         }
         if(mRendering->getCamera()->isFirstPerson())
-            togglePOV();
+            mRendering->getCamera()->toggleViewMode(true);
     }
 
     MWWorld::Player& World::getPlayer()
@@ -1621,12 +1624,20 @@ namespace MWWorld
     bool World::canPlaceObject(float cursorX, float cursorY)
     {
         Ogre::Vector3 normal(0,0,0);
-        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY, &normal);
+        std::string handle;
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY, &normal, &handle);
 
         if (result.first)
         {
             // check if the wanted position is on a flat surface, and not e.g. against a vertical wall
-            return (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() < 30);
+            if (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() >= 30)
+                return false;
+
+            MWWorld::Ptr hitObject = searchPtrViaHandle(handle);
+            if (!hitObject.isEmpty() && hitObject.getClass().isActor())
+                return false;
+
+            return true;
         }
         else
             return false;
@@ -1848,7 +1859,12 @@ namespace MWWorld
         if (!mPlayer)
             mPlayer = new MWWorld::Player(player, *this);
         else
+        {
+            // Remove the old CharacterController
+            MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+
             mPlayer->set(player);
+        }
 
         Ptr ptr = mPlayer->getPlayer();
         mRendering->setupPlayer(ptr);
@@ -2057,8 +2073,8 @@ namespace MWWorld
             // door to exterior
             if (it->mRef.getDestCell().empty()) {
                 int x, y;
-                const float *pos = it->mRef.getDoorDest().pos;
-                positionToIndex(pos[0], pos[1], x, y);
+                ESM::Position doorDest = it->mRef.getDoorDest();
+                positionToIndex(doorDest.pos[0], doorDest.pos[1], x, y);
                 source = getExterior(x, y);
             }
             // door to interior

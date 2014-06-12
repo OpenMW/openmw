@@ -13,6 +13,8 @@
 
 #include "widgets.hpp"
 
+#include "itemwidget.hpp"
+
 namespace MWGui
 {
 
@@ -35,16 +37,16 @@ void Repair::open()
     center();
 }
 
+void Repair::exit()
+{
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
+}
+
 void Repair::startRepairItem(const MWWorld::Ptr &item)
 {
     mRepair.setTool(item);
 
-    std::string path = std::string("icons\\");
-    path += item.getClass().getInventoryIcon(item);
-    int pos = path.rfind(".");
-    path.erase(pos);
-    path.append(".dds");
-    mToolIcon->setImageTexture (path);
+    mToolIcon->setItem(item);
     mToolIcon->setUserString("ToolTipType", "ItemPtr");
     mToolIcon->setUserData(item);
 
@@ -108,14 +110,9 @@ void Repair::updateRepairView()
             text->setNeedMouseFocus(false);
             currentY += 19;
 
-            MyGUI::ImageBox* icon = mRepairView->createWidget<MyGUI::ImageBox> (
-                        "ImageBox", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
-            std::string path = std::string("icons\\");
-            path += iter->getClass().getInventoryIcon(*iter);
-            int pos = path.rfind(".");
-            path.erase(pos);
-            path.append(".dds");
-            icon->setImageTexture (path);
+            ItemWidget* icon = mRepairView->createWidget<ItemWidget> (
+                        "MW_ItemIconSmall", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
+            icon->setItem(*iter);
             icon->setUserString("ToolTipType", "ItemPtr");
             icon->setUserData(*iter);
             icon->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onRepairItem);
@@ -134,7 +131,7 @@ void Repair::updateRepairView()
 
 void Repair::onCancel(MyGUI::Widget *sender)
 {
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
+    exit();
 }
 
 void Repair::onRepairItem(MyGUI::Widget *sender)
