@@ -1050,4 +1050,24 @@ namespace MWMechanics
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFighting(const MWWorld::Ptr& actor) {
         return mActors.getActorsFighting(actor);
     }
+
+    int MechanicsManager::countSavedGameRecords() const
+    {
+        return 1; // Death counter
+    }
+
+    void MechanicsManager::write(ESM::ESMWriter &writer, Loading::Listener &listener) const
+    {
+        mActors.write(writer, listener);
+    }
+
+    void MechanicsManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    {
+        mActors.readRecord(reader, type);
+    }
+
+    void MechanicsManager::clear()
+    {
+        mActors.clear();
+    }
 }

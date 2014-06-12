@@ -1181,4 +1181,36 @@ namespace MWMechanics
         }
         return list;
     }
+
+    void Actors::write (ESM::ESMWriter& writer, Loading::Listener& listener) const
+    {
+        writer.startRecord(ESM::REC_DCOU);
+        for (std::map<std::string, int>::const_iterator it = mDeathCount.begin(); it != mDeathCount.end(); ++it)
+        {
+            writer.writeHNString("ID__", it->first);
+            writer.writeHNT ("COUN", it->second);
+        }
+        writer.endRecord(ESM::REC_DCOU);
+
+        listener.increaseProgress(1);
+    }
+
+    void Actors::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        if (type == ESM::REC_DCOU)
+        {
+            while (reader.isNextSub("ID__"))
+            {
+                std::string id = reader.getHString();
+                int count;
+                reader.getHNT (count, "COUN");
+                mDeathCount[id] = count;
+            }
+        }
+    }
+
+    void Actors::clear()
+    {
+        mDeathCount.clear();
+    }
 }

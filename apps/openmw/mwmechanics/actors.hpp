@@ -112,6 +112,12 @@ namespace MWMechanics
             /**ie AiCombat is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
 
+            void write (ESM::ESMWriter& writer, Loading::Listener& listener) const;
+
+            void readRecord (ESM::ESMReader& reader, int32_t type);
+
+            void clear(); // Clear death counter
+
     private:
         PtrControllerMap mActors;
 

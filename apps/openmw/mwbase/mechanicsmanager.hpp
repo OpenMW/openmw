@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <stdint.h>
 
 namespace Ogre
 {
@@ -13,12 +14,20 @@ namespace Ogre
 namespace ESM
 {
     struct Class;
+
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace MWWorld
 {
     class Ptr;
     class CellStore;
+}
+
+namespace Loading
+{
+    class Listener;
 }
 
 namespace MWBase
@@ -174,6 +183,14 @@ namespace MWBase
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
 
             virtual void playerLoaded() = 0;
+
+            virtual int countSavedGameRecords() const = 0;
+
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+
+            virtual void clear() = 0;
     };
 }
 

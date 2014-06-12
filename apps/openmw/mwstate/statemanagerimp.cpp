@@ -45,6 +45,7 @@ void MWState::StateManager::cleanup (bool force)
         MWBase::Environment::get().getWorld()->clear();
         MWBase::Environment::get().getWindowManager()->clear();
         MWBase::Environment::get().getInputManager()->clear();
+        MWBase::Environment::get().getMechanicsManager()->clear();
 
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
@@ -205,7 +206,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
                 +MWBase::Environment::get().getWorld()->countSavedGameRecords()
                 +MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
                 +MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
-                +MWBase::Environment::get().getWindowManager()->countSavedGameRecords();
+                +MWBase::Environment::get().getWindowManager()->countSavedGameRecords()
+                +MWBase::Environment::get().getMechanicsManager()->countSavedGameRecords();
         writer.setRecordCount (recordCount);
 
         writer.save (stream);
@@ -226,6 +228,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         MWBase::Environment::get().getWorld()->write (writer, listener);
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().write (writer, listener);
         MWBase::Environment::get().getWindowManager()->write(writer, listener);
+        MWBase::Environment::get().getMechanicsManager()->write(writer, listener);
 
         // Ensure we have written the number of records that was estimated
         if (writer.getRecordCount() != recordCount+1) // 1 extra for TES3 record
@@ -355,6 +358,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_ASPL:
 
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
+                    break;
+
+                case ESM::REC_DCOU:
+
+                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.val);
                     break;
 
                 default:
