@@ -18,6 +18,9 @@ void DialInfo::load(ESMReader &esm)
         esm.getHT(mData, 12);
     }
 
+    if (!esm.hasMoreSubs())
+        return;
+
     // What follows is somewhat spaghetti-ish, but it's worth if for
     // an extra speedup. INFO is by far the most common record type.
 
