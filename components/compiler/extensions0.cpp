@@ -181,6 +181,7 @@ namespace Compiler
                 opcodeSameFactionExplicit);
             extensions.registerInstruction("modfactionreaction", "ccl", opcodeModFactionReaction);
             extensions.registerFunction("getfactionreaction", 'l', "ccl", opcodeGetFactionReaction);
+            extensions.registerInstruction("clearinfoactor", "", opcodeClearInfoActor, opcodeClearInfoActorExplicit);
         }
     }
 
@@ -215,6 +216,7 @@ namespace Compiler
 
             extensions.registerInstruction ("showmap", "S", opcodeShowMap);
             extensions.registerInstruction ("fillmap", "", opcodeFillMap);
+            extensions.registerInstruction ("menutest", "/l", opcodeMenuTest);
         }
     }
 

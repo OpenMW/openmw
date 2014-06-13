@@ -179,6 +179,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
         std::cout <<"Playing "<<filename<< std::endl;
+        mLastPlayedMusic = filename;
         try
         {
             stopMusic();
@@ -203,19 +204,34 @@ namespace MWSound
     void SoundManager::startRandomTitle()
     {
         Ogre::StringVector filelist;
-
-        Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-        for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+        if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
-            Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
-                                                                                        "Music/"+mCurrentPlaylist+"/*");
-            filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
+            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+            {
+                Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
+                                                                                            "Music/"+mCurrentPlaylist+"/*");
+                filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            }
+            mMusicFiles[mCurrentPlaylist] = filelist;
         }
+        else
+            filelist = mMusicFiles[mCurrentPlaylist];
 
         if(!filelist.size())
             return;
 
         int i = rand()%filelist.size();
+
+        // Don't play the same music track twice in a row
+        if (filelist[i] == mLastPlayedMusic)
+        {
+            if (i-1 == int(filelist.size()))
+                i = 0;
+            else
+                ++i;
+        }
+
         streamMusicFull(filelist[i]);
     }
 

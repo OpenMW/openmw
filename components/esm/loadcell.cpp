@@ -50,18 +50,14 @@ namespace ESM
         return ref.mRefNum == refNum;
     }
 
-
 void Cell::load(ESMReader &esm, bool saveContext)
 {
-    // Ignore this for now, it might mean we should delete the entire
-    // cell?
-    // TODO: treat the special case "another plugin moved this ref, but we want to delete it"!
-    if (esm.isNextSub("DELE")) {
-        esm.skipHSub();
-    }
+    loadData(esm);
+    loadCell(esm, saveContext);
+}
 
-    esm.getHNT(mData, "DATA", 12);
-
+void Cell::loadCell(ESMReader &esm, bool saveContext)
+{
     mNAM0 = 0;
 
     if (mData.mFlags & Interior)
@@ -73,12 +69,10 @@ void Cell::load(ESMReader &esm, bool saveContext)
             esm.getHT(waterl);
             mWater = (float) waterl;
             mWaterInt = true;
-            mHasWaterLevelRecord = true;
         }
         else if (esm.isNextSub("WHGT"))
         {
             esm.getHT(mWater);
-            mHasWaterLevelRecord = true;
         }
 
         // Quasi-exterior cells have a region (which determines the
@@ -107,6 +101,18 @@ void Cell::load(ESMReader &esm, bool saveContext)
     }
 }
 
+void Cell::loadData(ESMReader &esm)
+{
+    // Ignore this for now, it might mean we should delete the entire
+    // cell?
+    // TODO: treat the special case "another plugin moved this ref, but we want to delete it"!
+    if (esm.isNextSub("DELE")) {
+        esm.skipHSub();
+    }
+
+    esm.getHNT(mData, "DATA", 12);
+}
+
 void Cell::preLoad(ESMReader &esm) //Can't be "load" because it conflicts with function in esmtool
 {
     this->load(esm, false);
@@ -124,14 +130,12 @@ void Cell::save(ESMWriter &esm) const
     esm.writeHNT("DATA", mData, 12);
     if (mData.mFlags & Interior)
     {
-        if (mHasWaterLevelRecord) {
-            if (mWaterInt) {
-                int water =
-                    (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
-                esm.writeHNT("INTV", water);
-            } else {
-                esm.writeHNT("WHGT", mWater);
-            }
+        if (mWaterInt) {
+            int water =
+                (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
+            esm.writeHNT("INTV", water);
+        } else {
+            esm.writeHNT("WHGT", mWater);
         }
 
         if (mData.mFlags & QuasiEx)
@@ -226,19 +230,6 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;
         mAmbi.mFogDensity = 0;
-    }
-
-    void Cell::merge(Cell *original, Cell *modified)
-    {
-        float waterLevel = original->mWater;
-        if (modified->mHasWaterLevelRecord)
-        {
-            waterLevel = modified->mWater;
-        }
-        // else: keep original water level, instead of resetting to 0
-
-        *original = *modified;
-        original->mWater = waterLevel;
     }
 
     CellId Cell::getCellId() const

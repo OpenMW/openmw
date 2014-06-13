@@ -258,12 +258,16 @@ namespace MWGui
             code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                + MyGUI::utility::toString((fontSize-data[i].ascent)));
 
-            // More hacks! The french game uses U+2019, which is nowhere to be found in
-            // the CP437 encoding of the font. Fall back to 39 (regular apostrophe)
-            if (i == 39 && mEncoding == ToUTF8::CP437)
+            // More hacks! The french game uses several win1252 characters that are not included
+            // in the cp437 encoding of the font. Fall back to similar available characters.
+            // Same for U+2013
+            std::map<int, int> additional;
+            additional[39] = 0x2019; // apostrophe
+            additional[45] = 0x2013; // dash
+            if (additional.find(i) != additional.end() && mEncoding == ToUTF8::CP437)
             {
                 MyGUI::xml::ElementPtr code = codes->createChild("Code");
-                code->addAttribute("index", 0x2019);
+                code->addAttribute("index", additional[i]);
                 code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
                                             + MyGUI::utility::toString(y1) + " "
                                             + MyGUI::utility::toString(w) + " "

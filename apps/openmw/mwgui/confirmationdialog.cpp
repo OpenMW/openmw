@@ -30,9 +30,9 @@ namespace MWGui
 
     void ConfirmationDialog::exit()
     {
-        eventCancelClicked();
-
         setVisible(false);
+
+        eventCancelClicked();
     }
 
     void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
@@ -42,8 +42,8 @@ namespace MWGui
 
     void ConfirmationDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        eventOkClicked();
-
         setVisible(false);
+
+        eventOkClicked();
     }
 }

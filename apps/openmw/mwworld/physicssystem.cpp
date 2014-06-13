@@ -193,6 +193,11 @@ namespace MWWorld
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
 
+            // Early-out for totally static creatures
+            // (Not sure if gravity should still apply?)
+            if (!ptr.getClass().canWalk(ptr) && !isFlying && !ptr.getClass().canSwim(ptr))
+                return position;
+
             /* Anything to collide with? */
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
             if(!physicActor || !physicActor->getCollisionMode())
@@ -299,7 +304,7 @@ namespace MWWorld
                     continue; // velocity updated, calculate nextpos again
                 }
 
-                if(!newPosition.positionCloses(nextpos, 0.00000001))
+                if(newPosition.squaredDistance(nextpos) > 0.00000001*0.00000001)
                 {
                     // trace to where character would go if there were no obstructions
                     tracer.doTrace(colobj, newPosition, nextpos, engine);

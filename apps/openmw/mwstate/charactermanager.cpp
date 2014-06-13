@@ -3,12 +3,13 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <cctype> // std::isalnum
 
 #include <boost/filesystem.hpp>
 
 MWState::CharacterManager::CharacterManager (const boost::filesystem::path& saves,
     const std::string& game)
-: mPath (saves), mNext (0), mCurrent (0), mGame (game)
+: mPath (saves), mCurrent (0), mGame (game)
 {
     if (!boost::filesystem::is_directory (mPath))
     {
@@ -28,21 +29,14 @@ MWState::CharacterManager::CharacterManager (const boost::filesystem::path& save
                 if (character.begin()!=character.end())
                     mCharacters.push_back (character);
             }
-
-            std::istringstream stream (characterDir.filename().string());
-
-            int index = 0;
-
-            if ((stream >> index) && index>=mNext)
-                mNext = index+1;
         }
     }
 }
 
-MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create)
+MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create, const std::string& name)
 {
     if (!mCurrent && create)
-        createCharacter();
+        createCharacter(name);
 
     return mCurrent;
 }
@@ -63,12 +57,30 @@ void MWState::CharacterManager::deleteSlot(const MWState::Character *character, 
     }
 }
 
-void MWState::CharacterManager::createCharacter()
+void MWState::CharacterManager::createCharacter(const std::string& name)
 {
     std::ostringstream stream;
-    stream << mNext++;
+
+    // The character name is user-supplied, so we need to escape the path
+    for (std::string::const_iterator it = name.begin(); it != name.end(); ++it)
+    {
+        if (std::isalnum(*it)) // Ignores multibyte characters and non alphanumeric characters
+            stream << *it;
+        else
+            stream << "_";
+    }
 
     boost::filesystem::path path = mPath / stream.str();
+
+    // Append an index if necessary to ensure a unique directory
+    int i=0;
+    while (boost::filesystem::exists(path))
+    {
+           std::ostringstream test;
+           test << stream.str();
+           test << " - " << ++i;
+           path = mPath / test.str();
+    }
 
     mCharacters.push_back (Character (path, mGame));
 

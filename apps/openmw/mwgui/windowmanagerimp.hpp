@@ -12,6 +12,9 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Types.h>
+
 namespace MyGUI
 {
     class Gui;
@@ -316,6 +319,8 @@ namespace MWGui
         \param input Pointer to the current modal, to ensure proper modal is removed **/
     virtual void removeCurrentModal(WindowModal* input);
 
+    virtual void pinWindow (MWGui::GuiWindow window);
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -423,6 +428,9 @@ namespace MWGui
 
     void onCursorChange(const std::string& name);
     void onKeyFocusChanged(MyGUI::Widget* widget);
+
+    // Key pressed while playing a video
+    void onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
     void sizeVideo(int screenWidth, int screenHeight);
   };

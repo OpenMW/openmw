@@ -12,6 +12,7 @@ namespace MWGui
     public:
         WindowPinnableBase(const std::string& parLayout);
         bool pinned() { return mPinned; }
+        void setPinned (bool pinned);
         void setPinButtonVisible(bool visible);
 
     private:

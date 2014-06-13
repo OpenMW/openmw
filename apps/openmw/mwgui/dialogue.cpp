@@ -366,10 +366,11 @@ namespace MWGui
         }
     }
 
-    void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
+    void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory)
     {
         mGoodbye = false;
         mEnabled = true;
+        bool sameActor = (mPtr == actor);
         mPtr = actor;
         mTopicsList->setEnabled(true);
         setTitle(npcName);
@@ -378,9 +379,12 @@ namespace MWGui
 
         mTopicsList->clear();
 
-        for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
-            delete (*it);
-        mHistoryContents.clear();
+        if (resetHistory || !sameActor)
+        {
+            for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
+                delete (*it);
+            mHistoryContents.clear();
+        }
 
         for (std::vector<Link*>::iterator it = mLinks.begin(); it != mLinks.end(); ++it)
             delete (*it);

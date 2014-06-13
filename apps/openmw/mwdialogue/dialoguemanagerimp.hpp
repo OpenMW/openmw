@@ -40,7 +40,7 @@ namespace MWDialogue
             bool mTalkedTo;
 
             int mChoice;
-            std::string mLastTopic;
+            std::string mLastTopic; // last topic ID, lowercase
             bool mIsInChoice;
 
             float mTemporaryDispositionChange;
@@ -99,6 +99,9 @@ namespace MWDialogue
 
             /// @return faction1's opinion of faction2
             virtual int getFactionReaction (const std::string& faction1, const std::string& faction2) const;
+
+            /// Removes the last added topic response for the given actor from the journal
+            virtual void clearInfoActor (const MWWorld::Ptr& actor) const;
     };
 
 

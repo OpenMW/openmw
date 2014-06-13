@@ -83,8 +83,8 @@ namespace CSMWorld
             Data (const Data&);
             Data& operator= (const Data&);
 
-            void addModel (QAbstractItemModel *model, UniversalId::Type type1,
-                UniversalId::Type type2 = UniversalId::Type_None, bool update = true);
+            void addModel (QAbstractItemModel *model, UniversalId::Type type,
+                bool update = true);
 
             static void appendIds (std::vector<std::string>& ids, const CollectionBase& collection,
                 bool listDeleted);
