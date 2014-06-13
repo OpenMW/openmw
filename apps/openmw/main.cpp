@@ -294,8 +294,18 @@ private:
 
 int main(int argc, char**argv)
 {
+    // Some objects used to redirect cout and cerr
+    // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
     std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
+
+    boost::iostreams::stream_buffer<Tee> coutsb;
+    boost::iostreams::stream_buffer<Tee> cerrsb;
+
+    std::ostream oldcout(cout_rdbuf);
+    std::ostream oldcerr(cerr_rdbuf);
+
+    boost::filesystem::ofstream logfile;
 
     int ret = 0;
     try
@@ -310,19 +320,15 @@ int main(int argc, char**argv)
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to openmw.log
-        boost::filesystem::ofstream logfile (boost::filesystem::path(
-                                                 cfgMgr.getLogPath() / "/openmw.log"));
+        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/openmw.log"));
 
-        boost::iostreams::stream_buffer<Tee> coutsb;
-        std::ostream oldcout(cout_rdbuf);
         coutsb.open (Tee(logfile, oldcout));
-        std::cout.rdbuf (&coutsb);
-
-        boost::iostreams::stream_buffer<Tee> cerrsb;
-        std::ostream oldcerr(cerr_rdbuf);
         cerrsb.open (Tee(logfile, oldcerr));
+
+        std::cout.rdbuf (&coutsb);
         std::cerr.rdbuf (&cerrsb);
 #endif
+
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         // Unix crash catcher
