@@ -340,9 +340,6 @@ namespace SFO
     {
         //lifted from OIS's SDLKeyboard.cpp
 
-        //TODO: Consider switching to scancodes so we
-        //can properly support international keyboards
-        //look at SDL_GetKeyFromScancode and SDL_GetKeyName
         mKeyMap.insert( KeyMap::value_type(SDLK_UNKNOWN, OIS::KC_UNASSIGNED));
         mKeyMap.insert( KeyMap::value_type(SDLK_ESCAPE, OIS::KC_ESCAPE) );
         mKeyMap.insert( KeyMap::value_type(SDLK_1, OIS::KC_1) );
