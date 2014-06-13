@@ -54,6 +54,20 @@
 
 using namespace Ogre;
 
+namespace
+{
+
+// Wraps a value to (-PI, PI]
+void wrap(float& rad)
+{
+    if (rad>0)
+        rad = std::fmod(rad+M_PI, 2.0*M_PI)-M_PI;
+    else
+        rad = std::fmod(rad-M_PI, 2.0*M_PI)+M_PI;
+}
+
+}
+
 namespace MWWorld
 {
     struct GameContentLoader : public ContentLoader
@@ -1105,21 +1119,9 @@ namespace MWWorld
             ptr.getRefData().getLocalRotation().rot[1]=Ogre::Degree(y).valueRadians();
             ptr.getRefData().getLocalRotation().rot[2]=Ogre::Degree(z).valueRadians();
 
-            float fullRotateRad=Ogre::Degree(360).valueRadians();
-
-            while(ptr.getRefData().getLocalRotation().rot[0]>=fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[0]-=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[1]>=fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[1]-=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[2]>=fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[2]-=fullRotateRad;
-
-            while(ptr.getRefData().getLocalRotation().rot[0]<=-fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[0]+=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[1]<=-fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[1]+=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[2]<=-fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[2]+=fullRotateRad;
+            wrap(ptr.getRefData().getLocalRotation().rot[0]);
+            wrap(ptr.getRefData().getLocalRotation().rot[1]);
+            wrap(ptr.getRefData().getLocalRotation().rot[2]);
 
             Ogre::Quaternion worldRotQuat(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z);
             if (!ptr.getClass().isActor())
