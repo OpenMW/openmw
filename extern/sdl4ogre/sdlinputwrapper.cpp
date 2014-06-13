@@ -239,9 +239,11 @@ namespace SFO
 
         mWrapPointer = false;
 
-        //eep, wrap the pointer manually if the input driver doesn't support
-        //relative positioning natively
-        bool success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
+        // eep, wrap the pointer manually if the input driver doesn't support
+        // relative positioning natively
+        // also use wrapping if no-grab was specified in options (SDL_SetRelativeMouseMode
+        // appears to eat the mouse cursor when pausing in a debugger)
+        bool success = mAllowGrab && SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
         if(relative && !success)
             mWrapPointer = true;
 
