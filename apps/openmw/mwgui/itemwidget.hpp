@@ -42,6 +42,9 @@ namespace MWGui
 
         MyGUI::ImageBox* mItem;
         MyGUI::ImageBox* mFrame;
+
+        std::string mCurrentItemTexture;
+        std::string mCurrentFrameTexture;
     };
 
 }
