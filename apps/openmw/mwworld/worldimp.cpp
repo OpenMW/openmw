@@ -1681,6 +1681,13 @@ namespace MWWorld
         MWWorld::Ptr dropped =
             object.getClass().copyToCell(object, *cell, pos);
 
+        // Reset some position values that could be uninitialized if this item came from a container
+        LocalRotation& localRotation = dropped.getRefData().getLocalRotation();
+        localRotation.rot[0] = 0;
+        localRotation.rot[1] = 0;
+        localRotation.rot[2] = 0;
+        dropped.getCellRef().setPosition(pos);
+
         if (mWorldScene->isCellActive(*cell)) {
             if (dropped.getRefData().isEnabled()) {
                 mWorldScene->addObjectToScene(dropped);
