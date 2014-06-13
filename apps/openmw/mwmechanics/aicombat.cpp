@@ -167,15 +167,18 @@ namespace MWMechanics
         const MWWorld::Class& actorClass = actor.getClass();
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        if (!actorClass.isNpc() && target == world->getPlayerPtr() &&
-            (actorClass.canSwim(actor) && !actor.getClass().canWalk(actor) // 1. pure water creature and Player moved out of water
-            && !world->isSwimming(target))
-            || (!actorClass.canSwim(actor) && world->isSwimming(target))) // 2. creature can't swim to Player
+        if (!actorClass.isNpc() &&
+            // 1. pure water creature and Player moved out of water
+            ((target == world->getPlayerPtr() &&
+            actorClass.canSwim(actor) && !actor.getClass().canWalk(actor) && !world->isSwimming(target))
+            // 2. creature can't swim to target
+            || (!actorClass.canSwim(actor) && world->isSwimming(target))))
         {
-            actorClass.getCreatureStats(actor).setHostile(false);
+            if (target == world->getPlayerPtr())
+                actorClass.getCreatureStats(actor).setHostile(false);
             actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;
-        }
+        }  
 
         //Update every frame
         if(mCombatMove)
@@ -246,7 +249,7 @@ namespace MWMechanics
 
         const ESM::Weapon *weapon = NULL;
         MWMechanics::WeaponType weaptype;
-        float weapRange, weapSpeed = 1.0f;
+        float weapRange;
 
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
@@ -275,7 +278,6 @@ namespace MWMechanics
                 // All other WeapTypes are actually weapons, so get<ESM::Weapon> is safe.
                 weapon = weaponSlot->get<ESM::Weapon>()->mBase;
                 weapRange = weapon->mData.mReach;
-                weapSpeed = weapon->mData.mSpeed;
             }
             weapRange *= 100.0f;
         }
