@@ -33,7 +33,7 @@ namespace MWRender
         Ogre::Viewport* vp = mRenderTarget->addViewport(mCamera);
         vp->setOverlaysEnabled(false);
         vp->setShadowsEnabled(false);
-        vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain + RV_Sky);
+        vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain + RV_Sky + RV_FirstPerson);
         vp->setMaterialScheme("water_refraction");
         vp->setBackgroundColour (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
         mRenderTarget->setAutoUpdated(true);
