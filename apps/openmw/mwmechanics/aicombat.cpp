@@ -377,8 +377,11 @@ namespace MWMechanics
         bool canMoveByZ = (actorClass.canSwim(actor) && world->isSwimming(actor))
             || world->isFlying(actor);
 
+        // for distant combat we should know if target is in LOS even if distToTarget < rangeAttack 
+        bool inLOS = distantCombat ? world->getLOS(actor, target) : true;
+
         // (within attack dist) || (not quite attack dist while following)
-        if(distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck) )
+        if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck)))
         {
             //Melee and Close-up combat
             
@@ -437,7 +440,7 @@ namespace MWMechanics
         else // remote pathfinding
         {
             bool preferShortcut = false;
-            bool inLOS = world->getLOS(actor, target);
+            if (!distantCombat) inLOS = world->getLOS(actor, target);
 
             // check if shortcut is available
             if(inLOS && (!isStuck || mReadyToAttack)
