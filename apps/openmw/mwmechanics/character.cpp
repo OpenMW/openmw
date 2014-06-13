@@ -832,6 +832,8 @@ bool CharacterController::updateWeaponState()
                              MWRender::Animation::Group_UpperBody, false,
                              weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
                              1.0f-complete, 0);
+
+            complete = 0.f;
             mUpperBodyState = UpperCharState_MaxAttackToMinHit;
         }
         else if (mHitState == CharState_KnockDown)

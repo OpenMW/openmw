@@ -31,6 +31,10 @@ namespace MWSound
 
         std::auto_ptr<Sound_Output> mOutput;
 
+        // Caches available music tracks by <playlist name, (sound files) >
+        std::map<std::string, Ogre::StringVector> mMusicFiles;
+        std::string mLastPlayedMusic; // The music file that was last played
+
         float mMasterVolume;
         float mSFXVolume;
         float mMusicVolume;

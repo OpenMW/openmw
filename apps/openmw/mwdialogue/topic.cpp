@@ -59,8 +59,16 @@ namespace MWDialogue
         return mEntries.end();
     }
 
-    JournalEntry Topic::getEntry (const std::string& infoId) const
+    void Topic::removeLastAddedResponse (const std::string& actorName)
     {
-        return JournalEntry (mTopic, infoId);
+        for (std::vector<MWDialogue::Entry>::reverse_iterator it = mEntries.rbegin();
+             it != mEntries.rend(); ++it)
+        {
+            if (it->mActorName == actorName)
+            {
+                mEntries.erase( (++it).base() ); // erase doesn't take a reverse_iterator
+                return;
+            }
+        }
     }
 }

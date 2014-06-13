@@ -18,7 +18,7 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data
+    idtable idtableproxymodel regionmap data commanddispatcher
     )
 
 
@@ -198,10 +198,6 @@ target_link_libraries(opencs
     ${QT_LIBRARIES}
     components
 )
-
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS opencs RUNTIME DESTINATION games COMPONENT opencs)
-endif()
 
 if(APPLE)
     INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)

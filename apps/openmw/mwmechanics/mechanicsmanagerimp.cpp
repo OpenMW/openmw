@@ -929,7 +929,10 @@ namespace MWMechanics
         else if (type == OT_Murder)
             arg = store.find("iCrimeKilling")->getInt();
         else if (type == OT_Theft)
+        {
             arg *= store.find("fCrimeStealing")->getFloat();
+            arg = std::max(1, arg); // Minimum bounty of 1, in case items with zero value are stolen
+        }
 
         MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
         ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()

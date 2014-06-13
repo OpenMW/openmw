@@ -3,22 +3,8 @@
 
 namespace MWWorld {
 
-
-void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
+void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
 {
-    // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
-    //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
-    //  as many exterior cells do not have a name. Instead, we need to search by (x,y) coordinates - and they
-    //  are not available until both cells have been loaded! So first, proceed as usual.
-
-    // All cells have a name record, even nameless exterior cells.
-    std::string idLower = Misc::StringUtils::lowerCase(id);
-    ESM::Cell *cell = new ESM::Cell;
-    cell->mName = id;
-
-    //First part of cell loading
-    cell->preLoad(esm);
-
     //Handling MovedCellRefs, there is no way to do it inside loadcell
     while (esm.isNextSub("MVRF")) {
         ESM::CellRef ref;
@@ -43,35 +29,58 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
         else
           *iter = ref;
     }
+}
 
-    //Second part of cell loading
-    cell->postLoad(esm);
+void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
+{
+    // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
+    //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
+    //  as many exterior cells do not have a name. Instead, we need to search by (x,y) coordinates - and they
+    //  are not available until both cells have been loaded at least partially!
 
-    if(cell->mData.mFlags & ESM::Cell::Interior)
+    // All cells have a name record, even nameless exterior cells.
+    std::string idLower = Misc::StringUtils::lowerCase(id);
+    ESM::Cell cell;
+    cell.mName = id;
+
+    // Load the (x,y) coordinates of the cell, if it is an exterior cell,
+    // so we can find the cell we need to merge with
+    cell.loadData(esm);
+
+    if(cell.mData.mFlags & ESM::Cell::Interior)
     {
         // Store interior cell by name, try to merge with existing parent data.
         ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(idLower));
         if (oldcell) {
-            // push the new references on the list of references to manage
-            oldcell->mContextList.push_back(cell->mContextList.at(0));
-            // copy list into new cell
-            cell->mContextList = oldcell->mContextList;
-            // have new cell replace old cell
-            ESM::Cell::merge(oldcell, cell);
+            // merge new cell into old cell
+            // push the new references on the list of references to manage (saveContext = true)
+            oldcell->mData = cell.mData;
+            oldcell->loadCell(esm, true);
         } else
-            mInt[idLower] = *cell;
+        {
+            // spawn a new cell
+            cell.loadCell(esm, true);
+
+            mInt[idLower] = cell;
+        }
     }
     else
     {
         // Store exterior cells by grid position, try to merge with existing parent data.
-        ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(cell->getGridX(), cell->getGridY()));
+        ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(cell.getGridX(), cell.getGridY()));
         if (oldcell) {
+            // merge new cell into old cell
+            oldcell->mData = cell.mData;
+            oldcell->loadCell(esm, false);
+
+            // handle moved ref (MVRF) subrecords
+            handleMovedCellRefs (esm, &cell);
+
             // push the new references on the list of references to manage
-            oldcell->mContextList.push_back(cell->mContextList.at(0));
-            // copy list into new cell
-            cell->mContextList = oldcell->mContextList;
+            oldcell->postLoad(esm);
+
             // merge lists of leased references, use newer data in case of conflict
-            for (ESM::MovedCellRefTracker::const_iterator it = cell->mMovedRefs.begin(); it != cell->mMovedRefs.end(); ++it) {
+            for (ESM::MovedCellRefTracker::const_iterator it = cell.mMovedRefs.begin(); it != cell.mMovedRefs.end(); ++it) {
                 // remove reference from current leased ref tracker and add it to new cell
                 ESM::MovedCellRefTracker::iterator itold = std::find(oldcell->mMovedRefs.begin(), oldcell->mMovedRefs.end(), it->mRefNum);
                 if (itold != oldcell->mMovedRefs.end()) {
@@ -82,13 +91,24 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
                     *itold = *it;
                 }
             }
-            cell->mMovedRefs = oldcell->mMovedRefs;
-            // have new cell replace old cell
-            ESM::Cell::merge(oldcell, cell);
+
+            // We don't need to merge mLeasedRefs of cell / oldcell. This list is filled when another cell moves a
+            // reference to this cell, so the list for the new cell should be empty. The list for oldcell,
+            // however, could have leased refs in it and so should be kept.
         } else
-            mExt[std::make_pair(cell->mData.mX, cell->mData.mY)] = *cell;
+        {
+            // spawn a new cell
+            cell.loadCell(esm, false);
+
+            // handle moved ref (MVRF) subrecords
+            handleMovedCellRefs (esm, &cell);
+
+            // push the new references on the list of references to manage
+            cell.postLoad(esm);
+
+            mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
+        }
     }
-    delete cell;
 }
 
 }

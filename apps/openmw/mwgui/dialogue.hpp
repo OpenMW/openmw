@@ -111,7 +111,7 @@ namespace MWGui
 
         void notifyLinkClicked (TypesetBook::InteractiveId link);
 
-        void startDialogue(MWWorld::Ptr actor, std::string npcName);
+        void startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory);
         void setKeywords(std::list<std::string> keyWord);
 
         void addResponse (const std::string& text, const std::string& title="");

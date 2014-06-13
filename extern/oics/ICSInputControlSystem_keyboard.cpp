@@ -43,7 +43,7 @@ namespace ICS
 				dir = Control::DECREASE;
 			}
 
-			addKeyBinding(mControls.back(), mKeys[xmlKeyBinder->Attribute("key")], dir);
+            addKeyBinding(mControls.back(), FromString<int>(xmlKeyBinder->Attribute("key")), dir);
 
 			xmlKeyBinder = xmlKeyBinder->NextSiblingElement("KeyBinder");
 		}

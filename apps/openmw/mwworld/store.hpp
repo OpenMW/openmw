@@ -591,6 +591,8 @@ namespace MWWorld
             return search(cell.mName);
         }
 
+        void handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell);
+
     public:
         ESMStore *mEsmStore;
 
