@@ -8,6 +8,8 @@
 #include "movement.hpp"
 #include "obstacle.hpp"
 
+#include <OgreVector3.h>
+
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
@@ -61,12 +63,17 @@ namespace MWMechanics
             bool mFollowTarget;
             bool mCombatMove;
 
+            float mStrength; // this is actually make sense only in ranged combat
+            float mMinMaxAttackDuration[3][2]; // slash, thrust, chop has different durations
+
             bool mForceNoShortcut;
             ESM::Position mShortcutFailPos;
 
-            ESM::Position mLastPos;
+            Ogre::Vector3 mLastActorPos;
             MWMechanics::Movement mMovement;
+
             int mTargetActorId;
+            Ogre::Vector3 mLastTargetPos;
 
             const MWWorld::CellStore* mCell;
             ObstacleCheck mObstacleCheck;

@@ -917,14 +917,30 @@ bool Animation::getInfo(const std::string &groupname, float *complete, float *sp
 
 float Animation::getStartTime(const std::string &groupname) const
 {
-    AnimSourceList::const_iterator iter(mAnimSources.begin());
-    for(;iter != mAnimSources.end();iter++)
+    for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
     {
         const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
+
         NifOgre::TextKeyMap::const_iterator found = findGroupStart(keys, groupname);
         if(found != keys.end())
             return found->first;
     }
+    return -1.f;
+}
+
+float Animation::getTextKeyTime(const std::string &textKey) const
+{
+    for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
+    {
+        const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
+
+        for(NifOgre::TextKeyMap::const_iterator iterKey(keys.begin()); iterKey != keys.end(); ++iterKey)
+        {
+            if(iterKey->second.compare(0, textKey.size(), textKey) == 0)
+                return iterKey->first;
+        }
+    }
+
     return -1.f;
 }
 
