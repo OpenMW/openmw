@@ -88,10 +88,21 @@ namespace MWMechanics
 
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
         mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
+      , mMinMaxAttackDuration()
+      , mMovement()
     {
         init();
 
         mLastTargetPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
+    }
+
+    AiCombat::AiCombat(const ESM::AiSequence::AiCombat *combat)
+        : mMinMaxAttackDuration()
+        , mMovement()
+    {
+        mTargetActorId = combat->mTargetActorId;
+
+        init();
     }
 
     void AiCombat::init()
@@ -636,13 +647,6 @@ namespace MWMechanics
     AiCombat *MWMechanics::AiCombat::clone() const
     {
         return new AiCombat(*this);
-    }
-
-    AiCombat::AiCombat(const ESM::AiSequence::AiCombat *combat)
-    {
-        mTargetActorId = combat->mTargetActorId;
-
-        init();
     }
 
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
