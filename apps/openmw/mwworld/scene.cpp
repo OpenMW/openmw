@@ -22,6 +22,30 @@
 
 namespace
 {
+    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
+                                    MWRender::RenderingManager& rendering)
+    {
+        if (ptr.getRefData().getBaseNode() != NULL)
+        {
+            Ogre::Quaternion worldRotQuat(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z);
+            if (!ptr.getClass().isActor())
+                worldRotQuat = Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)*
+                        Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y)* worldRotQuat;
+
+            float x = ptr.getRefData().getLocalRotation().rot[0];
+            float y = ptr.getRefData().getLocalRotation().rot[1];
+            float z = ptr.getRefData().getLocalRotation().rot[2];
+
+            Ogre::Quaternion rot(Ogre::Radian(z), Ogre::Vector3::NEGATIVE_UNIT_Z);
+            if (!ptr.getClass().isActor())
+                rot = Ogre::Quaternion(Ogre::Radian(x), Ogre::Vector3::NEGATIVE_UNIT_X)*
+                Ogre::Quaternion(Ogre::Radian(y), Ogre::Vector3::NEGATIVE_UNIT_Y)*rot;
+
+            ptr.getRefData().getBaseNode()->setOrientation(worldRotQuat*rot);
+            physics.rotateObject(ptr);
+        }
+    }
+
     struct InsertFunctor
     {
         MWWorld::CellStore& mCell;
@@ -60,11 +84,7 @@ namespace
                 mRendering.addObject (ptr);
                 ptr.getClass().insertObject (ptr, mPhysics);
 
-                float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
-                float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
-                float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
-                MWBase::Environment::get().getWorld()->localRotateObject (ptr, ax, ay, az);
-
+                updateObjectLocalRotation(ptr, mPhysics, mRendering);
                 MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().getScale());
                 ptr.getClass().adjustPosition (ptr);
             }
@@ -84,6 +104,20 @@ namespace
 
 namespace MWWorld
 {
+
+    void Scene::updateObjectLocalRotation (const Ptr& ptr)
+    {
+        ::updateObjectLocalRotation(ptr, *mPhysics, mRendering);
+    }
+
+    void Scene::updateObjectRotation (const Ptr& ptr)
+    {
+        if(ptr.getRefData().getBaseNode() != 0)
+        {
+            mRendering.rotateObject(ptr);
+            mPhysics->rotateObject(ptr);
+        }
+    }
 
     void Scene::update (float duration, bool paused)
     {

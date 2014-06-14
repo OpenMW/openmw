@@ -103,6 +103,10 @@ namespace MWWorld
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
 
+            void updateObjectLocalRotation (const Ptr& ptr);
+
+            void updateObjectRotation (const Ptr& ptr);
+
             bool isCellActive(const CellStore &cell);
 
             Ptr searchPtrViaHandle (const std::string& handle);

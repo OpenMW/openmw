@@ -42,7 +42,8 @@ namespace MWWorld
         float getScale() const;
         void setScale(float scale);
 
-        // Position and rotation of this object within the cell
+        // The *original* position and rotation as it was given in the Construction Set.
+        // Current position and rotation of the object is stored in RefData.
         ESM::Position getPosition() const;
         void setPosition (const ESM::Position& position);
 

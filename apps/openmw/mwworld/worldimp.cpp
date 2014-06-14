@@ -957,11 +957,13 @@ namespace MWWorld
 
     void World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
     {
-        ESM::Position &pos = ptr.getRefData().getPosition();
+        ESM::Position pos = ptr.getRefData().getPosition();
 
         pos.pos[0] = x;
         pos.pos[1] = y;
         pos.pos[2] = z;
+
+        ptr.getRefData().setPosition(pos);
 
         Ogre::Vector3 vec(x, y, z);
 
@@ -1068,7 +1070,8 @@ namespace MWWorld
         const float two_pi = Ogre::Math::TWO_PI;
         const float pi = Ogre::Math::PI;
 
-        float *objRot = ptr.getRefData().getPosition().rot;
+        ESM::Position pos = ptr.getRefData().getPosition();
+        float *objRot = pos.rot;
         if(adjust)
         {
             objRot[0] += rot.x;
@@ -1105,43 +1108,33 @@ namespace MWWorld
         while(objRot[2] < -pi) objRot[2] += two_pi;
         while(objRot[2] >  pi) objRot[2] -= two_pi;
 
-        if(ptr.getRefData().getBaseNode() != 0)
-        {
-            mRendering->rotateObject(ptr);
-            mPhysics->rotateObject(ptr);
-        }
+        ptr.getRefData().setPosition(pos);
+
+        mWorldScene->updateObjectRotation(ptr);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
     {
-        if (ptr.getRefData().getBaseNode() != 0) {
+        if (ptr.getRefData().getBaseNode() != 0)
+        {
+            LocalRotation rot = ptr.getRefData().getLocalRotation();
+            rot.rot[0]=Ogre::Degree(x).valueRadians();
+            rot.rot[1]=Ogre::Degree(y).valueRadians();
+            rot.rot[2]=Ogre::Degree(z).valueRadians();
 
-            ptr.getRefData().getLocalRotation().rot[0]=Ogre::Degree(x).valueRadians();
-            ptr.getRefData().getLocalRotation().rot[1]=Ogre::Degree(y).valueRadians();
-            ptr.getRefData().getLocalRotation().rot[2]=Ogre::Degree(z).valueRadians();
+            wrap(rot.rot[0]);
+            wrap(rot.rot[1]);
+            wrap(rot.rot[2]);
 
-            wrap(ptr.getRefData().getLocalRotation().rot[0]);
-            wrap(ptr.getRefData().getLocalRotation().rot[1]);
-            wrap(ptr.getRefData().getLocalRotation().rot[2]);
+            ptr.getRefData().setLocalRotation(rot);
 
-            Ogre::Quaternion worldRotQuat(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z);
-            if (!ptr.getClass().isActor())
-                worldRotQuat = Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)*
-                        Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y)* worldRotQuat;
-
-            Ogre::Quaternion rot(Ogre::Degree(z), Ogre::Vector3::NEGATIVE_UNIT_Z);
-            if (!ptr.getClass().isActor())
-                rot = Ogre::Quaternion(Ogre::Degree(x), Ogre::Vector3::NEGATIVE_UNIT_X)*
-                Ogre::Quaternion(Ogre::Degree(y), Ogre::Vector3::NEGATIVE_UNIT_Y)*rot;
-
-            ptr.getRefData().getBaseNode()->setOrientation(worldRotQuat*rot);
-            mPhysics->rotateObject(ptr);
+            mWorldScene->updateObjectLocalRotation(ptr);
         }
     }
 
     void World::adjustPosition(const Ptr &ptr)
     {
-        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
+        ESM::Position pos (ptr.getRefData().getPosition());
 
         if(!ptr.getRefData().getBaseNode())
         {
@@ -1149,21 +1142,23 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = mRendering->getTerrainHeightAt(pos);
+        float terrainHeight = mRendering->getTerrainHeightAt(Ogre::Vector3(pos.pos));
 
-        if (pos.z < terrainHeight)
-            pos.z = terrainHeight;
+        if (pos.pos[2] < terrainHeight)
+            pos.pos[2] = terrainHeight;
 
-        ptr.getRefData().getPosition().pos[2] = pos.z + 20; // place slightly above. will snap down to ground with code below
+        pos.pos[2] += 20; // place slightly above. will snap down to ground with code below
+
+        ptr.getRefData().setPosition(pos);
 
         if (!isFlying(ptr))
         {
             Ogre::Vector3 traced = mPhysics->traceDown(ptr);
-            if (traced.z < pos.z)
-                pos.z = traced.z;
+            if (traced.z < pos.pos[2])
+                pos.pos[2] = traced.z;
         }
 
-        moveObject(ptr, ptr.getCell(), pos.x, pos.y, pos.z);
+        moveObject(ptr, ptr.getCell(), pos.pos[0], pos.pos[1], pos.pos[2]);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -1429,7 +1424,7 @@ namespace MWWorld
             // cast a ray from player to sun to detect if the sun is visible
             // this is temporary until we find a better place to put this code
             // currently its here because we need to access the physics system
-            float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
+            const float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
             Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
             mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
         }
@@ -1683,10 +1678,11 @@ namespace MWWorld
             object.getClass().copyToCell(object, *cell, pos);
 
         // Reset some position values that could be uninitialized if this item came from a container
-        LocalRotation& localRotation = dropped.getRefData().getLocalRotation();
+        LocalRotation localRotation;
         localRotation.rot[0] = 0;
         localRotation.rot[1] = 0;
         localRotation.rot[2] = 0;
+        dropped.getRefData().setLocalRotation(localRotation);
         dropped.getCellRef().setPosition(pos);
 
         if (mWorldScene->isCellActive(*cell)) {
@@ -1785,7 +1781,7 @@ namespace MWWorld
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
-        float *fpos = object.getRefData().getPosition().pos;
+        const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
@@ -1798,7 +1794,7 @@ namespace MWWorld
     World::isSwimming(const MWWorld::Ptr &object) const
     {
         /// \todo add check ifActor() - only actors can swim
-        float *fpos = object.getRefData().getPosition().pos;
+        const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
         /// \fixme 3/4ths submerged?
@@ -2031,9 +2027,9 @@ namespace MWWorld
         if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
         Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(npc.getRefData().getHandle())->getHalfExtents();
-        float* pos1 = npc.getRefData().getPosition().pos;
+        const float* pos1 = npc.getRefData().getPosition().pos;
         Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetNpc.getRefData().getHandle())->getHalfExtents();
-        float* pos2 = targetNpc.getRefData().getPosition().pos;
+        const float* pos2 = targetNpc.getRefData().getPosition().pos;
 
         btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z);
         btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z);

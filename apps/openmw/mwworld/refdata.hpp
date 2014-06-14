@@ -100,9 +100,11 @@ namespace MWWorld
 
             void disable();
 
-            ESM::Position& getPosition();
+            void setPosition (const ESM::Position& pos);
+            const ESM::Position& getPosition();
 
-            LocalRotation& getLocalRotation();
+            void setLocalRotation (const LocalRotation& rotation);
+            const LocalRotation& getLocalRotation();
 
             void setCustomData (CustomData *data);
             ///< Set custom data (potentially replacing old custom data). The ownership of \æ data is

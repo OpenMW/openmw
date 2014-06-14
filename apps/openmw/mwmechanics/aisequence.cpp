@@ -88,7 +88,7 @@ bool AiSequence::canAddTarget(const ESM::Position& actorPos, float distToTarget)
             else
             {
                 // add new target only if current target (player) is farther
-                ESM::Position &targetPos = combat->getTarget().getRefData().getPosition();
+                const ESM::Position &targetPos = combat->getTarget().getRefData().getPosition();
 
                 float distToCurrTarget = (Ogre::Vector3(targetPos.pos) - Ogre::Vector3(actorPos.pos)).length();
                 return (distToCurrTarget > distToTarget);
@@ -153,7 +153,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                     }
                     else
                     {
-                        ESM::Position &targetPos = target.getRefData().getPosition();
+                        const ESM::Position &targetPos = target.getRefData().getPosition();
 
                         float distTo = (Ogre::Vector3(targetPos.pos) - vActorPos).length();
                         if (distTo < nearestDist)

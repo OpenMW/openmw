@@ -188,15 +188,25 @@ namespace MWWorld
         mEnabled = false;
     }
 
-    ESM::Position& RefData::getPosition()
+    void RefData::setPosition(const ESM::Position& pos)
     {
         mChanged = true;
+        mPosition = pos;
+    }
+
+    const ESM::Position& RefData::getPosition()
+    {
         return mPosition;
     }
 
-    LocalRotation& RefData::getLocalRotation()
+    void RefData::setLocalRotation(const LocalRotation& rot)
     {
         mChanged = true;
+        mLocalRotation = rot;
+    }
+
+    const LocalRotation& RefData::getLocalRotation()
+    {
         return mLocalRotation;
     }
 

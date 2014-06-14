@@ -165,7 +165,7 @@ void RippleSimulation::addImpulses()
             // for non-player actors this is done in updateObjectCell
             it->mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         }
-        float* _currentPos = it->mPtr.getRefData().getPosition().pos;
+        const float* _currentPos = it->mPtr.getRefData().getPosition().pos;
         Ogre::Vector3 currentPos (_currentPos[0], _currentPos[1], _currentPos[2]);
 
         if ( (currentPos - it->mLastEmitPosition).length() > 2

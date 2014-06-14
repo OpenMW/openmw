@@ -837,8 +837,7 @@ namespace MWClass
                     ptr.getRefData().setCount(1);
 
                 // Reset to original position
-                ESM::Position& pos = ptr.getRefData().getPosition();
-                pos = ptr.getCellRef().getPosition();
+                ptr.getRefData().setPosition(ptr.getCellRef().getPosition());
 
                 ptr.getRefData().setCustomData(NULL);
             }

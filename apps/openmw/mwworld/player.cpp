@@ -44,8 +44,9 @@ namespace MWWorld
         cellRef.mRefID = "player";
         mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
-        float* playerPos = mPlayer.mData.getPosition().pos;
-        playerPos[0] = playerPos[1] = playerPos[2] = 0;
+        ESM::Position playerPos = mPlayer.mData.getPosition();
+        playerPos.pos[0] = playerPos.pos[1] = playerPos.pos[2] = 0;
+        mPlayer.mData.setPosition(playerPos);
     }
 
     void Player::set(const ESM::NPC *player)
