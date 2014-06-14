@@ -446,8 +446,8 @@ if(WIN32)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES
         "${OpenMW_SOURCE_DIR}/readme.txt"
-        "${OpenMW_SOURCE_DIR}/GPL3.txt"
-        "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
+        "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
+        "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
