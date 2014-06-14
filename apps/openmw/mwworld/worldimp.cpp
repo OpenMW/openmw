@@ -52,6 +52,10 @@
 #include "esmloader.hpp"
 #include "omwloader.hpp"
 
+#ifdef _WIN32
+#define M_PI 3.14159 // Windows doesn't have this
+#endif
+
 using namespace Ogre;
 
 namespace
