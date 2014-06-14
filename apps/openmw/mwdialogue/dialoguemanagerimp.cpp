@@ -125,6 +125,10 @@ namespace MWDialogue
 
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
+        // Dialogue with dead actor (e.g. through script) should not be allowed.
+        if (actor.getClass().getCreatureStats(actor).isDead())
+            return;
+
         mLastTopic = "";
         mPermanentDispositionChange = 0;
         mTemporaryDispositionChange = 0;
