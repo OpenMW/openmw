@@ -853,8 +853,15 @@ namespace MWMechanics
 
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
-        mActors.getObjectsInRange(Ogre::Vector3(player.getRefData().getPosition().pos),
-                                    esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt(), neighbors);
+
+        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        int radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt();
+
+        mActors.getObjectsInRange(from, radius, neighbors);
+
+        // victim should be considered even beyond alarm radius
+        if (from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+            neighbors.push_back(victim);
 
         int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
 
