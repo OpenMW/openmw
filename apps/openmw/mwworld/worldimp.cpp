@@ -1,4 +1,10 @@
 #include "worldimp.hpp"
+
+#ifdef _WIN32 // For M_PI
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+
 #ifdef _WIN32
 #include <boost/tr1/tr1/unordered_map>
 #elif defined HAVE_UNORDERED_MAP
@@ -51,10 +57,6 @@
 #include "contentloader.hpp"
 #include "esmloader.hpp"
 #include "omwloader.hpp"
-
-#ifdef _WIN32
-#define M_PI 3.14159 // Windows doesn't have this
-#endif
 
 using namespace Ogre;
 
