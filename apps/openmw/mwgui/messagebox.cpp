@@ -25,6 +25,23 @@ namespace MWGui
         }
     }
 
+    void MessageBoxManager::clear()
+    {
+        delete mInterMessageBoxe;
+        mInterMessageBoxe = NULL;
+
+        std::vector<MessageBox*>::iterator it(mMessageBoxes.begin());
+        for (; it != mMessageBoxes.end(); ++it)
+        {
+            if (*it == mStaticMessageBox)
+                mStaticMessageBox = NULL;
+            delete *it;
+        }
+        mMessageBoxes.clear();
+
+        mLastButtonPressed = -1;
+    }
+
     void MessageBoxManager::onFrame (float frameDuration)
     {
         std::vector<MessageBox*>::iterator it;

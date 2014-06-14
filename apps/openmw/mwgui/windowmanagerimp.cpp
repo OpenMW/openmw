@@ -1502,6 +1502,7 @@ namespace MWGui
     {
         mMap->clear();
         mQuickKeysMenu->clear();
+        mMessageBoxManager->clear();
 
         mTrainingWindow->resetReference();
         mDialogueWindow->resetReference();
