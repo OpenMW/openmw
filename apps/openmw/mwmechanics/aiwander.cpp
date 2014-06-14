@@ -153,6 +153,17 @@ namespace MWMechanics
             }
         }
 
+        // Are we there yet?
+        if(mWalking &&
+           mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+        {
+            stopWalking(actor);
+            mMoveNow = false;
+            mWalking = false;
+            mChooseAction = true;
+            mHasReturnPosition = false;
+        }
+
         if(mWalking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
@@ -522,17 +533,6 @@ namespace MWMechanics
                 else
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
             }
-        }
-
-        // Are we there yet?
-        if(mWalking &&
-           mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
-        {
-            stopWalking(actor);
-            mMoveNow = false;
-            mWalking = false;
-            mChooseAction = true;
-            mHasReturnPosition = false;
         }
 
         return false; // AiWander package not yet completed
