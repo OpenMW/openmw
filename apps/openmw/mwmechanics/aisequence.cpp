@@ -300,7 +300,8 @@ void AiSequence::writeState(ESM::AiSequence::AiSequence &sequence) const
 
 void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
 {
-    clear();
+    if (!sequence.mPackages.empty())
+        clear();
 
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
