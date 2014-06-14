@@ -435,9 +435,23 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
     mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(mDeathState - CharState_Death1);
 
     // For dead actors, refreshCurrentAnims is no longer called, so we need to disable the movement state manually.
+    // Note that these animations wouldn't actually be visible (due to the Death animation's priority being higher).
+    // However, they could still trigger text keys, such as Hit events, or sounds.
     mMovementState = CharState_None;
     mAnimation->disable(mCurrentMovement);
     mCurrentMovement = "";
+    mUpperBodyState = UpperCharState_Nothing;
+    mAnimation->disable(mCurrentWeapon);
+    mCurrentWeapon = "";
+    mHitState = CharState_None;
+    mAnimation->disable(mCurrentHit);
+    mCurrentHit = "";
+    mIdleState = CharState_None;
+    mAnimation->disable(mCurrentIdle);
+    mCurrentIdle = "";
+    mJumpState = JumpState_None;
+    mAnimation->disable(mCurrentJump);
+    mCurrentJump = "";
 
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                     false, 1.0f, "start", "stop", startpoint, 0);
