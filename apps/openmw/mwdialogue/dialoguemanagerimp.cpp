@@ -406,7 +406,7 @@ namespace MWDialogue
         win->setServices (windowServices);
 
         // sort again, because the previous sort was case-sensitive
-        keywordList.sort(Misc::StringUtils::ciEqual);
+        keywordList.sort(Misc::StringUtils::ciLess);
         win->setKeywords(keywordList);
 
         mChoice = choice;
