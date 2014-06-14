@@ -450,8 +450,23 @@ namespace MWWorld
                 if (deleted)
                     continue;
 
+                // Don't list reference if it was moved to a different cell.
+                ESM::MovedCellRefTracker::const_iterator iter =
+                    std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
+                if (iter != mCell->mMovedRefs.end()) {
+                    continue;
+                }
+
                 mIds.push_back (Misc::StringUtils::lowerCase (ref.mRefID));
             }
+        }
+
+        // List moved references, from separately tracked list.
+        for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
+        {
+            ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
+
+            mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
         }
 
         std::sort (mIds.begin(), mIds.end());
