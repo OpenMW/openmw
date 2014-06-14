@@ -1,10 +1,5 @@
 #include "worldimp.hpp"
 
-#ifdef _WIN32 // For M_PI
-#define _USE_MATH_DEFINES
-#include <cmath>
-#endif
-
 #ifdef _WIN32
 #include <boost/tr1/tr1/unordered_map>
 #elif defined HAVE_UNORDERED_MAP
@@ -67,9 +62,9 @@ namespace
 void wrap(float& rad)
 {
     if (rad>0)
-        rad = std::fmod(rad+M_PI, 2.0*M_PI)-M_PI;
+        rad = std::fmod(rad+Ogre::Math::PI, 2.0f*Ogre::Math::PI)-Ogre::Math::PI;
     else
-        rad = std::fmod(rad-M_PI, 2.0*M_PI)+M_PI;
+        rad = std::fmod(rad-Ogre::Math::PI, 2.0f*Ogre::Math::PI)+Ogre::Math::PI;
 }
 
 }
