@@ -514,6 +514,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
                 getWeaponGroup(mWeaponType, mCurrentWeapon);
                 mUpperBodyState = UpperCharState_WeapEquiped;
                 mAnimation->showWeapons(true);
+                mAnimation->setWeaponGroup(mCurrentWeapon);
             }
             mAnimation->showCarriedLeft(mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand);
         }
