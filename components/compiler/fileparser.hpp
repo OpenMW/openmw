@@ -31,7 +31,7 @@ namespace Compiler
             ///< Return script name.
 
             void getCode (std::vector<Interpreter::Type_Code>& code) const;
-            ///< store generated code in \æ code.
+            ///< store generated code in \a code.
             
             const Locals& getLocals() const;
             ///< get local variable declarations.

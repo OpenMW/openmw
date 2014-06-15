@@ -119,7 +119,7 @@ namespace Compiler
             ///< put back a keyword token
 
             void listKeywords (std::vector<std::string>& keywords);
-            ///< Append all known keywords to \æ kaywords.
+            ///< Append all known keywords to \a kaywords.
     };
 }
 

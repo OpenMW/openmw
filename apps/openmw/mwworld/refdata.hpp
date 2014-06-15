@@ -107,7 +107,7 @@ namespace MWWorld
             const LocalRotation& getLocalRotation();
 
             void setCustomData (CustomData *data);
-            ///< Set custom data (potentially replacing old custom data). The ownership of \æ data is
+            ///< Set custom data (potentially replacing old custom data). The ownership of \a data is
             /// transferred to this.
 
             CustomData *getCustomData();

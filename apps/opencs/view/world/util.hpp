@@ -73,9 +73,9 @@ namespace CSVWorld
             ~CommandDelegateFactoryCollection();
 
             void add (CSMWorld::ColumnBase::Display display, CommandDelegateFactory *factory);
-            ///< The ownership of \æ factory is transferred to *this.
+            ///< The ownership of \a factory is transferred to *this.
             ///
-            /// This function must not be called more than once per value of \æ display.
+            /// This function must not be called more than once per value of \a display.
 
             CommandDelegate *makeDelegate (CSMWorld::ColumnBase::Display display, QUndoStack& undoStack,
                 QObject *parent) const;
