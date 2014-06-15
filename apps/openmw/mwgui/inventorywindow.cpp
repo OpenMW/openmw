@@ -132,6 +132,11 @@ namespace MWGui
         adjustPanes();
     }
 
+    SortFilterItemModel* InventoryWindow::getSortFilterModel()
+    {
+        return mSortModel;
+    }
+
     TradeItemModel* InventoryWindow::getTradeModel()
     {
         return mTradeModel;

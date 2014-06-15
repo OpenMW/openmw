@@ -37,6 +37,7 @@ namespace MWGui
                 mPreview->rebuild();
             }
 
+            SortFilterItemModel* getSortFilterModel();
             TradeItemModel* getTradeModel();
             ItemModel* getModel();
 
