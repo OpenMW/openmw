@@ -504,11 +504,18 @@ namespace MWGui
 
                         text += "\n\n#DDC79E#{sFavoriteSkills}";
                         text += "\n#BF9959";
-                        for (int i=0; i<6; ++i)
+                        bool firstSkill = true;
+                        for (int i=0; i<7; ++i)
                         {
-                            text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
-                            if (i<5)
-                                text += ", ";
+                            if (faction->mData.mSkills[i] != -1)
+                            {
+                                if (!firstSkill)
+                                    text += ", ";
+
+                                firstSkill = false;
+
+                                text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
+                            }
                         }
 
                         text += "\n";

@@ -12,7 +12,7 @@ namespace ESM
 
     int& Faction::FADTstruct::getSkill (int index, bool ignored)
     {
-        if (index<0 || index>=6)
+        if (index<0 || index>=7)
             throw std::logic_error ("skill index out of range");
 
         return mSkills[index];
@@ -20,7 +20,7 @@ namespace ESM
 
     int Faction::FADTstruct::getSkill (int index, bool ignored) const
     {
-        if (index<0 || index>=6)
+        if (index<0 || index>=7)
             throw std::logic_error ("skill index out of range");
 
         return mSkills[index];
@@ -75,7 +75,6 @@ void Faction::save(ESMWriter &esm) const
     {
         mName.clear();
         mData.mAttribute[0] = mData.mAttribute[1] = 0;
-        mData.mUnknown = -1;
         mData.mIsHidden = 0;
 
         for (int i=0; i<10; ++i)
@@ -87,7 +86,7 @@ void Faction::save(ESMWriter &esm) const
             mRanks[i].clear();
         }
 
-        for (int i=0; i<6; ++i)
+        for (int i=0; i<7; ++i)
             mData.mSkills[i] = 0;
 
         mReactions.clear();
