@@ -509,7 +509,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         if (cls.hasInventoryStore(mPtr))
         {
             getActiveWeapon(cls.getCreatureStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
-            if(mWeaponType != WeapType_None)
+            if(mWeaponType != WeapType_None && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
             {
                 getWeaponGroup(mWeaponType, mCurrentWeapon);
                 mUpperBodyState = UpperCharState_WeapEquiped;
@@ -522,8 +522,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mIdleState = CharState_Idle;
         else
         {
-            /* FIXME: Get the actual death state used. */
-            mDeathState = CharState_Death1;
+            int deathindex = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
+            playDeath(1.0f, CharacterState(CharState_Death1 + deathindex));
         }
     }
     else
@@ -535,12 +535,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
 
-    if(mDeathState != CharState_None)
-    {
-        int deathindex = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
-        playDeath(1.0f, CharacterState(CharState_Death1 + deathindex));
-    }
-    else
+    if(mDeathState == CharState_None)
         refreshCurrentAnims(mIdleState, mMovementState, true);
 }
 
