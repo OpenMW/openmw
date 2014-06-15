@@ -161,6 +161,8 @@ struct KeyListT {
     unsigned int mInterpolationType;
     VecType mKeys;
 
+    KeyListT() : mInterpolationType(sLinearInterpolation) {}
+
     //Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
     void read(NIFStream *nif, bool force=false)
     {
