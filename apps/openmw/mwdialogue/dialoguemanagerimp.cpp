@@ -182,9 +182,19 @@ namespace MWDialogue
                     win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
-                    break;
+                    return;
                 }
             }
+        }
+
+        // No greetings found. The dialogue window should not be shown.
+        // If this is a companion, we must show the companion window directly (used by BM_bear_be_unique).
+        bool isCompanion = !mActor.getClass().getScript(mActor).empty()
+                && mActor.getRefData().getLocals().getIntVar(mActor.getClass().getScript(mActor), "companion");
+        if (isCompanion)
+        {
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion);
+            MWBase::Environment::get().getWindowManager()->showCompanionWindow(mActor);
         }
     }
 
