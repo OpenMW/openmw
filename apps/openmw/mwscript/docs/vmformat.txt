@@ -396,5 +396,7 @@ op 0x2000243: GetFactionReaction
 op 0x2000244: Activate, explicit
 op 0x2000245: ClearInfoActor
 op 0x2000246: ClearInfoActor, explicit
+op 0x2000247: BetaComment
+op 0x2000248: BetaComment, explicit
 
-opcodes 0x2000247-0x3ffffff unused
+opcodes 0x2000249-0x3ffffff unused

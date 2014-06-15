@@ -859,6 +859,47 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpBetaComment : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                std::stringstream msg;
+
+                msg << "Content file: ";
+
+                if (ptr.getCellRef().getRefNum().mContentFile == -1)
+                    msg << "[None]" << std::endl;
+                else
+                {
+                    std::vector<std::string> contentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
+                    assert (contentFiles.size() > ptr.getCellRef().getRefNum().mContentFile);
+                    msg << contentFiles[ptr.getCellRef().getRefNum().mContentFile] << std::endl;
+                }
+
+                msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
+
+                if (ptr.isInCell())
+                {
+                    MWWorld::CellStore* cell = ptr.getCell();
+                    msg << "Cell: " << MWBase::Environment::get().getWorld()->getCellName(cell) << std::endl;
+
+                    Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
+                    msg << "Coordinates: " << pos << std::endl;
+                }
+
+                std::string notes = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+                if (!notes.empty())
+                    msg << "Notes: " << notes << std::endl;
+
+                runtime.getContext().report(msg.str());
+            }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -932,6 +973,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcInJail, new OpGetPcInJail);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcTraveling, new OpGetPcTraveling);
+            interpreter.installSegment5 (Compiler::Misc::opcodeBetaComment, new OpBetaComment<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeBetaCommentExplicit, new OpBetaComment<ExplicitRef>);
         }
     }
 }
