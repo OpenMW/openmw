@@ -504,6 +504,13 @@ namespace MWMechanics
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
         mAiSequence.writeState(state.mAiSequence);
+
+        state.mSummonedCreatureMap = mSummonedCreatures;
+        state.mSummonGraveyard = mSummonGraveyard;
+
+        state.mHasAiSettings = true;
+        for (int i=0; i<4; ++i)
+            mAiSettings[i].writeState (state.mAiSettings[i]);
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
@@ -545,6 +552,13 @@ namespace MWMechanics
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
         mAiSequence.readState(state.mAiSequence);
+
+        mSummonedCreatures = state.mSummonedCreatureMap;
+        mSummonGraveyard = state.mSummonGraveyard;
+
+        if (state.mHasAiSettings)
+            for (int i=0; i<4; ++i)
+                mAiSettings[i].readState(state.mAiSettings[i]);
     }
 
     void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
@@ -604,5 +618,15 @@ namespace MWMechanics
     void CreatureStats::setDeathAnimation(unsigned char index)
     {
         mDeathAnimation = index;
+    }
+
+    std::map<int, int>& CreatureStats::getSummonedCreatureMap()
+    {
+        return mSummonedCreatures;
+    }
+
+    std::vector<int>& CreatureStats::getSummonedCreatureGraveyard()
+    {
+        return mSummonGraveyard;
     }
 }

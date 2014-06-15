@@ -80,6 +80,31 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mSpells.load(esm);
     mActiveSpells.load(esm);
     mAiSequence.load(esm);
+
+    while (esm.isNextSub("SUMM"))
+    {
+        int magicEffect;
+        esm.getHT(magicEffect);
+        int actorId;
+        esm.getHNT (actorId, "ACID");
+        mSummonedCreatureMap[magicEffect] = actorId;
+    }
+
+    while (esm.isNextSub("GRAV"))
+    {
+        int actorId;
+        esm.getHT(actorId);
+        mSummonGraveyard.push_back(actorId);
+    }
+
+    mHasAiSettings = false;
+    esm.getHNOT(mHasAiSettings, "AISE");
+
+    if (mHasAiSettings)
+    {
+        for (int i=0; i<4; ++i)
+            mAiSettings[i].load(esm);
+    }
 }
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
@@ -162,4 +187,19 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mSpells.save(esm);
     mActiveSpells.save(esm);
     mAiSequence.save(esm);
+
+    for (std::map<int, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
+    {
+        esm.writeHNT ("SUMM", it->first);
+        esm.writeHNT ("ACID", it->second);
+    }
+
+    for (std::vector<int>::const_iterator it = mSummonGraveyard.begin(); it != mSummonGraveyard.end(); ++it)
+    {
+        esm.writeHNT ("GRAV", *it);
+    }
+
+    esm.writeHNT("AISE", mHasAiSettings);
+    for (int i=0; i<4; ++i)
+        mAiSettings[i].save(esm);
 }

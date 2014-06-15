@@ -515,6 +515,8 @@ namespace MWBase
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
 
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos) = 0;
+
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
 

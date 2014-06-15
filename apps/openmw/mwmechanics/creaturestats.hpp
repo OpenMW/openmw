@@ -67,6 +67,12 @@ namespace MWMechanics
         // The index of the death animation that was played
         unsigned char mDeathAnimation;
 
+        // <ESM::MagicEffect index, ActorId>
+        std::map<int, int> mSummonedCreatures;
+        // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
+        // This may be necessary when the creature is in an inactive cell.
+        std::vector<int> mSummonGraveyard;
+
     protected:
         // These two are only set by NpcStats, but they are declared in CreatureStats to prevent using virtual methods.
         bool mIsWerewolf;
@@ -208,6 +214,9 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
+        std::map<int, int>& getSummonedCreatureMap();
+        std::vector<int>& getSummonedCreatureGraveyard();
+
         enum Flag
         {
             Flag_ForceRun = 1,
@@ -232,13 +241,6 @@ namespace MWMechanics
         // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
         // TODO: Put it somewhere else?
         std::set<int> mBoundItems;
-
-        // TODO: store in savegame
-        // TODO: encapsulate?
-        // <ESM::MagicEffect index, actor index>
-        std::map<int, int> mSummonedCreatures;
-        // Contains summoned creatures with an expired lifetime that have not been deleted yet.
-        std::vector<int> mSummonGraveyard;
 
         void writeState (ESM::CreatureStats& state) const;
 

@@ -2704,6 +2704,11 @@ namespace MWWorld
         mRendering->spawnEffect(model, texture, worldPosition);
     }
 
+    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const Vector3 &worldPos)
+    {
+        mRendering->spawnEffect(model, textureOverride, worldPos);
+    }
+
     void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster,
                              const std::string& id, const std::string& sourceName)
     {

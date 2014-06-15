@@ -20,6 +20,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwrender/animation.hpp"
+
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -529,7 +531,8 @@ namespace MWMechanics
 
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
         {
-            bool found = creatureStats.mSummonedCreatures.find(it->first) != creatureStats.mSummonedCreatures.end();
+            std::map<int, int>& creatureMap = creatureStats.getSummonedCreatureMap();
+            bool found = creatureMap.find(it->first) != creatureMap.end();
             int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
             {
@@ -563,17 +566,25 @@ namespace MWMechanics
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         int creatureActorId = summonedCreatureStats.getActorId();
 
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
 
-                        // TODO: VFX_SummonStart, VFX_SummonEnd
-                        creatureStats.mSummonedCreatures.insert(std::make_pair(it->first, creatureActorId));
+                        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(placed);
+                        if (anim)
+                        {
+                            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                                    .search("VFX_Summon_Start");
+                            if (fx)
+                                anim->addEffect("meshes\\" + fx->mModel, -1, false);
+                        }
+
+                        creatureMap.insert(std::make_pair(it->first, creatureActorId));
                     }
                 }
                 else
                 {
                     // Summon lifetime has expired. Try to delete the creature.
-                    int actorId = creatureStats.mSummonedCreatures[it->first];
-                    creatureStats.mSummonedCreatures.erase(it->first);
+                    int actorId = creatureMap[it->first];
+                    creatureMap.erase(it->first);
 
                     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(actorId);
                     if (!ptr.isEmpty())
@@ -581,24 +592,38 @@ namespace MWMechanics
                         // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
                         // plays though, which is a rather lame exploit in vanilla.
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
-                        creatureStats.mSummonedCreatures.erase(it->first);
+
+                        const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                                .search("VFX_Summon_End");
+                        if (fx)
+                            MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                                "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
                     }
                     else
                     {
                         // We didn't find the creature. It's probably in an inactive cell.
                         // Add to graveyard so we can delete it when the cell becomes active.
-                        creatureStats.mSummonGraveyard.push_back(actorId);
+                        std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
+                        graveyard.push_back(actorId);
                     }
                 }
             }
         }
 
-        for (std::vector<int>::iterator it = creatureStats.mSummonGraveyard.begin(); it != creatureStats.mSummonGraveyard.end(); )
+        std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
+        for (std::vector<int>::iterator it = graveyard.begin(); it != graveyard.end(); )
         {
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(*it);
             if (!ptr.isEmpty())
             {
-                it = creatureStats.mSummonGraveyard.erase(it);
+                it = graveyard.erase(it);
+
+                const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                        .search("VFX_Summon_End");
+                if (fx)
+                    MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                        "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
+
                 MWBase::Environment::get().getWorld()->deleteObject(ptr);
             }
             else

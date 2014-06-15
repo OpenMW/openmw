@@ -26,6 +26,12 @@ namespace ESM
 
         AiSequence::AiSequence mAiSequence;
 
+        bool mHasAiSettings;
+        StatState<int> mAiSettings[4];
+
+        std::map<int, int> mSummonedCreatureMap;
+        std::vector<int> mSummonGraveyard;
+
         ESM::TimeStamp mTradeTime;
         int mGoldPool;
         int mActorId;
