@@ -547,6 +547,10 @@ namespace MWInput
         }
         if (!mControlsDisabled)
             mInputBinder->keyPressed (arg);
+
+        // Clear MyGUI's clipboard, so it doesn't interfere with our own clipboard implementation.
+        // We do not use MyGUI's clipboard manager because it doesn't support system clipboard integration with SDL.
+        MyGUI::ClipboardManager::getInstance().clearClipboardData("Text");
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
