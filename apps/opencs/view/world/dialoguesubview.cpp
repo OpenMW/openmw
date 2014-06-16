@@ -600,11 +600,11 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
     mLocked = locked;
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
-    mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || locked);
-	
     if (currentIndex.isValid())
     {
 	CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
+
+	mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || locked);
 
 	mCommandDispatcher.setEditLock (locked);
     }
@@ -615,11 +615,12 @@ void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
 {
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
-    mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
 
     if (currentIndex.isValid() && index.row() == currentIndex.row())
     {
         CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
+
+	mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
     }
 }
 
