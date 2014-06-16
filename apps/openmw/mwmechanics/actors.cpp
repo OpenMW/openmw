@@ -1074,6 +1074,9 @@ namespace MWMechanics
                 isBattleMusic = true;
             }
 
+            static float sneakTimer = 0.f; // times update of sneak icon
+            static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
+
             // if player is in sneak state see if anyone detects him
             if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak))
             {
@@ -1081,27 +1084,54 @@ namespace MWMechanics
                 const int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
                 bool detected = false;
 
-                for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+                static float fSneakUseDelay = esmStore.get<ESM::GameSetting>().find("fSneakUseDelay")->getFloat();
+
+                if (sneakTimer >= fSneakUseDelay)
+                    sneakTimer = 0.f;
+
+                if (sneakTimer == 0.f)
                 {
-                    if (iter->first == player)  // not the player
-                        continue;
+                    // Set when an NPC is within line of sight and distance, but is still unaware. Used for skill progress.
+                    bool avoidedNotice = false;
 
-                    // is the player in range and can they be detected
-                    if (   (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius)
-                        && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, iter->first)
-                        && MWBase::Environment::get().getWorld()->getLOS(player, iter->first))
+                    for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                     {
-                        detected = true;
-                        MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
-                        break;
-                    }
-                }
+                        if (iter->first == player)  // not the player
+                            continue;
 
-                if (!detected)
-                    MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
+                        // is the player in range and can they be detected
+                        if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius
+                            && MWBase::Environment::get().getWorld()->getLOS(player, iter->first))
+                        {
+                            if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, iter->first))
+                            {
+                                detected = true;
+                                avoidedNotice = false;
+                                MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+                                break;
+                            }
+                            else if (!detected)
+                                avoidedNotice = true;
+                        }
+                    }
+
+                    if (sneakSkillTimer >= fSneakUseDelay)
+                        sneakSkillTimer = 0.f;
+
+                    if (avoidedNotice && sneakSkillTimer == 0.f)
+                        player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
+
+                    if (!detected)
+                        MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
+                }
+                sneakTimer += duration;
+                sneakSkillTimer += duration;
             }
             else
+            {
+                sneakTimer = 0.f;
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+            }
         }
     }
     void Actors::restoreDynamicStats(bool sleep)
