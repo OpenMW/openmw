@@ -522,8 +522,8 @@ void RenderingManager::applyFog (bool underwater)
     }
     else
     {
-        //Ogre::ColourValue clv(0.090195, 0.115685, 0.12745);
-        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(clv));
+        Ogre::ColourValue clv(0.090195, 0.115685, 0.12745);
+        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(clv), 0, 0, 1000);
         mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(clv));
         mWater->setViewportBackground (Ogre::ColourValue(clv));
     }
