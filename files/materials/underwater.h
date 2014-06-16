@@ -1,4 +1,4 @@
-#define UNDERWATER_COLOUR float3(0.18039, 0.23137, 0.25490)
+#define UNDERWATER_COLOUR float3(0.090195, 0.115685, 0.12745)
 
 #define VISIBILITY 1000.0      // how far you can look through water
 

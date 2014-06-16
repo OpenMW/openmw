@@ -340,7 +340,7 @@
 
 #if REFRACTION
         float3 refraction = shSample(refractionMap, (screenCoords-(normal.xy*REFR_BUMP))*1.0).rgb;
-        
+
          // brighten up the refraction underwater
         refraction = (cameraPos.z < 0) ? shSaturate(refraction * 1.5) : refraction;
 #endif
@@ -351,7 +351,7 @@
 #if REFRACTION
         shOutputColour(0).xyz = shLerp(  shLerp(refraction, scatterColour, lightScatter), reflection, fresnel) + specular * sunSpecular.xyz;
 #else
-        shOutputColour(0).xyz = shLerp(reflection, float3(0.18039, 0.23137, 0.25490), (1.0-fresnel)*0.5) + specular * sunSpecular.xyz;
+        shOutputColour(0).xyz = shLerp(reflection, float3(0.090195, 0.115685, 0.12745), (1.0-fresnel)*0.5) + specular * sunSpecular.xyz;
 #endif
         // fog
         float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);

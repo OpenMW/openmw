@@ -546,14 +546,14 @@ void SkyManager::sunDisable()
     mSunEnabled = false;
 }
 
-void SkyManager::setSunDirection(const Vector3& direction)
+void SkyManager::setSunDirection(const Vector3& direction, bool is_moon)
 {
     if (!mCreated) return;
     mSun->setPosition(direction);
     mSunGlare->setPosition(direction);
 
     float height = direction.z;
-    float fade = ( height > 0.5) ? 1.0 : height * 2;
+    float fade = is_moon ? 0.0 : (( height > 0.5) ? 1.0 : height * 2);
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(fade, height)));
 }
 

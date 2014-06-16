@@ -522,9 +522,10 @@ void RenderingManager::applyFog (bool underwater)
     }
     else
     {
-        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(0.18039, 0.23137, 0.25490), 0, 0, 1000);
-        mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
-        mWater->setViewportBackground (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
+        //Ogre::ColourValue clv(0.090195, 0.115685, 0.12745);
+        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(clv));
+        mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(clv));
+        mWater->setViewportBackground (Ogre::ColourValue(clv));
     }
 }
 
@@ -631,12 +632,12 @@ void RenderingManager::sunDisable(bool real)
     }
 }
 
-void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
+void RenderingManager::setSunDirection(const Ogre::Vector3& direction, bool is_moon)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
     if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
-    mSkyManager->setSunDirection(direction);
+    mSkyManager->setSunDirection(direction, is_moon);
 }
 
 void RenderingManager::setGlare(bool glare)

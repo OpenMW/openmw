@@ -148,7 +148,7 @@ namespace MWRender
 
         void sunDisable();
 
-        void setSunDirection(const Ogre::Vector3& direction);
+        void setSunDirection(const Ogre::Vector3& direction, bool is_moon);
 
         void setMasserDirection(const Ogre::Vector3& direction);
 
