@@ -989,9 +989,18 @@ namespace MWWorld
             }
             else
             {
-                if (!mWorldScene->isCellActive(*currCell))
-                    ptr.getClass().copyToCell(ptr, *newCell, pos);
-                else if (!mWorldScene->isCellActive(*newCell))
+                if (!mWorldScene->isCellActive(*currCell) && mWorldScene->isCellActive(*newCell))
+                {
+                    MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    mWorldScene->addObjectToScene(newPtr);
+
+                    std::string script = newPtr.getClass().getScript(newPtr);
+                    if (!script.empty()) {
+                        mLocalScripts.add(script, newPtr);
+                    }
+                    addContainerScripts(newPtr, newCell);
+                }
+                else if (!mWorldScene->isCellActive(*newCell) && mWorldScene->isCellActive(*currCell))
                 {
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
