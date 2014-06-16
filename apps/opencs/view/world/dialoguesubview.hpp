@@ -195,10 +195,6 @@ namespace CSVWorld
 
             void viewRecord();
 
-            void revertRecord();
-
-            void deleteRecord();
-
             void cloneRequest();
 
             void dataChanged(const QModelIndex & index);

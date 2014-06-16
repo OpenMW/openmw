@@ -495,8 +495,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
     connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
     connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneRequest()));
-    connect(revertButton, SIGNAL(clicked()), this, SLOT(revertRecord()));
-    connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteRecord()));
+    connect(revertButton, SIGNAL(clicked()), &mCommandDispatcher, SLOT(executeRevert()));
+    connect(deleteButton, SIGNAL(clicked()), &mCommandDispatcher, SLOT(executeDelete()));
 
     mMainLayout = new QVBoxLayout(mainWidget);
 
@@ -638,83 +638,9 @@ void CSVWorld::DialogueSubView::tableMimeDataDropped(QWidget* editor,
     }
 }
 
-void CSVWorld::DialogueSubView::revertRecord()
-{
-    const int rows = mTable->rowCount();
-
-    QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
-
-    if (!currentIndex.isValid())
-    {
-	return;
-    }
-
-    const int currentRow = currentIndex.row();
-
-    if (!mLocked && mTable->columnCount() > 0 && currentRow < mTable->rowCount() )
-    {
-         CSMWorld::RecordBase::State state =
-	     static_cast<CSMWorld::RecordBase::State> (mTable->data (mTable->index (currentRow, 1)).toInt());
-
-        if (state!=CSMWorld::RecordBase::State_BaseOnly)
-        {
-            mUndoStack.push(new CSMWorld::RevertCommand(*mTable, mCurrentId));
-        }
-        if (rows != mTable->rowCount())
-        {
-            if (mTable->rowCount() == 0)
-            {
-                mEditWidget->setDisabled(true); //closing the editor is other option
-
-                return;
-            }
-	    if (currentIndex.row() >= mTable->rowCount())
-            {
-                prevId();
-            } else {
-                dataChanged(currentIndex);
-            }
-        }
-    }
-}
-
-void CSVWorld::DialogueSubView::deleteRecord()
-{
-    const int rows = mTable->rowCount();
-    QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
-
-    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
-    bool deledetedOrErased = (state == CSMWorld::RecordBase::State_Deleted);
-
-    if (!mLocked &&
-	currentIndex.isValid() &&
-        mTable->columnCount() > 0 &&
-        !deledetedOrErased &&
-        currentIndex.row() < rows &&
-        mBottom->canCreateAndDelete())
-    {
-        mUndoStack.push(new CSMWorld::DeleteCommand(*mTable, mCurrentId));
-        if (rows != mTable->rowCount())
-        {
-            if (mTable->rowCount() == 0)
-            {
-                mEditWidget->setDisabled(true); //closing the editor is other option
-
-                return;
-            }
-            if (currentIndex.row() >= mTable->rowCount())
-            {
-                prevId();
-            } else {
-                dataChanged(currentIndex);
-            }
-        }
-    }
-}
-
 void CSVWorld::DialogueSubView::requestFocus (const std::string& id)
 {
-    mCurrentId = std::string(id);
+    changeCurrentId(id);
 
     mEditWidget->remake(mTable->getModelIndex (id, 0).row());
 }
