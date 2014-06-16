@@ -448,7 +448,9 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
     connect(mTable, SIGNAL(dataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT(dataChanged(const QModelIndex&)));
-    mCurrentId = id.getId();
+
+    changeCurrentId(id.getId());
+
     QWidget *mainWidget = new QWidget(this);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
@@ -509,7 +511,9 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
         new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this));
 
     mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+
     connect(mBottom, SIGNAL(requestFocus(const std::string&)), this, SLOT(requestFocus(const std::string&)));
+
     connect(addButton, SIGNAL(clicked()), mBottom, SLOT(createRequest()));
 
     if(!mBottom->canCreateAndDelete())
@@ -549,7 +553,7 @@ void CSVWorld::DialogueSubView::prevId()
                 setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
                                         mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
 
-		mCurrentId = std::string(mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData());
+		changeCurrentId(std::string(mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
 
                 mEditWidget->setDisabled(mLocked);
 
@@ -585,7 +589,7 @@ void CSVWorld::DialogueSubView::nextId()
                 setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (newRow, 2)).toInt()),
 						      mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
 
-		mCurrentId = std::string(mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData());
+		changeCurrentId(std::string(mTable->data (mTable->index (newRow, 0)).toString().toUtf8().constData()));
 
                 mEditWidget->setDisabled(mLocked);
 
@@ -614,7 +618,6 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
 void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
 {
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
-
 
     if (currentIndex.isValid() && index.row() == currentIndex.row())
     {
@@ -745,4 +748,13 @@ void CSVWorld::DialogueSubView::viewRecord()
         if (params.first.getType()!=CSMWorld::UniversalId::Type_None)
             emit focusId (params.first, params.second);
     }
+}
+
+void CSVWorld::DialogueSubView::changeCurrentId(const std::string& newId)
+{
+    std::vector<std::string> selection;
+    mCurrentId = std::string(newId);
+
+    selection.push_back(mCurrentId);
+    mCommandDispatcher.setSelection(selection);
 }

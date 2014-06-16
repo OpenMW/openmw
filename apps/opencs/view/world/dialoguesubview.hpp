@@ -181,6 +181,9 @@ namespace CSVWorld
                              bool sorting = false);
 
             virtual void setEditLock (bool locked);
+						  
+        private:
+	    void changeCurrentId(const std::string& newCurrent);
 
         private slots:
 
