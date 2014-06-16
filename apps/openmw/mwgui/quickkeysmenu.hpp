@@ -11,6 +11,7 @@ namespace MWGui
     class QuickKeysMenuAssign;
     class ItemSelectionDialog;
     class MagicSelectionDialog;
+    class ItemWidget;
 
     class QuickKeysMenu : public WindowBase
     {
@@ -51,7 +52,8 @@ namespace MWGui
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
 
-        std::vector<MyGUI::Button*> mQuickKeyButtons;
+        std::vector<ItemWidget*> mQuickKeyButtons;
+        std::vector<QuickKeyType> mAssigned;
 
         QuickKeysMenuAssign* mAssignDialog;
         ItemSelectionDialog* mItemSelectionDialog;
@@ -63,7 +65,7 @@ namespace MWGui
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
 
-        void unassign(MyGUI::Widget* key, int index);
+        void unassign(ItemWidget* key, int index);
     };
 
     class QuickKeysMenuAssign : public WindowModal

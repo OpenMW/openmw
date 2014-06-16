@@ -73,4 +73,9 @@ as around the sections of the stats window, or around popup info windows -->
         <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="Bottom Left"/>
         <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="Bottom Right"/>
     </Skin>
+
+    <Skin name="MW_Box_Overlay" size="516 516">
+        <Property key="NeedMouse" value="false"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+    </Skin>
 </MyGUI>

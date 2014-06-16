@@ -299,16 +299,32 @@ namespace MWWorld
                     continue; // velocity updated, calculate nextpos again
                 }
 
-                // trace to where character would go if there were no obstructions
-                tracer.doTrace(colobj, newPosition, nextpos, engine);
-
-                // check for obstructions
-                if(tracer.mFraction >= 1.0f)
+                if(!newPosition.positionCloses(nextpos, 0.00000001))
                 {
-                    newPosition = tracer.mEndPos; // ok to move, so set newPosition
+                    // trace to where character would go if there were no obstructions
+                    tracer.doTrace(colobj, newPosition, nextpos, engine);
+
+                    // check for obstructions
+                    if(tracer.mFraction >= 1.0f)
+                    {
+                        newPosition = tracer.mEndPos; // ok to move, so set newPosition
+                        remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
+                        break;
+                    }
+                }
+                else
+                {
+                    // The current position and next position are nearly the same, so just exit.
+                    // Note: Bullet can trigger an assert in debug modes if the positions
+                    // are the same, since that causes it to attempt to normalize a zero
+                    // length vector (which can also happen with nearly identical vectors, since
+                    // precision can be lost due to any math Bullet does internally). Since we
+                    // aren't performing any collision detection, we want to reject the next
+                    // position, so that we don't slowly move inside another object.
                     remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                     break;
                 }
+
 
                 Ogre::Vector3 oldPosition = newPosition;
                 // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
@@ -492,7 +508,7 @@ namespace MWWorld
         return std::make_pair(true, ray.getPoint(len * test.second));
     }
 
-    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY, Ogre::Vector3* normal)
+    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY, Ogre::Vector3* normal, std::string* hit)
     {
         Ogre::Ray ray = mRender.getCamera()->getCameraToViewportRay(
             mouseX,
@@ -510,6 +526,8 @@ namespace MWWorld
             return std::make_pair(false, Ogre::Vector3());
         else
         {
+            if (hit != NULL)
+                *hit = result.first;
             return std::make_pair(true, ray.getPoint(200*result.second));  /// \todo make this distance (ray length) configurable
         }
     }

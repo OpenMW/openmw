@@ -64,6 +64,7 @@
 #include "fontloader.hpp"
 #include "videowidget.hpp"
 #include "backgroundimage.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -166,6 +167,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
+        ItemWidget::registerComponents();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatClick>("Controller");
 
@@ -1579,12 +1581,13 @@ namespace MWGui
         bool cursorWasVisible = mCursorVisible;
         setCursorVisible(false);
 
-        while (mVideoWidget->update())
+        while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
 
             mRendering->getWindow()->update();
         }
+        mVideoWidget->cleanup();
 
         setCursorVisible(cursorWasVisible);
 

@@ -680,7 +680,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(ishealth)
+            if(ishealth && !attacker.isEmpty()) // Don't use armor mitigation for fall damage
             {
                 // Hit percentages:
                 // cuirass = 30%

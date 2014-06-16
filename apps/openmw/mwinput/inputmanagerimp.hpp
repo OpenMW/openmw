@@ -163,6 +163,7 @@ namespace MWInput
         int mMouseWheel;
         bool mUserFileExists;
         bool mAlwaysRunActive;
+        bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
 
@@ -172,6 +173,8 @@ namespace MWInput
 
         void resetIdleTime();
         void updateIdleTime(float dt);
+
+        void setPlayerControlsEnabled(bool enabled);
 
     private:
         void toggleMainMenu();
