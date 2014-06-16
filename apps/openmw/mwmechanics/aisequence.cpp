@@ -221,6 +221,11 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
             {
                 return; // target is already pursued
             }
+            if((*iter)->getTypeId() == AiPackage::TypeIdCombat && package.getTypeId() == AiPackage::TypeIdCombat
+                && static_cast<const AiCombat*>(*iter)->getTarget() == static_cast<const AiCombat*>(&package)->getTarget())
+            {
+                return; // already in combat with this actor
+            }
             else if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
                 static_cast<AiWander*>(*iter)->setReturnPosition(Ogre::Vector3(actor.getRefData().getPosition().pos));
         }

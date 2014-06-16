@@ -789,7 +789,6 @@ namespace MWMechanics
 
             if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.isHostile())
             {
-                /// \todo Move me! I shouldn't be here...
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
                 float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt());
                 // Force dialogue on sight if bounty is greater than the cutoff
@@ -817,22 +816,12 @@ namespace MWMechanics
                     creatureStats.getAiSequence().stopCombat();
 
                     // Reset factors to attack
-                    // TODO: Not a complete list, disposition changes?
                     creatureStats.setHostile(false);
                     creatureStats.setAttacked(false);
                     creatureStats.setAlarmed(false);
 
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
-                }
-                else if (!creatureStats.isHostile() && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue)
-                {
-                    if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stack(AiPursue(player), ptr);
-                    else
-                    {
-                        MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
-                    }
                 }
             }
         }

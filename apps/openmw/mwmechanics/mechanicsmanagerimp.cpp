@@ -14,6 +14,7 @@
 #include "../mwworld/player.hpp"
 
 #include "../mwmechanics/aicombat.hpp"
+#include "../mwmechanics/aipursue.hpp"
 
 #include <OgreSceneNode.h>
 
@@ -836,7 +837,7 @@ namespace MWMechanics
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
         // What amount of alarm did this crime generate?
-        int alarm;
+        int alarm = 0;
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmTresspass")->getInt();
         else if (type == OT_Pickpocket)
@@ -847,17 +848,14 @@ namespace MWMechanics
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmKilling")->getInt();
         else if (type == OT_Theft)
             alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
-        else
-            return false;
 
-        // Innocent until proven guilty
         bool reported = false;
 
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
 
         Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
-        int radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getInt();
+        float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
@@ -865,9 +863,9 @@ namespace MWMechanics
         if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
             neighbors.push_back(victim);
 
-        int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
+        bool victimAware = false;
 
-        // Find actors who witnessed the crime
+        // Find actors who directly witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             if (*it == player) continue; // not the player
@@ -875,21 +873,12 @@ namespace MWMechanics
             // Was the crime seen?
             if (MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
             {
-                // TODO: Add more messages
+                if (*it == victim)
+                    victimAware = true;
+
+                // TODO: are there other messages?
                 if (type == OT_Theft)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
-
-                if (*it == victim)
-                {
-                    // Self-defense
-                    // The victim is aware of the criminal/assailant. If being assaulted, fight back now
-                    // (regardless of whether the assault is reported or not)
-                    // This applies to both NPCs and creatures
-
-                    // ... except if this is a guard: then the player is given a chance to pay a fine / go to jail instead
-                    if (type == OT_Assault && !it->getClass().isClass(*it, "guard"))
-                        MWBase::Environment::get().getMechanicsManager()->startCombat(victim, player);
-                }
 
                 // Crime reporting only applies to NPCs
                 if (!it->getClass().isNpc())
@@ -899,32 +888,19 @@ namespace MWMechanics
                 if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
                     reported = true;
-
-                    // Tell everyone, including yourself
-                    for (std::vector<MWWorld::Ptr>::iterator it1 = neighbors.begin(); it1 != neighbors.end(); ++it1)
-                    {
-                        if (   *it1 == player
-                            || !it1->getClass().isNpc()) continue; // not the player and is an NPC
-
-                        // Will other witnesses paticipate in crime
-                        if (    it1->getClass().getCreatureStats(*it1).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm
-                            ||  type == OT_Assault )
-                        {
-                            it1->getClass().getNpcStats(*it1).setCrimeId(id);
-                        }
-
-                        // Mark as Alarmed for dialogue
-                        it1->getClass().getCreatureStats(*it1).setAlarmed(true);
-                    }
                 }
             }
         }
+
         if (reported)
             reportCrime(player, victim, type, arg);
+        else if (victimAware && !victim.isEmpty() && type == OT_Assault)
+            startCombat(victim, player);
+
         return reported;
     }
 
-    void MechanicsManager::reportCrime(const MWWorld::Ptr &ptr, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    void MechanicsManager::reportCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
@@ -944,7 +920,7 @@ namespace MWMechanics
         }
 
         MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
-        ptr.getClass().getNpcStats(ptr).setBounty(ptr.getClass().getNpcStats(ptr).getBounty()
+        player.getClass().getNpcStats(player).setBounty(player.getClass().getNpcStats(player).getBounty()
                                                   + arg);
 
         // If committing a crime against a faction member, expell from the faction
@@ -953,9 +929,81 @@ namespace MWMechanics
             std::string factionID;
             if(!victim.getClass().getNpcStats(victim).getFactionRanks().empty())
                 factionID = victim.getClass().getNpcStats(victim).getFactionRanks().begin()->first;
-            if (ptr.getClass().getNpcStats(ptr).isSameFaction(victim.getClass().getNpcStats(victim)))
+            if (player.getClass().getNpcStats(player).isSameFaction(victim.getClass().getNpcStats(victim)))
             {
-                ptr.getClass().getNpcStats(ptr).expell(factionID);
+                player.getClass().getNpcStats(player).expell(factionID);
+            }
+        }
+
+        // Make surrounding actors within alarm distance respond to the crime
+        std::vector<MWWorld::Ptr> neighbors;
+
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+
+        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
+
+        mActors.getObjectsInRange(from, radius, neighbors);
+
+        // victim should be considered even beyond alarm radius
+        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+            neighbors.push_back(victim);
+
+        int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
+
+        // What amount of provocation did this crime generate?
+        // Controls whether witnesses will engage combat with the criminal.
+        int fight = 0;
+        if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+            fight = esmStore.get<ESM::GameSetting>().find("iFightTrespass")->getInt();
+        else if (type == OT_Pickpocket)
+            fight = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt();
+        else if (type == OT_Assault) // Note: iFightAttack is for the victim, iFightAttacking for witnesses?
+            fight = esmStore.get<ESM::GameSetting>().find("iFightAttack")->getInt();
+        else if (type == OT_Murder)
+            fight = esmStore.get<ESM::GameSetting>().find("iFightKilling")->getInt();
+        else if (type == OT_Theft)
+            fight = esmStore.get<ESM::GameSetting>().find("fFightStealing")->getFloat();
+
+        const int iFightAttacking = esmStore.get<ESM::GameSetting>().find("iFightAttacking")->getInt();
+
+        // Tell everyone (including the original reporter) in alarm range
+        for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        {
+            if (   *it == player
+                || !it->getClass().isNpc()) continue;
+
+            int aggression = fight;
+
+            // Note: iFightAttack is used for the victim, iFightAttacking for witnesses?
+            if (*it != victim && type == OT_Assault)
+                aggression = iFightAttacking;
+
+            if (it->getClass().isClass(*it, "guard"))
+            {
+                // Mark as Alarmed for dialogue
+                it->getClass().getCreatureStats(*it).setAlarmed(true);
+
+                // Set the crime ID, which we will use to calm down participants
+                // once the bounty has been paid.
+                it->getClass().getNpcStats(*it).setCrimeId(id);
+
+                it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
+            }
+            else
+            {
+                bool aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(*it, player, aggression);
+                if (aggressive)
+                {
+                    startCombat(*it, player);
+
+                    // Set the crime ID, which we will use to calm down participants
+                    // once the bounty has been paid.
+                    it->getClass().getNpcStats(*it).setCrimeId(id);
+
+                    // Mark as Alarmed for dialogue
+                    it->getClass().getCreatureStats(*it).setAlarmed(true);
+                }
             }
         }
     }
@@ -1099,7 +1147,7 @@ namespace MWMechanics
         mActors.clear();
     }
 
-    bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
+    bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target, int bias)
     {
         Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
         Ogre::Vector3 pos2 (target.getRefData().getPosition().pos);
@@ -1117,9 +1165,10 @@ namespace MWMechanics
         if (ptr.getClass().isNpc())
             disposition = getDerivedDisposition(ptr);
 
-        int fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
+        int fight = std::max(0.f, ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
                 + (iFightDistanceBase - fFightDistanceMultiplier * d)
-                + ((50 - disposition)  * fFightDispMult);
+                + ((50 - disposition)  * fFightDispMult))
+                + bias;
 
         return (fight >= 100);
     }
