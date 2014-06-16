@@ -156,6 +156,8 @@ namespace MWMechanics
             virtual void readRecord (ESM::ESMReader& reader, int32_t type);
 
             virtual void clear();
+
+            virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target);
     };
 }
 

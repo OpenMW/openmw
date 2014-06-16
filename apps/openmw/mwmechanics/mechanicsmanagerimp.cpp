@@ -1098,4 +1098,29 @@ namespace MWMechanics
     {
         mActors.clear();
     }
+
+    bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
+    {
+        Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
+        Ogre::Vector3 pos2 (target.getRefData().getPosition().pos);
+
+        float d = pos1.distance(pos2);
+
+        static int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "iFightDistanceBase")->getInt();
+        static float fFightDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "fFightDistanceMultiplier")->getFloat();
+        static float fFightDispMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "fFightDispMult")->getFloat();
+
+        int disposition = 50;
+        if (ptr.getClass().isNpc())
+            disposition = getDerivedDisposition(ptr);
+
+        int fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
+                + (iFightDistanceBase - fFightDistanceMultiplier * d)
+                + ((50 - disposition)  * fFightDispMult);
+
+        return (fight >= 100);
+    }
 }

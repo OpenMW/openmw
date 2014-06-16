@@ -191,6 +191,8 @@ namespace MWBase
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
 
             virtual void clear() = 0;
+
+            virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
     };
 }
 

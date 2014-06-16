@@ -201,32 +201,28 @@ namespace MWMechanics
                 || (!actor1.getClass().canSwim(actor1) && MWBase::Environment::get().getWorld()->isSwimming(actor2)))) // creature can't swim to target
             return;
 
-        float fight;
+        bool aggressive;
 
         if (againstPlayer) 
-            fight = actor1.getClass().getCreatureStats(actor1).getAiSetting(CreatureStats::AI_Fight).getModified();
+            aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
         else
         {
-            fight = 0;
+            aggressive = false;
             // if one of actors is creature then we should make a decision to start combat or not
             // NOTE: function doesn't take into account combat between 2 creatures
             if (!actor1.getClass().isNpc())
             {
                 // if creature is hostile then it is necessarily to start combat
-                if (creatureStats.isHostile()) fight = 100;
-                else fight = creatureStats.getAiSetting(CreatureStats::AI_Fight).getModified();
+                if (creatureStats.isHostile()) aggressive = true;
+                else aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
 
-        ESM::Position actor1Pos = actor1.getRefData().getPosition();
-        ESM::Position actor2Pos = actor2.getRefData().getPosition();
-        float d = Ogre::Vector3(actor1Pos.pos).distance(Ogre::Vector3(actor2Pos.pos));
-
-        if(   (fight == 100 && d <= 5000)
-            || (fight >= 95 && d <= 3000)
-            || (fight >= 90 && d <= 2000)
-            || (fight >= 80 && d <= 1000))
+        if(aggressive)
         {
+            const ESM::Position& actor1Pos = actor2.getRefData().getPosition();
+            const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
+            float d = Ogre::Vector3(actor1Pos.pos).distance(Ogre::Vector3(actor2Pos.pos));
             if (againstPlayer || actor2.getClass().getCreatureStats(actor2).getAiSequence().canAddTarget(actor2Pos, d))
             {
                 bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
