@@ -827,6 +827,8 @@ namespace MWMechanics
         // NOTE: int arg can be from itemTaken() so DON'T modify it, since it is
         //  passed to reportCrime later on in this function.
 
+        // NOTE: victim may be empty
+
         // Only player can commit crime
         if (player.getRefData().getHandle() != "player")
             return false;
@@ -860,7 +862,7 @@ namespace MWMechanics
         mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
-        if (from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
             neighbors.push_back(victim);
 
         int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();

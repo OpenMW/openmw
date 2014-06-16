@@ -111,6 +111,7 @@ namespace MWMechanics
             /**
              * @brief Commit a crime. If any actors witness the crime and report it,
              *        reportCrime will be called automatically.
+             * @note victim may be empty
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
              * @return was the crime reported?
              */
