@@ -16,7 +16,7 @@
 namespace
 {
     ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
-    void adjustRefNum (ESM::CellRef::RefNum& refNum, ESM::ESMReader& reader)
+    void adjustRefNum (ESM::RefNum& refNum, ESM::ESMReader& reader)
     {
         int local = (refNum.mIndex & 0xff000000) >> 24;
 
@@ -40,12 +40,12 @@ namespace ESM
     unsigned int Cell::sRecordId = REC_CELL;
 
     // Some overloaded compare operators.
-    bool operator== (const MovedCellRef& ref, const CellRef::RefNum& refNum)
+    bool operator== (const MovedCellRef& ref, const RefNum& refNum)
     {
         return ref.mRefNum == refNum;
     }
 
-    bool operator== (const CellRef& ref, const CellRef::RefNum& refNum)
+    bool operator== (const CellRef& ref, const RefNum& refNum)
     {
         return ref.mRefNum == refNum;
     }

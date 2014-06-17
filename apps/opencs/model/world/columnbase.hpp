@@ -89,7 +89,9 @@ namespace CSMWorld
             Display_RefRecordType,
             Display_DialogueType,
             Display_QuestStatusType,
-            Display_Gender
+            Display_Gender,
+
+            Display_Nested
         };
 
         int mColumnId;
@@ -124,6 +126,12 @@ namespace CSMWorld
         {
             throw std::logic_error ("Column " + getTitle() + " is not editable");
         }
+    };
+
+    template<typename ESXRecordT>
+    struct NestedColumn
+    {
+        virtual QVariant getNested(const Record<ESXRecordT>& record, int subColumn, int subSow) const = 0;
     };
 }
 

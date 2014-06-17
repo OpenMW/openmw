@@ -82,6 +82,7 @@ namespace MWGui
   class Recharge;
   class CompanionWindow;
   class VideoWidget;
+  class WindowModal;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -132,10 +133,10 @@ namespace MWGui
     virtual void forceHide(MWGui::GuiWindow wnd);
     virtual void unsetForceHide(MWGui::GuiWindow wnd);
 
-    // Disallow all inventory mode windows
+    /// Disallow all inventory mode windows
     virtual void disallowAll();
 
-    // Allow one or more windows
+    /// Allow one or more windows
     virtual void allow(GuiWindow wnd);
 
     virtual bool isAllowed(GuiWindow wnd) const;
@@ -166,8 +167,9 @@ namespace MWGui
     virtual void setValue (const std::string& id, int value);
 
     /// Set time left for the player to start drowning (update the drowning bar)
-    /// @param time value from [0,20]
-    virtual void setDrowningTimeLeft (float time);
+    /// @param time time left to start drowning
+    /// @param maxTime how long we can be underwater (in total) until drowning starts
+    virtual void setDrowningTimeLeft (float time, float maxTime);
 
     virtual void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
     virtual void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
@@ -187,12 +189,12 @@ namespace MWGui
     virtual void setDragDrop(bool dragDrop);
     virtual bool getWorldMouseOver();
 
-    virtual void toggleFogOfWar();
-    virtual void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
+    virtual bool toggleFogOfWar();
+    virtual bool toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
     virtual bool getFullHelp() const;
 
-    virtual void setInteriorMapTexture(const int x, const int y);
-    ///< set the index of the map texture that should be used (for interiors)
+    virtual void setActiveMap(int x, int y, bool interior);
+    ///< set the indices of the map texture that should be used
 
     /// sets the visibility of the drowning bar
     virtual void setDrowningBarVisibility(bool visible);
@@ -224,7 +226,11 @@ namespace MWGui
 
     virtual void addVisitedLocation(const std::string& name, int x, int y);
 
-    virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
+    ///Hides dialog and schedules dialog to be deleted.
+    virtual void removeDialog(OEngine::GUI::Layout* dialog);
+
+    ///Gracefully attempts to exit the topmost GUI mode
+    virtual void exitCurrentGuiMode();
 
     virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
     virtual void staticMessageBox(const std::string& message);
@@ -290,8 +296,25 @@ namespace MWGui
     /// Clear all savegame-specific data
     virtual void clear();
 
-    virtual void write (ESM::ESMWriter& writer);
+    virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress);
     virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+    virtual int countSavedGameRecords() const;
+
+    /// Does the current stack of GUI-windows permit saving?
+    virtual bool isSavingAllowed() const;
+
+    /// Returns the current Modal
+    /** Used to send exit command to active Modal when Esc is pressed **/
+    virtual WindowModal* getCurrentModal() const;
+
+    /// Sets the current Modal
+    /** Used to send exit command to active Modal when Esc is pressed **/
+    virtual void addCurrentModal(WindowModal* input) {mCurrentModals.push(input);}
+
+    /// Removes the top Modal
+    /** Used when one Modal adds another Modal
+        \param input Pointer to the current modal, to ensure proper modal is removed **/
+    virtual void removeCurrentModal(WindowModal* input);
 
   private:
     bool mConsoleOnlyScripts;
@@ -301,6 +324,8 @@ namespace MWGui
     void onWindowChangeCoord(MyGUI::Window* _sender);
 
     std::string mSelectedSpell;
+
+    std::stack<WindowModal*> mCurrentModals;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;

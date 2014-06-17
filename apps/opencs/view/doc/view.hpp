@@ -126,6 +126,8 @@ namespace CSVDoc
 
             void abortOperation (int type);
 
+            void updateUserSetting (const QString &, const QStringList &);
+
         private slots:
 
             void newView();
@@ -177,6 +179,8 @@ namespace CSVDoc
             void addJournalInfosSubView();
 
             void toggleShowStatusBar (bool show);
+
+            void loadErrorLog();
     };
 }
 

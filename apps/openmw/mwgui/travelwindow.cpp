@@ -45,6 +45,11 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
+    void TravelWindow::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
+    }
+
     void TravelWindow::addDestination(const std::string& travelId,ESM::Position pos,bool interior)
     {
         int price = 0;
@@ -161,7 +166,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->changeToExteriorCell(pos);
         }
 
-        MWWorld::Class::get(player).adjustPosition(player);
+        player.getClass().adjustPosition(player);
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0);
@@ -170,7 +175,7 @@ namespace MWGui
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
+        exit();
     }
 
     void TravelWindow::updateLabels()

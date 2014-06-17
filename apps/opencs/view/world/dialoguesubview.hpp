@@ -8,7 +8,9 @@
 #include <QScrollArea>
 
 #include "../doc/subview.hpp"
+
 #include "../../model/world/columnbase.hpp"
+#include "../../model/world/commanddispatcher.hpp"
 
 class QDataWidgetMapper;
 class QSize;
@@ -165,10 +167,11 @@ namespace CSVWorld
         QVBoxLayout* mMainLayout;
         CSMWorld::IdTable* mTable;
         QUndoStack& mUndoStack;
-        int mRow;
+	std::string mCurrentId;
         bool mLocked;
         const CSMDoc::Document& mDocument;
         TableBottomBox* mBottom;
+        CSMWorld::CommandDispatcher mCommandDispatcher;
 
         public:
 
@@ -178,6 +181,9 @@ namespace CSVWorld
                              bool sorting = false);
 
             virtual void setEditLock (bool locked);
+						  
+        private:
+	    void changeCurrentId(const std::string& newCurrent);
 
         private slots:
 
@@ -188,10 +194,6 @@ namespace CSVWorld
             void showPreview();
 
             void viewRecord();
-
-            void revertRecord();
-
-            void deleteRecord();
 
             void cloneRequest();
 

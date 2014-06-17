@@ -71,12 +71,12 @@ ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
     return -1;
 }
 
-void ContainerItemModel::copyItem (const ItemStack& item, size_t count)
+MWWorld::Ptr ContainerItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
 {
     const MWWorld::Ptr& source = mItemSources[mItemSources.size()-1];
     if (item.mBase.getContainerStore() == &source.getClass().getContainerStore(source))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    source.getClass().getContainerStore(source).add(item.mBase, count, source);
+    return *source.getClass().getContainerStore(source).add(item.mBase, count, source);
 }
 
 void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
@@ -85,7 +85,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 
     for (std::vector<MWWorld::Ptr>::iterator source = mItemSources.begin(); source != mItemSources.end(); ++source)
     {
-        MWWorld::ContainerStore& store = MWWorld::Class::get(*source).getContainerStore(*source);
+        MWWorld::ContainerStore& store = source->getClass().getContainerStore(*source);
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
@@ -120,7 +120,7 @@ void ContainerItemModel::update()
     mItems.clear();
     for (std::vector<MWWorld::Ptr>::iterator source = mItemSources.begin(); source != mItemSources.end(); ++source)
     {
-        MWWorld::ContainerStore& store = MWWorld::Class::get(*source).getContainerStore(*source);
+        MWWorld::ContainerStore& store = source->getClass().getContainerStore(*source);
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {

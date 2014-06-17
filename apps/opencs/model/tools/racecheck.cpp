@@ -7,7 +7,7 @@
 
 #include "../world/universalid.hpp"
 
-void CSMTools::RaceCheckStage::performPerRecord (int stage, std::vector<std::string>& messages)
+void CSMTools::RaceCheckStage::performPerRecord (int stage, Messages& messages)
 {
     const CSMWorld::Record<ESM::Race>& record = mRaces.getRecord (stage);
 
@@ -20,24 +20,24 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, std::vector<std::str
 
     // test for empty name and description
     if (race.mName.empty())
-        messages.push_back (id.toString() + "|" + race.mId + " has an empty name");
+        messages.push_back (std::make_pair (id, race.mId + " has an empty name"));
 
     if (race.mDescription.empty())
-        messages.push_back (id.toString() + "|" + race.mId + " has an empty description");
+        messages.push_back (std::make_pair (id, race.mId + " has an empty description"));
 
     // test for positive height
     if (race.mData.mHeight.mMale<=0)
-        messages.push_back (id.toString() + "|male " + race.mId + " has non-positive height");
+        messages.push_back (std::make_pair (id, "male " + race.mId + " has non-positive height"));
 
     if (race.mData.mHeight.mFemale<=0)
-        messages.push_back (id.toString() + "|female " + race.mId + " has non-positive height");
+        messages.push_back (std::make_pair (id, "female " + race.mId + " has non-positive height"));
 
     // test for non-negative weight
     if (race.mData.mWeight.mMale<0)
-        messages.push_back (id.toString() + "|male " + race.mId + " has negative weight");
+        messages.push_back (std::make_pair (id, "male " + race.mId + " has negative weight"));
 
     if (race.mData.mWeight.mFemale<0)
-        messages.push_back (id.toString() + "|female " + race.mId + " has negative weight");
+        messages.push_back (std::make_pair (id, "female " + race.mId + " has negative weight"));
 
     // remember playable flag
     if (race.mData.mFlags & 0x1)
@@ -46,12 +46,12 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, std::vector<std::str
     /// \todo check data members that can't be edited in the table view
 }
 
-void CSMTools::RaceCheckStage::performFinal (std::vector<std::string>& messages)
+void CSMTools::RaceCheckStage::performFinal (Messages& messages)
 {
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Races);
 
     if (!mPlayable)
-        messages.push_back (id.toString() + "|No playable race");
+        messages.push_back (std::make_pair (id, "No playable race"));
 }
 
 CSMTools::RaceCheckStage::RaceCheckStage (const CSMWorld::IdCollection<ESM::Race>& races)
@@ -64,7 +64,7 @@ int CSMTools::RaceCheckStage::setup()
     return mRaces.getSize()+1;
 }
 
-void CSMTools::RaceCheckStage::perform (int stage, std::vector<std::string>& messages)
+void CSMTools::RaceCheckStage::perform (int stage, Messages& messages)
 {
     if (stage==mRaces.getSize())
         performFinal (messages);

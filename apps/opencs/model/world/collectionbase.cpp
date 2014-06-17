@@ -2,6 +2,7 @@
 #include "collectionbase.hpp"
 
 #include <stdexcept>
+#include <cassert>
 
 #include "columnbase.hpp"
 

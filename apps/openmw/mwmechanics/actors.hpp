@@ -27,7 +27,7 @@ namespace MWMechanics
     {
             std::map<std::string, int> mDeathCount;
 
-            void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
+            void updateNpc(const MWWorld::Ptr &ptr, float duration);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
@@ -58,7 +58,7 @@ namespace MWMechanics
             /// paused we may want to do it manually (after equipping permanent enchantment)
             void updateMagicEffects (const MWWorld::Ptr& ptr) { adjustMagicEffects(ptr); }
 
-            void addActor (const MWWorld::Ptr& ptr);
+            void addActor (const MWWorld::Ptr& ptr, bool updateImmediately=false);
             ///< Register an actor for stats management
             ///
             /// \note Dead actors are ignored.
@@ -81,6 +81,12 @@ namespace MWMechanics
             ///< This function is normally called automatically during the update process, but it can
             /// also be called explicitly at any time to force an update.
 
+            /** Start combat between two actors
+                @Notes: If againstPlayer = true then actor2 should be the Player.
+                        If one of the combatants is creature it should be actor1.
+            */
+            void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer);
+
             void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.
 
@@ -98,8 +104,13 @@ namespace MWMechanics
 
             void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
 
+            ///Returns the list of actors which are following the given actor
+            /**ie AiFollow is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
-            ///<return the list of actors which are following the given actor (ie AiFollow is active and the target is the actor)
+
+            ///Returns the list of actors which are fighting the given actor
+            /**ie AiCombat is active and the target is the actor **/
+            std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
 
     private:
         PtrControllerMap mActors;

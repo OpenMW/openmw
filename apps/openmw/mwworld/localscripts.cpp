@@ -36,10 +36,10 @@ namespace
 
             MWWorld::Ptr containerPtr (&*iter, cell);
 
-            MWWorld::ContainerStore& container = MWWorld::Class::get(containerPtr).getContainerStore(containerPtr);
+            MWWorld::ContainerStore& container = containerPtr.getClass().getContainerStore(containerPtr);
             for(MWWorld::ContainerStoreIterator it3 = container.begin(); it3 != container.end(); ++it3)
             {
-                std::string script = MWWorld::Class::get(*it3).getScript(*it3);
+                std::string script = it3->getClass().getScript(*it3);
                 if(script != "")
                 {
                     MWWorld::Ptr item = *it3;

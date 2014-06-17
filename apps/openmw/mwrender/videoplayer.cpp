@@ -6,14 +6,9 @@
 #include <cstdio>
 #include <cmath>
 
-#include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
-#include <OgreRenderWindow.h>
 #include <OgreTextureManager.h>
-#include <OgreTechnique.h>
-#include <OgreRectangle2D.h>
-#include <OgreMaterialManager.h>
-#include <OgreSceneNode.h>
+#include <OgreStringConverter.h>
 
 #include <boost/thread.hpp>
 
@@ -21,9 +16,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwsound/sound_decoder.hpp"
 #include "../mwsound/sound.hpp"
-#include "../mwbase/inputmanager.hpp"
-
-#include "renderconst.hpp"
 
 #ifdef _WIN32
 #include <BaseTsd.h>
@@ -57,6 +49,29 @@ extern "C"
         #include <libavutil/channel_layout.h>
     #endif
 }
+
+#ifdef _WIN32
+    // Decide whether to play binkaudio.
+    #include <libavcodec/version.h>
+    // libavcodec versions 54.10.100 (or maybe earlier) to 54.54.100 potentially crashes Windows 64bit.
+    // From version 54.56 or higher, there's no sound due to the encoding format changing from S16 to FLTP
+    // (see https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d and
+    // http://git.videolan.org/?p=ffmpeg.git;a=commitdiff;h=3049d5b9b32845c86aa5588bb3352bdeb2edfdb2;hp=43c6b45a53a186a187f7266e4d6bd3c2620519f1),
+    // but does not crash (or at least no known crash).
+    #if (LIBAVCODEC_VERSION_MAJOR > 54)
+        #define FFMPEG_PLAY_BINKAUDIO
+    #else
+        #ifdef _WIN64
+            #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 55))
+                #define FFMPEG_PLAY_BINKAUDIO
+            #endif
+        #else
+            #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 10))
+                #define FFMPEG_PLAY_BINKAUDIO
+            #endif
+        #endif
+    #endif
+#endif
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
@@ -978,8 +993,14 @@ void VideoState::init(const std::string& resourceName)
         MWBase::Environment::get().getSoundManager()->pauseSounds();
 
     this->external_clock_base = av_gettime();
+
+#if !defined(_WIN32) || defined(FFMPEG_PLAY_BINKAUDIO)
     if(audio_index >= 0)
         this->stream_open(audio_index, this->format_ctx);
+#else
+    std::cout<<"FFmpeg sound disabled for \""+resourceName+"\""<<std::endl;
+#endif
+
     if(video_index >= 0)
     {
         this->stream_open(video_index, this->format_ctx);

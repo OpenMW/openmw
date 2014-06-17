@@ -10,23 +10,23 @@ namespace MWGui
     {
     }
 
-    void CompanionItemModel::copyItem (const ItemStack& item, size_t count)
+    MWWorld::Ptr CompanionItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner=false)
     {
         if (mActor.getClass().isNpc())
         {
-            MWMechanics::NpcStats& stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
-            stats.modifyProfit(MWWorld::Class::get(item.mBase).getValue(item.mBase) * count);
+            MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats(mActor);
+            stats.modifyProfit(item.mBase.getClass().getValue(item.mBase) * count);
         }
 
-        InventoryItemModel::copyItem(item, count);
+        return InventoryItemModel::copyItem(item, count, setNewOwner);
     }
 
     void CompanionItemModel::removeItem (const ItemStack& item, size_t count)
     {
         if (mActor.getClass().isNpc())
         {
-            MWMechanics::NpcStats& stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
-            stats.modifyProfit(-MWWorld::Class::get(item.mBase).getValue(item.mBase) * count);
+            MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats(mActor);
+            stats.modifyProfit(-item.mBase.getClass().getValue(item.mBase) * count);
         }
 
         InventoryItemModel::removeItem(item, count);

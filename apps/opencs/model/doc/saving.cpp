@@ -8,8 +8,9 @@
 #include "savingstages.hpp"
 #include "document.hpp"
 
-CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& projectPath)
-: Operation (State_Saving, true, true), mDocument (document), mState (*this, projectPath)
+CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& projectPath,
+    ToUTF8::FromType encoding)
+: Operation (State_Saving, true, true), mDocument (document), mState (*this, projectPath, encoding)
 {
     // save project file
     appendStage (new OpenSaveStage (mDocument, mState, true));
@@ -64,7 +65,11 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WriteRefIdCollectionStage (mDocument, mState));
 
+    appendStage (new CollectionReferencesStage (mDocument, mState));
 
+    appendStage (new WriteCellCollectionStage (mDocument, mState));
+
+    // close file and clean up
     appendStage (new CloseSaveStage (mState));
 
     appendStage (new FinalSavingStage (mDocument, mState));

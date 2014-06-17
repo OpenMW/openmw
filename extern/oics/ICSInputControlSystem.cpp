@@ -796,6 +796,11 @@ namespace ICS
 		mMouseAxisBindingInitialValues[0] = ICS_MOUSE_AXIS_BINDING_NULL_VALUE;
 	}
 
+    bool InputControlSystem::detectingBindingState()
+    {
+        return mDetectingBindingControl != NULL;
+    }
+
 	void InputControlSystem::cancelDetectingBindingState()
 	{
 		mDetectingBindingControl = NULL;

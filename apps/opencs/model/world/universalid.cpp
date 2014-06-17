@@ -18,7 +18,7 @@ namespace
 
     static const TypeData sNoArg[] =
     {
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "empty", 0 },
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "-", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Globals, "Global Variables", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Gmsts, "Game Settings", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Skills, "Skills", 0 },
@@ -61,9 +61,10 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell", ":./spell.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Topic, "Topic", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Journal, "Journal", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_TopicInfo, "TopicInfo", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_JournalInfo, "JournalInfo", 0 },
+        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_TopicInfo, "TopicInfo", 0 },
+        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_JournalInfo, "JournalInfo", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell", ":./cell.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell_Missing, "Cell", ":./cell.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Referenceables", 0 },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Activator, "Activator", ":./activator.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Potion, "Potion", ":./potion.png" },
@@ -89,7 +90,7 @@ namespace
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Static, "Static", ":./static.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Weapon, "Weapon", ":./weapon.png" },
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Reference", 0 },
-        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Filter, "Filter", ":./filter.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Filter, "Filter", ":./filter.png" },
         { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Scene, "Scene", 0 },
 
         { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Preview, "Preview", 0 },
@@ -100,6 +101,7 @@ namespace
     static const TypeData sIndexArg[] =
     {
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", 0 },
+        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_LoadErrorLog, "Load Error Log", 0 },
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 }
@@ -316,6 +318,28 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceabl
             list.push_back (sIdArg[i].mType);
 
     return list;
+}
+
+CSMWorld::UniversalId::Type CSMWorld::UniversalId::getParentType (Type type)
+{
+    for (int i=0; sIdArg[i].mType; ++i)
+        if (type==sIdArg[i].mType)
+        {
+            if (sIdArg[i].mClass==Class_RefRecord)
+                return Type_Referenceables;
+
+            if (sIdArg[i].mClass==Class_SubRecord || sIdArg[i].mClass==Class_Record)
+            {
+                if (type==Type_Cell_Missing)
+                    return Type_Cells;
+
+                return static_cast<Type> (type-1);
+            }
+
+            break;
+        }
+
+    return Type_None;
 }
 
 bool CSMWorld::operator== (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)

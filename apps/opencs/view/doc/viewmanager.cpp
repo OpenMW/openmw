@@ -15,7 +15,8 @@
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
-#include "../settings/usersettingsdialog.hpp"
+
+#include "../../model/settings/usersettings.hpp"
 
 #include "view.hpp"
 
@@ -84,8 +85,32 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         mDelegateFactories->add (sMapping[i].mDisplay, new CSVWorld::EnumDelegateFactory (
             CSMWorld::Columns::getEnums (sMapping[i].mColumnId), sMapping[i].mAllowNone));
 
-    connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
-        this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
+    connect (&mDocumentManager, SIGNAL (loadRequest (CSMDoc::Document *)),
+        &mLoader, SLOT (add (CSMDoc::Document *)));
+
+    connect (
+        &mDocumentManager, SIGNAL (loadingStopped (CSMDoc::Document *, bool, const std::string&)),
+        &mLoader, SLOT (loadingStopped (CSMDoc::Document *, bool, const std::string&)));
+
+    connect (
+        &mDocumentManager, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)),
+        &mLoader, SLOT (nextStage (CSMDoc::Document *, const std::string&, int)));
+
+    connect (
+        &mDocumentManager, SIGNAL (nextRecord (CSMDoc::Document *)),
+        &mLoader, SLOT (nextRecord (CSMDoc::Document *)));
+
+    connect (
+        &mDocumentManager, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),
+        &mLoader, SLOT (loadMessage (CSMDoc::Document *, const std::string&)));
+
+    connect (
+        &mLoader, SIGNAL (cancel (CSMDoc::Document *)),
+        &mDocumentManager, SIGNAL (cancelLoading (CSMDoc::Document *)));
+
+    connect (
+        &mLoader, SIGNAL (close (CSMDoc::Document *)),
+        &mDocumentManager, SLOT (removeDocument (CSMDoc::Document *)));
 }
 
 CSVDoc::ViewManager::~ViewManager()
@@ -118,6 +143,11 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
     connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
+
+    connect (&CSMSettings::UserSettings::instance(),
+             SIGNAL (userSettingUpdated(const QString &, const QStringList &)),
+             view,
+             SLOT (updateUserSetting (const QString &, const QStringList &)));
 
     updateIndices();
 
@@ -312,10 +342,4 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
     if (notifySaveOnClose (view))
         QApplication::instance()->exit();
-}
-
-void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
-{
-    foreach (CSVDoc::View *view, mViews)
-        view->updateEditorSetting (settingName, settingValue);
 }

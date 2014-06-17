@@ -11,6 +11,7 @@ namespace MWGui
     class QuickKeysMenuAssign;
     class ItemSelectionDialog;
     class MagicSelectionDialog;
+    class ItemWidget;
 
     class QuickKeysMenu : public WindowBase
     {
@@ -18,6 +19,7 @@ namespace MWGui
         QuickKeysMenu();
         ~QuickKeysMenu();
 
+        virtual void exit();
 
         void onItemButtonClicked(MyGUI::Widget* sender);
         void onMagicButtonClicked(MyGUI::Widget* sender);
@@ -41,11 +43,17 @@ namespace MWGui
         };
 
 
+        void write (ESM::ESMWriter& writer);
+        void readRecord (ESM::ESMReader& reader, int32_t type);
+        void clear();
+
+
     private:
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
 
-        std::vector<MyGUI::Button*> mQuickKeyButtons;
+        std::vector<ItemWidget*> mQuickKeyButtons;
+        std::vector<QuickKeyType> mAssigned;
 
         QuickKeysMenuAssign* mAssignDialog;
         ItemSelectionDialog* mItemSelectionDialog;
@@ -57,13 +65,14 @@ namespace MWGui
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
 
-        void unassign(MyGUI::Widget* key, int index);
+        void unassign(ItemWidget* key, int index);
     };
 
     class QuickKeysMenuAssign : public WindowModal
     {
     public:
         QuickKeysMenuAssign(QuickKeysMenu* parent);
+        virtual void exit();
 
     private:
         MyGUI::TextBox* mLabel;
@@ -81,6 +90,7 @@ namespace MWGui
         MagicSelectionDialog(QuickKeysMenu* parent);
 
         virtual void open();
+        virtual void exit();
 
     private:
         MyGUI::Button* mCancelButton;

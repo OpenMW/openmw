@@ -5,11 +5,11 @@ opencs_units (. editor)
 set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
-    document operation saving
+    document operation saving documentmanager loader
     )
 
 opencs_units_noqt (model/doc
-    documentmanager stage savingstate savingstages
+    stage savingstate savingstages
     )
 
 opencs_hdrs_noqt (model/doc
@@ -18,7 +18,7 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data
+    idtable idtableproxymodel regionmap data commanddispatcher
     )
 
 
@@ -44,7 +44,7 @@ opencs_units_noqt (model/tools
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget
+    filewidget adjusterwidget loader
     )
 
 
@@ -60,7 +60,7 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap
+    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
     )
 
 opencs_units (view/render
@@ -88,34 +88,30 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
-    abstractblock
-    proxyblock
-    abstractwidget
-    usersettingsdialog
-    datadisplayformatpage
-    windowpage
+    settingwindow
+    dialog
+    page
+    view
+    booleanview
+    textview
+    listview
+    rangeview
+    resizeablestackedwidget
+    spinbox
     )
 
 opencs_units_noqt (view/settings
-    abstractpage
-    blankpage
-    groupblock
-    customblock
-    groupbox
-    itemblock
-    settingwidget
-    toggleblock
-    support
+    frame
     )
 
 opencs_units (model/settings
     usersettings
-    settingcontainer
+    setting
+    connector
     )
 
-opencs_units_noqt (model/settings
+opencs_hdrs_noqt (model/settings
     support
-    settingsitem
     )
 
 opencs_units_noqt (model/filter
@@ -149,6 +145,10 @@ if(WIN32)
 endif(WIN32)
 
 set(BOOST_COMPONENTS system filesystem program_options thread wave)
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
@@ -192,6 +192,7 @@ endif(APPLE)
 
 target_link_libraries(opencs
     ${OGRE_LIBRARIES}
+    ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}

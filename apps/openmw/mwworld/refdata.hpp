@@ -47,6 +47,8 @@ namespace MWWorld
 
             void cleanup();
 
+            bool mChanged;
+
         public:
 
             RefData();
@@ -108,6 +110,9 @@ namespace MWWorld
 
             CustomData *getCustomData();
             ///< May return a 0-pointer. The ownership of the return data object is not transferred.
+
+            bool hasChanged() const;
+            ///< Has this RefData changed since it was originally loaded?
     };
 }
 

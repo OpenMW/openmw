@@ -181,6 +181,7 @@ class CharacterController
 
     void updateVisibility();
 
+    void playDeath(float startpoint, CharacterState death);
     void playRandomDeath(float startpoint = 0.0f);
 
     /// choose a random animation group with \a prefix and numeric suffix
@@ -202,7 +203,9 @@ public:
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
+    /// @return false if the character has already been killed before
     bool kill();
+
     void resurrect();
     bool isDead() const
     { return mDeathState != CharState_None; }

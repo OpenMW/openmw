@@ -61,7 +61,8 @@ namespace CSMTools
 
         private slots:
 
-            void verifierMessage (const QString& message, int type);
+            void verifierMessage (const CSMWorld::UniversalId& id, const std::string& message,
+                int type);
 
         signals:
 

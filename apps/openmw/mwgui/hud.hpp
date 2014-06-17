@@ -10,6 +10,7 @@ namespace MWGui
 {
     class DragAndDrop;
     class SpellIcons;
+    class ItemWidget;
 
     class HUD : public OEngine::GUI::Layout, public LocalMapBase
     {
@@ -22,8 +23,9 @@ namespace MWGui
         void setBatchCount(unsigned int count);
 
         /// Set time left for the player to start drowning
-        /// @param time value from [0,20]
-        void setDrowningTimeLeft(float time);
+        /// @param time time left to start drowning
+        /// @param maxTime how long we can be underwater (in total) until drowning starts
+        void setDrowningTimeLeft(float time, float maxTime);
         void setDrowningBarVisible(bool visible);
 
         void setHmsVisible(bool visible);
@@ -56,12 +58,13 @@ namespace MWGui
         void update();
 
         void setEnemy(const MWWorld::Ptr& enemy);
+        void resetEnemy();
 
     private:
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
         MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *mWeapBox, *mSpellBox, *mSneakBox;
-        MyGUI::ImageBox *mWeapImage, *mSpellImage;
+        ItemWidget *mWeapImage, *mSpellImage;
         MyGUI::ProgressBar *mWeapStatus, *mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
         MyGUI::Button* mMinimapButton;

@@ -3,6 +3,9 @@
 
 #include "class.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 namespace MWWorld
 {
     ActionApply::ActionApply (const Ptr& target, const std::string& id)
@@ -11,7 +14,9 @@ namespace MWWorld
 
     void ActionApply::executeImp (const Ptr& actor)
     {
-        MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor);
+        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
+
+        getTarget().getClass().apply (getTarget(), mId, actor);
     }
 
 
@@ -22,7 +27,9 @@ namespace MWWorld
 
     void ActionApplyWithSkill::executeImp (const Ptr& actor)
     {
-        if (MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor) && mUsageType!=-1)
-            MWWorld::Class::get (getTarget()).skillUsageSucceeded (actor, mSkillIndex, mUsageType);
+        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
+
+        if (getTarget().getClass().apply (getTarget(), mId, actor) && mUsageType!=-1)
+            getTarget().getClass().skillUsageSucceeded (actor, mSkillIndex, mUsageType);
     }
 }

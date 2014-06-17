@@ -228,7 +228,7 @@ namespace MWGui
         NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
+        const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
 
         // level progress
         MyGUI::Widget* levelWidget;
@@ -454,20 +454,30 @@ namespace MWGui
 
         if (!mFactions.empty())
         {
-            // Add a line separator if there are items above
-            if (!mSkillWidgets.empty())
-                addSeparator(coord1, coord2);
-
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
+            const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
             const std::set<std::string> &expelled = PCstats.getExpelled();
 
-            addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFaction", "Faction"), coord1, coord2);
+            bool firstFaction=true;
             FactionList::const_iterator end = mFactions.end();
             for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
             {
                 const ESM::Faction *faction =
                     store.get<ESM::Faction>().find(it->first);
+                if (faction->mData.mIsHidden == 1)
+                    continue;
+
+                if (firstFaction)
+                {
+                    // Add a line separator if there are items above
+                    if (!mSkillWidgets.empty())
+                        addSeparator(coord1, coord2);
+
+                    addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFaction", "Faction"), coord1, coord2);
+
+                    firstFaction = false;
+                }
+
                 MyGUI::Widget* w = addItem(faction->mName, coord1, coord2);
 
                 std::string text;
@@ -475,7 +485,7 @@ namespace MWGui
                 text += std::string("#DDC79E") + faction->mName;
 
                 if (expelled.find(it->first) != expelled.end())
-                    text += "\n#{sExpelled}";
+                    text += "\n#BF9959#{sExpelled}";
                 else
                 {
                     text += std::string("\n#BF9959") + faction->mRanks[it->second];

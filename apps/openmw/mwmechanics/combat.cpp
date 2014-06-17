@@ -73,7 +73,14 @@ namespace MWMechanics
             return false;
 
         MWMechanics::CreatureStats& blockerStats = blocker.getClass().getCreatureStats(blocker);
+
+        // Don't block when in spellcasting state (shield is equipped, but not visible)
         if (blockerStats.getDrawState() == DrawState_Spell)
+            return false;
+
+        // Don't block when in hand-to-hand combat (shield is equipped, but not visible)
+        if (blockerStats.getDrawState() == DrawState_Weapon &&
+                inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight) == inv.end())
             return false;
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
@@ -102,10 +109,11 @@ namespace MWMechanics
         if (roll < x)
         {
             // Reduce shield durability by incoming damage
-            if (shield->getCellRef().mCharge == -1)
-                shield->getCellRef().mCharge = shield->getClass().getItemMaxHealth(*shield);
-            shield->getCellRef().mCharge -= std::min(shield->getCellRef().mCharge, int(damage));
-            if (!shield->getCellRef().mCharge)
+            int shieldhealth = shield->getClass().getItemHealth(*shield);
+
+            shieldhealth -= std::min(shieldhealth, int(damage));
+            shield->getCellRef().setCharge(shieldhealth);
+            if (shieldhealth == 0)
                 inv.unequipItem(*shield, blocker);
 
             // Reduce blocker fatigue
@@ -146,8 +154,8 @@ namespace MWMechanics
               || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
             damage *= multiplier;
 
-        if (weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
-                & actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+        if ((weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver)
+                && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
 
         if (damage == 0 && attacker.getRefData().getHandle() == "player")

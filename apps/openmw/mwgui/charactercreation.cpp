@@ -47,7 +47,7 @@ namespace
     void updatePlayerHealth()
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats(player);
+        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
         npcStats.updateHealth();
     }
 }
@@ -188,12 +188,13 @@ namespace MWGui
                 break;
 
             case GM_ClassCreate:
-                MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
-                mCreateClassDialog = 0;
-                mCreateClassDialog = new CreateClassDialog();
+                if (!mCreateClassDialog)
+                {
+                    mCreateClassDialog = new CreateClassDialog();
+                    mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
+                    mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
+                }
                 mCreateClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
-                mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
-                mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
                 mCreateClassDialog->setVisible(true);
                 if (mCreationStage < CSE_RaceChosen)
                     mCreationStage = CSE_RaceChosen;
@@ -219,7 +220,7 @@ namespace MWGui
 
                 {
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                    const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+                    const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
                     mReviewDialog->setHealth ( stats.getHealth()  );
                     mReviewDialog->setMagicka( stats.getMagicka() );
@@ -531,8 +532,8 @@ namespace MWGui
             mPlayerClass = klass;
             MWBase::Environment::get().getWindowManager()->setPlayerClass(klass);
 
-            MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
-            mCreateClassDialog = 0;
+            // Do not delete dialog, so that choices are rembered in case we want to go back and adjust them later
+            mCreateClassDialog->setVisible(false);
         }
 
         updatePlayerHealth();
@@ -554,8 +555,8 @@ namespace MWGui
 
     void CharacterCreation::onCreateClassDialogBack()
     {
-        MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
-        mCreateClassDialog = 0;
+        // Do not delete dialog, so that choices are rembered in case we want to go back and adjust them later
+        mCreateClassDialog->setVisible(false);
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);

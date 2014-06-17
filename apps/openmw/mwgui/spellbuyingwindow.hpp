@@ -25,6 +25,8 @@ namespace MWGui
 
             void startSpellBuying(const MWWorld::Ptr& actor);
 
+            virtual void exit();
+
         protected:
             MyGUI::Button* mCancelButton;
             MyGUI::TextBox* mPlayerGold;

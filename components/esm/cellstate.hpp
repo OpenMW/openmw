@@ -3,6 +3,8 @@
 
 #include "cellid.hpp"
 
+#include "defs.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -16,6 +18,10 @@ namespace ESM
         CellId mId;
 
         float mWaterLevel;
+
+        int mHasFogOfWar; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)
+
+        ESM::TimeStamp mLastRespawn;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

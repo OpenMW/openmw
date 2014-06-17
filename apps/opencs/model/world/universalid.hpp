@@ -32,6 +32,8 @@ namespace CSMWorld
                 ArgumentType_Index
             };
 
+            /// \note A record list type must always be immediately followed by the matching
+            /// record type, if this type is of class SubRecord or Record.
             enum Type
             {
                 Type_None = 0,
@@ -60,6 +62,7 @@ namespace CSMWorld
                 Type_Spell,
                 Type_Cells,
                 Type_Cell,
+                Type_Cell_Missing, //For cells that does not exist yet.
                 Type_Referenceables,
                 Type_Referenceable,
                 Type_Activator,
@@ -85,8 +88,8 @@ namespace CSMWorld
                 Type_References,
                 Type_Reference,
                 Type_RegionMap,
-                Type_Filter,
                 Type_Filters,
+                Type_Filter,
                 Type_Topics,
                 Type_Topic,
                 Type_Journals,
@@ -96,10 +99,11 @@ namespace CSMWorld
                 Type_JournalInfos,
                 Type_JournalInfo,
                 Type_Scene,
-                Type_Preview
+                Type_Preview,
+                Type_LoadErrorLog
             };
 
-            enum { NumberOfTypes = Type_Scene+1 };
+            enum { NumberOfTypes = Type_LoadErrorLog+1 };
 
         private:
 
@@ -145,6 +149,11 @@ namespace CSMWorld
             ///< Will return an empty string, if no icon is available.
 
             static std::vector<Type> listReferenceableTypes();
+
+            /// If \a type is a SubRecord, RefRecord or Record type return the type of the table
+            /// that contains records of type \a type.
+            /// Otherwise return Type_None.
+            static Type getParentType (Type type);
     };
 
     bool operator== (const UniversalId& left, const UniversalId& right);

@@ -8,23 +8,6 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
-void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-                             const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
-{
-    assert (begin!=end);
-
-    std::vector<boost::filesystem::path>::const_iterator end2 (end);
-
-    if (lastAsModified)
-        --end2;
-
-    for (std::vector<boost::filesystem::path>::const_iterator iter (begin); iter!=end2; ++iter)
-        getData().loadFile (*iter, true, false);
-
-    if (lastAsModified)
-        getData().loadFile (*end2, false, false);
-}
-
 void CSMDoc::Document::addGmsts()
 {
     static const char *gmstFloats[] =
@@ -2219,64 +2202,42 @@ void CSMDoc::Document::createBase()
     }
 }
 
-CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, const boost::filesystem::path& resDir, bool new_)
-    : mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
-      mProjectPath ((configuration.getUserDataPath() / "projects") /
-                    (savePath.filename().string() + ".project")),
-      mSaving (*this, mProjectPath)
+CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
+    const std::vector< boost::filesystem::path >& files, bool new_,
+    const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+    ToUTF8::FromType encoding)
+: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding), mTools (mData),
+  mResDir(resDir),
+  mProjectPath ((configuration.getUserDataPath() / "projects") /
+  (savePath.filename().string() + ".project")),
+  mSaving (*this, mProjectPath, encoding)
 {
-    if (files.empty())
+    if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
-    if (new_ && files.size()==1)
-        createBase();
-    else
-    {
-        std::vector<boost::filesystem::path>::const_iterator end = files.end();
-
-        if (new_)
-            --end;
-
-        load (files.begin(), end, !new_);
-    }
-
-    if (new_)
-    {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-    }
-
-    bool filtersFound = false;
-
-    if (boost::filesystem::exists (mProjectPath))
-    {
-        filtersFound = true;
-    }
-    else
+    if (!boost::filesystem::exists (mProjectPath))
     {
         boost::filesystem::path locCustomFiltersPath (configuration.getUserDataPath());
         locCustomFiltersPath /= "defaultfilters";
 
-        if (boost::filesystem::exists(locCustomFiltersPath))
+        if (boost::filesystem::exists (locCustomFiltersPath))
         {
             boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
-            filtersFound = true;
         }
         else
         {
-            boost::filesystem::path filters(mResDir);
-            filters /= "defaultfilters";
-
-            if (boost::filesystem::exists(filters))
-            {
-                boost::filesystem::copy_file(filters, mProjectPath);
-                filtersFound = true;
-            }
+            boost::filesystem::copy_file (mResDir / "defaultfilters", mProjectPath);
         }
     }
 
-    if (filtersFound)
-        getData().loadFile (mProjectPath, false, true);
+    if (mNew)
+    {
+        mData.setDescription ("");
+        mData.setAuthor ("");
+
+        if (mContentFiles.size()==1)
+            createBase();
+    }
 
     addOptionalGmsts();
     addOptionalGlobals();
@@ -2288,8 +2249,10 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
-    connect (&mSaving, SIGNAL (reportMessage (const QString&, int)),
-             this, SLOT (reportMessage (const QString&, int)));
+
+    connect (
+        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
+        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)));
 }
 
 CSMDoc::Document::~Document()
@@ -2322,9 +2285,19 @@ const boost::filesystem::path& CSMDoc::Document::getSavePath() const
     return mSavePath;
 }
 
+const boost::filesystem::path& CSMDoc::Document::getProjectPath() const
+{
+    return mProjectPath;
+}
+
 const std::vector<boost::filesystem::path>& CSMDoc::Document::getContentFiles() const
 {
     return mContentFiles;
+}
+
+bool CSMDoc::Document::isNew() const
+{
+    return mNew;
 }
 
 void CSMDoc::Document::save()
@@ -2358,10 +2331,11 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::reportMessage (const QString& message, int type)
+void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
+    int type)
 {
     /// \todo find a better way to get these messages to the user.
-    std::cout << message.toUtf8().constData() << std::endl;
+    std::cout << message << std::endl;
 }
 
 void CSMDoc::Document::operationDone (int type)

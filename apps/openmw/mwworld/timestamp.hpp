@@ -1,6 +1,11 @@
 #ifndef GAME_MWWORLD_TIMESTAMP_H
 #define GAME_MWWORLD_TIMESTAMP_H
 
+namespace ESM
+{
+    class TimeStamp;
+}
+
 namespace MWWorld
 {
     /// \brief In-game time stamp
@@ -14,8 +19,11 @@ namespace MWWorld
         public:
 
             explicit TimeStamp (float hour = 0, int day = 0);
-            ///< \oaram hour [0, 23)
+            ///< \param hour [0, 23)
             /// \param day >=0
+
+            explicit TimeStamp (const ESM::TimeStamp& esm);
+            ESM::TimeStamp toEsm () const;
 
             float getHour() const;
 

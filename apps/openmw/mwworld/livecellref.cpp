@@ -10,6 +10,11 @@
 #include "class.hpp"
 #include "esmstore.hpp"
 
+MWWorld::LiveCellRefBase::LiveCellRefBase(std::string type, const ESM::CellRef &cref)
+  : mClass(&Class::get(type)), mRef(cref), mData(cref)
+{
+}
+
 void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
 {
     mRef = state.mRef;
@@ -20,10 +25,15 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
     if (state.mHasLocals)
     {
         std::string scriptId = mClass->getScript (ptr);
-
-        mData.setLocals (*MWBase::Environment::get().getWorld()->getStore().
-            get<ESM::Script>().search (scriptId));
-        mData.getLocals().read (state.mLocals, scriptId);
+        // Make sure we still have a script. It could have been coming from a content file that is no longer active.
+        if (!scriptId.empty())
+        {
+            if (const ESM::Script* script = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (scriptId))
+            {
+                mData.setLocals (*script);
+                mData.getLocals().read (state.mLocals, scriptId);
+            }
+        }
     }
 
     mClass->readAdditionalState (ptr, state);
@@ -31,7 +41,7 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
 
 void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
 {
-    state.mRef = mRef;
+    mRef.writeState(state);
 
     /// \todo get rid of this cast once const-correct Ptr are available
     Ptr ptr (const_cast<LiveCellRefBase *> (this));

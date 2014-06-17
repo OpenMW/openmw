@@ -17,27 +17,13 @@
 
 #include "openal_output.hpp"
 #define SOUND_OUT "OpenAL"
-/* Set up the sound manager to use FFMPEG, MPG123+libsndfile, or Audiere for
- * input. The OPENMW_USE_x macros are set in CMakeLists.txt.
+/* Set up the sound manager to use FFMPEG for input.
+ * The OPENMW_USE_x macros are set in CMakeLists.txt.
 */
 #ifdef OPENMW_USE_FFMPEG
 #include "ffmpeg_decoder.hpp"
 #ifndef SOUND_IN
 #define SOUND_IN "FFmpeg"
-#endif
-#endif
-
-#ifdef OPENMW_USE_AUDIERE
-#include "audiere_decoder.hpp"
-#ifndef SOUND_IN
-#define SOUND_IN "Audiere"
-#endif
-#endif
-
-#ifdef OPENMW_USE_MPG123
-#include "mpgsnd_decoder.hpp"
-#ifndef SOUND_IN
-#define SOUND_IN "mpg123,sndfile"
 #endif
 #endif
 
@@ -335,7 +321,7 @@ namespace MWSound
             sound = mOutput->playSound(file, volume, basevol, pitch, mode|type, offset);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
-        catch(std::exception &e)
+        catch(std::exception&)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
@@ -363,11 +349,49 @@ namespace MWSound
             else
                 mActiveSounds[sound] = std::make_pair(ptr, soundId);
         }
+        catch(std::exception&)
+        {
+            //std::cout <<"Sound Error: "<<e.what()<< std::endl;
+        }
+        return sound;
+    }
+
+    MWBase::SoundPtr SoundManager::playManualSound3D(const Ogre::Vector3& initialPos, const std::string& soundId,
+                                                     float volume, float pitch, PlayType type, PlayMode mode, float offset)
+    {
+        MWBase::SoundPtr sound;
+        if(!mOutput->isInitialized())
+            return sound;
+        try
+        {
+            // Look up the sound in the ESM data
+            float basevol = volumeFromType(type);
+            float min, max;
+            std::string file = lookup(soundId, volume, min, max);
+
+            sound = mOutput->playSound3D(file, initialPos, volume, basevol, pitch, min, max, mode|type, offset);
+            mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
+        }
         catch(std::exception &e)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
         return sound;
+    }
+
+    void SoundManager::stopSound (MWBase::SoundPtr sound)
+    {
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
+        {
+            if(snditer->first == sound)
+            {
+                snditer->first->stop();
+                mActiveSounds.erase(snditer++);
+            }
+            else
+                ++snditer;
+        }
     }
 
     void SoundManager::stopSound3D(const MWWorld::Ptr &ptr, const std::string& soundId)
@@ -442,7 +466,7 @@ namespace MWSound
             {
                 snditer->first->setFadeout(duration);
             }
-            snditer++;
+            ++snditer;
         }
     }
 

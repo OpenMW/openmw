@@ -55,9 +55,9 @@ namespace CSMWorld
 
             virtual int getSize() const;
 
-	    virtual int getNestedRowsCount(int row, int column) const;
+            virtual int getNestedRowsCount(int row, int column) const;
 
-	    virtual int getNestedColumnsCount(int row, int column) const;
+            virtual int getNestedColumnsCount(int row, int column) const;
 
             virtual std::string getId (int index) const;
 
@@ -69,13 +69,15 @@ namespace CSMWorld
 
             virtual QVariant getData (int index, int column) const;
 
+            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+
             virtual void setData (int index, int column, const QVariant& data);
 
             virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
 
             virtual void removeRows (int index, int count);
 
-            virtual void cloneRecord(const std::string& origin, 
+            virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const UniversalId::Type type);
 

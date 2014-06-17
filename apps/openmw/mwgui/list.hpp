@@ -8,18 +8,6 @@ namespace MWGui
     namespace Widgets
     {
         /**
-         * \brief a custom ScrollView which has access to scrollbar properties
-         */
-        class MWScrollView : public MyGUI::ScrollView
-        {
-            MYGUI_RTTI_DERIVED(MWScrollView)
-        public:
-            size_t getScrollPosition();
-            void setScrollPosition(size_t);
-            size_t getScrollRange();
-        };
-
-        /**
          * \brief a very simple list widget that supports word-wrapping entries
          * \note if the width or height of the list changes, you must call adjustSize() method
          */
@@ -34,7 +22,7 @@ namespace MWGui
 
             /**
              * Event: Item selected with the mouse.
-             * signature: void method(std::string itemName)
+             * signature: void method(std::string itemName, int index)
              */
             EventHandle_StringInt eventItemSelected;
 
@@ -61,6 +49,8 @@ namespace MWGui
             MyGUI::Widget* getItemWidget(const std::string& name);
             ///< get widget for an item name, useful to set up tooltip
 
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+
         protected:
             void initialiseOverride();
 
@@ -70,8 +60,9 @@ namespace MWGui
             void onItemSelected(MyGUI::Widget* _sender);
 
         private:
-            MWGui::Widgets::MWScrollView* mScrollView;
+            MyGUI::ScrollView* mScrollView;
             MyGUI::Widget* mClient;
+            std::string mListItemSkin;
 
             std::vector<std::string> mItems;
 

@@ -17,6 +17,8 @@ namespace MWGui
 
             virtual void open();
 
+            virtual void exit();
+
             void updateControlsBox();
 
     protected:

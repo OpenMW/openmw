@@ -17,6 +17,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
 void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -180,7 +181,7 @@ void CSVWorld::RegionMap::setRegion (const std::string& regionId)
 
 CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     CSMDoc::Document& document, QWidget *parent)
-: QTableView (parent), mEditLock (false), mDocument (document)
+:  DragRecordTable(document, parent)
 {
     verticalHeader()->hide();
     horizontalHeader()->hide();
@@ -223,11 +224,8 @@ CSVWorld::RegionMap::RegionMap (const CSMWorld::UniversalId& universalId,
     mViewInTableAction = new QAction (tr ("View Cells in Table"), this);
     connect (mViewInTableAction, SIGNAL (triggered()), this, SLOT (viewInTable()));
     addAction (mViewInTableAction);
-}
 
-void CSVWorld::RegionMap::setEditLock (bool locked)
-{
-    mEditLock = locked;
+    setAcceptDrops(true);
 }
 
 void CSVWorld::RegionMap::selectAll()
@@ -343,4 +341,65 @@ void CSVWorld::RegionMap::viewInTable()
     hint << ")";
 
     emit editRequest (CSMWorld::UniversalId::Type_Cells, hint.str());
+}
+
+void CSVWorld::RegionMap::mouseMoveEvent (QMouseEvent* event)
+{
+    startDrag(*this);
+}
+
+std::vector< CSMWorld::UniversalId > CSVWorld::RegionMap::getDraggedRecords() const
+{
+    QModelIndexList selected(getSelectedCells(true, false));
+    std::vector<CSMWorld::UniversalId> ids;
+    foreach (QModelIndex it, selected)
+    {
+        ids.push_back(
+            CSMWorld::UniversalId(
+                CSMWorld::UniversalId::Type_Cell,
+                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData()));
+    }
+    selected = getSelectedCells(false, true);
+    foreach (QModelIndex it, selected)
+    {
+        ids.push_back(
+            CSMWorld::UniversalId(
+                CSMWorld::UniversalId::Type_Cell_Missing,
+                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData()));
+    }
+    return ids;
+}
+
+void CSVWorld::RegionMap::dropEvent (QDropEvent* event)
+{
+    QModelIndex index = indexAt (event->pos());
+
+    bool exists = QTableView::model()->data(index, Qt::BackgroundRole)!=QBrush (Qt::DiagCrossPattern);
+
+    if (!index.isValid() || !exists)
+    {
+        return;
+    }
+
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (mime->fromDocument(mDocument) && mime->holdsType(CSMWorld::UniversalId::Type_Region))
+    {
+        CSMWorld::UniversalId record (mime->returnMatching (CSMWorld::UniversalId::Type_Region));
+
+        QAbstractItemModel *regionModel = model();
+
+        CSMWorld::IdTable *cellsModel = &dynamic_cast<CSMWorld::IdTable&> (*
+            mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
+
+        std::string cellId(regionModel->data (index, CSMWorld::RegionMap::Role_CellId).
+            toString().toUtf8().constData());
+
+        QModelIndex index2(cellsModel->getModelIndex (cellId,
+            cellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Region)));
+
+        mDocument.getUndoStack().push(new CSMWorld::ModifyCommand 
+                                        (*cellsModel, index2, QString::fromUtf8(record.getId().c_str())));
+
+        mRegionId = record.getId();
+    }
 }

@@ -35,7 +35,7 @@ namespace MWGui
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(const float x, const float y);
 
-        void toggleFogOfWar();
+        bool toggleFogOfWar();
 
         struct MarkerPosition
         {
@@ -57,6 +57,10 @@ namespace MWGui
 
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
+
+        // Keep track of created marker widgets, just to easily remove them later.
+        std::vector<MyGUI::Widget*> mDoorMarkerWidgets; // Doors
+        std::vector<MyGUI::Widget*> mMarkerWidgets; // Other markers
 
         void applyFogOfWar();
 
@@ -93,19 +97,22 @@ namespace MWGui
 
         void renderGlobalMap(Loading::Listener* loadingListener);
 
-        void addVisitedLocation(const std::string& name, int x, int y); // adds the marker to the global map
+        // adds the marker to the global map
+        void addVisitedLocation(const std::string& name, int x, int y);
+
+        // reveals this cell's map on the global map
         void cellExplored(int x, int y);
 
         void setGlobalMapPlayerPosition (float worldX, float worldY);
 
         virtual void open();
 
-        void onFrame(float dt) { NoDrop::onFrame(dt); }
+        void onFrame(float dt);
 
         /// Clear all savegame-specific data
         void clear();
 
-        void write (ESM::ESMWriter& writer);
+        void write (ESM::ESMWriter& writer, Loading::Listener& progress);
         void readRecord (ESM::ESMReader& reader, int32_t type);
 
     private:
@@ -123,6 +130,14 @@ namespace MWGui
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
         bool mGlobal;
+
+        // Markers on global map
+        typedef std::pair<int, int> CellId;
+        std::vector<CellId> mMarkers;
+
+        // Cells that should be explored in the next frame (i.e. their map revealed on the global map)
+        // We can't do this immediately, because the map update is not immediate either (see mNeedMapUpdate in scene.cpp)
+        std::vector<CellId> mQueuedToExplore;
 
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;

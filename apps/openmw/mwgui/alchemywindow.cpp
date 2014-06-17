@@ -13,20 +13,7 @@
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "itemview.hpp"
-
-namespace
-{
-    std::string getIconPath(MWWorld::Ptr ptr)
-    {
-        std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(ptr).getInventoryIcon(ptr);
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
-        return path;
-    }
-
-}
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -66,10 +53,7 @@ namespace MWGui
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mAlchemy.clear();
-
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
+        exit();
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -152,11 +136,17 @@ namespace MWGui
             {
                 mApparatus.at (index)->setUserString ("ToolTipType", "ItemPtr");
                 mApparatus.at (index)->setUserData (*iter);
-                mApparatus.at (index)->setImageTexture (getIconPath (*iter));
+                mApparatus.at (index)->setItem(*iter);
             }
         }
 
         update();
+    }
+
+    void AlchemyWindow::exit() {
+        mAlchemy.clear();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
@@ -174,7 +164,7 @@ namespace MWGui
         {
             update();
 
-            std::string sound = MWWorld::Class::get(item).getUpSoundId(item);
+            std::string sound = item.getClass().getUpSoundId(item);
             MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
         }
     }
@@ -186,7 +176,7 @@ namespace MWGui
         MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy.beginIngredients ();
         for (int i=0; i<4; ++i)
         {
-            MyGUI::ImageBox* ingredient = mIngredients[i];
+            ItemWidget* ingredient = mIngredients[i];
 
             MWWorld::Ptr item;
             if (it != mAlchemy.endIngredients ())
@@ -201,15 +191,15 @@ namespace MWGui
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
 
-            ingredient->setImageTexture("");
             ingredient->clearUserStrings ();
+
+            ingredient->setItem(item);
 
             if (item.isEmpty ())
                 continue;
 
             ingredient->setUserString("ToolTipType", "ItemPtr");
             ingredient->setUserData(item);
-            ingredient->setImageTexture(getIconPath(item));
 
             MyGUI::TextBox* text = ingredient->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
             text->setTextAlign(MyGUI::Align::Right);
