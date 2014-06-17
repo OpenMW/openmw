@@ -43,9 +43,6 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
         return QVariant();
 
-<<<<<<< Updated upstream
-    return mIdCollection->getData (index.row(), index.column());
-=======
     if (index.internalId() != 0)
     {
         std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
@@ -53,7 +50,6 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     } else {
         return mIdCollection->getData (index.row(), index.column());
     }
->>>>>>> Stashed changes
 }
 
 QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation, int role) const
@@ -135,9 +131,6 @@ QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& pa
 
 QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
 {
-<<<<<<< Updated upstream
-    return QModelIndex();
-=======
     if (index.internalId() == 0) //0 is used for indexs with invalid parent (top level data)
     {
         return QModelIndex();
@@ -151,7 +144,6 @@ QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
         throw "Parent index is not present in the model";
     }
     return createIndex(adress.first, adress.second, 0);
->>>>>>> Stashed changes
 }
 
 void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type)
@@ -280,9 +272,6 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
 int CSMWorld::IdTable::getColumnId(int column) const
 {
     return mIdCollection->getColumn(column).getId();
-<<<<<<< Updated upstream
-}
-=======
 }
 
 bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
@@ -313,4 +302,3 @@ std::pair< int, int > CSMWorld::IdTable::unfoldIndexAdress (unsigned int id) con
     int column = id - row * this->columnCount();
     return std::make_pair<int, int>(row, column);
 }
->>>>>>> Stashed changes
