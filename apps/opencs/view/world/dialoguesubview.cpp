@@ -518,17 +518,17 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     if(!mBottom->canCreateAndDelete())
     {
-        cloneButton->setDisabled(true);
-        addButton->setDisabled(true);
-        deleteButton->setDisabled(true);
+        cloneButton->setDisabled (true);
+        addButton->setDisabled (true);
+        deleteButton->setDisabled (true);
     }
 
-    dataChanged(mTable->getModelIndex(mCurrentId, 0));
-    mMainLayout->addLayout(buttonsLayout);
-    setWidget(mainWidget);
+    dataChanged(mTable->getModelIndex (mCurrentId, 0));
+    mMainLayout->addLayout (buttonsLayout);
+    setWidget (mainWidget);
 }
 
-void CSVWorld::DialogueSubView::prevId()
+void CSVWorld::DialogueSubView::prevId ()
 {
     int newRow = mTable->getModelIndex(mCurrentId, 0).row() - 1;
 
@@ -563,7 +563,7 @@ void CSVWorld::DialogueSubView::prevId()
     }
 }
 
-void CSVWorld::DialogueSubView::nextId()
+void CSVWorld::DialogueSubView::nextId ()
 {
     int newRow = mTable->getModelIndex(mCurrentId, 0).row() + 1;
 
@@ -615,7 +615,7 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
 
 }
 
-void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
+void CSVWorld::DialogueSubView::dataChanged (const QModelIndex & index)
 {
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
@@ -627,10 +627,10 @@ void CSVWorld::DialogueSubView::dataChanged(const QModelIndex & index)
     }
 }
 
-void CSVWorld::DialogueSubView::tableMimeDataDropped(QWidget* editor,
-                                                     const QModelIndex& index,
-                                                     const CSMWorld::UniversalId& id,
-                                                     const CSMDoc::Document* document)
+void CSVWorld::DialogueSubView::tableMimeDataDropped (QWidget* editor,
+						      const QModelIndex& index,
+						      const CSMWorld::UniversalId& id,
+						      const CSMDoc::Document* document)
 {
     if (document == &mDocument)
     {
@@ -662,9 +662,9 @@ void CSVWorld::DialogueSubView::showPreview ()
     }
 }
 
-void CSVWorld::DialogueSubView::viewRecord()
+void CSVWorld::DialogueSubView::viewRecord ()
 {
-    QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
+    QModelIndex currentIndex(mTable->getModelIndex (mCurrentId, 0));
 
     if (currentIndex.isValid() &&
 	currentIndex.row() < mTable->rowCount())
@@ -676,7 +676,7 @@ void CSVWorld::DialogueSubView::viewRecord()
     }
 }
 
-void CSVWorld::DialogueSubView::changeCurrentId(const std::string& newId)
+void CSVWorld::DialogueSubView::changeCurrentId (const std::string& newId)
 {
     std::vector<std::string> selection;
     mCurrentId = std::string(newId);
