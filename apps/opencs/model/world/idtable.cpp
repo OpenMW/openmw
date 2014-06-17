@@ -1,4 +1,3 @@
-
 #include "idtable.hpp"
 
 #include <QDebug>
@@ -17,8 +16,7 @@ int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 {
     if (hasChildren(parent))
     {
-        int nestedRows = mIdCollection->getNestedRowsCount(parent.row(), parent.column());
-        return nestedRows;
+        return mIdCollection->getNestedRowsCount(parent.row(), parent.column());
     }
 
     return mIdCollection->getSize();
@@ -26,7 +24,8 @@ int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 
 int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
 {
-    if (parent.isValid())
+    if (parent.isValid() &&
+        parent.data().isValid())
     {
         return mIdCollection->getNestedColumnsCount(parent.row(), parent.column());
     }
@@ -42,16 +41,21 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
         return QVariant();
 
-    if (hasChildren(index))
+    if (index.internalId() != 0)
     {
         std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
-        return mIdCollection->getNestedData(parentAdress.first, parentAdress.second, index.row(), index.column());
+        return mIdCollection->getNestedData(parentAdress.first,
+                                            parentAdress.second,
+                                            index.row(),
+                                            index.column());
     } else {
         return mIdCollection->getData (index.row(), index.column());
     }
 }
 
-QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation, int role) const
+QVariant CSMWorld::IdTable::headerData (int section,
+                                        Qt::Orientation orientation,
+                                        int role) const
 {
     if (orientation==Qt::Vertical)
         return QVariant();
@@ -68,7 +72,7 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
     return QVariant();
 }
 
-bool CSMWorld::IdTable::setData ( const QModelIndex &index, const QVariant &value, int role)
+bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value, int role)
 {
     if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
     {
@@ -291,10 +295,7 @@ std::pair< int, int > CSMWorld::IdTable::unfoldIndexAdress (unsigned int id) con
 bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
 {
     return (index.isValid() &&
-            CSMWorld::ColumnBase::Display_Nested == static_cast<CSMWorld::ColumnBase::Display> (headerData
-                                                                                                (index.column(),
-                                                                                                 Qt::Horizontal,
-                                                                                                 CSMWorld::ColumnBase::Role_Display).toInt()) &&
+            CSMWorld::ColumnBase::Display_Nested == static_cast<CSMWorld::ColumnBase::Display> (headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt()) &&
             index.internalId() == 0 &&
             index.data().isValid());
 }

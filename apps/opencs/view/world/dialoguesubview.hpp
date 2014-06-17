@@ -38,16 +38,23 @@ namespace CSVWorld
     {
         const CSMWorld::IdTable* mTable;
     public:
-        NotEditableSubDelegate(const CSMWorld::IdTable* table, QObject * parent = 0);
+        NotEditableSubDelegate(const CSMWorld::IdTable* table,
+                               QObject * parent = 0);
 
-        virtual void setEditorData (QLabel* editor, const QModelIndex& index) const;
+        virtual void setEditorData (QLabel* editor,
+                                    const QModelIndex& index) const;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const;
+        virtual void setModelData (QWidget* editor, QAbstractItemModel* model,
+                                   const QModelIndex& index,
+                                   CSMWorld::ColumnBase::Display display) const;
 
-        virtual void paint (QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+        virtual void paint (QPainter* painter,
+                            const QStyleOptionViewItem& option,
+                            const QModelIndex& index) const;
         ///< does nothing
 
-        virtual QSize sizeHint (const QStyleOptionViewItem& option, const QModelIndex& index) const;
+        virtual QSize sizeHint (const QStyleOptionViewItem& option,
+                                const QModelIndex& index) const;
         ///< does nothing
 
         virtual QWidget *createEditor (QWidget *parent,
@@ -75,16 +82,20 @@ namespace CSVWorld
         std::auto_ptr<refWrapper> mIndexWrapper;
 
     public:
-        DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display);
+        DialogueDelegateDispatcherProxy(QWidget* editor,
+                                        CSMWorld::ColumnBase::Display display);
         QWidget* getEditor() const;
 
     public slots:
         void editorDataCommited();
         void setIndex(const QModelIndex& index);
-        void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document);
+        void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data,
+                                  const CSMDoc::Document* document);
 
     signals:
-        void editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display);
+        void editorDataCommited(QWidget* editor,
+                                const QModelIndex& index,
+                                CSMWorld::ColumnBase::Display display);
 
         void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
                                   const CSMWorld::UniversalId& id,
@@ -105,30 +116,42 @@ namespace CSVWorld
 
         NotEditableSubDelegate mNotEditableDelegate;
 
-        std::vector<DialogueDelegateDispatcherProxy*> mProxys; //once we move to the C++11 we should use unique_ptr
+        std::vector<DialogueDelegateDispatcherProxy*> mProxys;
+//once we move to the C++11 we should use unique_ptr
 
     public:
-        DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, QUndoStack& undoStack);
+        DialogueDelegateDispatcher(QObject* parent,
+                                   CSMWorld::IdTable* table,
+                                   QUndoStack& undoStack);
 
         ~DialogueDelegateDispatcher();
 
         CSVWorld::CommandDelegate* makeDelegate(CSMWorld::ColumnBase::Display display);
 
-        QWidget* makeEditor(CSMWorld::ColumnBase::Display display, const QModelIndex& index);
+        QWidget* makeEditor(CSMWorld::ColumnBase::Display display,
+                            const QModelIndex& index);
         ///< will return null if delegate is not present, parent of the widget is same as for dispatcher itself
 
-        virtual void setEditorData (QWidget* editor, const QModelIndex& index) const;
+        virtual void setEditorData (QWidget* editor,
+                                    const QModelIndex& index) const;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const;
+        virtual void setModelData (QWidget* editor,
+                                   QAbstractItemModel* model,
+                                   const QModelIndex& index,
+                                   CSMWorld::ColumnBase::Display display) const;
 
-        virtual void paint (QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+        virtual void paint (QPainter* painter,
+                            const QStyleOptionViewItem& option,
+                            const QModelIndex& index) const;
         ///< does nothing
 
-        virtual QSize sizeHint (const QStyleOptionViewItem& option, const QModelIndex& index) const;
+        virtual QSize sizeHint (const QStyleOptionViewItem& option,
+                                const QModelIndex& index) const;
         ///< does nothing
 
     private slots:
-        void editorDataCommited(QWidget* editor, const QModelIndex& index, CSMWorld::ColumnBase::Display display);
+        void editorDataCommited(QWidget* editor, const QModelIndex& index,
+                                CSMWorld::ColumnBase::Display display);
 
     signals:
         void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
@@ -149,7 +172,8 @@ namespace CSVWorld
 
         public:
 
-            EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table, QUndoStack& undoStack, bool createAndDelete = false);
+            EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table,
+                        QUndoStack& undoStack, bool createAndDelete = false);
 
             void remake(int row);
 
@@ -167,7 +191,7 @@ namespace CSVWorld
         QVBoxLayout* mMainLayout;
         CSMWorld::IdTable* mTable;
         QUndoStack& mUndoStack;
-	std::string mCurrentId;
+        std::string mCurrentId;
         bool mLocked;
         const CSMDoc::Document& mDocument;
         TableBottomBox* mBottom;
@@ -181,9 +205,9 @@ namespace CSVWorld
                              bool sorting = false);
 
             virtual void setEditLock (bool locked);
-						  
+
         private:
-	    void changeCurrentId(const std::string& newCurrent);
+        void changeCurrentId(const std::string& newCurrent);
 
         private slots:
 

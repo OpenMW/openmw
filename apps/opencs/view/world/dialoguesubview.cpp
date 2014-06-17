@@ -20,6 +20,7 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QTableView>
+#include <QDebug>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
@@ -133,25 +134,25 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
         if (mDisplay == CSMWorld::ColumnBase::Display_Referenceable)
         {
             if (  type == CSMWorld::UniversalId::Type_Activator
-		  || type == CSMWorld::UniversalId::Type_Potion
-		  || type == CSMWorld::UniversalId::Type_Apparatus
-		  || type == CSMWorld::UniversalId::Type_Armor
-		  || type == CSMWorld::UniversalId::Type_Book
-		  || type == CSMWorld::UniversalId::Type_Clothing
-		  || type == CSMWorld::UniversalId::Type_Container
-		  || type == CSMWorld::UniversalId::Type_Creature
-		  || type == CSMWorld::UniversalId::Type_Door
-		  || type == CSMWorld::UniversalId::Type_Ingredient
-		  || type == CSMWorld::UniversalId::Type_CreatureLevelledList
-		  || type == CSMWorld::UniversalId::Type_ItemLevelledList
-		  || type == CSMWorld::UniversalId::Type_Light
-		  || type == CSMWorld::UniversalId::Type_Lockpick
-		  || type == CSMWorld::UniversalId::Type_Miscellaneous
-		  || type == CSMWorld::UniversalId::Type_Npc
-		  || type == CSMWorld::UniversalId::Type_Probe
-		  || type == CSMWorld::UniversalId::Type_Repair
-		  || type == CSMWorld::UniversalId::Type_Static
-		  || type == CSMWorld::UniversalId::Type_Weapon)
+                  || type == CSMWorld::UniversalId::Type_Potion
+                  || type == CSMWorld::UniversalId::Type_Apparatus
+                  || type == CSMWorld::UniversalId::Type_Armor
+                  || type == CSMWorld::UniversalId::Type_Book
+                  || type == CSMWorld::UniversalId::Type_Clothing
+                  || type == CSMWorld::UniversalId::Type_Container
+                  || type == CSMWorld::UniversalId::Type_Creature
+                  || type == CSMWorld::UniversalId::Type_Door
+                  || type == CSMWorld::UniversalId::Type_Ingredient
+                  || type == CSMWorld::UniversalId::Type_CreatureLevelledList
+                  || type == CSMWorld::UniversalId::Type_ItemLevelledList
+                  || type == CSMWorld::UniversalId::Type_Light
+                  || type == CSMWorld::UniversalId::Type_Lockpick
+                  || type == CSMWorld::UniversalId::Type_Miscellaneous
+                  || type == CSMWorld::UniversalId::Type_Npc
+                  || type == CSMWorld::UniversalId::Type_Probe
+                  || type == CSMWorld::UniversalId::Type_Repair
+                  || type == CSMWorld::UniversalId::Type_Static
+                  || type == CSMWorld::UniversalId::Type_Weapon)
             {
                 type = CSMWorld::UniversalId::Type_Referenceable;
             }
@@ -304,7 +305,7 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         } //lisp cond pairs would be nice in the C++
 
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)),
-		this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
+                this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
 
         mProxys.push_back(proxy); //deleted in the destructor
     }
@@ -334,7 +335,7 @@ mTable(table)
     remake (row);
 
     connect(&mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)), 
-	    this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
+            this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 }
 
 void CSVWorld::EditWidget::remake(int row)
@@ -366,9 +367,12 @@ void CSVWorld::EditWidget::remake(int row)
     QVBoxLayout *mainLayout = new QVBoxLayout(mMainWidget);
     QGridLayout *unlockedLayout = new QGridLayout();
     QGridLayout *lockedLayout = new QGridLayout();
+    QVBoxLayout *tablesLayout = new QVBoxLayout();
+
     mainLayout->addLayout(lockedLayout, 0);
     mainLayout->addWidget(line, 1);
     mainLayout->addLayout(unlockedLayout, 2);
+    mainLayout->addLayout(tablesLayout, 3);
     mainLayout->addStretch(1);
 
     int unlocked = 0;
@@ -384,15 +388,12 @@ void CSVWorld::EditWidget::remake(int row)
             CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
                 (mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-            if (display == CSMWorld::ColumnBase::Display_Nested)
+            if (mTable->hasChildren(mTable->index(row, i)))
             {
-                const QModelIndex& parent = mTable->index(row, i);
-                if (parent.data().isValid() && mTable->hasChildren(parent))
-                {
-                    QTableView* table = new QTableView(this);
-                    table->setModel(mTable);
-                    table->setRootIndex(mTable->index(row, i));
-                }
+                QTableView* table = new QTableView();
+                table->setModel(mTable);
+                table->setRootIndex(mTable->index(row, i));
+                tablesLayout->addWidget(table);
             } else
             {
                 mDispatcher.makeDelegate (display);

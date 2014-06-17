@@ -601,8 +601,7 @@ int CSMWorld::RefIdCollection::getNestedRowsCount(int row, int column) const
 
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
 
-    const int count = adaptor.getNestedRowsCount(&mColumns.at(column), mData, localIndex.first);
-    return count;
+    return adaptor.getNestedRowsCount(&mColumns.at(column), mData, localIndex.first);
 }
 
 int CSMWorld::RefIdCollection::getNestedColumnsCount(int row, int column) const
