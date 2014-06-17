@@ -35,6 +35,7 @@ namespace MWMechanics
         AiSequence mAiSequence;
         bool mDead;
         bool mDied;
+        bool mMurdered;
         int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
@@ -169,6 +170,12 @@ namespace MWMechanics
         bool hasDied() const;
 
         void clearHasDied();
+
+        bool hasBeenMurdered() const;
+
+        void clearHasBeenMurdered();
+
+        void notifyMurder();
 
         void resurrect();
 

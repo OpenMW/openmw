@@ -14,7 +14,7 @@ namespace MWMechanics
     int CreatureStats::sActorId = 0;
 
     CreatureStats::CreatureStats()
-        : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
+        : mLevel (0), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false),
@@ -243,6 +243,21 @@ namespace MWMechanics
     void CreatureStats::clearHasDied()
     {
         mDied = false;
+    }
+
+    bool CreatureStats::hasBeenMurdered() const
+    {
+        return mMurdered;
+    }
+
+    void CreatureStats::notifyMurder()
+    {
+        mMurdered = true;
+    }
+
+    void CreatureStats::clearHasBeenMurdered()
+    {
+        mMurdered = false;
     }
 
     void CreatureStats::resurrect()
@@ -479,6 +494,7 @@ namespace MWMechanics
 
         state.mDead = mDead;
         state.mDied = mDied;
+        state.mMurdered = mMurdered;
         state.mFriendlyHits = mFriendlyHits;
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
@@ -527,6 +543,7 @@ namespace MWMechanics
 
         mDead = state.mDead;
         mDied = state.mDied;
+        mMurdered = state.mMurdered;
         mFriendlyHits = state.mFriendlyHits;
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;

@@ -628,6 +628,8 @@ namespace MWClass
                 !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker))
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
+        bool wasDead = getCreatureStats(ptr).isDead();
+
         getCreatureStats(ptr).setAttacked(true);
 
         if(!successful)
@@ -750,6 +752,17 @@ namespace MWClass
             MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
             fatigue.setCurrent(fatigue.getCurrent() - damage, true);
             getCreatureStats(ptr).setFatigue(fatigue);
+        }
+
+        if (!wasDead && getCreatureStats(ptr).isDead())
+        {
+            // NPC was killed
+            // Simple check for who attacked first: if the player attacked first, a crimeId should be set
+            // Doesn't handle possible edge case where no one reported the assault, but in such a case,
+            // for bystanders it is not possible to tell who attacked first, anyway.
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            if (ptr.getClass().getNpcStats(ptr).getCrimeId() != -1 && ptr != player)
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, ptr, MWBase::MechanicsManager::OT_Murder);
         }
     }
 

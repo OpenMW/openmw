@@ -385,6 +385,8 @@ namespace Compiler
         const int opcodeLowerRankExplicit = 0x20001eb;
         const int opcodeOnDeath = 0x20001fc;
         const int opcodeOnDeathExplicit = 0x2000205;
+        const int opcodeOnMurder = 0x2000249;
+        const int opcodeOnMurderExplicit = 0x200024a;
         const int opcodeOnKnockout = 0x2000240;
         const int opcodeOnKnockoutExplicit = 0x2000241;
 

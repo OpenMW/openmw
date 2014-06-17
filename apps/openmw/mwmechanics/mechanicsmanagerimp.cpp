@@ -868,10 +868,16 @@ namespace MWMechanics
         // Find actors who directly witnessed the crime
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (*it == player) continue; // not the player
+            if (*it == player)
+                continue; // skip player
+            if (it->getClass().getCreatureStats(*it).isDead())
+                continue;
 
             // Was the crime seen?
-            if (MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
+            if ((MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
+                    // Murder crime can be reported even if no one saw it (hearing is enough, I guess).
+                    // TODO: Add mod support for stealth executions!
+                    || (type == OT_Murder && *it != victim))
             {
                 if (*it == victim)
                     victimAware = true;
@@ -903,6 +909,9 @@ namespace MWMechanics
     void MechanicsManager::reportCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        if (type == OT_Murder && !victim.isEmpty())
+            victim.getClass().getCreatureStats(victim).notifyMurder();
 
         // Bounty for each type of crime
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
@@ -971,7 +980,7 @@ namespace MWMechanics
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             if (   *it == player
-                || !it->getClass().isNpc()) continue;
+                || !it->getClass().isNpc() || it->getClass().getCreatureStats(*it).isDead()) continue;
 
             int aggression = fight;
 

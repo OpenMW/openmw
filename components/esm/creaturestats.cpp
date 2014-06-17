@@ -21,6 +21,9 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mDied = false;
     esm.getHNOT (mDied, "DIED");
 
+    mMurdered = false;
+    esm.getHNOT (mMurdered, "MURD");
+
     mFriendlyHits = 0;
     esm.getHNOT (mFriendlyHits, "FRHT");
 
@@ -126,6 +129,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mDied)
         esm.writeHNT ("DIED", mDied);
+
+    if (mMurdered)
+        esm.writeHNT ("MURD", mMurdered);
 
     if (mFriendlyHits)
         esm.writeHNT ("FRHT", mFriendlyHits);
