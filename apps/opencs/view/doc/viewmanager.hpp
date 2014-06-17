@@ -5,6 +5,8 @@
 
 #include <QObject>
 
+#include "loader.hpp"
+
 namespace CSMDoc
 {
     class Document;
@@ -29,6 +31,7 @@ namespace CSVDoc
             CSVWorld::CommandDelegateFactoryCollection *mDelegateFactories;
             bool mExitOnSaveStateChange;
             bool mUserWarned;
+            Loader mLoader;
 
             // not implemented
             ViewManager (const ViewManager&);
@@ -76,9 +79,6 @@ namespace CSVDoc
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
 
             void onExitWarningHandler(int state, CSMDoc::Document* document);
-
-            /// connected to update signal in UserSettings
-            void slotUpdateEditorSetting (const QString &, const QString &);
     };
 
 }

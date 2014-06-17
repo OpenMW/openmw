@@ -175,9 +175,9 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
 }
 
 CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
-    const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn)
+    const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content)
 : NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, columns), mWeight (weight),
-  mOrganic (organic), mRespawn (respawn)
+  mOrganic (organic), mRespawn (respawn), mContent(content)
 {}
 
 int CSMWorld::ContainerRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
@@ -220,7 +220,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, co
 
     if (column==mRespawn)
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
-    
+
     if (column==mContent)
 	return true;
 
@@ -253,16 +253,14 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
 }
 
-<<<<<<< Updated upstream
-=======
 void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column, RefIdData& data,
-                                              int row,
+                                              int index,
                                               const QVariant& value,
                                               int subRowIndex,
                                               int subColIndex) const
 {
     Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
-        data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Container)));
+            data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
     if (column==mContent)
     {
@@ -286,12 +284,11 @@ void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column, R
 }
 
 QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdColumn* column,
-							 const CSMWorld::RefIdData& data,
-							 int index,
-							 int subRowIndex,
-							 int subColIndex) const
+                                                        const CSMWorld::RefIdData& data,
+                                                        int index,
+                                                        int subRowIndex,
+                                                        int subColIndex) const
 {
-    qDebug()<<"Accessing content column";
     const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
@@ -317,7 +314,6 @@ QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdCo
 }
 
 
->>>>>>> Stashed changes
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
 : ActorColumns (actorColumns)
 {}

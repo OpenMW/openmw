@@ -61,9 +61,12 @@ namespace MWMechanics
         /// @note Auto detects if spell, ingredient or potion
         bool cast (const std::string& id);
 
+        /// @note \a target can be any type of object, not just actors.
+        /// @note \a caster can be any type of object, or even an empty object.
         void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
 
+        /// @note \a caster can be any type of object, or even an empty object.
         void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
     };
 

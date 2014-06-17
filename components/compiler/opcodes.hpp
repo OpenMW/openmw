@@ -152,6 +152,8 @@ namespace Compiler
         const int opcodeGetReputationExplicit = 0x20001b2;
         const int opcodeSameFaction = 0x20001b5;
         const int opcodeSameFactionExplicit = 0x20001b6;
+        const int opcodeModFactionReaction = 0x2000242;
+        const int opcodeGetFactionReaction = 0x2000243;
     }
 
     namespace Gui
@@ -180,6 +182,7 @@ namespace Compiler
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
+        const int opcodeActivateExplicit = 0x2000244;
         const int opcodeLock = 0x20004;
         const int opcodeLockExplicit = 0x20005;
         const int opcodeUnlock = 0x200008c;
@@ -330,6 +333,10 @@ namespace Compiler
         const int opcodePCRaiseRank = 0x2000b;
         const int opcodePCLowerRank = 0x2000c;
         const int opcodePCJoinFaction = 0x2000d;
+        const int opcodePCRaiseRankExplicit = 0x20029;
+        const int opcodePCLowerRankExplicit = 0x2002a;
+        const int opcodePCJoinFactionExplicit = 0x2002b;
+
         const int opcodeGetPCRank = 0x2000e;
         const int opcodeGetPCRankExplicit = 0x2000f;
         const int opcodeModDisposition = 0x200014d;
@@ -373,6 +380,8 @@ namespace Compiler
         const int opcodeLowerRankExplicit = 0x20001eb;
         const int opcodeOnDeath = 0x20001fc;
         const int opcodeOnDeathExplicit = 0x2000205;
+        const int opcodeOnKnockout = 0x2000240;
+        const int opcodeOnKnockoutExplicit = 0x2000241;
 
         const int opcodeBecomeWerewolf = 0x2000217;
         const int opcodeBecomeWerewolfExplicit = 0x2000218;

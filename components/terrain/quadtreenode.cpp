@@ -400,13 +400,13 @@ void QuadTreeNode::load(const LoadResponseData &data)
     {
         if (mSize == 1)
         {
-            mChunk->setMaterial(mMaterialGenerator->generate(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generate());
         }
         else
         {
             ensureCompositeMap();
             mMaterialGenerator->setCompositeMap(mCompositeMap->getName());
-            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap());
         }
     }
     // else: will be loaded in loadMaterials() after background thread has finished loading layers
@@ -532,13 +532,13 @@ void QuadTreeNode::loadMaterials()
     {
         if (mSize == 1)
         {
-            mChunk->setMaterial(mMaterialGenerator->generate(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generate());
         }
         else
         {
             ensureCompositeMap();
             mMaterialGenerator->setCompositeMap(mCompositeMap->getName());
-            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap());
         }
     }
 }
@@ -554,7 +554,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
         std::vector<LayerInfo> layer;
         layer.push_back(mTerrain->getStorage()->getDefaultLayer());
         matGen.setLayerList(layer);
-        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
+        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT());
         return;
     }
     if (mSize > 1)
@@ -577,7 +577,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
     else
     {
         // TODO: when to destroy?
-        Ogre::MaterialPtr material = mMaterialGenerator->generateForCompositeMapRTT(Ogre::MaterialPtr());
+        Ogre::MaterialPtr material = mMaterialGenerator->generateForCompositeMapRTT();
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, material);
     }
 }
@@ -612,9 +612,9 @@ void QuadTreeNode::applyMaterials()
         mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());
         mMaterialGenerator->enableSplitShadows(mTerrain->getSplitShadowsEnabled());
         if (mSize <= 1)
-            mChunk->setMaterial(mMaterialGenerator->generate(Ogre::MaterialPtr()));
+            mChunk->setMaterial(mMaterialGenerator->generate());
         else
-            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(Ogre::MaterialPtr()));
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap());
     }
     if (hasChildren())
         for (int i=0; i<4; ++i)

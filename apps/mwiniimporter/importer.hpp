@@ -1,12 +1,11 @@
 #ifndef MWINIIMPORTER_IMPORTER
 #define MWINIIMPORTER_IMPORTER 1
 
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <string>
 #include <map>
 #include <vector>
 #include <exception>
+#include <iosfwd>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -24,7 +23,7 @@ class MwIniImporter {
     void    mergeFallback(multistrmap &cfg, const multistrmap &ini) const;
     void    importGameFiles(multistrmap &cfg, const multistrmap &ini) const;
     void    importArchives(multistrmap &cfg, const multistrmap &ini) const;
-    static void    writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, const multistrmap &cfg);
+    static void    writeToFile(std::ostream &out, const multistrmap &cfg);
 
   private:
     static void insertMultistrmap(multistrmap &cfg, const std::string& key, const std::string& value);

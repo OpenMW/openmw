@@ -35,7 +35,7 @@ namespace MWGui
         bool found = false;
         for (; it != out.end(); ++it)
         {
-            if (it->stacks(item))
+            if (it->mBase == item.mBase)
             {
                 it->mCount += item.mCount;
                 found = true;
@@ -52,7 +52,7 @@ namespace MWGui
         bool found = false;
         for (; it != out.end(); ++it)
         {
-            if (it->stacks(item))
+            if (it->mBase == item.mBase)
             {
                 if (it->mCount < count)
                     throw std::runtime_error("Not enough borrowed items to return");
@@ -114,20 +114,17 @@ namespace MWGui
             size_t i=0;
             for (; i<sourceModel->getItemCount(); ++i)
             {
-                if (it->stacks(sourceModel->getItem(i)))
+                if (it->mBase == sourceModel->getItem(i).mBase)
                     break;
             }
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            // reset owner before copying
+            // reset owner while copying, but only for items bought by the player
+            bool setNewOwner = (mMerchant.isEmpty());
             const ItemStack& item = sourceModel->getItem(i);
-            std::string owner = item.mBase.getCellRef().mOwner;
-            if (mMerchant.isEmpty()) // only for items bought by player
-                item.mBase.getCellRef().mOwner = "";
             // copy the borrowed items to our model
-            copyItem(item, it->mCount);
-            item.mBase.getCellRef().mOwner = owner;
+            copyItem(item, it->mCount, setNewOwner);
             // then remove them from the source model
             sourceModel->removeItem(item, it->mCount);
         }
@@ -141,7 +138,7 @@ namespace MWGui
 
         int services = 0;
         if (!mMerchant.isEmpty())
-            services = MWWorld::Class::get(mMerchant).getServices(mMerchant);
+            services = mMerchant.getClass().getServices(mMerchant);
 
         mItems.clear();
         // add regular items
@@ -151,14 +148,14 @@ namespace MWGui
             if(!mMerchant.isEmpty())
             {
                 MWWorld::Ptr base = item.mBase;
-                if(Misc::StringUtils::ciEqual(base.getCellRef().mRefID, MWWorld::ContainerStore::sGoldId))
+                if(Misc::StringUtils::ciEqual(base.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
                     continue;
-                if(!MWWorld::Class::get(base).canSell(base, services))
+                if(!base.getClass().canSell(base, services))
                     continue;
 
                 // Bound items may not be bought
-                if (item.mBase.getCellRef().mRefID.size() > 6
-                        && item.mBase.getCellRef().mRefID.substr(0,6) == "bound_")
+                if (item.mBase.getCellRef().getRefId().size() > 6
+                        && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
                 {
                     continue;
                 }
@@ -167,7 +164,7 @@ namespace MWGui
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))
                 {
                     bool isEquipped = false;
-                    MWWorld::InventoryStore& store = MWWorld::Class::get(mMerchant).getInventoryStore(mMerchant);
+                    MWWorld::InventoryStore& store = mMerchant.getClass().getInventoryStore(mMerchant);
                     for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
                     {
                         MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
@@ -185,7 +182,7 @@ namespace MWGui
             std::vector<ItemStack>::iterator it = mBorrowedFromUs.begin();
             for (; it != mBorrowedFromUs.end(); ++it)
             {
-                if (it->stacks(item))
+                if (it->mBase == item.mBase)
                 {
                     if (item.mCount < it->mCount)
                         throw std::runtime_error("Lent more items than present");

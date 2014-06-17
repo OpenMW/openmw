@@ -33,6 +33,11 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
     }
 
+    void SpellBuyingWindow::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
+    }
+
     void SpellBuyingWindow::addSpell(const std::string& spellId)
     {
         const MWWorld::ESMStore &store =
@@ -83,7 +88,7 @@ namespace MWGui
         mPtr = actor;
         clearSpells();
 
-        MWMechanics::Spells& merchantSpells = MWWorld::Class::get (actor).getCreatureStats (actor).getSpells();
+        MWMechanics::Spells& merchantSpells = actor.getClass().getCreatureStats (actor).getSpells();
 
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
@@ -107,7 +112,7 @@ namespace MWGui
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
+        MWMechanics::Spells& playerSpells = player.getClass().getCreatureStats (player).getSpells();
         for (MWMechanics::Spells::TIterator it = playerSpells.begin(); it != playerSpells.end(); ++it)
         {
             if (Misc::StringUtils::ciEqual(id, it->first))
@@ -121,7 +126,7 @@ namespace MWGui
         int price = *_sender->getUserData<int>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (mSpellsWidgetMap.find(_sender)->second);
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
@@ -132,7 +137,7 @@ namespace MWGui
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
+        exit();
     }
 
     void SpellBuyingWindow::updateLabels()

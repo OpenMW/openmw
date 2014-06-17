@@ -166,6 +166,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Respawn, ColumnBase::Display_Boolean));
     const RefIdColumn *respawn = &mColumns.back();
 
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_Nested, ColumnBase::Flag_Dialogue, false, false));
+    const RefIdColumn *content = &mColumns.back();
+
     CreatureColumns creatureColumns (actorsColumns);
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_CreatureType, ColumnBase::Display_CreatureType));
@@ -305,10 +308,17 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponReach, ColumnBase::Display_Float));
     weaponColumns.mReach = &mColumns.back();
 
-    for (int i=0; i<6; ++i)
+    for (int i=0; i<3; ++i)
     {
-        mColumns.push_back (RefIdColumn (Columns::ColumnId_MinChop + i, ColumnBase::Display_Integer));
-        weaponColumns.mChop[i] = &mColumns.back();
+        const RefIdColumn **column =
+            i==0 ? weaponColumns.mChop : (i==1 ? weaponColumns.mSlash : weaponColumns.mThrust);
+
+        for (int j=0; j<2; ++j)
+        {
+            mColumns.push_back (
+                RefIdColumn (Columns::ColumnId_MinChop+i*2+j, ColumnBase::Display_Integer));
+            column[j] = &mColumns.back();
+        }
     }
 
     static const struct
@@ -341,7 +351,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
         new ClothingRefIdAdapter (enchantableColumns, clothingType)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
-        new ContainerRefIdAdapter (nameColumns, weightCapacity, organic, respawn)));
+        new ContainerRefIdAdapter (nameColumns, weightCapacity, organic, respawn, content)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
         new CreatureRefIdAdapter (creatureColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
@@ -417,8 +427,6 @@ QVariant CSMWorld::RefIdCollection::getData (int index, int column) const
     return adaptor.getData (&mColumns.at (column), mData, localIndex.first);
 }
 
-<<<<<<< Updated upstream
-=======
 QVariant CSMWorld::RefIdCollection::getNestedData (int row, int column, int subRow, int subColumn) const
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex(row);
@@ -429,7 +437,6 @@ QVariant CSMWorld::RefIdCollection::getNestedData (int row, int column, int subR
     return adaptor.getNestedData (&mColumns.at (column), mData, localIndex.first, subRow, subColumn);
 }
 
->>>>>>> Stashed changes
 void CSMWorld::RefIdCollection::setData (int index, int column, const QVariant& data)
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);

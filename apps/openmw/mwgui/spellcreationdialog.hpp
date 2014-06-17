@@ -18,6 +18,7 @@ namespace MWGui
         EditEffectDialog();
 
         virtual void open();
+        virtual void exit();
 
         void setSkill(int skill);
         void setAttribute(int attribute);
@@ -127,6 +128,7 @@ namespace MWGui
         SpellCreationDialog();
 
         virtual void open();
+        virtual void exit();
 
         void startSpellMaking(MWWorld::Ptr actor);
 

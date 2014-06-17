@@ -8,19 +8,15 @@
 #include "universalid.hpp"
 #include "columns.hpp"
 
-<<<<<<< Updated upstream
-=======
 /*! \brief
  * Clas for holding the model. Uses typical qt table abstraction/interface for granting access to the individiual fields of the records,
  * Some records are holding nested data (for instance inventory list of the npc). In casses like this, table model offers interface
- * to access nested data in the qt way – that is specify parent. The parent is encoded in the internalid of the index model
- * See methods fold and unfold adress to see why. This approach has some serious limitations: it allows only
- * a single level of the nesting. At the point of creating this code this seemed to be a good enough solution.
- * If for some reason it turned out that in fact multiple levels of nesting are needed, change in the addressing of the
- * index is most likely the very first to be considered.
+ * to access nested data in the qt way – that is specify parent. Since some of those nested data require multiple columns to
+ * represent informations, single int (default way to index model in the qmodelindex) is not sufficiant. Therefore tablemodelindex class
+ * can hold two ints for the sake of indexing two dimensions of the table. This model does not support multiple levels of the nested
+ * data. Vast majority of methods makes sense only for the top level data.
  */
 
->>>>>>> Stashed changes
 namespace CSMWorld
 {
     class CollectionBase;
@@ -32,43 +28,38 @@ namespace CSMWorld
 
         public:
 
-            enum Reordering
+            enum Features
             {
-                Reordering_None,
-                Reordering_WithinTopic
-            };
+                Feature_ReorderWithinTopic = 1,
 
-            enum Viewing
-            {
-                Viewing_None,
-                Viewing_Id, // use ID column to generate view request (ID is transformed into
-                            // worldspace and original ID is passed as hint with c: prefix)
-                Viewing_Cell // use cell column to generate view request (cell ID is transformed
-                             // into worldspace and record ID is passed as hint with r: prefix)
+                /// Use ID column to generate view request (ID is transformed into
+                /// worldspace and original ID is passed as hint with c: prefix).
+                Feature_ViewId = 2,
+
+                /// Use cell column to generate view request (cell ID is transformed
+                /// into worldspace and record ID is passed as hint with r: prefix).
+                Feature_ViewCell = 4,
+
+                Feature_View = Feature_ViewId | Feature_ViewCell,
+
+                Feature_Preview = 8
             };
 
         private:
 
             CollectionBase *mIdCollection;
-            Reordering mReordering;
-            Viewing mViewing;
+            unsigned int mFeatures;
             bool mPreview;
 
             // not implemented
             IdTable (const IdTable&);
             IdTable& operator= (const IdTable&);
-<<<<<<< Updated upstream
-=======
-
             unsigned int foldIndexAdress(const QModelIndex& index) const;
-
             std::pair<int, int> unfoldIndexAdress(unsigned int id) const;
->>>>>>> Stashed changes
 
         public:
 
-            IdTable (CollectionBase *idCollection, Reordering reordering = Reordering_None,
-                Viewing viewing = Viewing_None, bool preview = false);
+            IdTable (CollectionBase *idCollection, unsigned int features = 0);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();
@@ -91,8 +82,8 @@ namespace CSMWorld
                 const;
 
             virtual QModelIndex parent (const QModelIndex& index) const;
-	
-	    virtual bool hasChildren (const QModelIndex& index) const;
+
+            virtual bool hasChildren (const QModelIndex& index) const;
 
             void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
@@ -119,11 +110,7 @@ namespace CSMWorld
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
 
-            Reordering getReordering() const;
-
-            Viewing getViewing() const;
-
-            bool hasPreview() const;
+            unsigned int getFeatures() const;
 
             std::pair<UniversalId, std::string> view (int row) const;
             ///< Return the UniversalId and the hint for viewing \a row. If viewing is not

@@ -14,6 +14,7 @@
 
 #include "itemselection.hpp"
 #include "container.hpp"
+#include "itemwidget.hpp"
 
 #include "sortfilteritemmodel.hpp"
 
@@ -57,8 +58,50 @@ namespace MWGui
     void EnchantingDialog::open()
     {
         center();
-        onRemoveItem(NULL);
-        onRemoveSoul(NULL);
+
+        setSoulGem(MWWorld::Ptr());
+        setItem(MWWorld::Ptr());
+    }
+
+    void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)
+    {
+        if (gem.isEmpty())
+        {
+            mSoulBox->setItem(MWWorld::Ptr());
+            mSoulBox->clearUserStrings();
+            mEnchanting.setSoulGem(MWWorld::Ptr());
+        }
+        else
+        {
+            mSoulBox->setItem(gem);
+            mSoulBox->setUserString ("ToolTipType", "ItemPtr");
+            mSoulBox->setUserData(gem);
+            mEnchanting.setSoulGem(gem);
+        }
+        updateLabels();
+    }
+
+    void EnchantingDialog::setItem(const MWWorld::Ptr &item)
+    {
+        if (item.isEmpty())
+        {
+            mItemBox->setItem(MWWorld::Ptr());
+            mItemBox->clearUserStrings();
+            mEnchanting.setOldItem(MWWorld::Ptr());
+        }
+        else
+        {
+            mItemBox->setItem(item);
+            mItemBox->setUserString ("ToolTipType", "ItemPtr");
+            mItemBox->setUserData(item);
+            mEnchanting.setOldItem(item);
+        }
+        updateLabels();
+    }
+
+    void EnchantingDialog::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 
     void EnchantingDialog::updateLabels()
@@ -117,16 +160,7 @@ namespace MWGui
         startEditing();
         mEnchanting.setSoulGem(soulgem);
 
-        MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
-        std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(soulgem).getInventoryIcon(soulgem);
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
-        image->setImageTexture (path);
-        image->setUserString ("ToolTipType", "ItemPtr");
-        image->setUserData(soulgem);
-        image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveSoul);
+        setSoulGem(soulgem);
 
         mPrice->setVisible(false);
         mPriceText->setVisible(false);
@@ -141,48 +175,33 @@ namespace MWGui
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+        exit();
     }
 
     void EnchantingDialog::onSelectItem(MyGUI::Widget *sender)
     {
-        delete mItemSelectionDialog;
-        mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}");
-        mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
-        mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
-        mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
-        mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyEnchantable);
+        if (mEnchanting.getOldItem().isEmpty())
+        {
+            delete mItemSelectionDialog;
+            mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}");
+            mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
+            mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
+            mItemSelectionDialog->setVisible(true);
+            mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+            mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyEnchantable);
+        }
+        else
+        {
+            setItem(MWWorld::Ptr());
+        }
     }
 
     void EnchantingDialog::onItemSelected(MWWorld::Ptr item)
     {
         mItemSelectionDialog->setVisible(false);
 
-        while (mItemBox->getChildCount ())
-            MyGUI::Gui::getInstance ().destroyWidget (mItemBox->getChildAt(0));
-
-        MyGUI::ImageBox* image = mItemBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
-        std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
-        image->setImageTexture (path);
-        image->setUserString ("ToolTipType", "ItemPtr");
-        image->setUserData(item);
-        image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveItem);
-
-        mEnchanting.setOldItem(item);
+        setItem(item);
         mEnchanting.nextCastStyle();
-        updateLabels();
-    }
-
-    void EnchantingDialog::onRemoveItem(MyGUI::Widget *sender)
-    {
-        while (mItemBox->getChildCount ())
-            MyGUI::Gui::getInstance ().destroyWidget (mItemBox->getChildAt(0));
-        mEnchanting.setOldItem(MWWorld::Ptr());
         updateLabels();
     }
 
@@ -202,28 +221,7 @@ namespace MWGui
             return;
         }
 
-        while (mSoulBox->getChildCount ())
-            MyGUI::Gui::getInstance ().destroyWidget (mSoulBox->getChildAt(0));
-
-        MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
-        std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(item).getInventoryIcon(item);
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
-        image->setImageTexture (path);
-        image->setUserString ("ToolTipType", "ItemPtr");
-        image->setUserData(item);
-        image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveSoul);
-        updateLabels();
-    }
-
-    void EnchantingDialog::onRemoveSoul(MyGUI::Widget *sender)
-    {
-        while (mSoulBox->getChildCount ())
-            MyGUI::Gui::getInstance ().destroyWidget (mSoulBox->getChildAt(0));
-        mEnchanting.setSoulGem(MWWorld::Ptr());
-        updateLabels();
+        setSoulGem(item);
     }
 
     void EnchantingDialog::onSoulCancel()
@@ -233,15 +231,22 @@ namespace MWGui
 
     void EnchantingDialog::onSelectSoul(MyGUI::Widget *sender)
     {
-        delete mItemSelectionDialog;
-        mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}");
-        mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
-        mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
-        mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
-        mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
+        if (mEnchanting.getGem().isEmpty())
+        {
+            delete mItemSelectionDialog;
+            mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}");
+            mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
+            mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
+            mItemSelectionDialog->setVisible(true);
+            mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+            mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
 
-        //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
+            //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
+        }
+        else
+        {
+            setSoulGem(MWWorld::Ptr());
+        }
     }
 
     void EnchantingDialog::notifyEffectsChanged ()
@@ -306,7 +311,7 @@ namespace MWGui
             for (int i=0; i<2; ++i)
             {
                 MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
-                if (Misc::StringUtils::ciEqual(item.getCellRef().mOwner, mPtr.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), mPtr.getCellRef().getRefId()))
                 {
                     std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->getString();
                     if (msg.find("%s") != std::string::npos)

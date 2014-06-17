@@ -13,7 +13,7 @@ namespace MWGui
         , mType(Type_Normal)
         , mBase(base)
     {
-        if (MWWorld::Class::get(base).getEnchantment(base) != "")
+        if (base.getClass().getEnchantment(base) != "")
             mFlags |= Flag_Enchanted;
     }
 
@@ -71,16 +71,22 @@ namespace MWGui
     {
     }
 
+    MWWorld::Ptr ItemModel::moveItem(const ItemStack &item, size_t count, ItemModel *otherModel)
+    {
+        MWWorld::Ptr ret = otherModel->copyItem(item, count);
+        removeItem(item, count);
+        return ret;
+    }
+
 
     ProxyItemModel::~ProxyItemModel()
     {
         delete mSourceModel;
     }
 
-    void ProxyItemModel::copyItem (const ItemStack& item, size_t count)
+    MWWorld::Ptr ProxyItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
     {
-        // no need to use mapToSource since itemIndex refers to an index in the sourceModel
-        mSourceModel->copyItem (item, count);
+        return mSourceModel->copyItem (item, count, setNewOwner);
     }
 
     void ProxyItemModel::removeItem (const ItemStack& item, size_t count)
@@ -94,7 +100,7 @@ namespace MWGui
         for (size_t i=0; i<mSourceModel->getItemCount(); ++i)
         {
             const ItemStack& item = mSourceModel->getItem(i);
-            if (item == itemToSearch)
+            if (item.mBase == itemToSearch.mBase)
                 return i;
         }
         return -1;
@@ -106,7 +112,7 @@ namespace MWGui
         for (size_t i=0; i<getItemCount(); ++i)
         {
             const ItemStack& item = getItem(i);
-            if (item == itemToSearch)
+            if (item.mBase == itemToSearch.mBase)
                 return i;
         }
         return -1;

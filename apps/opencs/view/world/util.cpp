@@ -172,7 +172,8 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             display == CSMWorld::ColumnBase::Display_Class ||
             display == CSMWorld::ColumnBase::Display_Faction ||
             display == CSMWorld::ColumnBase::Display_Miscellaneous ||
-            display == CSMWorld::ColumnBase::Display_Sound)
+            display == CSMWorld::ColumnBase::Display_Sound ||
+            display == CSMWorld::ColumnBase::Display_Region)
         {
             return new DropLineEdit(parent);
         }
@@ -194,12 +195,6 @@ void CSVWorld::CommandDelegate::setEditLock (bool locked)
 bool CSVWorld::CommandDelegate::isEditLocked() const
 {
     return mEditLock;
-}
-
-bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
-    const QString &settingValue)
-{
-    return false;
 }
 
 void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const

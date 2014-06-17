@@ -20,9 +20,6 @@ namespace CSVWorld
         explicit RecordStatusDelegate(const ValueList& values,
                                       const IconList& icons,
                                       QUndoStack& undoStack, QObject *parent = 0);
-
-        virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
-
     };
 
     class RecordStatusDelegateFactory : public DataDisplayDelegateFactory

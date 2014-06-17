@@ -30,6 +30,13 @@ namespace CSMWorld
                 const QVariant& value) const = 0;
             ///< If the data type does not match an exception is thrown.
 
+            virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data,
+                                      int idnex, int subRowIndex, int subColIndex) const;
+
+            virtual void setNestedData (const RefIdColumn *column, RefIdData& data,
+                                  const QVariant& value, int index,
+                                  int subRowIndex, int subColIndex) const;
+
             virtual std::string getId (const RecordBase& record) const = 0;
 
             virtual void setId(RecordBase& record, const std::string& id) = 0;
@@ -43,15 +50,14 @@ namespace CSMWorld
             virtual ~NestedRefIdAdapter();
  
             virtual void setNestedData (const RefIdColumn *column, RefIdData& data, int row,
-					const QVariant& value, int subRowIndex, int subColIndex) const = 0;
+                                        const QVariant& value, int subRowIndex, int subColIndex) const = 0;
 
-	    virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data,
-					    int index, int subRowIndex, int subColIndex) const = 0;
-      
-      
-	    virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const = 0;
+            virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data,
+                                        int index, int subRowIndex, int subColIndex) const = 0;
 
-	    virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const = 0;
+            virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const = 0;
+
+            virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const = 0;
     };
 }
 

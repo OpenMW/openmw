@@ -20,7 +20,7 @@ namespace MWDialogue
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic);
 
-        for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
+        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mId == mInfoId)
             {
@@ -73,7 +73,7 @@ namespace MWDialogue
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic);
 
-        for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
+        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mData.mDisposition==index) /// \todo cleanup info structure
             {

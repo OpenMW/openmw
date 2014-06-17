@@ -42,6 +42,7 @@ void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, 
     while(!ctrl.empty())
     {
         if(!(ctrl->recType == Nif::RC_NiParticleSystemController ||
+             ctrl->recType == Nif::RC_NiBSPArrayController ||
              ctrl->recType == Nif::RC_NiVisController ||
              ctrl->recType == Nif::RC_NiUVController ||
              ctrl->recType == Nif::RC_NiKeyframeController ||

@@ -75,6 +75,15 @@ namespace MWGui
         center();
     }
 
+    void EditEffectDialog::exit()
+    {
+        setVisible(false);
+        if(mEditing)
+            eventEffectModified(mOldEffect);
+        else
+            eventEffectRemoved(mEffect);
+    }
+
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
     {
         setMagicEffect(effect);
@@ -222,11 +231,7 @@ namespace MWGui
 
     void EditEffectDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
-        setVisible(false);
-        if(mEditing)
-            eventEffectModified(mOldEffect);
-        else
-            eventEffectRemoved(mEffect);
+        exit();
     }
 
     void EditEffectDialog::setSkill (int skill)
@@ -313,7 +318,7 @@ namespace MWGui
 
     void SpellCreationDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellCreation);
+        exit();
     }
 
     void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
@@ -353,7 +358,7 @@ namespace MWGui
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (spell->mId);
 
@@ -365,6 +370,11 @@ namespace MWGui
     void SpellCreationDialog::open()
     {
         center();
+    }
+
+    void SpellCreationDialog::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellCreation);
     }
 
     void SpellCreationDialog::onReferenceUnavailable ()
@@ -445,7 +455,7 @@ namespace MWGui
         // get the list of magic effects that are known to the player
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
         std::vector<short> knownEffects;

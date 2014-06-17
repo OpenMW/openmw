@@ -88,6 +88,12 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    if (!MWBase::Environment::get().getWorld()->getPlayerPtr().isInCell())
+                    {
+                        runtime.push (0);
+                        return;
+                    }
+
                     bool interior =
                         !MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->isExterior();
 
@@ -104,6 +110,11 @@ namespace MWScript
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if (!MWBase::Environment::get().getWorld()->getPlayerPtr().isInCell())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
                     const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
 
                     std::string current = cell->mName;
@@ -131,6 +142,11 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    if (!MWBase::Environment::get().getWorld()->getPlayerPtr().isInCell())
+                    {
+                        runtime.push(0.f);
+                        return;
+                    }
                     MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
                     if (cell->getCell()->hasWater())
                         runtime.push (cell->getWaterLevel());
@@ -146,6 +162,11 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
+
+                    if (!MWBase::Environment::get().getWorld()->getPlayerPtr().isInCell())
+                    {
+                        return;
+                    }
 
                     MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
@@ -164,6 +185,11 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
+
+                    if (!MWBase::Environment::get().getWorld()->getPlayerPtr().isInCell())
+                    {
+                        return;
+                    }
 
                     MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 

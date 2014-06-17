@@ -114,6 +114,14 @@ namespace MWGui
         setTakeButtonShow(true);
     }
 
+    void BookWindow::exit()
+    {
+        // no 3d sounds because the object could be in a container.
+        MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
+    }
+
     void BookWindow::setTakeButtonShow(bool show)
     {
         mTakeButtonShow = show;
@@ -128,10 +136,7 @@ namespace MWGui
 
     void BookWindow::onCloseButtonClicked (MyGUI::Widget* sender)
     {
-        // no 3d sounds because the object could be in a container.
-        MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
+        exit();
     }
 
     void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)

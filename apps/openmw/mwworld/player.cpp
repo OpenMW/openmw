@@ -9,13 +9,18 @@
 #include <components/esm/defs.hpp>
 #include <components/esm/loadbsgn.hpp>
 
+#include "../mwworld/esmstore.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actors.hpp"
+#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "class.hpp"
 #include "ptr.hpp"
@@ -32,10 +37,12 @@ namespace MWWorld
         mTeleported(false),
         mMarkedCell(NULL),
         mCurrentCrimeId(-1),
-        mPayedCrimeId(-1)
+        mPaidCrimeId(-1)
     {
-        mPlayer.mBase = player;
-        mPlayer.mRef.mRefID = "player";
+        ESM::CellRef cellRef;
+        cellRef.blank();
+        cellRef.mRefID = "player";
+        mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
@@ -70,7 +77,7 @@ namespace MWWorld
     void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
-         MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
+         ptr.getClass().getNpcStats(ptr).setDrawState (state);
     }
 
     bool Player::getAutoMove() const
@@ -89,14 +96,13 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[0] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[0] = value;
     }
 
     void Player::setForwardBackward (int value)
@@ -108,14 +114,13 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[2] = value;
+        ptr.getClass().getMovementSettings (ptr).mPosition[2] = value;
     }
 
     void Player::setRunState(bool run)
@@ -127,33 +132,29 @@ namespace MWWorld
     void Player::setSneak(bool sneak)
     {
         MWWorld::Ptr ptr = getPlayer();
-
         ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
-
-        // TODO show sneak indicator only when the player is not detected by any actor
-        MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
     }
 
     void Player::yaw(float yaw)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[2] += yaw;
+        ptr.getClass().getMovementSettings(ptr).mRotation[2] += yaw;
     }
     void Player::pitch(float pitch)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[0] += pitch;
+        ptr.getClass().getMovementSettings(ptr).mRotation[0] += pitch;
     }
     void Player::roll(float roll)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[1] += roll;
+        ptr.getClass().getMovementSettings(ptr).mRotation[1] += roll;
     }
 
     MWMechanics::DrawState_ Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();
-         return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();
+         return ptr.getClass().getNpcStats(ptr).getDrawState();
     }
 
     bool Player::wasTeleported() const
@@ -164,6 +165,10 @@ namespace MWWorld
     void Player::setTeleported(bool teleported)
     {
         mTeleported = teleported;
+    }
+
+    bool Player::isInCombat() {
+        return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
     }
 
     void Player::markPosition(CellStore *markedCell, ESM::Position markedPosition)
@@ -189,7 +194,7 @@ namespace MWWorld
         mTeleported = false;
     }
 
-    void Player::write (ESM::ESMWriter& writer) const
+    void Player::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         ESM::Player player;
 
@@ -197,7 +202,7 @@ namespace MWWorld
         player.mCellId = mCellStore->getCell()->getCellId();
 
         player.mCurrentCrimeId = mCurrentCrimeId;
-        player.mPayedCrimeId = mPayedCrimeId;
+        player.mPaidCrimeId = mPaidCrimeId;
 
         player.mBirthsign = mSign;
 
@@ -219,6 +224,8 @@ namespace MWWorld
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
         writer.endRecord (ESM::REC_PLAY);
+
+        progress.increaseProgress();
     }
 
     bool Player::readRecord (ESM::ESMReader& reader, int32_t type)
@@ -245,7 +252,7 @@ namespace MWWorld
                 throw std::runtime_error ("invalid player state record (birthsign)");
 
             mCurrentCrimeId = player.mCurrentCrimeId;
-            mPayedCrimeId = player.mPayedCrimeId;
+            mPaidCrimeId = player.mPaidCrimeId;
 
             mSign = player.mBirthsign;
 
@@ -290,11 +297,11 @@ namespace MWWorld
 
     void Player::recordCrimeId()
     {
-        mPayedCrimeId = mCurrentCrimeId;
+        mPaidCrimeId = mCurrentCrimeId;
     }
 
     int Player::getCrimeId() const
     {
-        return mPayedCrimeId;
+        return mPaidCrimeId;
     }
 }

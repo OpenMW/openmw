@@ -23,6 +23,8 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../mwsound/soundmanagerimp.hpp"
+
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "journalviewmodel.hpp"
@@ -62,6 +64,7 @@
 #include "fontloader.hpp"
 #include "videowidget.hpp"
 #include "backgroundimage.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -134,6 +137,7 @@ namespace MWGui
       , mFPS(0.0f)
       , mTriangleCount(0)
       , mBatchCount(0)
+      , mCurrentModals()
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
@@ -158,12 +162,12 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
+        ItemWidget::registerComponents();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatClick>("Controller");
 
@@ -187,7 +191,7 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        SDL_ShowCursor(false);
+        //SDL_ShowCursor(false);
 
         mCursorManager->setEnabled(true);
 
@@ -289,12 +293,17 @@ namespace MWGui
 
     void WindowManager::setNewGame(bool newgame)
     {
+        // This method will always be called after loading a savegame or starting a new game
+        // Reset enemy, it could be a dangling pointer from a previous game
+        mHud->resetEnemy();
+
         if (newgame)
         {
             disallowAll();
             delete mCharGen;
             mCharGen = new CharacterCreation();
             mGuiModes.clear();
+            MWBase::Environment::get().getInputManager()->changeInputMode(false);
             mHud->unsetSelectedWeapon();
             mHud->unsetSelectedSpell();
             unsetForceHide(GW_ALL);
@@ -435,128 +444,131 @@ namespace MWGui
             return;
         }
 
-        GuiMode mode = mGuiModes.back();
+        if(mGuiModes.size() != 0)
+        {
+            GuiMode mode = mGuiModes.back();
 
-        switch(mode) {
-            case GM_QuickKeysMenu:
-                mQuickKeysMenu->setVisible (true);
-                break;
-            case GM_MainMenu:
-                mMenu->setVisible(true);
-                break;
-            case GM_Settings:
-                mSettingsWindow->setVisible(true);
-                break;
-            case GM_Console:
-                mConsole->setVisible(true);
-                break;
-            case GM_Scroll:
-                mScrollWindow->setVisible(true);
-                break;
-            case GM_Book:
-                mBookWindow->setVisible(true);
-                break;
-            case GM_Alchemy:
-                mAlchemyWindow->setVisible(true);
-                break;
-            case GM_Rest:
-                mWaitDialog->setVisible(true);
-                break;
-            case GM_RestBed:
-                mWaitDialog->setVisible(true);
-                mWaitDialog->bedActivated();
-                break;
-            case GM_Levelup:
-                mLevelupDialog->setVisible(true);
-                break;
-            case GM_Name:
-            case GM_Race:
-            case GM_Class:
-            case GM_ClassPick:
-            case GM_ClassCreate:
-            case GM_Birth:
-            case GM_ClassGenerate:
-            case GM_Review:
-                mCharGen->spawnDialog(mode);
-                break;
-            case GM_Inventory:
-            {
-                // First, compute the effective set of windows to show.
-                // This is controlled both by what windows the
-                // user has opened/closed (the 'shown' variable) and by what
-                // windows we are allowed to show (the 'allowed' var.)
-                int eff = mShown & mAllowed & ~mForceHidden;
+            switch(mode) {
+                case GM_QuickKeysMenu:
+                    mQuickKeysMenu->setVisible (true);
+                    break;
+                case GM_MainMenu:
+                    mMenu->setVisible(true);
+                    break;
+                case GM_Settings:
+                    mSettingsWindow->setVisible(true);
+                    break;
+                case GM_Console:
+                    mConsole->setVisible(true);
+                    break;
+                case GM_Scroll:
+                    mScrollWindow->setVisible(true);
+                    break;
+                case GM_Book:
+                    mBookWindow->setVisible(true);
+                    break;
+                case GM_Alchemy:
+                    mAlchemyWindow->setVisible(true);
+                    break;
+                case GM_Rest:
+                    mWaitDialog->setVisible(true);
+                    break;
+                case GM_RestBed:
+                    mWaitDialog->setVisible(true);
+                    mWaitDialog->bedActivated();
+                    break;
+                case GM_Levelup:
+                    mLevelupDialog->setVisible(true);
+                    break;
+                case GM_Name:
+                case GM_Race:
+                case GM_Class:
+                case GM_ClassPick:
+                case GM_ClassCreate:
+                case GM_Birth:
+                case GM_ClassGenerate:
+                case GM_Review:
+                    mCharGen->spawnDialog(mode);
+                    break;
+                case GM_Inventory:
+                {
+                    // First, compute the effective set of windows to show.
+                    // This is controlled both by what windows the
+                    // user has opened/closed (the 'shown' variable) and by what
+                    // windows we are allowed to show (the 'allowed' var.)
+                    int eff = mShown & mAllowed & ~mForceHidden;
 
-                // Show the windows we want
-                mMap            ->setVisible(eff & GW_Map);
-                mStatsWindow    ->setVisible(eff & GW_Stats);
-                mInventoryWindow->setVisible(eff & GW_Inventory);
-                mInventoryWindow->setGuiMode(mode);
-                mSpellWindow    ->setVisible(eff & GW_Magic);
-                break;
+                    // Show the windows we want
+                    mMap            ->setVisible(eff & GW_Map);
+                    mStatsWindow    ->setVisible(eff & GW_Stats);
+                    mInventoryWindow->setVisible(eff & GW_Inventory);
+                    mInventoryWindow->setGuiMode(mode);
+                    mSpellWindow    ->setVisible(eff & GW_Magic);
+                    break;
+                }
+                case GM_Container:
+                    mContainerWindow->setVisible(true);
+                    mInventoryWindow->setVisible(true);
+                    mInventoryWindow->setGuiMode(mode);
+                    break;
+                case GM_Companion:
+                    mCompanionWindow->setVisible(true);
+                    mInventoryWindow->setVisible(true);
+                    mInventoryWindow->setGuiMode(mode);
+                    break;
+                case GM_Dialogue:
+                    mDialogueWindow->setVisible(true);
+                    break;
+                case GM_Barter:
+                    mInventoryWindow->setVisible(true);
+                    mInventoryWindow->setTrading(true);
+                    mInventoryWindow->setGuiMode(mode);
+                    mTradeWindow->setVisible(true);
+                    break;
+                case GM_SpellBuying:
+                    mSpellBuyingWindow->setVisible(true);
+                    break;
+                case GM_Travel:
+                    mTravelWindow->setVisible(true);
+                    break;
+                case GM_SpellCreation:
+                    mSpellCreationDialog->setVisible(true);
+                    break;
+                case GM_Recharge:
+                    mRecharge->setVisible(true);
+                    break;
+                case GM_Enchanting:
+                    mEnchantingDialog->setVisible(true);
+                    break;
+                case GM_Training:
+                    mTrainingWindow->setVisible(true);
+                    break;
+                case GM_MerchantRepair:
+                    mMerchantRepair->setVisible(true);
+                    break;
+                case GM_Repair:
+                    mRepair->setVisible(true);
+                    break;
+                case GM_Journal:
+                    mJournal->setVisible(true);
+                    break;
+                case GM_LoadingWallpaper:
+                    mHud->setVisible(false);
+                    setCursorVisible(false);
+                    break;
+                case GM_Loading:
+                    // Show the pinned windows
+                    mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
+                    mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
+                    mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
+                    mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
+
+                    setCursorVisible(false);
+                    break;
+                default:
+                    // Unsupported mode, switch back to game
+                    break;
             }
-            case GM_Container:
-                mContainerWindow->setVisible(true);
-                mInventoryWindow->setVisible(true);
-                mInventoryWindow->setGuiMode(mode);
-                break;
-            case GM_Companion:
-                mCompanionWindow->setVisible(true);
-                mInventoryWindow->setVisible(true);
-                mInventoryWindow->setGuiMode(mode);
-                break;
-            case GM_Dialogue:
-                mDialogueWindow->setVisible(true);
-                break;
-            case GM_Barter:
-                mInventoryWindow->setVisible(true);
-                mInventoryWindow->setTrading(true);
-                mInventoryWindow->setGuiMode(mode);
-                mTradeWindow->setVisible(true);
-                break;
-            case GM_SpellBuying:
-                mSpellBuyingWindow->setVisible(true);
-                break;
-            case GM_Travel:
-                mTravelWindow->setVisible(true);
-                break;
-            case GM_SpellCreation:
-                mSpellCreationDialog->setVisible(true);
-                break;
-            case GM_Recharge:
-                mRecharge->setVisible(true);
-                break;
-            case GM_Enchanting:
-                mEnchantingDialog->setVisible(true);
-                break;
-            case GM_Training:
-                mTrainingWindow->setVisible(true);
-                break;
-            case GM_MerchantRepair:
-                mMerchantRepair->setVisible(true);
-                break;
-            case GM_Repair:
-                mRepair->setVisible(true);
-                break;
-            case GM_Journal:
-                mJournal->setVisible(true);
-                break;
-            case GM_LoadingWallpaper:
-                mHud->setVisible(false);
-                setCursorVisible(false);
-                break;
-            case GM_Loading:
-                // Show the pinned windows
-                mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
-                mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
-                mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
-                mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
-
-                setCursorVisible(false);
-                break;
-            default:
-                // Unsupported mode, switch back to game
-                break;
         }
     }
 
@@ -621,9 +633,9 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
     }
 
-    void WindowManager::setDrowningTimeLeft (float time)
+    void WindowManager::setDrowningTimeLeft (float time, float maxTime)
     {
-        mHud->setDrowningTimeLeft(time);
+        mHud->setDrowningTimeLeft(time, maxTime);
     }
 
     void WindowManager::setPlayerClass (const ESM::Class &class_)
@@ -660,6 +672,93 @@ namespace MWGui
             return;
         dialog->setVisible(false);
         mGarbageDialogs.push_back(dialog);
+    }
+
+    void WindowManager::exitCurrentGuiMode() {
+        switch(mGuiModes.back()) {
+            case GM_QuickKeysMenu:
+                mQuickKeysMenu->exit();
+                break;
+            case GM_MainMenu:
+                removeGuiMode(GM_MainMenu); //Simple way to remove it
+                break;
+            case GM_Settings:
+                mSettingsWindow->exit();
+                break;
+            case GM_Console:
+                mConsole->exit();
+                break;
+            case GM_Scroll:
+                mScrollWindow->exit();
+                break;
+            case GM_Book:
+                mBookWindow->exit();
+                break;
+            case GM_Alchemy:
+                mAlchemyWindow->exit();
+                break;
+            case GM_Rest:
+                mWaitDialog->exit();
+                break;
+            case GM_RestBed:
+                mWaitDialog->exit();
+                break;
+            case GM_Name:
+            case GM_Race:
+            case GM_Class:
+            case GM_ClassPick:
+            case GM_ClassCreate:
+            case GM_Birth:
+            case GM_ClassGenerate:
+            case GM_Review:
+                break;
+            case GM_Inventory:
+                removeGuiMode(GM_Inventory); //Simple way to remove it
+                break;
+            case GM_Container:
+                mContainerWindow->exit();
+                break;
+            case GM_Companion:
+                mCompanionWindow->exit();
+                break;
+            case GM_Dialogue:
+                mDialogueWindow->exit();
+                break;
+            case GM_Barter:
+                mTradeWindow->exit();
+                break;
+            case GM_SpellBuying:
+                mSpellBuyingWindow->exit();
+                break;
+            case GM_Travel:
+                mTravelWindow->exit();
+                break;
+            case GM_SpellCreation:
+                mSpellCreationDialog->exit();
+                break;
+            case GM_Recharge:
+                mRecharge->exit();
+                break;
+            case GM_Enchanting:
+                mEnchantingDialog->exit();
+                break;
+            case GM_Training:
+                mTrainingWindow->exit();
+                break;
+            case GM_MerchantRepair:
+                mMerchantRepair->exit();
+                break;
+            case GM_Repair:
+                mRepair->exit();
+                break;
+            case GM_Journal:
+                MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+                removeGuiMode(GM_Journal); //Simple way to remove it
+                break;
+            default:
+                // Unsupported mode, switch back to game
+                break;
+        }
     }
 
     void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
@@ -708,6 +807,8 @@ namespace MWGui
         mMessageBoxManager->onFrame(frameDuration);
 
         mToolTips->onFrame(frameDuration);
+
+        mMenu->update(frameDuration);
 
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_NoGame)
@@ -762,8 +863,6 @@ namespace MWGui
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
-            mMap->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
-            mHud->setActiveCell (cell->getCell()->getGridX(), cell->getCell()->getGridY());
         }
         else
         {
@@ -779,10 +878,10 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setInteriorMapTexture(const int x, const int y)
+    void WindowManager::setActiveMap(int x, int y, bool interior)
     {
-        mMap->setActiveCell(x,y, true);
-        mHud->setActiveCell(x,y, true);
+        mMap->setActiveCell(x,y, interior);
+        mHud->setActiveCell(x,y, interior);
     }
 
     void WindowManager::setPlayerPos(const float x, const float y)
@@ -812,10 +911,10 @@ namespace MWGui
         mHud->setMinimapVisible (visible);
     }
 
-    void WindowManager::toggleFogOfWar()
+    bool WindowManager::toggleFogOfWar()
     {
         mMap->toggleFogOfWar();
-        mHud->toggleFogOfWar();
+        return mHud->toggleFogOfWar();
     }
 
     void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
@@ -828,9 +927,9 @@ namespace MWGui
         mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
     }
 
-    void WindowManager::toggleFullHelp()
+    bool WindowManager::toggleFullHelp()
     {
-        mToolTips->toggleFullHelp();
+        return mToolTips->toggleFullHelp();
     }
 
     bool WindowManager::getFullHelp() const
@@ -1025,20 +1124,20 @@ namespace MWGui
     {
         mSelectedSpell = "";
         const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
-                .find(MWWorld::Class::get(item).getEnchantment(item));
+                .find(item.getClass().getEnchantment(item));
 
-        int chargePercent = (item.getCellRef().mEnchantmentCharge == -1) ? 100
-                : (item.getCellRef().mEnchantmentCharge / static_cast<float>(ench->mData.mCharge) * 100);
+        int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
+                : (item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
-        mSpellWindow->setTitle(MWWorld::Class::get(item).getName(item));
+        mSpellWindow->setTitle(item.getClass().getName(item));
     }
 
     void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item)
     {
-        int durabilityPercent = (item.getCellRef().mCharge == -1) ? 100
-                 : (item.getCellRef().mCharge / static_cast<float>(MWWorld::Class::get(item).getItemMaxHealth(item)) * 100);
+        int durabilityPercent =
+             (item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
         mHud->setSelectedWeapon(item, durabilityPercent);
-        mInventoryWindow->setTitle(MWWorld::Class::get(item).getName(item));
+        mInventoryWindow->setTitle(item.getClass().getName(item));
     }
 
     void WindowManager::unsetSelectedSpell()
@@ -1324,9 +1423,6 @@ namespace MWGui
 
     void WindowManager::updatePlayer()
     {
-        unsetSelectedSpell();
-        unsetSelectedWeapon();
-
         mInventoryWindow->updatePlayer();
     }
 
@@ -1401,16 +1497,64 @@ namespace MWGui
     void WindowManager::clear()
     {
         mMap->clear();
+        mQuickKeysMenu->clear();
+
+        mTrainingWindow->resetReference();
+        mDialogueWindow->resetReference();
+        mTradeWindow->resetReference();
+        mSpellBuyingWindow->resetReference();
+        mSpellCreationDialog->resetReference();
+        mEnchantingDialog->resetReference();
+        mContainerWindow->resetReference();
+        mCompanionWindow->resetReference();
+        mConsole->resetReference();
+
+        mGuiModes.clear();
+        MWBase::Environment::get().getInputManager()->changeInputMode(false);
+        updateVisible();
     }
 
-    void WindowManager::write(ESM::ESMWriter &writer)
+    void WindowManager::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
-        mMap->write(writer);
+        mMap->write(writer, progress);
+
+        mQuickKeysMenu->write(writer);
+        progress.increaseProgress();
+
+        if (!mSelectedSpell.empty())
+        {
+            writer.startRecord(ESM::REC_ASPL);
+            writer.writeHNString("ID__", mSelectedSpell);
+            writer.endRecord(ESM::REC_ASPL);
+            progress.increaseProgress();
+        }
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
     {
-        mMap->readRecord(reader, type);
+        if (type == ESM::REC_GMAP)
+            mMap->readRecord(reader, type);
+        else if (type == ESM::REC_KEYS)
+            mQuickKeysMenu->readRecord(reader, type);
+        else if (type == ESM::REC_ASPL)
+        {
+            reader.getSubNameIs("ID__");
+            mSelectedSpell = reader.getHString();
+        }
+    }
+
+    int WindowManager::countSavedGameRecords() const
+    {
+        return 1 // Global map
+                + 1 // QuickKeysMenu
+                + (!mSelectedSpell.empty() ? 1 : 0);
+    }
+
+    bool WindowManager::isSavingAllowed() const
+    {
+        return !MyGUI::InputManager::getInstance().isModalAny()
+                // TODO: remove this, once we have properly serialized the state of open windows
+                && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest || getMode() == GM_RestBed)));
     }
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)
@@ -1437,12 +1581,13 @@ namespace MWGui
         bool cursorWasVisible = mCursorVisible;
         setCursorVisible(false);
 
-        while (mVideoWidget->update())
+        while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
 
             mRendering->getWindow()->update();
         }
+        mVideoWidget->cleanup();
 
         setCursorVisible(cursorWasVisible);
 
@@ -1465,5 +1610,22 @@ namespace MWGui
 
         mVideoWidget->setCoord(leftPadding, topPadding,
                                screenWidth - leftPadding*2, screenHeight - topPadding*2);
+    }
+
+    WindowModal* WindowManager::getCurrentModal() const
+    {
+        if(mCurrentModals.size() > 0)
+            return mCurrentModals.top();
+        else
+            return NULL;
+    }
+
+    void WindowManager::removeCurrentModal(WindowModal* input)
+    {
+        // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
+        //so just popping the top would cause massive issues.
+        if(mCurrentModals.size() > 0)
+            if(input == mCurrentModals.top())
+                mCurrentModals.pop();
     }
 }

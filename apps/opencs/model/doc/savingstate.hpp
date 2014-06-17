@@ -2,10 +2,14 @@
 #define CSM_DOC_SAVINGSTATE_H
 
 #include <fstream>
+#include <map>
 
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <components/esm/esmwriter.hpp>
+
+#include <components/to_utf8/to_utf8.hpp>
 
 namespace CSMDoc
 {
@@ -18,14 +22,16 @@ namespace CSMDoc
             boost::filesystem::path mPath;
             boost::filesystem::path mTmpPath;
             ToUTF8::Utf8Encoder mEncoder;
-            std::ofstream mStream;
+            boost::filesystem::ofstream mStream;
             ESM::ESMWriter mWriter;
             boost::filesystem::path mProjectPath;
             bool mProjectFile;
+            std::map<std::string, std::vector<int> > mSubRecords; // record ID, list of subrecords
 
         public:
 
-            SavingState (Operation& operation, const boost::filesystem::path& projectPath);
+            SavingState (Operation& operation, const boost::filesystem::path& projectPath,
+                ToUTF8::FromType encoding);
 
             bool hasError() const;
 
@@ -36,12 +42,14 @@ namespace CSMDoc
 
             const boost::filesystem::path& getTmpPath() const;
 
-            std::ofstream& getStream();
+            boost::filesystem::ofstream& getStream();
 
             ESM::ESMWriter& getWriter();
 
             bool isProjectFile() const;
             ///< Currently saving project file? (instead of content file)
+
+            std::map<std::string, std::vector<int> >& getSubRecords();
     };
 
 

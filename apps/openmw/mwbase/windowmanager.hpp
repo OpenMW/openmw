@@ -57,6 +57,7 @@ namespace MWGui
     class InventoryWindow;
     class ContainerWindow;
     class DialogueWindow;
+    class WindowModal;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -156,8 +157,9 @@ namespace MWBase
             virtual void setValue (const std::string& id, int value) = 0;
 
             /// Set time left for the player to start drowning (update the drowning bar)
-            /// @param time value from [0,20]
-            virtual void setDrowningTimeLeft (float time) =0;
+            /// @param time time left to start drowning
+            /// @param maxTime how long we can be underwater (in total) until drowning starts
+            virtual void setDrowningTimeLeft (float time, float maxTime) = 0;
 
             virtual void setPlayerClass (const ESM::Class &class_) = 0;
             ///< set current class of player
@@ -192,15 +194,15 @@ namespace MWBase
             virtual void setDragDrop(bool dragDrop) = 0;
             virtual bool getWorldMouseOver() = 0;
 
-            virtual void toggleFogOfWar() = 0;
+            virtual bool toggleFogOfWar() = 0;
 
-            virtual void toggleFullHelp() = 0;
+            virtual bool toggleFullHelp() = 0;
             ///< show extra info in item tooltips (owner, script)
 
             virtual bool getFullHelp() const = 0;
 
-            virtual void setInteriorMapTexture(const int x, const int y) = 0;
-            ///< set the index of the map texture that should be used (for interiors)
+            virtual void setActiveMap(int x, int y, bool interior) = 0;
+            ///< set the indices of the map texture that should be used
 
             /// sets the visibility of the drowning bar
             virtual void setDrowningBarVisibility(bool visible) = 0;
@@ -233,14 +235,19 @@ namespace MWBase
 
             virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
 
+            /// Hides dialog and schedules dialog to be deleted.
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
-            ///< Hides dialog and schedules dialog to be deleted.
+
+            ///Gracefully attempts to exit the topmost GUI mode
+            /** No guarentee of actually closing the window **/
+            virtual void exitCurrentGuiMode() = 0;
 
             virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
+
+            /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
-            ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
             virtual void onFrame (float frameDuration) = 0;
 
@@ -302,8 +309,25 @@ namespace MWBase
             /// Clear all savegame-specific data
             virtual void clear() = 0;
 
-            virtual void write (ESM::ESMWriter& writer) = 0;
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
             virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual int countSavedGameRecords() const = 0;
+
+            /// Does the current stack of GUI-windows permit saving?
+            virtual bool isSavingAllowed() const = 0;
+
+            /// Returns the current Modal
+            /** Used to send exit command to active Modal when Esc is pressed **/
+            virtual MWGui::WindowModal* getCurrentModal() const = 0;
+
+            /// Sets the current Modal
+            /** Used to send exit command to active Modal when Esc is pressed **/
+            virtual void addCurrentModal(MWGui::WindowModal* input) = 0;
+
+            /// Removes the top Modal
+            /** Used when one Modal adds another Modal
+                \param input Pointer to the current modal, to ensure proper modal is removed **/
+            virtual void removeCurrentModal(MWGui::WindowModal* input) = 0;
     };
 }
 

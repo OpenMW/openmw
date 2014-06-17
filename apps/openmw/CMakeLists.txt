@@ -33,7 +33,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
-    recharge mode videowidget backgroundimage
+    recharge mode videowidget backgroundimage itemwidget
     )
 
 add_openmw_dir (mwdialogue
@@ -48,7 +48,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
+    soundmanagerimp openal_output ffmpeg_decoder sound
     )
 
 add_openmw_dir (mwworld
@@ -57,7 +57,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader actiontrap cellreflist
+    contentloader esmloader omwloader actiontrap cellreflist projectilemanager cellref
     )
 
 add_openmw_dir (mwclass
@@ -67,7 +67,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
-    drawstate spells activespells npcstats aipackage aisequence aipersue alchemy aiwander aitravel aifollow
+    drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
     disease pickpocket levelledlist combat steering obstacle
     )
@@ -83,20 +83,11 @@ add_openmw_dir (mwbase
 
 # Main executable
 set(BOOST_COMPONENTS system filesystem program_options thread wave)
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+if(WIN32)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+endif(WIN32)
 
-IF(OGRE_STATIC)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
-IF(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_Direct3D9)
-list (APPEND OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_Direct3D9_LIBRARIES})
-ENDIF(WIN32)
-IF (Cg_FOUND)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager)
-list (APPEND OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${Cg_LIBRARIES})
-ENDIF (Cg_FOUND)
-ENDIF(OGRE_STATIC)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}

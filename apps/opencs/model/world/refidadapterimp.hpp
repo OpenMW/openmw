@@ -35,7 +35,7 @@ namespace CSMWorld
             BaseRefIdAdapter (UniversalId::Type type, const BaseColumns& base);
 
             virtual std::string getId (const RecordBase& record) const;
-            
+
             virtual void setId (RecordBase& record, const std::string& id);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
@@ -58,7 +58,7 @@ namespace CSMWorld
     {
         (dynamic_cast<Record<RecordT>&> (record).get().mId) = id;
     }
-    
+
     template<typename RecordT>
     std::string BaseRefIdAdapter<RecordT>::getId (const RecordBase& record) const
     {
@@ -611,33 +611,27 @@ namespace CSMWorld
             const RefIdColumn *mWeight;
             const RefIdColumn *mOrganic;
             const RefIdColumn *mRespawn;
+            const RefIdColumn *mContent;
 
         public:
 
             ContainerRefIdAdapter (const NameColumns& columns, const RefIdColumn *weight,
-<<<<<<< Updated upstream
-                const RefIdColumn *organic, const RefIdColumn *respawn);
-=======
-				   const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content);
+                                   const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content);
 
-            virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data,
-					    int index, int subRowIndex, int subColIndex) const;
->>>>>>> Stashed changes
+            virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data, int index,
+                                            int subRowIndex, int subColIndex) const;
 
-	    virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index) const;
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index) const;
 
-<<<<<<< Updated upstream
-=======
             virtual void setNestedData (const RefIdColumn *column, RefIdData& data, int index,
-					const QVariant& value, int subRowIndex, int subColIndex) const;
+                const QVariant& value, int subRowIndex, int subColIndex) const;
 
->>>>>>> Stashed changes
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
-				  const QVariant& value) const;
+                                  const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
-      
+
             virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
-      
+
             virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
     };
 

@@ -20,8 +20,8 @@ namespace Terrain
 
         virtual ~Chunk();
 
-        /// @note Takes ownership of \a material
-        void setMaterial (const Ogre::MaterialPtr& material);
+        /// @param own Should we take ownership of the material?
+        void setMaterial (const Ogre::MaterialPtr& material, bool own=true);
 
         void setIndexBuffer(Ogre::HardwareIndexBufferSharedPtr buffer);
 
@@ -43,6 +43,7 @@ namespace Terrain
     private:
         Ogre::AxisAlignedBox mBounds;
         Ogre::MaterialPtr mMaterial;
+        bool mOwnMaterial; // Should we remove mMaterial on destruction?
 
         Ogre::VertexData* mVertexData;
         Ogre::IndexData* mIndexData;

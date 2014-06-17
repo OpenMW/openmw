@@ -47,6 +47,14 @@ void ESM::InventoryState::load (ESMReader &esm)
             mItems.push_back (std::make_pair (state, std::make_pair (id, slot)));
         }
     }
+
+    while (esm.isNextSub("LEVM"))
+    {
+        std::string id = esm.getHString();
+        int count;
+        esm.getHNT (count, "COUN");
+        mLevelledItemMap[id] = count;
+    }
 }
 
 void ESM::InventoryState::save (ESMWriter &esm) const
@@ -57,4 +65,10 @@ void ESM::InventoryState::save (ESMWriter &esm) const
     for (std::vector<std::pair<LightState, int> >::const_iterator iter (mLights.begin());
         iter!=mLights.end(); ++iter)
         write (esm, iter->first, ESM::REC_LIGH, iter->second);
+
+    for (std::map<std::string, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    {
+        esm.writeHNString ("LEVM", it->first);
+        esm.writeHNT ("COUN", it->second);
+    }
 }

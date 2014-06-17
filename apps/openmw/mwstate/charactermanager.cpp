@@ -47,6 +47,22 @@ MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create)
     return mCurrent;
 }
 
+void MWState::CharacterManager::deleteSlot(const MWState::Character *character, const MWState::Slot *slot)
+{
+    std::list<Character>::iterator it = findCharacter(character);
+
+    it->deleteSlot(slot);
+
+    if (character->begin() == character->end())
+    {
+        // All slots deleted, cleanup and remove this character
+        it->cleanup();
+        if (character == mCurrent)
+            mCurrent = NULL;
+        mCharacters.erase(it);
+    }
+}
+
 void MWState::CharacterManager::createCharacter()
 {
     std::ostringstream stream;
@@ -59,14 +75,24 @@ void MWState::CharacterManager::createCharacter()
     mCurrent = &mCharacters.back();
 }
 
+std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter(const MWState::Character* character)
+{
+    std::list<Character>::iterator it = mCharacters.begin();
+    for (; it != mCharacters.end(); ++it)
+    {
+        if (&*it == character)
+            break;
+    }
+    if (it == mCharacters.end())
+        throw std::logic_error ("invalid character");
+    return it;
+}
+
 void MWState::CharacterManager::setCurrentCharacter (const Character *character)
 {
-    int index = character - &mCharacters[0];
+    std::list<Character>::iterator it = findCharacter(character);
 
-    if (index<0 || index>=static_cast<int> (mCharacters.size()))
-        throw std::logic_error ("invalid character");
-
-    mCurrent = &mCharacters[index];
+    mCurrent = &*it;
 }
 
 void MWState::CharacterManager::clearCurrentCharacter()
@@ -74,12 +100,12 @@ void MWState::CharacterManager::clearCurrentCharacter()
     mCurrent = 0;
 }
 
-std::vector<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
+std::list<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
 {
     return mCharacters.begin();
 }
 
-std::vector<MWState::Character>::const_iterator MWState::CharacterManager::end() const
+std::list<MWState::Character>::const_iterator MWState::CharacterManager::end() const
 {
     return mCharacters.end();
 }

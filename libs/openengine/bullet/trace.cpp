@@ -116,7 +116,7 @@ void ActorTracer::findGround(btCollisionObject *actor, const Ogre::Vector3 &star
         mFraction = newTraceCallback.m_closestHitFraction;
         mPlaneNormal = Ogre::Vector3(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
         mEndPos = (end-start)*mFraction + start;
-        mEndPos[2] -= 1.0f;
+        mEndPos[2] += 1.0f;
     }
     else
     {

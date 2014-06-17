@@ -26,6 +26,11 @@ namespace MWGui
         center();
     }
 
+    void ItemSelectionDialog::exit()
+    {
+        eventDialogCanceled();
+    }
+
     void ItemSelectionDialog::openContainer(const MWWorld::Ptr& container)
     {
         mModel = new InventoryItemModel(container);
@@ -53,7 +58,7 @@ namespace MWGui
 
     void ItemSelectionDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        eventDialogCanceled();
+        exit();
     }
 
 }

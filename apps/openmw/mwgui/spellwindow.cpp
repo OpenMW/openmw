@@ -84,8 +84,8 @@ namespace MWGui
         // retrieve all player spells, divide them into Powers and Spells and sort them
         std::vector<std::string> spellList;
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
@@ -122,7 +122,7 @@ namespace MWGui
         std::vector<MWWorld::Ptr> items;
         for (MWWorld::ContainerStoreIterator it(store.begin()); it != store.end(); ++it)
         {
-            std::string enchantId = MWWorld::Class::get(*it).getEnchantment(*it);
+            std::string enchantId = it->getClass().getEnchantment(*it);
             if (enchantId != "")
             {
                 // only add items with "Cast once" or "Cast on use"
@@ -190,6 +190,7 @@ namespace MWGui
             costChance->setNeedMouseFocus(false);
             costChance->setStateSelected(*it == MWBase::Environment::get().getWindowManager()->getSelectedSpell());
 
+            t->setSize(mWidth-12-costChance->getTextSize().width, t->getHeight());
 
             mHeight += spellHeight;
         }
@@ -203,7 +204,7 @@ namespace MWGui
             MWWorld::Ptr item = *it;
 
             const ESM::Enchantment* enchant =
-                esmStore.get<ESM::Enchantment>().find(MWWorld::Class::get(item).getEnchantment(item));
+                esmStore.get<ESM::Enchantment>().find(item.getClass().getEnchantment(item));
 
             // check if the item is currently equipped (will display in a different color)
             bool equipped = false;
@@ -218,7 +219,7 @@ namespace MWGui
 
             MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
-            t->setCaption(MWWorld::Class::get(item).getName(item));
+            t->setCaption(item.getClass().getName(item));
             t->setTextAlign(MyGUI::Align::Left);
             t->setUserData(item);
             t->setUserString("ToolTipType", "ItemPtr");
@@ -238,7 +239,7 @@ namespace MWGui
             int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
             std::string cost = boost::lexical_cast<std::string>(castCost);
-            int currentCharge = int(item.getCellRef().mEnchantmentCharge);
+            int currentCharge = int(item.getCellRef().getEnchantmentCharge());
             if (currentCharge ==  -1)
                 currentCharge = enchant->mData.mCharge;
             std::string charge = boost::lexical_cast<std::string>(currentCharge);
@@ -254,6 +255,8 @@ namespace MWGui
             costCharge->setNeedMouseFocus(false);
             if (store.getSelectedEnchantItem() != store.end())
                 costCharge->setStateSelected(item == *store.getSelectedEnchantItem());
+
+            t->setSize(mWidth-12-costCharge->getTextSize().width, t->getHeight());
 
             mHeight += spellHeight;
         }
@@ -287,6 +290,8 @@ namespace MWGui
             groupWidget2->setCaptionWithReplacing(label2);
             groupWidget2->setTextAlign(MyGUI::Align::Right);
             groupWidget2->setNeedMouseFocus(false);
+
+            groupWidget->setSize(mWidth-8-groupWidget2->getTextSize().width, groupWidget->getHeight());
         }
 
         mHeight += 24;
@@ -300,7 +305,7 @@ namespace MWGui
     void SpellWindow::onEnchantedItemSelected(MyGUI::Widget* _sender)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
         MWWorld::Ptr item = *_sender->getUserData<MWWorld::Ptr>();
 
         // retrieve ContainerStoreIterator to the item
@@ -316,13 +321,12 @@ namespace MWGui
 
         // equip, if it can be equipped and is not already equipped
         if (_sender->getUserString("Equipped") == "false"
-            && !MWWorld::Class::get(item).getEquipmentSlots(item).first.empty())
+            && !item.getClass().getEquipmentSlots(item).first.empty())
         {
             MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
         }
 
         store.setSelectedEnchantItem(it);
-        MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item);
 
         updateSpells();
     }
@@ -331,7 +335,7 @@ namespace MWGui
     {
         std::string spellId = _sender->getUserString("Spell");
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
         if (MyGUI::InputManager::getInstance().isShiftPressed())
         {
@@ -385,7 +389,7 @@ namespace MWGui
     void SpellWindow::onDeleteSpellAccept()
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
         if (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == mSpellToDelete)

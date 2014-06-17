@@ -89,6 +89,8 @@ namespace ICS
 
 		IntervalList& getIntervals(){ return mIntervals; };
 
+        void setEnabled(bool enabled);
+
     protected:
 
         int mNumber;
@@ -112,7 +114,9 @@ namespace ICS
 		std::vector<ControlChannelBinderItem> mAttachedControls;
 
         std::list<ChannelListener* > mListeners;
-	    void notifyListeners(float previousValue);
+        void notifyListeners(float previousValue);
+
+        bool mEnabled;
 
 	};
 

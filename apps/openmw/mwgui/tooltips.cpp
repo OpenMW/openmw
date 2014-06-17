@@ -89,7 +89,7 @@ namespace MWGui
                 if (mFocusObject.isEmpty ())
                     return;
 
-                const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
+                const MWWorld::Class& objectclass = mFocusObject.getClass();
 
                 MyGUI::IntSize tooltipSize;
                 if ((!objectclass.hasToolTip(mFocusObject))&&(MWBase::Environment::get().getWindowManager()->getMode() == GM_Console))
@@ -97,7 +97,7 @@ namespace MWGui
                     setCoord(0, 0, 300, 300);
                     mDynamicToolTipBox->setVisible(true);
                     ToolTipInfo info;
-                    info.caption=mFocusObject.getCellRef().mRefID;
+                    info.caption=mFocusObject.getCellRef().getRefId();
                     info.icon="";
                     tooltipSize = createToolTip(info);
                 }
@@ -305,7 +305,7 @@ namespace MWGui
 
         MyGUI::IntSize tooltipSize;
 
-        const MWWorld::Class& object = MWWorld::Class::get (mFocusObject);
+        const MWWorld::Class& object = mFocusObject.getClass();
         if (!object.hasToolTip(mFocusObject))
         {
             mDynamicToolTipBox->setVisible(false);
@@ -400,7 +400,7 @@ namespace MWGui
         if (!info.effects.empty())
         {
             MyGUI::Widget* effectArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
-                MyGUI::IntCoord(0, totalSize.height, 300, 300-totalSize.height),
+                MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
                 MyGUI::Align::Stretch, "ToolTipEffectArea");
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
@@ -419,7 +419,7 @@ namespace MWGui
         {
             assert(enchant);
             MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
-                MyGUI::IntCoord(0, totalSize.height, 300, 300-totalSize.height),
+                MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
                 MyGUI::Align::Stretch, "ToolTipEnchantArea");
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
@@ -512,7 +512,11 @@ namespace MWGui
     std::string ToolTips::toString(const float value)
     {
         std::ostringstream stream;
-        stream << std::setprecision(3) << value;
+
+        if (value != int(value))
+            stream << std::setprecision(3);
+
+        stream << value;
         return stream.str();
     }
 
@@ -547,9 +551,10 @@ namespace MWGui
             return " (" + boost::lexical_cast<std::string>(value) + ")";
     }
 
-    void ToolTips::toggleFullHelp()
+    bool ToolTips::toggleFullHelp()
     {
         mFullHelp = !mFullHelp;
+        return mFullHelp;
     }
 
     bool ToolTips::getFullHelp() const

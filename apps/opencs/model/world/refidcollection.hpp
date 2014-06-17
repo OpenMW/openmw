@@ -69,6 +69,8 @@ namespace CSMWorld
 
             virtual QVariant getData (int index, int column) const;
 
+            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+
             virtual void setData (int index, int column, const QVariant& data);
 
             virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);

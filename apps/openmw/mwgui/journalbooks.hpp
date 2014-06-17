@@ -18,10 +18,9 @@ namespace MWGui
         Book createEmptyJournalBook ();
         Book createJournalBook ();
         Book createTopicBook (uintptr_t topicId);
-        Book createQuestBook (uintptr_t questId);
+        Book createTopicBook (const std::string& topicId);
+        Book createQuestBook (const std::string& questName);
         Book createTopicIndexBook ();
-        Book createTopicIndexBook (char character);
-        Book createQuestIndexBook (bool showAll);
 
     private:
         BookTypesetter::Ptr createTypesetter ();

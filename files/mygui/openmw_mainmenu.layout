@@ -2,11 +2,11 @@
 
 <MyGUI type="Layout">
     <!-- The entire screen -->
-    <Widget type="Widget" layer="Windows" position="0 0 300 300" name="_Main" >
-        <Widget type="TextBox" skin="SandText" position="0 250 300 50" align="Bottom" name="VersionText">
-            <Property key="TextAlign" value="Center"/>
+    <Widget type="Widget" layer="Windows" position="0 0 300 300" name="_Main">
+        <Widget type="TextBox" skin="SandText" position="0 250 280 50" align="Bottom Right" name="VersionText">
+            <Property key="TextAlign" value="Right"/>
             <Property key="TextShadow" value="true"/>
             <Property key="TextShadowColour" value="0 0 0"/>
         </Widget>
-    </Widget>	
+    </Widget>
 </MyGUI>

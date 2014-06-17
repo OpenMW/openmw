@@ -136,6 +136,8 @@ namespace MWGui
         SelectSpecializationDialog();
         ~SelectSpecializationDialog();
 
+        virtual void exit();
+
         ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
 
         // Events
@@ -167,6 +169,8 @@ namespace MWGui
         SelectAttributeDialog();
         ~SelectAttributeDialog();
 
+        virtual void exit();
+
         ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
 
         // Events
@@ -195,6 +199,8 @@ namespace MWGui
     public:
         SelectSkillDialog();
         ~SelectSkillDialog();
+
+        virtual void exit();
 
         ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
 

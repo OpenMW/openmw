@@ -20,9 +20,8 @@ namespace MWWorld
 
         //find any NPC that is following the actor and teleport him too
         std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
-        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();it++)
+        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
-            std::cout << "teleporting someone!" << (*it).getCellRef().mRefID;
             executeImp(*it);
         }
 

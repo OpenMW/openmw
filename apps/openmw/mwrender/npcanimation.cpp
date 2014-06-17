@@ -68,7 +68,8 @@ namespace MWRender
 
 float HeadAnimationTime::getValue() const
 {
-    // TODO: Handle eye blinking (time is in the text keys)
+    // TODO use time from text keys (Talk Start/Stop, Blink Start/Stop)
+    // TODO: Handle eye blinking
     if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
         return 0;
     else
@@ -236,7 +237,7 @@ void NpcAnimation::updateNpcBase()
 void NpcAnimation::updateParts()
 {    
     mAlpha = 1.f;
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const MWWorld::Class &cls = mPtr.getClass();
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
 
     NpcType curType = Type_Normal;
@@ -307,7 +308,7 @@ void NpcAnimation::updateParts()
             ESM::PartReferenceType parts[] = {
                 ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
                 ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
-                ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron
+                ESM::PRT_RForearm, ESM::PRT_LForearm
             };
             size_t parts_size = sizeof(parts)/sizeof(parts[0]);
             for(size_t p = 0;p < parts_size;++p)
@@ -349,8 +350,6 @@ void NpcAnimation::updateParts()
 
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
-
-    static std::map <std::pair<std::string,int>, std::vector<const ESM::BodyPart*> > sVampireMapping;
 
     static const int Flag_Female      = 1<<0;
     static const int Flag_FirstPerson = 1<<1;
@@ -407,8 +406,6 @@ void NpcAnimation::updateParts()
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
                 continue;
 
-            if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
-                continue;
             if (!Misc::StringUtils::ciEqual(bodypart.mRace, mNpc->mRace))
                 continue;
 
@@ -434,6 +431,20 @@ void NpcAnimation::updateParts()
                 }
                 continue;
             }
+
+            if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            {
+                // Allow opposite gender's parts as fallback if parts for our gender are missing
+                BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+                {
+                    if(!parts[bIt->second])
+                        parts[bIt->second] = &*it;
+                    ++bIt;
+                }
+                continue;
+            }
+
             BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
             while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
             {
@@ -667,12 +678,12 @@ void NpcAnimation::showWeapons(bool showWeapon)
     mShowWeapons = showWeapon;
     if(showWeapon)
     {
-        MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+        MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(weapon != inv.end())
         {
             Ogre::Vector3 glowColor = getEnchantmentColor(*weapon);
-            std::string mesh = MWWorld::Class::get(*weapon).getModel(*weapon);
+            std::string mesh = weapon->getClass().getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
@@ -700,13 +711,13 @@ void NpcAnimation::showWeapons(bool showWeapon)
 void NpcAnimation::showCarriedLeft(bool show)
 {
     mShowCarriedLeft = show;
-    MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+    MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
     if(show && iter != inv.end())
     {
         Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
-        std::string mesh = MWWorld::Class::get(*iter).getModel(*iter);
+        std::string mesh = iter->getClass().getModel(*iter);
         if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {

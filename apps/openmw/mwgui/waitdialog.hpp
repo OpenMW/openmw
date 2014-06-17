@@ -28,12 +28,15 @@ namespace MWGui
 
         virtual void open();
 
+        virtual void exit();
+
         void onFrame(float dt);
 
         void bedActivated() { setCanRest(true); }
 
         bool getSleeping() { return mWaiting && mSleeping; }
         void wakeUp();
+        void autosave();
 
     protected:
         MyGUI::TextBox* mDateTimeText;

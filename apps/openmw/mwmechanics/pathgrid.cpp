@@ -296,7 +296,7 @@ namespace MWMechanics
                             // add this edge to openset, lowest cost goes to the front
                             // TODO: if this causes performance problems a hash table may help
                             std::list<int>::iterator it = openset.begin();
-                            for(it = openset.begin(); it!= openset.end(); it++)
+                            for(it = openset.begin(); it!= openset.end(); ++it)
                             {
                                 if(fScore[*it] > fScore[dest])
                                     break;
@@ -328,6 +328,12 @@ namespace MWMechanics
             path.push_front(pt);
             current = graphParent[current];
         }
+
+        // add first node to path explicitly
+        ESM::Pathgrid::Point pt = mPathgrid->mPoints[start];
+        pt.mX += xCell;
+        pt.mY += yCell;
+        path.push_front(pt);
         return path;
     }
 }

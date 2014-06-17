@@ -15,9 +15,9 @@ namespace CSMTools
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
             bool mPlayable;
 
-            void performPerRecord (int stage, std::vector<std::string>& messages);
+            void performPerRecord (int stage, Messages& messages);
 
-            void performFinal (std::vector<std::string>& messages);
+            void performFinal (Messages& messages);
 
         public:
 
@@ -26,7 +26,7 @@ namespace CSMTools
             virtual int setup();
             ///< \return number of steps
 
-            virtual void perform (int stage, std::vector<std::string>& messages);
+            virtual void perform (int stage, Messages& messages);
             ///< Messages resulting from this tage will be appended to \a messages.
     };
 }

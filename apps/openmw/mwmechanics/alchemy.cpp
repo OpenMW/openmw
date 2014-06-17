@@ -292,13 +292,13 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
 
 void MWMechanics::Alchemy::increaseSkill()
 {
-    MWWorld::Class::get (mAlchemist).skillUsageSucceeded (mAlchemist, ESM::Skill::Alchemy, 0);
+    mAlchemist.getClass().skillUsageSucceeded (mAlchemist, ESM::Skill::Alchemy, 0);
 }
 
 float MWMechanics::Alchemy::getChance() const
 {
-    const CreatureStats& creatureStats = MWWorld::Class::get (mAlchemist).getCreatureStats (mAlchemist);
-    const NpcStats& npcStats = MWWorld::Class::get (mAlchemist).getNpcStats (mAlchemist);
+    const CreatureStats& creatureStats = mAlchemist.getClass().getCreatureStats (mAlchemist);
+    const NpcStats& npcStats = mAlchemist.getClass().getNpcStats (mAlchemist);
 
     return
         (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
@@ -331,7 +331,7 @@ void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
 
     mEffects.clear();
 
-    MWWorld::ContainerStore& store = MWWorld::Class::get (npc).getContainerStore (npc);
+    MWWorld::ContainerStore& store = npc.getClass().getContainerStore (npc);
 
     for (MWWorld::ContainerStoreIterator iter (store.begin (MWWorld::ContainerStore::Type_Apparatus));
         iter!=store.end(); ++iter)
@@ -395,7 +395,8 @@ int MWMechanics::Alchemy::addIngredient (const MWWorld::Ptr& ingredient)
         return -1;
 
     for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
-        if (!iter->isEmpty() && ingredient.get<ESM::Ingredient>()==iter->get<ESM::Ingredient>())
+        if (!iter->isEmpty() && Misc::StringUtils::ciEqual(ingredient.getClass().getId(ingredient),
+                                                           iter->getClass().getId(*iter)))
             return -1;
 
     mIngredients[slot] = ingredient;

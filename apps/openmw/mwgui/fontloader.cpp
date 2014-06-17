@@ -64,10 +64,15 @@ namespace
         return unicode;
     }
 
+    // getUtf8, aka the worst function ever written.
+    // This includes various hacks for dealing with Morrowind's .fnt files that are *mostly*
+    // in the expected win12XX encoding, but also have randomly swapped characters sometimes.
+    // Looks like the Morrowind developers found standard encodings too boring and threw in some twists for fun.
     std::string getUtf8 (unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
     {
         if (encoding == ToUTF8::WINDOWS_1250)
         {
+            // Hacks for polish font
             unsigned char win1250;
             std::map<unsigned char, unsigned char> conv;
             conv[0x80] = 0xc6;
@@ -101,7 +106,8 @@ namespace
             conv[0xa3] = 0xbf;
             conv[0xa4] = 0x0; // not contained in win1250
             conv[0xe1] = 0x8c;
-            conv[0xe1] = 0x8c;
+            // Can't remember if this was supposed to read 0xe2, or is it just an extraneous copypaste?
+            //conv[0xe1] = 0x8c;
             conv[0xe3] = 0x0; // not contained in win1250
             conv[0xf5] = 0x0; // not contained in win1250
 
@@ -196,6 +202,16 @@ namespace MWGui
         bitmapFile->read(&textureData[0], width*height*4);
         bitmapFile->close();
 
+        std::string resourceName;
+        if (name.size() >= 5 && Misc::StringUtils::ciEqual(name.substr(0, 5), "magic"))
+            resourceName = "Magic Cards";
+        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "century"))
+            resourceName = "Century Gothic";
+        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
+            resourceName = "Daedric";
+        else
+            return; // no point in loading it, since there is no way of using additional fonts
+
         std::string textureName = name;
         Ogre::Image image;
         image.loadDynamicImage(&textureData[0], width, height, Ogre::PF_BYTE_RGBA);
@@ -208,18 +224,11 @@ namespace MWGui
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
+
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0
         MyGUI::xml::Document xmlDocument;
         MyGUI::xml::ElementPtr root = xmlDocument.createRoot("ResourceManualFont");
-
-        if (name.size() >= 5 && Misc::StringUtils::ciEqual(name.substr(0, 5), "magic"))
-            root->addAttribute("name", "Magic Cards");
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "century"))
-            root->addAttribute("name", "Century Gothic");
-        else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
-            root->addAttribute("name", "Daedric");
-        else
-            return; // no point in loading it, since there is no way of using additional fonts
+        root->addAttribute("name", resourceName);
 
         MyGUI::xml::ElementPtr defaultHeight = root->createChild("Property");
         defaultHeight->addAttribute("key", "DefaultHeight");
@@ -249,6 +258,21 @@ namespace MWGui
             code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                + MyGUI::utility::toString((fontSize-data[i].ascent)));
 
+            // More hacks! The french game uses U+2019, which is nowhere to be found in
+            // the CP437 encoding of the font. Fall back to 39 (regular apostrophe)
+            if (i == 39 && mEncoding == ToUTF8::CP437)
+            {
+                MyGUI::xml::ElementPtr code = codes->createChild("Code");
+                code->addAttribute("index", 0x2019);
+                code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
+                                            + MyGUI::utility::toString(y1) + " "
+                                            + MyGUI::utility::toString(w) + " "
+                                            + MyGUI::utility::toString(h));
+                code->addAttribute("advance", data[i].width);
+                code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
+                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
+            }
+
             // ASCII vertical bar, use this as text input cursor
             if (i == 124)
             {
@@ -262,18 +286,30 @@ namespace MWGui
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
             }
+
+            // Question mark, use for NotDefined marker (used for glyphs not existing in the font)
+            if (i == 63)
+            {
+                MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
+                cursorCode->addAttribute("index", MyGUI::FontCodeType::NotDefined);
+                cursorCode->addAttribute("coord", MyGUI::utility::toString(x1) + " "
+                                            + MyGUI::utility::toString(y1) + " "
+                                            + MyGUI::utility::toString(w) + " "
+                                            + MyGUI::utility::toString(h));
+                cursorCode->addAttribute("advance", data[i].width);
+                cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
+                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
+            }
         }
 
         // These are required as well, but the fonts don't provide them
-        for (int i=0; i<3; ++i)
+        for (int i=0; i<2; ++i)
         {
             MyGUI::FontCodeType::Enum type;
             if(i == 0)
                 type = MyGUI::FontCodeType::Selected;
             else if (i == 1)
                 type = MyGUI::FontCodeType::SelectedBack;
-            else if (i == 2)
-                type = MyGUI::FontCodeType::NotDefined;
 
             MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
             cursorCode->addAttribute("index", type);
@@ -285,6 +321,7 @@ namespace MWGui
 
         font->deserialization(root, MyGUI::Version(3,2,0));
 
+        MyGUI::ResourceManager::getInstance().removeByName(font->getResourceName());
         MyGUI::ResourceManager::getInstance().addResource(font);
     }
 

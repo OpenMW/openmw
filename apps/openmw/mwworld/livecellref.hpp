@@ -3,7 +3,7 @@
 
 #include <typeinfo>
 
-#include <components/esm/cellref.hpp>
+#include "cellref.hpp"
 
 #include "refdata.hpp"
 
@@ -26,7 +26,7 @@ namespace MWWorld
         /** Information about this instance, such as 3D location and rotation
          * and individual type-dependent data.
          */
-        ESM::CellRef mRef;
+        MWWorld::CellRef mRef;
 
         /** runtime-data */
         RefData mData;
@@ -62,9 +62,9 @@ namespace MWWorld
             /// \note Does not check if the RefId exists.
     };
 
-    inline bool operator== (const LiveCellRefBase& cellRef, const ESM::CellRef::RefNum refNum)
+    inline bool operator== (const LiveCellRefBase& cellRef, const ESM::RefNum refNum)
     {
-        return cellRef.mRef.mRefNum==refNum;
+        return cellRef.mRef.getRefNum()==refNum;
     }
 
     /// A reference to one object (of any type) in a cell.

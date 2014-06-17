@@ -98,7 +98,7 @@ namespace Compiler
         else if (t1=='f' || t2=='f')
             mOperands.push_back ('f');
         else
-            std::logic_error ("failed to determine result operand type");
+            throw std::logic_error ("failed to determine result operand type");
     }
 
     void ExprParser::pop()
@@ -730,7 +730,7 @@ namespace Compiler
     }
 
     int ExprParser::parseArguments (const std::string& arguments, Scanner& scanner,
-        std::vector<Interpreter::Type_Code>& code, bool invert)
+        std::vector<Interpreter::Type_Code>& code)
     {
         bool optional = false;
         int optionalCount = 0;
@@ -762,15 +762,10 @@ namespace Compiler
 
                 if (*iter!='x')
                 {
-                    if (invert)
-                    {
-                        std::vector<Interpreter::Type_Code> tmp;
-                        stringParser.append (tmp);
+                    std::vector<Interpreter::Type_Code> tmp;
+                    stringParser.append (tmp);
 
-                        stack.push (tmp);
-                    }
-                    else
-                        stringParser.append (code);
+                    stack.push (tmp);
 
                     if (optional)
                         ++optionalCount;
@@ -795,10 +790,7 @@ namespace Compiler
                 if (type!=*iter)
                     Generator::convert (tmp, type, *iter);
 
-                if (invert)
-                    stack.push (tmp);
-                else
-                    std::copy (tmp.begin(), tmp.end(), std::back_inserter (code));
+                stack.push (tmp);
 
                 if (optional)
                     ++optionalCount;

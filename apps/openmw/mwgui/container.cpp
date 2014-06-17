@@ -13,12 +13,14 @@
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/pickpocket.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
 #include "inventorywindow.hpp"
 
 #include "itemview.hpp"
+#include "itemwidget.hpp"
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "pickpocketitemmodel.hpp"
@@ -36,7 +38,7 @@ namespace MWGui
         mIsOnDragAndDrop = true;
         mDragAndDropWidget->setVisible(true);
 
-        std::string sound = MWWorld::Class::get(mItem.mBase).getUpSoundId(mItem.mBase);
+        std::string sound = mItem.mBase.getClass().getUpSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         if (mSourceSortModel)
@@ -45,22 +47,15 @@ namespace MWGui
             mSourceSortModel->addDragItem(mItem.mBase, count);
         }
 
-        std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(mItem.mBase).getInventoryIcon(mItem.mBase);
-        MyGUI::ImageBox* baseWidget = mDragAndDropWidget->createWidget<MyGUI::ImageBox>
-                ("ImageBox", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
+        ItemWidget* baseWidget = mDragAndDropWidget->createWidget<ItemWidget>
+                ("MW_ItemIcon", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
         mDraggedWidget = baseWidget;
-        MyGUI::ImageBox* image = baseWidget->createWidget<MyGUI::ImageBox>("ImageBox",
-            MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
-        size_t pos = path.rfind(".");
-        if (pos != std::string::npos)
-            path.erase(pos);
-        path.append(".dds");
-        image->setImageTexture(path);
-        image->setNeedMouseFocus(false);
+        baseWidget->setItem(mItem.mBase);
+        baseWidget->setNeedMouseFocus(false);
 
         // text widget that shows item count
-        MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText",
+        // TODO: move to ItemWidget
+        MyGUI::TextBox* text = baseWidget->createWidget<MyGUI::TextBox>("SandBrightText",
             MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
         text->setTextAlign(MyGUI::Align::Right);
         text->setNeedMouseFocus(false);
@@ -75,7 +70,7 @@ namespace MWGui
 
     void DragAndDrop::drop(ItemModel *targetModel, ItemView *targetView)
     {
-        std::string sound = MWWorld::Class::get(mItem.mBase).getDownSoundId(mItem.mBase);
+        std::string sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         mDragAndDropWidget->setVisible(false);
@@ -84,14 +79,14 @@ namespace MWGui
         // otherwise, do the transfer
         if (targetModel != mSourceModel)
         {
-            targetModel->copyItem(mItem, mDraggedCount);
-            mSourceModel->removeItem(mItem, mDraggedCount);
+            mSourceModel->moveItem(mItem, mDraggedCount, targetModel);
         }
 
         mSourceModel->update();
 
         finish();
-        targetView->update();
+        if (targetView)
+            targetView->update();
 
         // We need to update the view since an other item could be auto-equipped.
         mSourceView->update();
@@ -154,7 +149,7 @@ namespace MWGui
         if (count > 1 && !shift)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-            dialog->open(MWWorld::Class::get(object).getName(object), "#{sTake}", count);
+            dialog->open(object.getClass().getName(object), "#{sTake}", count);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
@@ -176,8 +171,8 @@ namespace MWGui
         {
             // check that we don't exceed container capacity
             MWWorld::Ptr item = mDragAndDrop->mItem.mBase;
-            float weight = MWWorld::Class::get(item).getWeight(item) * mDragAndDrop->mDraggedCount;
-            if (MWWorld::Class::get(mPtr).getCapacity(mPtr) < MWWorld::Class::get(mPtr).getEncumbrance(mPtr) + weight)
+            float weight = item.getClass().getWeight(item) * mDragAndDrop->mDraggedCount;
+            if (mPtr.getClass().getCapacity(mPtr) < mPtr.getClass().getEncumbrance(mPtr) + weight)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
                 return;
@@ -226,7 +221,7 @@ namespace MWGui
 
         // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
         // or we end up using a possibly invalid model.
-        setTitle(MWWorld::Class::get(container).getName(container));
+        setTitle(container.getClass().getName(container));
     }
 
     void ContainerWindow::onKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
@@ -262,12 +257,17 @@ namespace MWGui
         }
     }
 
-    void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    void ContainerWindow::exit()
     {
         if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
         {
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
         }
+    }
+
+    void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    {
+        exit();
     }
 
     void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
@@ -283,7 +283,7 @@ namespace MWGui
                 {
                     // play the sound of the first object
                     MWWorld::Ptr item = mModel->getItem(i).mBase;
-                    std::string sound = MWWorld::Class::get(item).getUpSoundId(item);
+                    std::string sound = item.getClass().getUpSoundId(item);
                     MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
                 }
 
@@ -292,8 +292,7 @@ namespace MWGui
                 if (!onTakeItem(item, item.mCount))
                     break;
 
-                playerModel->copyItem(item, item.mCount);
-                mModel->removeItem(item, item.mCount);
+                mModel->moveItem(item, item.mCount, playerModel);
             }
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
@@ -306,7 +305,7 @@ namespace MWGui
         {
             onTakeAllButtonClicked(mTakeButton);
 
-            if (MWWorld::Class::get(mPtr).isPersistent(mPtr))
+            if (mPtr.getClass().isPersistent(mPtr))
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
             else
                 MWBase::Environment::get().getWorld()->deleteObject(mPtr);
@@ -341,7 +340,11 @@ namespace MWGui
         }
         else
         {
-            MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item.mBase, count);
+            // Looting a dead corpse is considered OK
+            if (mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead())
+                return true;
+            else
+                MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item.mBase, count);
         }
         return true;
     }
