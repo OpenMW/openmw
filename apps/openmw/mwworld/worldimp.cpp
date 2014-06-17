@@ -2344,6 +2344,9 @@ namespace MWWorld
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
         if (actor.getClass().hasInventoryStore(actor))
             actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+
+        // Normally updated once per frame, but here it is kinda important to do it right away.
+        MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
     }
 
     bool World::isDark() const
