@@ -36,6 +36,7 @@ namespace MWGui
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
         , mCompass(NULL)
+        , mMarkerUpdateTimer(0.0f)
     {
     }
 
@@ -345,6 +346,18 @@ namespace MWGui
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
             markerWidget->setColour(markerColour);
+            mMarkerWidgets.push_back(markerWidget);
+        }
+    }
+
+    void LocalMapBase::onFrame(float dt)
+    {
+        mMarkerUpdateTimer += dt;
+
+        if (mMarkerUpdateTimer >= 0.25)
+        {
+            mMarkerUpdateTimer = 0;
+            updateMarkers();
         }
     }
 
@@ -471,6 +484,8 @@ namespace MWGui
 
     void MapWindow::onFrame(float dt)
     {
+        LocalMapBase::onFrame(dt);
+
         for (std::vector<CellId>::iterator it = mQueuedToExplore.begin(); it != mQueuedToExplore.end(); ++it)
         {
             mGlobalMapRender->exploreCell(it->first, it->second);

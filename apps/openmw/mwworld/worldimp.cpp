@@ -2445,14 +2445,15 @@ namespace MWWorld
             if (!ptr.getRefData().isEnabled())
                 return true;
 
-            // Consider references inside containers as well
-            if (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name())
+            // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
+            if (mType != World::Detect_Creature &&
+                    (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name()))
             {
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 {
                     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                     {
-                        if (needToAdd(*it))
+                        if (needToAdd(*it, mDetector))
                         {
                             mOut.push_back(ptr);
                             return true;
@@ -2461,16 +2462,25 @@ namespace MWWorld
                 }
             }
 
-            if (needToAdd(ptr))
+            if (needToAdd(ptr, mDetector))
                 mOut.push_back(ptr);
 
             return true;
         }
 
-        bool needToAdd (MWWorld::Ptr ptr)
+        bool needToAdd (MWWorld::Ptr ptr, MWWorld::Ptr detector)
         {
-            if (mType == World::Detect_Creature && ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
-                return false;
+            if (mType == World::Detect_Creature)
+            {
+                // If in werewolf form, this detects only NPCs, otherwise only creatures
+                if (detector.getClass().isNpc() && detector.getClass().getNpcStats(detector).isWerewolf())
+                {
+                    if (ptr.getClass().getTypeName() != typeid(ESM::NPC).name())
+                        return false;
+                }
+                else if (ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                    return false;
+            }
             if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
                 return false;
             if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())

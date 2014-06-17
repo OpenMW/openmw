@@ -35,6 +35,8 @@ namespace MWGui
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(const float x, const float y);
 
+        void onFrame(float dt);
+
         bool toggleFogOfWar();
 
         struct MarkerPosition
@@ -73,11 +75,13 @@ namespace MWGui
         virtual void notifyMapChanged() {}
 
         // Update markers (Detect X effects, Mark/Recall effects)
-        // Note, door markers handled in setActiveCell
+        // Note, door markers are handled in setActiveCell
         void updateMarkers();
         void addDetectionMarkers(int type);
 
         OEngine::GUI::Layout* mLayout;
+
+        float mMarkerUpdateTimer;
 
         bool mMapDragAndDrop;
 
