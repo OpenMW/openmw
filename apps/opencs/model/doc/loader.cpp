@@ -39,6 +39,7 @@ void CSMDoc::Loader::load()
     Document *document = iter->first;
 
     int size = static_cast<int> (document->getContentFiles().size());
+    int editedIndex = size-1; // index of the file to be edited/created
 
     if (document->isNew())
         --size;
@@ -77,7 +78,7 @@ void CSMDoc::Loader::load()
         {
             boost::filesystem::path path = document->getContentFiles()[iter->second.mFile];
 
-            int steps = document->getData().startLoading (path, iter->second.mFile<size-1, false);
+            int steps = document->getData().startLoading (path, iter->second.mFile!=editedIndex, false);
             iter->second.mRecordsLeft = true;
 
             emit nextStage (document, path.filename().string(), steps/batchingSize);
