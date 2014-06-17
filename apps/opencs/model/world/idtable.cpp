@@ -42,7 +42,7 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
         return QVariant();
 
-    if (index.internalId() != 0)
+    if (index.hasChildren())
     {
         std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
         return mIdCollection->getNestedData(parentAdress.first, parentAdress.second, index.row(), index.column());

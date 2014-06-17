@@ -46,7 +46,7 @@ namespace CSMWorld
                                         const QVariant& value, int subRowIndex, int subColIndex) const = 0;
 
             virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data,
-                                        int index, int subRowIndex, int subColIndex) const = 0;
+                                            int index, int subRowIndex, int subColIndex) const = 0;
 
             virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const = 0;
 
