@@ -441,7 +441,7 @@ namespace Compiler
 
             extensions.registerFunction ("getrace", 'l', "c", opcodeGetRace,
                 opcodeGetRaceExplicit);
-            extensions.registerFunction ("getwerewolfkills", 'f', "", opcodeGetWerewolfKills);
+            extensions.registerFunction ("getwerewolfkills", 'l', "", opcodeGetWerewolfKills);
             extensions.registerFunction ("pcexpelled", 'l', "/S", opcodePcExpelled, opcodePcExpelledExplicit);
             extensions.registerInstruction ("pcexpell", "/S", opcodePcExpell, opcodePcExpellExplicit);
             extensions.registerInstruction ("pcclearexpelled", "/S", opcodePcClearExpelled, opcodePcClearExpelledExplicit);

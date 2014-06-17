@@ -460,6 +460,9 @@ namespace MWMechanics
         {
             // The actor was killed by a magic effect. Figure out if the player was responsible for it.
             const ActiveSpells& spells = creatureStats.getActiveSpells();
+            bool killedByPlayer = false;
+            bool murderedByPlayer = false;
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
             {
                 const ActiveSpells::ActiveSpellParams& spell = it->second;
@@ -478,20 +481,23 @@ namespace MWMechanics
                     if (effectId == ESM::MagicEffect::DamageHealth || effectId == ESM::MagicEffect::AbsorbHealth)
                         isDamageEffect = true;
 
-                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
                     if (isDamageEffect && caster == player)
                     {
+                        killedByPlayer = true;
                         // Simple check for who attacked first: if the player attacked first, a crimeId should be set
                         // Doesn't handle possible edge case where no one reported the assault, but in such a case,
                         // for bystanders it is not possible to tell who attacked first, anyway.
                         if (ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).getCrimeId() != -1
                                 && ptr != player)
-                            MWBase::Environment::get().getMechanicsManager()->commitCrime(player, ptr, MWBase::MechanicsManager::OT_Murder);
-                        break;
+                            murderedByPlayer = true;
                     }
                 }
             }
+            if (murderedByPlayer)
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, ptr, MWBase::MechanicsManager::OT_Murder);
+            if (killedByPlayer && player.getClass().getNpcStats(player).isWerewolf())
+                player.getClass().getNpcStats(player).addWerewolfKill();
         }
 
         // TODO: dirty flag for magic effects to avoid some unnecessary work below?

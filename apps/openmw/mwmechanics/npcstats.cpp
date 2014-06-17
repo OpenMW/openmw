@@ -396,6 +396,8 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
     {
         const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
+        mWerewolfKills = 0;
+
         for(size_t i = 0;i < ESM::Attribute::Length;i++)
         {
             mWerewolfAttributes[i] = getAttribute(i);
@@ -425,6 +427,11 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
 int MWMechanics::NpcStats::getWerewolfKills() const
 {
     return mWerewolfKills;
+}
+
+void MWMechanics::NpcStats::addWerewolfKill()
+{
+    ++mWerewolfKills;
 }
 
 int MWMechanics::NpcStats::getProfit() const
