@@ -624,11 +624,7 @@ namespace CSMWorld
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index) const;
 
             virtual void setNestedData (const RefIdColumn *column, RefIdData& data, int index,
-<<<<<<< HEAD
                                         const QVariant& value, int subRowIndex, int subColIndex) const;
-=======
-                const QVariant& value, int subRowIndex, int subColIndex) const;
->>>>>>> 187fccc8cc630f1f469b4f5fc4e23a28ad8253ec
 
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
                                   const QVariant& value) const;
