@@ -148,13 +148,17 @@ namespace MWMechanics
         return school;
     }
 
-    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell)
+    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+                               const ESM::Spell* spell, const MagicEffects* effects)
     {
         const ESM::MagicEffect *magicEffect =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
             effectId);
 
         const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        const MWMechanics::MagicEffects* magicEffects = &stats.getMagicEffects();
+        if (effects)
+            magicEffects = effects;
 
         float resisted = 0;
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
@@ -165,9 +169,9 @@ namespace MWMechanics
 
             float resistance = 0;
             if (resistanceEffect != -1)
-                resistance += stats.getMagicEffects().get(resistanceEffect).mMagnitude;
+                resistance += magicEffects->get(resistanceEffect).mMagnitude;
             if (weaknessEffect != -1)
-                resistance -= stats.getMagicEffects().get(weaknessEffect).mMagnitude;
+                resistance -= magicEffects->get(weaknessEffect).mMagnitude;
 
 
             float willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
@@ -204,9 +208,10 @@ namespace MWMechanics
         return resisted;
     }
 
-    float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell)
+    float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+                              const ESM::Spell* spell, const MagicEffects* effects)
     {
-        float resistance = getEffectResistance(effectId, actor, caster, spell);
+        float resistance = getEffectResistance(effectId, actor, caster, spell, effects);
         if (resistance >= 0)
             return 1 - resistance / 100.f;
         else
@@ -260,6 +265,13 @@ namespace MWMechanics
         std::vector<ActiveSpells::ActiveEffect> appliedLastingEffects;
         bool firstAppliedEffect = true;
         bool anyHarmfulEffect = false;
+
+        // HACK: cache target's magic effects here, and add any applied effects to it. Use the cached effects for determining resistance.
+        // This is required for Weakness effects in a spell to apply to any subsequent effects in the spell.
+        // Otherwise, they'd only apply after the whole spell was added.
+        MagicEffects targetEffects;
+        if (target.getClass().isActor())
+            targetEffects += target.getClass().getCreatureStats(target).getMagicEffects();
 
         bool castByPlayer = (!caster.isEmpty() && caster.getRefData().getHandle() == "player");
 
@@ -346,8 +358,7 @@ namespace MWMechanics
                 // Try resisting
                 if (magnitudeMult > 0 && target.getClass().isActor())
                 {
-
-                    magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell);
+                    magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
                     if (magnitudeMult == 0)
                     {
                         // Fully resisted, show message
@@ -374,6 +385,8 @@ namespace MWMechanics
                     effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
                     effect.mDuration = effectIt->mDuration;
                     effect.mMagnitude = magnitude;
+
+                    targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
 
                     appliedLastingEffects.push_back(effect);
 
