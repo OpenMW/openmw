@@ -1001,7 +1001,7 @@ namespace MWMechanics
             }
             else
             {
-                bool aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(*it, player, aggression);
+                bool aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(*it, player, aggression, true);
                 if (aggressive)
                 {
                     startCombat(*it, player);
@@ -1156,12 +1156,14 @@ namespace MWMechanics
         mActors.clear();
     }
 
-    bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target, int bias)
+    bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target, int bias, bool ignoreDistance)
     {
         Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
         Ogre::Vector3 pos2 (target.getRefData().getPosition().pos);
 
-        float d = pos1.distance(pos2);
+        float d = 0;
+        if (!ignoreDistance)
+            d = pos1.distance(pos2);
 
         static int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "iFightDistanceBase")->getInt();
