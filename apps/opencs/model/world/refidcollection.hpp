@@ -26,8 +26,8 @@ namespace CSMWorld
         public:
 
             RefIdColumn (int columnId, Display displayType,
-                int flag = Flag_Table | Flag_Dialogue, bool editable = true,
-                bool userEditable = true);
+                         int flag = Flag_Table | Flag_Dialogue, bool editable = true,
+                         bool userEditable = true, bool canNest = false);
 
             virtual bool isEditable() const;
 

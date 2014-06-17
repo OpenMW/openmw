@@ -91,14 +91,15 @@ namespace CSMWorld
             Display_QuestStatusType,
             Display_Gender,
 
-            Display_Nested
+            Display_NestedItemList
         };
 
         int mColumnId;
         int mFlags;
         Display mDisplayType;
+        const bool mCanNest;
 
-        ColumnBase (int columnId, Display displayType, int flag);
+        ColumnBase (int columnId, Display displayType, int flag, bool canNest = false);
 
         virtual ~ColumnBase();
 
@@ -110,6 +111,8 @@ namespace CSMWorld
         virtual std::string getTitle() const;
 
         virtual int getId() const;
+
+        bool canHaveNestedColumns() const;
     };
 
     template<typename ESXRecordT>
@@ -117,8 +120,8 @@ namespace CSMWorld
     {
         int mFlags;
 
-        Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
-        : ColumnBase (columnId, displayType, flags) {}
+        Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue, bool canNest = false)
+            : ColumnBase (columnId, displayType, flags, canNest) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 

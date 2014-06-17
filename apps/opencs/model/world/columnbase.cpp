@@ -3,8 +3,8 @@
 
 #include "columns.hpp"
 
-CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags)
-: mColumnId (columnId), mDisplayType (displayType), mFlags (flags)
+CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags, bool canNest)
+    : mColumnId (columnId), mDisplayType (displayType), mFlags (flags), mCanNest(canNest)
 {}
 
 CSMWorld::ColumnBase::~ColumnBase() {}
@@ -22,4 +22,9 @@ std::string CSMWorld::ColumnBase::getTitle() const
 int  CSMWorld::ColumnBase::getId() const
 {
     return mColumnId;
+}
+
+bool CSMWorld::ColumnBase::canHaveNestedColumns() const
+{
+    return mCanNest;
 }

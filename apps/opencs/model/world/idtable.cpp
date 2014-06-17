@@ -1,7 +1,5 @@
 #include "idtable.hpp"
 
-#include <QDebug>
-
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
@@ -295,7 +293,7 @@ std::pair< int, int > CSMWorld::IdTable::unfoldIndexAdress (unsigned int id) con
 bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
 {
     return (index.isValid() &&
-            CSMWorld::ColumnBase::Display_Nested == static_cast<CSMWorld::ColumnBase::Display> (headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt()) &&
             index.internalId() == 0 &&
+            mIdCollection->getColumn (index.column()).canHaveNestedColumns() &&
             index.data().isValid());
 }

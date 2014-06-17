@@ -12,8 +12,8 @@
 #include "columns.hpp"
 
 CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
-    bool editable, bool userEditable)
-: ColumnBase (columnId, displayType, flag), mEditable (editable), mUserEditable (userEditable)
+                                    bool editable, bool userEditable, bool canNest)
+    : ColumnBase (columnId, displayType, flag, canNest), mEditable (editable), mUserEditable (userEditable)
 {}
 
 bool CSMWorld::RefIdColumn::isEditable() const
@@ -166,7 +166,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Respawn, ColumnBase::Display_Boolean));
     const RefIdColumn *respawn = &mColumns.back();
 
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_Nested, ColumnBase::Flag_Dialogue, false, false));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue, true, true, true));
     const RefIdColumn *content = &mColumns.back();
 
     CreatureColumns creatureColumns (actorsColumns);
