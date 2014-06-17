@@ -340,7 +340,7 @@ namespace MWMechanics
                 }
 
                 // Try reflecting
-                if (!reflected && magnitudeMult > 0 && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
+                if (!reflected && magnitudeMult > 0 && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
                     int reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).mMagnitude;
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
@@ -465,14 +465,14 @@ namespace MWMechanics
         if (!appliedLastingEffects.empty())
         {
             int casterActorId = -1;
-            if (caster.getClass().isActor())
+            if (!caster.isEmpty() && caster.getClass().isActor())
                 casterActorId = caster.getClass().getCreatureStats(caster).getActorId();
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, casterActorId);
         }
 
         // Notify the target actor they've been hit
-        if (anyHarmfulEffect && target.getClass().isActor() && target != caster && caster.getClass().isActor())
+        if (anyHarmfulEffect && target.getClass().isActor() && target != caster && !caster.isEmpty() && caster.getClass().isActor())
             target.getClass().onHit(target, 0.f, true, MWWorld::Ptr(), caster, true);
     }
 
@@ -657,7 +657,9 @@ namespace MWMechanics
         getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
         if (!projectileModel.empty())
             MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                                                               false, enchantment->mEffects, mCaster, mSourceName);
+                                                               false, enchantment->mEffects, mCaster, mSourceName,
+                                                                   // Not needed, enchantments can only be cast by actors
+                                                                   Ogre::Vector3(1,0,0));
 
         return true;
     }
@@ -742,8 +744,18 @@ namespace MWMechanics
         float speed = 0;
         getProjectileInfo(spell->mEffects, projectileModel, sound, speed);
         if (!projectileModel.empty())
+        {
+            Ogre::Vector3 fallbackDirection (0,1,0);
+            // Fall back to a "caster to target" direction if we have no other means of determining it
+            // (e.g. when cast by a non-actor)
+            if (!mTarget.isEmpty())
+                fallbackDirection =
+                   Ogre::Vector3(mTarget.getRefData().getPosition().pos)-
+                   Ogre::Vector3(mCaster.getRefData().getPosition().pos);
+
             MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                                                               false, spell->mEffects, mCaster, mSourceName);
+                       false, spell->mEffects, mCaster, mSourceName, fallbackDirection);
+        }
 
         return true;
     }

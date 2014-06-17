@@ -2329,9 +2329,9 @@ namespace MWWorld
 
     void World::launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
                                  float speed, bool stack, const ESM::EffectList& effects,
-                                   const MWWorld::Ptr& actor, const std::string& sourceName)
+                                   const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection)
     {
-        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, actor, sourceName);
+        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, caster, sourceName, fallbackDirection);
     }
 
     const std::vector<std::string>& World::getContentFiles() const

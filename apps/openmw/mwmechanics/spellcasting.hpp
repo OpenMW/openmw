@@ -47,8 +47,8 @@ namespace MWMechanics
     class CastSpell
     {
     private:
-        MWWorld::Ptr mCaster;
-        MWWorld::Ptr mTarget;
+        MWWorld::Ptr mCaster; // May be empty
+        MWWorld::Ptr mTarget; // May be empty
     public:
         bool mStack;
         std::string mId; // ID of spell, potion, item etc
@@ -59,8 +59,13 @@ namespace MWMechanics
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target);
 
         bool cast (const ESM::Spell* spell);
+
+        /// @note mCaster must be an actor
         bool cast (const MWWorld::Ptr& item);
+
+        /// @note mCaster must be an NPC
         bool cast (const ESM::Ingredient* ingredient);
+
         bool cast (const ESM::Potion* potion);
 
         /// @note Auto detects if spell, ingredient or potion
