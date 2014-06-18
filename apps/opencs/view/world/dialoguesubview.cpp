@@ -393,7 +393,7 @@ void CSVWorld::EditWidget::remake(int row)
     int locked = 0;
     const int columns = mTable->columnCount();
 
-    for (unsigned i=0; i<columns; ++i)
+    for (int i=0; i<columns; ++i)
     {
         int flags = mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
 

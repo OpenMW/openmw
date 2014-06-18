@@ -9,8 +9,12 @@ CSMWorld::NestedTableModel::NestedTableModel(const QModelIndex& parent,
     : mParentColumn(parent.column())
 {
     const int parentRow = parent.row();
+
     mId = std::string(parentModel->index(parentRow, 0).data().toString().toUtf8());
+
     QAbstractProxyModel::setSourceModel(parentModel);
+
+    setupHeaderVectors(columnId);
 }
 
 QModelIndex CSMWorld::NestedTableModel::mapFromSource(const QModelIndex& sourceIndex) const
@@ -58,8 +62,8 @@ QModelIndex CSMWorld::NestedTableModel::index(int row, int column, const QModelI
 
     CSMWorld::IdTable* table = dynamic_cast<CSMWorld::IdTable*>(sourceModel());
 
-    unsigned rows = table->rowCount(parent);
-    usigned columns = table->columnCount(parent);
+    int rows = table->rowCount(parent);
+    int columns = table->columnCount(parent);
 
     if (row < 0 ||
         row >= rows ||
@@ -75,4 +79,40 @@ QModelIndex CSMWorld::NestedTableModel::index(int row, int column, const QModelI
 QModelIndex CSMWorld::NestedTableModel::parent(const QModelIndex& index) const
 {
     return QModelIndex();
+}
+
+QVariant CSMWorld::NestedTableModel::headerData(int section,
+                                                Qt::Orientation orientation,
+                                                int role) const
+{
+    if (orientation==Qt::Vertical)
+        return QVariant();
+
+    if (role==Qt::DisplayRole)
+        return tr (mHeaderTitle[section].c_str());
+
+    if (role==ColumnBase::Role_Flags)
+        return QVariant(); //TODO
+
+    if (role==ColumnBase::Role_Display)
+        return mHeaderDisplay[section];
+
+    return QVariant();
+}
+
+void CSMWorld::NestedTableModel::setupHeaderVectors(ColumnBase::Display columnId)
+{
+    switch(columnId)
+    {
+        case ColumnBase::Display_NestedItemList:
+            mHeaderTitle.push_back("test1");
+            mHeaderTitle.push_back("test2");
+
+            mHeaderDisplay.push_back(ColumnBase::Display_String);
+            mHeaderDisplay.push_back(ColumnBase::Display_Integer);
+            break;
+
+        default:
+            assert(false);
+    }
 }

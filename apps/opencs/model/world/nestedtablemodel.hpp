@@ -43,6 +43,11 @@ namespace CSMWorld
         virtual QModelIndex index(int row, int column, const QModelIndex& parent) const;
 
         virtual QModelIndex parent(const QModelIndex& index) const;
+
+        virtual QVariant headerData ( int section, Qt::Orientation orientation, int role ) const;
+        
+    private:
+        void setupHeaderVectors(ColumnBase::Display columnId);
     };
 }
 
