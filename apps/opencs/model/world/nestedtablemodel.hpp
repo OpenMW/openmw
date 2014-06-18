@@ -1,4 +1,3 @@
- 
 #ifndef CSM_WOLRD_NESTEDTABLEMODEL_H
 #define CSM_WOLRD_NESTEDTABLEMODEL_H
 
@@ -26,16 +25,24 @@ namespace CSMWorld
         std::string mId;
         std::vector<std::string> mHeaderTitle;
         std::vector<ColumnBase::Display> mHeaderDisplay;
-        
+
         public:
         NestedTableModel(const QModelIndex& parent,
                          ColumnBase::Display displayType,
                          IdTable* parentModel);
         //parent is the parent of columns to work with. Columnid provides information about the column
-        
+
         virtual QModelIndex mapFromSource(const QModelIndex& sourceIndex) const;
-        
+
         virtual QModelIndex mapToSource(const QModelIndex& proxyIndex) const;
+
+        virtual int rowCount(const QModelIndex& parent) const;
+
+        virtual int columnCount(const QModelIndex& parent) const;
+
+        virtual QModelIndex index(int row, int column, const QModelIndex& parent) const;
+
+        virtual QModelIndex parent(const QModelIndex& index) const;
     };
 }
 

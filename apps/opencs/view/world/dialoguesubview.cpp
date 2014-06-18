@@ -22,6 +22,7 @@
 #include <QTableView>
 #include <QDebug>
 
+#include "../../model/world/nestedtablemodel.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
@@ -324,6 +325,14 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 =============================================================EditWidget=====================================================
 */
 
+CSVWorld::EditWidget::~EditWidget()
+{
+    for (unsigned i = 0; i < mNestedModels.size(); ++i)
+    {
+        delete mNestedModels[i];
+    }
+}
+
 CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, QUndoStack& undoStack, bool createAndDelete) :
 mDispatcher(this, table, undoStack),
 QScrollArea(parent),
@@ -340,6 +349,11 @@ mTable(table)
 
 void CSVWorld::EditWidget::remake(int row)
 {
+    for (unsigned i = 0; i < mNestedModels.size(); ++i)
+    {
+        delete mNestedModels[i];
+    }
+    
     if (mMainWidget)
     {
         delete mMainWidget;
@@ -379,7 +393,7 @@ void CSVWorld::EditWidget::remake(int row)
     int locked = 0;
     const int columns = mTable->columnCount();
 
-    for (int i=0; i<columns; ++i)
+    for (unsigned i=0; i<columns; ++i)
     {
         int flags = mTable->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
 
@@ -390,9 +404,12 @@ void CSVWorld::EditWidget::remake(int row)
 
             if (mTable->hasChildren(mTable->index(row, i)))
             {
+                mNestedModels.push_back(new CSMWorld::NestedTableModel (mTable->index(row, i), display, mTable));
+                
                 QTableView* table = new QTableView();
-                table->setModel(mTable);
-                table->setRootIndex(mTable->index(row, i));
+
+                table->setModel(*(mNestedModels.rbegin()));
+
                 tablesLayout->addWidget(table);
             } else
             {

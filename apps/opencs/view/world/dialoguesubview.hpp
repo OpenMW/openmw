@@ -21,6 +21,7 @@ class QVBoxLayout;
 namespace CSMWorld
 {
     class IdTable;
+    class NestedTableModel;
 }
 
 namespace CSMDoc
@@ -169,12 +170,15 @@ namespace CSVWorld
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
             QUndoStack& mUndoStack;
+        std::vector<CSMWorld::NestedTableModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
         public:
 
             EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table,
                         QUndoStack& undoStack, bool createAndDelete = false);
 
+            ~EditWidget();
+        
             void remake(int row);
 
         signals:
