@@ -37,6 +37,8 @@ void ESM::InventoryState::load (ESMReader &esm)
             LightState state;
             int slot;
             read (esm, state, slot);
+            if (state.mCount == 0)
+                continue;
             mLights.push_back (std::make_pair (state, slot));
         }
         else
@@ -44,6 +46,8 @@ void ESM::InventoryState::load (ESMReader &esm)
             ObjectState state;
             int slot;
             read (esm, state, slot);
+            if (state.mCount == 0)
+                continue;
             mItems.push_back (std::make_pair (state, std::make_pair (id, slot)));
         }
     }

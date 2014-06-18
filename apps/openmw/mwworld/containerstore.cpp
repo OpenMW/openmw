@@ -92,6 +92,8 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
     for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
         iter!=collection.mList.end(); ++iter)
     {
+        if (iter->mData.getCount() == 0)
+            continue;
         ESM::ObjectState state;
         storeState (*iter, state);
         int slot = equipable ? getSlot (*iter) : -1;
