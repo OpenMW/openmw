@@ -587,7 +587,9 @@ namespace MWScript
                         }
                         else
                         {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] = player.getClass().getNpcStats(player).getFactionRanks()[factionID] +1;
+                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] =
+                                    std::min(player.getClass().getNpcStats(player).getFactionRanks()[factionID] +1,
+                                             9);
                         }
                     }
                 }
