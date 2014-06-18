@@ -2615,6 +2615,8 @@ namespace MWWorld
             int days = std::max(1, bounty / iDaysinPrisonMod);
 
             advanceTime(days * 24);
+            for (int i=0; i<days*24; ++i)
+                MWBase::Environment::get().getMechanicsManager ()->rest (true);
 
             std::set<int> skills;
             for (int day=0; day<days; ++day)
@@ -2657,8 +2659,6 @@ namespace MWWorld
                     skillMsg.replace(skillMsg.find("%d"), 2, skillValue.str());
                 message += "\n" + skillMsg;
             }
-
-            // TODO: Sleep the player
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
