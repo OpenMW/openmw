@@ -1293,7 +1293,12 @@ namespace MWClass
     {
         const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            // Create a CustomData, but don't fill it from ESM records (not needed)
+            std::auto_ptr<NpcCustomData> data (new NpcCustomData);
+            ptr.getRefData().setCustomData (data.release());
+        }
 
         NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
 

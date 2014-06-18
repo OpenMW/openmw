@@ -798,7 +798,20 @@ namespace MWClass
     {
         const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            // Create a CustomData, but don't fill it from ESM records (not needed)
+            std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+
+            MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+
+            if (ref->mBase->mFlags & ESM::Creature::Weapon)
+                data->mContainerStore = new MWWorld::InventoryStore();
+            else
+                data->mContainerStore = new MWWorld::ContainerStore();
+
+            ptr.getRefData().setCustomData (data.release());
+        }
 
         CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
 
