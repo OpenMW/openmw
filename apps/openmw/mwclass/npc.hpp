@@ -17,27 +17,32 @@ namespace MWClass
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
-            static const ESM::GameSetting *fMinWalkSpeed;
-            static const ESM::GameSetting *fMaxWalkSpeed;
-            static const ESM::GameSetting *fEncumberedMoveEffect;
-            static const ESM::GameSetting *fSneakSpeedMultiplier;
-            static const ESM::GameSetting *fAthleticsRunBonus;
-            static const ESM::GameSetting *fBaseRunMultiplier;
-            static const ESM::GameSetting *fMinFlySpeed;
-            static const ESM::GameSetting *fMaxFlySpeed;
-            static const ESM::GameSetting *fSwimRunBase;
-            static const ESM::GameSetting *fSwimRunAthleticsMult;
-            static const ESM::GameSetting *fJumpEncumbranceBase;
-            static const ESM::GameSetting *fJumpEncumbranceMultiplier;
-            static const ESM::GameSetting *fJumpAcrobaticsBase;
-            static const ESM::GameSetting *fJumpAcroMultiplier;
-            static const ESM::GameSetting *fJumpRunMultiplier;
-            static const ESM::GameSetting *fWereWolfRunMult;
-            static const ESM::GameSetting *fKnockDownMult;
-            static const ESM::GameSetting *iKnockDownOddsMult;
-            static const ESM::GameSetting *iKnockDownOddsBase;
-            static const ESM::GameSetting *fDamageStrengthBase;
-            static const ESM::GameSetting *fDamageStrengthMult;
+            struct GMST
+            {
+                const ESM::GameSetting *fMinWalkSpeed;
+                const ESM::GameSetting *fMaxWalkSpeed;
+                const ESM::GameSetting *fEncumberedMoveEffect;
+                const ESM::GameSetting *fSneakSpeedMultiplier;
+                const ESM::GameSetting *fAthleticsRunBonus;
+                const ESM::GameSetting *fBaseRunMultiplier;
+                const ESM::GameSetting *fMinFlySpeed;
+                const ESM::GameSetting *fMaxFlySpeed;
+                const ESM::GameSetting *fSwimRunBase;
+                const ESM::GameSetting *fSwimRunAthleticsMult;
+                const ESM::GameSetting *fJumpEncumbranceBase;
+                const ESM::GameSetting *fJumpEncumbranceMultiplier;
+                const ESM::GameSetting *fJumpAcrobaticsBase;
+                const ESM::GameSetting *fJumpAcroMultiplier;
+                const ESM::GameSetting *fJumpRunMultiplier;
+                const ESM::GameSetting *fWereWolfRunMult;
+                const ESM::GameSetting *fKnockDownMult;
+                const ESM::GameSetting *iKnockDownOddsMult;
+                const ESM::GameSetting *iKnockDownOddsBase;
+                const ESM::GameSetting *fDamageStrengthBase;
+                const ESM::GameSetting *fDamageStrengthMult;
+            };
+
+            static const GMST& getGmst();
 
         public:
 

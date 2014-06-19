@@ -59,34 +59,37 @@ namespace
 
 namespace MWClass
 {
+    const Creature::GMST& Creature::getGmst()
+    {
+        static GMST gmst;
+        static bool inited = false;
+        if (!inited)
+        {
+            const MWBase::World *world = MWBase::Environment::get().getWorld();
+            const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+            gmst.fMinWalkSpeedCreature = store.find("fMinWalkSpeedCreature");
+            gmst.fMaxWalkSpeedCreature = store.find("fMaxWalkSpeedCreature");
+            gmst.fEncumberedMoveEffect = store.find("fEncumberedMoveEffect");
+            gmst.fSneakSpeedMultiplier = store.find("fSneakSpeedMultiplier");
+            gmst.fAthleticsRunBonus = store.find("fAthleticsRunBonus");
+            gmst.fBaseRunMultiplier = store.find("fBaseRunMultiplier");
+            gmst.fMinFlySpeed = store.find("fMinFlySpeed");
+            gmst.fMaxFlySpeed = store.find("fMaxFlySpeed");
+            gmst.fSwimRunBase = store.find("fSwimRunBase");
+            gmst.fSwimRunAthleticsMult = store.find("fSwimRunAthleticsMult");
+            gmst.fKnockDownMult = store.find("fKnockDownMult");
+            gmst.iKnockDownOddsMult = store.find("iKnockDownOddsMult");
+            gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
+            inited = true;
+        }
+        return gmst;
+    }
+
     void Creature::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
         {
             std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
-
-            static bool inited = false;
-            if(!inited)
-            {
-                const MWBase::World *world = MWBase::Environment::get().getWorld();
-                const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
-
-                fMinWalkSpeedCreature = gmst.find("fMinWalkSpeedCreature");
-                fMaxWalkSpeedCreature = gmst.find("fMaxWalkSpeedCreature");
-                fEncumberedMoveEffect = gmst.find("fEncumberedMoveEffect");
-                fSneakSpeedMultiplier = gmst.find("fSneakSpeedMultiplier");
-                fAthleticsRunBonus = gmst.find("fAthleticsRunBonus");
-                fBaseRunMultiplier = gmst.find("fBaseRunMultiplier");
-                fMinFlySpeed = gmst.find("fMinFlySpeed");
-                fMaxFlySpeed = gmst.find("fMaxFlySpeed");
-                fSwimRunBase = gmst.find("fSwimRunBase");
-                fSwimRunAthleticsMult = gmst.find("fSwimRunAthleticsMult");
-                fKnockDownMult = gmst.find("fKnockDownMult");
-                iKnockDownOddsMult = gmst.find("iKnockDownOddsMult");
-                iKnockDownOddsBase = gmst.find("iKnockDownOddsBase");
-
-                inited = true;
-            }
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -376,9 +379,9 @@ namespace MWClass
         if (damage > 0.f)
         {
             // Check for knockdown
-            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * fKnockDownMult->getFloat();
+            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
             float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                    * iKnockDownOddsMult->getInt() * 0.01 + iKnockDownOddsBase->getInt();
+                    * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
             int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
             if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
             {
@@ -522,9 +525,10 @@ namespace MWClass
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const GMST& gmst = getGmst();
 
-        float walkSpeed = fMinWalkSpeedCreature->getFloat() + 0.01 * stats.getAttribute(ESM::Attribute::Speed).getModified()
-                * (fMaxWalkSpeedCreature->getFloat() - fMinWalkSpeedCreature->getFloat());
+        float walkSpeed = gmst.fMinWalkSpeedCreature->getFloat() + 0.01 * stats.getAttribute(ESM::Attribute::Speed).getModified()
+                * (gmst.fMaxWalkSpeedCreature->getFloat() - gmst.fMinWalkSpeedCreature->getFloat());
 
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
@@ -534,7 +538,7 @@ namespace MWClass
         bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
         float runSpeed = walkSpeed*(0.01f * getSkill(ptr, ESM::Skill::Athletics) *
-                                    fAthleticsRunBonus->getFloat() + fBaseRunMultiplier->getFloat());
+                                    gmst.fAthleticsRunBonus->getFloat() + gmst.fBaseRunMultiplier->getFloat());
 
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
@@ -544,8 +548,8 @@ namespace MWClass
         {
             float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
                                     mageffects.get(ESM::MagicEffect::Levitate).mMagnitude);
-            flySpeed = fMinFlySpeed->getFloat() + flySpeed*(fMaxFlySpeed->getFloat() - fMinFlySpeed->getFloat());
-            flySpeed *= 1.0f - fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
+            flySpeed = gmst.fMinFlySpeed->getFloat() + flySpeed*(gmst.fMaxFlySpeed->getFloat() - gmst.fMinFlySpeed->getFloat());
+            flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;
         }
@@ -555,8 +559,8 @@ namespace MWClass
             if(running)
                 swimSpeed = runSpeed;
             swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).mMagnitude;
-            swimSpeed *= fSwimRunBase->getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics) *
-                                                    fSwimRunAthleticsMult->getFloat();
+            swimSpeed *= gmst.fSwimRunBase->getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics) *
+                                                    gmst.fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
         }
         else if(running)
@@ -871,19 +875,4 @@ namespace MWClass
         MWWorld::ContainerStore& store = getContainerStore(ptr);
         store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
     }
-
-    const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
-    const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
-    const ESM::GameSetting *Creature::fEncumberedMoveEffect;
-    const ESM::GameSetting *Creature::fSneakSpeedMultiplier;
-    const ESM::GameSetting *Creature::fAthleticsRunBonus;
-    const ESM::GameSetting *Creature::fBaseRunMultiplier;
-    const ESM::GameSetting *Creature::fMinFlySpeed;
-    const ESM::GameSetting *Creature::fMaxFlySpeed;
-    const ESM::GameSetting *Creature::fSwimRunBase;
-    const ESM::GameSetting *Creature::fSwimRunAthleticsMult;
-    const ESM::GameSetting *Creature::fKnockDownMult;
-    const ESM::GameSetting *Creature::iKnockDownOddsMult;
-    const ESM::GameSetting *Creature::iKnockDownOddsBase;
-
 }
