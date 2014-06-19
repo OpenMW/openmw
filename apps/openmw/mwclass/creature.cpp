@@ -798,6 +798,12 @@ namespace MWClass
     {
         const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
 
+        ensureCustomData(ptr);
+
+        // If we do the following instead we get a sizable speedup, but this causes compatibility issues
+        // with 0.30 savegames, where some state in CreatureStats was not saved yet,
+        // and therefore needs to be loaded from ESM records. TODO: re-enable this in a future release.
+        /*
         if (!ptr.getRefData().getCustomData())
         {
             // Create a CustomData, but don't fill it from ESM records (not needed)
@@ -812,6 +818,7 @@ namespace MWClass
 
             ptr.getRefData().setCustomData (data.release());
         }
+        */
 
         CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
 

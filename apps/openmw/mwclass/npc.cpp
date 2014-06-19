@@ -1293,12 +1293,18 @@ namespace MWClass
     {
         const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
 
+        ensureCustomData(ptr);
+        // If we do the following instead we get a sizable speedup, but this causes compatibility issues
+        // with 0.30 savegames, where some state in CreatureStats was not saved yet,
+        // and therefore needs to be loaded from ESM records. TODO: re-enable this in a future release.
+        /*
         if (!ptr.getRefData().getCustomData())
         {
             // Create a CustomData, but don't fill it from ESM records (not needed)
             std::auto_ptr<NpcCustomData> data (new NpcCustomData);
             ptr.getRefData().setCustomData (data.release());
         }
+        */
 
         NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
 
