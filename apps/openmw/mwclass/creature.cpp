@@ -537,8 +537,8 @@ namespace MWClass
 
         bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
-        float runSpeed = walkSpeed*(0.01f * getSkill(ptr, ESM::Skill::Athletics) *
-                                    gmst.fAthleticsRunBonus->getFloat() + gmst.fBaseRunMultiplier->getFloat());
+        float runSpeed = walkSpeed*6;
+        runSpeed = std::min(gmst.fMaxWalkSpeedCreature->getFloat(), runSpeed); // flame atronach runs way too fast without this
 
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
