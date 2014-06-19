@@ -2031,20 +2031,24 @@ namespace MWWorld
         }
     }
 
-    bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
+    bool World::getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor)
     {
-        if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
+        if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
-        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(npc.getRefData().getHandle())->getHalfExtents();
-        const float* pos1 = npc.getRefData().getPosition().pos;
-        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetNpc.getRefData().getHandle())->getHalfExtents();
-        const float* pos2 = targetNpc.getRefData().getPosition().pos;
+        if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
+            return false; // not in active cell
 
-        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z);
-        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z);
+        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(actor.getRefData().getHandle())->getHalfExtents();
+        const float* pos1 = actor.getRefData().getPosition().pos;
+        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle())->getHalfExtents();
+        const float* pos2 = targetActor.getRefData().getPosition().pos;
+
+        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9); // eye level
+        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z*2*0.9);
 
         std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
         if(result.first == "") return true;
+
         return false;
     }
 
