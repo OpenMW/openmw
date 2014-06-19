@@ -1,5 +1,7 @@
 #include "idtable.hpp"
 
+#include <cassert>
+
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
@@ -66,6 +68,25 @@ QVariant CSMWorld::IdTable::headerData (int section,
 
     if (role==ColumnBase::Role_Display)
         return mIdCollection->getColumn (section).mDisplayType;
+
+    return QVariant();
+}
+
+QVariant CSMWorld::IdTable::nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role) const
+{
+    assert(mIdCollection->getColumn(section).canHaveNestedColumns());
+
+    if (orientation==Qt::Vertical)
+        return QVariant();
+
+    if (role==Qt::DisplayRole)
+        return tr (mIdCollection->getColumn(section).getNestedColumnTitle(subSection).c_str());
+
+    if (role==ColumnBase::Role_Flags)
+        return mIdCollection->getColumn (section).mFlags;
+
+    if (role==ColumnBase::Role_Display)
+        return mIdCollection->getColumn (section).mNestedDisplayType.at(subSection);
 
     return QVariant();
 }

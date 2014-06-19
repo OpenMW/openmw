@@ -22,9 +22,8 @@ namespace CSMWorld
     class NestedTableModel : public QAbstractProxyModel
     {
         const int mParentColumn;
+        IdTable* mMainModel;
         std::string mId;
-        std::vector<std::string> mHeaderTitle;
-        std::vector<ColumnBase::Display> mHeaderDisplay;
 
         public:
         NestedTableModel(const QModelIndex& parent,

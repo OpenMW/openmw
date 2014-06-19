@@ -2,6 +2,7 @@
 #define CSM_WOLRD_COLUMNBASE_H
 
 #include <string>
+#include <vector>
 
 #include <Qt>
 #include <QVariant>
@@ -97,6 +98,7 @@ namespace CSMWorld
         int mColumnId;
         int mFlags;
         Display mDisplayType;
+        std::vector<Display> mNestedDisplayType;
         const bool mCanNest;
 
         ColumnBase (int columnId, Display displayType, int flag, bool canNest = false);
@@ -109,6 +111,10 @@ namespace CSMWorld
         ///< Can this column be edited directly by the user?
 
         virtual std::string getTitle() const;
+
+        std::string getNestedColumnTitle(int columnNumber) const;
+        
+        virtual void addNestedColumnDisplay(Display displayDefinition);
 
         virtual int getId() const;
 

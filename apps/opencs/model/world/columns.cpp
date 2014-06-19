@@ -216,6 +216,21 @@ std::string CSMWorld::Columns::getName (ColumnId column)
     return "";
 }
 
+std::string CSMWorld::Columns::getName(CSMWorld::ColumnBase::Display displayType, int columnNumber)
+{
+//TODO, this is just temporary solution
+    switch (displayType)
+    {
+    case CSMWorld::ColumnBase::Display_NestedItemList:
+        if (columnNumber == 0)
+            return "ID";
+
+        if (columnNumber == 1)
+            return "Count";
+    }
+    return "Do yourself a favor and take a look at the columns.cpp";
+}
+
 int CSMWorld::Columns::getId (const std::string& name)
 {
     std::string name2 = Misc::StringUtils::lowerCase (name);

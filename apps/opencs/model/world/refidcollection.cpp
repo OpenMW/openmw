@@ -168,6 +168,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue, true, true, true));
     const RefIdColumn *content = &mColumns.back();
+    (&mColumns.back())->addNestedColumnDisplay(CSMWorld::ColumnBase::Display_String);
+    (&mColumns.back())->addNestedColumnDisplay(CSMWorld::ColumnBase::Display_Integer);
 
     CreatureColumns creatureColumns (actorsColumns);
 

@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "columnbase.hpp"
+
 namespace CSMWorld
 {
     namespace Columns
@@ -207,6 +209,8 @@ namespace CSMWorld
         };
 
         std::string getName (ColumnId column);
+
+        std::string getName (ColumnBase::Display displayType, int columnNumber);
 
         int getId (const std::string& name);
         ///< Will return -1 for an invalid name.

@@ -3,6 +3,8 @@
 
 #include "columns.hpp"
 
+#include <cassert>
+
 CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags, bool canNest)
     : mColumnId (columnId), mDisplayType (displayType), mFlags (flags), mCanNest(canNest)
 {}
@@ -27,4 +29,16 @@ int  CSMWorld::ColumnBase::getId() const
 bool CSMWorld::ColumnBase::canHaveNestedColumns() const
 {
     return mCanNest;
+}
+
+std::string CSMWorld::ColumnBase::getNestedColumnTitle(int columnNumber) const
+{
+    return Columns::getName (mDisplayType, columnNumber);
+}
+
+void CSMWorld::ColumnBase::addNestedColumnDisplay(CSMWorld::ColumnBase::Display displayDefinition)
+{
+    assert (canHaveNestedColumns());
+    
+    mNestedDisplayType.push_back(displayDefinition);
 }
