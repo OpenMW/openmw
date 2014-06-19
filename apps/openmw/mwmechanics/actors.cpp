@@ -530,8 +530,12 @@ namespace MWMechanics
                             itemGmst)->getString();
                 if (it->first == ESM::MagicEffect::BoundGloves)
                 {
-                    adjustBoundItem("sMagicBoundLeftGauntletID", magnitude > 0, ptr);
-                    adjustBoundItem("sMagicBoundRightGauntletID", magnitude > 0, ptr);
+                    item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                                "sMagicBoundLeftGauntletID")->getString();
+                    adjustBoundItem(item, magnitude > 0, ptr);
+                    item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                                "sMagicBoundRightGauntletID")->getString();
+                    adjustBoundItem(item, magnitude > 0, ptr);
                 }
                 else
                     adjustBoundItem(item, magnitude > 0, ptr);

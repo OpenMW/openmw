@@ -67,12 +67,12 @@ namespace MWWorld
 
             int mActorId;
 
-            // actorId doesn't work for non-actors, so we also keep track of the Ptr.
+            // actorId doesn't work for non-actors, so we also keep track of the Ogre-handle.
             // For non-actors, the caster ptr is mainly needed to prevent the projectile
             // from colliding with its caster.
             // TODO: this will break when the game is saved and reloaded, since there is currently
             // no way to write identifiers for non-actors to a savegame.
-            MWWorld::Ptr mCaster;
+            std::string mCasterHandle;
 
             // MW-id of this projectile
             std::string mId;
