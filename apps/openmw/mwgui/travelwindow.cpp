@@ -10,6 +10,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -140,6 +141,9 @@ namespace MWGui
         if (playerGold<price)
             return;
 
+        if (!mPtr.getCell()->isExterior())
+            // Interior cell -> mages guild transport
+            MWBase::Environment::get().getSoundManager()->playSound("mysticism cast", 1, 1);
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
