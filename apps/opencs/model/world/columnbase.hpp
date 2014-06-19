@@ -130,12 +130,6 @@ namespace CSMWorld
             throw std::logic_error ("Column " + getTitle() + " is not editable");
         }
     };
-
-    template<typename ESXRecordT>
-    struct NestedColumn
-    {
-        virtual QVariant getNested(const Record<ESXRecordT>& record, int subColumn, int subSow) const = 0;
-    };
 }
 
 #endif
