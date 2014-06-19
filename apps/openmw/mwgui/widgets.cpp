@@ -630,8 +630,11 @@ namespace MWGui
 
         MyGUI::IntSize AutoSizedButton::getRequestedSize()
         {
-            MyGUI::IntSize size = getTextSize() + MyGUI::IntSize(24,0);
-            size.height = std::max(24, size.height);
+            MyGUI::IntSize padding(24, 8);
+            if (isUserString("TextPadding"))
+                padding = MyGUI::IntSize::parse(getUserString("TextPadding"));
+
+            MyGUI::IntSize size = getTextSize() + MyGUI::IntSize(padding.width,padding.height);
             return size;
         }
 

@@ -31,17 +31,18 @@
             <UserString key="HStretch" value="false"/>
             <UserString key="VStretch" value="false"/>
 
-            <Widget type="TextBox" skin="SandText" position="0 0 100 24" name="AttribMultiplier1"/>
-            <Widget type="TextBox" skin="SandText" position="0 24 100 24" name="AttribMultiplier2"/>
-            <Widget type="TextBox" skin="SandText" position="0 48 100 24" name="AttribMultiplier3"/>
-            <Widget type="TextBox" skin="SandText" position="0 72 100 24" name="AttribMultiplier4"/>
-            <Widget type="TextBox" skin="SandText" position="200 0 100 24" name="AttribMultiplier5"/>
-            <Widget type="TextBox" skin="SandText" position="200 24 100 24" name="AttribMultiplier6"/>
-            <Widget type="TextBox" skin="SandText" position="200 48 100 24" name="AttribMultiplier7"/>
-            <Widget type="TextBox" skin="SandText" position="200 72 100 24" name="AttribMultiplier8"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="0 0 100 24" name="AttribMultiplier1"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="0 24 100 24" name="AttribMultiplier2"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="0 48 100 24" name="AttribMultiplier3"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="0 72 100 24" name="AttribMultiplier4"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="200 0 100 24" name="AttribMultiplier5"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="200 24 100 24" name="AttribMultiplier6"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="200 48 100 24" name="AttribMultiplier7"/>
+            <Widget type="TextBox" skin="SandTextVCenter" position="200 72 100 24" name="AttribMultiplier8"/>
 
             <Widget type="HBox" position="22 0 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib1">
+                    <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeStrength}"/>
@@ -55,6 +56,7 @@
 
             <Widget type="HBox" position="22 24 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib2">
+                    <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeIntelligence}"/>
@@ -68,6 +70,7 @@
 
             <Widget type="HBox" position="22 48 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib3">
+                    <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeWillpower}"/>
@@ -81,6 +84,7 @@
 
             <Widget type="HBox" position="22 72 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib4">
+                    <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeAgility}"/>
@@ -95,6 +99,7 @@
 
             <Widget type="HBox" position="222 0 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib5">
+                    <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeSpeed}"/>
@@ -108,6 +113,7 @@
 
             <Widget type="HBox" position="222 24 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib6">
+                    <UserString key="TextPadding" value="0 0"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                     <UserString key="Caption_AttributeName" value="#{sAttributeEndurance}"/>
@@ -121,6 +127,7 @@
 
             <Widget type="HBox" position="222 48 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib7">
+                <UserString key="TextPadding" value="0 0"/>
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributePersonality}"/>
@@ -134,6 +141,7 @@
 
             <Widget type="HBox" position="222 72 200 24">
                 <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib8">
+                <UserString key="TextPadding" value="0 0"/>
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeLuck}"/>

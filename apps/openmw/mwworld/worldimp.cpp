@@ -989,9 +989,18 @@ namespace MWWorld
             }
             else
             {
-                if (!mWorldScene->isCellActive(*currCell))
-                    ptr.getClass().copyToCell(ptr, *newCell, pos);
-                else if (!mWorldScene->isCellActive(*newCell))
+                if (!mWorldScene->isCellActive(*currCell) && mWorldScene->isCellActive(*newCell))
+                {
+                    MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    mWorldScene->addObjectToScene(newPtr);
+
+                    std::string script = newPtr.getClass().getScript(newPtr);
+                    if (!script.empty()) {
+                        mLocalScripts.add(script, newPtr);
+                    }
+                    addContainerScripts(newPtr, newCell);
+                }
+                else if (!mWorldScene->isCellActive(*newCell) && mWorldScene->isCellActive(*currCell))
                 {
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
@@ -2022,20 +2031,24 @@ namespace MWWorld
         }
     }
 
-    bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
+    bool World::getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor)
     {
-        if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
+        if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
-        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(npc.getRefData().getHandle())->getHalfExtents();
-        const float* pos1 = npc.getRefData().getPosition().pos;
-        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetNpc.getRefData().getHandle())->getHalfExtents();
-        const float* pos2 = targetNpc.getRefData().getPosition().pos;
+        if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
+            return false; // not in active cell
 
-        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z);
-        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z);
+        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(actor.getRefData().getHandle())->getHalfExtents();
+        const float* pos1 = actor.getRefData().getPosition().pos;
+        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle())->getHalfExtents();
+        const float* pos2 = targetActor.getRefData().getPosition().pos;
+
+        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9); // eye level
+        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z*2*0.9);
 
         std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
         if(result.first == "") return true;
+
         return false;
     }
 
@@ -2320,9 +2333,9 @@ namespace MWWorld
 
     void World::launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
                                  float speed, bool stack, const ESM::EffectList& effects,
-                                   const MWWorld::Ptr& actor, const std::string& sourceName)
+                                   const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection)
     {
-        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, actor, sourceName);
+        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, caster, sourceName, fallbackDirection);
     }
 
     const std::vector<std::string>& World::getContentFiles() const
@@ -2335,6 +2348,9 @@ namespace MWWorld
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
         if (actor.getClass().hasInventoryStore(actor))
             actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+
+        // Normally updated once per frame, but here it is kinda important to do it right away.
+        MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
     }
 
     bool World::isDark() const
@@ -2436,14 +2452,15 @@ namespace MWWorld
             if (!ptr.getRefData().isEnabled())
                 return true;
 
-            // Consider references inside containers as well
-            if (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name())
+            // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
+            if (mType != World::Detect_Creature &&
+                    (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name()))
             {
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 {
                     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                     {
-                        if (needToAdd(*it))
+                        if (needToAdd(*it, mDetector))
                         {
                             mOut.push_back(ptr);
                             return true;
@@ -2452,16 +2469,25 @@ namespace MWWorld
                 }
             }
 
-            if (needToAdd(ptr))
+            if (needToAdd(ptr, mDetector))
                 mOut.push_back(ptr);
 
             return true;
         }
 
-        bool needToAdd (MWWorld::Ptr ptr)
+        bool needToAdd (MWWorld::Ptr ptr, MWWorld::Ptr detector)
         {
-            if (mType == World::Detect_Creature && ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
-                return false;
+            if (mType == World::Detect_Creature)
+            {
+                // If in werewolf form, this detects only NPCs, otherwise only creatures
+                if (detector.getClass().isNpc() && detector.getClass().getNpcStats(detector).isWerewolf())
+                {
+                    if (ptr.getClass().getTypeName() != typeid(ESM::NPC).name())
+                        return false;
+                }
+                else if (ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                    return false;
+            }
             if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
                 return false;
             if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
@@ -2593,6 +2619,8 @@ namespace MWWorld
             int days = std::max(1, bounty / iDaysinPrisonMod);
 
             advanceTime(days * 24);
+            for (int i=0; i<days*24; ++i)
+                MWBase::Environment::get().getMechanicsManager ()->rest (true);
 
             std::set<int> skills;
             for (int day=0; day<days; ++day)
@@ -2635,8 +2663,6 @@ namespace MWWorld
                     skillMsg.replace(skillMsg.find("%d"), 2, skillValue.str());
                 message += "\n" + skillMsg;
             }
-
-            // TODO: Sleep the player
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");

@@ -106,7 +106,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                                             const Nif::NiZBufferProperty *zprop,
                                             const Nif::NiSpecularProperty *specprop,
                                             const Nif::NiWireframeProperty *wireprop,
-                                            bool &needTangents)
+                                            bool &needTangents, bool disableLighting)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
     Ogre::MaterialPtr material = matMgr.getByName(name);
@@ -243,6 +243,14 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                 warn("Unhandled material controller "+ctrls->recName+" in "+name);
             ctrls = ctrls->next;
         }
+    }
+
+    if (disableLighting)
+    {
+        ambient = Ogre::Vector3(0.f);
+        diffuse = Ogre::Vector3(0.f);
+        specular = Ogre::Vector3(0.f);
+        emissive = Ogre::Vector3(1.f);
     }
 
     {

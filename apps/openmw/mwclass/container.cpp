@@ -286,7 +286,12 @@ namespace MWClass
     {
         const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            // Create a CustomData, but don't fill it from ESM records (not needed)
+            std::auto_ptr<ContainerCustomData> data (new ContainerCustomData);
+            ptr.getRefData().setCustomData (data.release());
+        }
 
         dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             readState (state2.mInventory);

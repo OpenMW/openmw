@@ -371,6 +371,12 @@ namespace MWScript
 
                     MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
+                    if(!actor.getClass().isActor() || !observer.getClass().isActor())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     Interpreter::Type_Integer value =
                             MWBase::Environment::get().getWorld()->getLOS(observer, actor) &&
                             MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, observer);
@@ -392,9 +398,10 @@ namespace MWScript
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+
                     MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->getPtr(actorID,true);
                     bool value = false;
-                    if(dest != MWWorld::Ptr() )
+                    if(dest != MWWorld::Ptr() && source.getClass().isActor() && dest.getClass().isActor())
                     {
                         value = MWBase::Environment::get().getWorld()->getLOS(source,dest);
                     }

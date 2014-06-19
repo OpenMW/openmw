@@ -118,6 +118,7 @@ namespace MWScript
             virtual void stopScript (const std::string& name);
 
             virtual float getDistance (const std::string& name, const std::string& id = "") const;
+            ///< @note if \a id is empty, assumes an implicit reference
 
             bool hasBeenActivated (const MWWorld::Ptr& ptr);
             ///< \attention Calling this function for the right reference will mark the action as

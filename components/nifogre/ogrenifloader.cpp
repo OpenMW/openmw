@@ -850,7 +850,10 @@ class NIFObjectLoader
         partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, group,
                                                                 texprop, matprop, alphaprop,
                                                                 vertprop, zprop, specprop,
-                                                                wireprop, needTangents));
+                                                                wireprop, needTangents,
+                                                                // MW doesn't light particles, but the MaterialProperty
+                                                                // used still has lighting, so that must be ignored.
+                                                                true));
 
         partsys->setCullIndividually(false);
         partsys->setParticleQuota(particledata->numParticles);

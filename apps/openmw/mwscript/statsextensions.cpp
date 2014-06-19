@@ -587,7 +587,9 @@ namespace MWScript
                         }
                         else
                         {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] = player.getClass().getNpcStats(player).getFactionRanks()[factionID] +1;
+                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] =
+                                    std::min(player.getClass().getNpcStats(player).getFactionRanks()[factionID] +1,
+                                             9);
                         }
                     }
                 }
@@ -1073,6 +1075,25 @@ namespace MWScript
         };
 
         template <class R>
+        class OpOnMurder : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value =
+                        ptr.getClass().getCreatureStats (ptr).hasBeenMurdered();
+
+                    if (value)
+                        ptr.getClass().getCreatureStats (ptr).clearHasBeenMurdered();
+
+                    runtime.push (value);
+                }
+        };
+
+        template <class R>
         class OpOnKnockout : public Interpreter::Opcode0
         {
             public:
@@ -1264,6 +1285,8 @@ namespace MWScript
 
             interpreter.installSegment5 (Compiler::Stats::opcodeOnDeath, new OpOnDeath<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnMurder, new OpOnMurder<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnMurderExplicit, new OpOnMurder<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockout, new OpOnKnockout<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockoutExplicit, new OpOnKnockout<ExplicitRef>);
 

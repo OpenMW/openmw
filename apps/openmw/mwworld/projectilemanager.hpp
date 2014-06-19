@@ -39,9 +39,10 @@ namespace MWWorld
         ProjectileManager (Ogre::SceneManager* sceneMgr,
                 OEngine::Physic::PhysicEngine& engine);
 
+        /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
         void launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
                                      float speed, bool stack, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& actor, const std::string& sourceName);
+                                       const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection);
 
         void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                        const Ogre::Vector3& pos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed);
@@ -64,8 +65,14 @@ namespace MWWorld
             NifOgre::ObjectScenePtr mObject;
             Ogre::SceneNode* mNode;
 
-            // Actor who shot this projectile
             int mActorId;
+
+            // actorId doesn't work for non-actors, so we also keep track of the Ptr.
+            // For non-actors, the caster ptr is mainly needed to prevent the projectile
+            // from colliding with its caster.
+            // TODO: this will break when the game is saved and reloaded, since there is currently
+            // no way to write identifiers for non-actors to a savegame.
+            MWWorld::Ptr mCaster;
 
             // MW-id of this projectile
             std::string mId;

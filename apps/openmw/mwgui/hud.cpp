@@ -384,6 +384,8 @@ namespace MWGui
 
     void HUD::onFrame(float dt)
     {
+        LocalMapBase::onFrame(dt);
+
         mCellNameTimer -= dt;
         mWeaponSpellTimer -= dt;
         if (mCellNameTimer < 0)

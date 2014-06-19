@@ -104,9 +104,10 @@ namespace MWGui
 
             int attribute = mSpentAttributes[i];
 
-            int xdiff = mAttributeMultipliers[attribute]->getCaption() == "" ? 0 : 30;
+            int xdiff = mAttributeMultipliers[attribute]->getCaption() == "" ? 0 : 20;
 
-            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mMainWidget->getAbsolutePosition() - MyGUI::IntPoint(24+xdiff,-4);
+            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mMainWidget->getAbsolutePosition() - MyGUI::IntPoint(22+xdiff,0);
+            pos.top += (mAttributes[attribute]->getHeight() - image->getHeight())/2;
             image->setPosition(pos);
         }
 

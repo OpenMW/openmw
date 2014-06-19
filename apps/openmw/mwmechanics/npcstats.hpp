@@ -126,6 +126,9 @@ namespace MWMechanics
 
             int getWerewolfKills() const;
 
+            /// Increments mWerewolfKills by 1.
+            void addWerewolfKill();
+
             float getTimeToStartDrowning() const;
             /// Sets time left for the creature to drown if it stays underwater.
             /// @param time value from [0,20]

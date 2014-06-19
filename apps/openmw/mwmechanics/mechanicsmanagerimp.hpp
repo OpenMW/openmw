@@ -156,6 +156,10 @@ namespace MWMechanics
             virtual void readRecord (ESM::ESMReader& reader, int32_t type);
 
             virtual void clear();
+
+            /// @param bias Can be used to add an additional aggression bias towards the target,
+            ///             making it more likely for the function to return true.
+            virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, int bias=0, bool ignoreDistance=false);
     };
 }
 

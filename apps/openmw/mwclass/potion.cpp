@@ -166,13 +166,8 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-        // remove used potion (assume it is present in inventory)
-        ptr.getContainerStore()->remove(ptr, 1, actor);
-
         boost::shared_ptr<MWWorld::Action> action (
-            new MWWorld::ActionApply (actor, ref->mBase->mId));
+            new MWWorld::ActionApply (ptr, ref->mBase->mId));
 
         action->setSound ("Drink");
 

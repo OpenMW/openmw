@@ -148,13 +148,17 @@ namespace MWMechanics
         return school;
     }
 
-    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell)
+    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+                               const ESM::Spell* spell, const MagicEffects* effects)
     {
         const ESM::MagicEffect *magicEffect =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
             effectId);
 
         const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        const MWMechanics::MagicEffects* magicEffects = &stats.getMagicEffects();
+        if (effects)
+            magicEffects = effects;
 
         float resisted = 0;
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
@@ -165,9 +169,9 @@ namespace MWMechanics
 
             float resistance = 0;
             if (resistanceEffect != -1)
-                resistance += stats.getMagicEffects().get(resistanceEffect).mMagnitude;
+                resistance += magicEffects->get(resistanceEffect).mMagnitude;
             if (weaknessEffect != -1)
-                resistance -= stats.getMagicEffects().get(weaknessEffect).mMagnitude;
+                resistance -= magicEffects->get(weaknessEffect).mMagnitude;
 
 
             float willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
@@ -204,9 +208,10 @@ namespace MWMechanics
         return resisted;
     }
 
-    float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell)
+    float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+                              const ESM::Spell* spell, const MagicEffects* effects)
     {
-        float resistance = getEffectResistance(effectId, actor, caster, spell);
+        float resistance = getEffectResistance(effectId, actor, caster, spell, effects);
         if (resistance >= 0)
             return 1 - resistance / 100.f;
         else
@@ -260,6 +265,13 @@ namespace MWMechanics
         std::vector<ActiveSpells::ActiveEffect> appliedLastingEffects;
         bool firstAppliedEffect = true;
         bool anyHarmfulEffect = false;
+
+        // HACK: cache target's magic effects here, and add any applied effects to it. Use the cached effects for determining resistance.
+        // This is required for Weakness effects in a spell to apply to any subsequent effects in the spell.
+        // Otherwise, they'd only apply after the whole spell was added.
+        MagicEffects targetEffects;
+        if (target.getClass().isActor())
+            targetEffects += target.getClass().getCreatureStats(target).getMagicEffects();
 
         bool castByPlayer = (!caster.isEmpty() && caster.getRefData().getHandle() == "player");
 
@@ -328,7 +340,7 @@ namespace MWMechanics
                 }
 
                 // Try reflecting
-                if (!reflected && magnitudeMult > 0 && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
+                if (!reflected && magnitudeMult > 0 && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
                     int reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).mMagnitude;
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
@@ -346,8 +358,7 @@ namespace MWMechanics
                 // Try resisting
                 if (magnitudeMult > 0 && target.getClass().isActor())
                 {
-
-                    magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell);
+                    magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
                     if (magnitudeMult == 0)
                     {
                         // Fully resisted, show message
@@ -374,6 +385,8 @@ namespace MWMechanics
                     effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
                     effect.mDuration = effectIt->mDuration;
                     effect.mMagnitude = magnitude;
+
+                    targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
 
                     appliedLastingEffects.push_back(effect);
 
@@ -452,14 +465,14 @@ namespace MWMechanics
         if (!appliedLastingEffects.empty())
         {
             int casterActorId = -1;
-            if (caster.getClass().isActor())
+            if (!caster.isEmpty() && caster.getClass().isActor())
                 casterActorId = caster.getClass().getCreatureStats(caster).getActorId();
             target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
                                                                                   mSourceName, casterActorId);
         }
 
         // Notify the target actor they've been hit
-        if (anyHarmfulEffect && target.getClass().isActor() && target != caster && caster.getClass().isActor())
+        if (anyHarmfulEffect && target.getClass().isActor() && target != caster && !caster.isEmpty() && caster.getClass().isActor())
             target.getClass().onHit(target, 0.f, true, MWWorld::Ptr(), caster, true);
     }
 
@@ -644,7 +657,9 @@ namespace MWMechanics
         getProjectileInfo(enchantment->mEffects, projectileModel, sound, speed);
         if (!projectileModel.empty())
             MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                                                               false, enchantment->mEffects, mCaster, mSourceName);
+                                                               false, enchantment->mEffects, mCaster, mSourceName,
+                                                                   // Not needed, enchantments can only be cast by actors
+                                                                   Ogre::Vector3(1,0,0));
 
         return true;
     }
@@ -729,8 +744,18 @@ namespace MWMechanics
         float speed = 0;
         getProjectileInfo(spell->mEffects, projectileModel, sound, speed);
         if (!projectileModel.empty())
+        {
+            Ogre::Vector3 fallbackDirection (0,1,0);
+            // Fall back to a "caster to target" direction if we have no other means of determining it
+            // (e.g. when cast by a non-actor)
+            if (!mTarget.isEmpty())
+                fallbackDirection =
+                   Ogre::Vector3(mTarget.getRefData().getPosition().pos)-
+                   Ogre::Vector3(mCaster.getRefData().getPosition().pos);
+
             MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
-                                                               false, spell->mEffects, mCaster, mSourceName);
+                       false, spell->mEffects, mCaster, mSourceName, fallbackDirection);
+        }
 
         return true;
     }

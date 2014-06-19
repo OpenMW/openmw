@@ -159,17 +159,21 @@ void FFmpeg_Decoder::open(const std::string &fname)
     mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
     if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
     {
-        if (mFormatCtx->pb != NULL)
+        // "Note that a user-supplied AVFormatContext will be freed on failure".
+        if (mFormatCtx)
         {
-          if (mFormatCtx->pb->buffer != NULL)
-          {
-            av_free(mFormatCtx->pb->buffer);
-            mFormatCtx->pb->buffer = NULL;
-          }
-          av_free(mFormatCtx->pb);
-          mFormatCtx->pb = NULL;
+            if (mFormatCtx->pb != NULL)
+            {
+                if (mFormatCtx->pb->buffer != NULL)
+                {
+                    av_free(mFormatCtx->pb->buffer);
+                    mFormatCtx->pb->buffer = NULL;
+                }
+                av_free(mFormatCtx->pb);
+                mFormatCtx->pb = NULL;
+            }
+            avformat_free_context(mFormatCtx);
         }
-        avformat_free_context(mFormatCtx);
         mFormatCtx = NULL;
         fail("Failed to allocate input stream");
     }

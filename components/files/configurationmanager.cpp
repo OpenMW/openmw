@@ -18,7 +18,7 @@ static const char* const openmwCfgFile = "openmw.cfg";
 
 const char* const mwToken = "?mw?";
 const char* const localToken = "?local?";
-const char* const userToken = "?user?";
+const char* const userDataToken = "?userdata?";
 const char* const globalToken = "?global?";
 
 ConfigurationManager::ConfigurationManager()
@@ -40,7 +40,7 @@ void ConfigurationManager::setupTokensMapping()
 {
     mTokensMapping.insert(std::make_pair(mwToken, &FixedPath<>::getInstallPath));
     mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalPath));
-    mTokensMapping.insert(std::make_pair(userToken, &FixedPath<>::getUserConfigPath));
+    mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::getUserDataPath));
     mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalDataPath));
 }
 

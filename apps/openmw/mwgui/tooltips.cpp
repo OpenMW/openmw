@@ -233,13 +233,9 @@ namespace MWGui
                     for (std::map<std::string, std::string>::iterator it = userStrings.begin();
                         it != userStrings.end(); ++it)
                     {
-                        if (it->first == "ToolTipType"
-                            || it->first == "ToolTipLayout"
-                            || it->first == "IsMarker")
-                            continue;
-
-
                         size_t underscorePos = it->first.find("_");
+                        if (underscorePos == std::string::npos)
+                            continue;
                         std::string propertyKey = it->first.substr(0, underscorePos);
                         std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
 

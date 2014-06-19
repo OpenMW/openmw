@@ -167,7 +167,6 @@ namespace Compiler
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
             extensions.registerInstruction ("choice", "/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
-            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting);
             extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
                 opcodeForceGreetingExplicit);
             extensions.registerInstruction("goodbye", "", opcodeGoodbye);
@@ -442,7 +441,7 @@ namespace Compiler
 
             extensions.registerFunction ("getrace", 'l', "c", opcodeGetRace,
                 opcodeGetRaceExplicit);
-            extensions.registerFunction ("getwerewolfkills", 'f', "", opcodeGetWerewolfKills);
+            extensions.registerFunction ("getwerewolfkills", 'l', "", opcodeGetWerewolfKills);
             extensions.registerFunction ("pcexpelled", 'l', "/S", opcodePcExpelled, opcodePcExpelledExplicit);
             extensions.registerInstruction ("pcexpell", "/S", opcodePcExpell, opcodePcExpellExplicit);
             extensions.registerInstruction ("pcclearexpelled", "/S", opcodePcClearExpelled, opcodePcClearExpelledExplicit);
@@ -450,6 +449,7 @@ namespace Compiler
             extensions.registerInstruction ("lowerrank", "", opcodeLowerRank, opcodeLowerRankExplicit);
 
             extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath, opcodeOnDeathExplicit);
+            extensions.registerFunction ("onmurder", 'l', "", opcodeOnMurder, opcodeOnMurderExplicit);
             extensions.registerFunction ("onknockout", 'l', "", opcodeOnKnockout, opcodeOnKnockoutExplicit);
 
             extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);

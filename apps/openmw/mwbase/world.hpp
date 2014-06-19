@@ -407,7 +407,7 @@ namespace MWBase
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all items in active cells owned by this Npc
 
-            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc) = 0;
+            virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
             virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
@@ -470,7 +470,7 @@ namespace MWBase
 
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
-                                           const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
+                                           const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed) = 0;
 

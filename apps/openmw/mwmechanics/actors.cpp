@@ -201,32 +201,28 @@ namespace MWMechanics
                 || (!actor1.getClass().canSwim(actor1) && MWBase::Environment::get().getWorld()->isSwimming(actor2)))) // creature can't swim to target
             return;
 
-        float fight;
+        bool aggressive;
 
         if (againstPlayer) 
-            fight = actor1.getClass().getCreatureStats(actor1).getAiSetting(CreatureStats::AI_Fight).getModified();
+            aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
         else
         {
-            fight = 0;
+            aggressive = false;
             // if one of actors is creature then we should make a decision to start combat or not
             // NOTE: function doesn't take into account combat between 2 creatures
             if (!actor1.getClass().isNpc())
             {
                 // if creature is hostile then it is necessarily to start combat
-                if (creatureStats.isHostile()) fight = 100;
-                else fight = creatureStats.getAiSetting(CreatureStats::AI_Fight).getModified();
+                if (creatureStats.isHostile()) aggressive = true;
+                else aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
 
-        ESM::Position actor1Pos = actor1.getRefData().getPosition();
-        ESM::Position actor2Pos = actor2.getRefData().getPosition();
-        float d = Ogre::Vector3(actor1Pos.pos).distance(Ogre::Vector3(actor2Pos.pos));
-
-        if(   (fight == 100 && d <= 5000)
-            || (fight >= 95 && d <= 3000)
-            || (fight >= 90 && d <= 2000)
-            || (fight >= 80 && d <= 1000))
+        if(aggressive)
         {
+            const ESM::Position& actor1Pos = actor2.getRefData().getPosition();
+            const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
+            float d = Ogre::Vector3(actor1Pos.pos).distance(Ogre::Vector3(actor2Pos.pos));
             if (againstPlayer || actor2.getClass().getCreatureStats(actor2).getAiSequence().canAddTarget(actor2Pos, d))
             {
                 bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
@@ -346,6 +342,8 @@ namespace MWMechanics
         CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
         const MagicEffects &effects = creatureStats.getMagicEffects();
 
+        bool wasDead = creatureStats.isDead();
+
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
@@ -457,6 +455,50 @@ namespace MWMechanics
 
         }
         creatureStats.setHealth(health);
+
+        if (!wasDead && creatureStats.isDead())
+        {
+            // The actor was killed by a magic effect. Figure out if the player was responsible for it.
+            const ActiveSpells& spells = creatureStats.getActiveSpells();
+            bool killedByPlayer = false;
+            bool murderedByPlayer = false;
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
+            {
+                const ActiveSpells::ActiveSpellParams& spell = it->second;
+                for (std::vector<ActiveSpells::ActiveEffect>::const_iterator effectIt = spell.mEffects.begin();
+                     effectIt != spell.mEffects.end(); ++effectIt)
+                {
+                    int effectId = effectIt->mEffectId;
+                    bool isDamageEffect = false;
+                    for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
+                    {
+                        if (damageEffects[i] == effectId)
+                            isDamageEffect = true;
+                    }
+
+
+                    if (effectId == ESM::MagicEffect::DamageHealth || effectId == ESM::MagicEffect::AbsorbHealth)
+                        isDamageEffect = true;
+
+                    MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
+                    if (isDamageEffect && caster == player)
+                    {
+                        killedByPlayer = true;
+                        // Simple check for who attacked first: if the player attacked first, a crimeId should be set
+                        // Doesn't handle possible edge case where no one reported the assault, but in such a case,
+                        // for bystanders it is not possible to tell who attacked first, anyway.
+                        if (ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).getCrimeId() != -1
+                                && ptr != player)
+                            murderedByPlayer = true;
+                    }
+                }
+            }
+            if (murderedByPlayer)
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, ptr, MWBase::MechanicsManager::OT_Murder);
+            if (killedByPlayer && player.getClass().getNpcStats(player).isWerewolf())
+                player.getClass().getNpcStats(player).addWerewolfKill();
+        }
 
         // TODO: dirty flag for magic effects to avoid some unnecessary work below?
 
@@ -793,7 +835,6 @@ namespace MWMechanics
 
             if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.isHostile())
             {
-                /// \todo Move me! I shouldn't be here...
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
                 float cutoff = float(esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt());
                 // Force dialogue on sight if bounty is greater than the cutoff
@@ -821,22 +862,12 @@ namespace MWMechanics
                     creatureStats.getAiSequence().stopCombat();
 
                     // Reset factors to attack
-                    // TODO: Not a complete list, disposition changes?
                     creatureStats.setHostile(false);
                     creatureStats.setAttacked(false);
                     creatureStats.setAlarmed(false);
 
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
-                }
-                else if (!creatureStats.isHostile() && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue)
-                {
-                    if (ptr.getClass().isClass(ptr, "Guard"))
-                        creatureStats.getAiSequence().stack(AiPursue(player), ptr);
-                    else
-                    {
-                        MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
-                    }
                 }
             }
         }
@@ -1089,6 +1120,9 @@ namespace MWMechanics
                 isBattleMusic = true;
             }
 
+            static float sneakTimer = 0.f; // times update of sneak icon
+            static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
+
             // if player is in sneak state see if anyone detects him
             if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak))
             {
@@ -1096,27 +1130,54 @@ namespace MWMechanics
                 const int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
                 bool detected = false;
 
-                for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+                static float fSneakUseDelay = esmStore.get<ESM::GameSetting>().find("fSneakUseDelay")->getFloat();
+
+                if (sneakTimer >= fSneakUseDelay)
+                    sneakTimer = 0.f;
+
+                if (sneakTimer == 0.f)
                 {
-                    if (iter->first == player)  // not the player
-                        continue;
+                    // Set when an NPC is within line of sight and distance, but is still unaware. Used for skill progress.
+                    bool avoidedNotice = false;
 
-                    // is the player in range and can they be detected
-                    if (   (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius)
-                        && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, iter->first)
-                        && MWBase::Environment::get().getWorld()->getLOS(player, iter->first))
+                    for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                     {
-                        detected = true;
-                        MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
-                        break;
-                    }
-                }
+                        if (iter->first == player)  // not the player
+                            continue;
 
-                if (!detected)
-                    MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
+                        // is the player in range and can they be detected
+                        if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius
+                            && MWBase::Environment::get().getWorld()->getLOS(player, iter->first))
+                        {
+                            if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, iter->first))
+                            {
+                                detected = true;
+                                avoidedNotice = false;
+                                MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+                                break;
+                            }
+                            else if (!detected)
+                                avoidedNotice = true;
+                        }
+                    }
+
+                    if (sneakSkillTimer >= fSneakUseDelay)
+                        sneakSkillTimer = 0.f;
+
+                    if (avoidedNotice && sneakSkillTimer == 0.f)
+                        player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
+
+                    if (!detected)
+                        MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
+                }
+                sneakTimer += duration;
+                sneakSkillTimer += duration;
             }
             else
+            {
+                sneakTimer = 0.f;
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+            }
         }
     }
     void Actors::restoreDynamicStats(bool sleep)

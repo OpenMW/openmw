@@ -470,6 +470,8 @@ namespace MWMechanics
 
             if(preferShortcut)
             {
+                if (canMoveByZ)
+                    mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
                 mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
                 mForceNoShortcut = false;
                 mShortcutFailPos.pos[0] = mShortcutFailPos.pos[1] = mShortcutFailPos.pos[2] = 0;
