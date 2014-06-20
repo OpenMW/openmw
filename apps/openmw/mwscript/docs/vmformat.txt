@@ -400,5 +400,6 @@ op 0x2000247: BetaComment
 op 0x2000248: BetaComment, explicit
 op 0x2000249: OnMurder
 op 0x200024a: OnMurder, explicit
+op 0x200024b: ToggleMenus
 
-opcodes 0x200024b-0x3ffffff unused
+opcodes 0x200024c-0x3ffffff unused

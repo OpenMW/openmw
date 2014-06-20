@@ -223,6 +223,9 @@ namespace MWGui
     virtual bool getSubtitlesEnabled();
     virtual void toggleHud();
 
+    /// Turn visibility of *all* GUI elements on or off (HUD and all windows, except the console)
+    virtual bool toggleGui();
+
     virtual void disallowMouse();
     virtual void allowMouse();
     virtual void notifyInputActionBound();
@@ -381,6 +384,7 @@ namespace MWGui
     bool mCrosshairEnabled;
     bool mSubtitlesEnabled;
     bool mHudEnabled;
+    bool mGuiEnabled;
     bool mCursorVisible;
 
     void setCursorVisible(bool visible);
