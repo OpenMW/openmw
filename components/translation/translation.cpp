@@ -32,9 +32,6 @@ namespace Translation
             boost::filesystem::ifstream stream (
                 dataFileCollections.getCollection (extension).getPath (fileName));
 
-            // Configure the stream to throw exception upon error
-            stream.exceptions ( boost::filesystem::ifstream::failbit | boost::filesystem::ifstream::badbit );
-
             if (!stream.is_open())
                 throw std::runtime_error ("failed to open translation file: " + fileName);
 
@@ -44,9 +41,8 @@ namespace Translation
 
     void Storage::loadDataFromStream(ContainerType& container, std::istream& stream)
     {
-        // NOTE: does not handle failbit/badbit. stream must be set up beforehand to throw in these cases.
         std::string line;
-        while (!stream.eof())
+        while (!stream.eof() && !stream.fail())
         {
             std::getline( stream, line );
             if (!line.empty() && *line.rbegin() == '\r')
