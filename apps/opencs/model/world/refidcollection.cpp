@@ -170,6 +170,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
     const RefIdColumn *content = &mColumns.back();
     (&mColumns.back())->addNestedColumnDisplay(CSMWorld::ColumnBase::Display_String);
     (&mColumns.back())->addNestedColumnDisplay(CSMWorld::ColumnBase::Display_Integer);
+    (&mColumns.back())->addNestedColumnId(Columns::ColumnId_InventoryItemId);
+    (&mColumns.back())->addNestedColumnId(Columns::ColumnId_ItemCount);
 
     CreatureColumns creatureColumns (actorsColumns);
 

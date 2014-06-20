@@ -1,4 +1,3 @@
-
 #include "columnbase.hpp"
 
 #include "columns.hpp"
@@ -33,12 +32,21 @@ bool CSMWorld::ColumnBase::canHaveNestedColumns() const
 
 std::string CSMWorld::ColumnBase::getNestedColumnTitle(int columnNumber) const
 {
-    return Columns::getName (mDisplayType, columnNumber);
+    assert (mCanNest);
+
+    return Columns::getName(static_cast<Columns::ColumnId>(mNestedColumnId[columnNumber]));
 }
 
 void CSMWorld::ColumnBase::addNestedColumnDisplay(CSMWorld::ColumnBase::Display displayDefinition)
 {
-    assert (canHaveNestedColumns());
-    
+    assert (mCanNest);
+
     mNestedDisplayType.push_back(displayDefinition);
+}
+
+void CSMWorld::ColumnBase::addNestedColumnId(int columnId)
+{
+    assert (mCanNest);
+
+    mNestedColumnId.push_back(columnId);
 }

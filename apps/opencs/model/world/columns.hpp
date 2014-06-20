@@ -171,6 +171,7 @@ namespace CSMWorld
             ColumnId_ReferenceableId = 156,
             ColumnId_ContainerContent = 157,
             ColumnId_ItemCount = 158,
+            ColumnId_InventoryItemId = 159,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
@@ -209,8 +210,6 @@ namespace CSMWorld
         };
 
         std::string getName (ColumnId column);
-
-        std::string getName (ColumnBase::Display displayType, int columnNumber);
 
         int getId (const std::string& name);
         ///< Will return -1 for an invalid name.

@@ -31,7 +31,7 @@ namespace CSMWorld
             Display_String,
             Display_LongString,
 
-            //CONCRETE TYPES STARTS HERE
+            //CONCRETE TYPES STARTS HERE (for drag and drop)
             Display_Skill,
             Display_Class,
             Display_Faction,
@@ -92,13 +92,15 @@ namespace CSMWorld
             Display_QuestStatusType,
             Display_Gender,
 
+            //Those are top level columns that nest other columns
             Display_NestedItemList
         };
 
         int mColumnId;
         int mFlags;
         Display mDisplayType;
-        std::vector<Display> mNestedDisplayType;
+        std::vector<Display> mNestedDisplayType; //used only for the columns that actually nest other columns
+        std::vector<int> mNestedColumnId; //used only for the columns that actually nest other columns
         const bool mCanNest;
 
         ColumnBase (int columnId, Display displayType, int flag, bool canNest = false);
@@ -113,8 +115,10 @@ namespace CSMWorld
         virtual std::string getTitle() const;
 
         std::string getNestedColumnTitle(int columnNumber) const;
-        
-        virtual void addNestedColumnDisplay(Display displayDefinition);
+
+        void addNestedColumnDisplay(Display displayDefinition);
+
+        void addNestedColumnId(int columnId);
 
         virtual int getId() const;
 

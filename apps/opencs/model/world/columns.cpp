@@ -174,6 +174,8 @@ namespace CSMWorld
             { ColumnId_PcRank, "PC Rank" },
             { ColumnId_Scope, "Scope" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
+            { ColumnId_InventoryItemId, "ID"},
+            { ColumnId_ItemCount, "Count"},
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -214,21 +216,6 @@ std::string CSMWorld::Columns::getName (ColumnId column)
             return sNames[i].mName;
 
     return "";
-}
-
-std::string CSMWorld::Columns::getName(CSMWorld::ColumnBase::Display displayType, int columnNumber)
-{
-//TODO, this is just temporary solution
-    switch (displayType)
-    {
-    case CSMWorld::ColumnBase::Display_NestedItemList:
-        if (columnNumber == 0)
-            return "ID";
-
-        if (columnNumber == 1)
-            return "Count";
-    }
-    return "Do yourself a favor and take a look at the columns.cpp";
 }
 
 int CSMWorld::Columns::getId (const std::string& name)
