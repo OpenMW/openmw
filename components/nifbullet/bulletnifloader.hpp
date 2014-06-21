@@ -108,6 +108,11 @@ private:
     bool mHasShape;
 };
 
+
+bool getBoundingBox(const std::string& nifFile, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation);
+
+bool findBoundingBox(const Nif::Node* node, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation);
+
 }
 
 #endif

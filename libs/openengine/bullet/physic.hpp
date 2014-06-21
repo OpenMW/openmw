@@ -76,6 +76,9 @@ namespace Physic
         RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
         virtual ~RigidBody();
         std::string mName;
+
+        // Hack: placeable objects (that can be picked up by the player) have different collision behaviour.
+        // This variable needs to be passed to BulletNifLoader.
         bool mPlaceable;
     };
 
@@ -93,13 +96,6 @@ namespace Physic
         void setPosition(const Ogre::Vector3 &pos);
 
         /**
-         * This adjusts the rotation of a PhysicActor
-         * If we have any problems with this (getting stuck in pmove) we should change it 
-         * from setting the visual orientation to setting the orientation of the rigid body directly.
-         */
-        void setRotation(const Ogre::Quaternion &quat);
-
-        /**
          * Sets the collisionMode for this actor. If disabled, the actor can fly and clip geometry.
          */
         void enableCollisionMode(bool collision);
@@ -111,25 +107,17 @@ namespace Physic
 
         bool getCollisionMode() const
         {
-            return mCollisionMode;
+            return mInternalCollisionMode;
         }
-
-
-        /**
-         * This returns the visual position of the PhysicActor (used to position a scenenode).
-         * Note - this is different from the position of the contained mBody.
-         */
-        Ogre::Vector3 getPosition();
-
-        /**
-         * Returns the visual orientation of the PhysicActor
-         */
-        Ogre::Quaternion getRotation();
 
         /**
          * Sets the scale of the PhysicActor
          */
         void setScale(float scale);
+
+        void setRotation (const Ogre::Quaternion& rotation);
+
+        const Ogre::Vector3& getPosition() const;
 
         /**
          * Returns the half extents for this PhysiActor
@@ -153,7 +141,7 @@ namespace Physic
 
         bool getOnGround() const
         {
-            return mCollisionMode && mOnGround;
+            return mInternalCollisionMode && mOnGround;
         }
 
         btCollisionObject *getCollisionBody() const
@@ -165,17 +153,21 @@ namespace Physic
         void disableCollisionBody();
         void enableCollisionBody();
 
-        OEngine::Physic::RigidBody* mBody;
-        OEngine::Physic::RigidBody* mRaycastingBody;
+        boost::shared_ptr<btCollisionShape> mShape;
 
-        Ogre::Vector3 mBoxScaledTranslation;
-        Ogre::Quaternion mBoxRotation;
-        Ogre::Quaternion mBoxRotationInverse;
+        OEngine::Physic::RigidBody* mBody;
+
+        Ogre::Quaternion mMeshOrientation;
+        Ogre::Vector3 mMeshTranslation;
+        Ogre::Vector3 mHalfExtents;
+
+        float mScale;
+        Ogre::Vector3 mPosition;
 
         Ogre::Vector3 mForce;
         bool mOnGround;
-        bool mCollisionMode;
-        bool mCollisionBody;
+        bool mInternalCollisionMode;
+        bool mExternalCollisionMode;
 
         std::string mMesh;
         std::string mName;
@@ -242,7 +234,7 @@ namespace Physic
         /**
          * Add a RigidBody to the simulation
          */
-        void addRigidBody(RigidBody* body, bool addToMap = true, RigidBody* raycastingBody = NULL,bool actor = false);
+        void addRigidBody(RigidBody* body, bool addToMap = true, RigidBody* raycastingBody = NULL);
 
         /**
          * Remove a RigidBody from the simulation. It does not delete it, and does not remove it from the RigidBodyMap.
@@ -335,7 +327,7 @@ namespace Physic
         btDefaultCollisionConfiguration* collisionConfiguration;
         btSequentialImpulseConstraintSolver* solver;
         btCollisionDispatcher* dispatcher;
-        btDiscreteDynamicsWorld* dynamicsWorld;
+        btDiscreteDynamicsWorld* mDynamicsWorld;
 
         //the NIF file loader.
         BulletShapeLoader* mShapeLoader;

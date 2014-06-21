@@ -1847,7 +1847,7 @@ namespace MWWorld
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             OEngine::Physic::ActorTracer tracer;
             // a small distance above collision object is considered "on ground"
-            tracer.findGround(physactor->getCollisionBody(),
+            tracer.findGround(physactor,
                               pos,
                               pos - Ogre::Vector3(0, 0, 1.5f), // trace a small amount down
                               mPhysEngine);

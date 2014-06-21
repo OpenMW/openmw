@@ -304,4 +304,53 @@ void ManualBulletShapeLoader::load(const std::string &name,const std::string &gr
     OEngine::Physic::BulletShapeManager::getSingleton().create(name,group,true,this);
 }
 
+bool findBoundingBox (const Nif::Node* node, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation)
+{
+    if(node->hasBounds)
+    {
+        if (!(node->flags & Nif::NiNode::Flag_Hidden))
+        {
+            translation = node->boundPos;
+            orientation = node->boundRot;
+            halfExtents = node->boundXYZ;
+            return true;
+        }
+    }
+
+    const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
+    if(ninode)
+    {
+        const Nif::NodeList &list = ninode->children;
+        for(size_t i = 0;i < list.length();i++)
+        {
+            if(!list[i].empty())
+                if (findBoundingBox(list[i].getPtr(), halfExtents, translation, orientation))
+                    return true;
+        }
+    }
+    return false;
+}
+
+bool getBoundingBox(const std::string& nifFile, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation)
+{
+    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (nifFile));
+    Nif::NIFFile & nif = *pnif.get ();
+
+    if (nif.numRoots() < 1)
+    {
+        return false;
+    }
+
+    Nif::Record *r = nif.getRoot(0);
+    assert(r != NULL);
+
+    Nif::Node *node = dynamic_cast<Nif::Node*>(r);
+    if (node == NULL)
+    {
+        return false;
+    }
+
+    return findBoundingBox(node, halfExtents, translation, orientation);
+}
+
 } // namespace NifBullet

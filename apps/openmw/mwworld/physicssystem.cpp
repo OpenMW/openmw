@@ -175,7 +175,7 @@ namespace MWWorld
 
             const int maxHeight = 200.f;
             OEngine::Physic::ActorTracer tracer;
-            tracer.findGround(physicActor->getCollisionBody(), position, position-Ogre::Vector3(0,0,maxHeight), engine);
+            tracer.findGround(physicActor, position, position-Ogre::Vector3(0,0,maxHeight), engine);
             if(tracer.mFraction >= 1.0f)
             {
                 physicActor->setOnGround(false);
@@ -607,9 +607,10 @@ namespace MWWorld
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         const std::string &handle = node->getName();
         const Ogre::Quaternion &rotation = node->getOrientation();
+
+        // TODO: map to MWWorld::Ptr for faster access
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
-            //Needs to be changed
             act->setRotation(rotation);
         }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
@@ -740,8 +741,9 @@ namespace MWWorld
                 btCollisionObject object;
                 object.setCollisionShape(&planeShape);
 
+                // TODO: this seems to have a slight performance impact
                 if (waterCollision)
-                    mEngine->dynamicsWorld->addCollisionObject(&object);
+                    mEngine->mDynamicsWorld->addCollisionObject(&object);
 
                 // 100 points of slowfall reduce gravity by 90% (this is just a guess)
                 float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).mMagnitude / 100.f) * 0.9f), 0.9f);
@@ -751,7 +753,7 @@ namespace MWWorld
                                                             waterlevel, slowFall, mEngine);
 
                 if (waterCollision)
-                    mEngine->dynamicsWorld->removeCollisionObject(&object);
+                    mEngine->mDynamicsWorld->removeCollisionObject(&object);
 
                 float heightDiff = newpos.z - oldHeight;
 
