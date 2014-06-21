@@ -29,7 +29,14 @@ namespace Physic
             mMeshOrientation = Ogre::Quaternion::IDENTITY;
         }
 
-        mShape.reset(new btBoxShape(BtOgre::Convert::toBullet(mHalfExtents)));
+        // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
+        if (std::abs(mHalfExtents.x-mHalfExtents.y)<mHalfExtents.x*0.05 && mHalfExtents.z >= mHalfExtents.x)
+        {
+            mShape.reset(new btCapsuleShapeZ(mHalfExtents.x, mHalfExtents.z*2.f - mHalfExtents.x*2.f));
+        }
+        else
+            mShape.reset(new btBoxShape(BtOgre::Convert::toBullet(mHalfExtents)));
+
         mShape->setLocalScaling(btVector3(scale,scale,scale));
 
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
@@ -102,7 +109,7 @@ namespace Physic
 
     Ogre::Vector3 PhysicActor::getHalfExtents() const
     {
-        return mHalfExtents;
+        return mHalfExtents * mScale;
     }
 
     void PhysicActor::setInertialForce(const Ogre::Vector3 &force)

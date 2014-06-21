@@ -107,7 +107,7 @@ void ActorTracer::findGround(const OEngine::Physic::PhysicActor* actor, const Og
     btVector3 halfExtents(actor->getHalfExtents().x, actor->getHalfExtents().y, actor->getHalfExtents().z);
 
     halfExtents[2] = 1.0f;
-    btBoxShape base(halfExtents);
+    btCylinderShapeZ base(halfExtents);
 
     enginePass->mDynamicsWorld->convexSweepTest(&base, from, to, newTraceCallback);
     if(newTraceCallback.hasHit())
