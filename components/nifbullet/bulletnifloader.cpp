@@ -137,12 +137,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 
     handleNode(mesh2, node,0,true,true,false);
 
-    if(mBoundingBox != NULL)
-    {
-       mShape->mRaycastingShape = mBoundingBox;
-       delete mesh2;
-    }
-    else if (mHasShape)
+    if (mHasShape)
     {
         mShape->mRaycastingShape = new TriangleMeshShape(mesh2,true);
     }
@@ -227,10 +222,12 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
     if ( (isCollisionNode || (!mShape->mHasCollisionNode && !raycasting))
             && (!isMarker || (mShape->mHasCollisionNode && !raycasting)))
     {
+        // NOTE: a trishape with hasBounds=true, but no BBoxCollision flag should NOT go through handleNiTriShape!
+        // It must be ignored completely.
+        // (occurs in tr_ex_imp_wall_arch_04.nif)
         if(node->hasBounds)
         {
-            // Checking for BBoxCollision flag causes issues with some actors :/
-            if (!(node->flags & Nif::NiNode::Flag_Hidden))
+            if (flags & Nif::NiNode::Flag_BBoxCollision && !raycasting)
             {
                 mShape->mBoxTranslation = node->boundPos;
                 mShape->mBoxRotation = node->boundRot;
