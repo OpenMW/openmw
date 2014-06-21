@@ -690,8 +690,11 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getNpcStats (ptr).setBaseDisposition
-                        (ptr.getClass().getNpcStats (ptr).getBaseDisposition() + value);
+                    if (ptr.getClass().isNpc())
+                        ptr.getClass().getNpcStats (ptr).setBaseDisposition
+                            (ptr.getClass().getNpcStats (ptr).getBaseDisposition() + value);
+
+                    // else: must not throw exception (used by an Almalexia dialogue script)
                 }
         };
 
@@ -707,7 +710,8 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getNpcStats (ptr).setBaseDisposition (value);
+                    if (ptr.getClass().isNpc())
+                        ptr.getClass().getNpcStats (ptr).setBaseDisposition (value);
                 }
         };
 
@@ -720,7 +724,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
+                    if (!ptr.getClass().isNpc())
+                        runtime.push(0);
+                    else
+                        runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
                 }
         };
 
