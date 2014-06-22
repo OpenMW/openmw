@@ -1101,7 +1101,7 @@ namespace MWMechanics
                     if (iter->first.getClass().isClass(iter->first, "Guard"))
                     {
                         MWMechanics::AiSequence& aiSeq = iter->first.getClass().getCreatureStats(iter->first).getAiSequence();
-                        if (aiSeq.getActivePackage()->getTypeId() == MWMechanics::AiPackage::TypeIdPursue)
+                        if (aiSeq.getTypeId() == MWMechanics::AiPackage::TypeIdPursue)
                         {
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);
