@@ -82,10 +82,7 @@ namespace Physic
         bool mPlaceable;
     };
 
-    /**
-     * A physic actor uses a rigid body based on box shapes.
-     * Pmove is used to move the physic actor around the dynamic world.
-     */
+
     class PhysicActor
     {
     public:
