@@ -15,8 +15,6 @@ namespace Physic
 */
 class BulletShape : public Ogre::Resource
 {
-    Ogre::String mString;
-
 protected:
     void loadImpl();
     void unloadImpl();
