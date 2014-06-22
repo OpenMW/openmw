@@ -299,8 +299,10 @@ int main(int argc, char**argv)
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
     std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
 
+#if !(defined(_WIN32) && defined(_DEBUG))
     boost::iostreams::stream_buffer<Tee> coutsb;
     boost::iostreams::stream_buffer<Tee> cerrsb;
+#endif
 
     std::ostream oldcout(cout_rdbuf);
     std::ostream oldcerr(cerr_rdbuf);
