@@ -32,7 +32,8 @@ namespace Physic
         // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
         if (std::abs(mHalfExtents.x-mHalfExtents.y)<mHalfExtents.x*0.05 && mHalfExtents.z >= mHalfExtents.x)
         {
-            mShape.reset(new btCapsuleShapeZ(mHalfExtents.x, mHalfExtents.z*2.f - mHalfExtents.x*2.f));
+            // Could also be btCapsuleShapeZ, but the movement solver seems to have issues with it (jumping on slopes doesn't work)
+            mShape.reset(new btCylinderShapeZ(BtOgre::Convert::toBullet(mHalfExtents)));
         }
         else
             mShape.reset(new btBoxShape(BtOgre::Convert::toBullet(mHalfExtents)));
