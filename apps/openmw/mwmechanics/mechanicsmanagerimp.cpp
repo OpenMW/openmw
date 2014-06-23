@@ -1112,7 +1112,7 @@ namespace MWMechanics
         }
 
         // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
-        if (ptr.getClass().isNpc())
+        if (ptr.getClass().isNpc() && !ptr.getClass().getCreatureStats(ptr).isDead())
             MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
