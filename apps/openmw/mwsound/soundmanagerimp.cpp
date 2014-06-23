@@ -385,7 +385,7 @@ namespace MWSound
             sound = mOutput->playSound3D(file, initialPos, volume, basevol, pitch, min, max, mode|type, offset);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
-        catch(std::exception &e)
+        catch(std::exception &)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
