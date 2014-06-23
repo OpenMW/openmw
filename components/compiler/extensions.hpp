@@ -20,7 +20,8 @@ namespace Compiler
         l - Integer <BR>
         s - Short <BR>
         S - String, case preserved <BR>
-        x - Optional, ignored argument
+        x - Optional, ignored string argument
+        X - Optional, ignored integer argument
     **/
     typedef std::string ScriptArgs;
 
