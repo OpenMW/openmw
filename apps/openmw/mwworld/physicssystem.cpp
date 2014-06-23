@@ -12,6 +12,7 @@
 
 #include <openengine/bullet/trace.h>
 #include <openengine/bullet/physic.hpp>
+#include <openengine/bullet/BtOgreExtras.h>
 #include <openengine/ogre/renderer.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -26,10 +27,49 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../apps/openmw/mwrender/animation.hpp"
+#include "../apps/openmw/mwbase/world.hpp"
+#include "../apps/openmw/mwbase/environment.hpp"
+
 #include "ptr.hpp"
 #include "class.hpp"
 
 using namespace Ogre;
+
+namespace
+{
+
+void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map)
+{
+    for (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>::iterator it = map.begin();
+         it != map.end(); ++it)
+    {
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(it->first->mName);
+        MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+
+        OEngine::Physic::AnimatedShapeInstance& instance = it->second;
+
+        std::map<std::string, int>& shapes = instance.mAnimatedShapes;
+        for (std::map<std::string, int>::iterator shapeIt = shapes.begin();
+             shapeIt != shapes.end(); ++shapeIt)
+        {
+            Ogre::Node* bone = animation->getNode(shapeIt->first);
+
+            btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
+
+            btTransform trans;
+            trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()));
+            trans.setRotation(BtOgre::Convert::toBullet(bone->_getDerivedOrientation()));
+
+            compound->getChildShape(shapeIt->second)->setLocalScaling(BtOgre::Convert::toBullet(bone->_getDerivedScale()));
+            compound->updateChildTransform(shapeIt->second, trans);
+        }
+    }
+}
+
+}
+
+
 namespace MWWorld
 {
 
@@ -564,11 +604,10 @@ namespace MWWorld
         std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
-        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(
+        mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
-        OEngine::Physic::RigidBody* raycastingBody = mEngine->createAndAdjustRigidBody(
+        mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
-        mEngine->addRigidBody(body, true, raycastingBody);
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr)
@@ -769,5 +808,13 @@ namespace MWWorld
         mMovementQueue.clear();
 
         return mMovementResults;
+    }
+
+    void PhysicsSystem::stepSimulation(float dt)
+    {
+        animateCollisionShapes(mEngine->mAnimatedShapes);
+        animateCollisionShapes(mEngine->mAnimatedRaycastingShapes);
+
+        mEngine->stepSimulation(dt);
     }
 }

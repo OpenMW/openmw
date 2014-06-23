@@ -117,7 +117,7 @@ namespace Physic
         const Ogre::Vector3& getPosition() const;
 
         /**
-         * Returns the half extents for this PhysiActor
+         * Returns the (scaled) half extents
          */
         Ogre::Vector3 getHalfExtents() const;
 
@@ -178,6 +178,14 @@ namespace Physic
         RigidBody* mBody;
     };
 
+    struct AnimatedShapeInstance
+    {
+        btCollisionShape* mCompound;
+
+        // Maps bone name to child index in the compound shape
+        std::map<std::string, int> mAnimatedShapes;
+    };
+
     /**
      * The PhysicEngine class contain everything which is needed for Physic.
      * It's needed that Ogre Resources are set up before the PhysicEngine is created.
@@ -227,11 +235,6 @@ namespace Physic
          * Remove a HeightField from the simulation
          */
         void removeHeightField(int x, int y);
-
-        /**
-         * Add a RigidBody to the simulation
-         */
-        void addRigidBody(RigidBody* body, bool addToMap = true, RigidBody* raycastingBody = NULL);
 
         /**
          * Remove a RigidBody from the simulation. It does not delete it, and does not remove it from the RigidBodyMap.
@@ -335,7 +338,13 @@ namespace Physic
         typedef std::map<std::string,RigidBody*> RigidBodyContainer;
         RigidBodyContainer mCollisionObjectMap;
 
+        // Compound shapes that must be animated each frame based on bone positions
+        // the index refers to an element in mCollisionObjectMap
+        std::map<RigidBody*, AnimatedShapeInstance > mAnimatedShapes;
+
         RigidBodyContainer mRaycastingObjectMap;
+
+        std::map<RigidBody*, AnimatedShapeInstance > mAnimatedRaycastingShapes;
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
         PhysicActorContainer mActorMap;

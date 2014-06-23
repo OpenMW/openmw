@@ -11,6 +11,59 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
+namespace
+{
+
+// Create a copy of the given collision shape (responsibility of user to delete the returned shape).
+btCollisionShape *duplicateCollisionShape(btCollisionShape *shape)
+{
+    if(shape->isCompound())
+    {
+        btCompoundShape *comp = static_cast<btCompoundShape*>(shape);
+        btCompoundShape *newShape = new btCompoundShape;
+
+        int numShapes = comp->getNumChildShapes();
+        for(int i = 0;i < numShapes;i++)
+        {
+            btCollisionShape *child = duplicateCollisionShape(comp->getChildShape(i));
+            btTransform trans = comp->getChildTransform(i);
+            newShape->addChildShape(trans, child);
+        }
+
+        return newShape;
+    }
+
+    if(btBvhTriangleMeshShape *trishape = dynamic_cast<btBvhTriangleMeshShape*>(shape))
+    {
+        btTriangleMesh* oldMesh = dynamic_cast<btTriangleMesh*>(trishape->getMeshInterface());
+        btTriangleMesh* newMesh = new btTriangleMesh(*oldMesh);
+        NifBullet::TriangleMeshShape *newShape = new NifBullet::TriangleMeshShape(newMesh, true);
+
+        return newShape;
+    }
+
+    throw std::logic_error(std::string("Unhandled Bullet shape duplication: ")+shape->getName());
+}
+
+void deleteShape(btCollisionShape* shape)
+{
+    if(shape!=NULL)
+    {
+        if(shape->isCompound())
+        {
+            btCompoundShape* ms = static_cast<btCompoundShape*>(shape);
+            int a = ms->getNumChildShapes();
+            for(int i=0; i <a;i++)
+            {
+                deleteShape(ms->getChildShape(i));
+            }
+        }
+        delete shape;
+    }
+}
+
+}
+
 namespace OEngine {
 namespace Physic
 {
@@ -228,6 +281,11 @@ namespace Physic
 
     PhysicEngine::~PhysicEngine()
     {
+        for (std::map<RigidBody*, AnimatedShapeInstance>::iterator it = mAnimatedShapes.begin(); it != mAnimatedShapes.end(); ++it)
+            deleteShape(it->second.mCompound);
+        for (std::map<RigidBody*, AnimatedShapeInstance>::iterator it = mAnimatedRaycastingShapes.begin(); it != mAnimatedRaycastingShapes.end(); ++it)
+            deleteShape(it->second.mCompound);
+
         HeightFieldContainer::iterator hf_it = mHeightFieldMap.begin();
         for (; hf_it != mHeightFieldMap.end(); ++hf_it)
         {
@@ -386,16 +444,37 @@ namespace Physic
         if (!shape->mRaycastingShape && raycasting)
             return NULL;
 
-        if (!raycasting)
-            shape->mCollisionShape->setLocalScaling( btVector3(scale,scale,scale));
-        else
-            shape->mRaycastingShape->setLocalScaling( btVector3(scale,scale,scale));
+        btCollisionShape* collisionShape = raycasting ? shape->mRaycastingShape : shape->mCollisionShape;
+
+        // If this is an animated compound shape, we must duplicate it so we can animate
+        // multiple instances independently.
+        if (!raycasting && !shape->mAnimatedShapes.empty())
+            collisionShape = duplicateCollisionShape(collisionShape);
+        if (raycasting && !shape->mAnimatedRaycastingShapes.empty())
+            collisionShape = duplicateCollisionShape(collisionShape);
+
+        collisionShape->setLocalScaling( btVector3(scale,scale,scale));
 
         //create the real body
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
-                (0,0, raycasting ? shape->mRaycastingShape : shape->mCollisionShape);
+                (0,0, collisionShape);
         RigidBody* body = new RigidBody(CI,name);
         body->mPlaceable = placeable;
+
+        if (!raycasting && !shape->mAnimatedShapes.empty())
+        {
+            AnimatedShapeInstance instance;
+            instance.mAnimatedShapes = shape->mAnimatedShapes;
+            instance.mCompound = collisionShape;
+            mAnimatedShapes[body] = instance;
+        }
+        if (raycasting && !shape->mAnimatedRaycastingShapes.empty())
+        {
+            AnimatedShapeInstance instance;
+            instance.mAnimatedShapes = shape->mAnimatedRaycastingShapes;
+            instance.mCompound = collisionShape;
+            mAnimatedRaycastingShapes[body] = instance;
+        }
 
         if(scaledBoxTranslation != 0)
             *scaledBoxTranslation = shape->mBoxTranslation * scale;
@@ -404,33 +483,20 @@ namespace Physic
 
         adjustRigidBody(body, position, rotation, shape->mBoxTranslation * scale, shape->mBoxRotation);
 
-        return body;
-
-    }
-
-    void PhysicEngine::addRigidBody(RigidBody* body, bool addToMap, RigidBody* raycastingBody)
-    {
-        if(!body && !raycastingBody)
-            return; // nothing to do
-
-        const std::string& name = (body ? body->mName : raycastingBody->mName);
-
-        if (body){
+        if (!raycasting)
+        {
+            assert (mCollisionObjectMap.find(name) == mCollisionObjectMap.end());
+            mCollisionObjectMap[name] = body;
             mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
         }
-
-        if (raycastingBody)
-            mDynamicsWorld->addRigidBody(raycastingBody,CollisionType_Raycasting,CollisionType_Raycasting);
-
-        if(addToMap){
-            removeRigidBody(name);
-            deleteRigidBody(name);
-
-            if (body)
-                mCollisionObjectMap[name] = body;
-            if (raycastingBody)
-                mRaycastingObjectMap[name] = raycastingBody;
+        else
+        {
+            assert (mRaycastingObjectMap.find(name) == mRaycastingObjectMap.end());
+            mRaycastingObjectMap[name] = body;
+            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting);
         }
+
+        return body;
     }
 
     void PhysicEngine::removeRigidBody(const std::string &name)
@@ -464,6 +530,10 @@ namespace Physic
 
             if(body != NULL)
             {
+                if (mAnimatedShapes.find(body) != mAnimatedShapes.end())
+                    deleteShape(mAnimatedShapes[body].mCompound);
+                mAnimatedShapes.erase(body);
+
                 delete body;
             }
             mCollisionObjectMap.erase(it);
@@ -475,6 +545,10 @@ namespace Physic
 
             if(body != NULL)
             {
+                if (mAnimatedRaycastingShapes.find(body) != mAnimatedRaycastingShapes.end())
+                    deleteShape(mAnimatedRaycastingShapes[body].mCompound);
+                mAnimatedRaycastingShapes.erase(body);
+
                 delete body;
             }
             mRaycastingObjectMap.erase(it);
@@ -609,7 +683,6 @@ namespace Physic
         return std::make_pair(callback.mObject, callback.mContactPoint);
     }
 
-
     void PhysicEngine::stepSimulation(double deltaT)
     {
         // This seems to be needed for character controller objects
@@ -629,8 +702,6 @@ namespace Physic
 
         PhysicActor* newActor = new PhysicActor(name, mesh, this, position, rotation, scale);
 
-
-        //dynamicsWorld->addAction( newActor->mCharacter );
         mActorMap[name] = newActor;
     }
 
@@ -642,7 +713,6 @@ namespace Physic
             PhysicActor* act = it->second;
             if(act != NULL)
             {
-
                 delete act;
             }
             mActorMap.erase(it);

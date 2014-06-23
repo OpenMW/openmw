@@ -30,6 +30,14 @@ public:
 
     virtual ~BulletShape();
 
+    // Stores animated collision shapes. If any collision nodes in the NIF are animated, then mCollisionShape
+    // will be a btCompoundShape (which consists of one or more child shapes).
+    // In this map, for each animated collision shape,
+    // we store the bone name mapped to the child index of the shape in the btCompoundShape.
+    std::map<std::string, int> mAnimatedShapes;
+
+    std::map<std::string, int> mAnimatedRaycastingShapes;
+
     btCollisionShape* mCollisionShape;
     btCollisionShape* mRaycastingShape;
 

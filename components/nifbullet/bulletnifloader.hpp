@@ -28,6 +28,7 @@
 #include <string>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <btBulletDynamicsCommon.h>
 #include <openengine/bullet/BulletShapeLoader.h>
 
@@ -44,6 +45,22 @@ namespace Nif
 namespace NifBullet
 {
 
+// Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
+struct TriangleMeshShape : public btBvhTriangleMeshShape
+{
+    TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
+        : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
+    {
+    }
+
+    virtual ~TriangleMeshShape()
+    {
+        delete getTriangleInfoMap();
+        delete m_meshInterface;
+    }
+};
+
+
 /**
 *Load bulletShape from NIF files.
 */
@@ -52,8 +69,9 @@ class ManualBulletShapeLoader : public OEngine::Physic::BulletShapeLoader
 public:
     ManualBulletShapeLoader()
       : mShape(NULL)
+      , mStaticMesh(NULL)
+      , mCompoundShape(NULL)
       , mBoundingBox(NULL)
-      , mHasShape(false)
     {
     }
 
@@ -88,7 +106,8 @@ private:
     /**
     *Parse a node.
     */
-    void handleNode(btTriangleMesh* mesh, Nif::Node const *node, int flags, bool isCollisionNode, bool raycasting, bool isMarker);
+    void handleNode(Nif::Node const *node, int flags, bool isCollisionNode,
+                    bool raycasting, bool isMarker, bool isAnimated=false);
 
     /**
     *Helper function
@@ -98,14 +117,17 @@ private:
     /**
     *convert a NiTriShape to a bullet trishape.
     */
-    void handleNiTriShape(btTriangleMesh* mesh, const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool raycasting);
+    void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool raycasting, bool isAnimated);
 
     std::string mResourceName;
 
     OEngine::Physic::BulletShape* mShape;//current shape
-    btBoxShape *mBoundingBox;
 
-    bool mHasShape;
+    btCompoundShape* mCompoundShape;
+
+    btTriangleMesh* mStaticMesh;
+
+    btBoxShape *mBoundingBox;
 };
 
 
