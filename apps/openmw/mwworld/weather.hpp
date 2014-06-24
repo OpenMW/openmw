@@ -58,6 +58,8 @@ namespace MWWorld
         float mNightFade; // fading factor for night skybox
 
         std::string mAmbientLoopSoundID;
+
+        std::string mParticleEffect;
     };
 
 
@@ -119,7 +121,10 @@ namespace MWWorld
         // Rain sound effect
         std::string mRainLoopSoundID;
 
-        /// \todo disease chance
+        std::string mParticleEffect;
+
+        // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
+        // is broken in the vanilla game and was disabled.
     };
 
     ///
