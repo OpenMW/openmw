@@ -55,6 +55,43 @@ std::string getBestAttack (const ESM::Weapon* weapon)
         return "thrust";
 }
 
+// Converts a movement Run state to its equivalent Walk state.
+MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    CharacterState ret = state;
+    switch (state)
+    {
+        case CharState_RunForward:
+            ret = CharState_WalkForward;
+            break;
+        case CharState_RunBack:
+            ret = CharState_WalkBack;
+            break;
+        case CharState_RunLeft:
+            ret = CharState_WalkLeft;
+            break;
+        case CharState_RunRight:
+            ret = CharState_WalkRight;
+            break;
+        case CharState_SwimRunForward:
+            ret = CharState_SwimWalkForward;
+            break;
+        case CharState_SwimRunBack:
+            ret = CharState_SwimWalkBack;
+            break;
+        case CharState_SwimRunLeft:
+            ret = CharState_SwimWalkLeft;
+            break;
+        case CharState_SwimRunRight:
+            ret = CharState_SwimWalkRight;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
 }
 
 namespace MWMechanics
@@ -323,7 +360,18 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
             bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
-            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
+            // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
+            // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
+            std::string anim = mCurrentMovement;
+            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name()
+                    && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
+            {
+                CharacterState walkState = runStateToWalkState(mMovementState);
+                const StateInfo *stateinfo = std::find_if(sMovementList, sMovementListEnd, FindCharState(walkState));
+                anim = stateinfo->groupname;
+            }
+
+            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
             {
                 mMovementAnimVelocity = vel;
                 speedmult = mMovementSpeed / vel;
