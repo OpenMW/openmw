@@ -209,7 +209,16 @@ void CSMWorld::DeleteNestedCommand::redo()
 
 void CSMWorld::DeleteNestedCommand::undo()
 {
-    //TODO
+    const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
+
+    mModel.addNestedRow(parentIndex, mNestedRow);
+    
+    for (int i = 0; i < mModel.columnCount(parentIndex); ++i)
+    {
+        const QModelIndex& current = mModel.index(mNestedRow, i, parentIndex);
+
+        mModel.setData(current, mOld[i]);
+    }
 }
 
 CSMWorld::AddNestedCommand::AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
