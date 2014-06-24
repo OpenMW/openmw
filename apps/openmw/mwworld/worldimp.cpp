@@ -1471,8 +1471,13 @@ namespace MWWorld
         std::vector < std::pair < float, std::string > >::iterator it = results.begin();
         while (it != results.end())
         {
-            if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
-            || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
+            if ((*it).second.find("HeightField") != std::string::npos) // Don't attempt to getPtrViaHandle on terrain
+            {
+                ++it;
+                continue;
+            }
+
+            if (getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
             {
                 it = results.erase(it);
             }
@@ -1480,7 +1485,8 @@ namespace MWWorld
                 ++it;
         }
 
-        if (results.empty())
+        if (results.empty()
+                || results.front().second.find("HeightField") != std::string::npos) // Blocked by terrain
         {
             mFacedHandle = "";
             mFacedDistance = FLT_MAX;

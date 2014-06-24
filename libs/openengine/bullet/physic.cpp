@@ -805,7 +805,7 @@ namespace Physic
     {
         MyRayResultCallback resultCallback1;
         resultCallback1.m_collisionFilterGroup = 0xff;
-        resultCallback1.m_collisionFilterMask = CollisionType_Raycasting|CollisionType_Actor;
+        resultCallback1.m_collisionFilterMask = CollisionType_Raycasting|CollisionType_Actor|CollisionType_HeightMap;
         mDynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;
 
