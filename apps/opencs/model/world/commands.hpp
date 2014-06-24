@@ -10,6 +10,7 @@
 #include <QVariant>
 #include <QUndoCommand>
 #include <QModelIndex>
+#include <QVariant>
 
 #include "universalid.hpp"
 
@@ -49,7 +50,7 @@ namespace CSMWorld
 
         public:
 
-            CloneCommand (IdTable& model, const std::string& idOrigin, 
+            CloneCommand (IdTable& model, const std::string& idOrigin,
                           const std::string& IdDestination,
                           const UniversalId::Type type,
                           QUndoCommand* parent = 0);
@@ -130,6 +131,27 @@ namespace CSMWorld
         public:
 
             ReorderRowsCommand (IdTable& model, int baseIndex, const std::vector<int>& newOrder);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+    class DeleteNestedCommand : public QUndoCommand
+    {
+            IdTable& mModel;
+
+            std::string mId;
+
+            std::vector<QVariant> mOld;
+
+            int mParentColumn;
+
+            int mNestedRow;
+
+        public:
+
+            DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent);
 
             virtual void redo();
 

@@ -1,4 +1,3 @@
-
 #include "commands.hpp"
 
 #include <QAbstractItemModel>
@@ -171,4 +170,44 @@ void CSMWorld::CloneCommand::redo()
 void CSMWorld::CloneCommand::undo()
 {
     mModel.removeRow (mModel.getModelIndex (mIdDestination, 0).row());
+}
+
+CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
+    : mId(id),
+      mModel(model),
+      mParentColumn(parentColumn),
+      QUndoCommand(parent),
+      mNestedRow(nestedRow)
+{
+    setText (("Delete nested row in " + mId).c_str());
+
+    const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
+
+    const int columnsCount = mModel.columnCount(parentIndex);
+
+    for (int i = 0; i < columnsCount; ++i)
+    {
+        const QModelIndex& childIndex = mModel.index(nestedRow, i, parentIndex);
+
+        QVariant data = childIndex.data();
+        if (!data.isValid())
+        {
+            data = childIndex.data(Qt::DisplayRole);
+        }
+
+        mOld.push_back(data);
+    }
+}
+
+void CSMWorld::DeleteNestedCommand::redo()
+{
+    const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
+
+    mModel.removeRows (mNestedRow, 1, parentIndex);
+}   
+
+
+void CSMWorld::DeleteNestedCommand::undo()
+{
+    //TODO
 }
