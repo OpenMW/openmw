@@ -677,7 +677,7 @@ namespace Physic
                                                                            btCollisionObject *object)
     {
         DeepestNotMeContactTestResultCallback callback(filter, origin);
-        callback.m_collisionFilterGroup = 0xff;
+        callback.m_collisionFilterGroup = CollisionType_Actor;
         callback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap | CollisionType_Actor;
         mDynamicsWorld->contactTest(object, callback);
         return std::make_pair(callback.mObject, callback.mContactPoint);
