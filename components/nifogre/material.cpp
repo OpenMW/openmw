@@ -248,11 +248,6 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     if (particleMaterial)
     {
         alpha = 1.f; // Apparently ignored, might be overridden by particle vertex colors?
-
-        ambient = Ogre::Vector3(0.f);
-        diffuse = Ogre::Vector3(0.f);
-        specular = Ogre::Vector3(0.f);
-        emissive = Ogre::Vector3(1.f);
     }
 
     {
