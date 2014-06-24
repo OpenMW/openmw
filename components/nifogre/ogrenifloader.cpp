@@ -756,7 +756,12 @@ class NIFObjectLoader
         Ogre::ParticleEmitter *emitter = partsys->addEmitter("Nif");
         emitter->setParticleVelocity(partctrl->velocity - partctrl->velocityRandom*0.5f,
                                      partctrl->velocity + partctrl->velocityRandom*0.5f);
-        emitter->setEmissionRate(partctrl->emitRate);
+
+        if (partctrl->emitFlags & Nif::NiParticleSystemController::NoAutoAdjust)
+            emitter->setEmissionRate(partctrl->emitRate);
+        else
+            emitter->setEmissionRate(partctrl->numParticles / (partctrl->lifetime + partctrl->lifetimeRandom/2));
+
         emitter->setTimeToLive(partctrl->lifetime,
                                partctrl->lifetime + partctrl->lifetimeRandom);
         emitter->setParameter("width", Ogre::StringConverter::toString(partctrl->offsetRandom.x));
