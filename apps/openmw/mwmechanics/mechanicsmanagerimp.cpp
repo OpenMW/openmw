@@ -501,7 +501,8 @@ namespace MWMechanics
         {
             if (!playerStats.getExpelled(npcFaction))
             {
-                reaction = playerStats.getFactionReputation(npcFaction);
+                // faction reaction towards itself. yes, that exists
+                reaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, npcFaction);
 
                 rank = playerStats.getFactionRanks().find(npcFaction)->second;
             }
