@@ -127,10 +127,12 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
 {
     if (parent.isValid())
     {
+        beginRemoveRows(parent, row, row+count-1);
         for (int i = 0; i < count; ++i)
         {
             mIdCollection->removeNestedRows(parent.row(), parent.column(), row+i); 
         }
+        endRemoveRows();
         return true;
     }
 
