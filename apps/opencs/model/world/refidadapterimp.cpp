@@ -227,6 +227,25 @@ void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column
     list.erase (list.begin () + rowToRemove);
 }
 
+void CSMWorld::ContainerRefIdAdapter::addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const
+{
+    assert(column==mContent);
+    
+    std::vector<ESM::ContItem>& list = static_cast<Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container))).get().mInventory.mList;
+    
+    ESM::ContItem newRow = {0, ""};
+    if (position >= (int)list.size())
+    {
+        list.push_back(newRow);
+        return;
+    }
+    
+    list.insert(list.begin()+position, newRow);
+
+    return;
+}
+
 void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
     const QVariant& value) const
 {

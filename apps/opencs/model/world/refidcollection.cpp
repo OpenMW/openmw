@@ -625,3 +625,12 @@ int CSMWorld::RefIdCollection::getNestedColumnsCount(int row, int column) const
 
     return adaptor.getNestedColumnsCount(&mColumns.at(column), mData);
 }
+
+void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+
+    adaptor.addNestedRow(&mColumns.at(col), mData, localIndex.first, position);
+}

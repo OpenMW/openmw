@@ -52,3 +52,8 @@ void CSMWorld::CollectionBase::removeNestedRows(int row, int column, int subRow)
 {
     assert(false); //todo, make pure abstract
 }
+
+void  CSMWorld::CollectionBase::addNestedRow(int row, int col, int position)
+{
+    assert(false);
+}

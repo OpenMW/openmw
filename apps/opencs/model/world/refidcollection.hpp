@@ -79,6 +79,8 @@ namespace CSMWorld
         
             virtual void removeNestedRows(int row, int column, int subRow);
 
+            virtual void addNestedRow(int row, int col, int position);
+        
             virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const UniversalId::Type type);

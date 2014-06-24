@@ -80,6 +80,8 @@ namespace CSMWorld
 
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
 
+            void addNestedRow (const QModelIndex& parent, int position);
+
             virtual QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex())
                 const;
 

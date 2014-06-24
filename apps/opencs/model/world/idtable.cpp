@@ -145,6 +145,13 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
     return true;
 }
 
+void CSMWorld::IdTable::addNestedRow(const QModelIndex& parent, int position)
+{
+    assert(parent.isValid());
+
+    mIdCollection->addNestedRow(parent.row(), parent.column(), position);
+}
+
 QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const
 {
     unsigned int encodedId = 0;
