@@ -201,6 +201,13 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             writer.addMaster (*iter, 0); // not using the size information anyway -> use value of 0
 
         writer.setFormat (ESM::Header::CurrentFormat);
+
+        // all unused
+        writer.setVersion(0);
+        writer.setType(0);
+        writer.setAuthor("");
+        writer.setDescription("");
+
         int recordCount =         1 // saved game header
                 +MWBase::Environment::get().getJournal()->countSavedGameRecords()
                 +MWBase::Environment::get().getWorld()->countSavedGameRecords()
