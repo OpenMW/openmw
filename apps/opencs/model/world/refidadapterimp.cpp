@@ -1,7 +1,6 @@
-
 #include "refidadapterimp.hpp"
 
-#include <QDebug>
+#include <cassert>
 
 CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const InventoryColumns& columns,
     const RefIdColumn *autoCalc)
@@ -182,26 +181,21 @@ CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& colum
 
 int CSMWorld::ContainerRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
 {
-    if (column==mContent)
-    {
-        return 2;
-    } else {
-        throw "Trying to obtain nested columns count, but column does not have nested columns!";
-    }
+    assert(column==mContent);
+
+    return 2;
 }
 
 int CSMWorld::ContainerRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
 {
+    assert(column==mContent);
+
     const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
         data.getRecord(RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
-    if (column==mContent)
-    {
-        return record.get().mInventory.mList.size();
-    } else {
-        throw "Trying to obtain nested rows count, but column does not have nested columns!";
-    }
+    return record.get().mInventory.mList.size();
 }
+
 QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
     int index) const
 {
@@ -222,6 +216,18 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, co
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
+
+void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, unsigned rowToRemove) const
+{
+    assert(column==mContent);
+
+    std::vector<ESM::ContItem>& list = static_cast<Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container))).get().mInventory.mList;
+    
+    list.erase (list.begin () + rowToRemove);
+}
+
+
 
 void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
     const QVariant& value) const
@@ -249,17 +255,19 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
 }
 
-void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column, RefIdData& data,
-                                              int index,
-                                              const QVariant& value,
-                                              int subRowIndex,
-                                              int subColIndex) const
+void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column,
+                                                    RefIdData& data,
+                                                    int index,
+                                                    const QVariant& value,
+                                                    int subRowIndex,
+                                                    int subColIndex) const
 {
-    Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
-            data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
     if (column==mContent)
     {
+        Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
+            data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
         switch (subColIndex)
         {
             case 0:
@@ -275,7 +283,7 @@ void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column, R
         }
     } else
     {
-        throw "This column does not hold multiple values.";
+        assert(false);
     }
 }
 

@@ -633,6 +633,9 @@ namespace CSMWorld
             virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
 
             virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+        
+
+            virtual void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, unsigned rowToRemove) const;
     };
 
     struct CreatureColumns : public ActorColumns
