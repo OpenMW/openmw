@@ -157,6 +157,25 @@ namespace CSMWorld
 
             virtual void undo();
     };
+    
+    class AddNestedCommand : public QUndoCommand
+    {
+            IdTable& mModel;
+
+            std::string mId;
+
+            int mNewRow;
+
+            int mParentColumn;
+
+        public:
+
+            AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
 }
 
 #endif
