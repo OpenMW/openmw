@@ -59,6 +59,8 @@ namespace Compiler
         const int opcodeStartCombatExplicit = 0x200023b;
         const int opcodeStopCombat = 0x200023c;
         const int opcodeStopCombatExplicit = 0x200023d;
+        const int opcodeFace = 0x200024c;
+        const int opcodeFaceExplicit = 0x200024d;
     }
 
     namespace Animation
