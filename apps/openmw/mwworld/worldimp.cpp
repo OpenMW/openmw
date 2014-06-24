@@ -967,7 +967,7 @@ namespace MWWorld
 
         Ogre::Vector3 vec(x, y, z);
 
-        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL;
+        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
@@ -989,7 +989,9 @@ namespace MWWorld
             }
             else
             {
-                if (!mWorldScene->isCellActive(*currCell) && mWorldScene->isCellActive(*newCell))
+                bool currCellActive = mWorldScene->isCellActive(*currCell);
+                bool newCellActive = mWorldScene->isCellActive(*newCell);
+                if (!currCellActive && newCellActive)
                 {
                     MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
                     mWorldScene->addObjectToScene(newPtr);
@@ -1000,7 +1002,7 @@ namespace MWWorld
                     }
                     addContainerScripts(newPtr, newCell);
                 }
-                else if (!mWorldScene->isCellActive(*newCell) && mWorldScene->isCellActive(*currCell))
+                else if (!newCellActive && currCellActive)
                 {
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
@@ -1011,7 +1013,9 @@ namespace MWWorld
                             .copyToCell(ptr, *newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
-                else
+                else if (!currCellActive && !newCellActive)
+                    ptr.getClass().copyToCell(ptr, *newCell);
+                else // both cells active
                 {
                     MWWorld::Ptr copy =
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
