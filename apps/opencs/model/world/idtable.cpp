@@ -126,7 +126,13 @@ Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
 bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& parent)
 {
     if (parent.isValid())
-        return false;
+    {
+        for (int i = 0; i < count; ++i)
+        {
+            mIdCollection->removeNestedRows(parent.row(), parent.column(), row+i); 
+        }
+        return true;
+    }
 
     beginRemoveRows (parent, row, row+count-1);
 

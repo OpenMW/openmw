@@ -52,7 +52,7 @@ namespace CSMWorld
 
             virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const = 0;
 
-            virtual void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, unsigned rowToRemove) const = 0;
+            virtual void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const = 0;
     };
 }
 

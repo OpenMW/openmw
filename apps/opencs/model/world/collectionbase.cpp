@@ -47,3 +47,8 @@ int CSMWorld::CollectionBase::getNestedRowsCount(int row, int column) const
     assert(false); //TODO, make pure abstract
     return 0;
 }
+
+void CSMWorld::CollectionBase::removeNestedRows(int row, int column, int subRow)
+{
+    assert(false); //todo, make pure abstract
+}

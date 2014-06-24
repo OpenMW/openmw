@@ -217,7 +217,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, co
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
 
-void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, unsigned rowToRemove) const
+void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const
 {
     assert(column==mContent);
 
@@ -226,8 +226,6 @@ void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column
     
     list.erase (list.begin () + rowToRemove);
 }
-
-
 
 void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
     const QVariant& value) const

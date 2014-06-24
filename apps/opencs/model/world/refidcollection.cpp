@@ -463,6 +463,15 @@ void CSMWorld::RefIdCollection::removeRows (int index, int count)
     mData.erase (index, count);
 }
 
+void CSMWorld::RefIdCollection::removeNestedRows(int row, int column, int subRow)
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
+
+    dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(adaptor).removeNestedRow(&mColumns.at (column), mData, localIndex.first, subRow);
+}
+
 void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
 {
     mData.appendRecord (type, id, false);

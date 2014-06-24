@@ -76,6 +76,8 @@ namespace CSMWorld
             virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
 
             virtual void removeRows (int index, int count);
+        
+            virtual void removeNestedRows(int row, int column, int subRow);
 
             virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,

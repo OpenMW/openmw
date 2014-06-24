@@ -64,6 +64,8 @@ namespace CSMWorld
 
             virtual void removeRows (int index, int count) = 0;
 
+            virtual void removeNestedRows(int row, int column, int subRow);
+
             virtual void appendBlankRecord (const std::string& id,
                 UniversalId::Type type = UniversalId::Type_None) = 0;
             ///< \param type Will be ignored, unless the collection supports multiple record types
