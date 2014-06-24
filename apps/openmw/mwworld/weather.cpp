@@ -63,6 +63,8 @@ void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name
     if (offset != std::string::npos)
         weather.mCloudTexture.replace(offset, weather.mCloudTexture.length() - offset, ".dds");
 
+    weather.mIsStorm = (name == "ashstorm" || name == "blight");
+
     mWeatherSettings[name] = weather;
 }
 
@@ -213,6 +215,8 @@ void WeatherManager::setResult(const String& weatherType)
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     mResult.mSunColor = current.mSunDiscSunsetColor;
 
+    mResult.mIsStorm = current.mIsStorm;
+
     mResult.mParticleEffect = current.mParticleEffect;
 
     mResult.mNight = (mHour < mSunriseTime || mHour > mNightStart - 1);
@@ -318,6 +322,7 @@ void WeatherManager::transition(float factor)
 
     mResult.mNight = current.mNight;
 
+    mResult.mIsStorm = current.mIsStorm;
     mResult.mParticleEffect = current.mParticleEffect;
 }
 
@@ -770,4 +775,14 @@ void WeatherManager::switchToNextWeather(bool instantly)
             setWeather(weatherType, instantly);
         }
     }
+}
+
+bool WeatherManager::isInStorm() const
+{
+    return mResult.mIsStorm;
+}
+
+Ogre::Vector3 WeatherManager::getStormDirection() const
+{
+    return Ogre::Vector3(0,-1,0);
 }

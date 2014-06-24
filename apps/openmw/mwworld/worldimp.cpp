@@ -1998,6 +1998,22 @@ namespace MWWorld
             return 0.f;
     }
 
+    bool World::isInStorm() const
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->isInStorm();
+        else
+            return false;
+    }
+
+    Ogre::Vector3 World::getStormDirection() const
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->getStormDirection();
+        else
+            return Ogre::Vector3(0,1,0);
+    }
+
     void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
     {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
@@ -2313,6 +2329,7 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
+        // TODO: this only works for the player
         MWWorld::Ptr target = getFacedObject();
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();

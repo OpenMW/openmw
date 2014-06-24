@@ -20,6 +20,7 @@
 #include "character.hpp"
 
 #include <OgreStringConverter.h>
+#include <OgreSceneNode.h>
 
 #include "movement.hpp"
 #include "npcstats.hpp"
@@ -233,6 +234,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::Group_All, false,
                              1.0f, "start", "stop", 0.0f, ~0ul);
     }
+
+    updateIdleStormState();
 
     if(force && mJumpState != JumpState_None)
     {
@@ -548,6 +551,45 @@ CharacterController::~CharacterController()
 void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 {
     mPtr = ptr;
+}
+
+void CharacterController::updateIdleStormState()
+{
+    bool inStormDirection = false;
+    if (MWBase::Environment::get().getWorld()->isInStorm())
+    {
+        Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
+        Ogre::Vector3 characterDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
+        inStormDirection = stormDirection.angleBetween(characterDirection) < Ogre::Degree(40);
+    }
+    if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
+    {
+        float complete = 0;
+        mAnimation->getInfo("idlestorm", &complete);
+
+        if (complete == 0)
+            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+                             1.0f, "start", "loop start", 0.0f, 0);
+        else if (complete == 1)
+            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+                             1.0f, "loop start", "loop stop", 0.0f, ~0ul);
+    }
+    else
+    {
+        if (mUpperBodyState == UpperCharState_Nothing)
+        {
+            if (mAnimation->isPlaying("idlestorm"))
+            {
+                if (mAnimation->getCurrentTime("idlestorm") < mAnimation->getTextKeyTime("idlestorm: loop stop"))
+                {
+                    mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, true,
+                                     1.0f, "loop stop", "stop", 0.0f, 0);
+                }
+            }
+        }
+        else
+            mAnimation->disable("idlestorm");
+    }
 }
 
 bool CharacterController::updateCreatureState()

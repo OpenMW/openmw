@@ -461,7 +461,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         {
             if (!mParticleNode)
             {
-                mParticleNode = mCamera->getParentSceneNode()->createChildSceneNode();
+                mParticleNode = mCamera->getParentSceneNode()->createChildSceneNode(Ogre::Vector3(0,0,100));
                 mParticleNode->setInheritOrientation(false);
             }
 

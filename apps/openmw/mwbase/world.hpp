@@ -521,6 +521,12 @@ namespace MWBase
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
+
+            /// @see MWWorld::WeatherManager::isInStorm
+            virtual bool isInStorm() const = 0;
+
+            /// @see MWWorld::WeatherManager::getStormDirection
+            virtual Ogre::Vector3 getStormDirection() const = 0;
     };
 }
 
