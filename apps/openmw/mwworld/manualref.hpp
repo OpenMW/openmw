@@ -35,6 +35,8 @@ namespace MWWorld
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
                 cellRef.mReferenceBlocked = 0;
+                cellRef.mFltv = 0;
+                cellRef.mNam0 = 0;
 
                 LiveCellRef<T> ref(cellRef, base);
 
