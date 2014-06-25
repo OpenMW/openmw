@@ -45,7 +45,12 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
          it != map.end(); ++it)
     {
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(it->first->mName);
+        if (ptr.isEmpty()) // Shouldn't happen
+            throw std::runtime_error("can't find Ptr");
+
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+        if (!animation) // Shouldn't happen either, since keyframe-controlled objects are not batched in StaticGeometry
+            throw std::runtime_error("can't find Animation for " + ptr.getCellRef().getRefId());
 
         OEngine::Physic::AnimatedShapeInstance& instance = it->second;
 

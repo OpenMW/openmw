@@ -181,7 +181,8 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
     // the flags we currently use, at least.
     flags |= node->flags;
 
-    if (!node->controller.empty() && node->controller->recType == Nif::RC_NiKeyframeController)
+    if (!node->controller.empty() && node->controller->recType == Nif::RC_NiKeyframeController
+            && (node->controller->flags & Nif::NiNode::ControllerFlag_Active))
         isAnimated = true;
 
     if (!raycasting)
