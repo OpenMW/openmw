@@ -152,7 +152,8 @@ namespace MWWorld
         {
             mLocals.configure (script);
             mHasLocals = true;
-            mChanged = true;
+            if (!mLocals.isEmpty())
+                mChanged = true;
         }
     }
 

@@ -21,6 +21,11 @@ namespace MWScript
         mFloats.resize (script.mData.mNumFloats, 0);
     }
 
+    bool Locals::isEmpty() const
+    {
+        return (mShorts.empty() && mLongs.empty() && mFloats.empty());
+    }
+
     int Locals::getIntVar(const std::string &script, const std::string &var)
     {
         Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);

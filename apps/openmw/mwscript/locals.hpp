@@ -20,6 +20,9 @@ namespace MWScript
             std::vector<Interpreter::Type_Integer> mLongs;
             std::vector<Interpreter::Type_Float> mFloats;
 
+            /// Are there any locals?
+            bool isEmpty() const;
+
             void configure (const ESM::Script& script);
             bool setVarByInt(const std::string& script, const std::string& var, int val);
             int getIntVar (const std::string& script, const std::string& var); ///< if var does not exist, returns 0
