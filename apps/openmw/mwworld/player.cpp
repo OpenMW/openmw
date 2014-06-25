@@ -246,7 +246,15 @@ namespace MWWorld
 
             MWBase::World& world = *MWBase::Environment::get().getWorld();
 
-            mCellStore = world.getCell (player.mCellId);
+            try
+            {
+                mCellStore = world.getCell (player.mCellId);
+            }
+            catch (...)
+            {
+                // Cell no longer exists. Place the player in a default cell.
+                mCellStore = world.getExterior(0,0);
+            }
 
             if (!player.mBirthsign.empty() &&
                 !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
