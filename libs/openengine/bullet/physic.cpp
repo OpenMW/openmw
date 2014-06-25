@@ -180,7 +180,7 @@ namespace Physic
     {
         mEngine->mDynamicsWorld->removeRigidBody(mBody);
         mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_Raycasting);
+            CollisionType_World|CollisionType_HeightMap);
     }
 
     void PhysicActor::enableCollisionBody()

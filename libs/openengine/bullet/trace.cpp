@@ -65,9 +65,9 @@ void ActorTracer::doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, 
     to.setOrigin(btend);
 
     ClosestNotMeConvexResultCallback newTraceCallback(actor, btstart-btend, btScalar(0.0));
-    newTraceCallback.m_collisionFilterGroup = CollisionType_Actor;
-    newTraceCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap |
-                                             CollisionType_Actor;
+    // Inherit the actor's collision group and mask
+    newTraceCallback.m_collisionFilterGroup = actor->getBroadphaseHandle()->m_collisionFilterGroup;
+    newTraceCallback.m_collisionFilterMask = actor->getBroadphaseHandle()->m_collisionFilterMask;
 
     btCollisionShape *shape = actor->getCollisionShape();
     assert(shape->isConvex());
@@ -100,9 +100,9 @@ void ActorTracer::findGround(const OEngine::Physic::PhysicActor* actor, const Og
     btTransform to(trans.getBasis(), btend);
 
     ClosestNotMeConvexResultCallback newTraceCallback(actor->getCollisionBody(), btstart-btend, btScalar(0.0));
-    newTraceCallback.m_collisionFilterGroup = CollisionType_Actor;
-    newTraceCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap |
-                                             CollisionType_Actor;
+    // Inherit the actor's collision group and mask
+    newTraceCallback.m_collisionFilterGroup = actor->getCollisionBody()->getBroadphaseHandle()->m_collisionFilterGroup;
+    newTraceCallback.m_collisionFilterMask = actor->getCollisionBody()->getBroadphaseHandle()->m_collisionFilterMask;
 
     btVector3 halfExtents(actor->getHalfExtents().x, actor->getHalfExtents().y, actor->getHalfExtents().z);
 
