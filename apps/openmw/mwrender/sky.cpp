@@ -236,6 +236,10 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mCloudAnimationTimer(0.f)
     , mMoonRed(false)
     , mParticleNode(NULL)
+    , mRainEnabled(false)
+    , mRainTimer(0)
+    , mRainSpeed(0)
+    , mRainFrequency(1)
 {
     mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -351,6 +355,7 @@ void SkyManager::create()
 
 SkyManager::~SkyManager()
 {
+    clearRain();
     delete mSun;
     delete mSunGlare;
     delete mMasser;
@@ -369,6 +374,66 @@ int SkyManager::getSecundaPhase() const
     return mSecunda->getPhaseInt();
 }
 
+void SkyManager::clearRain()
+{
+    for (std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr>::iterator it = mRainModels.begin(); it != mRainModels.end();)
+    {
+        it->second.setNull();
+        Ogre::SceneNode* parent = it->first->getParentSceneNode();
+        mSceneMgr->destroySceneNode(it->first);
+        mSceneMgr->destroySceneNode(parent);
+        mRainModels.erase(it++);
+    }
+}
+
+void SkyManager::updateRain(float dt)
+{
+    // Move existing rain
+    // Note: if rain gets disabled, we let the existing rain drops finish falling down.
+    float minHeight = 200;
+    for (std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr>::iterator it = mRainModels.begin(); it != mRainModels.end();)
+    {
+        Ogre::Vector3 pos = it->first->getPosition();
+        pos.z -= mRainSpeed * dt;
+        it->first->setPosition(pos);
+        if (pos.z < -minHeight)
+        {
+            it->second.setNull();
+            Ogre::SceneNode* parent = it->first->getParentSceneNode();
+            mSceneMgr->destroySceneNode(it->first);
+            mSceneMgr->destroySceneNode(parent);
+            mRainModels.erase(it++);
+        }
+        else
+            ++it;
+    }
+
+    // Spawn new rain
+    float rainFrequency = mRainFrequency;
+    float startHeight = 700;
+    if (mRainEnabled)
+    {
+        mRainTimer += dt;
+        if (mRainTimer >= 1.f/rainFrequency)
+        {
+            mRainTimer = 0;
+
+            const float rangeRandom = 100;
+            float xOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
+            float yOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
+            Ogre::SceneNode* sceneNode = mCamera->getParentSceneNode()->createChildSceneNode();
+            sceneNode->setInheritOrientation(false);
+
+            // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
+            // consider the orientation of the parent node for its position, just not for its orientation
+            Ogre::SceneNode* offsetNode = sceneNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
+
+            NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(offsetNode, mRainEffect);
+            mRainModels[offsetNode] = objects;
+        }
+    }
+}
+
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
@@ -379,6 +444,8 @@ void SkyManager::update(float duration)
         for (unsigned int i=0; i<mParticle->mControllers.size(); ++i)
             mParticle->mControllers[i].update();
     }
+
+    updateRain(duration);
 
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed;
@@ -430,13 +497,22 @@ void SkyManager::enable()
     if (!mCreated)
         create();
 
+    if (mParticleNode)
+        mParticleNode->setVisible(true);
+
     mRootNode->setVisible(true);
     mEnabled = true;
 }
 
 void SkyManager::disable()
 {
+    if (mParticleNode)
+        mParticleNode->setVisible(false);
+
+    clearRain();
+
     mRootNode->setVisible(false);
+
     mEnabled = false;
 }
 
@@ -448,6 +524,11 @@ void SkyManager::setMoonColour (bool red)
 void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 {
     if (!mCreated) return;
+
+    mRainEffect = weather.mRainEffect;
+    mRainEnabled = !mRainEffect.empty();
+    mRainFrequency = weather.mRainFrequency;
+    mRainSpeed = weather.mRainSpeed;
 
     if (mCurrentParticleEffect != weather.mParticleEffect)
     {
@@ -461,7 +542,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         {
             if (!mParticleNode)
             {
-                mParticleNode = mCamera->getParentSceneNode()->createChildSceneNode(Ogre::Vector3(0,0,100));
+                mParticleNode = mCamera->getParentSceneNode()->createChildSceneNode();
                 mParticleNode->setInheritOrientation(false);
             }
 

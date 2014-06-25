@@ -62,6 +62,10 @@ namespace MWWorld
         std::string mAmbientLoopSoundID;
 
         std::string mParticleEffect;
+
+        std::string mRainEffect;
+        float mRainSpeed;
+        float mRainFrequency;
     };
 
 
@@ -129,7 +133,16 @@ namespace MWWorld
         // Possible effect on movement speed?
         bool mIsStorm;
 
+        // How fast does rain travel down?
+        // In Morrowind.ini this is set globally, but we may want to change it per weather later.
+        float mRainSpeed;
+
+        // How often does a new rain mesh spawn?
+        float mRainFrequency;
+
         std::string mParticleEffect;
+
+        std::string mRainEffect;
 
         // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
         // is broken in the vanilla game and was disabled.
@@ -188,6 +201,7 @@ namespace MWWorld
     private:
         float mHour;
         float mWindSpeed;
+        bool mIsStorm;
         MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
@@ -226,6 +240,7 @@ namespace MWWorld
         typedef std::map<std::string,std::vector<char> > RegionModMap;
         RegionModMap mRegionMods;
 
+        float mRainSpeed;
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;
