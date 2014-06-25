@@ -42,6 +42,7 @@ namespace MWSound
         , mListenerPos(0,0,0)
         , mListenerDir(1,0,0)
         , mListenerUp(0,0,1)
+        , mListenerUnderwater(false)
     {
         if(!useSound)
             return;
@@ -584,12 +585,8 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
-        MWWorld::Ptr player =
-            MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->getCell();
-
         Environment env = Env_Normal;
-        if((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater)
+        if (mListenerUnderwater)
         {
             env = Env_Underwater;
             //play underwater sound
@@ -682,6 +679,12 @@ namespace MWSound
         mListenerPos = pos;
         mListenerDir = dir;
         mListenerUp  = up;
+
+        MWWorld::Ptr player =
+            MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const ESM::Cell *cell = player.getCell()->getCell();
+
+        mListenerUnderwater = ((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater);
     }
 
     void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

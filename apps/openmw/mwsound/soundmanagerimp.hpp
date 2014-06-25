@@ -50,6 +50,7 @@ namespace MWSound
 
         MWBase::SoundPtr mUnderwaterSound;
 
+        bool mListenerUnderwater;
         Ogre::Vector3 mListenerPos;
         Ogre::Vector3 mListenerDir;
         Ogre::Vector3 mListenerUp;
