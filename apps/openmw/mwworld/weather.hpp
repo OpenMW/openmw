@@ -57,7 +57,11 @@ namespace MWWorld
         bool mNight; // use night skybox
         float mNightFade; // fading factor for night skybox
 
+        bool mIsStorm;
+
         std::string mAmbientLoopSoundID;
+
+        std::string mParticleEffect;
     };
 
 
@@ -100,7 +104,7 @@ namespace MWWorld
         // Duration of weather transition (in days)
         float mTransitionDelta;
 
-        // No idea what this one is used for?
+        // Used by scripts to animate signs, etc based on the wind (GetWindSpeed)
         float mWindSpeed;
 
         // Cloud animation speed multiplier
@@ -119,7 +123,16 @@ namespace MWWorld
         // Rain sound effect
         std::string mRainLoopSoundID;
 
-        /// \todo disease chance
+        // Is this an ash storm / blight storm? This controls two things:
+        // - The particle node will be oriented so that the particles appear to come from the Red Mountain. (not implemented yet)
+        // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm animation)
+        // Possible effect on movement speed?
+        bool mIsStorm;
+
+        std::string mParticleEffect;
+
+        // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
+        // is broken in the vanilla game and was disabled.
     };
 
     ///
@@ -150,6 +163,11 @@ namespace MWWorld
         void setHour(const float hour);
 
         float getWindSpeed() const;
+
+        /// Are we in an ash or blight storm?
+        bool isInStorm() const;
+
+        Ogre::Vector3 getStormDirection() const;
 
         void advanceTime(double hours)
         {

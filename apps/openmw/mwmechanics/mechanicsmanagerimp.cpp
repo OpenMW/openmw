@@ -501,7 +501,8 @@ namespace MWMechanics
         {
             if (!playerStats.getExpelled(npcFaction))
             {
-                reaction = playerStats.getFactionReputation(npcFaction);
+                // faction reaction towards itself. yes, that exists
+                reaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, npcFaction);
 
                 rank = playerStats.getFactionRanks().find(npcFaction)->second;
             }
@@ -1101,7 +1102,7 @@ namespace MWMechanics
                     if (iter->first.getClass().isClass(iter->first, "Guard"))
                     {
                         MWMechanics::AiSequence& aiSeq = iter->first.getClass().getCreatureStats(iter->first).getAiSequence();
-                        if (aiSeq.getActivePackage()->getTypeId() == MWMechanics::AiPackage::TypeIdPursue)
+                        if (aiSeq.getTypeId() == MWMechanics::AiPackage::TypeIdPursue)
                         {
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);
@@ -1112,7 +1113,7 @@ namespace MWMechanics
         }
 
         // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
-        if (ptr.getClass().isNpc())
+        if (ptr.getClass().isNpc() && !ptr.getClass().getCreatureStats(ptr).isDead())
             MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 

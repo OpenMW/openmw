@@ -8,10 +8,11 @@
 #include <OgreSceneManager.h>
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreHighLevelGpuProgramManager.h>
-#include <OgreBillboardSet.h>
+#include <OgreParticleSystem.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
 #include <OgreTechnique.h>
+#include <OgreControllerManager.h>
 
 #include <OgreMeshManager.h>
 
@@ -234,6 +235,7 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mCreated(false)
     , mCloudAnimationTimer(0.f)
     , mMoonRed(false)
+    , mParticleNode(NULL)
 {
     mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -372,6 +374,12 @@ void SkyManager::update(float duration)
     if (!mEnabled) return;
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
 
+    if (!mParticle.isNull())
+    {
+        for (unsigned int i=0; i<mParticle->mControllers.size(); ++i)
+            mParticle->mControllers[i].update();
+    }
+
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed;
     sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
@@ -440,6 +448,37 @@ void SkyManager::setMoonColour (bool red)
 void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 {
     if (!mCreated) return;
+
+    if (mCurrentParticleEffect != weather.mParticleEffect)
+    {
+        mCurrentParticleEffect = weather.mParticleEffect;
+
+        if (mCurrentParticleEffect.empty())
+        {
+            mParticle.setNull();
+        }
+        else
+        {
+            if (!mParticleNode)
+            {
+                mParticleNode = mCamera->getParentSceneNode()->createChildSceneNode(Ogre::Vector3(0,0,100));
+                mParticleNode->setInheritOrientation(false);
+            }
+
+            mParticle = NifOgre::Loader::createObjects(mParticleNode, mCurrentParticleEffect);
+            for(size_t i = 0; i < mParticle->mParticles.size(); ++i)
+            {
+                ParticleSystem* particle = mParticle->mParticles[i];
+                particle->setRenderQueueGroup(RQG_Alpha);
+                particle->setVisibilityFlags(RV_Sky);
+            }
+            for (size_t i = 0; i < mParticle->mControllers.size(); ++i)
+            {
+                if (mParticle->mControllers[i].getSource().isNull())
+                    mParticle->mControllers[i].setSource(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
+            }
+        }
+    }
 
     if (mClouds != weather.mCloudTexture)
     {

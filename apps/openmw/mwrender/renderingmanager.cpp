@@ -506,10 +506,19 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
     mFogColour = colour;
     float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
 
-    mFogStart = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
-    mFogEnd = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
+    if (density == 0)
+    {
+        mFogStart = 0;
+        mFogEnd = std::numeric_limits<float>().max();
+        mRendering.getCamera()->setFarClipDistance (max);
+    }
+    else
+    {
+        mFogStart = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
+        mFogEnd = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
+        mRendering.getCamera()->setFarClipDistance (max / density);
+    }
 
-    mRendering.getCamera()->setFarClipDistance ( Settings::Manager::getFloat("max viewing distance", "Viewing distance") / density );
 }
 
 void RenderingManager::applyFog (bool underwater)

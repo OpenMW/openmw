@@ -64,12 +64,12 @@ namespace MWScript
                 Success = false;
             }
 
-            if (!Success && mVerbose)
+            if (!Success)
             {
                 std::cerr
-                    << "compiling failed: " << name << std::endl
-                    << script->mScriptText
-                    << std::endl << std::endl;
+                    << "compiling failed: " << name << std::endl;
+                if (mVerbose)
+                    std::cerr << script->mScriptText << std::endl << std::endl;
             }
 
             if (Success)

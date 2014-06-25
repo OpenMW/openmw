@@ -431,6 +431,9 @@ namespace MWGui
     {
         mGlobalMapRender = new MWRender::GlobalMap("");
         mGlobalMapRender->render(loadingListener);
+        mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
+        mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
+
         mGlobalMapImage->setImageTexture("GlobalMap.png");
         mGlobalMapOverlay->setImageTexture("GlobalMapOverlay");
     }
@@ -512,7 +515,6 @@ namespace MWGui
         else
             mGlobalMap->setViewOffset( mGlobalMap->getViewOffset() + diff );
 
-
         mLastDragPos = MyGUI::IntPoint(_left, _top);
     }
 
@@ -536,9 +538,6 @@ namespace MWGui
 
     void MapWindow::open()
     {
-        mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-        mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-
         // force markers to foreground
         for (unsigned int i=0; i<mGlobalMapOverlay->getChildCount (); ++i)
         {

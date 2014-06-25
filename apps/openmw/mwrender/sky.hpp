@@ -200,6 +200,9 @@ namespace MWRender
 
         std::vector<NifOgre::ObjectScenePtr> mObjects;
 
+        Ogre::SceneNode* mParticleNode;
+        NifOgre::ObjectScenePtr mParticle;
+
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;
         Ogre::String mNextClouds;
@@ -210,6 +213,8 @@ namespace MWRender
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
         Ogre::ColourValue mFogColour;
+
+        std::string mCurrentParticleEffect;
 
         Ogre::Light* mLightning;
 

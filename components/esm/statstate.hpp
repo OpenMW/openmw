@@ -12,7 +12,8 @@ namespace ESM
     struct StatState
     {
         T mBase;
-        T mMod;
+        T mMod; // Note: can either be the modifier, or the modified value.
+                // A bit inconsistent, but we can't fix this without breaking compatibility.
         T mCurrent;
         T mDamage;
         float mProgress;
@@ -30,7 +31,9 @@ namespace ESM
     void StatState<T>::load (ESMReader &esm)
     {
         esm.getHNT (mBase, "STBA");
-        esm.getHNT (mMod, "STMO");
+
+        mMod = 0;
+        esm.getHNOT (mMod, "STMO");
         mCurrent = 0;
         esm.getHNOT (mCurrent, "STCU");
         mDamage = 0;
@@ -43,7 +46,9 @@ namespace ESM
     void StatState<T>::save (ESMWriter &esm) const
     {
         esm.writeHNT ("STBA", mBase);
-        esm.writeHNT ("STMO", mMod);
+
+        if (mMod != 0)
+            esm.writeHNT ("STMO", mMod);
 
         if (mCurrent)
             esm.writeHNT ("STCU", mCurrent);

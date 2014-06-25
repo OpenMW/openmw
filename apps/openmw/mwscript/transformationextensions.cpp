@@ -323,7 +323,7 @@ namespace MWScript
                     }
                     else
                     {
-                        throw std::runtime_error ("unknown cell");
+                        throw std::runtime_error (std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };
@@ -420,7 +420,7 @@ namespace MWScript
                     }
                     else
                     {
-                        throw std::runtime_error ("unknown cell");
+                        throw std::runtime_error ( std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };

@@ -49,20 +49,6 @@ typedef unsigned char ubyte;
 namespace NifBullet
 {
 
-struct TriangleMeshShape : public btBvhTriangleMeshShape
-{
-    TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
-        : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
-    {
-    }
-
-    virtual ~TriangleMeshShape()
-    {
-        delete getTriangleInfoMap();
-        delete m_meshInterface;
-    }
-};
-
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
 {
 }
@@ -81,9 +67,8 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     mBoundingBox = NULL;
     mShape->mBoxTranslation = Ogre::Vector3(0,0,0);
     mShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
-    mHasShape = false;
-
-    btTriangleMesh* mesh1 = new btTriangleMesh();
+    mCompoundShape = NULL;
+    mStaticMesh = NULL;
 
     // Load the NIF. TODO: Wrap this in a try-catch block once we're out
     // of the early stages of development. Right now we WANT to catch
@@ -111,19 +96,35 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     mShape->mHasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
-    handleNode(mesh1, node,0,false,false,false);
+    handleNode(node,0,false,false,false);
 
     if(mBoundingBox != NULL)
     {
        mShape->mCollisionShape = mBoundingBox;
-       delete mesh1;
-    }
-    else if (mHasShape && mShape->mCollide)
-    {
-        mShape->mCollisionShape = new TriangleMeshShape(mesh1,true);
+       delete mStaticMesh;
+       if (mCompoundShape)
+       {
+           int n = mCompoundShape->getNumChildShapes();
+           for(int i=0; i <n;i++)
+               delete (mCompoundShape->getChildShape(i));
+           delete mCompoundShape;
+       }
     }
     else
-        delete mesh1;
+    {
+        if (mCompoundShape)
+        {
+            mShape->mCollisionShape = mCompoundShape;
+            if (mStaticMesh)
+            {
+                btTransform trans;
+                trans.setIdentity();
+                mCompoundShape->addChildShape(trans, new TriangleMeshShape(mStaticMesh,true));
+            }
+        }
+        else if (mStaticMesh)
+            mShape->mCollisionShape = new TriangleMeshShape(mStaticMesh,true);
+    }
 
     //second pass which create a shape for raycasting.
     mResourceName = mShape->getName();
@@ -131,23 +132,23 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     mBoundingBox = NULL;
     mShape->mBoxTranslation = Ogre::Vector3(0,0,0);
     mShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
-    mHasShape = false;
+    mStaticMesh = NULL;
+    mCompoundShape = NULL;
 
-    btTriangleMesh* mesh2 = new btTriangleMesh();
+    handleNode(node,0,true,true,false);
 
-    handleNode(mesh2, node,0,true,true,false);
-
-    if(mBoundingBox != NULL)
+    if (mCompoundShape)
     {
-       mShape->mRaycastingShape = mBoundingBox;
-       delete mesh2;
+        mShape->mRaycastingShape = mCompoundShape;
+        if (mStaticMesh)
+        {
+            btTransform trans;
+            trans.setIdentity();
+            mCompoundShape->addChildShape(trans, new TriangleMeshShape(mStaticMesh,true));
+        }
     }
-    else if (mHasShape)
-    {
-        mShape->mRaycastingShape = new TriangleMeshShape(mesh2,true);
-    }
-    else
-        delete mesh2;
+    else if (mStaticMesh)
+        mShape->mRaycastingShape = new TriangleMeshShape(mStaticMesh,true);
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
@@ -172,13 +173,16 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
     return false;
 }
 
-void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *node, int flags,
+void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
                                          bool isCollisionNode,
-                                         bool raycasting, bool isMarker)
+                                         bool raycasting, bool isMarker, bool isAnimated)
 {
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
+
+    if (!node->controller.empty() && node->controller->recType == Nif::RC_NiKeyframeController)
+        isAnimated = true;
 
     if (!raycasting)
         isCollisionNode = isCollisionNode || (node->recType == Nif::RC_RootCollisionNode);
@@ -227,10 +231,12 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
     if ( (isCollisionNode || (!mShape->mHasCollisionNode && !raycasting))
             && (!isMarker || (mShape->mHasCollisionNode && !raycasting)))
     {
+        // NOTE: a trishape with hasBounds=true, but no BBoxCollision flag should NOT go through handleNiTriShape!
+        // It must be ignored completely.
+        // (occurs in tr_ex_imp_wall_arch_04.nif)
         if(node->hasBounds)
         {
-            // Checking for BBoxCollision flag causes issues with some actors :/
-            if (!(node->flags & Nif::NiNode::Flag_Hidden))
+            if (flags & Nif::NiNode::Flag_BBoxCollision && !raycasting)
             {
                 mShape->mBoxTranslation = node->boundPos;
                 mShape->mBoxRotation = node->boundRot;
@@ -240,7 +246,7 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
         else if(node->recType == Nif::RC_NiTriShape)
         {
             mShape->mCollide = !(flags&0x800);
-            handleNiTriShape(mesh, static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycasting);
+            handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycasting, isAnimated);
         }
     }
 
@@ -252,13 +258,13 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
         for(size_t i = 0;i < list.length();i++)
         {
             if(!list[i].empty())
-                handleNode(mesh, list[i].getPtr(), flags, isCollisionNode, raycasting, isMarker);
+                handleNode(list[i].getPtr(), flags, isCollisionNode, raycasting, isMarker, isAnimated);
         }
     }
 }
 
-void ManualBulletShapeLoader::handleNiTriShape(btTriangleMesh* mesh, const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform,
-                                               bool raycasting)
+void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform,
+                                               bool raycasting, bool isAnimated)
 {
     assert(shape != NULL);
 
@@ -281,17 +287,64 @@ void ManualBulletShapeLoader::handleNiTriShape(btTriangleMesh* mesh, const Nif::
         // bother setting it up.
         return;
 
-    mHasShape = true;
+    if (!shape->skin.empty())
+        isAnimated = false;
 
-    const Nif::NiTriShapeData *data = shape->data.getPtr();
-    const std::vector<Ogre::Vector3> &vertices = data->vertices;
-    const short *triangles = &data->triangles[0];
-    for(size_t i = 0;i < data->triangles.size();i+=3)
+    if (isAnimated)
     {
-        Ogre::Vector3 b1 = transform*vertices[triangles[i+0]];
-        Ogre::Vector3 b2 = transform*vertices[triangles[i+1]];
-        Ogre::Vector3 b3 = transform*vertices[triangles[i+2]];
-        mesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
+        if (!mCompoundShape)
+            mCompoundShape = new btCompoundShape();
+
+        btTriangleMesh* childMesh = new btTriangleMesh();
+
+        const Nif::NiTriShapeData *data = shape->data.getPtr();
+
+        childMesh->preallocateVertices(data->vertices.size());
+        childMesh->preallocateIndices(data->triangles.size());
+
+        const std::vector<Ogre::Vector3> &vertices = data->vertices;
+        const std::vector<short> &triangles = data->triangles;
+
+        for(size_t i = 0;i < data->triangles.size();i+=3)
+        {
+            Ogre::Vector3 b1 = vertices[triangles[i+0]];
+            Ogre::Vector3 b2 = vertices[triangles[i+1]];
+            Ogre::Vector3 b3 = vertices[triangles[i+2]];
+            childMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
+        }
+
+        TriangleMeshShape* childShape = new TriangleMeshShape(childMesh,true);
+
+        childShape->setLocalScaling(btVector3(transform[0][0], transform[1][1], transform[2][2]));
+
+        Ogre::Quaternion q = transform.extractQuaternion();
+        Ogre::Vector3 v = transform.getTrans();
+        btTransform trans(btQuaternion(q.x, q.y, q.z, q.w), btVector3(v.x, v.y, v.z));
+
+        if (raycasting)
+            mShape->mAnimatedRaycastingShapes.insert(std::make_pair(shape->name, mCompoundShape->getNumChildShapes()));
+        else
+            mShape->mAnimatedShapes.insert(std::make_pair(shape->name, mCompoundShape->getNumChildShapes()));
+
+        mCompoundShape->addChildShape(trans, childShape);
+    }
+    else
+    {
+        if (!mStaticMesh)
+            mStaticMesh = new btTriangleMesh();
+
+        // Static shape, just transform all vertices into position
+        const Nif::NiTriShapeData *data = shape->data.getPtr();
+        const std::vector<Ogre::Vector3> &vertices = data->vertices;
+        const std::vector<short> &triangles = data->triangles;
+
+        for(size_t i = 0;i < data->triangles.size();i+=3)
+        {
+            Ogre::Vector3 b1 = transform*vertices[triangles[i+0]];
+            Ogre::Vector3 b2 = transform*vertices[triangles[i+1]];
+            Ogre::Vector3 b3 = transform*vertices[triangles[i+2]];
+            mStaticMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
+        }
     }
 }
 
@@ -302,6 +355,55 @@ void ManualBulletShapeLoader::load(const std::string &name,const std::string &gr
     if (!ptr.isNull())
         return;
     OEngine::Physic::BulletShapeManager::getSingleton().create(name,group,true,this);
+}
+
+bool findBoundingBox (const Nif::Node* node, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation)
+{
+    if(node->hasBounds)
+    {
+        if (!(node->flags & Nif::NiNode::Flag_Hidden))
+        {
+            translation = node->boundPos;
+            orientation = node->boundRot;
+            halfExtents = node->boundXYZ;
+            return true;
+        }
+    }
+
+    const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
+    if(ninode)
+    {
+        const Nif::NodeList &list = ninode->children;
+        for(size_t i = 0;i < list.length();i++)
+        {
+            if(!list[i].empty())
+                if (findBoundingBox(list[i].getPtr(), halfExtents, translation, orientation))
+                    return true;
+        }
+    }
+    return false;
+}
+
+bool getBoundingBox(const std::string& nifFile, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation)
+{
+    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (nifFile));
+    Nif::NIFFile & nif = *pnif.get ();
+
+    if (nif.numRoots() < 1)
+    {
+        return false;
+    }
+
+    Nif::Record *r = nif.getRoot(0);
+    assert(r != NULL);
+
+    Nif::Node *node = dynamic_cast<Nif::Node*>(r);
+    if (node == NULL)
+    {
+        return false;
+    }
+
+    return findBoundingBox(node, halfExtents, translation, orientation);
 }
 
 } // namespace NifBullet

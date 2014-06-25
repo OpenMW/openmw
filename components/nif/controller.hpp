@@ -89,7 +89,14 @@ public:
     float lifetime;
     float lifetimeRandom;
 
-    int emitFlags; // Bit 0: Emit Rate toggle bit (0 = auto adjust, 1 = use Emit Rate value)
+    enum EmitFlags
+    {
+        NoAutoAdjust = 0x1 // If this flag is set, we use the emitRate value. Otherwise,
+                           // we calculate an emit rate so that the maximum number of particles
+                           // in the system (numParticles) is never exceeded.
+    };
+    int emitFlags;
+
     Ogre::Vector3 offsetRandom;
 
     NodePtr emitter;

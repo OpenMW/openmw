@@ -65,12 +65,13 @@ void ActorTracer::doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, 
     to.setOrigin(btend);
 
     ClosestNotMeConvexResultCallback newTraceCallback(actor, btstart-btend, btScalar(0.0));
+    newTraceCallback.m_collisionFilterGroup = CollisionType_Actor;
     newTraceCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap |
                                              CollisionType_Actor;
 
     btCollisionShape *shape = actor->getCollisionShape();
     assert(shape->isConvex());
-    enginePass->dynamicsWorld->convexSweepTest(static_cast<btConvexShape*>(shape),
+    enginePass->mDynamicsWorld->convexSweepTest(static_cast<btConvexShape*>(shape),
                                                from, to, newTraceCallback);
 
     // Copy the hit data over to our trace results struct:
@@ -89,27 +90,26 @@ void ActorTracer::doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, 
     }
 }
 
-void ActorTracer::findGround(btCollisionObject *actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end, const PhysicEngine *enginePass)
+void ActorTracer::findGround(const OEngine::Physic::PhysicActor* actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end, const PhysicEngine *enginePass)
 {
     const btVector3 btstart(start.x, start.y, start.z+1.0f);
     const btVector3 btend(end.x, end.y, end.z+1.0f);
 
-    const btTransform &trans = actor->getWorldTransform();
+    const btTransform &trans = actor->getCollisionBody()->getWorldTransform();
     btTransform from(trans.getBasis(), btstart);
     btTransform to(trans.getBasis(), btend);
 
-    ClosestNotMeConvexResultCallback newTraceCallback(actor, btstart-btend, btScalar(0.0));
+    ClosestNotMeConvexResultCallback newTraceCallback(actor->getCollisionBody(), btstart-btend, btScalar(0.0));
+    newTraceCallback.m_collisionFilterGroup = CollisionType_Actor;
     newTraceCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap |
                                              CollisionType_Actor;
 
-    const btBoxShape *shape = dynamic_cast<btBoxShape*>(actor->getCollisionShape());
-    assert(shape);
+    btVector3 halfExtents(actor->getHalfExtents().x, actor->getHalfExtents().y, actor->getHalfExtents().z);
 
-    btVector3 halfExtents = shape->getHalfExtentsWithMargin();
     halfExtents[2] = 1.0f;
-    btBoxShape box(halfExtents);
+    btCylinderShapeZ base(halfExtents);
 
-    enginePass->dynamicsWorld->convexSweepTest(&box, from, to, newTraceCallback);
+    enginePass->mDynamicsWorld->convexSweepTest(&base, from, to, newTraceCallback);
     if(newTraceCallback.hasHit())
     {
         const btVector3& tracehitnormal = newTraceCallback.m_hitNormalWorld;

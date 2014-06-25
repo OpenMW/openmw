@@ -12,6 +12,7 @@
 
 #include <openengine/bullet/trace.h>
 #include <openengine/bullet/physic.hpp>
+#include <openengine/bullet/BtOgreExtras.h>
 #include <openengine/ogre/renderer.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -26,10 +27,49 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../apps/openmw/mwrender/animation.hpp"
+#include "../apps/openmw/mwbase/world.hpp"
+#include "../apps/openmw/mwbase/environment.hpp"
+
 #include "ptr.hpp"
 #include "class.hpp"
 
 using namespace Ogre;
+
+namespace
+{
+
+void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map)
+{
+    for (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>::iterator it = map.begin();
+         it != map.end(); ++it)
+    {
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(it->first->mName);
+        MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+
+        OEngine::Physic::AnimatedShapeInstance& instance = it->second;
+
+        std::map<std::string, int>& shapes = instance.mAnimatedShapes;
+        for (std::map<std::string, int>::iterator shapeIt = shapes.begin();
+             shapeIt != shapes.end(); ++shapeIt)
+        {
+            Ogre::Node* bone = animation->getNode(shapeIt->first);
+
+            btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
+
+            btTransform trans;
+            trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()));
+            trans.setRotation(BtOgre::Convert::toBullet(bone->_getDerivedOrientation()));
+
+            compound->getChildShape(shapeIt->second)->setLocalScaling(BtOgre::Convert::toBullet(bone->_getDerivedScale()));
+            compound->updateChildTransform(shapeIt->second, trans);
+        }
+    }
+}
+
+}
+
+
 namespace MWWorld
 {
 
@@ -175,7 +215,7 @@ namespace MWWorld
 
             const int maxHeight = 200.f;
             OEngine::Physic::ActorTracer tracer;
-            tracer.findGround(physicActor->getCollisionBody(), position, position-Ogre::Vector3(0,0,maxHeight), engine);
+            tracer.findGround(physicActor, position, position-Ogre::Vector3(0,0,maxHeight), engine);
             if(tracer.mFraction >= 1.0f)
             {
                 physicActor->setOnGround(false);
@@ -564,11 +604,10 @@ namespace MWWorld
         std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
-        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(
+        mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
-        OEngine::Physic::RigidBody* raycastingBody = mEngine->createAndAdjustRigidBody(
+        mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
-        mEngine->addRigidBody(body, true, raycastingBody);
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr)
@@ -607,9 +646,10 @@ namespace MWWorld
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         const std::string &handle = node->getName();
         const Ogre::Quaternion &rotation = node->getOrientation();
+
+        // TODO: map to MWWorld::Ptr for faster access
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
-            //Needs to be changed
             act->setRotation(rotation);
         }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
@@ -740,8 +780,10 @@ namespace MWWorld
                 btCollisionObject object;
                 object.setCollisionShape(&planeShape);
 
+                // TODO: this seems to have a slight performance impact
                 if (waterCollision)
-                    mEngine->dynamicsWorld->addCollisionObject(&object);
+                    mEngine->mDynamicsWorld->addCollisionObject(&object,
+                                                                0xff, OEngine::Physic::CollisionType_Actor);
 
                 // 100 points of slowfall reduce gravity by 90% (this is just a guess)
                 float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).mMagnitude / 100.f) * 0.9f), 0.9f);
@@ -751,7 +793,7 @@ namespace MWWorld
                                                             waterlevel, slowFall, mEngine);
 
                 if (waterCollision)
-                    mEngine->dynamicsWorld->removeCollisionObject(&object);
+                    mEngine->mDynamicsWorld->removeCollisionObject(&object);
 
                 float heightDiff = newpos.z - oldHeight;
 
@@ -766,5 +808,13 @@ namespace MWWorld
         mMovementQueue.clear();
 
         return mMovementResults;
+    }
+
+    void PhysicsSystem::stepSimulation(float dt)
+    {
+        animateCollisionShapes(mEngine->mAnimatedShapes);
+        animateCollisionShapes(mEngine->mAnimatedRaycastingShapes);
+
+        mEngine->stepSimulation(dt);
     }
 }

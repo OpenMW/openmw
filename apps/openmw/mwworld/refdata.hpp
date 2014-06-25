@@ -54,7 +54,7 @@ namespace MWWorld
             RefData();
 
             /// @param cellRef Used to copy constant data such as position into this class where it can
-            /// be altered without effecting the original data. This makes it possible
+            /// be altered without affecting the original data. This makes it possible
             /// to reset the position as the orignal data is still held in the CellRef
             RefData (const ESM::CellRef& cellRef);
 

@@ -118,6 +118,7 @@ namespace MWGui
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
       , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
       , mHudEnabled(true)
+      , mGuiEnabled(true)
       , mCursorVisible(true)
       , mPlayerName()
       , mPlayerRaceId()
@@ -420,7 +421,7 @@ namespace MWGui
         mRecharge->setVisible(false);
         mVideoBackground->setVisible(false);
 
-        mHud->setVisible(mHudEnabled);
+        mHud->setVisible(mHudEnabled && mGuiEnabled);
 
         bool gameMode = !isGuiMode();
 
@@ -429,6 +430,13 @@ namespace MWGui
 
         if (gameMode)
             setKeyFocusWidget (NULL);
+
+        if (!mGuiEnabled)
+        {
+            if (containsMode(GM_Console))
+                mConsole->setVisible(true);
+            return;
+        }
 
         // Icons of forced hidden windows are displayed
         setMinimapVisibility((mAllowed & GW_Map) && (!mMap->pinned() || (mForceHidden & GW_Map)));
@@ -1343,6 +1351,13 @@ namespace MWGui
     {
         mHudEnabled = !mHudEnabled;
         mHud->setVisible (mHudEnabled);
+    }
+
+    bool WindowManager::toggleGui()
+    {
+        mGuiEnabled = !mGuiEnabled;
+        updateVisible();
+        return mGuiEnabled;
     }
 
     bool WindowManager::getRestEnabled()

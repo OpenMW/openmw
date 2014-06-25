@@ -227,9 +227,6 @@ namespace MWScript
                 std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
-                // ignore extra garbage argument
-                runtime.pop();
-
                 runtime.push(MWBase::Environment::get().getDialogueManager()
                              ->getFactionReaction(faction1, faction2));
             }

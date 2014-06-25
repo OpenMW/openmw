@@ -967,7 +967,7 @@ namespace MWWorld
 
         Ogre::Vector3 vec(x, y, z);
 
-        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL;
+        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
@@ -989,7 +989,9 @@ namespace MWWorld
             }
             else
             {
-                if (!mWorldScene->isCellActive(*currCell) && mWorldScene->isCellActive(*newCell))
+                bool currCellActive = mWorldScene->isCellActive(*currCell);
+                bool newCellActive = mWorldScene->isCellActive(*newCell);
+                if (!currCellActive && newCellActive)
                 {
                     MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
                     mWorldScene->addObjectToScene(newPtr);
@@ -1000,7 +1002,7 @@ namespace MWWorld
                     }
                     addContainerScripts(newPtr, newCell);
                 }
-                else if (!mWorldScene->isCellActive(*newCell) && mWorldScene->isCellActive(*currCell))
+                else if (!newCellActive && currCellActive)
                 {
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
@@ -1011,7 +1013,9 @@ namespace MWWorld
                             .copyToCell(ptr, *newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
-                else
+                else if (!currCellActive && !newCellActive)
+                    ptr.getClass().copyToCell(ptr, *newCell);
+                else // both cells active
                 {
                     MWWorld::Ptr copy =
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
@@ -1231,7 +1235,7 @@ namespace MWWorld
         if(player != results.end())
             moveObjectImp(player->first, player->second.x, player->second.y, player->second.z);
 
-        mPhysEngine->stepSimulation(duration);
+        mPhysics->stepSimulation(duration);
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -1471,8 +1475,13 @@ namespace MWWorld
         std::vector < std::pair < float, std::string > >::iterator it = results.begin();
         while (it != results.end())
         {
-            if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
-            || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
+            if ((*it).second.find("HeightField") != std::string::npos) // Don't attempt to getPtrViaHandle on terrain
+            {
+                ++it;
+                continue;
+            }
+
+            if (getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
             {
                 it = results.erase(it);
             }
@@ -1480,7 +1489,8 @@ namespace MWWorld
                 ++it;
         }
 
-        if (results.empty())
+        if (results.empty()
+                || results.front().second.find("HeightField") != std::string::npos) // Blocked by terrain
         {
             mFacedHandle = "";
             mFacedDistance = FLT_MAX;
@@ -1847,7 +1857,7 @@ namespace MWWorld
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             OEngine::Physic::ActorTracer tracer;
             // a small distance above collision object is considered "on ground"
-            tracer.findGround(physactor->getCollisionBody(),
+            tracer.findGround(physactor,
                               pos,
                               pos - Ogre::Vector3(0, 0, 1.5f), // trace a small amount down
                               mPhysEngine);
@@ -1986,6 +1996,22 @@ namespace MWWorld
             return mWeatherManager->getWindSpeed();
         else
             return 0.f;
+    }
+
+    bool World::isInStorm() const
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->isInStorm();
+        else
+            return false;
+    }
+
+    Ogre::Vector3 World::getStormDirection() const
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->getStormDirection();
+        else
+            return Ogre::Vector3(0,1,0);
     }
 
     void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
@@ -2303,6 +2329,7 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
+        // TODO: this only works for the player
         MWWorld::Ptr target = getFacedObject();
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();

@@ -1027,7 +1027,11 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
         if(!state.mPlaying && state.mAutoDisable)
         {
+            if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
+                mAccumRoot->setPosition(0.f,0.f,0.f);
+
             mStates.erase(stateiter++);
+
             resetActiveGroups();
         }
         else
@@ -1169,20 +1173,68 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
             params.mObjects->mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationTime> (new EffectAnimationTime()));
     }
 
-    if (!texture.empty())
+
+    // Do some manual adjustments on the created entities/particle systems
+
+    // It looks like vanilla MW totally ignores lighting settings for effects attached to characters.
+    // If we don't do this, some effects will look way too dark depending on the environment
+    // (e.g. magic_cast_dst.nif). They were clearly meant to use emissive lighting.
+    // We used to have this hack in the NIF material loader, but for effects not attached to characters
+    // (e.g. ash storms) the lighting settings do seem to be in use. Is there maybe a flag we have missed?
+    Ogre::ColourValue ambient = Ogre::ColourValue(0.f, 0.f, 0.f);
+    Ogre::ColourValue diffuse = Ogre::ColourValue(0.f, 0.f, 0.f);
+    Ogre::ColourValue specular = Ogre::ColourValue(0.f, 0.f, 0.f);
+    Ogre::ColourValue emissive = Ogre::ColourValue(1.f, 1.f, 1.f);
+    for(size_t i = 0;i < params.mObjects->mParticles.size(); ++i)
     {
-        for(size_t i = 0;i < params.mObjects->mParticles.size(); ++i)
+        Ogre::ParticleSystem* partSys = params.mObjects->mParticles[i];
+
+        Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(partSys);
+
+        for (int t=0; t<mat->getNumTechniques(); ++t)
         {
-            Ogre::ParticleSystem* partSys = params.mObjects->mParticles[i];
-
-            Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(partSys);
-
-            for (int t=0; t<mat->getNumTechniques(); ++t)
+            Ogre::Technique* tech = mat->getTechnique(t);
+            for (int p=0; p<tech->getNumPasses(); ++p)
             {
-                Ogre::Technique* tech = mat->getTechnique(t);
-                for (int p=0; p<tech->getNumPasses(); ++p)
+                Ogre::Pass* pass = tech->getPass(p);
+
+                pass->setAmbient(ambient);
+                pass->setDiffuse(diffuse);
+                pass->setSpecular(specular);
+                pass->setEmissive(emissive);
+
+                if (!texture.empty())
                 {
-                    Ogre::Pass* pass = tech->getPass(p);
+                    for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
+                    {
+                        Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
+                        tus->setTextureName("textures\\" + texture);
+                    }
+                }
+            }
+        }
+    }
+    for(size_t i = 0;i < params.mObjects->mEntities.size(); ++i)
+    {
+        Ogre::Entity* ent = params.mObjects->mEntities[i];
+        if (ent == params.mObjects->mSkelBase)
+            continue;
+        Ogre::MaterialPtr mat = params.mObjects->mMaterialControllerMgr.getWritableMaterial(ent);
+
+        for (int t=0; t<mat->getNumTechniques(); ++t)
+        {
+            Ogre::Technique* tech = mat->getTechnique(t);
+            for (int p=0; p<tech->getNumPasses(); ++p)
+            {
+                Ogre::Pass* pass = tech->getPass(p);
+
+                pass->setAmbient(ambient);
+                pass->setDiffuse(diffuse);
+                pass->setSpecular(specular);
+                pass->setEmissive(emissive);
+
+                if (!texture.empty())
+                {
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);

@@ -20,6 +20,7 @@
 #include "character.hpp"
 
 #include <OgreStringConverter.h>
+#include <OgreSceneNode.h>
 
 #include "movement.hpp"
 #include "npcstats.hpp"
@@ -52,6 +53,43 @@ std::string getBestAttack (const ESM::Weapon* weapon)
         return "chop";
     else
         return "thrust";
+}
+
+// Converts a movement Run state to its equivalent Walk state.
+MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState state)
+{
+    using namespace MWMechanics;
+    CharacterState ret = state;
+    switch (state)
+    {
+        case CharState_RunForward:
+            ret = CharState_WalkForward;
+            break;
+        case CharState_RunBack:
+            ret = CharState_WalkBack;
+            break;
+        case CharState_RunLeft:
+            ret = CharState_WalkLeft;
+            break;
+        case CharState_RunRight:
+            ret = CharState_WalkRight;
+            break;
+        case CharState_SwimRunForward:
+            ret = CharState_SwimWalkForward;
+            break;
+        case CharState_SwimRunBack:
+            ret = CharState_SwimWalkBack;
+            break;
+        case CharState_SwimRunLeft:
+            ret = CharState_SwimWalkLeft;
+            break;
+        case CharState_SwimRunRight:
+            ret = CharState_SwimWalkRight;
+            break;
+        default:
+            break;
+    }
+    return ret;
 }
 
 }
@@ -234,6 +272,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                              1.0f, "start", "stop", 0.0f, ~0ul);
     }
 
+    updateIdleStormState();
+
     if(force && mJumpState != JumpState_None)
     {
         std::string jump;
@@ -320,7 +360,18 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
             bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
 
-            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
+            // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
+            // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
+            std::string anim = mCurrentMovement;
+            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name()
+                    && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
+            {
+                CharacterState walkState = runStateToWalkState(mMovementState);
+                const StateInfo *stateinfo = std::find_if(sMovementList, sMovementListEnd, FindCharState(walkState));
+                anim = stateinfo->groupname;
+            }
+
+            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
             {
                 mMovementAnimVelocity = vel;
                 speedmult = mMovementSpeed / vel;
@@ -548,6 +599,45 @@ CharacterController::~CharacterController()
 void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 {
     mPtr = ptr;
+}
+
+void CharacterController::updateIdleStormState()
+{
+    bool inStormDirection = false;
+    if (MWBase::Environment::get().getWorld()->isInStorm())
+    {
+        Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
+        Ogre::Vector3 characterDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
+        inStormDirection = stormDirection.angleBetween(characterDirection) < Ogre::Degree(40);
+    }
+    if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
+    {
+        float complete = 0;
+        mAnimation->getInfo("idlestorm", &complete);
+
+        if (complete == 0)
+            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+                             1.0f, "start", "loop start", 0.0f, 0);
+        else if (complete == 1)
+            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+                             1.0f, "loop start", "loop stop", 0.0f, ~0ul);
+    }
+    else
+    {
+        if (mUpperBodyState == UpperCharState_Nothing)
+        {
+            if (mAnimation->isPlaying("idlestorm"))
+            {
+                if (mAnimation->getCurrentTime("idlestorm") < mAnimation->getTextKeyTime("idlestorm: loop stop"))
+                {
+                    mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, true,
+                                     1.0f, "loop stop", "stop", 0.0f, 0);
+                }
+            }
+        }
+        else
+            mAnimation->disable("idlestorm");
+    }
 }
 
 bool CharacterController::updateCreatureState()

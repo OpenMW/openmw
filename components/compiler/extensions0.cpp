@@ -70,6 +70,7 @@ namespace Compiler
             extensions.registerFunction ("getlineofsight", 'l', "c", opcodeGetLineOfSight, opcodeGetLineOfSightExplicit);
             extensions.registerFunction ("getlos", 'l', "c", opcodeGetLineOfSight, opcodeGetLineOfSightExplicit);
             extensions.registerFunction("gettarget", 'l', "c", opcodeGetTarget, opcodeGetTargetExplicit);
+            extensions.registerInstruction("face", "llX", opcodeFace, opcodeFaceExplicit);
         }
     }
 
@@ -179,7 +180,7 @@ namespace Compiler
             extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
                 opcodeSameFactionExplicit);
             extensions.registerInstruction("modfactionreaction", "ccl", opcodeModFactionReaction);
-            extensions.registerFunction("getfactionreaction", 'l', "ccl", opcodeGetFactionReaction);
+            extensions.registerFunction("getfactionreaction", 'l', "ccX", opcodeGetFactionReaction);
             extensions.registerInstruction("clearinfoactor", "", opcodeClearInfoActor, opcodeClearInfoActorExplicit);
         }
     }
@@ -216,6 +217,8 @@ namespace Compiler
             extensions.registerInstruction ("showmap", "S", opcodeShowMap);
             extensions.registerInstruction ("fillmap", "", opcodeFillMap);
             extensions.registerInstruction ("menutest", "/l", opcodeMenuTest);
+            extensions.registerInstruction ("togglemenus", "", opcodeToggleMenus);
+            extensions.registerInstruction ("tm", "", opcodeToggleMenus);
         }
     }
 
@@ -403,7 +406,7 @@ namespace Compiler
             extensions.registerInstruction ("setpccrimelevel", "f", opcodeSetPCCrimeLevel);
             extensions.registerInstruction ("modpccrimelevel", "f", opcodeModPCCrimeLevel);
 
-            extensions.registerInstruction ("addspell", "cx", opcodeAddSpell, opcodeAddSpellExplicit);
+            extensions.registerInstruction ("addspell", "cxX", opcodeAddSpell, opcodeAddSpellExplicit);
             extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
                 opcodeRemoveSpellExplicit);
             extensions.registerInstruction ("removespelleffects", "c", opcodeRemoveSpellEffects,

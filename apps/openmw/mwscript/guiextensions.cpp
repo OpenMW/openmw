@@ -203,6 +203,15 @@ namespace MWScript
             }
         };
 
+        class OpToggleMenus : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                bool state = MWBase::Environment::get().getWindowManager()->toggleGui();
+                runtime.getContext().report(state ? "GUI -> On" : "GUI -> Off");
+            }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -242,6 +251,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Gui::opcodeShowMap, new OpShowMap);
             interpreter.installSegment5 (Compiler::Gui::opcodeFillMap, new OpFillMap);
             interpreter.installSegment3 (Compiler::Gui::opcodeMenuTest, new OpMenuTest);
+            interpreter.installSegment5 (Compiler::Gui::opcodeToggleMenus, new OpToggleMenus);
         }
     }
 }

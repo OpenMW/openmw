@@ -25,10 +25,15 @@ class ESMWriter
         ESMWriter();
 
         unsigned int getVersion() const;
+
+        // Set various header data (ESM::Header::Data). All of the below functions must be called before writing,
+        // otherwise this data will be left uninitialized.
         void setVersion(unsigned int ver = 0x3fa66666);
+        void setType(int type);
         void setEncoder(ToUTF8::Utf8Encoder *encoding);
         void setAuthor(const std::string& author);
         void setDescription(const std::string& desc);
+
         // Set the record count for writing it in the file header
         void setRecordCount (int count);
         // Counts how many records we have actually written.

@@ -78,7 +78,7 @@ namespace MWWorld
         state.mSourceName = sourceName;
         state.mId = model;
         state.mSpellId = spellId;
-        state.mCaster = caster;
+        state.mCasterHandle = caster.getRefData().getHandle();
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
@@ -162,7 +162,7 @@ namespace MWWorld
             {
                 MWWorld::Ptr obstacle = MWBase::Environment::get().getWorld()->searchPtrViaHandle(cIt->second);
 
-                MWWorld::Ptr caster = it->mCaster;
+                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaHandle(it->mCasterHandle);
                 if (caster.isEmpty())
                     caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
 
