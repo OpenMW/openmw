@@ -87,7 +87,7 @@ namespace CSVRender
 
         std::stringstream windowHandle;
 #ifdef WIN32
-        windowHandle << Ogre::StringConverter::toString((unsigned long)(this->winId()));
+        windowHandle << Ogre::StringConverter::toString((uintptr_t)(this->winId()));
 #else
         windowHandle << this->winId();
 #endif

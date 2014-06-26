@@ -613,8 +613,10 @@ if (WIN32)
         4127 # Conditional expression is constant
         4242 # Storing value in a variable of a smaller type, possible loss of data
         4244 # Storing value of one type in variable of another (size_t in int, for example)
+        4267 # Conversion from 'size_t' to 'int', possible loss of data
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
+        4351 # New behavior: elements of array 'array' will be default initialized (desired behavior)
         4355 # Using 'this' in member initialization list
         4505 # Unreferenced local function has been removed
         4701 # Potentially uninitialized local variable used
@@ -633,7 +635,9 @@ if (WIN32)
     set(SHINY_OGRE_WARNINGS "${WARNINGS} /wd4101")
     set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${SHINY_OGRE_WARNINGS})
     set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS ${WARNINGS})
-    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    # oics uses tinyxml, which has an initialized but unused variable
+    set(OICS_WARNINGS "${WARNINGS} /wd4189")
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${OICS_WARNINGS})
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
     if (BUILD_LAUNCHER)
         set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
