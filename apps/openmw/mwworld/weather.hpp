@@ -5,6 +5,7 @@
 #include <string>
 
 #include <OgreColourValue.h>
+#include <OgreVector3.h>
 
 namespace ESM
 {
@@ -202,6 +203,8 @@ namespace MWWorld
         float mHour;
         float mWindSpeed;
         bool mIsStorm;
+        Ogre::Vector3 mStormDirection;
+
         MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;

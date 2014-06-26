@@ -115,7 +115,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
      mHour(14), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
      mWeatherUpdateTime(0), mThunderFlash(0), mThunderChance(0),
      mThunderChanceNeeded(50), mThunderSoundDelay(0), mRemainingTransitionTime(0),
-     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering), mIsStorm(false)
+     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering), mIsStorm(false),
+     mStormDirection(0,1,0)
 {
     //Globals
     mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
@@ -388,6 +389,17 @@ void WeatherManager::update(float duration)
 
     mWindSpeed = mResult.mWindSpeed;
     mIsStorm = mResult.mIsStorm;
+
+    if (mIsStorm)
+    {
+        MWWorld::Ptr player = world->getPlayerPtr();
+        Ogre::Vector3 playerPos (player.getRefData().getPosition().pos);
+        Ogre::Vector3 redMountainPos (19950, 72032, 27831);
+
+        mStormDirection = (playerPos - redMountainPos);
+        mStormDirection.z = 0;
+        mRendering->getSkyManager()->setStormDirection(mStormDirection);
+    }
 
     mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
 
@@ -812,5 +824,5 @@ bool WeatherManager::isInStorm() const
 
 Ogre::Vector3 WeatherManager::getStormDirection() const
 {
-    return Ogre::Vector3(0,-1,0);
+    return mStormDirection;
 }

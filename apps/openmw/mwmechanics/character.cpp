@@ -608,7 +608,7 @@ void CharacterController::updateIdleStormState()
     {
         Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         Ogre::Vector3 characterDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
-        inStormDirection = stormDirection.angleBetween(characterDirection) < Ogre::Degree(40);
+        inStormDirection = stormDirection.angleBetween(characterDirection) > Ogre::Degree(120);
     }
     if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
