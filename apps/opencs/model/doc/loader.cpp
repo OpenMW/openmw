@@ -46,7 +46,7 @@ void CSMDoc::Loader::load()
 
     bool done = false;
 
-    const int batchingSize = 100;
+    const int batchingSize = 50;
 
     try
     {
