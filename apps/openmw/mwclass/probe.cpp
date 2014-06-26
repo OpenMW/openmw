@@ -85,7 +85,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        return ref->mBase->mData.mValue * (static_cast<float>(getItemHealth(ptr)) / getItemMaxHealth(ptr));
+        return ref->mBase->mData.mValue;
     }
 
     void Probe::registerSelf()

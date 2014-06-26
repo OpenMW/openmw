@@ -154,7 +154,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
-        return ref->mBase->mData.mValue * (static_cast<float>(getItemHealth(ptr)) / getItemMaxHealth(ptr));
+        return ref->mBase->mData.mValue;
     }
 
     void Weapon::registerSelf()

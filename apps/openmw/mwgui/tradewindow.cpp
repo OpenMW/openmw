@@ -23,6 +23,19 @@
 #include "countdialog.hpp"
 #include "dialogue.hpp"
 
+namespace
+{
+
+    int getEffectiveValue (MWWorld::Ptr item, int count)
+    {
+        int price = item.getClass().getValue(item) * count;
+        if (item.getClass().hasItemHealth(item))
+            price *= (static_cast<float>(item.getClass().getItemHealth(item)) / item.getClass().getItemMaxHealth(item));
+        return price;
+    }
+
+}
+
 namespace MWGui
 {
     const float TradeWindow::sBalanceChangeInitialPause = 0.5;
@@ -465,7 +478,7 @@ namespace MWGui
 
     void TradeWindow::sellToNpc(const MWWorld::Ptr& item, int count, bool boughtItem)
     {
-        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, item.getClass().getValue(item) * count, boughtItem);
+        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(item, count), boughtItem);
 
         mCurrentBalance += diff;
         mCurrentMerchantOffer += diff;
@@ -475,7 +488,7 @@ namespace MWGui
 
     void TradeWindow::buyFromNpc(const MWWorld::Ptr& item, int count, bool soldItem)
     {
-        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, item.getClass().getValue(item) * count, !soldItem);
+        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(item, count), !soldItem);
 
         mCurrentBalance -= diff;
         mCurrentMerchantOffer -= diff;
