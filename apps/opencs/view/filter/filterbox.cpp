@@ -35,7 +35,11 @@ void CSVFilter::FilterBox::setRecordFilter (const std::string& filter)
 
 void CSVFilter::FilterBox::dropEvent (QDropEvent* event)
 {
-    std::vector<CSMWorld::UniversalId> data = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData())->getData();
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
+
+    std::vector<CSMWorld::UniversalId> data = mime->getData();
 
     emit recordDropped(data, event->proposedAction());
 }

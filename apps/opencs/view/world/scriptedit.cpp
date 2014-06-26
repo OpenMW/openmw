@@ -45,19 +45,36 @@ CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& docum
 
 void CSVWorld::ScriptEdit::dragEnterEvent (QDragEnterEvent* event)
 {
-    setTextCursor (cursorForPosition (event->pos()));
-    event->acceptProposedAction();
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime)
+        QTextEdit::dragEnterEvent(event);
+    else
+    {
+        setTextCursor (cursorForPosition (event->pos()));
+        event->acceptProposedAction();
+    }
 }
 
 void CSVWorld::ScriptEdit::dragMoveEvent (QDragMoveEvent* event)
 {
-    setTextCursor (cursorForPosition (event->pos()));
-    event->accept();
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime)
+        QTextEdit::dragMoveEvent(event);
+    else
+    {
+        setTextCursor (cursorForPosition (event->pos()));
+        event->accept();
+    }
 }
 
 void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+    {
+        QTextEdit::dropEvent(event);
+        return;
+    }
 
     setTextCursor (cursorForPosition (event->pos()));
 

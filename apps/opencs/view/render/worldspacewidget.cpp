@@ -120,6 +120,8 @@ void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
 
     if (mime->fromDocument (mDocument))
     {
