@@ -315,15 +315,22 @@ namespace MWWorld
                     wasOnGround = physicActor->getOnGround(); // store current state
                     tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine); // check if down 2 possible
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
+                    {
                         isOnGround = true;
+                        // if we're on the ground, don't try to fall any more
+                        velocity.z = std::max(0.0f, velocity.z);
+                    }
                 }
             }
 
-            // NOTE: isOnGround was initialised false, so should stay false if falling or sliding horizontally
-            if(isOnGround)
+            // Now that we have the effective movement vector, apply wind forces to it
+            if (MWBase::Environment::get().getWorld()->isInStorm())
             {
-                // if we're on the ground, don't try to fall any more
-                velocity.z = std::max(0.0f, velocity.z); // NOTE: two different velocity assignments above
+                Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
+                Ogre::Degree angle = stormDirection.angleBetween(velocity);
+                static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("fStromWalkMult")->getFloat();
+                velocity *= 1.f-(fStromWalkMult * (angle.valueDegrees()/180.f));
             }
 
             Ogre::Vector3 newPosition = position;

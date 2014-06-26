@@ -128,10 +128,10 @@ namespace MWWorld
         // Rain sound effect
         std::string mRainLoopSoundID;
 
-        // Is this an ash storm / blight storm? This controls two things:
-        // - The particle node will be oriented so that the particles appear to come from the Red Mountain. (not implemented yet)
+        // Is this an ash storm / blight storm? If so, the following will happen:
+        // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
         // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm animation)
-        // Possible effect on movement speed?
+        // - Slower movement when walking against the storm (fStromWalkMult)
         bool mIsStorm;
 
         // How fast does rain travel down?
