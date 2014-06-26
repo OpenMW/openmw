@@ -246,7 +246,7 @@ namespace MWWorld
 
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
-            if (!ptr.getClass().canWalk(ptr) && !isFlying && !ptr.getClass().canSwim(ptr))
+            if (!ptr.getClass().canWalk(ptr) && !ptr.getClass().canFly(ptr) && !ptr.getClass().canSwim(ptr))
                 return position;
 
             /* Anything to collide with? */
