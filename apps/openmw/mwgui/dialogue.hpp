@@ -170,7 +170,7 @@ namespace MWGui
         BookPage* mHistory;
         Widgets::MWList*   mTopicsList;
         MyGUI::ScrollBar* mScrollBar;
-        MyGUI::ProgressPtr mDispositionBar;
+        MyGUI::Progress* mDispositionBar;
         MyGUI::EditBox*     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
