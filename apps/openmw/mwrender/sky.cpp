@@ -429,6 +429,16 @@ void SkyManager::updateRain(float dt)
             Ogre::SceneNode* offsetNode = sceneNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
 
             NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(offsetNode, mRainEffect);
+            for (unsigned int i=0; i<objects->mEntities.size(); ++i)
+            {
+                objects->mEntities[i]->setRenderQueueGroup(RQG_Alpha);
+                objects->mEntities[i]->setVisibilityFlags(RV_Sky);
+            }
+            for (unsigned int i=0; i<objects->mParticles.size(); ++i)
+            {
+                objects->mParticles[i]->setRenderQueueGroup(RQG_Alpha);
+                objects->mParticles[i]->setVisibilityFlags(RV_Sky);
+            }
             mRainModels[offsetNode] = objects;
         }
     }
