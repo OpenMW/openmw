@@ -1395,6 +1395,9 @@ void CharacterController::update(float duration)
             if (mMovementAnimVelocity == 0)
                 world->queueMovement(mPtr, vec);
         }
+        else
+            // We must always queue movement, even if there is none, to apply gravity.
+            world->queueMovement(mPtr, Ogre::Vector3(0.0f));
 
         movement = vec;
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = cls.getMovementSettings(mPtr).mPosition[2] = 0;

@@ -1764,6 +1764,9 @@ namespace MWWorld
     bool
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
+        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
+
         if(!ptr.getClass().isActor())
             return false;
 
@@ -1771,9 +1774,8 @@ namespace MWWorld
             return false;
 
         if (ptr.getClass().canFly(ptr))
-            return true;
+            return !isParalyzed;
 
-        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
         if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
                 && isLevitationEnabled())
             return true;
