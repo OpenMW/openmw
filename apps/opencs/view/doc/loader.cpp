@@ -45,7 +45,7 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mFileProgress->setValue (0);
 
     // record progress
-    mLayout->addWidget (new QLabel ("Records", this));
+    mLayout->addWidget (mRecords = new QLabel ("Records", this));
 
     mRecordProgress = new QProgressBar (this);
 
@@ -75,22 +75,30 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     connect (mButtons, SIGNAL (rejected()), this, SLOT (cancel()));
 }
 
-void CSVDoc::LoadingDocument::nextStage (const std::string& name, int steps)
+void CSVDoc::LoadingDocument::nextStage (const std::string& name, int totalRecords)
 {
     mFile->setText (QString::fromUtf8 (("Loading: " + name).c_str()));
 
     mFileProgress->setValue (mFileProgress->value()+1);
 
     mRecordProgress->setValue (0);
-    mRecordProgress->setMaximum (steps>0 ? steps : 1);
+    mRecordProgress->setMaximum (totalRecords>0 ? totalRecords : 1);
+
+    mTotalRecords = totalRecords;
 }
 
-void CSVDoc::LoadingDocument::nextRecord()
+void CSVDoc::LoadingDocument::nextRecord (int records)
 {
-    int value = mRecordProgress->value()+1;
+    if (records<=mTotalRecords)
+    {
+        mRecordProgress->setValue (records);
 
-    if (value<=mRecordProgress->maximum())
-        mRecordProgress->setValue (value);
+        std::ostringstream stream;
+
+        stream << "Records: " << records << " of " << mTotalRecords;
+
+        mRecords->setText (QString::fromUtf8 (stream.str().c_str()));
+    }
 }
 
 void CSVDoc::LoadingDocument::abort (const std::string& error)
@@ -168,20 +176,21 @@ void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,
     }
 }
 
-void CSVDoc::Loader::nextStage (CSMDoc::Document *document, const std::string& name, int steps)
+void CSVDoc::Loader::nextStage (CSMDoc::Document *document, const std::string& name,
+    int totalRecords)
 {
     std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.find (document);
 
     if (iter!=mDocuments.end())
-        iter->second->nextStage (name, steps);
+        iter->second->nextStage (name, totalRecords);
 }
 
-void CSVDoc::Loader::nextRecord (CSMDoc::Document *document)
+void CSVDoc::Loader::nextRecord (CSMDoc::Document *document, int records)
 {
     std::map<CSMDoc::Document *, LoadingDocument *>::iterator iter = mDocuments.find (document);
 
     if (iter!=mDocuments.end())
-        iter->second->nextRecord();
+        iter->second->nextRecord (records);
 }
 
 void CSVDoc::Loader::loadMessage (CSMDoc::Document *document, const std::string& message)

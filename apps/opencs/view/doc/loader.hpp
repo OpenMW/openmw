@@ -26,6 +26,7 @@ namespace CSVDoc
 
             CSMDoc::Document *mDocument;
             QLabel *mFile;
+            QLabel *mRecords;
             QProgressBar *mFileProgress;
             QProgressBar *mRecordProgress;
             bool mAborted;
@@ -33,6 +34,7 @@ namespace CSVDoc
             QLabel *mError;
             QListWidget *mMessages;
             QVBoxLayout *mLayout;
+            int mTotalRecords;
 
         private:
 
@@ -42,9 +44,9 @@ namespace CSVDoc
 
             LoadingDocument (CSMDoc::Document *document);
 
-            void nextStage (const std::string& name, int steps);
+            void nextStage (const std::string& name, int totalRecords);
 
-            void nextRecord();
+            void nextRecord (int records);
 
             void abort (const std::string& error);
 
@@ -88,9 +90,9 @@ namespace CSVDoc
             void loadingStopped (CSMDoc::Document *document, bool completed,
                 const std::string& error);
 
-            void nextStage (CSMDoc::Document *document, const std::string& name, int steps);
+            void nextStage (CSMDoc::Document *document, const std::string& name, int totalRecords);
 
-            void nextRecord (CSMDoc::Document *document);
+            void nextRecord (CSMDoc::Document *document, int records);
 
             void loadMessage (CSMDoc::Document *document, const std::string& message);
     };

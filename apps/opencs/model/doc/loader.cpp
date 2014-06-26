@@ -8,7 +8,7 @@
 #include "document.hpp"
 #include "state.hpp"
 
-CSMDoc::Loader::Stage::Stage() : mFile (0), mRecordsLeft (false) {}
+CSMDoc::Loader::Stage::Stage() : mFile (0), mRecordsLoaded (0), mRecordsLeft (false) {}
 
 
 CSMDoc::Loader::Loader()
@@ -59,17 +59,21 @@ void CSMDoc::Loader::load()
                     iter->second.mRecordsLeft = false;
                     break;
                 }
+                else
+                    ++(iter->second.mRecordsLoaded);
 
             CSMWorld::UniversalId log (CSMWorld::UniversalId::Type_LoadErrorLog, 0);
 
+            { // silence a g++ warning
             for (CSMDoc::Stage::Messages::const_iterator iter (messages.begin());
                 iter!=messages.end(); ++iter)
             {
                 document->getReport (log)->add (iter->first, iter->second);
                 emit loadMessage (document, iter->second);
             }
+            }
 
-            emit nextRecord (document);
+            emit nextRecord (document, iter->second.mRecordsLoaded);
 
             return;
         }
@@ -80,15 +84,17 @@ void CSMDoc::Loader::load()
 
             int steps = document->getData().startLoading (path, iter->second.mFile!=editedIndex, false);
             iter->second.mRecordsLeft = true;
+            iter->second.mRecordsLoaded = 0;
 
-            emit nextStage (document, path.filename().string(), steps/batchingSize);
+            emit nextStage (document, path.filename().string(), steps);
         }
         else if (iter->second.mFile==size)
         {
             int steps = document->getData().startLoading (document->getProjectPath(), false, true);
             iter->second.mRecordsLeft = true;
+            iter->second.mRecordsLoaded = 0;
 
-            emit nextStage (document, "Project File", steps/batchingSize);
+            emit nextStage (document, "Project File", steps);
         }
         else
         {
