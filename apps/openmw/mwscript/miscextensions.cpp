@@ -876,8 +876,8 @@ namespace MWScript
                 else
                 {
                     std::vector<std::string> contentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
-                    assert (contentFiles.size() > ptr.getCellRef().getRefNum().mContentFile);
-                    msg << contentFiles[ptr.getCellRef().getRefNum().mContentFile] << std::endl;
+
+                    msg << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << std::endl;
                 }
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
