@@ -65,6 +65,7 @@ namespace MWMechanics
 
             float mStrength; // this is actually make sense only in ranged combat
             float mMinMaxAttackDuration[3][2]; // slash, thrust, chop has different durations
+            bool mMinMaxAttackDurationInitialised;
 
             bool mForceNoShortcut;
             ESM::Position mShortcutFailPos;
