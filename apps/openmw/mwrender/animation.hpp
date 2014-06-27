@@ -173,7 +173,8 @@ protected:
                const std::string &groupname, const std::string &start, const std::string &stop,
                float startpoint);
 
-    void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
+    void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key,
+                       const NifOgre::TextKeyMap& map);
 
     /* Sets the root model of the object. If 'baseonly' is true, then any meshes or particle
      * systems in the model are ignored (useful for NPCs, where only the skeleton is needed for

@@ -669,7 +669,8 @@ void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     }
 }
 
-void Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
+void Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key,
+                              const NifOgre::TextKeyMap& textkeys)
 {
     //float time = key->first;
     const std::string &evt = key->second;
@@ -742,6 +743,34 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
             mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
         else
             mPtr.getClass().hit(mPtr);
+    }
+    else if (!groupname.empty() && groupname.compare(0, groupname.size()-1, "attack") == 0
+             && evt.compare(off, len, "start") == 0)
+    {
+        NifOgre::TextKeyMap::const_iterator hitKey = key;
+
+        // Not all animations have a hit key defined. If there is none, the hit happens with the start key.
+        bool hasHitKey = false;
+        while (hitKey != textkeys.end())
+        {
+            if (hitKey->second == groupname + ": hit")
+            {
+                hasHitKey = true;
+                break;
+            }
+            if (hitKey->second == groupname + ": stop")
+                break;
+            ++hitKey;
+        }
+        if (!hasHitKey)
+        {
+            if (groupname == "attack1")
+                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+            else if (groupname == "attack2")
+                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+            else if (groupname == "attack3")
+                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+        }
     }
     else if (evt.compare(off, len, "shoot attach") == 0)
         attachArrow();
@@ -821,7 +850,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
             NifOgre::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
             while(textkey != textkeys.end() && textkey->first <= state.mTime)
             {
-                handleTextKey(state, groupname, textkey);
+                handleTextKey(state, groupname, textkey, textkeys);
                 ++textkey;
             }
 
@@ -836,7 +865,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
                 textkey = textkeys.lower_bound(state.mTime);
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
                 {
-                    handleTextKey(state, groupname, textkey);
+                    handleTextKey(state, groupname, textkey, textkeys);
                     ++textkey;
                 }
             }
@@ -1014,7 +1043,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
             while(textkey != textkeys.end() && textkey->first <= state.mTime)
             {
-                handleTextKey(state, stateiter->first, textkey);
+                handleTextKey(state, stateiter->first, textkey, textkeys);
                 ++textkey;
             }
 
@@ -1028,7 +1057,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
                 textkey = textkeys.lower_bound(state.mTime);
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
                 {
-                    handleTextKey(state, stateiter->first, textkey);
+                    handleTextKey(state, stateiter->first, textkey, textkeys);
                     ++textkey;
                 }
 
