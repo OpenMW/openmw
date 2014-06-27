@@ -70,7 +70,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright
+    lightingbright object
     )
 
 opencs_units_noqt (view/world

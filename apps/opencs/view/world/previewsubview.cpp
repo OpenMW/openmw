@@ -23,10 +23,10 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
         referenceableIdChanged (referenceableId);
 
         mScene =
-            new CSVRender::PreviewWidget (document.getData(), referenceableId, id.getId(), this);
+            new CSVRender::PreviewWidget (document.getData(), id.getId(), false, this);
     }
     else
-        mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), this);
+        mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), true, this);
 
     SceneToolbar *toolbar = new SceneToolbar (48+6, this);
 
