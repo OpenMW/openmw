@@ -144,12 +144,6 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     }
     else
         mAttachedObjects.clear();
-
-    for(size_t i = 0;i < mObjectRoot->mControllers.size();i++)
-    {
-        if(mObjectRoot->mControllers[i].getSource().isNull())
-            mObjectRoot->mControllers[i].setSource(mAnimationTimePtr[0]);
-    }
 }
 
 struct AddGlow
@@ -308,6 +302,12 @@ void Animation::addAnimSource(const std::string &model)
 
         ctrls[i].setSource(mAnimationTimePtr[grp]);
         grpctrls[grp].push_back(ctrls[i]);
+    }
+
+    for (unsigned int i = 0; i < mObjectRoot->mControllers.size(); ++i)
+    {
+        if (mObjectRoot->mControllers[i].getSource().isNull())
+            mObjectRoot->mControllers[i].setSource(mAnimationTimePtr[0]);
     }
 }
 
@@ -1039,7 +1039,10 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     }
 
     for(size_t i = 0;i < mObjectRoot->mControllers.size();i++)
-        mObjectRoot->mControllers[i].update();
+    {
+        if(!mObjectRoot->mControllers[i].getSource().isNull())
+            mObjectRoot->mControllers[i].update();
+    }
 
     // Apply group controllers
     for(size_t grp = 0;grp < sNumGroups;grp++)
