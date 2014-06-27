@@ -467,16 +467,17 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
     const std::string stop = groupname+": stop";
     float starttime = std::numeric_limits<float>::max();
     float stoptime = 0.0f;
-    NifOgre::TextKeyMap::const_iterator keyiter(keys.begin());
-    while(keyiter != keys.end())
+    // Have to find keys in reverse (see reset method)
+    NifOgre::TextKeyMap::const_reverse_iterator keyiter(keys.rbegin());
+    while(keyiter != keys.rend())
     {
         if(keyiter->second == start || keyiter->second == loopstart)
-            starttime = keyiter->first;
-        else if(keyiter->second == loopstop || keyiter->second == stop)
         {
-            stoptime = keyiter->first;
+            starttime = keyiter->first;
             break;
         }
+        else if(keyiter->second == loopstop || keyiter->second == stop)
+            stoptime = keyiter->first;
         ++keyiter;
     }
 
@@ -592,31 +593,39 @@ void Animation::updatePosition(float oldtime, float newtime, Ogre::Vector3 &posi
 
 bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
 {
-    const NifOgre::TextKeyMap::const_iterator groupstart = findGroupStart(keys, groupname);
+    // Look for text keys in reverse. This normally wouldn't matter, but for some reason undeadwolf_2.nif has two
+    // separate walkforward keys, and the last one is supposed to be used.
+    NifOgre::TextKeyMap::const_reverse_iterator groupend(keys.rbegin());
+    for(;groupend != keys.rend();++groupend)
+    {
+        if(groupend->second.compare(0, groupname.size(), groupname) == 0 &&
+           groupend->second.compare(groupname.size(), 2, ": ") == 0)
+            break;
+    }
 
     std::string starttag = groupname+": "+start;
-    NifOgre::TextKeyMap::const_iterator startkey(groupstart);
-    while(startkey != keys.end() && startkey->second != starttag)
+    NifOgre::TextKeyMap::const_reverse_iterator startkey(groupend);
+    while(startkey != keys.rend() && startkey->second != starttag)
         ++startkey;
-    if(startkey == keys.end() && start == "loop start")
+    if(startkey == keys.rend() && start == "loop start")
     {
         starttag = groupname+": start";
-        startkey = groupstart;
-        while(startkey != keys.end() && startkey->second != starttag)
+        startkey = groupend;
+        while(startkey != keys.rend() && startkey->second != starttag)
             ++startkey;
     }
-    if(startkey == keys.end())
+    if(startkey == keys.rend())
         return false;
 
     const std::string stoptag = groupname+": "+stop;
-    NifOgre::TextKeyMap::const_iterator stopkey(groupstart);
-    while(stopkey != keys.end()
+    NifOgre::TextKeyMap::const_reverse_iterator stopkey(groupend);
+    while(stopkey != keys.rend()
           // We have to ignore extra garbage at the end.
           // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
           // Why, just why? :(
           && (stopkey->second.size() < stoptag.size() || stopkey->second.substr(0,stoptag.size()) != stoptag))
         ++stopkey;
-    if(stopkey == keys.end())
+    if(stopkey == keys.rend())
         return false;
 
     if(startkey->first > stopkey->first)
@@ -628,18 +637,24 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
     state.mStopTime = stopkey->first;
 
     state.mTime = state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint);
+
+    // mLoopStartTime and mLoopStopTime normally get assigned when encountering these keys while playing the animation
+    // (see handleTextKey). But if startpoint is already past these keys, we need to assign them now.
     if(state.mTime > state.mStartTime)
     {
         const std::string loopstarttag = groupname+": loop start";
         const std::string loopstoptag = groupname+": loop stop";
-        NifOgre::TextKeyMap::const_iterator key(groupstart);
-        while(key->first <= state.mTime && key != stopkey)
+
+        NifOgre::TextKeyMap::const_reverse_iterator key(groupend);
+        for (; key != startkey && key != keys.rend(); ++key)
         {
-            if(key->second == loopstarttag)
+            if (key->first > state.mTime)
+                continue;
+
+            if (key->second == loopstarttag)
                 state.mLoopStartTime = key->first;
-            else if(key->second == loopstoptag)
+            else if (key->second == loopstoptag)
                 state.mLoopStopTime = key->first;
-            ++key;
         }
     }
 
