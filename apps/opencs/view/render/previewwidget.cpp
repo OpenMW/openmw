@@ -18,9 +18,9 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
         mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables);
 
     connect (referenceables, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (ReferenceableDataChanged (const QModelIndex&, const QModelIndex&)));
+        this, SLOT (referenceableDataChanged (const QModelIndex&, const QModelIndex&)));
     connect (referenceables, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        this, SLOT (ReferenceableAboutToBeRemoved (const QModelIndex&, int, int)));
+        this, SLOT (referenceableAboutToBeRemoved (const QModelIndex&, int, int)));
 
     if (!referenceable)
     {
@@ -28,23 +28,23 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
             mData.getTableModel (CSMWorld::UniversalId::Type_References);
 
         connect (references, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-            this, SLOT (ReferenceDataChanged (const QModelIndex&, const QModelIndex&)));
+            this, SLOT (referenceDataChanged (const QModelIndex&, const QModelIndex&)));
         connect (references, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-            this, SLOT (ReferenceAboutToBeRemoved (const QModelIndex&, int, int)));
+            this, SLOT (referenceAboutToBeRemoved (const QModelIndex&, int, int)));
     }
 }
 
-void CSVRender::PreviewWidget::ReferenceableDataChanged (const QModelIndex& topLeft,
+void CSVRender::PreviewWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
-    if (mObject.ReferenceableDataChanged (topLeft, bottomRight))
+    if (mObject.referenceableDataChanged (topLeft, bottomRight))
         flagAsModified();
 }
 
-void CSVRender::PreviewWidget::ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start,
+void CSVRender::PreviewWidget::referenceableAboutToBeRemoved (const QModelIndex& parent, int start,
     int end)
 {
-    if (mObject.ReferenceableAboutToBeRemoved (parent, start, end))
+    if (mObject.referenceableAboutToBeRemoved (parent, start, end))
         flagAsModified();
 
     if (mObject.getReferenceableId().empty())
@@ -65,10 +65,10 @@ void CSVRender::PreviewWidget::ReferenceableAboutToBeRemoved (const QModelIndex&
     }
 }
 
-void CSVRender::PreviewWidget::ReferenceDataChanged (const QModelIndex& topLeft,
+void CSVRender::PreviewWidget::referenceDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
-    if (mObject.ReferenceDataChanged (topLeft, bottomRight))
+    if (mObject.referenceDataChanged (topLeft, bottomRight))
         flagAsModified();
 
     if (mObject.getReferenceId().empty())
@@ -86,7 +86,7 @@ void CSVRender::PreviewWidget::ReferenceDataChanged (const QModelIndex& topLeft,
             emit referenceableIdChanged (mObject.getReferenceableId());
 }
 
-void CSVRender::PreviewWidget::ReferenceAboutToBeRemoved (const QModelIndex& parent, int start,
+void CSVRender::PreviewWidget::referenceAboutToBeRemoved (const QModelIndex& parent, int start,
     int end)
 {
     if (mObject.getReferenceId().empty())

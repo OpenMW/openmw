@@ -59,16 +59,16 @@ namespace CSVRender
 
             /// \return Did this call result in a modification of the visual representation of
             /// this object?
-            bool ReferenceableDataChanged (const QModelIndex& topLeft,
+            bool referenceableDataChanged (const QModelIndex& topLeft,
                 const QModelIndex& bottomRight);
 
             /// \return Did this call result in a modification of the visual representation of
             /// this object?
-            bool ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            bool referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
             /// \return Did this call result in a modification of the visual representation of
             /// this object?
-            bool ReferenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+            bool referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             /// Returns an empty string if this is a refereceable-type object.
             std::string getReferenceId() const;

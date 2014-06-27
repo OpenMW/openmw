@@ -137,7 +137,7 @@ CSVRender::Object::~Object()
         mBase->getCreator()->destroySceneNode (mBase);
 }
 
-bool CSVRender::Object::ReferenceableDataChanged (const QModelIndex& topLeft,
+bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
     const CSMWorld::RefIdCollection& referenceables = mData.getReferenceables();
@@ -154,7 +154,7 @@ bool CSVRender::Object::ReferenceableDataChanged (const QModelIndex& topLeft,
     return false;
 }
 
-bool CSVRender::Object::ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start,
+bool CSVRender::Object::referenceableAboutToBeRemoved (const QModelIndex& parent, int start,
     int end)
 {
     const CSMWorld::RefIdCollection& referenceables = mData.getReferenceables();
@@ -175,7 +175,7 @@ bool CSVRender::Object::ReferenceableAboutToBeRemoved (const QModelIndex& parent
     return false;
 }
 
-bool CSVRender::Object::ReferenceDataChanged (const QModelIndex& topLeft,
+bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
     if (mReferenceId.empty())

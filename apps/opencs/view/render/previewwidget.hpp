@@ -36,14 +36,14 @@ namespace CSVRender
 
         private slots:
 
-            void ReferenceableDataChanged (const QModelIndex& topLeft,
+            void referenceableDataChanged (const QModelIndex& topLeft,
                 const QModelIndex& bottomRight);
 
-            void ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
-            void ReferenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+            void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void ReferenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
     };
 }
 
