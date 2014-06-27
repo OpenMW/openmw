@@ -336,7 +336,17 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             {
                 std::string::size_type swimpos = movement.find("swim");
                 if(swimpos == std::string::npos)
-                    movement.clear();
+                {
+                    std::string::size_type runpos = movement.find("run");
+                    if (runpos != std::string::npos)
+                    {
+                        movement.replace(runpos, runpos+3, "walk");
+                        if (!mAnimation->hasAnimation(movement))
+                            movement.clear();
+                    }
+                    else
+                        movement.clear();
+                }
                 else
                 {
                     movegroup = MWRender::Animation::Group_LowerBody;
