@@ -115,12 +115,12 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     if (selectedRows.size()==1)
     {
+        int row = selectedRows.begin()->row();
+
+        row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
+
         if (mModel->getFeatures() & CSMWorld::IdTable::Feature_View)
         {
-            int row = selectedRows.begin()->row();
-
-            row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
-
             CSMWorld::UniversalId id = mModel->view (row).first;
 
             int index = mDocument.getData().getCells().searchId (id.getId());
@@ -132,7 +132,16 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
         }
 
         if (mModel->getFeatures() & CSMWorld::IdTable::Feature_Preview)
-            menu.addAction (mPreviewAction);
+        {
+            QModelIndex index = mModel->index (row,
+                mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification));
+
+            CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State> (
+                mModel->data (index).toInt());
+
+            if (state!=CSMWorld::RecordBase::State_Deleted)
+                menu.addAction (mPreviewAction);
+        }
     }
 
     menu.exec (event->globalPos());
@@ -377,7 +386,12 @@ void CSVWorld::Table::previewRecord()
     {
         std::string id = getUniversalId (selectedRows.begin()->row()).getId();
 
-        emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id) , "");
+        QModelIndex index = mModel->getModelIndex (id,
+            mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification));
+
+        if (mModel->data (index)!=CSMWorld::RecordBase::State_Deleted)
+            emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id),
+                "");
     }
 }
 
