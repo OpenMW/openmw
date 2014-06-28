@@ -1449,6 +1449,8 @@ void CharacterController::update(float duration)
         if(mMovementAnimVelocity > 0)
             world->queueMovement(mPtr, moved);
     }
+    else if (mAnimation)
+        mAnimation->updateEffects(duration);
     mSkipAnim = false;
 }
 

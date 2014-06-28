@@ -226,9 +226,6 @@ public:
     virtual void preRender (Ogre::Camera* camera);
 
     virtual void setAlpha(float alpha) {}
-private:
-    void updateEffects(float duration);
-
 
 public:
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -300,6 +297,9 @@ public:
     virtual void setPitchFactor(float factor) {}
 
     virtual Ogre::Vector3 runAnimation(float duration);
+
+    /// This is typically called as part of runAnimation, but may be called manually if needed.
+    void updateEffects(float duration);
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show) {}
