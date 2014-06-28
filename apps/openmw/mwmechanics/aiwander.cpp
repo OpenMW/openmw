@@ -26,6 +26,7 @@ namespace MWMechanics
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
     {
+        mIdle.resize(8, 0);
         init();
     }
 
@@ -652,7 +653,7 @@ namespace MWMechanics
         wander->mData.mDuration = mDuration;
         wander->mData.mTimeOfDay = mTimeOfDay;
         wander->mStartTime = mStartTime.toEsm();
-        assert (mIdle.size() >= 8);
+        assert (mIdle.size() == 8);
         for (int i=0; i<8; ++i)
             wander->mData.mIdle[i] = mIdle[i];
         wander->mData.mShouldRepeat = mRepeat;
