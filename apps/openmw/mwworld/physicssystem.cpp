@@ -58,13 +58,16 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
         for (std::map<std::string, int>::iterator shapeIt = shapes.begin();
              shapeIt != shapes.end(); ++shapeIt)
         {
-            Ogre::Node* bone = animation->getNode(shapeIt->first);
 
-            // FIXME: this will happen for nodes with empty names. Ogre's SkeletonInstance::cloneBoneAndChildren
-            // will assign an auto-generated name if the bone name was empty. We could use the bone handle instead of
-            // the bone name, but that is a bit tricky to retrieve.
+            Ogre::Node* bone;
+            if (shapeIt->first.empty())
+                // HACK: see NifSkeletonLoader::buildBones
+                bone = animation->getNode(" ");
+            else
+                bone = animation->getNode(shapeIt->first);
+
             if (bone == NULL)
-                continue;
+                throw std::runtime_error("can't find bone");
 
             btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
 
