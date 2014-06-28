@@ -215,7 +215,7 @@ namespace MWWorld
 
 
     public:
-        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, OEngine::Physic::PhysicEngine *engine)
+        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, OEngine::Physic::PhysicEngine *engine, float maxHeight)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -224,7 +224,6 @@ namespace MWWorld
             if (!physicActor)
                 return position;
 
-            const int maxHeight = 200.f;
             OEngine::Physic::ActorTracer tracer;
             tracer.findGround(physicActor, position, position-Ogre::Vector3(0,0,maxHeight), engine);
             if(tracer.mFraction >= 1.0f)
@@ -600,9 +599,9 @@ namespace MWWorld
         return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
     }
 
-    Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr)
+    Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
     {
-        return MovementSolver::traceDown(ptr, mEngine);
+        return MovementSolver::traceDown(ptr, mEngine, maxHeight);
     }
 
     void PhysicsSystem::addHeightField (float* heights,

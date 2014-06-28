@@ -274,6 +274,9 @@ namespace MWBase
             virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
 
+            virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
+            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;

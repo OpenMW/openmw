@@ -1166,12 +1166,23 @@ namespace MWWorld
 
         if (!isFlying(ptr))
         {
-            Ogre::Vector3 traced = mPhysics->traceDown(ptr);
+            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
             if (traced.z < pos.pos[2])
                 pos.pos[2] = traced.z;
         }
 
         moveObject(ptr, ptr.getCell(), pos.pos[0], pos.pos[1], pos.pos[2]);
+    }
+
+    void World::fixPosition(const Ptr &actor)
+    {
+        const float dist = 8000;
+        ESM::Position pos (actor.getRefData().getPosition());
+        pos.pos[2] += dist;
+        actor.getRefData().setPosition(pos);
+
+        Ogre::Vector3 traced = mPhysics->traceDown(actor, dist*1.1);
+        moveObject(actor, actor.getCell(), traced.x, traced.y, traced.z);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
