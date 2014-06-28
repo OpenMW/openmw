@@ -552,23 +552,16 @@ namespace MWWorld
     template <>
     class Store<ESM::Cell> : public StoreBase
     {
-        struct ExtCmp
-        {
-            bool operator()(const ESM::Cell &x, const ESM::Cell &y) {
-                if (x.mData.mX == y.mData.mX) {
-                    return x.mData.mY < y.mData.mY;
-                }
-                return x.mData.mX < y.mData.mX;
-            }
-        };
-
         struct DynamicExtCmp
         {
             bool operator()(const std::pair<int, int> &left, const std::pair<int, int> &right) const {
-                if (left.first == right.first) {
-                    return left.second < right.second;
-                }
-                return left.first < right.first;
+                if (left.first == right.first && left.second == right.second)
+                    return false;
+
+                if (left.first == right.first)
+                    return left.second > right.second;
+
+                return left.first > right.first;
             }
         };
 
