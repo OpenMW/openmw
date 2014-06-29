@@ -21,6 +21,8 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     setDefaultAmbient (colour);
 
     /// \todo deal with mSunlight and mFog/mForDensity
+
+    flagAsModified();
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
@@ -29,12 +31,17 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
     mCellsModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
 
+    mReferenceablesModel = &dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Referenceables));
+
     connect (mCellsModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
         this, SLOT (cellDataChanged (const QModelIndex&, const QModelIndex&)));
     connect (mCellsModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (cellRowsAboutToBeRemoved (const QModelIndex&, int, int)));
 
     update();
+
+    mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId));
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -72,6 +79,62 @@ void CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld
     mCellId = data.begin()->getId();
     update();
     emit cellChanged(*data.begin());
+
+    /// \todo replace mCell
+}
+
+void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    if (mCell.get())
+        if (mCell.get()->referenceableDataChanged (topLeft, bottomRight))
+            flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::referenceableAboutToBeRemoved (
+    const QModelIndex& parent, int start, int end)
+{
+    if (mCell.get())
+        if (mCell.get()->referenceableAboutToBeRemoved (parent, start, end))
+            flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::referenceableAdded (const QModelIndex& parent,
+    int start, int end)
+{
+    if (mCell.get())
+    {
+        QModelIndex topLeft = mReferenceablesModel->index (start, 0);
+        QModelIndex bottomRight =
+            mReferenceablesModel->index (end, mReferenceablesModel->columnCount());
+
+        if (mCell.get()->referenceableDataChanged (topLeft, bottomRight))
+            flagAsModified();
+    }
+}
+
+void CSVRender::UnpagedWorldspaceWidget::referenceDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    if (mCell.get())
+        if (mCell.get()->referenceDataChanged (topLeft, bottomRight))
+            flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::referenceAboutToBeRemoved (const QModelIndex& parent,
+    int start, int end)
+{
+    if (mCell.get())
+        if (mCell.get()->referenceAboutToBeRemoved (parent, start, end))
+            flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::referenceAdded (const QModelIndex& parent, int start,
+    int end)
+{
+    if (mCell.get())
+        if (mCell.get()->referenceAdded (parent, start, end))
+            flagAsModified();
 }
 
 CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
