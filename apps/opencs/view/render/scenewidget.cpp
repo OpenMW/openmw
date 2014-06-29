@@ -43,7 +43,7 @@ namespace CSVRender
         mCamera->setPosition (300, 0, 0);
         mCamera->lookAt (0, 0, 0);
         mCamera->setNearClipDistance (0.1);
-        mCamera->setFarClipDistance (30000);
+        mCamera->setFarClipDistance (300000); ///< \todo make this configurable
         mCamera->roll (Ogre::Degree (90));
 
         setLighting (&mLightingDay);
@@ -135,6 +135,11 @@ namespace CSVRender
     Ogre::SceneManager *SceneWidget::getSceneManager()
     {
         return mSceneMgr;
+    }
+
+    Ogre::Camera *SceneWidget::getCamera()
+    {
+        return mCamera;
     }
 
     void SceneWidget::flagAsModified()

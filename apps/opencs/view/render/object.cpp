@@ -49,7 +49,7 @@ void CSVRender::Object::update()
         error = 1;
     else
     {
-        // xxx check for Deleted state (error 1)
+        /// \todo check for Deleted state (error 1)
 
         model = referenceables.getData (index,
             referenceables.findColumnIndex (CSMWorld::Columns::ColumnId_Model)).
@@ -81,19 +81,15 @@ void CSVRender::Object::adjust()
 
     // position
     if (!mForceBaseToZero)
-    {
-        Ogre::Vector3 (reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]);
-
         mBase->setPosition (Ogre::Vector3 (
             reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]));
-    }
 
     // orientation
-    Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.pos[0]), Ogre::Vector3::UNIT_X);
+    Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.rot[0]), Ogre::Vector3::UNIT_X);
 
-    Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.pos[1]), Ogre::Vector3::UNIT_Y);
+    Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
 
-    Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.pos[2]), Ogre::Vector3::UNIT_Z);
+    Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
 
     mBase->setOrientation (xr*yr*zr);
 
