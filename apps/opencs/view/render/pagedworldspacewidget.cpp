@@ -3,13 +3,136 @@
 
 #include <sstream>
 
+#include <OgreCamera.h>
+
 #include <QtGui/qevent.h>
 
-#include <apps/opencs/model/world/tablemimedata.hpp>
+#include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/idtable.hpp"
+
+bool CSVRender::PagedWorldspaceWidget::adjustCells()
+{
+    bool modified = false;
+    bool setCamera = false;
+
+    {
+        // remove
+        std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+
+        while (iter!=mCells.end())
+        {
+            if (!mSelection.has (iter->first))
+            {
+                delete iter->second;
+                mCells.erase (iter++);
+                modified = true;
+            }
+            else
+                ++iter;
+        }
+    }
+
+    if (mCells.begin()==mCells.end())
+        setCamera = true;
+
+    // add
+    for (CSMWorld::CellSelection::Iterator iter (mSelection.begin()); iter!=mSelection.end();
+        ++iter)
+    {
+        if (mCells.find (*iter)==mCells.end())
+        {
+            if (setCamera)
+            {
+                setCamera = false;
+                getCamera()->setPosition (8192*iter->getX()+4096, 8192*iter->getY()+4096, 0);
+            }
+
+            mCells.insert (std::make_pair (*iter,
+                new Cell (mDocument.getData(), getSceneManager(),
+                iter->getId ("std::default"))));
+
+            modified = true;
+        }
+    }
+
+    return modified;
+}
+
+void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        if (iter->second->referenceableDataChanged (topLeft, bottomRight))
+            flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::referenceableAboutToBeRemoved (
+    const QModelIndex& parent, int start, int end)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        if (iter->second->referenceableAboutToBeRemoved (parent, start, end))
+            flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::referenceableAdded (const QModelIndex& parent,
+    int start, int end)
+{
+    CSMWorld::IdTable& referenceables = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_Referenceables));
+
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+    {
+        QModelIndex topLeft = referenceables.index (start, 0);
+        QModelIndex bottomRight =
+            referenceables.index (end, referenceables.columnCount());
+
+        if (iter->second->referenceableDataChanged (topLeft, bottomRight))
+            flagAsModified();
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::referenceDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        if (iter->second->referenceDataChanged (topLeft, bottomRight))
+            flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::referenceAboutToBeRemoved (const QModelIndex& parent,
+    int start, int end)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        if (iter->second->referenceAboutToBeRemoved (parent, start, end))
+            flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent, int start,
+    int end)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        if (iter->second->referenceAdded (parent, start, end))
+            flagAsModified();
+}
+
+
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget (document, parent)
+: WorldspaceWidget (document, parent), mDocument (document)
 {}
+
+CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        delete iter->second;
+}
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
 {
@@ -47,6 +170,10 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
 void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSelection& selection)
 {
     mSelection = selection;
+
+    if (adjustCells())
+        flagAsModified();
+
     emit cellSelectionChanged (mSelection);
 }
 
@@ -72,6 +199,9 @@ void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::
     }
     if (selectionChanged)
     {
+        if (adjustCells())
+            flagAsModified();
+
         emit cellSelectionChanged(mSelection);
     }
 }

@@ -80,17 +80,17 @@ namespace CSVRender
             void selectNavigationMode (const std::string& mode);
 
             virtual void referenceableDataChanged (const QModelIndex& topLeft,
-                const QModelIndex& bottomRight) {}
+                const QModelIndex& bottomRight) = 0;
 
-            virtual void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end) {}
+            virtual void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
 
-            virtual void referenceableAdded (const QModelIndex& index, int start, int end) {}
+            virtual void referenceableAdded (const QModelIndex& index, int start, int end) = 0;
 
-            virtual void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) {}
+            virtual void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) = 0;
 
-            virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end) {}
+            virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
 
-            virtual void referenceAdded (const QModelIndex& index, int start, int end) {}
+            virtual void referenceAdded (const QModelIndex& index, int start, int end) = 0;
 
         signals:
 

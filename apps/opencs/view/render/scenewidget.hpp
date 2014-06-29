@@ -49,6 +49,8 @@ namespace CSVRender
 
             Ogre::SceneManager *getSceneManager();
 
+            Ogre::Camera *getCamera();
+
             void flagAsModified();
 
             void setDefaultAmbient (const Ogre::ColourValue& colour);
