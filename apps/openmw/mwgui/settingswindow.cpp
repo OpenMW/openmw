@@ -322,6 +322,15 @@ namespace MWGui
         if (_sender == mFullscreenButton)
         {
             // check if this resolution is supported in fullscreen
+            if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
+            {
+                std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
+                int resX, resY;
+                parseResolution (resX, resY, resStr);
+                Settings::Manager::setInt("resolution x", "Video", resX);
+                Settings::Manager::setInt("resolution y", "Video", resY);
+            }
+
             bool supported = false;
             for (unsigned int i=0; i<mResolutionList->getItemCount(); ++i)
             {
