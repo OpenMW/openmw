@@ -8,19 +8,17 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
-
-#include "world.hpp" // FIXME: for LoadResponseData, move to backgroundloader.hpp
-
 namespace Terrain
 {
 
-    Chunk::Chunk(Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds, const LoadResponseData& data)
+    Chunk::Chunk(Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds,
+                 const std::vector<float>& positions, const std::vector<float>& normals, const std::vector<Ogre::uint8>& colours)
         : mBounds(bounds)
         , mOwnMaterial(false)
     {
         mVertexData = OGRE_NEW Ogre::VertexData;
         mVertexData->vertexStart = 0;
-        mVertexData->vertexCount = data.mPositions.size()/3;
+        mVertexData->vertexCount = positions.size()/3;
 
         // Set up the vertex declaration, which specifies the info for each vertex (normals, colors, UVs, etc)
         Ogre::VertexDeclaration* vertexDecl = mVertexData->vertexDeclaration;
@@ -48,9 +46,9 @@ namespace Terrain
         Ogre::HardwareVertexBufferSharedPtr colourBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
-        vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), &data.mPositions[0], true);
-        normalBuffer->writeData(0, normalBuffer->getSizeInBytes(), &data.mNormals[0], true);
-        colourBuffer->writeData(0, colourBuffer->getSizeInBytes(), &data.mColours[0], true);
+        vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), &positions[0], true);
+        normalBuffer->writeData(0, normalBuffer->getSizeInBytes(), &normals[0], true);
+        colourBuffer->writeData(0, colourBuffer->getSizeInBytes(), &colours[0], true);
 
         mVertexData->vertexBufferBinding->setBinding(0, vertexBuffer);
         mVertexData->vertexBufferBinding->setBinding(1, normalBuffer);

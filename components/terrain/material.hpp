@@ -11,11 +11,7 @@ namespace Terrain
     class MaterialGenerator
     {
     public:
-        /// @param layerList layer textures
-        /// @param blendmapList blend textures
-        /// @param shaders Whether to use shaders. With a shader, blendmap packing can be used (4 channels instead of one),
-        ///                so if this parameter is true, then the supplied blend maps are expected to be packed.
-        MaterialGenerator (bool shaders);
+        MaterialGenerator ();
 
         void setLayerList (const std::vector<LayerInfo>& layerList) { mLayerList = layerList; }
         bool hasLayers() { return mLayerList.size(); }
@@ -23,6 +19,7 @@ namespace Terrain
         const std::vector<Ogre::TexturePtr>& getBlendmapList() { return mBlendmapList; }
         void setCompositeMap (const std::string& name) { mCompositeMap = name; }
 
+        void enableShaders(bool shaders) { mShaders = shaders; }
         void enableShadows(bool shadows) { mShadows = shadows; }
         void enableNormalMapping(bool normalMapping) { mNormalMapping = normalMapping; }
         void enableParallaxMapping(bool parallaxMapping) { mParallaxMapping = parallaxMapping; }
