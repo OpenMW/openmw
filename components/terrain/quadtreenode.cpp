@@ -6,7 +6,7 @@
 #include <OgreMaterialManager.h>
 #include <OgreTextureManager.h>
 
-#include "world.hpp"
+#include "defaultworld.hpp"
 #include "chunk.hpp"
 #include "storage.hpp"
 #include "buffercache.hpp"
@@ -142,7 +142,7 @@ namespace
     }
 }
 
-QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
+QuadTreeNode::QuadTreeNode(DefaultWorld* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
     : mMaterialGenerator(NULL)
     , mIsDummy(false)
     , mSize(size)
@@ -178,7 +178,8 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
 
     mSceneNode->setPosition(sceneNodePos);
 
-    mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
+    mMaterialGenerator = new MaterialGenerator();
+    mMaterialGenerator->enableShaders(mTerrain->getShadersEnabled());
 }
 
 void QuadTreeNode::createChild(ChildDirection id, float size, const Ogre::Vector2 &center)
@@ -386,11 +387,9 @@ void QuadTreeNode::load(const LoadResponseData &data)
 {
     assert (!mChunk);
 
-    mChunk = new Chunk(mTerrain->getBufferCache().getUVBuffer(), mBounds, data);
-    mChunk->setVisibilityFlags(mTerrain->getVisiblityFlags());
+    mChunk = new Chunk(mTerrain->getBufferCache().getUVBuffer(), mBounds, data.mPositions, data.mNormals, data.mColours);
+    mChunk->setVisibilityFlags(mTerrain->getVisibilityFlags());
     mChunk->setCastShadows(true);
-    if (!mTerrain->getDistantLandEnabled())
-        mChunk->setRenderingDistance(8192);
     mSceneNode->attachObject(mChunk);
 
     mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());
@@ -550,7 +549,8 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
     if (mIsDummy)
     {
         // TODO - store this default material somewhere instead of creating one for each empty cell
-        MaterialGenerator matGen(mTerrain->getShadersEnabled());
+        MaterialGenerator matGen;
+        matGen.enableShaders(mTerrain->getShadersEnabled());
         std::vector<LayerInfo> layer;
         layer.push_back(mTerrain->getStorage()->getDefaultLayer());
         matGen.setLayerList(layer);

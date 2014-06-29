@@ -3,25 +3,27 @@
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
-    shUniform(float4x4, view) @shAutoConstant(view, view_matrix)
-shUniform(float4x4, projection) @shAutoConstant(projection, projection_matrix)
+    shUniform(float4x4, worldview) @shAutoConstant(worldview, worldview_matrix)
+    shUniform(float4x4, proj) @shAutoConstant(proj, projection_matrix)
         shVertexInput(float2, uv0)
         shOutput(float2, UV)
         shOutput(float, alphaFade)
 
     SH_START_PROGRAM
     {
-        float4x4 viewFixed = view;
+        float4x4 worldviewFixed = worldview;
+
 #if !SH_GLSL
-        viewFixed[0][3] = 0;
-        viewFixed[1][3] = 0;
-        viewFixed[2][3] = 0;
+        worldviewFixed[0][3] = 0;
+        worldviewFixed[1][3] = 0;
+        worldviewFixed[2][3] = 0;
 #else
-        viewFixed[3][0] = 0;
-        viewFixed[3][1] = 0;
-        viewFixed[3][2] = 0;
+        worldviewFixed[3][0] = 0;
+        worldviewFixed[3][1] = 0;
+        worldviewFixed[3][2] = 0;
 #endif
-        shOutputPosition = shMatrixMult(projection, shMatrixMult(viewFixed, shInputPosition));
+
+        shOutputPosition = shMatrixMult(proj, shMatrixMult(worldviewFixed, shInputPosition));
         UV = uv0;
             alphaFade = (shInputPosition.z <= 200.f) ? ((shInputPosition.z <= 100.f) ? 0.0 : 0.25) : 1.0;
     }

@@ -36,8 +36,8 @@ std::string getBlendmapComponentForLayer (int layerIndex)
 namespace Terrain
 {
 
-    MaterialGenerator::MaterialGenerator(bool shaders)
-        : mShaders(shaders)
+    MaterialGenerator::MaterialGenerator()
+        : mShaders(true)
         , mShadows(false)
         , mSplitShadows(false)
         , mNormalMapping(true)

@@ -219,6 +219,7 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mSceneMgr(NULL)
     , mAtmosphereDay(NULL)
     , mAtmosphereNight(NULL)
+    , mCloudNode(NULL)
     , mClouds()
     , mNextClouds()
     , mCloudBlendFactor(0.0f)
@@ -240,10 +241,11 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mRainTimer(0)
     , mRainSpeed(0)
     , mRainFrequency(1)
+    , mStormDirection(0,-1,0)
+    , mIsStorm(false)
 {
     mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-    mRootNode->setInheritOrientation(false);
 }
 
 void SkyManager::create()
@@ -335,8 +337,8 @@ void SkyManager::create()
     mObjects.push_back(objects);
 
     // Clouds
-    SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    objects = NifOgre::Loader::createObjects(clouds_node, "meshes\\sky_clouds_01.nif");
+    mCloudNode = mRootNode->createChildSceneNode();
+    objects = NifOgre::Loader::createObjects(mCloudNode, "meshes\\sky_clouds_01.nif");
     for(size_t i = 0;i < objects->mEntities.size();i++)
     {
         Entity* clouds_ent = objects->mEntities[i];
@@ -429,6 +431,16 @@ void SkyManager::updateRain(float dt)
             Ogre::SceneNode* offsetNode = sceneNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
 
             NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(offsetNode, mRainEffect);
+            for (unsigned int i=0; i<objects->mEntities.size(); ++i)
+            {
+                objects->mEntities[i]->setRenderQueueGroup(RQG_Alpha);
+                objects->mEntities[i]->setVisibilityFlags(RV_Sky);
+            }
+            for (unsigned int i=0; i<objects->mParticles.size(); ++i)
+            {
+                objects->mParticles[i]->setRenderQueueGroup(RQG_Alpha);
+                objects->mParticles[i]->setVisibilityFlags(RV_Sky);
+            }
             mRainModels[offsetNode] = objects;
         }
     }
@@ -443,7 +455,15 @@ void SkyManager::update(float duration)
     {
         for (unsigned int i=0; i<mParticle->mControllers.size(); ++i)
             mParticle->mControllers[i].update();
+
+        if (mIsStorm)
+            mParticleNode->setOrientation(Ogre::Vector3::UNIT_Y.getRotationTo(mStormDirection));
     }
+
+    if (mIsStorm)
+        mCloudNode->setOrientation(Ogre::Vector3::UNIT_Y.getRotationTo(mStormDirection));
+    else
+        mCloudNode->setOrientation(Ogre::Quaternion::IDENTITY);
 
     updateRain(duration);
 
@@ -529,6 +549,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     mRainEnabled = !mRainEffect.empty();
     mRainFrequency = weather.mRainFrequency;
     mRainSpeed = weather.mRainSpeed;
+    mIsStorm = weather.mIsStorm;
 
     if (mCurrentParticleEffect != weather.mParticleEffect)
     {
@@ -664,6 +685,11 @@ void SkyManager::sunEnable()
 void SkyManager::sunDisable()
 {
     mSunEnabled = false;
+}
+
+void SkyManager::setStormDirection(const Vector3 &direction)
+{
+    mStormDirection = direction;
 }
 
 void SkyManager::setSunDirection(const Vector3& direction, bool is_moon)

@@ -127,7 +127,7 @@ namespace MWClass
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap
-            ptr.getCellRef().getTrap() = "";
+            ptr.getCellRef().setTrap("");
         }
 
         if (!needKey || hasKey)

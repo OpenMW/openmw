@@ -263,6 +263,9 @@ namespace MWWorld
             virtual void adjustPosition (const Ptr& ptr);
             ///< Adjust position after load to be on ground. Must be called after model load.
 
+            virtual void fixPosition (const Ptr& actor);
+            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+
             virtual void enable (const Ptr& ptr);
 
             virtual void disable (const Ptr& ptr);

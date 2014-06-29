@@ -14,10 +14,24 @@ namespace NifOgre
 void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent)
 {
     Ogre::Bone *bone;
-    if(!skel->hasBone(node->name))
-        bone = skel->createBone(node->name);
+    if (node->name.empty())
+    {
+        // HACK: use " " instead of empty name, otherwise Ogre will replace it with an auto-generated
+        // name in SkeletonInstance::cloneBoneAndChildren.
+        static const char* emptyname = " ";
+        if (!skel->hasBone(emptyname))
+            bone = skel->createBone(emptyname);
+        else
+            bone = skel->createBone();
+    }
     else
-        bone = skel->createBone();
+    {
+        if(!skel->hasBone(node->name))
+            bone = skel->createBone(node->name);
+        else
+            bone = skel->createBone();
+    }
+
     if(parent) parent->addChild(bone);
     mNifToOgreHandleMap[node->recIndex] = bone->getHandle();
 

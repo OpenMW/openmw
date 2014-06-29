@@ -150,6 +150,8 @@ namespace MWRender
 
         void setRainSpeed(float speed);
 
+        void setStormDirection(const Ogre::Vector3& direction);
+
         void setSunDirection(const Ogre::Vector3& direction, bool is_moon);
 
         void setMasserDirection(const Ogre::Vector3& direction);
@@ -185,6 +187,8 @@ namespace MWRender
 
         bool mMoonRed;
 
+        bool mIsStorm;
+
         float mHour;
         int mDay;
         int mMonth;
@@ -203,6 +207,8 @@ namespace MWRender
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
 
+        Ogre::SceneNode* mCloudNode;
+
         std::vector<NifOgre::ObjectScenePtr> mObjects;
 
         Ogre::SceneNode* mParticleNode;
@@ -210,6 +216,8 @@ namespace MWRender
 
         std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr> mRainModels;
         float mRainTimer;
+
+        Ogre::Vector3 mStormDirection;
 
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;

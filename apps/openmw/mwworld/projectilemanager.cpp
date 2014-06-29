@@ -67,6 +67,9 @@ namespace MWWorld
         Ogre::Vector3 pos(caster.getRefData().getPosition().pos);
         pos.z += height;
 
+        if (MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos)) // Underwater casting not possible
+            return;
+
         Ogre::Quaternion orient;
         if (caster.getClass().isActor())
             orient = Ogre::Quaternion(Ogre::Radian(caster.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -188,6 +191,11 @@ namespace MWWorld
 
                 hit = true;
             }
+
+            // Explodes when hitting water
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), newPos))
+                hit = true;
+
             if (hit)
             {
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);

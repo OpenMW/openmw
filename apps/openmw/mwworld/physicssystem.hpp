@@ -56,7 +56,7 @@ namespace MWWorld
             void stepSimulation(float dt);
 
             std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr); ///< get handles this object collides with
-            Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr);
+            Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
             std::pair<float, std::string> getFacedHandle(float queryDistance);
             std::pair<std::string,Ogre::Vector3> getHitContact(const std::string &name,

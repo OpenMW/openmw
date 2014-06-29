@@ -47,6 +47,7 @@ namespace MWScript
                     if (world->findExteriorPosition(cell, pos))
                     {
                         world->changeToExteriorCell(pos);
+                        world->fixPosition(world->getPlayerPtr());
                     }
                     else
                     {
@@ -79,6 +80,7 @@ namespace MWScript
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
                     world->changeToExteriorCell (pos);
+                    world->fixPosition(world->getPlayerPtr());
                 }
         };
 

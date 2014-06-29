@@ -58,13 +58,16 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
         for (std::map<std::string, int>::iterator shapeIt = shapes.begin();
              shapeIt != shapes.end(); ++shapeIt)
         {
-            Ogre::Node* bone = animation->getNode(shapeIt->first);
 
-            // FIXME: this will happen for nodes with empty names. Ogre's SkeletonInstance::cloneBoneAndChildren
-            // will assign an auto-generated name if the bone name was empty. We could use the bone handle instead of
-            // the bone name, but that is a bit tricky to retrieve.
+            Ogre::Node* bone;
+            if (shapeIt->first.empty())
+                // HACK: see NifSkeletonLoader::buildBones
+                bone = animation->getNode(" ");
+            else
+                bone = animation->getNode(shapeIt->first);
+
             if (bone == NULL)
-                continue;
+                throw std::runtime_error("can't find bone");
 
             btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
 
@@ -215,7 +218,7 @@ namespace MWWorld
 
 
     public:
-        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, OEngine::Physic::PhysicEngine *engine)
+        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, OEngine::Physic::PhysicEngine *engine, float maxHeight)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -224,7 +227,6 @@ namespace MWWorld
             if (!physicActor)
                 return position;
 
-            const int maxHeight = 200.f;
             OEngine::Physic::ActorTracer tracer;
             tracer.findGround(physicActor, position, position-Ogre::Vector3(0,0,maxHeight), engine);
             if(tracer.mFraction >= 1.0f)
@@ -246,7 +248,7 @@ namespace MWWorld
 
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
-            if (!ptr.getClass().canWalk(ptr) && !isFlying && !ptr.getClass().canSwim(ptr))
+            if (!ptr.getClass().canWalk(ptr) && !ptr.getClass().canFly(ptr) && !ptr.getClass().canSwim(ptr))
                 return position;
 
             /* Anything to collide with? */
@@ -315,15 +317,22 @@ namespace MWWorld
                     wasOnGround = physicActor->getOnGround(); // store current state
                     tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine); // check if down 2 possible
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
+                    {
                         isOnGround = true;
+                        // if we're on the ground, don't try to fall any more
+                        velocity.z = std::max(0.0f, velocity.z);
+                    }
                 }
             }
 
-            // NOTE: isOnGround was initialised false, so should stay false if falling or sliding horizontally
-            if(isOnGround)
+            // Now that we have the effective movement vector, apply wind forces to it
+            if (MWBase::Environment::get().getWorld()->isInStorm())
             {
-                // if we're on the ground, don't try to fall any more
-                velocity.z = std::max(0.0f, velocity.z); // NOTE: two different velocity assignments above
+                Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
+                Ogre::Degree angle = stormDirection.angleBetween(velocity);
+                static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                        .find("fStromWalkMult")->getFloat();
+                velocity *= 1.f-(fStromWalkMult * (angle.valueDegrees()/180.f));
             }
 
             Ogre::Vector3 newPosition = position;
@@ -593,9 +602,9 @@ namespace MWWorld
         return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
     }
 
-    Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr)
+    Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
     {
-        return MovementSolver::traceDown(ptr, mEngine);
+        return MovementSolver::traceDown(ptr, mEngine, maxHeight);
     }
 
     void PhysicsSystem::addHeightField (float* heights,

@@ -46,7 +46,7 @@ namespace MWRender
         /// Create textures holding layer blend values for a terrain chunk.
         /// @note The terrain chunk shouldn't be larger than one cell since otherwise we might
         ///       have to do a ridiculous amount of different layers. For larger chunks, composite maps should be used.
-        /// @note May be called from *one* background thread.
+        /// @note May be called from background threads.
         /// @param chunkSize size of the terrain chunk in cell units
         /// @param chunkCenter center of the chunk in cell units
         /// @param pack Whether to pack blend values for up to 4 layers into one texture (one in each channel) -
@@ -62,7 +62,7 @@ namespace MWRender
         /// This variant is provided to eliminate the overhead of virtual function calls when retrieving a large number of blendmaps at once.
         /// @note The terrain chunks shouldn't be larger than one cell since otherwise we might
         ///       have to do a ridiculous amount of different layers. For larger chunks, composite maps should be used.
-        /// @note May be called from *one* background thread.
+        /// @note May be called from background threads.
         /// @param nodes A collection of nodes for which to retrieve the aforementioned data
         /// @param out Output vector
         /// @param pack Whether to pack blend values for up to 4 layers into one texture (one in each channel) -

@@ -22,7 +22,7 @@
 #include <openengine/bullet/physic.hpp>
 
 #include <components/settings/settings.hpp>
-#include <components/terrain/world.hpp>
+#include <components/terrain/defaultworld.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -45,6 +45,7 @@
 #include "globalmap.hpp"
 #include "terrainstorage.hpp"
 #include "effectmanager.hpp"
+#include "terraingrid.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -223,6 +224,9 @@ MWRender::Camera* RenderingManager::getCamera() const
 
 void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
+    if (store->isExterior())
+        mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+
     mLocalMap->saveFogOfWar(store);
     mObjects->removeCell(store);
     mActors->removeCell(store);
@@ -241,6 +245,9 @@ bool RenderingManager::toggleWater()
 
 void RenderingManager::cellAdded (MWWorld::CellStore *store)
 {
+    if (store->isExterior())
+        mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+
     mObjects->buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
@@ -1039,9 +1046,12 @@ void RenderingManager::enableTerrain(bool enable)
     {
         if (!mTerrain)
         {
-            mTerrain = new Terrain::World(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
-                                            Settings::Manager::getBool("distant land", "Terrain"),
-                                            Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
+            if (Settings::Manager::getBool("distant land", "Terrain"))
+                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                                Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
+            else
+                mTerrain = new MWRender::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                                Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));
             mTerrain->update(mRendering.getCamera()->getRealPosition());

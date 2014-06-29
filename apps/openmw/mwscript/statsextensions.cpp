@@ -623,7 +623,8 @@ namespace MWScript
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                         if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) != player.getClass().getNpcStats(player).getFactionRanks().end())
                         {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] = player.getClass().getNpcStats(player).getFactionRanks()[factionID] -1;
+                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] =
+                                    std::max(0, player.getClass().getNpcStats(player).getFactionRanks()[factionID]-1);
                         }
                     }
                 }
@@ -1031,7 +1032,7 @@ namespace MWScript
                         return;
 
                     std::map<std::string, int>& ranks = ptr.getClass().getNpcStats(ptr).getFactionRanks ();
-                    ranks[factionID] = ranks[factionID]+1;
+                    ranks[factionID] = std::min(9, ranks[factionID]+1);
                 }
         };
 
@@ -1058,7 +1059,7 @@ namespace MWScript
                         return;
 
                     std::map<std::string, int>& ranks = ptr.getClass().getNpcStats(ptr).getFactionRanks ();
-                    ranks[factionID] = ranks[factionID]-1;
+                    ranks[factionID] = std::max(0, ranks[factionID]-1);
                 }
         };
 

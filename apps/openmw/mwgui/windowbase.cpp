@@ -21,6 +21,17 @@ void WindowBase::setVisible(bool visible)
         open();
     else if (wasVisible && !visible)
         close();
+
+    // This is needed as invisible widgets can retain key focus.
+    if (!visible)
+    {
+        MyGUI::Widget* keyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        while (keyFocus != mMainWidget && keyFocus != NULL)
+            keyFocus = keyFocus->getParent();
+
+        if (keyFocus == mMainWidget)
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
+    }
 }
 
 bool WindowBase::isVisible()

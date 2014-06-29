@@ -118,6 +118,7 @@ namespace MWMechanics
         mStrength = 0;
         mCell = NULL;
         mLastTargetPos = Ogre::Vector3(0,0,0);
+        mMinMaxAttackDurationInitialised = false;
     }
 
     /*
@@ -219,8 +220,6 @@ namespace MWMechanics
             if(smoothTurn(actor, Ogre::Degree(mMovement.mRotation[0]), 0)) mMovement.mRotation[0] = 0;
         }
 
-        mTimerAttack -= duration;
-
         //TODO: Some skills affect period of strikes.For berserk-like style period ~ 0.25f
         float attacksPeriod = 1.0f;
 
@@ -228,12 +227,16 @@ namespace MWMechanics
 
         if(mReadyToAttack)
         {
-            if (mMinMaxAttackDuration[0][0] == 0)
+            if (!mMinMaxAttackDurationInitialised)
             {
+                // TODO: this must be updated when a different weapon is equipped
                 getMinMaxAttackDuration(actor, mMinMaxAttackDuration);
+                mMinMaxAttackDurationInitialised = true;
             }
 
-            if (mTimerAttack <= 0) mAttack = false;   
+            if (mTimerAttack < 0) mAttack = false;
+
+            mTimerAttack -= duration;
         }
         else
         {
@@ -326,6 +329,8 @@ namespace MWMechanics
                 else attackType = ESM::Weapon::AT_Chop; // cause it's =0
 
                 mStrength = static_cast<float>(rand()) / RAND_MAX;
+
+                // Note: may be 0 for some animations
                 mTimerAttack = mMinMaxAttackDuration[attackType][0] + 
                     (mMinMaxAttackDuration[attackType][1] - mMinMaxAttackDuration[attackType][0]) * mStrength;
 

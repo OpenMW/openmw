@@ -336,7 +336,17 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             {
                 std::string::size_type swimpos = movement.find("swim");
                 if(swimpos == std::string::npos)
-                    movement.clear();
+                {
+                    std::string::size_type runpos = movement.find("run");
+                    if (runpos != std::string::npos)
+                    {
+                        movement.replace(runpos, runpos+3, "walk");
+                        if (!mAnimation->hasAnimation(movement))
+                            movement.clear();
+                    }
+                    else
+                        movement.clear();
+                }
                 else
                 {
                     movegroup = MWRender::Animation::Group_LowerBody;
@@ -608,7 +618,7 @@ void CharacterController::updateIdleStormState()
     {
         Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         Ogre::Vector3 characterDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
-        inStormDirection = stormDirection.angleBetween(characterDirection) < Ogre::Degree(40);
+        inStormDirection = stormDirection.angleBetween(characterDirection) > Ogre::Degree(120);
     }
     if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
@@ -1395,6 +1405,9 @@ void CharacterController::update(float duration)
             if (mMovementAnimVelocity == 0)
                 world->queueMovement(mPtr, vec);
         }
+        else
+            // We must always queue movement, even if there is none, to apply gravity.
+            world->queueMovement(mPtr, Ogre::Vector3(0.0f));
 
         movement = vec;
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = cls.getMovementSettings(mPtr).mPosition[2] = 0;
@@ -1436,6 +1449,8 @@ void CharacterController::update(float duration)
         if(mMovementAnimVelocity > 0)
             world->queueMovement(mPtr, moved);
     }
+    else if (mAnimation)
+        mAnimation->updateEffects(duration);
     mSkipAnim = false;
 }
 

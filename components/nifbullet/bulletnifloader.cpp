@@ -108,6 +108,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
            for(int i=0; i <n;i++)
                delete (mCompoundShape->getChildShape(i));
            delete mCompoundShape;
+           mShape->mAnimatedShapes.clear();
        }
     }
     else
