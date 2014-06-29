@@ -419,11 +419,11 @@ namespace MWGui
             std::string effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
             std::string spellLine = MWBase::Environment::get().getWindowManager()->getGameSettingString(effectIDStr, "");
 
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && mEffectParams.mSkill != -1)
             {
                 spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
             }
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && mEffectParams.mAttribute != -1)
             {
                 spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
             }
