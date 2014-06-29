@@ -170,7 +170,7 @@ namespace CSVWorld
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
             QUndoStack& mUndoStack;
-        std::vector<CSMWorld::NestedTableModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
+            std::vector<CSMWorld::NestedTableModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
         public:
 
