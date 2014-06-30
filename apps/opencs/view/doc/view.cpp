@@ -146,6 +146,10 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *spells = new QAction (tr ("Spells"), this);
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
     mechanics->addAction (spells);
+
+    QAction *enchantments = new QAction (tr ("Enchantments"), this);
+    connect (enchantments, SIGNAL (triggered()), this, SLOT (addEnchantmentsSubView()));
+    mechanics->addAction (enchantments);
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -467,6 +471,11 @@ void CSVDoc::View::addTopicInfosSubView()
 void CSVDoc::View::addJournalInfosSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_JournalInfos);
+}
+
+void CSVDoc::View::addEnchantmentsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Enchantments);
 }
 
 void CSVDoc::View::abortOperation (int type)
