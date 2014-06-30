@@ -61,6 +61,15 @@ namespace CSVRender
         signals:
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
+
+        private slots:
+
+            virtual void cellDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            virtual void cellRemoved (const QModelIndex& parent, int start, int end);
+
+            virtual void cellAdded (const QModelIndex& index, int start, int end);
+
     };
 }
 

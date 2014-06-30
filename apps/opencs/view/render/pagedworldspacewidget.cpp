@@ -129,11 +129,19 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
             flagAsModified();
 }
 
-
-
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default")
-{}
+{
+    QAbstractItemModel *cells =
+        document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
+
+    connect (cells, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (cellDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (cells, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
+        this, SLOT (cellRemoved (const QModelIndex&, int, int)));
+    connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (cellAdded (const QModelIndex&, int, int)));
+}
 
 CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
 {
@@ -227,4 +235,27 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
         default:
             return ignored;
     }
+}
+
+void CSVRender::PagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    /// \todo check if no selected cell is affected and do not update, if that is the case
+    if (adjustCells())
+        flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::cellRemoved (const QModelIndex& parent, int start,
+    int end)
+{
+    if (adjustCells())
+        flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int start,
+    int end)
+{
+    /// \todo check if no selected cell is affected and do not update, if that is the case
+    if (adjustCells())
+        flagAsModified();
 }
