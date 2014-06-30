@@ -1,5 +1,5 @@
 #ifndef CSV_WORLD_NESTEDTABLE_H
-#define CSV_WORLD_TABLE_H
+#define CSV_WORLD_NESTEDTABLE_H
 
 #include <QTableView>
 #include <QtGui/qevent.h>
@@ -10,6 +10,12 @@ class QAction;
 namespace CSMWorld
 {
     class NestedTableModel;
+    class UniversalId;
+}
+
+namespace CSMDoc
+{
+    class Document;
 }
 
 namespace CSVWorld
@@ -18,13 +24,13 @@ namespace CSVWorld
     {
         Q_OBJECT
 
-        std::vector<CommandDelegate*> mDelegates;
         QAction *mAddNewRowAction;
         QAction *mRemoveRowAction;
-        CSMWorld::CommandDispatcher *mDispatcher;
         
     public:
-        NestedTable(CSMDoc::Document& document, CSMWorld::NestedTableModel* model, const CSMWorld::UniversalId& id, QWidget* parent = NULL);
+        NestedTable(QUndoStack& undoStack,
+                    CSMWorld::NestedTableModel* model,
+                    QWidget* parent = NULL);
         
     protected:
         void dragEnterEvent(QDragEnterEvent *event);
@@ -32,3 +38,5 @@ namespace CSVWorld
         void dragMoveEvent(QDragMoveEvent *event);
     };
 }
+
+#endif

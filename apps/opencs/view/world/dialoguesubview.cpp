@@ -19,7 +19,6 @@
 #include <QScrollArea>
 #include <QPushButton>
 #include <QToolButton>
-#include <QTableView>
 #include <QDebug>
 
 #include "../../model/world/nestedtablemodel.hpp"
@@ -34,6 +33,7 @@
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
 #include "tablebottombox.hpp"
+#include "nestedtable.hpp"
 /*
 ==============================NotEditableSubDelegate==========================================
 */
@@ -406,9 +406,7 @@ void CSVWorld::EditWidget::remake(int row)
             {
                 mNestedModels.push_back(new CSMWorld::NestedTableModel (mTable->index(row, i), display, mTable));
                 
-                QTableView* table = new QTableView();
-
-                table->setModel(*(mNestedModels.rbegin()));
+                NestedTable* table = new NestedTable(mUndoStack, *(mNestedModels.rbegin()), this);
 
                 tablesLayout->addWidget(table);
             } else
