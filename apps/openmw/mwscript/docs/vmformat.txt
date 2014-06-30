@@ -403,5 +403,7 @@ op 0x200024a: OnMurder, explicit
 op 0x200024b: ToggleMenus
 op 0x200024c: Face
 op 0x200024d: Face, explicit
+op 0x200024e: GetStat (dummy function)
+op 0x200024f: GetStat (dummy function), explicit
 
-opcodes 0x200024e-0x3ffffff unused
+opcodes 0x2000250-0x3ffffff unused

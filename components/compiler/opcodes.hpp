@@ -410,6 +410,9 @@ namespace Compiler
         const int opcodeRemoveEffectsExplicit = 0x200022e;
         const int opcodeResurrect = 0x200022f;
         const int opcodeResurrectExplicit = 0x2000230;
+
+        const int opcodeGetStat = 0x200024e;
+        const int opcodeGetStatExplicit = 0x200024f;
     }
 
     namespace Transformation
