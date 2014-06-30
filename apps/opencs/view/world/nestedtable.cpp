@@ -3,13 +3,19 @@
 #include "../../model/world/universalid.hpp"
 #include "util.hpp"
 
+#include <QHeaderView>
+
 CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
                                    CSMWorld::NestedTableModel* model,
                                    QWidget* parent)
     : QTableView(parent)
 {
-    setModel(model);
-    setAcceptDrops(true);
+
+    setSelectionBehavior (QAbstractItemView::SelectRows);
+    setSelectionMode (QAbstractItemView::ExtendedSelection);
+
+    horizontalHeader()->setResizeMode (QHeaderView::Interactive);
+    verticalHeader()->hide();
 
     int columns = model->columnCount(QModelIndex());
 
@@ -17,13 +23,16 @@ CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
     {
         CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display> (
             model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
+        
         CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
                                                                                          undoStack,
                                                                                          this);
         
         setItemDelegateForColumn(i, delegate);
     }
+
+    setModel(model);
+    setAcceptDrops(true);
 }
 
 void CSVWorld::NestedTable::dragEnterEvent(QDragEnterEvent *event)

@@ -80,3 +80,14 @@ QVariant CSMWorld::NestedTableModel::headerData(int section,
 {
     return mMainModel->nestedHeaderData(mParentColumn, section, orientation, role);
 }
+
+
+bool CSMWorld::NestedTableModel::setData ( const QModelIndex & index, const QVariant & value, int role)
+{
+    return mMainModel->setData(mapToSource(index), value, role);
+}
+
+Qt::ItemFlags CSMWorld::NestedTableModel::flags(const QModelIndex& index) const
+{
+    return mMainModel->flags(mMainModel->index(0, mParentColumn));
+}
