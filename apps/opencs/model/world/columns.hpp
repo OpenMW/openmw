@@ -167,6 +167,9 @@ namespace CSMWorld
             ColumnId_PcRank = 154,
             ColumnId_Scope = 155,
             ColumnId_ReferenceableId = 156,
+            ColumnId_CombatState = 157,
+            ColumnId_MagicState = 158,
+            ColumnId_StealthState = 159,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
