@@ -26,6 +26,7 @@ namespace CSVWorld
 
         QAction *mAddNewRowAction;
         QAction *mRemoveRowAction;
+        QUndoStack& mUndoStack;
         
     public:
         NestedTable(QUndoStack& undoStack,

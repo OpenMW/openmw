@@ -8,7 +8,8 @@
 CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
                                    CSMWorld::NestedTableModel* model,
                                    QWidget* parent)
-    : QTableView(parent)
+    : QTableView(parent),
+      mUndoStack(undoStack)
 {
 
     setSelectionBehavior (QAbstractItemView::SelectRows);
