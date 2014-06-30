@@ -154,7 +154,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
-        return ref->mBase->mData.mValue * (static_cast<float>(getItemHealth(ptr)) / getItemMaxHealth(ptr));
+        return ref->mBase->mData.mValue;
     }
 
     void Weapon::registerSelf()
@@ -343,7 +343,7 @@ namespace MWClass
         }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         info.enchant = ref->mBase->mEnchant;
 

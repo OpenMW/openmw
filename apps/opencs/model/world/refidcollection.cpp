@@ -45,7 +45,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mId = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Modification, ColumnBase::Display_RecordState,
-        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, true, false));
     baseColumns.mModified = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_RecordType, ColumnBase::Display_RefRecordType,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));

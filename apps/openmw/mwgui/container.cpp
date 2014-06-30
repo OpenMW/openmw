@@ -38,6 +38,32 @@ namespace MWGui
         mIsOnDragAndDrop = true;
         mDragAndDropWidget->setVisible(true);
 
+        // If picking up an item that isn't from the player's inventory, the item gets added to player inventory backend
+        // immediately, even though it's still floating beneath the mouse cursor. A bit counterintuitive,
+        // but this is how it works in vanilla, and not doing so would break quests (BM_beasts for instance).
+        ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
+        if (mSourceModel != playerModel)
+        {
+            MWWorld::Ptr item = mSourceModel->moveItem(mItem, mDraggedCount, playerModel);
+
+            playerModel->update();
+
+            ItemModel::ModelIndex newIndex = -1;
+            for (unsigned int i=0; i<playerModel->getItemCount(); ++i)
+            {
+                if (playerModel->getItem(i).mBase == item)
+                {
+                    newIndex = i;
+                    break;
+                }
+            }
+            mItem = playerModel->getItem(newIndex);
+            mSourceModel = playerModel;
+
+            SortFilterItemModel* playerFilterModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getSortFilterModel();
+            mSourceSortModel = playerFilterModel;
+        }
+
         std::string sound = mItem.mBase.getClass().getUpSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 

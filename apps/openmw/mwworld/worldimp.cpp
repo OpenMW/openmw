@@ -1,4 +1,5 @@
 #include "worldimp.hpp"
+
 #ifdef _WIN32
 #include <boost/tr1/tr1/unordered_map>
 #elif defined HAVE_UNORDERED_MAP
@@ -36,6 +37,8 @@
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
 
+#include "../mwscript/interpretercontext.hpp"
+
 #include "../mwclass/door.hpp"
 
 #include "player.hpp"
@@ -51,6 +54,20 @@
 #include "omwloader.hpp"
 
 using namespace Ogre;
+
+namespace
+{
+
+// Wraps a value to (-PI, PI]
+void wrap(float& rad)
+{
+    if (rad>0)
+        rad = std::fmod(rad+Ogre::Math::PI, 2.0f*Ogre::Math::PI)-Ogre::Math::PI;
+    else
+        rad = std::fmod(rad-Ogre::Math::PI, 2.0f*Ogre::Math::PI)+Ogre::Math::PI;
+}
+
+}
 
 namespace MWWorld
 {
@@ -940,15 +957,17 @@ namespace MWWorld
 
     void World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
     {
-        ESM::Position &pos = ptr.getRefData().getPosition();
+        ESM::Position pos = ptr.getRefData().getPosition();
 
         pos.pos[0] = x;
         pos.pos[1] = y;
         pos.pos[2] = z;
 
+        ptr.getRefData().setPosition(pos);
+
         Ogre::Vector3 vec(x, y, z);
 
-        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL;
+        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
@@ -970,9 +989,20 @@ namespace MWWorld
             }
             else
             {
-                if (!mWorldScene->isCellActive(*currCell))
-                    ptr.getClass().copyToCell(ptr, *newCell, pos);
-                else if (!mWorldScene->isCellActive(*newCell))
+                bool currCellActive = mWorldScene->isCellActive(*currCell);
+                bool newCellActive = mWorldScene->isCellActive(*newCell);
+                if (!currCellActive && newCellActive)
+                {
+                    MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    mWorldScene->addObjectToScene(newPtr);
+
+                    std::string script = newPtr.getClass().getScript(newPtr);
+                    if (!script.empty()) {
+                        mLocalScripts.add(script, newPtr);
+                    }
+                    addContainerScripts(newPtr, newCell);
+                }
+                else if (!newCellActive && currCellActive)
                 {
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
@@ -983,7 +1013,9 @@ namespace MWWorld
                             .copyToCell(ptr, *newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
-                else
+                else if (!currCellActive && !newCellActive)
+                    ptr.getClass().copyToCell(ptr, *newCell);
+                else // both cells active
                 {
                     MWWorld::Ptr copy =
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
@@ -1051,7 +1083,8 @@ namespace MWWorld
         const float two_pi = Ogre::Math::TWO_PI;
         const float pi = Ogre::Math::PI;
 
-        float *objRot = ptr.getRefData().getPosition().rot;
+        ESM::Position pos = ptr.getRefData().getPosition();
+        float *objRot = pos.rot;
         if(adjust)
         {
             objRot[0] += rot.x;
@@ -1088,55 +1121,33 @@ namespace MWWorld
         while(objRot[2] < -pi) objRot[2] += two_pi;
         while(objRot[2] >  pi) objRot[2] -= two_pi;
 
-        if(ptr.getRefData().getBaseNode() != 0)
-        {
-            mRendering->rotateObject(ptr);
-            mPhysics->rotateObject(ptr);
-        }
+        ptr.getRefData().setPosition(pos);
+
+        mWorldScene->updateObjectRotation(ptr);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
     {
-        if (ptr.getRefData().getBaseNode() != 0) {
+        if (ptr.getRefData().getBaseNode() != 0)
+        {
+            LocalRotation rot = ptr.getRefData().getLocalRotation();
+            rot.rot[0]=Ogre::Degree(x).valueRadians();
+            rot.rot[1]=Ogre::Degree(y).valueRadians();
+            rot.rot[2]=Ogre::Degree(z).valueRadians();
 
-            ptr.getRefData().getLocalRotation().rot[0]=Ogre::Degree(x).valueRadians();
-            ptr.getRefData().getLocalRotation().rot[1]=Ogre::Degree(y).valueRadians();
-            ptr.getRefData().getLocalRotation().rot[2]=Ogre::Degree(z).valueRadians();
+            wrap(rot.rot[0]);
+            wrap(rot.rot[1]);
+            wrap(rot.rot[2]);
 
-            float fullRotateRad=Ogre::Degree(360).valueRadians();
+            ptr.getRefData().setLocalRotation(rot);
 
-            while(ptr.getRefData().getLocalRotation().rot[0]>=fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[0]-=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[1]>=fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[1]-=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[2]>=fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[2]-=fullRotateRad;
-
-            while(ptr.getRefData().getLocalRotation().rot[0]<=-fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[0]+=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[1]<=-fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[1]+=fullRotateRad;
-            while(ptr.getRefData().getLocalRotation().rot[2]<=-fullRotateRad)
-                ptr.getRefData().getLocalRotation().rot[2]+=fullRotateRad;
-
-            Ogre::Quaternion worldRotQuat(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z);
-            if (!ptr.getClass().isActor())
-                worldRotQuat = Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)*
-                        Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y)* worldRotQuat;
-
-            Ogre::Quaternion rot(Ogre::Degree(z), Ogre::Vector3::NEGATIVE_UNIT_Z);
-            if (!ptr.getClass().isActor())
-                rot = Ogre::Quaternion(Ogre::Degree(x), Ogre::Vector3::NEGATIVE_UNIT_X)*
-                Ogre::Quaternion(Ogre::Degree(y), Ogre::Vector3::NEGATIVE_UNIT_Y)*rot;
-
-            ptr.getRefData().getBaseNode()->setOrientation(worldRotQuat*rot);
-            mPhysics->rotateObject(ptr);
+            mWorldScene->updateObjectLocalRotation(ptr);
         }
     }
 
     void World::adjustPosition(const Ptr &ptr)
     {
-        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
+        ESM::Position pos (ptr.getRefData().getPosition());
 
         if(!ptr.getRefData().getBaseNode())
         {
@@ -1144,21 +1155,34 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = mRendering->getTerrainHeightAt(pos);
+        float terrainHeight = mRendering->getTerrainHeightAt(Ogre::Vector3(pos.pos));
 
-        if (pos.z < terrainHeight)
-            pos.z = terrainHeight;
+        if (pos.pos[2] < terrainHeight)
+            pos.pos[2] = terrainHeight;
 
-        ptr.getRefData().getPosition().pos[2] = pos.z + 20; // place slightly above. will snap down to ground with code below
+        pos.pos[2] += 20; // place slightly above. will snap down to ground with code below
+
+        ptr.getRefData().setPosition(pos);
 
         if (!isFlying(ptr))
         {
-            Ogre::Vector3 traced = mPhysics->traceDown(ptr);
-            if (traced.z < pos.z)
-                pos.z = traced.z;
+            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
+            if (traced.z < pos.pos[2])
+                pos.pos[2] = traced.z;
         }
 
-        moveObject(ptr, ptr.getCell(), pos.x, pos.y, pos.z);
+        moveObject(ptr, ptr.getCell(), pos.pos[0], pos.pos[1], pos.pos[2]);
+    }
+
+    void World::fixPosition(const Ptr &actor)
+    {
+        const float dist = 8000;
+        ESM::Position pos (actor.getRefData().getPosition());
+        pos.pos[2] += dist;
+        actor.getRefData().setPosition(pos);
+
+        Ogre::Vector3 traced = mPhysics->traceDown(actor, dist*1.1);
+        moveObject(actor, actor.getCell(), traced.x, traced.y, traced.z);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -1222,7 +1246,7 @@ namespace MWWorld
         if(player != results.end())
             moveObjectImp(player->first, player->second.x, player->second.y, player->second.z);
 
-        mPhysEngine->stepSimulation(duration);
+        mPhysics->stepSimulation(duration);
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -1424,7 +1448,7 @@ namespace MWWorld
             // cast a ray from player to sun to detect if the sun is visible
             // this is temporary until we find a better place to put this code
             // currently its here because we need to access the physics system
-            float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
+            const float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
             Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
             mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
         }
@@ -1462,8 +1486,13 @@ namespace MWWorld
         std::vector < std::pair < float, std::string > >::iterator it = results.begin();
         while (it != results.end())
         {
-            if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
-            || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
+            if ((*it).second.find("HeightField") != std::string::npos) // Don't attempt to getPtrViaHandle on terrain
+            {
+                ++it;
+                continue;
+            }
+
+            if (getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
             {
                 it = results.erase(it);
             }
@@ -1471,7 +1500,8 @@ namespace MWWorld
                 ++it;
         }
 
-        if (results.empty())
+        if (results.empty()
+                || results.front().second.find("HeightField") != std::string::npos) // Blocked by terrain
         {
             mFacedHandle = "";
             mFacedDistance = FLT_MAX;
@@ -1677,6 +1707,14 @@ namespace MWWorld
         MWWorld::Ptr dropped =
             object.getClass().copyToCell(object, *cell, pos);
 
+        // Reset some position values that could be uninitialized if this item came from a container
+        LocalRotation localRotation;
+        localRotation.rot[0] = 0;
+        localRotation.rot[1] = 0;
+        localRotation.rot[2] = 0;
+        dropped.getRefData().setLocalRotation(localRotation);
+        dropped.getCellRef().setPosition(pos);
+
         if (mWorldScene->isCellActive(*cell)) {
             if (dropped.getRefData().isEnabled()) {
                 mWorldScene->addObjectToScene(dropped);
@@ -1703,14 +1741,15 @@ namespace MWWorld
 
         Ogre::Vector3 orig =
             Ogre::Vector3(pos.pos);
+        orig.z += 20;
         Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
 
-        float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
-        len += 100.0;
+        float len = 100.0;
 
         std::pair<bool, Ogre::Vector3> hit =
             mPhysics->castRay(orig, dir, len);
-        pos.pos[2] = hit.second.z;
+        if (hit.first)
+            pos.pos[2] = hit.second.z;
 
         // copy the object and set its count
         int origCount = object.getRefData().getCount();
@@ -1736,6 +1775,9 @@ namespace MWWorld
     bool
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
+        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
+
         if(!ptr.getClass().isActor())
             return false;
 
@@ -1743,9 +1785,8 @@ namespace MWWorld
             return false;
 
         if (ptr.getClass().canFly(ptr))
-            return true;
+            return !isParalyzed;
 
-        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
         if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
                 && isLevitationEnabled())
             return true;
@@ -1772,7 +1813,7 @@ namespace MWWorld
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
-        float *fpos = object.getRefData().getPosition().pos;
+        const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
@@ -1785,7 +1826,7 @@ namespace MWWorld
     World::isSwimming(const MWWorld::Ptr &object) const
     {
         /// \todo add check ifActor() - only actors can swim
-        float *fpos = object.getRefData().getPosition().pos;
+        const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
         /// \fixme 3/4ths submerged?
@@ -1829,7 +1870,7 @@ namespace MWWorld
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             OEngine::Physic::ActorTracer tracer;
             // a small distance above collision object is considered "on ground"
-            tracer.findGround(physactor->getCollisionBody(),
+            tracer.findGround(physactor,
                               pos,
                               pos - Ogre::Vector3(0, 0, 1.5f), // trace a small amount down
                               mPhysEngine);
@@ -1970,6 +2011,22 @@ namespace MWWorld
             return 0.f;
     }
 
+    bool World::isInStorm() const
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->isInStorm();
+        else
+            return false;
+    }
+
+    Ogre::Vector3 World::getStormDirection() const
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->getStormDirection();
+        else
+            return Ogre::Vector3(0,1,0);
+    }
+
     void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
     {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
@@ -2013,20 +2070,24 @@ namespace MWWorld
         }
     }
 
-    bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
+    bool World::getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor)
     {
-        if (!targetNpc.getRefData().isEnabled() || !npc.getRefData().isEnabled())
+        if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
-        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(npc.getRefData().getHandle())->getHalfExtents();
-        float* pos1 = npc.getRefData().getPosition().pos;
-        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetNpc.getRefData().getHandle())->getHalfExtents();
-        float* pos2 = targetNpc.getRefData().getPosition().pos;
+        if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
+            return false; // not in active cell
 
-        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z);
-        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z);
+        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(actor.getRefData().getHandle())->getHalfExtents();
+        const float* pos1 = actor.getRefData().getPosition().pos;
+        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle())->getHalfExtents();
+        const float* pos2 = targetActor.getRefData().getPosition().pos;
+
+        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9); // eye level
+        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z*2*0.9);
 
         std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
         if(result.first == "") return true;
+
         return false;
     }
 
@@ -2281,6 +2342,7 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
+        // TODO: this only works for the player
         MWWorld::Ptr target = getFacedObject();
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
@@ -2311,9 +2373,9 @@ namespace MWWorld
 
     void World::launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
                                  float speed, bool stack, const ESM::EffectList& effects,
-                                   const MWWorld::Ptr& actor, const std::string& sourceName)
+                                   const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection)
     {
-        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, actor, sourceName);
+        mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, caster, sourceName, fallbackDirection);
     }
 
     const std::vector<std::string>& World::getContentFiles() const
@@ -2326,6 +2388,9 @@ namespace MWWorld
         actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
         if (actor.getClass().hasInventoryStore(actor))
             actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+
+        // Normally updated once per frame, but here it is kinda important to do it right away.
+        MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
     }
 
     bool World::isDark() const
@@ -2427,14 +2492,15 @@ namespace MWWorld
             if (!ptr.getRefData().isEnabled())
                 return true;
 
-            // Consider references inside containers as well
-            if (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name())
+            // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
+            if (mType != World::Detect_Creature &&
+                    (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name()))
             {
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 {
                     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                     {
-                        if (needToAdd(*it))
+                        if (needToAdd(*it, mDetector))
                         {
                             mOut.push_back(ptr);
                             return true;
@@ -2443,16 +2509,25 @@ namespace MWWorld
                 }
             }
 
-            if (needToAdd(ptr))
+            if (needToAdd(ptr, mDetector))
                 mOut.push_back(ptr);
 
             return true;
         }
 
-        bool needToAdd (MWWorld::Ptr ptr)
+        bool needToAdd (MWWorld::Ptr ptr, MWWorld::Ptr detector)
         {
-            if (mType == World::Detect_Creature && ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
-                return false;
+            if (mType == World::Detect_Creature)
+            {
+                // If in werewolf form, this detects only NPCs, otherwise only creatures
+                if (detector.getClass().isNpc() && detector.getClass().getNpcStats(detector).isWerewolf())
+                {
+                    if (ptr.getClass().getTypeName() != typeid(ESM::NPC).name())
+                        return false;
+                }
+                else if (ptr.getClass().getTypeName() != typeid(ESM::Creature).name())
+                    return false;
+            }
             if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
                 return false;
             if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
@@ -2584,6 +2659,8 @@ namespace MWWorld
             int days = std::max(1, bounty / iDaysinPrisonMod);
 
             advanceTime(days * 24);
+            for (int i=0; i<days*24; ++i)
+                MWBase::Environment::get().getMechanicsManager ()->rest (true);
 
             std::set<int> skills;
             for (int day=0; day<days; ++day)
@@ -2626,8 +2703,6 @@ namespace MWWorld
                     skillMsg.replace(skillMsg.find("%d"), 2, skillValue.str());
                 message += "\n" + skillMsg;
             }
-
-            // TODO: Sleep the player
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
@@ -2695,6 +2770,11 @@ namespace MWWorld
         mRendering->spawnEffect(model, texture, worldPosition);
     }
 
+    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const Vector3 &worldPos)
+    {
+        mRendering->spawnEffect(model, textureOverride, worldPos);
+    }
+
     void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster,
                              const std::string& id, const std::string& sourceName)
     {
@@ -2757,5 +2837,23 @@ namespace MWWorld
             effects.mList = apply->second;
             cast.inflict(apply->first, caster, effects, ESM::RT_Target, false, true);
         }
+    }
+
+    void World::activate(const Ptr &object, const Ptr &actor)
+    {
+        MWScript::InterpreterContext interpreterContext (&object.getRefData().getLocals(), object);
+        interpreterContext.activate (object);
+
+        std::string script = object.getClass().getScript (object);
+
+        breakInvisibility(actor);
+
+        if (!script.empty())
+        {
+            getLocalScripts().setIgnore (object);
+            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+        }
+        if (!interpreterContext.hasActivationBeenHandled())
+            interpreterContext.executeActivation(object, actor);
     }
 }

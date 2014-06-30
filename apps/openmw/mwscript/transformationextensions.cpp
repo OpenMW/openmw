@@ -323,7 +323,7 @@ namespace MWScript
                     }
                     else
                     {
-                        throw std::runtime_error ("unknown cell");
+                        throw std::runtime_error (std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };
@@ -420,7 +420,7 @@ namespace MWScript
                     }
                     else
                     {
-                        throw std::runtime_error ("unknown cell");
+                        throw std::runtime_error ( std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };
@@ -578,7 +578,7 @@ namespace MWScript
                     Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float *objRot = ptr.getRefData().getPosition().rot;
+                    const float *objRot = ptr.getRefData().getPosition().rot;
 
                     float ax = Ogre::Radian(objRot[0]).valueDegrees();
                     float ay = Ogre::Radian(objRot[1]).valueDegrees();
@@ -613,9 +613,12 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    ptr.getRefData().getLocalRotation().rot[0] = 0;
-                    ptr.getRefData().getLocalRotation().rot[1] = 0;
-                    ptr.getRefData().getLocalRotation().rot[2] = 0;
+                    MWWorld::LocalRotation rot;
+                    rot.rot[0] = 0;
+                    rot.rot[1] = 0;
+                    rot.rot[2] = 0;
+                    ptr.getRefData().setLocalRotation(rot);
+
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
                     MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
                             ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]);
@@ -678,7 +681,7 @@ namespace MWScript
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float *objPos = ptr.getRefData().getPosition().pos;
+                    const float *objPos = ptr.getRefData().getPosition().pos;
 
                     if (axis == "x")
                     {

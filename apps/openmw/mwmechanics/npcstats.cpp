@@ -361,8 +361,14 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
 
     std::vector<int> skills;
 
-    for (int i=0; i<6; ++i)
-        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
+    for (int i=0; i<7; ++i)
+    {
+        if (faction.mData.mSkills[i] != -1)
+            skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
+    }
+
+    if (skills.empty())
+        return true;
 
     std::sort (skills.begin(), skills.end());
 
@@ -372,6 +378,9 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
 
     if (*iter<rankData.mSkill1)
         return false;
+
+    if (skills.size() < 2)
+        return true;
 
     return *++iter>=rankData.mSkill2;
 }
@@ -386,6 +395,8 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
     if(set != false)
     {
         const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        mWerewolfKills = 0;
 
         for(size_t i = 0;i < ESM::Attribute::Length;i++)
         {
@@ -416,6 +427,11 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
 int MWMechanics::NpcStats::getWerewolfKills() const
 {
     return mWerewolfKills;
+}
+
+void MWMechanics::NpcStats::addWerewolfKill()
+{
+    ++mWerewolfKills;
 }
 
 int MWMechanics::NpcStats::getProfit() const

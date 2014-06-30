@@ -488,14 +488,16 @@ namespace MWGui
                     text += "\n#BF9959#{sExpelled}";
                 else
                 {
-                    text += std::string("\n#BF9959") + faction->mRanks[it->second];
+                    int rank = it->second;
+                    rank = std::max(0, std::min(9, rank));
+                    text += std::string("\n#BF9959") + faction->mRanks[rank];
 
-                    if (it->second < 9)
+                    if (rank < 9)
                     {
                         // player doesn't have max rank yet
-                        text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[it->second+1];
+                        text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[rank+1];
 
-                        ESM::RankData rankData = faction->mData.mRankData[it->second+1];
+                        ESM::RankData rankData = faction->mData.mRankData[rank+1];
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
 
@@ -504,11 +506,18 @@ namespace MWGui
 
                         text += "\n\n#DDC79E#{sFavoriteSkills}";
                         text += "\n#BF9959";
-                        for (int i=0; i<6; ++i)
+                        bool firstSkill = true;
+                        for (int i=0; i<7; ++i)
                         {
-                            text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
-                            if (i<5)
-                                text += ", ";
+                            if (faction->mData.mSkills[i] != -1)
+                            {
+                                if (!firstSkill)
+                                    text += ", ";
+
+                                firstSkill = false;
+
+                                text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
+                            }
                         }
 
                         text += "\n";

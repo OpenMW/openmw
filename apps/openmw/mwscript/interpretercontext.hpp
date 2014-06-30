@@ -118,6 +118,7 @@ namespace MWScript
             virtual void stopScript (const std::string& name);
 
             virtual float getDistance (const std::string& name, const std::string& id = "") const;
+            ///< @note if \a id is empty, assumes an implicit reference
 
             bool hasBeenActivated (const MWWorld::Ptr& ptr);
             ///< \attention Calling this function for the right reference will mark the action as
@@ -129,7 +130,7 @@ namespace MWScript
             ///< Store reference acted upon. The actual execution of the action does not
             /// take place here.
 
-            void executeActivation(MWWorld::Ptr ptr);
+            void executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor);
             ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
 
             void clearActivation();

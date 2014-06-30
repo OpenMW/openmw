@@ -6,6 +6,14 @@
 
 #include "pathfinding.hpp"
 
+namespace ESM
+{
+namespace AiSequence
+{
+    struct AiActivate;
+}
+}
+
 namespace MWMechanics
 {
     /// \brief Causes actor to walk to activatable object and activate it
@@ -16,9 +24,14 @@ namespace MWMechanics
             /// Constructor
             /** \param objectId Reference to object to activate **/
             AiActivate(const std::string &objectId);
+
+            AiActivate(const ESM::AiSequence::AiActivate* activate);
+
             virtual AiActivate *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
             virtual int getTypeId() const;
+
+            virtual void writeState(ESM::AiSequence::AiSequence& sequence) const;
 
         private:
             std::string mObjectId;

@@ -101,7 +101,7 @@ namespace MWGui
             size_t viewRange = mScrollView->getCanvasSize().height;
             if(viewPosition > viewRange)
                 viewPosition = viewRange;
-            mScrollView->setViewOffset(MyGUI::IntPoint(0, -viewPosition));
+            mScrollView->setViewOffset(MyGUI::IntPoint(0, viewPosition * -1));
         }
 
         void MWList::setPropertyOverride(const std::string &_key, const std::string &_value)

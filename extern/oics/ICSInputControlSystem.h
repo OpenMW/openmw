@@ -208,8 +208,6 @@ namespace ICS
 		std::vector<Channel *> mChannels;
 
 		ControlsKeyBinderMapType mControlsKeyBinderMap;
-		std::map<std::string, SDL_Keycode> mKeys;
-		std::map<SDL_Keycode, std::string> mKeyCodes;
 
 		bool mActive;
 		InputControlSystemLog* mLog;
@@ -226,8 +224,6 @@ namespace ICS
 		int mMouseAxisBindingInitialValues[3];
 
 	private:
-
-		void fillSDLKeysMap();
 
 		Uint16 mClientWidth;
 		Uint16 mClientHeight;

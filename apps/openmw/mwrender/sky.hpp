@@ -148,7 +148,11 @@ namespace MWRender
 
         void sunDisable();
 
-        void setSunDirection(const Ogre::Vector3& direction);
+        void setRainSpeed(float speed);
+
+        void setStormDirection(const Ogre::Vector3& direction);
+
+        void setSunDirection(const Ogre::Vector3& direction, bool is_moon);
 
         void setMasserDirection(const Ogre::Vector3& direction);
 
@@ -176,9 +180,14 @@ namespace MWRender
         void create();
         ///< no need to call this, automatically done on first enable()
 
+        void updateRain(float dt);
+        void clearRain();
+
         bool mCreated;
 
         bool mMoonRed;
+
+        bool mIsStorm;
 
         float mHour;
         int mDay;
@@ -198,7 +207,17 @@ namespace MWRender
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
 
+        Ogre::SceneNode* mCloudNode;
+
         std::vector<NifOgre::ObjectScenePtr> mObjects;
+
+        Ogre::SceneNode* mParticleNode;
+        NifOgre::ObjectScenePtr mParticle;
+
+        std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr> mRainModels;
+        float mRainTimer;
+
+        Ogre::Vector3 mStormDirection;
 
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;
@@ -211,12 +230,19 @@ namespace MWRender
         Ogre::ColourValue mSkyColour;
         Ogre::ColourValue mFogColour;
 
+        std::string mCurrentParticleEffect;
+
         Ogre::Light* mLightning;
 
         float mRemainingTransitionTime;
 
         float mGlare; // target
         float mGlareFade; // actual
+
+        bool mRainEnabled;
+        std::string mRainEffect;
+        float mRainSpeed;
+        float mRainFrequency;
 
         bool mEnabled;
         bool mSunEnabled;

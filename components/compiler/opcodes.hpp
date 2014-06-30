@@ -59,6 +59,8 @@ namespace Compiler
         const int opcodeStartCombatExplicit = 0x200023b;
         const int opcodeStopCombat = 0x200023c;
         const int opcodeStopCombatExplicit = 0x200023d;
+        const int opcodeFace = 0x200024c;
+        const int opcodeFaceExplicit = 0x200024d;
     }
 
     namespace Animation
@@ -154,6 +156,8 @@ namespace Compiler
         const int opcodeSameFactionExplicit = 0x20001b6;
         const int opcodeModFactionReaction = 0x2000242;
         const int opcodeGetFactionReaction = 0x2000243;
+        const int opcodeClearInfoActor = 0x2000245;
+        const int opcodeClearInfoActorExplicit = 0x2000246;
     }
 
     namespace Gui
@@ -175,6 +179,8 @@ namespace Compiler
         const int opcodeToggleFullHelp = 0x2000151;
         const int opcodeShowMap = 0x20001a0;
         const int opcodeFillMap = 0x20001a1;
+        const int opcodeMenuTest = 0x2002c;
+        const int opcodeToggleMenus = 0x200024b;
     }
 
     namespace Misc
@@ -204,6 +210,8 @@ namespace Compiler
         const int opcodeGetLockedExplicit = 0x20001c8;
         const int opcodeGetEffect = 0x20001cf;
         const int opcodeGetEffectExplicit = 0x20001d0;
+        const int opcodeBetaComment = 0x2000247;
+        const int opcodeBetaCommentExplicit = 0x2000248;
         const int opcodeAddSoulGem = 0x20001f3;
         const int opcodeAddSoulGemExplicit = 0x20001f4;
         const int opcodeRemoveSoulGem = 0x20027;
@@ -380,6 +388,8 @@ namespace Compiler
         const int opcodeLowerRankExplicit = 0x20001eb;
         const int opcodeOnDeath = 0x20001fc;
         const int opcodeOnDeathExplicit = 0x2000205;
+        const int opcodeOnMurder = 0x2000249;
+        const int opcodeOnMurderExplicit = 0x200024a;
         const int opcodeOnKnockout = 0x2000240;
         const int opcodeOnKnockoutExplicit = 0x2000241;
 

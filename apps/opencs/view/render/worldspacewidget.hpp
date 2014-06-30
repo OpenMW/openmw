@@ -47,7 +47,7 @@ namespace CSVRender
                 ignored //either mixed cells, or not cells
             };
 
-            WorldspaceWidget (const CSMDoc::Document& document, QWidget *parent = 0);
+            WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = 0);
 
             CSVWorld::SceneToolMode *makeNavigationSelector (CSVWorld::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
@@ -78,6 +78,19 @@ namespace CSVRender
         private slots:
 
             void selectNavigationMode (const std::string& mode);
+
+            virtual void referenceableDataChanged (const QModelIndex& topLeft,
+                const QModelIndex& bottomRight) = 0;
+
+            virtual void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
+
+            virtual void referenceableAdded (const QModelIndex& index, int start, int end) = 0;
+
+            virtual void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) = 0;
+
+            virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
+
+            virtual void referenceAdded (const QModelIndex& index, int start, int end) = 0;
 
         signals:
 

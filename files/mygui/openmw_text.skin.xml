@@ -32,6 +32,13 @@
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
     </Skin>
 
+    <Skin name="SandTextVCenter" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+        <Property key="TextColour" value="0.75 0.6 0.35"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
+    </Skin>
+
     <Skin name="SandTextRight" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Right Bottom"/>

@@ -18,6 +18,7 @@ namespace ESM
 namespace MWMechanics
 {
     class EffectKey;
+    class MagicEffects;
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
@@ -35,15 +36,19 @@ namespace MWMechanics
     int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
 
     /// @return >=100 for fully resisted. can also return negative value for damage amplification.
-    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell = NULL);
+    /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
+    ///                being applied (but not applied yet) that should also be considered.
+    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
 
-    float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell = NULL);
+    float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+                              const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
 
     class CastSpell
     {
     private:
-        MWWorld::Ptr mCaster;
-        MWWorld::Ptr mTarget;
+        MWWorld::Ptr mCaster; // May be empty
+        MWWorld::Ptr mTarget; // May be empty
     public:
         bool mStack;
         std::string mId; // ID of spell, potion, item etc
@@ -54,8 +59,13 @@ namespace MWMechanics
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target);
 
         bool cast (const ESM::Spell* spell);
+
+        /// @note mCaster must be an actor
         bool cast (const MWWorld::Ptr& item);
+
+        /// @note mCaster must be an NPC
         bool cast (const ESM::Ingredient* ingredient);
+
         bool cast (const ESM::Potion* potion);
 
         /// @note Auto detects if spell, ingredient or potion

@@ -108,13 +108,13 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
         esm.writeHNT("NAM9", mGoldValue);
     }
 
-    if (mTeleport && !inInventory)
+    if (!inInventory && mTeleport)
     {
         esm.writeHNT("DODT", mDoorDest);
         esm.writeHNOCString("DNAM", mDestCell);
     }
 
-    if (mLockLevel != 0 && !inInventory) {
+    if (!inInventory && mLockLevel != 0) {
             esm.writeHNT("FLTV", mLockLevel);
     }
 
@@ -127,13 +127,13 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     if (mReferenceBlocked != -1)
         esm.writeHNT("UNAM", mReferenceBlocked);
 
-    if (mFltv != 0 && !inInventory)
+    if (!inInventory && mFltv != 0)
         esm.writeHNT("FLTV", mFltv);
 
     if (!inInventory)
         esm.writeHNT("DATA", mPos, 24);
 
-    if (mNam0 != 0 && !inInventory)
+    if (!inInventory && mNam0 != 0)
         esm.writeHNT("NAM0", mNam0);
 }
 
@@ -158,6 +158,7 @@ void ESM::CellRef::blank()
     mReferenceBlocked = 0;
     mFltv = 0;
     mNam0 = 0;
+    mTeleport = false;
 
     for (int i=0; i<3; ++i)
     {

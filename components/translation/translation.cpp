@@ -42,7 +42,7 @@ namespace Translation
     void Storage::loadDataFromStream(ContainerType& container, std::istream& stream)
     {
         std::string line;
-        while (!stream.eof())
+        while (!stream.eof() && !stream.fail())
         {
             std::getline( stream, line );
             if (!line.empty() && *line.rbegin() == '\r')

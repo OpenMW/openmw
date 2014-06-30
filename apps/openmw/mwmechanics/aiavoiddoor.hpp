@@ -24,6 +24,8 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
+            virtual unsigned int getPriority() const;
+
         private:
             float mDuration;
             MWWorld::Ptr mDoorPtr;

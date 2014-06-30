@@ -18,6 +18,11 @@ namespace ESM
         mHeader.mData.version = ver;
     }
 
+    void ESMWriter::setType(int type)
+    {
+        mHeader.mData.type = type;
+    }
+
     void ESMWriter::setAuthor(const std::string& auth)
     {
         mHeader.mData.author.assign (auth);

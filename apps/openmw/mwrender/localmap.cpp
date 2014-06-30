@@ -319,7 +319,7 @@ void LocalMap::createFogOfWar(const std::string& texturePrefix)
     std::vector<uint32> buffer;
 
     // initialize to (0, 0, 0, 1)
-    buffer.resize(sFogOfWarResolution*sFogOfWarResolution, (255 << 24));
+    buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
 
     // upload to the texture
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);

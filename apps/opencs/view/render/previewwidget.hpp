@@ -1,11 +1,10 @@
 #ifndef OPENCS_VIEW_PREVIEWWIDGET_H
 #define OPENCS_VIEW_PREVIEWWIDGET_H
 
-#include <components/nifogre/ogrenifloader.hpp>
-
 #include "scenewidget.hpp"
 
 #include "navigationorbit.hpp"
+#include "object.hpp"
 
 class QModelIndex;
 
@@ -22,25 +21,12 @@ namespace CSVRender
 
             CSMWorld::Data& mData;
             CSVRender::NavigationOrbit mOrbit;
-            NifOgre::ObjectScenePtr mObject;
-            Ogre::SceneNode *mNode;
-            std::string mReferenceId;
-            std::string mReferenceableId;
-
-            void setup();
-
-            void setModel();
-
-            void adjust();
-            ///< Adjust referenceable preview according to the reference
+            Object mObject;
 
         public:
 
-            PreviewWidget (CSMWorld::Data& data, const std::string& referenceableId,
+            PreviewWidget (CSMWorld::Data& data, const std::string& id, bool referenceable,
                 QWidget *parent = 0);
-
-            PreviewWidget (CSMWorld::Data& data, const std::string& referenceableId,
-                const std::string& referenceId, QWidget *parent = 0);
 
         signals:
 
@@ -50,14 +36,14 @@ namespace CSVRender
 
         private slots:
 
-            void ReferenceableDataChanged (const QModelIndex& topLeft,
+            void referenceableDataChanged (const QModelIndex& topLeft,
                 const QModelIndex& bottomRight);
 
-            void ReferenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
-            void ReferenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+            void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-            void ReferenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
     };
 }
 

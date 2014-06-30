@@ -24,6 +24,7 @@
 #include "spellwindow.hpp"
 
 #include "itemwidget.hpp"
+#include "sortfilteritemmodel.hpp"
 
 
 namespace MWGui
@@ -134,6 +135,7 @@ namespace MWGui
         }
         mItemSelectionDialog->setVisible(true);
         mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyUsableItems);
 
         mAssignDialog->setVisible (false);
     }
@@ -162,7 +164,7 @@ namespace MWGui
 
     void QuickKeysMenu::onAssignItem(MWWorld::Ptr item)
     {
-        assert (mSelectedIndex > 0);
+        assert (mSelectedIndex >= 0);
         ItemWidget* button = mQuickKeyButtons[mSelectedIndex];
         while (button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(button->getChildAt(0));
@@ -184,7 +186,7 @@ namespace MWGui
 
     void QuickKeysMenu::onAssignMagicItem (MWWorld::Ptr item)
     {
-        assert (mSelectedIndex > 0);
+        assert (mSelectedIndex >= 0);
         ItemWidget* button = mQuickKeyButtons[mSelectedIndex];
         while (button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(button->getChildAt(0));
@@ -203,7 +205,7 @@ namespace MWGui
 
     void QuickKeysMenu::onAssignMagic (const std::string& spellId)
     {
-        assert (mSelectedIndex > 0);
+        assert (mSelectedIndex >= 0);
         ItemWidget* button = mQuickKeyButtons[mSelectedIndex];
         while (button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(button->getChildAt(0));
@@ -245,7 +247,7 @@ namespace MWGui
 
     void QuickKeysMenu::activateQuickKey(int index)
     {
-        assert (index-1 > 0);
+        assert (index-1 >= 0);
         ItemWidget* button = mQuickKeyButtons[index-1];
 
         QuickKeyType type = mAssigned[index-1];

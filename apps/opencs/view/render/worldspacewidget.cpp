@@ -10,15 +10,30 @@
 #include "../world/scenetoolmode.hpp"
 #include <apps/opencs/model/world/universalid.hpp>
 
-CSVRender::WorldspaceWidget::WorldspaceWidget (const CSMDoc::Document& document, QWidget* parent)
+CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (parent), mDocument(document)
 {
-    Ogre::Entity* ent = getSceneManager()->createEntity("cube", Ogre::SceneManager::PT_CUBE);
-    ent->setMaterialName("BaseWhite");
-
-    getSceneManager()->getRootSceneNode()->attachObject(ent);
-
     setAcceptDrops(true);
+
+    QAbstractItemModel *referenceables =
+        document.getData().getTableModel (CSMWorld::UniversalId::Type_Referenceables);
+
+    connect (referenceables, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (referenceableDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (referenceables, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (referenceableAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (referenceables, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (referenceableAdded (const QModelIndex&, int, int)));
+
+    QAbstractItemModel *references =
+        document.getData().getTableModel (CSMWorld::UniversalId::Type_References);
+
+    connect (references, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (referenceDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (references, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (referenceAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (references, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (referenceAdded (const QModelIndex&, int, int)));
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
@@ -120,6 +135,8 @@ void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
 
     if (mime->fromDocument (mDocument))
     {

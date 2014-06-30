@@ -57,7 +57,8 @@ op 0x20028: RemoveSoulGem, explicit reference
 op 0x20029: PCRaiseRank, explicit reference
 op 0x2002a: PCLowerRank, explicit reference
 op 0x2002b: PCJoinFaction, explicit reference
-opcodes 0x2002c-0x3ffff unused
+op 0x2002c: MenuTest
+opcodes 0x2002d-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -393,5 +394,14 @@ op 0x2000241: onKnockoutExplicit
 op 0x2000242: ModFactionReaction
 op 0x2000243: GetFactionReaction
 op 0x2000244: Activate, explicit
+op 0x2000245: ClearInfoActor
+op 0x2000246: ClearInfoActor, explicit
+op 0x2000247: BetaComment
+op 0x2000248: BetaComment, explicit
+op 0x2000249: OnMurder
+op 0x200024a: OnMurder, explicit
+op 0x200024b: ToggleMenus
+op 0x200024c: Face
+op 0x200024d: Face, explicit
 
-opcodes 0x2000245-0x3ffffff unused
+opcodes 0x200024e-0x3ffffff unused

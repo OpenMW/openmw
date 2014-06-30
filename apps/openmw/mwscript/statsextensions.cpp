@@ -587,7 +587,9 @@ namespace MWScript
                         }
                         else
                         {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] = player.getClass().getNpcStats(player).getFactionRanks()[factionID] +1;
+                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] =
+                                    std::min(player.getClass().getNpcStats(player).getFactionRanks()[factionID] +1,
+                                             9);
                         }
                     }
                 }
@@ -621,7 +623,8 @@ namespace MWScript
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                         if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) != player.getClass().getNpcStats(player).getFactionRanks().end())
                         {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] = player.getClass().getNpcStats(player).getFactionRanks()[factionID] -1;
+                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] =
+                                    std::max(0, player.getClass().getNpcStats(player).getFactionRanks()[factionID]-1);
                         }
                     }
                 }
@@ -688,8 +691,11 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getNpcStats (ptr).setBaseDisposition
-                        (ptr.getClass().getNpcStats (ptr).getBaseDisposition() + value);
+                    if (ptr.getClass().isNpc())
+                        ptr.getClass().getNpcStats (ptr).setBaseDisposition
+                            (ptr.getClass().getNpcStats (ptr).getBaseDisposition() + value);
+
+                    // else: must not throw exception (used by an Almalexia dialogue script)
                 }
         };
 
@@ -705,7 +711,8 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getNpcStats (ptr).setBaseDisposition (value);
+                    if (ptr.getClass().isNpc())
+                        ptr.getClass().getNpcStats (ptr).setBaseDisposition (value);
                 }
         };
 
@@ -718,7 +725,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
+                    if (!ptr.getClass().isNpc())
+                        runtime.push(0);
+                    else
+                        runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
                 }
         };
 
@@ -1022,7 +1032,7 @@ namespace MWScript
                         return;
 
                     std::map<std::string, int>& ranks = ptr.getClass().getNpcStats(ptr).getFactionRanks ();
-                    ranks[factionID] = ranks[factionID]+1;
+                    ranks[factionID] = std::min(9, ranks[factionID]+1);
                 }
         };
 
@@ -1049,7 +1059,7 @@ namespace MWScript
                         return;
 
                     std::map<std::string, int>& ranks = ptr.getClass().getNpcStats(ptr).getFactionRanks ();
-                    ranks[factionID] = ranks[factionID]-1;
+                    ranks[factionID] = std::max(0, ranks[factionID]-1);
                 }
         };
 
@@ -1067,6 +1077,25 @@ namespace MWScript
 
                     if (value)
                         ptr.getClass().getCreatureStats (ptr).clearHasDied();
+
+                    runtime.push (value);
+                }
+        };
+
+        template <class R>
+        class OpOnMurder : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value =
+                        ptr.getClass().getCreatureStats (ptr).hasBeenMurdered();
+
+                    if (value)
+                        ptr.getClass().getCreatureStats (ptr).clearHasBeenMurdered();
 
                     runtime.push (value);
                 }
@@ -1264,6 +1293,8 @@ namespace MWScript
 
             interpreter.installSegment5 (Compiler::Stats::opcodeOnDeath, new OpOnDeath<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnMurder, new OpOnMurder<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnMurderExplicit, new OpOnMurder<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockout, new OpOnKnockout<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeOnKnockoutExplicit, new OpOnKnockout<ExplicitRef>);
 

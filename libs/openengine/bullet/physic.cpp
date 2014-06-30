@@ -11,120 +11,159 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
+namespace
+{
+
+// Create a copy of the given collision shape (responsibility of user to delete the returned shape).
+btCollisionShape *duplicateCollisionShape(btCollisionShape *shape)
+{
+    if(shape->isCompound())
+    {
+        btCompoundShape *comp = static_cast<btCompoundShape*>(shape);
+        btCompoundShape *newShape = new btCompoundShape;
+
+        int numShapes = comp->getNumChildShapes();
+        for(int i = 0;i < numShapes;i++)
+        {
+            btCollisionShape *child = duplicateCollisionShape(comp->getChildShape(i));
+            btTransform trans = comp->getChildTransform(i);
+            newShape->addChildShape(trans, child);
+        }
+
+        return newShape;
+    }
+
+    if(btBvhTriangleMeshShape *trishape = dynamic_cast<btBvhTriangleMeshShape*>(shape))
+    {
+        btTriangleMesh* oldMesh = dynamic_cast<btTriangleMesh*>(trishape->getMeshInterface());
+        btTriangleMesh* newMesh = new btTriangleMesh(*oldMesh);
+        NifBullet::TriangleMeshShape *newShape = new NifBullet::TriangleMeshShape(newMesh, true);
+
+        return newShape;
+    }
+
+    throw std::logic_error(std::string("Unhandled Bullet shape duplication: ")+shape->getName());
+}
+
+void deleteShape(btCollisionShape* shape)
+{
+    if(shape!=NULL)
+    {
+        if(shape->isCompound())
+        {
+            btCompoundShape* ms = static_cast<btCompoundShape*>(shape);
+            int a = ms->getNumChildShapes();
+            for(int i=0; i <a;i++)
+            {
+                deleteShape(ms->getChildShape(i));
+            }
+        }
+        delete shape;
+    }
+}
+
+}
+
 namespace OEngine {
 namespace Physic
 {
 
     PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
-      : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
-      , mBody(0), mRaycastingBody(0), mOnGround(false), mCollisionMode(true), mBoxRotation(0,0,0,0)
-      , mCollisionBody(true)
+      : mName(name), mEngine(engine), mMesh(mesh)
+      , mBody(0), mOnGround(false), mInternalCollisionMode(true)
+      , mExternalCollisionMode(true)
       , mForce(0.0f)
+      , mScale(scale)
     {
-        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
-        mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, true);
-        Ogre::Quaternion inverse = mBoxRotation.Inverse();
-        mBoxRotationInverse = Ogre::Quaternion(inverse.w, inverse.x, inverse.y,inverse.z);
-        mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
+        if (!NifBullet::getBoundingBox(mMesh, mHalfExtents, mMeshTranslation, mMeshOrientation))
+        {
+            mHalfExtents = Ogre::Vector3(0.f);
+            mMeshTranslation = Ogre::Vector3(0.f);
+            mMeshOrientation = Ogre::Quaternion::IDENTITY;
+        }
+
+        // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
+        if (std::abs(mHalfExtents.x-mHalfExtents.y)<mHalfExtents.x*0.05 && mHalfExtents.z >= mHalfExtents.x)
+        {
+            // Could also be btCapsuleShapeZ, but the movement solver seems to have issues with it (jumping on slopes doesn't work)
+            mShape.reset(new btCylinderShapeZ(BtOgre::Convert::toBullet(mHalfExtents)));
+        }
+        else
+            mShape.reset(new btBoxShape(BtOgre::Convert::toBullet(mHalfExtents)));
+
+        mShape->setLocalScaling(btVector3(scale,scale,scale));
+
+        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
+                (0,0, mShape.get());
+        mBody = new RigidBody(CI, name);
+        mBody->mPlaceable = false;
+
+        setPosition(position);
+        setRotation(rotation);
+
+        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
+            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
     }
 
     PhysicActor::~PhysicActor()
     {
         if(mBody)
         {
-            mEngine->dynamicsWorld->removeRigidBody(mBody);
+            mEngine->mDynamicsWorld->removeRigidBody(mBody);
             delete mBody;
-        }
-        if(mRaycastingBody)
-        {
-            mEngine->dynamicsWorld->removeRigidBody(mRaycastingBody);
-            delete mRaycastingBody;
-        }
+        }  
     }
 
     void PhysicActor::enableCollisionMode(bool collision)
     {
-        mCollisionMode = collision;
+        mInternalCollisionMode = collision;
     }
 
     void PhysicActor::enableCollisionBody(bool collision)
     {
         assert(mBody);
-        if(collision && !mCollisionBody) enableCollisionBody();
-        if(!collision && mCollisionBody) disableCollisionBody();
-        mCollisionBody = collision;
+        if(collision && !mExternalCollisionMode) enableCollisionBody();
+        if(!collision && mExternalCollisionMode) disableCollisionBody();
+        mExternalCollisionMode = collision;
     }
 
-    void PhysicActor::setPosition(const Ogre::Vector3 &pos)
+    const Ogre::Vector3& PhysicActor::getPosition() const
+    {
+        return mPosition;
+    }
+
+    void PhysicActor::setPosition(const Ogre::Vector3 &position)
     {
         assert(mBody);
-        if(pos != getPosition())
-        {
-            mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
-            mEngine->adjustRigidBody(mRaycastingBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
-        }
+
+        mPosition = position;
+
+        btTransform tr = mBody->getWorldTransform();
+        Ogre::Quaternion meshrot = mMeshOrientation;
+        Ogre::Vector3 transrot = meshrot * (mMeshTranslation * mScale);
+        Ogre::Vector3 newPosition = transrot + position;
+
+        tr.setOrigin(BtOgre::Convert::toBullet(newPosition));
+        mBody->setWorldTransform(tr);
     }
 
-    void PhysicActor::setRotation(const Ogre::Quaternion &quat)
+    void PhysicActor::setRotation (const Ogre::Quaternion& rotation)
     {
-        assert(mBody);
-        if(!quat.equals(getRotation(), Ogre::Radian(0))){
-            mEngine->adjustRigidBody(mBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
-            mEngine->adjustRigidBody(mRaycastingBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
-
-        }
+        btTransform tr = mBody->getWorldTransform();
+        tr.setRotation(BtOgre::Convert::toBullet(mMeshOrientation * rotation));
+        mBody->setWorldTransform(tr);
     }
 
-
-    Ogre::Vector3 PhysicActor::getPosition()
+    void PhysicActor::setScale(float scale)
     {
-        assert(mBody);
-        btVector3 vec = mBody->getWorldTransform().getOrigin();
-        Ogre::Quaternion rotation = Ogre::Quaternion(mBody->getWorldTransform().getRotation().getW(), mBody->getWorldTransform().getRotation().getX(),
-            mBody->getWorldTransform().getRotation().getY(), mBody->getWorldTransform().getRotation().getZ());
-        Ogre::Vector3 transrot = rotation * mBoxScaledTranslation;
-        Ogre::Vector3 visualPosition = Ogre::Vector3(vec.getX(), vec.getY(), vec.getZ()) - transrot;
-        return visualPosition;
-    }
-
-    Ogre::Quaternion PhysicActor::getRotation()
-    {
-        assert(mBody);
-        btQuaternion quat = mBody->getWorldTransform().getRotation();
-        return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ()) * mBoxRotationInverse;
-    }
-
-    void PhysicActor::setScale(float scale){
-        //We only need to change the scaled box translation, box rotations remain the same.
-        assert(mBody);
-        mBoxScaledTranslation = mBoxScaledTranslation / mBody->getCollisionShape()->getLocalScaling().getX();
-        mBoxScaledTranslation *= scale;
-        Ogre::Vector3 pos = getPosition();
-        Ogre::Quaternion rot = getRotation();
-        if(mBody){
-            mEngine->dynamicsWorld->removeRigidBody(mBody);
-            mEngine->dynamicsWorld->removeRigidBody(mRaycastingBody);
-            delete mBody;
-            delete mRaycastingBody;
-        }
-        //Create the newly scaled rigid body
-        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot);
-        mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot, 0, 0, true);
-        mEngine->addRigidBody(mCollisionBody ? mBody : 0, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
+        mScale = scale;
+        mShape->setLocalScaling(btVector3(scale,scale,scale));
+        setPosition(mPosition);
     }
 
     Ogre::Vector3 PhysicActor::getHalfExtents() const
     {
-        if(mBody)
-        {
-            btBoxShape *box = static_cast<btBoxShape*>(mBody->getCollisionShape());
-            if(box != NULL)
-            {
-                btVector3 size = box->getHalfExtentsWithMargin();
-                return Ogre::Vector3(size.getX(), size.getY(), size.getZ());
-            }
-        }
-        return Ogre::Vector3(0.0f);
+        return mHalfExtents * mScale;
     }
 
     void PhysicActor::setInertialForce(const Ogre::Vector3 &force)
@@ -139,12 +178,16 @@ namespace Physic
 
     void PhysicActor::disableCollisionBody()
     {
-        mEngine->dynamicsWorld->removeRigidBody(mBody);
+        mEngine->mDynamicsWorld->removeRigidBody(mBody);
+        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
+            CollisionType_World|CollisionType_HeightMap);
     }
 
     void PhysicActor::enableCollisionBody()
     {
-        mEngine->dynamicsWorld->addRigidBody(mBody,CollisionType_Actor,CollisionType_World|CollisionType_HeightMap);
+        mEngine->mDynamicsWorld->removeRigidBody(mBody);
+        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
+            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,8 +232,8 @@ namespace Physic
         broadphase = new btDbvtBroadphase();
 
         // The world.
-        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
-        dynamicsWorld->setGravity(btVector3(0,0,-10));
+        mDynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+        mDynamicsWorld->setGravity(btVector3(0,0,-10));
 
         if(BulletShapeManager::getSingletonPtr() == NULL)
         {
@@ -208,10 +251,10 @@ namespace Physic
         if(!isDebugCreated)
         {
             Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-            mDebugDrawer = new BtOgre::DebugDrawer(node, dynamicsWorld);
-            dynamicsWorld->setDebugDrawer(mDebugDrawer);
+            mDebugDrawer = new BtOgre::DebugDrawer(node, mDynamicsWorld);
+            mDynamicsWorld->setDebugDrawer(mDebugDrawer);
             isDebugCreated = true;
-            dynamicsWorld->debugDrawWorld();
+            mDynamicsWorld->debugDrawWorld();
         }
     }
 
@@ -238,10 +281,15 @@ namespace Physic
 
     PhysicEngine::~PhysicEngine()
     {
+        for (std::map<RigidBody*, AnimatedShapeInstance>::iterator it = mAnimatedShapes.begin(); it != mAnimatedShapes.end(); ++it)
+            deleteShape(it->second.mCompound);
+        for (std::map<RigidBody*, AnimatedShapeInstance>::iterator it = mAnimatedRaycastingShapes.begin(); it != mAnimatedRaycastingShapes.end(); ++it)
+            deleteShape(it->second.mCompound);
+
         HeightFieldContainer::iterator hf_it = mHeightFieldMap.begin();
         for (; hf_it != mHeightFieldMap.end(); ++hf_it)
         {
-            dynamicsWorld->removeRigidBody(hf_it->second.mBody);
+            mDynamicsWorld->removeRigidBody(hf_it->second.mBody);
             delete hf_it->second.mShape;
             delete hf_it->second.mBody;
         }
@@ -251,7 +299,7 @@ namespace Physic
         {
             if (rb_it->second != NULL)
             {
-                dynamicsWorld->removeRigidBody(rb_it->second);
+                mDynamicsWorld->removeRigidBody(rb_it->second);
 
                 delete rb_it->second;
                 rb_it->second = NULL;
@@ -262,7 +310,7 @@ namespace Physic
         {
             if (rb_it->second != NULL)
             {
-                dynamicsWorld->removeRigidBody(rb_it->second);
+                mDynamicsWorld->removeRigidBody(rb_it->second);
 
                 delete rb_it->second;
                 rb_it->second = NULL;
@@ -281,7 +329,7 @@ namespace Physic
 
         delete mDebugDrawer;
 
-        delete dynamicsWorld;
+        delete mDynamicsWorld;
         delete solver;
         delete collisionConfiguration;
         delete dispatcher;
@@ -331,7 +379,7 @@ namespace Physic
 
         mHeightFieldMap [name] = hf;
 
-        dynamicsWorld->addRigidBody(body,CollisionType_HeightMap|CollisionType_Raycasting,
+        mDynamicsWorld->addRigidBody(body,CollisionType_HeightMap,
                                     CollisionType_World|CollisionType_Actor|CollisionType_Raycasting);
     }
 
@@ -343,7 +391,7 @@ namespace Physic
 
         HeightField hf = mHeightFieldMap [name];
 
-        dynamicsWorld->removeRigidBody(hf.mBody);
+        mDynamicsWorld->removeRigidBody(hf.mBody);
         delete hf.mShape;
         delete hf.mBody;
 
@@ -367,7 +415,6 @@ namespace Physic
     {
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
-        //std::cout << "The string" << outputstring << "\n";
 
         //get the shape from the .nif
         mShapeLoader->load(outputstring,"General");
@@ -397,16 +444,37 @@ namespace Physic
         if (!shape->mRaycastingShape && raycasting)
             return NULL;
 
-        if (!raycasting)
-            shape->mCollisionShape->setLocalScaling( btVector3(scale,scale,scale));
-        else
-            shape->mRaycastingShape->setLocalScaling( btVector3(scale,scale,scale));
+        btCollisionShape* collisionShape = raycasting ? shape->mRaycastingShape : shape->mCollisionShape;
+
+        // If this is an animated compound shape, we must duplicate it so we can animate
+        // multiple instances independently.
+        if (!raycasting && !shape->mAnimatedShapes.empty())
+            collisionShape = duplicateCollisionShape(collisionShape);
+        if (raycasting && !shape->mAnimatedRaycastingShapes.empty())
+            collisionShape = duplicateCollisionShape(collisionShape);
+
+        collisionShape->setLocalScaling( btVector3(scale,scale,scale));
 
         //create the real body
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
-                (0,0, raycasting ? shape->mRaycastingShape : shape->mCollisionShape);
+                (0,0, collisionShape);
         RigidBody* body = new RigidBody(CI,name);
         body->mPlaceable = placeable;
+
+        if (!raycasting && !shape->mAnimatedShapes.empty())
+        {
+            AnimatedShapeInstance instance;
+            instance.mAnimatedShapes = shape->mAnimatedShapes;
+            instance.mCompound = collisionShape;
+            mAnimatedShapes[body] = instance;
+        }
+        if (raycasting && !shape->mAnimatedRaycastingShapes.empty())
+        {
+            AnimatedShapeInstance instance;
+            instance.mAnimatedShapes = shape->mAnimatedRaycastingShapes;
+            instance.mCompound = collisionShape;
+            mAnimatedRaycastingShapes[body] = instance;
+        }
 
         if(scaledBoxTranslation != 0)
             *scaledBoxTranslation = shape->mBoxTranslation * scale;
@@ -415,34 +483,20 @@ namespace Physic
 
         adjustRigidBody(body, position, rotation, shape->mBoxTranslation * scale, shape->mBoxRotation);
 
+        if (!raycasting)
+        {
+            assert (mCollisionObjectMap.find(name) == mCollisionObjectMap.end());
+            mCollisionObjectMap[name] = body;
+            mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
+        }
+        else
+        {
+            assert (mRaycastingObjectMap.find(name) == mRaycastingObjectMap.end());
+            mRaycastingObjectMap[name] = body;
+            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting);
+        }
+
         return body;
-
-    }
-
-    void PhysicEngine::addRigidBody(RigidBody* body, bool addToMap, RigidBody* raycastingBody,bool actor)
-    {
-        if(!body && !raycastingBody)
-            return; // nothing to do
-
-        const std::string& name = (body ? body->mName : raycastingBody->mName);
-
-        if (body){
-            if(actor) dynamicsWorld->addRigidBody(body,CollisionType_Actor,CollisionType_World|CollisionType_HeightMap);
-            else dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
-        }
-
-        if (raycastingBody)
-            dynamicsWorld->addRigidBody(raycastingBody,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_World);
-
-        if(addToMap){
-            removeRigidBody(name);
-            deleteRigidBody(name);
-
-            if (body)
-                mCollisionObjectMap[name] = body;
-            if (raycastingBody)
-                mRaycastingObjectMap[name] = raycastingBody;
-        }
     }
 
     void PhysicEngine::removeRigidBody(const std::string &name)
@@ -453,7 +507,7 @@ namespace Physic
             RigidBody* body = it->second;
             if(body != NULL)
             {
-                dynamicsWorld->removeRigidBody(body);
+                mDynamicsWorld->removeRigidBody(body);
             }
         }
         it = mRaycastingObjectMap.find(name);
@@ -462,7 +516,7 @@ namespace Physic
             RigidBody* body = it->second;
             if(body != NULL)
             {
-                dynamicsWorld->removeRigidBody(body);
+                mDynamicsWorld->removeRigidBody(body);
             }
         }
     }
@@ -476,6 +530,10 @@ namespace Physic
 
             if(body != NULL)
             {
+                if (mAnimatedShapes.find(body) != mAnimatedShapes.end())
+                    deleteShape(mAnimatedShapes[body].mCompound);
+                mAnimatedShapes.erase(body);
+
                 delete body;
             }
             mCollisionObjectMap.erase(it);
@@ -487,6 +545,10 @@ namespace Physic
 
             if(body != NULL)
             {
+                if (mAnimatedRaycastingShapes.find(body) != mAnimatedRaycastingShapes.end())
+                    deleteShape(mAnimatedRaycastingShapes[body].mCompound);
+                mAnimatedRaycastingShapes.erase(body);
+
                 delete body;
             }
             mRaycastingObjectMap.erase(it);
@@ -605,7 +667,7 @@ namespace Physic
         if (!body) // fall back to raycasting body if there is no collision body
             body = getRigidBody(name, true);
         ContactTestResultCallback callback;
-        dynamicsWorld->contactTest(body, callback);
+        mDynamicsWorld->contactTest(body, callback);
         return callback.mResult;
     }
 
@@ -615,16 +677,16 @@ namespace Physic
                                                                            btCollisionObject *object)
     {
         DeepestNotMeContactTestResultCallback callback(filter, origin);
+        callback.m_collisionFilterGroup = CollisionType_Actor;
         callback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap | CollisionType_Actor;
-        dynamicsWorld->contactTest(object, callback);
+        mDynamicsWorld->contactTest(object, callback);
         return std::make_pair(callback.mObject, callback.mContactPoint);
     }
-
 
     void PhysicEngine::stepSimulation(double deltaT)
     {
         // This seems to be needed for character controller objects
-        dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
+        mDynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
         if(isDebugCreated)
         {
             mDebugDrawer->step();
@@ -640,8 +702,6 @@ namespace Physic
 
         PhysicActor* newActor = new PhysicActor(name, mesh, this, position, rotation, scale);
 
-
-        //dynamicsWorld->addAction( newActor->mCharacter );
         mActorMap[name] = newActor;
     }
 
@@ -653,7 +713,6 @@ namespace Physic
             PhysicActor* act = it->second;
             if(act != NULL)
             {
-
                 delete act;
             }
             mActorMap.erase(it);
@@ -684,14 +743,15 @@ namespace Physic
         float d = -1;
 
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
+        resultCallback1.m_collisionFilterGroup = 0xff;
         if(raycastingObjectOnly)
-            resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
+            resultCallback1.m_collisionFilterMask = CollisionType_Raycasting|CollisionType_Actor;
         else
             resultCallback1.m_collisionFilterMask = CollisionType_World;
 
         if(!ignoreHeightMap)
             resultCallback1.m_collisionFilterMask = resultCallback1.m_collisionFilterMask | CollisionType_HeightMap;
-        dynamicsWorld->rayTest(from, to, resultCallback1);
+        mDynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
             name = static_cast<const RigidBody&>(*resultCallback1.m_collisionObject).mName;
@@ -724,6 +784,7 @@ namespace Physic
     std::pair<bool, float> PhysicEngine::sphereCast (float radius, btVector3& from, btVector3& to)
     {
         OurClosestConvexResultCallback callback(from, to);
+        callback.m_collisionFilterGroup = 0xff;
         callback.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap;
 
         btSphereShape shape(radius);
@@ -732,7 +793,7 @@ namespace Physic
         btTransform from_ (btrot, from);
         btTransform to_ (btrot, to);
 
-        dynamicsWorld->convexSweepTest(&shape, from_, to_, callback);
+        mDynamicsWorld->convexSweepTest(&shape, from_, to_, callback);
 
         if (callback.hasHit())
             return std::make_pair(true, callback.m_closestHitFraction);
@@ -743,8 +804,9 @@ namespace Physic
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
-        dynamicsWorld->rayTest(from, to, resultCallback1);
+        resultCallback1.m_collisionFilterGroup = 0xff;
+        resultCallback1.m_collisionFilterMask = CollisionType_Raycasting|CollisionType_Actor|CollisionType_HeightMap;
+        mDynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;
 
         std::vector< std::pair<float, std::string> > results2;

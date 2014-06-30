@@ -8,10 +8,11 @@
 #include <OgreSceneManager.h>
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreHighLevelGpuProgramManager.h>
-#include <OgreBillboardSet.h>
+#include <OgreParticleSystem.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
 #include <OgreTechnique.h>
+#include <OgreControllerManager.h>
 
 #include <OgreMeshManager.h>
 
@@ -218,6 +219,7 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mSceneMgr(NULL)
     , mAtmosphereDay(NULL)
     , mAtmosphereNight(NULL)
+    , mCloudNode(NULL)
     , mClouds()
     , mNextClouds()
     , mCloudBlendFactor(0.0f)
@@ -234,10 +236,16 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mCreated(false)
     , mCloudAnimationTimer(0.f)
     , mMoonRed(false)
+    , mParticleNode(NULL)
+    , mRainEnabled(false)
+    , mRainTimer(0)
+    , mRainSpeed(0)
+    , mRainFrequency(1)
+    , mStormDirection(0,-1,0)
+    , mIsStorm(false)
 {
     mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-    mRootNode->setInheritOrientation(false);
 }
 
 void SkyManager::create()
@@ -329,8 +337,8 @@ void SkyManager::create()
     mObjects.push_back(objects);
 
     // Clouds
-    SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    objects = NifOgre::Loader::createObjects(clouds_node, "meshes\\sky_clouds_01.nif");
+    mCloudNode = mRootNode->createChildSceneNode();
+    objects = NifOgre::Loader::createObjects(mCloudNode, "meshes\\sky_clouds_01.nif");
     for(size_t i = 0;i < objects->mEntities.size();i++)
     {
         Entity* clouds_ent = objects->mEntities[i];
@@ -349,6 +357,7 @@ void SkyManager::create()
 
 SkyManager::~SkyManager()
 {
+    clearRain();
     delete mSun;
     delete mSunGlare;
     delete mMasser;
@@ -367,10 +376,96 @@ int SkyManager::getSecundaPhase() const
     return mSecunda->getPhaseInt();
 }
 
+void SkyManager::clearRain()
+{
+    for (std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr>::iterator it = mRainModels.begin(); it != mRainModels.end();)
+    {
+        it->second.setNull();
+        Ogre::SceneNode* parent = it->first->getParentSceneNode();
+        mSceneMgr->destroySceneNode(it->first);
+        mSceneMgr->destroySceneNode(parent);
+        mRainModels.erase(it++);
+    }
+}
+
+void SkyManager::updateRain(float dt)
+{
+    // Move existing rain
+    // Note: if rain gets disabled, we let the existing rain drops finish falling down.
+    float minHeight = 200;
+    for (std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr>::iterator it = mRainModels.begin(); it != mRainModels.end();)
+    {
+        Ogre::Vector3 pos = it->first->getPosition();
+        pos.z -= mRainSpeed * dt;
+        it->first->setPosition(pos);
+        if (pos.z < -minHeight)
+        {
+            it->second.setNull();
+            Ogre::SceneNode* parent = it->first->getParentSceneNode();
+            mSceneMgr->destroySceneNode(it->first);
+            mSceneMgr->destroySceneNode(parent);
+            mRainModels.erase(it++);
+        }
+        else
+            ++it;
+    }
+
+    // Spawn new rain
+    float rainFrequency = mRainFrequency;
+    float startHeight = 700;
+    if (mRainEnabled)
+    {
+        mRainTimer += dt;
+        if (mRainTimer >= 1.f/rainFrequency)
+        {
+            mRainTimer = 0;
+
+            const float rangeRandom = 100;
+            float xOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
+            float yOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
+            Ogre::SceneNode* sceneNode = mCamera->getParentSceneNode()->createChildSceneNode();
+            sceneNode->setInheritOrientation(false);
+
+            // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
+            // consider the orientation of the parent node for its position, just not for its orientation
+            Ogre::SceneNode* offsetNode = sceneNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
+
+            NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(offsetNode, mRainEffect);
+            for (unsigned int i=0; i<objects->mEntities.size(); ++i)
+            {
+                objects->mEntities[i]->setRenderQueueGroup(RQG_Alpha);
+                objects->mEntities[i]->setVisibilityFlags(RV_Sky);
+            }
+            for (unsigned int i=0; i<objects->mParticles.size(); ++i)
+            {
+                objects->mParticles[i]->setRenderQueueGroup(RQG_Alpha);
+                objects->mParticles[i]->setVisibilityFlags(RV_Sky);
+            }
+            mRainModels[offsetNode] = objects;
+        }
+    }
+}
+
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+
+    if (!mParticle.isNull())
+    {
+        for (unsigned int i=0; i<mParticle->mControllers.size(); ++i)
+            mParticle->mControllers[i].update();
+
+        if (mIsStorm)
+            mParticleNode->setOrientation(Ogre::Vector3::UNIT_Y.getRotationTo(mStormDirection));
+    }
+
+    if (mIsStorm)
+        mCloudNode->setOrientation(Ogre::Vector3::UNIT_Y.getRotationTo(mStormDirection));
+    else
+        mCloudNode->setOrientation(Ogre::Quaternion::IDENTITY);
+
+    updateRain(duration);
 
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed;
@@ -422,13 +517,22 @@ void SkyManager::enable()
     if (!mCreated)
         create();
 
+    if (mParticleNode)
+        mParticleNode->setVisible(true);
+
     mRootNode->setVisible(true);
     mEnabled = true;
 }
 
 void SkyManager::disable()
 {
+    if (mParticleNode)
+        mParticleNode->setVisible(false);
+
+    clearRain();
+
     mRootNode->setVisible(false);
+
     mEnabled = false;
 }
 
@@ -440,6 +544,43 @@ void SkyManager::setMoonColour (bool red)
 void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 {
     if (!mCreated) return;
+
+    mRainEffect = weather.mRainEffect;
+    mRainEnabled = !mRainEffect.empty();
+    mRainFrequency = weather.mRainFrequency;
+    mRainSpeed = weather.mRainSpeed;
+    mIsStorm = weather.mIsStorm;
+
+    if (mCurrentParticleEffect != weather.mParticleEffect)
+    {
+        mCurrentParticleEffect = weather.mParticleEffect;
+
+        if (mCurrentParticleEffect.empty())
+        {
+            mParticle.setNull();
+        }
+        else
+        {
+            if (!mParticleNode)
+            {
+                mParticleNode = mCamera->getParentSceneNode()->createChildSceneNode();
+                mParticleNode->setInheritOrientation(false);
+            }
+
+            mParticle = NifOgre::Loader::createObjects(mParticleNode, mCurrentParticleEffect);
+            for(size_t i = 0; i < mParticle->mParticles.size(); ++i)
+            {
+                ParticleSystem* particle = mParticle->mParticles[i];
+                particle->setRenderQueueGroup(RQG_Alpha);
+                particle->setVisibilityFlags(RV_Sky);
+            }
+            for (size_t i = 0; i < mParticle->mControllers.size(); ++i)
+            {
+                if (mParticle->mControllers[i].getSource().isNull())
+                    mParticle->mControllers[i].setSource(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
+            }
+        }
+    }
 
     if (mClouds != weather.mCloudTexture)
     {
@@ -546,14 +687,19 @@ void SkyManager::sunDisable()
     mSunEnabled = false;
 }
 
-void SkyManager::setSunDirection(const Vector3& direction)
+void SkyManager::setStormDirection(const Vector3 &direction)
+{
+    mStormDirection = direction;
+}
+
+void SkyManager::setSunDirection(const Vector3& direction, bool is_moon)
 {
     if (!mCreated) return;
     mSun->setPosition(direction);
     mSunGlare->setPosition(direction);
 
     float height = direction.z;
-    float fade = ( height > 0.5) ? 1.0 : height * 2;
+    float fade = is_moon ? 0.0 : (( height > 0.5) ? 1.0 : height * 2);
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(fade, height)));
 }
 

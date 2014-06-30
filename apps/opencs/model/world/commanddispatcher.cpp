@@ -1,6 +1,10 @@
 
 #include "commanddispatcher.hpp"
 
+#include <algorithm>
+
+#include <components/misc/stringops.hpp>
+
 #include "../doc/document.hpp"
 
 #include "idtable.hpp"
@@ -88,6 +92,13 @@ void CSMWorld::CommandDispatcher::setEditLock (bool locked)
 void CSMWorld::CommandDispatcher::setSelection (const std::vector<std::string>& selection)
 {
     mSelection = selection;
+    std::for_each (mSelection.begin(), mSelection.end(), Misc::StringUtils::toLower);
+    std::sort (mSelection.begin(), mSelection.end());
+}
+
+void CSMWorld::CommandDispatcher::setExtendedTypes (const std::vector<UniversalId>& types)
+{
+    mExtendedTypes = types;
 }
 
 bool CSMWorld::CommandDispatcher::canDelete() const
@@ -104,6 +115,20 @@ bool CSMWorld::CommandDispatcher::canRevert() const
         return false;
 
     return getRevertableRecords().size()!=0;
+}
+
+std::vector<CSMWorld::UniversalId> CSMWorld::CommandDispatcher::getExtendedTypes() const
+{
+    std::vector<CSMWorld::UniversalId> tables;
+
+    if (mId==UniversalId::Type_Cells)
+    {
+        tables.push_back (mId);
+        tables.push_back (UniversalId::Type_References);
+        /// \todo add other cell-specific types
+    }
+
+    return tables;
 }
 
 void CSMWorld::CommandDispatcher::executeDelete()
@@ -161,5 +186,82 @@ void CSMWorld::CommandDispatcher::executeRevert()
     }
 
     if (rows.size()>1)
+        mDocument.getUndoStack().endMacro();
+}
+
+void CSMWorld::CommandDispatcher::executeExtendedDelete()
+{
+    if (mExtendedTypes.size()>1)
+        mDocument.getUndoStack().beginMacro (tr ("Extended delete of multiple records"));
+
+    for (std::vector<UniversalId>::const_iterator iter (mExtendedTypes.begin());
+        iter!=mExtendedTypes.end(); ++iter)
+    {
+        if (*iter==mId)
+            executeDelete();
+        else if (*iter==UniversalId::Type_References)
+        {
+            IdTable& model = dynamic_cast<IdTable&> (
+                *mDocument.getData().getTableModel (*iter));
+
+            const RefCollection& collection = mDocument.getData().getReferences();
+
+            int size = collection.getSize();
+
+            for (int i=size-1; i>=0; --i)
+            {
+                const Record<CellRef>& record = collection.getRecord (i);
+
+                if (record.mState==RecordBase::State_Deleted)
+                    continue;
+
+                if (!std::binary_search (mSelection.begin(), mSelection.end(),
+                    Misc::StringUtils::lowerCase (record.get().mCell)))
+                    continue;
+
+                mDocument.getUndoStack().push (
+                    new CSMWorld::DeleteCommand (model, record.get().mId));
+            }
+        }
+    }
+
+    if (mExtendedTypes.size()>1)
+        mDocument.getUndoStack().endMacro();
+}
+
+void CSMWorld::CommandDispatcher::executeExtendedRevert()
+{
+    if (mExtendedTypes.size()>1)
+        mDocument.getUndoStack().beginMacro (tr ("Extended revert of multiple records"));
+
+    for (std::vector<UniversalId>::const_iterator iter (mExtendedTypes.begin());
+        iter!=mExtendedTypes.end(); ++iter)
+    {
+        if (*iter==mId)
+            executeRevert();
+        else if (*iter==UniversalId::Type_References)
+        {
+            IdTable& model = dynamic_cast<IdTable&> (
+                *mDocument.getData().getTableModel (*iter));
+
+            const RefCollection& collection = mDocument.getData().getReferences();
+
+            int size = collection.getSize();
+
+            for (int i=size-1; i>=0; --i)
+            {
+                const Record<CellRef>& record = collection.getRecord (i);
+
+                if (!std::binary_search (mSelection.begin(), mSelection.end(),
+                    Misc::StringUtils::lowerCase (record.get().mCell)))
+                    continue;
+
+                mDocument.getUndoStack().push (
+                    new CSMWorld::RevertCommand (model, record.get().mId));
+            }
+        }
+    }
+
+    if (mExtendedTypes.size()>1)
         mDocument.getUndoStack().endMacro();
 }

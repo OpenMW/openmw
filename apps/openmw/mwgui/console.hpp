@@ -66,6 +66,8 @@ namespace MWGui
 
             void executeFile (const std::string& path);
 
+            virtual void resetReference ();
+
         protected:
 
             virtual void onReferenceUnavailable();

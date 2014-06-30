@@ -172,7 +172,8 @@ NIFFile::ptr NIFFile::create (const std::string &name) { return LoadedCache::cre
 
 /// Open a NIF stream. The name is used for error messages.
 NIFFile::NIFFile(const std::string &name, psudo_private_modifier)
-    : filename(name)
+    : ver(0)
+    , filename(name)
 {
     parse();
 }

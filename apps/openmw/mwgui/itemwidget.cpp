@@ -33,12 +33,26 @@ namespace MWGui
 
     void ItemWidget::setIcon(const std::string &icon)
     {
+        // HACK HACK HACK: Don't setImageTexture if it hasn't changed.
+        // There is a leak in MyGUI for each setImageTexture on the same widget.
+        // http://www.ogre3d.org/addonforums/viewtopic.php?f=17&t=30251
+        if (mCurrentItemTexture == icon)
+            return;
+
+        mCurrentItemTexture = icon;
         if (mItem)
             mItem->setImageTexture(icon);
     }
 
     void ItemWidget::setFrame(const std::string &frame, const MyGUI::IntCoord &coord)
     {
+        // HACK HACK HACK: Don't setImageTexture if it hasn't changed.
+        // There is a leak in MyGUI for each setImageTexture on the same widget.
+        // http://www.ogre3d.org/addonforums/viewtopic.php?f=17&t=30251
+        if (mCurrentFrameTexture == frame)
+            return;
+
+        mCurrentFrameTexture = frame;
         if (mFrame)
         {
             mFrame->setImageTexture(frame);
@@ -69,8 +83,21 @@ namespace MWGui
         if (ptr.isEmpty())
         {
             if (mFrame)
-                mFrame->setImageTexture("");
-            mItem->setImageTexture("");
+            {
+                // HACK HACK HACK: Don't setImageTexture if it hasn't changed.
+                // There is a leak in MyGUI for each setImageTexture on the same widget.
+                // http://www.ogre3d.org/addonforums/viewtopic.php?f=17&t=30251
+                if (!mCurrentFrameTexture.empty())
+                {
+                    mFrame->setImageTexture("");
+                    mCurrentFrameTexture = "";
+                }
+            }
+            if (!mCurrentItemTexture.empty())
+            {
+                mCurrentItemTexture = "";
+                mItem->setImageTexture("");
+            }
             return;
         }
 

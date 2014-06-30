@@ -14,7 +14,7 @@ namespace Ogre
 
 namespace Terrain
 {
-    class World;
+    class DefaultWorld;
     class Chunk;
     class MaterialGenerator;
     struct LoadResponseData;
@@ -48,7 +48,7 @@ namespace Terrain
         /// @param size size (in *cell* units!)
         /// @param center center (in *cell* units!)
         /// @param parent parent node
-        QuadTreeNode (World* terrain, ChildDirection dir, float size, const Ogre::Vector2& center, QuadTreeNode* parent);
+        QuadTreeNode (DefaultWorld* terrain, ChildDirection dir, float size, const Ogre::Vector2& center, QuadTreeNode* parent);
         ~QuadTreeNode();
 
         /// Rebuild all materials
@@ -95,7 +95,7 @@ namespace Terrain
 
         const Ogre::AxisAlignedBox& getWorldBoundingBox();
 
-        World* getTerrain() { return mTerrain; }
+        DefaultWorld* getTerrain() { return mTerrain; }
 
         /// Adjust LODs for the given camera position, possibly splitting up chunks or merging them.
         /// @param force Always choose to render this node, even if not the perfect LOD.
@@ -158,7 +158,7 @@ namespace Terrain
 
         Chunk* mChunk;
 
-        World* mTerrain;
+        DefaultWorld* mTerrain;
 
         Ogre::TexturePtr mCompositeMap;
 

@@ -119,10 +119,6 @@ endif(NOT WIN32)
 
 
 
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS omwlauncher RUNTIME DESTINATION games COMPONENT omwlauncher)
-endif()
-
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(omwlauncher gcov)

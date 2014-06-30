@@ -1,5 +1,9 @@
 #include "aifollow.hpp"
+
 #include <iostream>
+
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
@@ -12,16 +16,16 @@
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), AiPackage()
+: mAlwaysFollow(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId("")
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId), AiPackage()
+: mAlwaysFollow(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId)
 {
 }
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId)
-: mAlwaysFollow(true), mDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId(""), AiPackage()
+: mAlwaysFollow(true), mRemainingDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId("")
 {
 }
 
@@ -35,8 +39,13 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
     if(!mAlwaysFollow) //Update if you only follow for a bit
     {
-        if(mTotalTime > mDuration && mDuration != 0) //Check if we've run out of time
-            return true;
+         //Check if we've run out of time
+        if (mRemainingDuration != 0)
+        {
+            mRemainingDuration -= duration;
+            if (duration <= 0)
+                return true;
+        }
 
         if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
             (pos.pos[1]-mY)*(pos.pos[1]-mY) +
@@ -55,7 +64,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
         }
     }
 
-    //Set the target desition from the actor
+    //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 100) //Stop when you get close
@@ -83,7 +92,32 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
     return new AiFollow(*this);
 }
 
- int MWMechanics::AiFollow::getTypeId() const
+int MWMechanics::AiFollow::getTypeId() const
 {
     return TypeIdFollow;
+}
+
+void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
+{
+    std::auto_ptr<ESM::AiSequence::AiFollow> follow(new ESM::AiSequence::AiFollow());
+    follow->mData.mX = mX;
+    follow->mData.mY = mY;
+    follow->mData.mZ = mZ;
+    follow->mTargetId = mActorId;
+    follow->mRemainingDuration = mRemainingDuration;
+    follow->mCellId = mCellId;
+    follow->mAlwaysFollow = mAlwaysFollow;
+
+    ESM::AiSequence::AiPackageContainer package;
+    package.mType = ESM::AiSequence::Ai_Follow;
+    package.mPackage = follow.release();
+    sequence.mPackages.push_back(package);
+}
+
+MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
+    : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
+    , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
+    , mActorId(follow->mTargetId), mCellId(follow->mCellId)
+{
+
 }

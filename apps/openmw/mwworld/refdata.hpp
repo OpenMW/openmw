@@ -54,7 +54,7 @@ namespace MWWorld
             RefData();
 
             /// @param cellRef Used to copy constant data such as position into this class where it can
-            /// be altered without effecting the original data. This makes it possible
+            /// be altered without affecting the original data. This makes it possible
             /// to reset the position as the orignal data is still held in the CellRef
             RefData (const ESM::CellRef& cellRef);
 
@@ -100,12 +100,14 @@ namespace MWWorld
 
             void disable();
 
-            ESM::Position& getPosition();
+            void setPosition (const ESM::Position& pos);
+            const ESM::Position& getPosition();
 
-            LocalRotation& getLocalRotation();
+            void setLocalRotation (const LocalRotation& rotation);
+            const LocalRotation& getLocalRotation();
 
             void setCustomData (CustomData *data);
-            ///< Set custom data (potentially replacing old custom data). The ownership of \æ data is
+            ///< Set custom data (potentially replacing old custom data). The ownership of \a data is
             /// transferred to this.
 
             CustomData *getCustomData();

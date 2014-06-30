@@ -48,13 +48,13 @@ namespace MWDialogue
 
             virtual std::string getName() const;
 
+            void removeLastAddedResponse (const std::string& actorName);
+
             TEntryIter begin() const;
             ///< Iterator pointing to the begin of the journal for this topic.
 
             TEntryIter end() const;
             ///< Iterator pointing past the end of the journal for this topic.
-
-            JournalEntry getEntry (const std::string& infoId) const;
     };
 }
 

@@ -97,8 +97,8 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         &mLoader, SLOT (nextStage (CSMDoc::Document *, const std::string&, int)));
 
     connect (
-        &mDocumentManager, SIGNAL (nextRecord (CSMDoc::Document *)),
-        &mLoader, SLOT (nextRecord (CSMDoc::Document *)));
+        &mDocumentManager, SIGNAL (nextRecord (CSMDoc::Document *, int)),
+        &mLoader, SLOT (nextRecord (CSMDoc::Document *, int)));
 
     connect (
         &mDocumentManager, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),

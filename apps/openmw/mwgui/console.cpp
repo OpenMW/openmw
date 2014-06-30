@@ -435,4 +435,10 @@ namespace MWGui
     {
         setSelectedObject(MWWorld::Ptr());
     }
+
+    void Console::resetReference()
+    {
+        ReferenceInterface::resetReference();
+        setSelectedObject(MWWorld::Ptr());
+    }
 }

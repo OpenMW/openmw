@@ -62,6 +62,12 @@ namespace MWRender
         loadingListener->setProgressRange((mMaxX-mMinX+1) * (mMaxY-mMinY+1));
         loadingListener->setProgress(0);
 
+        const Ogre::ColourValue waterShallowColour(0.15, 0.2, 0.19);
+        const Ogre::ColourValue waterDeepColour(0.1, 0.14, 0.13);
+        const Ogre::ColourValue groundColour(0.254, 0.19, 0.13);
+        const Ogre::ColourValue mountainColour(0.05, 0.05, 0.05);
+        const Ogre::ColourValue hillColour(0.16, 0.12, 0.08);
+
         //if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
         if (1)
         {
@@ -90,12 +96,6 @@ namespace MWRender
 
                             int texelX = (x-mMinX) * cellSize + cellX;
                             int texelY = (mHeight-1) - ((y-mMinY) * cellSize + cellY);
-
-                            Ogre::ColourValue waterShallowColour(0.15, 0.2, 0.19);
-                            Ogre::ColourValue waterDeepColour(0.1, 0.14, 0.13);
-                            Ogre::ColourValue groundColour(0.254, 0.19, 0.13);
-                            Ogre::ColourValue mountainColour(0.05, 0.05, 0.05);
-                            Ogre::ColourValue hillColour(0.16, 0.12, 0.08);
 
                             unsigned char r,g,b;
 

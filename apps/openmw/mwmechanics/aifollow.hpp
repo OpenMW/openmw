@@ -6,6 +6,14 @@
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
 
+namespace ESM
+{
+namespace AiSequence
+{
+    struct AiFollow;
+}
+}
+
 namespace MWMechanics
 {
     /// \brief AiPackage for an actor to follow another actor/the PC
@@ -21,6 +29,8 @@ namespace MWMechanics
             /// Follow Actor indefinitively
             AiFollow(const std::string &ActorId);
 
+            AiFollow(const ESM::AiSequence::AiFollow* follow);
+
             virtual AiFollow *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
@@ -30,11 +40,13 @@ namespace MWMechanics
             /// Returns the actor being followed
             std::string getFollowedActor();
 
+            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const;
+
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
             bool mAlwaysFollow;
-            float mDuration;
+            float mRemainingDuration; // Seconds
             float mX;
             float mY;
             float mZ;

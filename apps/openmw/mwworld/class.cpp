@@ -366,7 +366,7 @@ namespace MWWorld
     Class::copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const
     {
         Ptr newPtr = copyToCell(ptr, cell);
-        newPtr.getRefData().getPosition() = pos;
+        newPtr.getRefData().setPosition(pos);
 
         return newPtr;
     }

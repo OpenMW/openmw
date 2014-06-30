@@ -263,6 +263,9 @@ namespace MWWorld
             virtual void adjustPosition (const Ptr& ptr);
             ///< Adjust position after load to be on ground. Must be called after model load.
 
+            virtual void fixPosition (const Ptr& actor);
+            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+
             virtual void enable (const Ptr& ptr);
 
             virtual void disable (const Ptr& ptr);
@@ -336,10 +339,11 @@ namespace MWWorld
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 
-            /// Rotates object, uses degrees
+            /// World rotates object, uses degrees
             /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
+            /// Local rotates object, uses degrees
             virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
 
             virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos);
@@ -481,7 +485,7 @@ namespace MWWorld
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all items in active cells owned by this Npc
 
-            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc);
+            virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor);
             ///< get Line of Sight (morrowind stupid implementation)
 
             virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist);
@@ -545,7 +549,7 @@ namespace MWWorld
 
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
-                                           const MWWorld::Ptr& actor, const std::string& sourceName);
+                                           const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection);
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed);
 
@@ -584,8 +588,18 @@ namespace MWWorld
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition);
 
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos);
+
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName);
+
+            virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor);
+
+            /// @see MWWorld::WeatherManager::isInStorm
+            virtual bool isInStorm() const;
+
+            /// @see MWWorld::WeatherManager::getStormDirection
+            virtual Ogre::Vector3 getStormDirection() const;
     };
 }
 

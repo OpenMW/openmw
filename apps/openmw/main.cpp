@@ -4,19 +4,20 @@
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
 
-#include <SDL.h>
+#include <SDL_messagebox.h>
+#include <SDL_main.h>
 #include "engine.hpp"
 
-#if defined(_WIN32) && !defined(_CONSOLE)
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
+#include <boost/filesystem/fstream.hpp>
 
+#if defined(_WIN32)
 // For OutputDebugString
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
-
 #endif
 
 
@@ -253,58 +254,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     return true;
 }
 
-int main(int argc, char**argv)
-{
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-    // Unix crash catcher
-    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
-    {
-        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-        cc_install_handlers(argc, argv, 5, s, "crash.log", NULL);
-        std::cout << "Installing crash catcher" << std::endl;
-    }
-    else
-        std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
-#endif
+#if defined(_WIN32) && defined(_DEBUG)
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-    // set current dir to bundle path
-    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
-    boost::filesystem::current_path(bundlePath);
-#endif
-
-    try
-    {
-        Files::ConfigurationManager cfgMgr;
-        OMW::Engine engine(cfgMgr);
-
-        if (parseOptions(argc, argv, engine, cfgMgr))
-        {
-            engine.go();
-        }
-    }
-    catch (std::exception &e)
-    {
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        if (isatty(fileno(stdin)) || !SDL_WasInit(SDL_INIT_VIDEO))
-            std::cerr << "\nERROR: " << e.what() << std::endl;
-        else
-#endif
-            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
-
-        return 1;
-    }
-
-    return 0;
-}
-
-// Platform specific for Windows when there is no console built into the executable.
-// Windows will call the WinMain function instead of main in this case, the normal
-// main function is then called with the __argc and __argv parameters.
-// In addition if it is a debug build it will redirect cout to the debug console in Visual Studio
-#if defined(_WIN32) && !defined(_CONSOLE)
-
-#if defined(_DEBUG)
 class DebugOutput : public boost::iostreams::sink
 {
 public:
@@ -318,11 +269,11 @@ public:
     }
 };
 #else
-class Logger : public boost::iostreams::sink
+class Tee : public boost::iostreams::sink
 {
 public:
-    Logger(std::ofstream &stream)
-        : out(stream)
+    Tee(std::ostream &stream, std::ostream &stream2)
+        : out(stream), out2(stream2)
     {
     }
 
@@ -330,38 +281,107 @@ public:
     {
         out.write (str, size);
         out.flush();
+        out2.write (str, size);
+        out2.flush();
         return size;
     }
 
 private:
-    std::ofstream &out;
+    std::ostream &out;
+    std::ostream &out2;
 };
 #endif
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+int main(int argc, char**argv)
 {
-    std::streambuf* old_rdbuf = std::cout.rdbuf ();
+    // Some objects used to redirect cout and cerr
+    // Scope must be here, so this still works inside the catch block for logging exceptions
+    std::streambuf* cout_rdbuf = std::cout.rdbuf ();
+    std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
+
+#if !(defined(_WIN32) && defined(_DEBUG))
+    boost::iostreams::stream_buffer<Tee> coutsb;
+    boost::iostreams::stream_buffer<Tee> cerrsb;
+#endif
+
+    std::ostream oldcout(cout_rdbuf);
+    std::ostream oldcerr(cerr_rdbuf);
+
+    boost::filesystem::ofstream logfile;
 
     int ret = 0;
-#if defined(_DEBUG)
-    // Redirect cout to VS debug output when running in debug mode
+    try
     {
+        Files::ConfigurationManager cfgMgr;
+
+#if defined(_WIN32) && defined(_DEBUG)
+        // Redirect cout and cerr to VS debug output when running in debug mode
         boost::iostreams::stream_buffer<DebugOutput> sb;
         sb.open(DebugOutput());
-#else
-    // Redirect cout to openmw.log
-    std::ofstream logfile ("openmw.log");
-    {
-        boost::iostreams::stream_buffer<Logger> sb;
-        sb.open (Logger (logfile));
-#endif
         std::cout.rdbuf (&sb);
+        std::cerr.rdbuf (&sb);
+#else
+        // Redirect cout and cerr to openmw.log
+        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/openmw.log"));
 
-        ret = main (__argc, __argv);
+        coutsb.open (Tee(logfile, oldcout));
+        cerrsb.open (Tee(logfile, oldcerr));
 
-        std::cout.rdbuf(old_rdbuf);
+        std::cout.rdbuf (&coutsb);
+        std::cerr.rdbuf (&cerrsb);
+#endif
+
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        // Unix crash catcher
+        if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
+        {
+            int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+            cc_install_handlers(argc, argv, 5, s, (cfgMgr.getLogPath() / "crash.log").string().c_str(), NULL);
+            std::cout << "Installing crash catcher" << std::endl;
+        }
+        else
+            std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
+#endif
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        // set current dir to bundle path
+        boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
+        boost::filesystem::current_path(bundlePath);
+#endif
+
+        OMW::Engine engine(cfgMgr);
+
+        if (parseOptions(argc, argv, engine, cfgMgr))
+        {
+            engine.go();
+        }
     }
+    catch (std::exception &e)
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        if (isatty(fileno(stdin)))
+            std::cerr << "\nERROR: " << e.what() << std::endl;
+        else
+#endif
+            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
+        ret = 1;
+    }
+
+    // Restore cout and cerr
+    std::cout.rdbuf(cout_rdbuf);
+    std::cerr.rdbuf(cerr_rdbuf);
+
     return ret;
 }
 
+// Platform specific for Windows when there is no console built into the executable.
+// Windows will call the WinMain function instead of main in this case, the normal
+// main function is then called with the __argc and __argv parameters.
+#if defined(_WIN32) && !defined(_CONSOLE)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+{
+    return main(__argc, __argv);
+}
 #endif

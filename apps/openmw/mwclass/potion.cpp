@@ -127,7 +127,7 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->mBase->mEffects);
 
@@ -166,13 +166,8 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-        // remove used potion (assume it is present in inventory)
-        ptr.getContainerStore()->remove(ptr, 1, actor);
-
         boost::shared_ptr<MWWorld::Action> action (
-            new MWWorld::ActionApply (actor, ref->mBase->mId));
+            new MWWorld::ActionApply (ptr, ref->mBase->mId));
 
         action->setSound ("Drink");
 

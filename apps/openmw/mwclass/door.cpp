@@ -57,11 +57,13 @@ namespace MWClass
             physics.addObject(ptr);
 
         // Resume the door's opening/closing animation if it wasn't finished
-        ensureCustomData(ptr);
-        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
-        if (customData.mDoorState > 0)
+        if (ptr.getRefData().getCustomData())
         {
-            MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState == 1 ? true : false);
+            const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+            if (customData.mDoorState > 0)
+            {
+                MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState == 1 ? true : false);
+            }
         }
     }
 
@@ -125,7 +127,7 @@ namespace MWClass
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap
-            ptr.getCellRef().getTrap() = "";
+            ptr.getCellRef().setTrap("");
         }
 
         if (!needKey || hasKey)

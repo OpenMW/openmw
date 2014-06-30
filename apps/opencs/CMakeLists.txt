@@ -71,7 +71,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright
+    lightingbright object cell
     )
 
 opencs_units_noqt (view/world
@@ -199,10 +199,6 @@ target_link_libraries(opencs
     ${QT_LIBRARIES}
     components
 )
-
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS opencs RUNTIME DESTINATION games COMPONENT opencs)
-endif()
 
 if(APPLE)
     INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)

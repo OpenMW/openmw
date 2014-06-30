@@ -378,12 +378,20 @@ namespace MWScript
 
     float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
     {
-        const MWWorld::Ptr ref2 = getReference (id, false, false);
+        // NOTE: id may be empty, indicating an implicit reference
+
+        MWWorld::Ptr ref2;
+
+        if (id.empty())
+            ref2 = getReference("", true, true);
+        else
+            ref2 = MWBase::Environment::get().getWorld()->searchPtr(id, true);
+
         // If either actor is in a non-active cell, return a large value (just like vanilla)
         if (ref2.isEmpty())
             return std::numeric_limits<float>().max();
 
-        const MWWorld::Ptr ref = getReference (name, false, false);
+        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->searchPtr(name, true);
         if (ref.isEmpty())
             return std::numeric_limits<float>().max();
 
@@ -419,11 +427,10 @@ namespace MWScript
         mActivationHandled = false;
     }
 
-    void InterpreterContext::executeActivation(MWWorld::Ptr ptr)
+    void InterpreterContext::executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, player));
-        action->execute (player);
+        boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
+        action->execute (actor);
         if (mActivated == ptr)
             mActivationHandled = true;
     }

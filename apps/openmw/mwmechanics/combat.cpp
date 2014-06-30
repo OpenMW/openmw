@@ -231,9 +231,13 @@ namespace MWMechanics
         if (damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
-        float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
-        if ((::rand()/(RAND_MAX+1.0)) < fProjectileThrownStoreChance/100.f)
-            victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
+        // Arrows shot at enemies have a chance to turn up in their inventory
+        if (victim != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        {
+            float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
+            if ((::rand()/(RAND_MAX+1.0)) < fProjectileThrownStoreChance/100.f)
+                victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
+        }
 
         victim.getClass().onHit(victim, damage, true, projectile, attacker, true);
     }

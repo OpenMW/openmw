@@ -59,7 +59,12 @@ namespace MWBase
             virtual int getJournalIndex (const std::string& id) const = 0;
             ///< Get the journal index.
 
-            virtual void addTopic (const std::string& topicId, const std::string& infoId, const std::string& actorName) = 0;
+            virtual void addTopic (const std::string& topicId, const std::string& infoId, const MWWorld::Ptr& actor) = 0;
+            /// \note topicId must be lowercase
+
+            virtual void removeLastAddedTopicResponse (const std::string& topicId, const std::string& actorName) = 0;
+            ///< Removes the last topic response added for the given topicId and actor name.
+            /// \note topicId must be lowercase
 
             virtual TEntryIter begin() const = 0;
             ///< Iterator pointing to the begin of the main journal.

@@ -178,6 +178,7 @@ class CharacterController
 
     bool updateWeaponState();
     bool updateCreatureState();
+    void updateIdleStormState();
 
     void updateVisibility();
 

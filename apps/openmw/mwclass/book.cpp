@@ -136,7 +136,7 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");

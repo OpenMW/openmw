@@ -15,7 +15,7 @@ add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
     characterpreview globalmap videoplayer ripplesimulation refraction
-    terrainstorage renderconst effectmanager weaponanimation
+    terrainstorage renderconst effectmanager weaponanimation terraingrid
     )
 
 add_openmw_dir (mwinput
@@ -141,10 +141,6 @@ if(APPLE)
         target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
     endif()
 endif(APPLE)
-
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS openmw RUNTIME DESTINATION games COMPONENT openmw)
-endif(DPKG_PROGRAM)
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)

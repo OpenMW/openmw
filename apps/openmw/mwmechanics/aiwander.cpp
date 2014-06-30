@@ -3,6 +3,8 @@
 #include <OgreVector3.h>
 #include <OgreSceneNode.h>
 
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -21,31 +23,29 @@ namespace MWMechanics
     static const int COUNT_BEFORE_RESET = 200; // TODO: maybe no longer needed
     static const float DOOR_CHECK_INTERVAL = 1.5f;
 
-    AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
+    AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
-      , mCellX(std::numeric_limits<int>::max())
-      , mCellY(std::numeric_limits<int>::max())
-      , mXCell(0)
-      , mYCell(0)
-      , mCell(NULL)
-      , mStuckCount(0) // TODO: maybe no longer needed
-      , mDoorCheckDuration(0)
-      , mTrimCurrentNode(false)
-      , mReaction(0)
-      , mGreetDistanceMultiplier(0)
-      , mGreetDistanceReset(0)
-      , mChance(0)
-      , mRotate(false)
-      , mTargetAngle(0)
-      , mSaidGreeting(false)
-      , mHasReturnPosition(false)
-      , mReturnPosition(0,0,0)
     {
-        for(unsigned short counter = 0; counter < mIdle.size(); counter++)
-        {
-            if(mIdle[counter] >= 127 || mIdle[counter] < 0)
-                mIdle[counter] = 0;
-        }
+        mIdle.resize(8, 0);
+        init();
+    }
+
+    void AiWander::init()
+    {
+        mCellX = std::numeric_limits<int>::max();
+        mCellY = std::numeric_limits<int>::max();
+        mXCell = 0;
+        mYCell = 0;
+        mCell = NULL;
+        mStuckCount = 0;// TODO: maybe no longer needed
+        mDoorCheckDuration = 0;
+        mTrimCurrentNode = false;
+        mReaction = 0;
+        mRotate = false;
+        mTargetAngle = 0;
+        mSaidGreeting = false;
+        mHasReturnPosition = false;
+        mReturnPosition = Ogre::Vector3(0,0,0);
 
         if(mDistance < 0)
             mDistance = 0;
@@ -56,15 +56,6 @@ namespace MWMechanics
 
         mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
         mPlayedIdle = 0;
-        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        mIdleChanceMultiplier =
-            store.get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
-
-        mGreetDistanceMultiplier =
-            store.get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
-        mGreetDistanceReset =
-            store.get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
-        mChance = store.get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
         mStoredAvailableNodes = false;
         mChooseAction = true;
@@ -163,6 +154,17 @@ namespace MWMechanics
             }
         }
 
+        // Are we there yet?
+        if(mWalking &&
+           mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+        {
+            stopWalking(actor);
+            mMoveNow = false;
+            mWalking = false;
+            mChooseAction = true;
+            mHasReturnPosition = false;
+        }
+
         if(mWalking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
@@ -219,11 +221,12 @@ namespace MWMechanics
         }
 
         mReaction += duration;
-        if(mReaction > 0.25f) // FIXME: hard coded constant
+        if(mReaction < 0.25f) // FIXME: hard coded constant
         {
-            mReaction = 0;
             return false;
         }
+        else
+            mReaction = 0;
 
         // NOTE: everything below get updated every 0.25 seconds
 
@@ -394,7 +397,10 @@ namespace MWMechanics
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                     // Don't bother if the player is out of hearing range
-                    if (roll < mChance && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500)
+                    static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
+                            .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+
+                    if (roll < fVoiceIdleOdds && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500)
                         MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
                 }
             }
@@ -406,7 +412,10 @@ namespace MWMechanics
             // Play a random voice greeting if the player gets too close
             int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
             float helloDistance = hello;
-            helloDistance *= mGreetDistanceMultiplier;
+            static int iGreetDistanceMultiplier =MWBase::Environment::get().getWorld()->getStore()
+                .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
+
+            helloDistance *= iGreetDistanceMultiplier;
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             Ogre::Vector3 playerPos(player.getRefData().getPosition().pos);
@@ -455,7 +464,10 @@ namespace MWMechanics
             }
             else
             {
-                if (playerDistSqr >= mGreetDistanceReset*mGreetDistanceReset * mGreetDistanceMultiplier*mGreetDistanceMultiplier)
+                static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
+                        .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
+
+                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset * iGreetDistanceMultiplier*iGreetDistanceMultiplier)
                     mSaidGreeting = false;
             }
 
@@ -522,17 +534,6 @@ namespace MWMechanics
                 else
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
             }
-        }
-
-        // Are we there yet?
-        if(mWalking &&
-           mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
-        {
-            stopWalking(actor);
-            mMoveNow = false;
-            mWalking = false;
-            mChooseAction = true;
-            mHasReturnPosition = false;
         }
 
         return false; // AiWander package not yet completed
@@ -632,14 +633,49 @@ namespace MWMechanics
 
         for(unsigned int counter = 0; counter < mIdle.size(); counter++)
         {
-            unsigned short idleChance = mIdleChanceMultiplier * mIdle[counter];
-            unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mIdleChanceMultiplier));
+            static float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
+                .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
+
+            unsigned short idleChance = fIdleChanceMultiplier * mIdle[counter];
+            unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / fIdleChanceMultiplier));
             if(randSelect < idleChance && randSelect > idleRoll)
             {
                 mPlayedIdle = counter+2;
                 idleRoll = randSelect;
             }
         }
+    }
+
+    void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
+    {
+        std::auto_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
+        wander->mData.mDistance = mDistance;
+        wander->mData.mDuration = mDuration;
+        wander->mData.mTimeOfDay = mTimeOfDay;
+        wander->mStartTime = mStartTime.toEsm();
+        assert (mIdle.size() == 8);
+        for (int i=0; i<8; ++i)
+            wander->mData.mIdle[i] = mIdle[i];
+        wander->mData.mShouldRepeat = mRepeat;
+
+        ESM::AiSequence::AiPackageContainer package;
+        package.mType = ESM::AiSequence::Ai_Wander;
+        package.mPackage = wander.release();
+        sequence.mPackages.push_back(package);
+    }
+
+    AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
+    {
+        init();
+
+        mDistance = wander->mData.mDistance;
+        mDuration = wander->mData.mDuration;
+        mStartTime = MWWorld::TimeStamp(wander->mStartTime);
+        mTimeOfDay = wander->mData.mTimeOfDay;
+        for (int i=0; i<8; ++i)
+            mIdle.push_back(wander->mData.mIdle[i]);
+
+        mRepeat = wander->mData.mShouldRepeat;
     }
 }
 

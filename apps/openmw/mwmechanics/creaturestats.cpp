@@ -14,7 +14,7 @@ namespace MWMechanics
     int CreatureStats::sActorId = 0;
 
     CreatureStats::CreatureStats()
-        : mLevel (0), mDead (false), mDied (false), mFriendlyHits (0),
+        : mLevel (0), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
           mAttackingOrSpell(false),
@@ -243,6 +243,21 @@ namespace MWMechanics
     void CreatureStats::clearHasDied()
     {
         mDied = false;
+    }
+
+    bool CreatureStats::hasBeenMurdered() const
+    {
+        return mMurdered;
+    }
+
+    void CreatureStats::notifyMurder()
+    {
+        mMurdered = true;
+    }
+
+    void CreatureStats::clearHasBeenMurdered()
+    {
+        mMurdered = false;
     }
 
     void CreatureStats::resurrect()
@@ -479,6 +494,7 @@ namespace MWMechanics
 
         state.mDead = mDead;
         state.mDied = mDied;
+        state.mMurdered = mMurdered;
         state.mFriendlyHits = mFriendlyHits;
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
@@ -503,6 +519,14 @@ namespace MWMechanics
 
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
+        mAiSequence.writeState(state.mAiSequence);
+
+        state.mSummonedCreatureMap = mSummonedCreatures;
+        state.mSummonGraveyard = mSummonGraveyard;
+
+        state.mHasAiSettings = true;
+        for (int i=0; i<4; ++i)
+            mAiSettings[i].writeState (state.mAiSettings[i]);
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
@@ -519,6 +543,7 @@ namespace MWMechanics
 
         mDead = state.mDead;
         mDied = state.mDied;
+        mMurdered = state.mMurdered;
         mFriendlyHits = state.mFriendlyHits;
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
@@ -543,6 +568,14 @@ namespace MWMechanics
 
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
+        mAiSequence.readState(state.mAiSequence);
+
+        mSummonedCreatures = state.mSummonedCreatureMap;
+        mSummonGraveyard = state.mSummonGraveyard;
+
+        if (state.mHasAiSettings)
+            for (int i=0; i<4; ++i)
+                mAiSettings[i].readState(state.mAiSettings[i]);
     }
 
     void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
@@ -602,5 +635,15 @@ namespace MWMechanics
     void CreatureStats::setDeathAnimation(unsigned char index)
     {
         mDeathAnimation = index;
+    }
+
+    std::map<int, int>& CreatureStats::getSummonedCreatureMap()
+    {
+        return mSummonedCreatures;
+    }
+
+    std::vector<int>& CreatureStats::getSummonedCreatureGraveyard()
+    {
+        return mSummonGraveyard;
     }
 }

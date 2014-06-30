@@ -22,7 +22,7 @@
 #include <openengine/bullet/physic.hpp>
 
 #include <components/settings/settings.hpp>
-#include <components/terrain/world.hpp>
+#include <components/terrain/defaultworld.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -45,6 +45,7 @@
 #include "globalmap.hpp"
 #include "terrainstorage.hpp"
 #include "effectmanager.hpp"
+#include "terraingrid.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -223,6 +224,9 @@ MWRender::Camera* RenderingManager::getCamera() const
 
 void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
+    if (store->isExterior())
+        mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+
     mLocalMap->saveFogOfWar(store);
     mObjects->removeCell(store);
     mActors->removeCell(store);
@@ -241,6 +245,9 @@ bool RenderingManager::toggleWater()
 
 void RenderingManager::cellAdded (MWWorld::CellStore *store)
 {
+    if (store->isExterior())
+        mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+
     mObjects->buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
@@ -506,10 +513,19 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
     mFogColour = colour;
     float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
 
-    mFogStart = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
-    mFogEnd = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
+    if (density == 0)
+    {
+        mFogStart = 0;
+        mFogEnd = std::numeric_limits<float>().max();
+        mRendering.getCamera()->setFarClipDistance (max);
+    }
+    else
+    {
+        mFogStart = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
+        mFogEnd = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
+        mRendering.getCamera()->setFarClipDistance (max / density);
+    }
 
-    mRendering.getCamera()->setFarClipDistance ( Settings::Manager::getFloat("max viewing distance", "Viewing distance") / density );
 }
 
 void RenderingManager::applyFog (bool underwater)
@@ -522,9 +538,10 @@ void RenderingManager::applyFog (bool underwater)
     }
     else
     {
-        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(0.18039, 0.23137, 0.25490), 0, 0, 1000);
-        mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
-        mWater->setViewportBackground (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
+        Ogre::ColourValue clv(0.090195, 0.115685, 0.12745);
+        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(clv), 0, 0, 1000);
+        mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(clv));
+        mWater->setViewportBackground (Ogre::ColourValue(clv));
     }
 }
 
@@ -631,12 +648,12 @@ void RenderingManager::sunDisable(bool real)
     }
 }
 
-void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
+void RenderingManager::setSunDirection(const Ogre::Vector3& direction, bool is_moon)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
     if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
-    mSkyManager->setSunDirection(direction);
+    mSkyManager->setSunDirection(direction, is_moon);
 }
 
 void RenderingManager::setGlare(bool glare)
@@ -1029,9 +1046,12 @@ void RenderingManager::enableTerrain(bool enable)
     {
         if (!mTerrain)
         {
-            mTerrain = new Terrain::World(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
-                                            Settings::Manager::getBool("distant land", "Terrain"),
-                                            Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
+            if (Settings::Manager::getBool("distant land", "Terrain"))
+                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                                Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
+            else
+                mTerrain = new MWRender::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                                Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));
             mTerrain->update(mRendering.getCamera()->getRealPosition());

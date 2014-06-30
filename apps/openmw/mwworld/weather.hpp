@@ -5,6 +5,7 @@
 #include <string>
 
 #include <OgreColourValue.h>
+#include <OgreVector3.h>
 
 namespace ESM
 {
@@ -57,7 +58,15 @@ namespace MWWorld
         bool mNight; // use night skybox
         float mNightFade; // fading factor for night skybox
 
+        bool mIsStorm;
+
         std::string mAmbientLoopSoundID;
+
+        std::string mParticleEffect;
+
+        std::string mRainEffect;
+        float mRainSpeed;
+        float mRainFrequency;
     };
 
 
@@ -100,7 +109,7 @@ namespace MWWorld
         // Duration of weather transition (in days)
         float mTransitionDelta;
 
-        // No idea what this one is used for?
+        // Used by scripts to animate signs, etc based on the wind (GetWindSpeed)
         float mWindSpeed;
 
         // Cloud animation speed multiplier
@@ -119,7 +128,25 @@ namespace MWWorld
         // Rain sound effect
         std::string mRainLoopSoundID;
 
-        /// \todo disease chance
+        // Is this an ash storm / blight storm? If so, the following will happen:
+        // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
+        // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm animation)
+        // - Slower movement when walking against the storm (fStromWalkMult)
+        bool mIsStorm;
+
+        // How fast does rain travel down?
+        // In Morrowind.ini this is set globally, but we may want to change it per weather later.
+        float mRainSpeed;
+
+        // How often does a new rain mesh spawn?
+        float mRainFrequency;
+
+        std::string mParticleEffect;
+
+        std::string mRainEffect;
+
+        // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
+        // is broken in the vanilla game and was disabled.
     };
 
     ///
@@ -151,6 +178,11 @@ namespace MWWorld
 
         float getWindSpeed() const;
 
+        /// Are we in an ash or blight storm?
+        bool isInStorm() const;
+
+        Ogre::Vector3 getStormDirection() const;
+
         void advanceTime(double hours)
         {
             mTimePassed += hours*3600;
@@ -170,6 +202,9 @@ namespace MWWorld
     private:
         float mHour;
         float mWindSpeed;
+        bool mIsStorm;
+        Ogre::Vector3 mStormDirection;
+
         MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
@@ -208,6 +243,7 @@ namespace MWWorld
         typedef std::map<std::string,std::vector<char> > RegionModMap;
         RegionModMap mRegionMods;
 
+        float mRainSpeed;
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;

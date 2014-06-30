@@ -42,6 +42,7 @@ add_component_dir (esm
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate dialoguestate statstate
     npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate
+    aisequence
     )
 
 add_component_dir (misc
@@ -71,7 +72,7 @@ add_component_dir (translation
 
 add_definitions(-DTERRAIN_USE_SHADER=1)
 add_component_dir (terrain
-    quadtreenode chunk world storage material buffercache defs
+    quadtreenode chunk world defaultworld storage material buffercache defs backgroundloader
     )
 
 add_component_dir (loadinglistener

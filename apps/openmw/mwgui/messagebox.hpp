@@ -30,6 +30,9 @@ namespace MWGui
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
             bool isInteractiveMessageBox ();
 
+            /// Remove all message boxes
+            void clear();
+
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
 

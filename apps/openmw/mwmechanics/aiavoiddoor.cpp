@@ -78,8 +78,14 @@ MWMechanics::AiAvoidDoor *MWMechanics::AiAvoidDoor::clone() const
     return new AiAvoidDoor(*this);
 }
 
- int MWMechanics::AiAvoidDoor::getTypeId() const
+int MWMechanics::AiAvoidDoor::getTypeId() const
 {
     return TypeIdAvoidDoor;
 }
+
+unsigned int MWMechanics::AiAvoidDoor::getPriority() const
+{
+ return 2;
+}
+
 

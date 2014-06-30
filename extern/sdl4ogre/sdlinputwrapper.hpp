@@ -1,6 +1,8 @@
 #ifndef SDL4OGRE_SDLINPUTWRAPPER_H
 #define SDL4OGRE_SDLINPUTWRAPPER_H
 
+#define NOMINMAX
+
 #include <SDL_events.h>
 
 #include <OgreRenderWindow.h>

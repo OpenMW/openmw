@@ -173,7 +173,8 @@ protected:
                const std::string &groupname, const std::string &start, const std::string &stop,
                float startpoint);
 
-    void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
+    void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key,
+                       const NifOgre::TextKeyMap& map);
 
     /* Sets the root model of the object. If 'baseonly' is true, then any meshes or particle
      * systems in the model are ignored (useful for NPCs, where only the skeleton is needed for
@@ -210,7 +211,7 @@ public:
     /**
      * @brief Add an effect mesh attached to a bone or the insert scene node
      * @param model
-     * @param effectId An ID for this effect. Note that adding the same ID again won't add another effect.
+     * @param effectId An ID for this effect by which you can identify it later. If this is not wanted, set to -1.
      * @param loop Loop the effect. If false, it is removed automatically after it finishes playing. If true,
      *              you need to remove it manually using removeEffect when the effect should end.
      * @param bonename Bone to attach to, or empty string to use the scene node instead
@@ -225,9 +226,6 @@ public:
     virtual void preRender (Ogre::Camera* camera);
 
     virtual void setAlpha(float alpha) {}
-private:
-    void updateEffects(float duration);
-
 
 public:
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -277,6 +275,9 @@ public:
     /// Get the absolute position in the animation track of the first text key with the given group.
     float getStartTime(const std::string &groupname) const;
 
+    /// Get the absolute position in the animation track of the text key
+    float getTextKeyTime(const std::string &textKey) const;
+
     /// Get the current absolute position in the animation track for the animation that is currently playing from the given group.
     float getCurrentTime(const std::string& groupname) const;
 
@@ -296,6 +297,9 @@ public:
     virtual void setPitchFactor(float factor) {}
 
     virtual Ogre::Vector3 runAnimation(float duration);
+
+    /// This is typically called as part of runAnimation, but may be called manually if needed.
+    void updateEffects(float duration);
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show) {}

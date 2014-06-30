@@ -49,7 +49,7 @@ public:
                                     const Nif::NiZBufferProperty *zprop,
                                     const Nif::NiSpecularProperty *specprop,
                                     const Nif::NiWireframeProperty *wireprop,
-                                    bool &needTangents);
+                                    bool &needTangents, bool particleMaterial=false);
 };
 
 }

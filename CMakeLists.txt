@@ -56,7 +56,7 @@ include(OpenMWMacros)
 
 # doxygen main page
 
-configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
+configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
@@ -79,13 +79,6 @@ option(USE_FFMPEG "use ffmpeg for sound" ON)
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
-
-if(UNIX AND NOT APPLE)
-    option(BUILD_WITH_DPKG "enable dpkg-based install for debian and debian derivatives" OFF)
-    if(BUILD_WITH_DPKG)
-        find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
-    endif(BUILD_WITH_DPKG)
-endif(UNIX AND NOT APPLE)
 
 # Location of morrowind data files
 if (APPLE)
@@ -395,46 +388,36 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
 IF(NOT WIN32 AND NOT APPLE)
-    ## Debian and non debian Linux building
+    # Linux building
     # Paths
-    IF (DPKG_PROGRAM)
-        ## Debian specific
-        SET(CMAKE_INSTALL_PREFIX "/usr")
-        SET(DATAROOTDIR "share" CACHE PATH "Sets the root of data directories to a non-default location")
-        SET(DATADIR "share/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-        SET(ICONDIR "share/pixmaps" CACHE PATH "Set icon dir")
-        SET(SYSCONFDIR "../etc/openmw" CACHE PATH "Set config dir")
-    ELSE ()
-        ## Non debian specific
-        SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
-        SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
-        SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-        SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-        SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-        SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
+    SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+    SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
+    SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+    SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+    SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+    SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
 
-        # Install binaries
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
-        IF(BUILD_LAUNCHER)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_LAUNCHER)
-        IF(BUILD_BSATOOL)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_BSATOOL)
-        IF(BUILD_ESMTOOL)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_ESMTOOL)
-        IF(BUILD_MWINIIMPORTER)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_MWINIIMPORTER)
-        IF(BUILD_OPENCS)
-            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
-        ENDIF(BUILD_OPENCS)
+    # Install binaries
+    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+    IF(BUILD_LAUNCHER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_LAUNCHER)
+    IF(BUILD_BSATOOL)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_BSATOOL)
+    IF(BUILD_ESMTOOL)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_MWINIIMPORTER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_MWINIIMPORTER)
+    IF(BUILD_OPENCS)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_OPENCS)
 
-        # Install licenses
-        INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-        INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
-    ENDIF (DPKG_PROGRAM)
+    # Install licenses
+    INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
 
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
@@ -463,8 +446,8 @@ if(WIN32)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES
         "${OpenMW_SOURCE_DIR}/readme.txt"
-        "${OpenMW_SOURCE_DIR}/GPL3.txt"
-        "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
+        "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
+        "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
@@ -630,8 +613,10 @@ if (WIN32)
         4127 # Conditional expression is constant
         4242 # Storing value in a variable of a smaller type, possible loss of data
         4244 # Storing value of one type in variable of another (size_t in int, for example)
+        4267 # Conversion from 'size_t' to 'int', possible loss of data
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
+        4351 # New behavior: elements of array 'array' will be default initialized (desired behavior)
         4355 # Using 'this' in member initialization list
         4505 # Unreferenced local function has been removed
         4701 # Potentially uninitialized local variable used
@@ -650,7 +635,9 @@ if (WIN32)
     set(SHINY_OGRE_WARNINGS "${WARNINGS} /wd4101")
     set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${SHINY_OGRE_WARNINGS})
     set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS ${WARNINGS})
-    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    # oics uses tinyxml, which has an initialized but unused variable
+    set(OICS_WARNINGS "${WARNINGS} /wd4189")
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${OICS_WARNINGS})
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
     if (BUILD_LAUNCHER)
         set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})

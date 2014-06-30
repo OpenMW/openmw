@@ -111,6 +111,7 @@ namespace MWMechanics
             /**
              * @brief Commit a crime. If any actors witness the crime and report it,
              *        reportCrime will be called automatically.
+             * @note victim may be empty
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
              * @return was the crime reported?
              */
@@ -147,6 +148,18 @@ namespace MWMechanics
             virtual bool isAIActive();
 
             virtual void playerLoaded();
+
+            virtual int countSavedGameRecords() const;
+
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+
+            virtual void clear();
+
+            /// @param bias Can be used to add an additional aggression bias towards the target,
+            ///             making it more likely for the function to return true.
+            virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, int bias=0, bool ignoreDistance=false);
     };
 }
 

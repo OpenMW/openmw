@@ -12,6 +12,14 @@ namespace MWWorld
     class Ptr;
 }
 
+namespace ESM
+{
+    namespace AiSequence
+    {
+        class AiSequence;
+    }
+}
+
 namespace MWMechanics
 {
     /// \brief Base class for AI packages
@@ -51,6 +59,8 @@ namespace MWMechanics
             /// Higher number is higher priority (0 being the lowest)
             virtual unsigned int getPriority() const {return 0;}
 
+            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const {}
+
         protected:
             /// Causes the actor to attempt to walk to the specified location
             /** \return If the actor has arrived at his destination **/
@@ -62,7 +72,6 @@ namespace MWMechanics
             float mDoorCheckDuration;
             float mTimer;
             float mStuckTimer;
-            float mTotalTime;
 
             MWWorld::Ptr mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
 

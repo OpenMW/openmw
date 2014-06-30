@@ -274,6 +274,9 @@ namespace MWBase
             virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
 
+            virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
+            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
@@ -407,7 +410,7 @@ namespace MWBase
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all items in active cells owned by this Npc
 
-            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc) = 0;
+            virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
             virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
@@ -470,7 +473,7 @@ namespace MWBase
 
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
-                                           const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
+                                           const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed) = 0;
 
@@ -515,8 +518,18 @@ namespace MWBase
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
 
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos) = 0;
+
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
+
+            virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
+
+            /// @see MWWorld::WeatherManager::isInStorm
+            virtual bool isInStorm() const = 0;
+
+            /// @see MWWorld::WeatherManager::getStormDirection
+            virtual Ogre::Vector3 getStormDirection() const = 0;
     };
 }
 

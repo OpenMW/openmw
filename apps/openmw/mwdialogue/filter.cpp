@@ -530,7 +530,8 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_ShouldAttack:
 
-            return mActor.getClass().getCreatureStats(mActor).getAiSetting(MWMechanics::CreatureStats::AI_Fight).getModified() >= 80;
+            return MWBase::Environment::get().getMechanicsManager()->isAggressive(mActor,
+                    MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         case SelectWrapper::Function_CreatureTargetted:
 

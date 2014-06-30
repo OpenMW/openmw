@@ -36,6 +36,7 @@ namespace MWGui
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
         , mCompass(NULL)
+        , mMarkerUpdateTimer(0.0f)
     {
     }
 
@@ -345,6 +346,18 @@ namespace MWGui
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
             markerWidget->setColour(markerColour);
+            mMarkerWidgets.push_back(markerWidget);
+        }
+    }
+
+    void LocalMapBase::onFrame(float dt)
+    {
+        mMarkerUpdateTimer += dt;
+
+        if (mMarkerUpdateTimer >= 0.25)
+        {
+            mMarkerUpdateTimer = 0;
+            updateMarkers();
         }
     }
 
@@ -418,6 +431,9 @@ namespace MWGui
     {
         mGlobalMapRender = new MWRender::GlobalMap("");
         mGlobalMapRender->render(loadingListener);
+        mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
+        mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
+
         mGlobalMapImage->setImageTexture("GlobalMap.png");
         mGlobalMapOverlay->setImageTexture("GlobalMapOverlay");
     }
@@ -471,6 +487,8 @@ namespace MWGui
 
     void MapWindow::onFrame(float dt)
     {
+        LocalMapBase::onFrame(dt);
+
         for (std::vector<CellId>::iterator it = mQueuedToExplore.begin(); it != mQueuedToExplore.end(); ++it)
         {
             mGlobalMapRender->exploreCell(it->first, it->second);
@@ -497,7 +515,6 @@ namespace MWGui
         else
             mGlobalMap->setViewOffset( mGlobalMap->getViewOffset() + diff );
 
-
         mLastDragPos = MyGUI::IntPoint(_left, _top);
     }
 
@@ -521,9 +538,6 @@ namespace MWGui
 
     void MapWindow::open()
     {
-        mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-        mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-
         // force markers to foreground
         for (unsigned int i=0; i<mGlobalMapOverlay->getChildCount (); ++i)
         {

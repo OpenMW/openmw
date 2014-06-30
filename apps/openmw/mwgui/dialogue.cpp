@@ -366,10 +366,11 @@ namespace MWGui
         }
     }
 
-    void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
+    void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory)
     {
         mGoodbye = false;
         mEnabled = true;
+        bool sameActor = (mPtr == actor);
         mPtr = actor;
         mTopicsList->setEnabled(true);
         setTitle(npcName);
@@ -378,9 +379,12 @@ namespace MWGui
 
         mTopicsList->clear();
 
-        for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
-            delete (*it);
-        mHistoryContents.clear();
+        if (resetHistory || !sameActor)
+        {
+            for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
+                delete (*it);
+            mHistoryContents.clear();
+        }
 
         for (std::vector<Link*>::iterator it = mLinks.begin(); it != mLinks.end(); ++it)
             delete (*it);
@@ -582,12 +586,31 @@ namespace MWGui
         //Clear the list of topics
         mTopicsList->clear();
 
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        bool dispositionVisible = false;
+        if (mPtr.getClass().isNpc())
         {
+            dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
             mDispositionText->eraseText(0, mDispositionText->getTextLength());
             mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
+        }
+
+        bool dispositionWasVisible = mDispositionBar->getVisible();
+
+        if (dispositionVisible && !dispositionWasVisible)
+        {
+            mDispositionBar->setVisible(true);
+            float offset = mDispositionBar->getHeight()+5;
+            mTopicsList->setCoord(mTopicsList->getCoord() + MyGUI::IntCoord(0,offset,0,-offset));
+            mTopicsList->adjustSize();
+        }
+        else if (!dispositionVisible && dispositionWasVisible)
+        {
+            mDispositionBar->setVisible(false);
+            float offset = mDispositionBar->getHeight()+5;
+            mTopicsList->setCoord(mTopicsList->getCoord() - MyGUI::IntCoord(0,offset,0,-offset));
+            mTopicsList->adjustSize();
         }
     }
 

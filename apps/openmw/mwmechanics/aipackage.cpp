@@ -26,8 +26,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //Update various Timers
     mTimer += duration; //Update timer
     mStuckTimer += duration;   //Update stuck timer
-    mTotalTime += duration; //Update total time following
-
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 

@@ -118,6 +118,7 @@ namespace MWGui
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
       , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
       , mHudEnabled(true)
+      , mGuiEnabled(true)
       , mCursorVisible(true)
       , mPlayerName()
       , mPlayerRaceId()
@@ -202,8 +203,12 @@ namespace MWGui
             MyGUI::Align::Default, "Overlay");
         mVideoBackground->setImageTexture("black.png");
         mVideoBackground->setVisible(false);
+        mVideoBackground->setNeedMouseFocus(true);
+        mVideoBackground->setNeedKeyFocus(true);
 
         mVideoWidget = mVideoBackground->createWidgetReal<VideoWidget>("ImageBox", 0,0,1,1, MyGUI::Align::Default);
+        mVideoWidget->setNeedMouseFocus(true);
+        mVideoWidget->setNeedKeyFocus(true);
     }
 
     void WindowManager::initUI()
@@ -263,7 +268,7 @@ namespace MWGui
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
 
-        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
+        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows");
 
         mHud->setVisible(mHudEnabled);
 
@@ -416,7 +421,7 @@ namespace MWGui
         mRecharge->setVisible(false);
         mVideoBackground->setVisible(false);
 
-        mHud->setVisible(mHudEnabled);
+        mHud->setVisible(mHudEnabled && mGuiEnabled);
 
         bool gameMode = !isGuiMode();
 
@@ -425,6 +430,13 @@ namespace MWGui
 
         if (gameMode)
             setKeyFocusWidget (NULL);
+
+        if (!mGuiEnabled)
+        {
+            if (containsMode(GM_Console))
+                mConsole->setVisible(true);
+            return;
+        }
 
         // Icons of forced hidden windows are displayed
         setMinimapVisibility((mAllowed & GW_Map) && (!mMap->pinned() || (mForceHidden & GW_Map)));
@@ -1341,6 +1353,13 @@ namespace MWGui
         mHud->setVisible (mHudEnabled);
     }
 
+    bool WindowManager::toggleGui()
+    {
+        mGuiEnabled = !mGuiEnabled;
+        updateVisible();
+        return mGuiEnabled;
+    }
+
     bool WindowManager::getRestEnabled()
     {
         //Enable rest dialogue if character creation finished
@@ -1498,6 +1517,7 @@ namespace MWGui
     {
         mMap->clear();
         mQuickKeysMenu->clear();
+        mMessageBoxManager->clear();
 
         mTrainingWindow->resetReference();
         mDialogueWindow->resetReference();
@@ -1559,7 +1579,15 @@ namespace MWGui
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)
     {
-        mVideoWidget->playVideo("video\\" + name, allowSkipping);
+        mVideoWidget->playVideo("video\\" + name);
+
+        mVideoWidget->eventKeyButtonPressed.clear();
+        mVideoBackground->eventKeyButtonPressed.clear();
+        if (allowSkipping)
+        {
+            mVideoWidget->eventKeyButtonPressed += MyGUI::newDelegate(this, &WindowManager::onVideoKeyPressed);
+            mVideoBackground->eventKeyButtonPressed += MyGUI::newDelegate(this, &WindowManager::onVideoKeyPressed);
+        }
 
         // Turn off all rendering except for the GUI
         mRendering->getScene()->clearSpecialCaseRenderQueues();
@@ -1587,7 +1615,7 @@ namespace MWGui
 
             mRendering->getWindow()->update();
         }
-        mVideoWidget->cleanup();
+        mVideoWidget->stop();
 
         setCursorVisible(cursorWasVisible);
 
@@ -1627,5 +1655,34 @@ namespace MWGui
         if(mCurrentModals.size() > 0)
             if(input == mCurrentModals.top())
                 mCurrentModals.pop();
+    }
+
+    void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    {
+        if (_key == MyGUI::KeyCode::Escape)
+            mVideoWidget->stop();
+    }
+
+    void WindowManager::pinWindow(GuiWindow window)
+    {
+        switch (window)
+        {
+        case GW_Inventory:
+            mInventoryWindow->setPinned(true);
+            break;
+        case GW_Map:
+            mMap->setPinned(true);
+            break;
+        case GW_Magic:
+            mSpellWindow->setPinned(true);
+            break;
+        case GW_Stats:
+            mStatsWindow->setPinned(true);
+            break;
+        default:
+            break;
+        }
+
+        updateVisible();
     }
 }

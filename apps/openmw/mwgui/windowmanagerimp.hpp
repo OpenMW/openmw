@@ -12,6 +12,9 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Types.h>
+
 namespace MyGUI
 {
     class Gui;
@@ -220,6 +223,9 @@ namespace MWGui
     virtual bool getSubtitlesEnabled();
     virtual void toggleHud();
 
+    /// Turn visibility of *all* GUI elements on or off (HUD and all windows, except the console)
+    virtual bool toggleGui();
+
     virtual void disallowMouse();
     virtual void allowMouse();
     virtual void notifyInputActionBound();
@@ -316,6 +322,8 @@ namespace MWGui
         \param input Pointer to the current modal, to ensure proper modal is removed **/
     virtual void removeCurrentModal(WindowModal* input);
 
+    virtual void pinWindow (MWGui::GuiWindow window);
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -376,6 +384,7 @@ namespace MWGui
     bool mCrosshairEnabled;
     bool mSubtitlesEnabled;
     bool mHudEnabled;
+    bool mGuiEnabled;
     bool mCursorVisible;
 
     void setCursorVisible(bool visible);
@@ -423,6 +432,9 @@ namespace MWGui
 
     void onCursorChange(const std::string& name);
     void onKeyFocusChanged(MyGUI::Widget* widget);
+
+    // Key pressed while playing a video
+    void onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
     void sizeVideo(int screenWidth, int screenHeight);
   };

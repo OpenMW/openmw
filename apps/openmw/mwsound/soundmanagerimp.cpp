@@ -42,6 +42,7 @@ namespace MWSound
         , mListenerPos(0,0,0)
         , mListenerDir(1,0,0)
         , mListenerUp(0,0,1)
+        , mListenerUnderwater(false)
     {
         if(!useSound)
             return;
@@ -179,6 +180,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
         std::cout <<"Playing "<<filename<< std::endl;
+        mLastPlayedMusic = filename;
         try
         {
             stopMusic();
@@ -203,19 +205,31 @@ namespace MWSound
     void SoundManager::startRandomTitle()
     {
         Ogre::StringVector filelist;
-
-        Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-        for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+        if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
-            Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
-                                                                                        "Music/"+mCurrentPlaylist+"/*");
-            filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
+            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+            {
+                Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
+                                                                                            "Music/"+mCurrentPlaylist+"/*");
+                filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            }
+            mMusicFiles[mCurrentPlaylist] = filelist;
         }
+        else
+            filelist = mMusicFiles[mCurrentPlaylist];
 
         if(!filelist.size())
             return;
 
         int i = rand()%filelist.size();
+
+        // Don't play the same music track twice in a row
+        if (filelist[i] == mLastPlayedMusic)
+        {
+            i = (i+1) % filelist.size();
+        }
+
         streamMusicFull(filelist[i]);
     }
 
@@ -372,7 +386,7 @@ namespace MWSound
             sound = mOutput->playSound3D(file, initialPos, volume, basevol, pitch, min, max, mode|type, offset);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
-        catch(std::exception &e)
+        catch(std::exception &)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
@@ -571,12 +585,8 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
-        MWWorld::Ptr player =
-            MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->getCell();
-
         Environment env = Env_Normal;
-        if((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater)
+        if (mListenerUnderwater)
         {
             env = Env_Underwater;
             //play underwater sound
@@ -669,6 +679,12 @@ namespace MWSound
         mListenerPos = pos;
         mListenerDir = dir;
         mListenerUp  = up;
+
+        MWWorld::Ptr player =
+            MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const ESM::Cell *cell = player.getCell()->getCell();
+
+        mListenerUnderwater = ((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater);
     }
 
     void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

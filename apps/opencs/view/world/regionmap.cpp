@@ -382,6 +382,9 @@ void CSVWorld::RegionMap::dropEvent (QDropEvent* event)
     }
 
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
+
     if (mime->fromDocument(mDocument) && mime->holdsType(CSMWorld::UniversalId::Type_Region))
     {
         CSMWorld::UniversalId record (mime->returnMatching (CSMWorld::UniversalId::Type_Region));

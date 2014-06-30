@@ -228,6 +228,7 @@ namespace MWBase
             virtual void showCrosshair(bool show) = 0;
             virtual bool getSubtitlesEnabled() = 0;
             virtual void toggleHud() = 0;
+            virtual bool toggleGui() = 0;
 
             virtual void disallowMouse() = 0;
             virtual void allowMouse() = 0;
@@ -328,6 +329,8 @@ namespace MWBase
             /** Used when one Modal adds another Modal
                 \param input Pointer to the current modal, to ensure proper modal is removed **/
             virtual void removeCurrentModal(MWGui::WindowModal* input) = 0;
+
+            virtual void pinWindow (MWGui::GuiWindow window) = 0;
     };
 }
 

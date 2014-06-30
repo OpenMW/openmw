@@ -102,7 +102,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (0));
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (1));
     mFactions.addColumn (new HiddenColumn<ESM::Faction>);
-    for (int i=0; i<6; ++i)
+    for (int i=0; i<7; ++i)
         mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
 
     mRaces.addColumn (new StringIdColumn<ESM::Race>);

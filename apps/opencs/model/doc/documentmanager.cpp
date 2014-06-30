@@ -31,8 +31,8 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
         &mLoader, SLOT (loadDocument (CSMDoc::Document *)));
     connect (&mLoader, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)),
         this, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)));
-    connect (&mLoader, SIGNAL (nextRecord (CSMDoc::Document *)),
-        this, SIGNAL (nextRecord (CSMDoc::Document *)));
+    connect (&mLoader, SIGNAL (nextRecord (CSMDoc::Document *, int)),
+        this, SIGNAL (nextRecord (CSMDoc::Document *, int)));
     connect (this, SIGNAL (cancelLoading (CSMDoc::Document *)),
         &mLoader, SLOT (abortLoading (CSMDoc::Document *)));
     connect (&mLoader, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),

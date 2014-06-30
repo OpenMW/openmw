@@ -747,7 +747,7 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
  * buffer. We use this to store the global_pts in
  * a frame at the time it is allocated.
  */
-static uint64_t global_video_pkt_pts = AV_NOPTS_VALUE;
+static uint64_t global_video_pkt_pts = static_cast<uint64_t>(AV_NOPTS_VALUE);
 static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
 {
     int ret = avcodec_default_get_buffer(c, pic);

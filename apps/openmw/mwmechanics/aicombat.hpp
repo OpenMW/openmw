@@ -8,9 +8,19 @@
 #include "movement.hpp"
 #include "obstacle.hpp"
 
+#include <OgreVector3.h>
+
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
+
+namespace ESM
+{
+    namespace AiSequence
+    {
+        struct AiCombat;
+    }
+}
 
 namespace MWMechanics
 {
@@ -22,6 +32,10 @@ namespace MWMechanics
             /** \param actor Actor to fight **/
             AiCombat(const MWWorld::Ptr& actor);
 
+            AiCombat (const ESM::AiSequence::AiCombat* combat);
+
+            void init();
+
             virtual AiCombat *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor,float duration);
@@ -32,6 +46,8 @@ namespace MWMechanics
 
             ///Returns target ID
             MWWorld::Ptr getTarget() const;
+
+            virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
         private:
             PathFinder mPathFinder;
@@ -46,22 +62,22 @@ namespace MWMechanics
             bool mReadyToAttack, mAttack;
             bool mFollowTarget;
             bool mCombatMove;
-            bool mBackOffDoor;
+
+            float mStrength; // this is actually make sense only in ranged combat
+            float mMinMaxAttackDuration[3][2]; // slash, thrust, chop has different durations
+            bool mMinMaxAttackDurationInitialised;
 
             bool mForceNoShortcut;
             ESM::Position mShortcutFailPos;
 
-            ESM::Position mLastPos;
+            Ogre::Vector3 mLastActorPos;
             MWMechanics::Movement mMovement;
+
             int mTargetActorId;
+            Ogre::Vector3 mLastTargetPos;
 
             const MWWorld::CellStore* mCell;
             ObstacleCheck mObstacleCheck;
-            float mDoorCheckDuration;
-            // TODO: for some reason mDoors.searchViaHandle() returns
-            // null pointers, workaround by keeping an iterator
-            MWWorld::CellRefList<ESM::Door>::List::iterator mDoorIter;
-            MWWorld::CellRefList<ESM::Door>& mDoors;
 
             void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
     };

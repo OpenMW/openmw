@@ -91,7 +91,11 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (mUseSound)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
-        bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
+        // GUI active? Most game processing will be paused, but scripts still run.
+        bool guiActive = MWBase::Environment::get().getWindowManager()->isGuiMode();
+
+        // Main menu opened? Then scripts are also paused.
+        bool paused = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu);
 
         // update game state
         MWBase::Environment::get().getStateManager()->update (frametime);
@@ -99,15 +103,18 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
-            // global scripts
-            MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
-
-            // local scripts
-            executeLocalScripts();
-
-            MWBase::Environment::get().getWorld()->markCellAsUnchanged();
-
             if (!paused)
+            {
+                // global scripts
+                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+
+                // local scripts
+                executeLocalScripts();
+
+                MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+            }
+
+            if (!guiActive)
                 MWBase::Environment::get().getWorld()->advanceTime(
                     frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
         }
@@ -118,14 +125,14 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::StateManager::State_NoGame)
         {
             MWBase::Environment::get().getMechanicsManager()->update(frametime,
-                paused);
+                guiActive);
         }
 
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
             MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
-            if(!paused && player.getClass().getCreatureStats(player).isDead())
+            if(!guiActive && player.getClass().getCreatureStats(player).isDead())
                 MWBase::Environment::get().getStateManager()->endGame();
         }
 
@@ -133,7 +140,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
-            MWBase::Environment::get().getWorld()->update(frametime, paused);
+            MWBase::Environment::get().getWorld()->update(frametime, guiActive);
         }
 
         // update GUI
@@ -357,7 +364,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v1.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
     MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
@@ -489,24 +496,7 @@ void OMW::Engine::activate()
     if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
         return;
 
-    MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
-
-    interpreterContext.activate (ptr);
-
-    std::string script = ptr.getClass().getScript (ptr);
-
-    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-    if (!script.empty())
-    {
-        MWBase::Environment::get().getWorld()->getLocalScripts().setIgnore (ptr);
-        MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
-    }
-
-    if (!interpreterContext.hasActivationBeenHandled())
-    {
-        interpreterContext.executeActivation(ptr);
-    }
+    MWBase::Environment::get().getWorld()->activate(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 }
 
 void OMW::Engine::screenshot()

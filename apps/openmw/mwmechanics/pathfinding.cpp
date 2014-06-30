@@ -90,12 +90,12 @@ namespace
 
 namespace MWMechanics
 {
-    float distanceZCorrected(ESM::Pathgrid::Point point, float x, float y, float z)
+    float sqrDistanceZCorrected(ESM::Pathgrid::Point point, float x, float y, float z)
     {
         x -= point.mX;
         y -= point.mY;
         z -= point.mZ;
-        return sqrt(x * x + y * y + 0.1 * z * z);
+        return (x * x + y * y + 0.1 * z * z);
     }
 
     float distance(ESM::Pathgrid::Point point, float x, float y, float z)
@@ -296,7 +296,7 @@ namespace MWMechanics
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(distanceZCorrected(nextPoint, x, y, z) < 64)
+        if(sqrDistanceZCorrected(nextPoint, x, y, z) < 64*64)
         {
             mPath.pop_front();
             if(mPath.empty()) mIsPathConstructed = false;
@@ -311,7 +311,7 @@ namespace MWMechanics
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(distanceZCorrected(nextPoint, x, y, z) < 64)
+        if(sqrDistanceZCorrected(nextPoint, x, y, z) < 64*64)
         {
             mPath.pop_front();
             if(mPath.empty())

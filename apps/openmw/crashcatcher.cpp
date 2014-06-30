@@ -128,7 +128,7 @@ static void gdb_info(pid_t pid)
     int fd;
 
     /* Create a temp file to put gdb commands into */
-    strcpy(respfile, "gdb-respfile-XXXXXX");
+    strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
     if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != NULL)
     {
         fprintf(f, "attach %d\n"
@@ -381,10 +381,7 @@ static void crash_handler(const char *logfile)
 
     if(logfile)
     {
-        char cwd[MAXPATHLEN];
-        getcwd(cwd, MAXPATHLEN);
-
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(cwd) + "/" + std::string(logfile) + "'.\n Please report this to https://bugs.openmw.org !";
+        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile) + "'.\n Please report this to https://bugs.openmw.org !";
         SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), NULL);
     }
     exit(0);

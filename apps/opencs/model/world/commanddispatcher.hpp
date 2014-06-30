@@ -22,6 +22,7 @@ namespace CSMWorld
             CSMDoc::Document& mDocument;
             UniversalId mId;
             std::vector<std::string> mSelection;
+            std::vector<UniversalId> mExtendedTypes;
 
             std::vector<std::string> getDeletableRecords() const;
 
@@ -37,15 +38,30 @@ namespace CSMWorld
 
             void setSelection (const std::vector<std::string>& selection);
 
+            void setExtendedTypes (const std::vector<UniversalId>& types);
+            ///< Set record lists selected by the user for extended operations.
+
             bool canDelete() const;
 
             bool canRevert() const;
+
+            /// Return IDs of the record collection that can also be affected when
+            /// operating on the record collection this dispatcher is used for.
+            ///
+            /// \note The returned collection contains the ID of the record collection this
+            /// dispatcher is used for. However if that record collection does not support
+            /// the extended mode, the returned vector will be empty instead.
+            std::vector<UniversalId> getExtendedTypes() const;
 
         public slots:
 
             void executeDelete();
 
             void executeRevert();
+
+            void executeExtendedDelete();
+
+            void executeExtendedRevert();
 
     };
 }

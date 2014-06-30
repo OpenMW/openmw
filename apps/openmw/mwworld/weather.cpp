@@ -58,6 +58,28 @@ void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name
     weather.mWindSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Wind_Speed");
     weather.mCloudSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
     weather.mGlareView = mFallback->getFallbackFloat("Weather_"+upper+"_Glare_View");
+    weather.mCloudTexture = mFallback->getFallbackString("Weather_"+upper+"_Cloud_Texture");
+
+    bool usesPrecip = mFallback->getFallbackBool("Weather_"+upper+"_Using_Precip");
+    if (usesPrecip)
+        weather.mRainEffect = "meshes\\raindrop.nif";
+    weather.mRainSpeed = mRainSpeed;
+    weather.mRainFrequency = mFallback->getFallbackFloat("Weather_"+upper+"_Rain_Entrance_Speed");
+    /*
+Unhandled:
+Rain Diameter=600 ?
+Rain Height Min=200 ?
+Rain Height Max=700 ?
+Rain Threshold=0.6 ?
+Max Raindrops=650 ?
+*/
+
+    size_t offset = weather.mCloudTexture.find(".tga");
+    if (offset != std::string::npos)
+        weather.mCloudTexture.replace(offset, weather.mCloudTexture.length() - offset, ".dds");
+
+    weather.mIsStorm = (name == "ashstorm" || name == "blight");
+
     mWeatherSettings[name] = weather;
 }
 
@@ -93,7 +115,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
      mHour(14), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
      mWeatherUpdateTime(0), mThunderFlash(0), mThunderChance(0),
      mThunderChanceNeeded(50), mThunderSoundDelay(0), mRemainingTransitionTime(0),
-     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering)
+     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering), mIsStorm(false),
+     mStormDirection(0,1,0)
 {
     //Globals
     mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
@@ -110,6 +133,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
     mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
     mThunderSoundDelay = 0.25;
 
+    mRainSpeed = mFallback->getFallbackFloat("Weather_Precip_Gravity");
+
     //Some useful values
     /* TODO: Use pre-sunrise_time, pre-sunset_time,
      * post-sunrise_time, and post-sunset_time to better
@@ -123,48 +148,44 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
 
     //Weather
     Weather clear;
-    clear.mCloudTexture = "tx_sky_clear.dds";
     setFallbackWeather(clear,"clear");
 
     Weather cloudy;
-    cloudy.mCloudTexture = "tx_sky_cloudy.dds";
     setFallbackWeather(cloudy,"cloudy");
 
     Weather foggy;
-    foggy.mCloudTexture = "tx_sky_foggy.dds";
     setFallbackWeather(foggy,"foggy");
 
     Weather thunderstorm;
-    thunderstorm.mCloudTexture = "tx_sky_thunder.dds";
     thunderstorm.mRainLoopSoundID = "rain heavy";
+    thunderstorm.mRainEffect = "meshes\\raindrop.nif";
     setFallbackWeather(thunderstorm,"thunderstorm");
 
     Weather rain;
-    rain.mCloudTexture = "tx_sky_rainy.dds";
     rain.mRainLoopSoundID = "rain";
+    rain.mRainEffect = "meshes\\raindrop.nif";
     setFallbackWeather(rain,"rain");
 
     Weather overcast;
-    overcast.mCloudTexture = "tx_sky_overcast.dds";
     setFallbackWeather(overcast,"overcast");
 
     Weather ashstorm;
-    ashstorm.mCloudTexture = "tx_sky_ashstorm.dds";
     ashstorm.mAmbientLoopSoundID = "ashstorm";
+    ashstorm.mParticleEffect = "meshes\\ashcloud.nif";
     setFallbackWeather(ashstorm,"ashstorm");
 
     Weather blight;
-    blight.mCloudTexture = "tx_sky_blight.dds";
     blight.mAmbientLoopSoundID = "blight";
+    blight.mParticleEffect = "meshes\\blightcloud.nif";
     setFallbackWeather(blight,"blight");
 
     Weather snow;
-    snow.mCloudTexture = "tx_bm_sky_snow.dds";
+    snow.mParticleEffect = "meshes\\snow.nif";
     setFallbackWeather(snow, "snow");
 
     Weather blizzard;
-    blizzard.mCloudTexture = "tx_bm_sky_blizzard.dds";
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
+    blizzard.mParticleEffect = "meshes\\blizzard.nif";
     setFallbackWeather(blizzard,"blizzard");
 }
 
@@ -213,6 +234,14 @@ void WeatherManager::setResult(const String& weatherType)
     mResult.mGlareView = current.mGlareView;
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     mResult.mSunColor = current.mSunDiscSunsetColor;
+
+    mResult.mIsStorm = current.mIsStorm;
+
+    mResult.mRainSpeed = current.mRainSpeed;
+    mResult.mRainFrequency = current.mRainFrequency;
+
+    mResult.mParticleEffect = current.mParticleEffect;
+    mResult.mRainEffect = current.mRainEffect;
 
     mResult.mNight = (mHour < mSunriseTime || mHour > mNightStart - 1);
 
@@ -316,6 +345,12 @@ void WeatherManager::transition(float factor)
     mResult.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
 
     mResult.mNight = current.mNight;
+
+    mResult.mIsStorm = current.mIsStorm;
+    mResult.mParticleEffect = current.mParticleEffect;
+    mResult.mRainEffect = current.mRainEffect;
+    mResult.mRainSpeed = current.mRainSpeed;
+    mResult.mRainFrequency = current.mRainFrequency;
 }
 
 void WeatherManager::update(float duration)
@@ -353,6 +388,18 @@ void WeatherManager::update(float duration)
         setResult(mCurrentWeather);
 
     mWindSpeed = mResult.mWindSpeed;
+    mIsStorm = mResult.mIsStorm;
+
+    if (mIsStorm)
+    {
+        MWWorld::Ptr player = world->getPlayerPtr();
+        Ogre::Vector3 playerPos (player.getRefData().getPosition().pos);
+        Ogre::Vector3 redMountainPos (19950, 72032, 27831);
+
+        mStormDirection = (playerPos - redMountainPos);
+        mStormDirection.z = 0;
+        mRendering->getSkyManager()->setStormDirection(mStormDirection);
+    }
 
     mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
 
@@ -378,11 +425,13 @@ void WeatherManager::update(float duration)
 
     int facing = (mHour > 13.f) ? 1 : -1;
 
+    bool sun_is_moon = mHour >= mNightStart || mHour <= mSunriseTime;
+
     Vector3 final(
             (height - 1) * facing,
             (height - 1) * facing,
             height);
-    mRendering->setSunDirection(final);
+    mRendering->setSunDirection(final, sun_is_moon);
 
     /*
      * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish
@@ -490,7 +539,6 @@ void WeatherManager::update(float duration)
     mRendering->setSunColour(mResult.mSunColor);
 
     mRendering->getSkyManager()->setWeather(mResult);
-
 
     // Play sounds
     if (mNextWeather == "")
@@ -767,4 +815,14 @@ void WeatherManager::switchToNextWeather(bool instantly)
             setWeather(weatherType, instantly);
         }
     }
+}
+
+bool WeatherManager::isInStorm() const
+{
+    return mIsStorm;
+}
+
+Ogre::Vector3 WeatherManager::getStormDirection() const
+{
+    return mStormDirection;
 }

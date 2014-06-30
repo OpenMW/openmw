@@ -217,7 +217,7 @@ namespace CSMWorld
         bool hasEnums (ColumnId column);
 
         std::vector<std::string> getEnums (ColumnId column);
-        ///< Returns an empty vector, if \æ column isn't an enum type column.
+        ///< Returns an empty vector, if \a column isn't an enum type column.
     }
 }
 
