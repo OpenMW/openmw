@@ -4,6 +4,7 @@
 #include "util.hpp"
 
 #include <QHeaderView>
+#include <QContextMenuEvent>
 
 CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
                                    CSMWorld::NestedTableModel* model,
@@ -42,4 +43,9 @@ void CSVWorld::NestedTable::dragEnterEvent(QDragEnterEvent *event)
 
 void CSVWorld::NestedTable::dragMoveEvent(QDragMoveEvent *event)
 {
+}
+
+void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
 }

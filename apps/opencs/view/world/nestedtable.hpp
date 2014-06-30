@@ -6,6 +6,7 @@
 
 class QUndoStack;
 class QAction;
+class QContextMenuEvent;
 
 namespace CSMWorld
 {
@@ -37,6 +38,9 @@ namespace CSVWorld
         void dragEnterEvent(QDragEnterEvent *event);
         
         void dragMoveEvent(QDragMoveEvent *event);
+        
+    private:
+        void contextMenuEvent (QContextMenuEvent *event);
     };
 }
 
