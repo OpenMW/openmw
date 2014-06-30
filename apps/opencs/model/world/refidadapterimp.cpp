@@ -248,6 +248,15 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
     if (column==mColumns.mOriginal)
         return QString::fromUtf8 (record.get().mOriginal.c_str());
 
+    if (column==mColumns.mCombat)
+        return static_cast<int> (record.get().mData.mCombat);
+
+    if (column==mColumns.mMagic)
+        return static_cast<int> (record.get().mData.mMagic);
+
+    if (column==mColumns.mStealth)
+        return static_cast<int> (record.get().mData.mStealth);
+
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
 
@@ -271,6 +280,12 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
         record.get().mScale = value.toFloat();
     else if (column==mColumns.mOriginal)
         record.get().mOriginal = value.toString().toUtf8().constData();
+    else if (column==mColumns.mCombat)
+        record.get().mData.mCombat = value.toInt();
+    else if (column==mColumns.mMagic)
+        record.get().mData.mMagic = value.toInt();
+    else if (column==mColumns.mStealth)
+        record.get().mData.mStealth = value.toInt();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =

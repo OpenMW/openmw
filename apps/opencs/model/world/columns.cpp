@@ -174,6 +174,9 @@ namespace CSMWorld
             { ColumnId_PcRank, "PC Rank" },
             { ColumnId_Scope, "Scope" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
+            { ColumnId_CombatState, "Combat" },
+            { ColumnId_MagicState, "Magic" },
+            { ColumnId_StealthState, "Stealth" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
