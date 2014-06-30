@@ -17,6 +17,7 @@ namespace CSVRender
             CSMDoc::Document& mDocument;
             CSMWorld::CellSelection mSelection;
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
+            std::string mWorldspace;
 
         private:
 

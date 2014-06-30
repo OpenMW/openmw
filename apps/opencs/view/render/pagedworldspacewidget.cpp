@@ -15,13 +15,18 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     bool modified = false;
     bool setCamera = false;
 
+    const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
+
     {
         // remove
         std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
 
         while (iter!=mCells.end())
         {
-            if (!mSelection.has (iter->first))
+            int index = cells.searchId (iter->first.getId (mWorldspace));
+
+            if (!mSelection.has (iter->first) || index==-1 ||
+                cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted)
             {
                 delete iter->second;
                 mCells.erase (iter++);
@@ -39,7 +44,10 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     for (CSMWorld::CellSelection::Iterator iter (mSelection.begin()); iter!=mSelection.end();
         ++iter)
     {
-        if (mCells.find (*iter)==mCells.end())
+        int index = cells.searchId (iter->getId (mWorldspace));
+
+        if (index!=0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
+            mCells.find (*iter)==mCells.end())
         {
             if (setCamera)
             {
@@ -49,7 +57,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 
             mCells.insert (std::make_pair (*iter,
                 new Cell (mDocument.getData(), getSceneManager(),
-                iter->getId ("std::default"))));
+                iter->getId (mWorldspace))));
 
             modified = true;
         }
@@ -124,7 +132,7 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
 
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget (document, parent), mDocument (document)
+: WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default")
 {}
 
 CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
