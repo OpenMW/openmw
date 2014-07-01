@@ -90,6 +90,8 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
                     wipecell->mLeasedRefs.erase(it_lease);
                     *itold = *it;
                 }
+                else
+                    oldcell->mMovedRefs.push_back(*it);
             }
 
             // We don't need to merge mLeasedRefs of cell / oldcell. This list is filled when another cell moves a
