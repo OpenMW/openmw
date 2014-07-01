@@ -102,10 +102,12 @@ namespace CSMWorld
                 Type_Preview,
                 Type_LoadErrorLog,
                 Type_Enchantments,
-                Type_Enchantment
+                Type_Enchantment,
+                Type_BodyParts,
+                Type_BodyPart
             };
 
-            enum { NumberOfTypes = Type_Enchantment+1 };
+            enum { NumberOfTypes = Type_BodyPart+1 };
 
         private:
 

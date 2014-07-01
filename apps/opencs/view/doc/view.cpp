@@ -191,6 +191,10 @@ void CSVDoc::View::setupCharacterMenu()
     QAction *journalInfos = new QAction (tr ("Journal Infos"), this);
     connect (journalInfos, SIGNAL (triggered()), this, SLOT (addJournalInfosSubView()));
     characters->addAction (journalInfos);
+
+    QAction *bodyParts = new QAction (tr ("Body Parts"), this);
+    connect (bodyParts, SIGNAL (triggered()), this, SLOT (addBodyPartsSubView()));
+    characters->addAction (bodyParts);
 }
 
 void CSVDoc::View::setupAssetsMenu()
@@ -476,6 +480,11 @@ void CSVDoc::View::addJournalInfosSubView()
 void CSVDoc::View::addEnchantmentsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Enchantments);
+}
+
+void CSVDoc::View::addBodyPartsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_BodyParts);
 }
 
 void CSVDoc::View::abortOperation (int type)

@@ -171,6 +171,7 @@ namespace CSMWorld
             ColumnId_MagicState = 158,
             ColumnId_StealthState = 159,
             ColumnId_EnchantmentType = 160,
+            ColumnId_Vampire = 161,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

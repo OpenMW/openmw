@@ -178,7 +178,7 @@ namespace CSMWorld
             { ColumnId_MagicState, "Magic" },
             { ColumnId_StealthState, "Stealth" },
             { ColumnId_EnchantmentType, "Enchantment Type" },
-            { ColumnId_AutoCalc, "Auto Calc" },
+            { ColumnId_Vampire, "Vampire" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
