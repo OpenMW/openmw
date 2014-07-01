@@ -1817,6 +1817,59 @@ namespace CSMWorld
         }
     };
 
+    template<typename ESXRecordT>
+    struct BodyPartTypeColumn : public Column<ESXRecordT>
+    {
+        BodyPartTypeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_BodyPartType, ColumnBase::Display_BodyPartType)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mData.mPart);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mPart = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct MeshTypeColumn : public Column<ESXRecordT>
+    {
+        MeshTypeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_MeshType, ColumnBase::Display_MeshType)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mData.mType);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mType = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif

@@ -90,6 +90,8 @@ namespace CSMWorld
             Display_DialogueType,
             Display_QuestStatusType,
             Display_EnchantmentType,
+            Display_BodyPartType,
+            Display_MeshType,
             Display_Gender
         };
 

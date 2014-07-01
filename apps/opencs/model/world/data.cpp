@@ -209,14 +209,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
     mBodyParts.addColumn (new StringIdColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new RecordStateColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new FixedRecordTypeColumn<ESM::BodyPart> (UniversalId::Type_BodyPart));
-
+    mBodyParts.addColumn (new BodyPartTypeColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new VampireColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Female, ESM::BodyPart::BPF_Female));
     mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Playable, ESM::BodyPart::BPF_NotPlayable, true));
-
+    mBodyParts.addColumn (new MeshTypeColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new ModelColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new RaceColumn<ESM::BodyPart>);
-
 
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
