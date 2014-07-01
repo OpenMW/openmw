@@ -1709,6 +1709,55 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct ChargesColumn2 : public Column<ESXRecordT>
+    {
+        ChargesColumn2() : Column<ESXRecordT> (Columns::ColumnId_Charges, ColumnBase::Display_Integer) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mCharge;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mCharge = data.toInt();
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct AutoCalcColumn : public Column<ESXRecordT>
+    {
+        AutoCalcColumn() : Column<ESXRecordT> (Columns::ColumnId_AutoCalc, ColumnBase::Display_Boolean)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mAutocalc!=0;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mAutocalc = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif
