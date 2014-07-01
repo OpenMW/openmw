@@ -23,11 +23,14 @@ void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
         // We should not need to test for duplicates, as this part of the code is pre-cell merge.
         cell->mMovedRefs.push_back(cMRef);
         // But there may be duplicates here!
-        ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefNum);
-        if (iter == cellAlt->mLeasedRefs.end())
-          cellAlt->mLeasedRefs.push_back(ref);
-        else
-          *iter = ref;
+        if (!deleted)
+        {
+            ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefNum);
+            if (iter == cellAlt->mLeasedRefs.end())
+              cellAlt->mLeasedRefs.push_back(ref);
+            else
+              *iter = ref;
+        }
     }
 }
 
