@@ -201,6 +201,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new FixedRecordTypeColumn<ESM::Enchantment> (UniversalId::Type_Enchantment));
+    mEnchantments.addColumn (new EnchantmentTypeColumn<ESM::Enchantment>);
 
     mEnchantments.addColumn (new CostColumn<ESM::Enchantment>);
 

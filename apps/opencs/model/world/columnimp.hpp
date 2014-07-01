@@ -1682,6 +1682,33 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct EnchantmentTypeColumn : public Column<ESXRecordT>
+    {
+        EnchantmentTypeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_EnchantmentType, ColumnBase::Display_EnchantmentType)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mData.mType);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mType = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif

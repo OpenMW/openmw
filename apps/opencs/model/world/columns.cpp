@@ -177,6 +177,7 @@ namespace CSMWorld
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
             { ColumnId_StealthState, "Stealth" },
+            { ColumnId_EnchantmentType, "Enchantment Type" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -302,6 +303,11 @@ namespace
         "Male", "Female", 0
     };
 
+    static const char *sEnchantmentTypes[] =
+    {
+        "Cast Once", "When Strikes", "When Used", "Constant Effect", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -319,6 +325,7 @@ namespace
             case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
             case CSMWorld::Columns::ColumnId_QuestStatusType: return sQuestStatusTypes;
             case CSMWorld::Columns::ColumnId_Gender: return sGenderEnums;
+            case CSMWorld::Columns::ColumnId_EnchantmentType: return sEnchantmentTypes;
 
             default: return 0;
         }

@@ -89,6 +89,7 @@ namespace CSMWorld
             Display_RefRecordType,
             Display_DialogueType,
             Display_QuestStatusType,
+            Display_EnchantmentType,
             Display_Gender
         };
 
