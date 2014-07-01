@@ -91,3 +91,18 @@ Qt::ItemFlags CSMWorld::NestedTableModel::flags(const QModelIndex& index) const
 {
     return mMainModel->flags(mMainModel->index(0, mParentColumn));
 }
+
+std::string CSMWorld::NestedTableModel::getParentId() const
+{
+    return mId;
+}
+
+int CSMWorld::NestedTableModel::getParentColumn() const
+{
+    return mParentColumn;
+}
+
+CSMWorld::IdTable* CSMWorld::NestedTableModel::model() const
+{
+    return mMainModel;
+}

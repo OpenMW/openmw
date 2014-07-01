@@ -151,7 +151,7 @@ namespace CSMWorld
 
         public:
 
-            DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent);
+            DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
             virtual void redo();
 
@@ -170,7 +170,7 @@ namespace CSMWorld
 
         public:
 
-            AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent);
+            AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
             virtual void redo();
 

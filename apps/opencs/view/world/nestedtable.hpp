@@ -28,6 +28,7 @@ namespace CSVWorld
         QAction *mAddNewRowAction;
         QAction *mRemoveRowAction;
         QUndoStack& mUndoStack;
+        CSMWorld::NestedTableModel* mModel;
         
     public:
         NestedTable(QUndoStack& undoStack,
@@ -41,6 +42,16 @@ namespace CSVWorld
         
     private:
         void contextMenuEvent (QContextMenuEvent *event);
+        
+    private slots:
+        void removeRowActionTriggered();
+        
+        void addNewRowActionTriggered();
+        
+    signals:
+        void addNewRow();
+        
+        void removeRow(int row);
     };
 }
 

@@ -31,6 +31,12 @@ namespace CSMWorld
                          IdTable* parentModel);
         //parent is the parent of columns to work with. Columnid provides information about the column
 
+        std::string getParentId() const;
+        
+        int getParentColumn() const;
+        
+        CSMWorld::IdTable* model() const;
+
         virtual QModelIndex mapFromSource(const QModelIndex& sourceIndex) const;
 
         virtual QModelIndex mapToSource(const QModelIndex& proxyIndex) const;
