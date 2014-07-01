@@ -24,6 +24,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -886,7 +887,8 @@ namespace MWScript
                 {
                     MWWorld::CellStore* cell = ptr.getCell();
                     msg << "Cell: " << MWBase::Environment::get().getWorld()->getCellName(cell) << std::endl;
-
+                    if (cell->getCell()->isExterior())
+                        msg << "Grid: " << cell->getCell()->getGridX() << " " << cell->getCell()->getGridY() << std::endl;
                     Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
                     msg << "Coordinates: " << pos << std::endl;
                 }
