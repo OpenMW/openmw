@@ -77,7 +77,6 @@ void CSVWorld::NestedTable::removeRowActionTriggered()
                                                       mModel->getParentId(), 
                                                       selectionModel()->selectedRows().begin()->row(),
                                                       mModel->getParentColumn()));
-                                                      
 }
 
 void CSVWorld::NestedTable::addNewRowActionTriggered()
@@ -86,5 +85,4 @@ void CSVWorld::NestedTable::addNewRowActionTriggered()
                                                    mModel->getParentId(), 
                                                    selectionModel()->selectedRows().size(),
                                                    mModel->getParentColumn()));
-                                                      
 }

@@ -127,12 +127,10 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
 {
     if (parent.isValid())
     {
-        beginRemoveRows(parent, row, row+count-1);
         for (int i = 0; i < count; ++i)
         {
             mIdCollection->removeNestedRows(parent.row(), parent.column(), row+i); 
         }
-        endRemoveRows();
         return true;
     }
 
@@ -149,7 +147,11 @@ void CSMWorld::IdTable::addNestedRow(const QModelIndex& parent, int position)
 {
     assert(parent.isValid());
 
-    mIdCollection->addNestedRow(parent.row(), parent.column(), position);
+    int row = parent.row();
+    mIdCollection->addNestedRow(row, parent.column(), position);
+
+    emit dataChanged (CSMWorld::IdTable::index (row, 0),
+                      CSMWorld::IdTable::index (row, mIdCollection->getColumns()-1));
 }
 
 QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const

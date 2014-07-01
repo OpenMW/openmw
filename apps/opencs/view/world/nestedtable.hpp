@@ -47,11 +47,6 @@ namespace CSVWorld
         void removeRowActionTriggered();
         
         void addNewRowActionTriggered();
-        
-    signals:
-        void addNewRow();
-        
-        void removeRow(int row);
     };
 }
 
