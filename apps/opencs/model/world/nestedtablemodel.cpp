@@ -22,6 +22,11 @@ CSMWorld::NestedTableModel::NestedTableModel(const QModelIndex& parent,
     connect(mMainModel, SIGNAL(rowsInserted(const QModelIndex &, int, int)),
             this, SLOT(forwardRowsInserted(const QModelIndex &, int, int)));
 
+    connect(mMainModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)),
+            this, SLOT(forwardRowsAboutToRemoved(const QModelIndex &, int, int)));
+
+    connect(mMainModel, SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+            this, SLOT(forwardRowsRemoved(const QModelIndex &, int, int)));
 }
 
 QModelIndex CSMWorld::NestedTableModel::mapFromSource(const QModelIndex& sourceIndex) const
@@ -141,4 +146,20 @@ bool CSMWorld::NestedTableModel::indexIsParent(const QModelIndex& index)
     return (index.isValid() &&
             index.column() == mParentColumn &&
             mMainModel->data(mMainModel->index(index.row(), 0)).toString().toUtf8().constData() == mId);
+}
+
+void CSMWorld::NestedTableModel::forwardRowsAboutToRemoved(const QModelIndex& parent, int first, int last)
+{
+    if (indexIsParent(parent))
+    {
+        beginRemoveRows(QModelIndex(), first, last);
+    }
+}
+
+void CSMWorld::NestedTableModel::forwardRowsRemoved(const QModelIndex& parent, int first, int last)
+{
+    if (indexIsParent(parent))
+    {
+        endRemoveRows();
+    }
 }

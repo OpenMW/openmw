@@ -66,6 +66,10 @@ namespace CSMWorld
         void forwardRowsAboutToInserted(const QModelIndex & parent, int first, int last);
         
         void forwardRowsInserted(const QModelIndex & parent, int first, int last);
+
+        void forwardRowsAboutToRemoved(const QModelIndex & parent, int first, int last);
+
+        void forwardRowsRemoved(const QModelIndex & parent, int first, int last);
     };
 }
 
