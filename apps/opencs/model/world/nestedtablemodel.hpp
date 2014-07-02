@@ -21,6 +21,8 @@ namespace CSMWorld
 
     class NestedTableModel : public QAbstractProxyModel
     {
+        Q_OBJECT
+
         const int mParentColumn;
         IdTable* mMainModel;
         std::string mId;
@@ -57,6 +59,13 @@ namespace CSMWorld
         
     private:
         void setupHeaderVectors(ColumnBase::Display columnId);
+
+        bool indexIsParent(const QModelIndex& index);
+        
+    private slots:
+        void forwardRowsAboutToInserted(const QModelIndex & parent, int first, int last);
+        
+        void forwardRowsInserted(const QModelIndex & parent, int first, int last);
     };
 }
 

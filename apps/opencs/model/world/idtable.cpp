@@ -148,10 +148,14 @@ void CSMWorld::IdTable::addNestedRow(const QModelIndex& parent, int position)
     assert(parent.isValid());
 
     int row = parent.row();
+
+    beginInsertRows(parent, position, position);
     mIdCollection->addNestedRow(row, parent.column(), position);
 
     emit dataChanged (CSMWorld::IdTable::index (row, 0),
                       CSMWorld::IdTable::index (row, mIdCollection->getColumns()-1));
+    
+    endInsertRows();
 }
 
 QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const

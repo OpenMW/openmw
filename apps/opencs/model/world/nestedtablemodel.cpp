@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include "./idtable.hpp"
+#include <QDebug>
 
 CSMWorld::NestedTableModel::NestedTableModel(const QModelIndex& parent,
                                              ColumnBase::Display columnId,
@@ -14,6 +15,13 @@ CSMWorld::NestedTableModel::NestedTableModel(const QModelIndex& parent,
     mId = std::string(parentModel->index(parentRow, 0).data().toString().toUtf8());
 
     QAbstractProxyModel::setSourceModel(parentModel);
+    
+    connect(mMainModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex &, int, int)),
+            this, SLOT(forwardRowsAboutToInserted(const QModelIndex &, int, int)));
+    
+    connect(mMainModel, SIGNAL(rowsInserted(const QModelIndex &, int, int)),
+            this, SLOT(forwardRowsInserted(const QModelIndex &, int, int)));
+
 }
 
 QModelIndex CSMWorld::NestedTableModel::mapFromSource(const QModelIndex& sourceIndex) const
@@ -105,4 +113,32 @@ int CSMWorld::NestedTableModel::getParentColumn() const
 CSMWorld::IdTable* CSMWorld::NestedTableModel::model() const
 {
     return mMainModel;
+}
+
+void CSMWorld::NestedTableModel::forwardRowsAboutToInserted(const QModelIndex& parent, int first, int last)
+{
+    if (indexIsParent(parent))
+    {
+        qDebug()<<"Adding new rows "<< first<<":"<<last;
+        beginInsertRows(QModelIndex(), first, last);
+    }
+}
+
+void CSMWorld::NestedTableModel::forwardRowsInserted(const QModelIndex& parent, int first, int last)
+{
+    if (indexIsParent(parent))
+    {
+        qDebug()<<"rows added"<< first<<":"<<last;
+        endInsertRows();
+    }
+}
+
+bool CSMWorld::NestedTableModel::indexIsParent(const QModelIndex& index)
+{
+    qDebug()<<"Testing for parenty";
+    qDebug()<<index.isValid();
+    qDebug()<<(index.column() == mParentColumn);
+    return (index.isValid() &&
+            index.column() == mParentColumn &&
+            mMainModel->data(mMainModel->index(index.row(), 0)).toString().toUtf8().constData() == mId);
 }
