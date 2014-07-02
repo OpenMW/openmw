@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include "./idtable.hpp"
-#include <QDebug>
 
 CSMWorld::NestedTableModel::NestedTableModel(const QModelIndex& parent,
                                              ColumnBase::Display columnId,
@@ -140,9 +139,6 @@ void CSMWorld::NestedTableModel::forwardRowsInserted(const QModelIndex& parent, 
 
 bool CSMWorld::NestedTableModel::indexIsParent(const QModelIndex& index)
 {
-    qDebug()<<"Testing for parenty";
-    qDebug()<<index.isValid();
-    qDebug()<<(index.column() == mParentColumn);
     return (index.isValid() &&
             index.column() == mParentColumn &&
             mMainModel->data(mMainModel->index(index.row(), 0)).toString().toUtf8().constData() == mId);
