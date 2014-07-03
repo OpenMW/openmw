@@ -712,6 +712,7 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getJournals().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getEnchantments().searchId (id)!=-1 ||
+        getBodyParts().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
 }
 
@@ -731,6 +732,7 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mSpells) +
         count (state, mCells) +
         count (state, mEnchantments) +
+        count (state, mBodyParts) +
         count (state, mReferenceables);
 }
 
@@ -772,6 +774,7 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     appendIds (ids, mJournals, listDeleted);
     appendIds (ids, mCells, listDeleted);
     appendIds (ids, mEnchantments, listDeleted);
+    appendIds (ids, mBodyParts, listDeleted);
     appendIds (ids, mReferenceables, listDeleted);
 
     std::sort (ids.begin(), ids.end());
