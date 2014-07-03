@@ -175,6 +175,15 @@ CSMWorld::RefIdCollection::RefIdCollection()
     creatureColumns.mScale = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_OriginalCreature, ColumnBase::Display_String));
     creatureColumns.mOriginal = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_CombatState, ColumnBase::Display_Integer));
+    creatureColumns.mCombat = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_MagicState, ColumnBase::Display_Integer));
+    creatureColumns.mMagic = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_StealthState, ColumnBase::Display_Integer));
+    creatureColumns.mStealth = &mColumns.back();
 
     static const struct
     {

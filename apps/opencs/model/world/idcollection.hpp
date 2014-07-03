@@ -15,7 +15,10 @@ namespace CSMWorld
 
             void load (ESM::ESMReader& reader, bool base);
 
-            void load (const ESXRecordT& record, bool base);
+            /// \param index Index at which the record can be found.
+            /// Special values: -2 index unknown, -1 record does not exist yet and therefore
+            /// does not have an index
+            void load (const ESXRecordT& record, bool base, int index = -2);
 
             bool tryDelete (const std::string& id);
             ///< Try deleting \a id. If the id does not exist or can't be deleted the call is ignored.
@@ -56,17 +59,28 @@ namespace CSMWorld
         else
         {
             ESXRecordT record;
-            IdAccessorT().getId (record) = id;
+
+            int index = this->searchId (id);
+
+            if (index==-1)
+                IdAccessorT().getId (record) = id;
+            else
+            {
+                record = this->getRecord (index).get();
+            }
+
             record.load (reader);
 
-            load (record, base);
+            load (record, base, index);
         }
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::load (const ESXRecordT& record, bool base)
+    void IdCollection<ESXRecordT, IdAccessorT>::load (const ESXRecordT& record, bool base,
+        int index)
     {
-        int index = this->searchId (IdAccessorT().getId (record));
+        if (index==-2)
+            index = this->searchId (IdAccessorT().getId (record));
 
         if (index==-1)
         {
