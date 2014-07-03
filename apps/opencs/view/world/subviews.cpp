@@ -39,6 +39,8 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Regions,
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
+        CSMWorld::UniversalId::Type_Enchantments,
+        CSMWorld::UniversalId::Type_BodyParts,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -92,6 +94,8 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Filter,
         CSMWorld::UniversalId::Type_Sound,
         CSMWorld::UniversalId::Type_Faction,
+        CSMWorld::UniversalId::Type_Enchantment,
+        CSMWorld::UniversalId::Type_BodyPart,
 
         CSMWorld::UniversalId::Type_None // end marker
     };

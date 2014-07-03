@@ -178,6 +178,10 @@ namespace CSVDoc
 
             void addJournalInfosSubView();
 
+            void addEnchantmentsSubView();
+
+            void addBodyPartsSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();

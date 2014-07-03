@@ -100,10 +100,14 @@ namespace CSMWorld
                 Type_JournalInfo,
                 Type_Scene,
                 Type_Preview,
-                Type_LoadErrorLog
+                Type_LoadErrorLog,
+                Type_Enchantments,
+                Type_Enchantment,
+                Type_BodyParts,
+                Type_BodyPart
             };
 
-            enum { NumberOfTypes = Type_LoadErrorLog+1 };
+            enum { NumberOfTypes = Type_BodyPart+1 };
 
         private:
 

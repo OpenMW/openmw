@@ -177,6 +177,10 @@ namespace CSMWorld
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
             { ColumnId_StealthState, "Stealth" },
+            { ColumnId_EnchantmentType, "Enchantment Type" },
+            { ColumnId_Vampire, "Vampire" },
+            { ColumnId_BodyPartType, "Bodypart Type" },
+            { ColumnId_MeshType, "Mesh Type" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -302,6 +306,22 @@ namespace
         "Male", "Female", 0
     };
 
+    static const char *sEnchantmentTypes[] =
+    {
+        "Cast Once", "When Strikes", "When Used", "Constant Effect", 0
+    };
+
+    static const char *sBodyPartTypes[] =
+    {
+        "Head", "Hair", "Neck", "Chest", "Groin", "Hand", "Wrist", "Forearm", "Upper Arm",
+        "Foot", "Ankle", "Knee", "Upper Leg", "Clavicle", "Tail", 0
+    };
+
+    static const char *sMeshTypes[] =
+    {
+        "Skin", "Clothing", "Armour", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -319,6 +339,9 @@ namespace
             case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
             case CSMWorld::Columns::ColumnId_QuestStatusType: return sQuestStatusTypes;
             case CSMWorld::Columns::ColumnId_Gender: return sGenderEnums;
+            case CSMWorld::Columns::ColumnId_EnchantmentType: return sEnchantmentTypes;
+            case CSMWorld::Columns::ColumnId_BodyPartType: return sBodyPartTypes;
+            case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
 
             default: return 0;
         }
