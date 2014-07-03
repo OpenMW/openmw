@@ -10,8 +10,6 @@ namespace ESM
 
 void NPC::load(ESMReader &esm)
 {
-    //mNpdt52.mGold = -10;
-
     mPersistent = esm.getRecordFlags() & 0x0400;
 
     mModel = esm.getHNOString("MODL");
@@ -63,7 +61,6 @@ void NPC::load(ESMReader &esm)
         }
     }
     mAiPackage.load(esm);
-    esm.skipRecord();
 }
 void NPC::save(ESMWriter &esm) const
 {
