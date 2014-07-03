@@ -123,7 +123,6 @@ void CSMWorld::NestedTableModel::forwardRowsAboutToInserted(const QModelIndex& p
 {
     if (indexIsParent(parent))
     {
-        qDebug()<<"Adding new rows "<< first<<":"<<last;
         beginInsertRows(QModelIndex(), first, last);
     }
 }
@@ -132,7 +131,6 @@ void CSMWorld::NestedTableModel::forwardRowsInserted(const QModelIndex& parent, 
 {
     if (indexIsParent(parent))
     {
-        qDebug()<<"rows added"<< first<<":"<<last;
         endInsertRows();
     }
 }
