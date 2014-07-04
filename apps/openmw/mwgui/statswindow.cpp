@@ -414,7 +414,7 @@ namespace MWGui
         }
         mSkillWidgets.clear();
 
-        const int valueSize = 40;
+        const int valueSize = 70;
         MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
         MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);
 
