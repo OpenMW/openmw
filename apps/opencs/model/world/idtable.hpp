@@ -40,7 +40,6 @@ namespace CSMWorld
 
             CollectionBase *mIdCollection;
             unsigned int mFeatures;
-            bool mPreview;
 
             // not implemented
             IdTable (const IdTable&);
