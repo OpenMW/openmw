@@ -7,7 +7,7 @@ CSMFilter::AndNode::AndNode (const std::vector<boost::shared_ptr<Node> >& nodes)
 : NAryNode (nodes, "and")
 {}
 
-bool CSMFilter::AndNode::test (const CSMWorld::IdTable& table, int row,
+bool CSMFilter::AndNode::test (const CSMWorld::IdTableBase& table, int row,
     const std::map<int, int>& columns) const
 {
     int size = getSize();

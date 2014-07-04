@@ -14,7 +14,7 @@ namespace CSMFilter
 
             TextNode (int columnId, const std::string& text);
 
-            virtual bool test (const CSMWorld::IdTable& table, int row,
+            virtual bool test (const CSMWorld::IdTableBase& table, int row,
                 const std::map<int, int>& columns) const;
             ///< \return Can the specified table row pass through to filter?
             /// \param columns column ID to column index mapping
