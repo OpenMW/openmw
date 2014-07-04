@@ -35,6 +35,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
         mFsStrict);
 
+    mDocumentManager.listResources();
+
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
 

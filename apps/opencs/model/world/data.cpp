@@ -15,6 +15,7 @@
 #include "columnimp.hpp"
 #include "regionmap.hpp"
 #include "columns.hpp"
+#include "resourcesmanager.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
@@ -56,8 +57,9 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding)
-: mEncoder (encoding), mRefs (mCells), mReader (0), mDialogue (0)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
+: mEncoder (encoding), mRefs (mCells), mResourcesManager (resourcesManager), mReader (0),
+  mDialogue (0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -496,6 +498,11 @@ const CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts() cons
 CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
 {
     return mBodyParts;
+}
+
+const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
+{
+    return mResourcesManager.get (UniversalId::getParentType (id.getType()));
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)

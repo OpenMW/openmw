@@ -2205,9 +2205,9 @@ void CSMDoc::Document::createBase()
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
-    ToUTF8::FromType encoding)
-: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding), mTools (mData),
-  mResDir(resDir),
+    ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager)
+: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
+  mTools (mData), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSaving (*this, mProjectPath, encoding)

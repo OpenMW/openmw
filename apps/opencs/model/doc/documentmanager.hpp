@@ -11,6 +11,8 @@
 
 #include <components/to_utf8/to_utf8.hpp>
 
+#include "../world/resourcesmanager.hpp"
+
 #include "loader.hpp"
 
 namespace Files
@@ -31,6 +33,7 @@ namespace CSMDoc
             QThread mLoaderThread;
             Loader mLoader;
             ToUTF8::FromType mEncoding;
+            CSMWorld::ResourcesManager mResourcesManager;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
@@ -49,6 +52,9 @@ namespace CSMDoc
 	    void setResourceDir (const boost::filesystem::path& parResDir);
 
             void setEncoding (ToUTF8::FromType encoding);
+
+            /// Ask OGRE for a list of available resources.
+            void listResources();
 
         private:
 
