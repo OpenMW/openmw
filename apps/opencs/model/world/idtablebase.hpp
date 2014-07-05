@@ -29,7 +29,10 @@ namespace CSMWorld
 
                 Feature_View = Feature_ViewId | Feature_ViewCell,
 
-                Feature_Preview = 8
+                Feature_Preview = 8,
+
+                /// Table can not be modified through ordinary means.
+                Feature_Constant = 16
             };
 
         private:

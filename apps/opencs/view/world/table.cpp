@@ -54,7 +54,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     ///  \todo add menu items for select all and clear selection
 
-    if (!mEditLock)
+    if (!mEditLock && !(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
     {
         if (selectedRows.size()==1)
         {
@@ -276,7 +276,7 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
 
 void CSVWorld::Table::editRecord()
 {
-    if (!mEditLock)
+    if (!mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
 
@@ -287,7 +287,7 @@ void CSVWorld::Table::editRecord()
 
 void CSVWorld::Table::cloneRecord()
 {
-    if (!mEditLock)
+    if (!mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
         const CSMWorld::UniversalId& toClone = getUniversalId(selectedRows.begin()->row());
@@ -300,7 +300,7 @@ void CSVWorld::Table::cloneRecord()
 
 void CSVWorld::Table::moveUpRecord()
 {
-    if (mEditLock)
+    if (mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
         return;
 
     QModelIndexList selectedRows = selectionModel()->selectedRows();
@@ -333,7 +333,7 @@ void CSVWorld::Table::moveUpRecord()
 
 void CSVWorld::Table::moveDownRecord()
 {
-    if (mEditLock)
+    if (mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
         return;
 
     QModelIndexList selectedRows = selectionModel()->selectedRows();
