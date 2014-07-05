@@ -47,7 +47,7 @@ namespace
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Meshes, "Meshes", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Icons, "Icons", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Musics, "Musics", 0 },
-        { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_SoundsRes, "Sounds", 0 },
+        { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_SoundsRes, "Sound Files", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Textures, "Textures", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Videos, "Videos", 0 },
 
@@ -106,7 +106,7 @@ namespace
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_Mesh, "Mesh", 0 },
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_Icon, "Icon", 0 },
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_Music, "Music", 0 },
-        { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_SoundRes, "Sound", 0 },
+        { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_SoundRes, "Sound File", 0 },
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_Texture, "Texture", 0 },
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_Video, "Video", 0 },
 
