@@ -16,6 +16,7 @@
 #include "regionmap.hpp"
 #include "columns.hpp"
 #include "resourcesmanager.hpp"
+#include "resourcetable.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
@@ -279,6 +280,18 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Mesh)),
+        UniversalId::Type_Mesh);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icon)),
+        UniversalId::Type_Icon);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Music)),
+        UniversalId::Type_Music);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundRes)),
+        UniversalId::Type_SoundRes);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Texture)),
+        UniversalId::Type_Texture);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Video)),
+        UniversalId::Type_Video);
 }
 
 CSMWorld::Data::~Data()
