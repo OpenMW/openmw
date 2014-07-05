@@ -425,21 +425,27 @@ void CSVWorld::Table::tableSizeUpdate()
     {
         int rows = mProxyModel->rowCount();
 
-        for (int i=0; i<rows; ++i)
+        int columnIndex = mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_Modification);
+
+        if (columnIndex!=-1)
         {
-            QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (i, 0));
-
-            int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
-            int state = mModel->data (mModel->index (index.row(), columnIndex)).toInt();
-
-            switch (state)
+            for (int i=0; i<rows; ++i)
             {
-                case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
-                case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
-                case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
-                case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (i, 0));
+
+                int state = mModel->data (mModel->index (index.row(), columnIndex)).toInt();
+
+                switch (state)
+                {
+                    case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
+                    case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
+                    case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
+                    case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                }
             }
         }
+        else
+            size = rows;
     }
 
     tableSizeChanged (size, deleted, modified);
