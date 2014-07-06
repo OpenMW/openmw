@@ -5,6 +5,7 @@
 #include <OgreTextureManager.h>
 
 #include <GL/GL.h>
+#include <OgreBuildSettings.h> /* OGRE_NO_GL_STATE_CACHE_SUPPORT */
 
 #include <SDL_syswm.h>
 #include <SDL_endian.h>
@@ -25,11 +26,20 @@ bool checkMinGLVersion(std::ostream& error)
     //   https://github.com/mono/MonoGame/issues/998
     //   http://www.ogre3d.org/forums/viewtopic.php?f=1&t=79698
     //
-    // If using OpenGL we must ensure version 3.0 or higher for Ogre 1.9.
+    // If using OpenGL we must ensure framebuffer object functions exist for Ogre 1.9.
     //
-    // Root::createRenderWindow() ends up with GLStateCacheManagerImp::initializeCache()
-    // which uses OpenGL 3.0 core functions glBindFramebuffer() & glBindRenderbuffer().
-    // If these are not available then a null pointer exception can occur.
+    // Ogre::Root::getSingleton().createRenderWindow() below eventualy ends up calling
+    // GLStateCacheManagerImp::initializeCache() which uses glBindFramebuffer() and
+    // glBindRenderbuffer().  This is the default where GL state cache is disabled.
+    //
+    // They are part of OpenGL 3.0 core functions, but older drivers with lower
+    // versions may still support them.  If these are not available then a null
+    // pointer exception will occur.
+    //
+    // If GL state cache is enabled in the Ogre build then glBindFramebufferEXT()
+    // and glBindRenderbufferEXT() are used instead.
+    //
+    // More detail below:
     //
     // Ogre 1.9 introduced StateCacheManager/OgreGLNullStateCacheManagerImp.cpp and
     // StateCacheManager/OgreGLStateCacheManagerImp.cpp.  Details from mercurial log:
@@ -65,11 +75,15 @@ bool checkMinGLVersion(std::ostream& error)
     typedef BOOL (* WGL_MakeCurrent_Func) (HDC, HGLRC);
     typedef BOOL (* WGL_DeleteContext_Func) (HGLRC);
     typedef const GLubyte* (* GL_GetString_Func) (unsigned int);
+    typedef void (* GL_BindFramebuffer_Func) (GLenum, GLuint);
+    typedef void (* GL_BindRenderbuffer_Func) (GLenum, GLuint);
 
     WGL_CreateContext_Func wglCreateContextPtr = 0;
     WGL_MakeCurrent_Func wglMakeCurrentPtr = 0;
     WGL_DeleteContext_Func wglDeleteContextPtr = 0;
     GL_GetString_Func glGetStringPtr = 0;
+    GL_BindFramebuffer_Func glBindFramebufferPtr = 0;
+    GL_BindRenderbuffer_Func glBindRenderbufferPtr = 0;
 
     SDL_Window* sdlWin = SDL_CreateWindow(
         "temp",           // window title
@@ -152,38 +166,39 @@ bool checkMinGLVersion(std::ostream& error)
         return false;
     }
 
-    // Some of the code below copied from OgreGLSupport.cpp
-    const GLubyte* pcVer = glGetStringPtr(GL_VERSION);
-    if (!pcVer)
+    // Ogre 1.9 uses EXT versions of these functions only when state cache is enabled
+    // See: https://ogre3d.atlassian.net/browse/OGRE-402
+#if OGRE_NO_GL_STATE_CACHE_SUPPORT == 0
+    glBindFramebufferPtr = (GL_BindFramebuffer_Func) SDL_GL_GetProcAddress("glBindFramebufferEXT");
+    glBindRenderbufferPtr = (GL_BindRenderbuffer_Func) SDL_GL_GetProcAddress("glBindRenderbufferEXT");
+    std::cout << "OpenGL: State cache enabled, looking for EXT framebuffer functions" << std::endl;
+#else
+    glBindFramebufferPtr = (GL_BindFramebuffer_Func) SDL_GL_GetProcAddress("glBindFramebuffer");
+    glBindRenderbufferPtr = (GL_BindRenderbuffer_Func) SDL_GL_GetProcAddress("glBindRenderbuffer");
+    std::cout << "OpenGL: State cache disabled, looking for core framebuffer functions" << std::endl;
+#endif
+
+    if (!glBindFramebufferPtr || !glBindRenderbufferPtr)
     {
-        error << "OpenGL version check: Failed to get GL version string";
-        return false;
-    }
+        const GLubyte* pcVer = glGetStringPtr(GL_VERSION);
+        if (!pcVer)
+        {
+            error << "OpenGL version check: Failed to get GL version string";
+            return false;
+        }
 
-    Ogre::String tmpStr = (const char*)pcVer;
-    std::cout << "OpenGL GL_VERSION: " + tmpStr << std::endl;
+        Ogre::String tmpStr = (const char*)pcVer;
+        std::cout << "OpenGL GL_VERSION: " + tmpStr << std::endl;
 
-    // FIXME: Does not work, returns "0.0.0.0"
-    //Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-    //std::cout << "OpenGL Driver Version: " + rs->getDriverVersion().toString() << std::endl;
-
-    Ogre::String glVersion = tmpStr.substr(0, tmpStr.find(" "));
-    Ogre::String::size_type pos = glVersion.find(".");
-    if (pos == Ogre::String::npos)
-    {
-        error << "OpenGL version check: Failed to parse parse GL version string";
+        error << "OpenGL: Missing required functions for Ogre 1.9:";
+        if (!glBindFramebufferPtr)
+            error << " glBindFramebuffer";
+        if (!glBindRenderbufferPtr)
+            error << " glBindRenderbuffer";
         return false;
     }
     else
-    {
-        unsigned int cardFirst = ::atoi(glVersion.substr(0, pos).c_str());
-        if (cardFirst < 3)
-        {
-            error << "OpenGL: Version " << glVersion.c_str()
-                  << " detected. Version 3.0 or higer required for Ogre 1.9";
-            return false;
-        }
-    }
+        std::cout << "OpenGL: Found framebuffer functions" << std::endl;
 
     // Remove temporary context, device context and dummy window
     wglMakeCurrentPtr(NULL, NULL);
