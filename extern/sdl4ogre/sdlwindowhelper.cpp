@@ -4,7 +4,7 @@
 #include <OgreRoot.h>
 #include <OgreTextureManager.h>
 
-#include <GL/GL.h>
+#include <GL/gl.h>
 #include <OgreBuildSettings.h> /* OGRE_NO_GL_STATE_CACHE_SUPPORT */
 
 #include <SDL_syswm.h>
@@ -190,7 +190,7 @@ bool checkMinGLVersion(std::ostream& error)
         Ogre::String tmpStr = (const char*)pcVer;
         std::cout << "OpenGL GL_VERSION: " + tmpStr << std::endl;
 
-        error << "OpenGL: Missing required functions for Ogre 1.9:";
+        error << "OpenGL: Missing required functions for Ogre-1.9:";
         if (!glBindFramebufferPtr)
             error << " glBindFramebuffer";
         if (!glBindRenderbufferPtr)
