@@ -177,7 +177,7 @@ namespace CSVWorld
             EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table,
                         QUndoStack& undoStack, bool createAndDelete = false);
 
-            ~EditWidget();
+            virtual ~EditWidget();
         
             void remake(int row);
 
