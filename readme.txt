@@ -130,6 +130,7 @@ Bug #1179: Crash after trying to load game after being killed
 Bug #1180: Changing footstep sound location
 Bug #1196: Jumping not disabled when showing messageboxes
 Bug #1202: "strange" keys are not shown in binding menu, and are not saved either, but works
+Bug #1216: Broken dialog topics in russian Morrowind
 Bug #1217: Container content changes based on the current position of the mouse
 Bug #1234: Loading/saving issues with dynamic records
 Bug #1277: Text pasted into the console appears twice
