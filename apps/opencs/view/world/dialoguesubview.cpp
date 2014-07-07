@@ -353,6 +353,7 @@ void CSVWorld::EditWidget::remake(int row)
     {
         delete mNestedModels[i];
     }
+    mNestedModels.clear();
     
     if (mMainWidget)
     {
