@@ -5,7 +5,10 @@
 
 void CSMWorld::ResourcesManager::listResources()
 {
-    mResources.insert (std::make_pair (UniversalId::Type_Mesh, "meshes"));
+    static const char * const sMeshTypes[] = { "nif", 0 };
+
+    mResources.insert (
+        std::make_pair (UniversalId::Type_Mesh, Resources ("meshes", sMeshTypes)));
     mResources.insert (std::make_pair (UniversalId::Type_Icon, "icons"));
     mResources.insert (std::make_pair (UniversalId::Type_Music, "music"));
     mResources.insert (std::make_pair (UniversalId::Type_SoundRes, "sound"));

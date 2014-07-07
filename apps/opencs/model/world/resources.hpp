@@ -15,7 +15,7 @@ namespace CSMWorld
 
         public:
 
-            Resources (const std::string& baseDirectory);
+            Resources (const std::string& baseDirectory, const char * const *extensions = 0);
 
             int getSize() const;
 

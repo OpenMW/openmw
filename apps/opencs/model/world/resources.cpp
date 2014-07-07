@@ -8,7 +8,8 @@
 
 #include <components/misc/stringops.hpp>
 
-CSMWorld::Resources::Resources (const std::string& baseDirectory)
+CSMWorld::Resources::Resources (const std::string& baseDirectory,
+    const char * const *extensions)
 : mBaseDirectory (baseDirectory)
 {
     int baseSize = mBaseDirectory.size();
@@ -28,14 +29,33 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory)
         for (Ogre::StringVector::const_iterator iter (resources->begin());
             iter!=resources->end(); ++iter)
         {
-            if (static_cast<int> (iter->size())>=baseSize+1 &&
-                iter->substr (0, baseSize)==mBaseDirectory &&
-                ((*iter)[baseSize]=='/' || (*iter)[baseSize]=='\\'))
+            if (static_cast<int> (iter->size())<baseSize+1 ||
+                iter->substr (0, baseSize)!=mBaseDirectory ||
+                ((*iter)[baseSize]!='/' && (*iter)[baseSize]!='\\'))
+                continue;
+
+            if (extensions)
             {
-                std::string file = iter->substr (baseSize+1);
-                mFiles.push_back (file);
-                mIndex.insert (std::make_pair (file, static_cast<int> (mFiles.size())-1));
+                std::string::size_type index = iter->find_last_of ('.');
+
+                if (index==std::string::npos)
+                    continue;
+
+                std::string extension = iter->substr (index+1);
+
+                int i = 0;
+
+                for (; extensions[i]; ++i)
+                    if (extensions[i]==extension)
+                        break;
+
+                if (!extensions[i])
+                    continue;
             }
+
+            std::string file = iter->substr (baseSize+1);
+            mFiles.push_back (file);
+            mIndex.insert (std::make_pair (file, static_cast<int> (mFiles.size())-1));
         }
     }
 }
