@@ -54,6 +54,8 @@ namespace MWGui
         void open(const MWWorld::Ptr& container, bool loot=false);
         virtual void close();
 
+        virtual void resetReference();
+
         virtual void exit();
 
     private:
