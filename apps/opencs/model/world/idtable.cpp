@@ -1,4 +1,5 @@
 #include "idtable.hpp"
+#include <QDebug>
 
 #include <cassert>
 
@@ -93,23 +94,34 @@ QVariant CSMWorld::IdTable::nestedHeaderData(int section, int subSection, Qt::Or
 
 bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value, int role)
 {
-    if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
+    if (index.internalId() != 0)
     {
-        if (index.internalId() == 0)
-        {
-            mIdCollection->setData (index.row(), index.column(), value);
-
-            emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
-                CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
-        } else
+        if (mIdCollection->getColumn(parent(index).column()).isEditable() && role==Qt::EditRole)
         {
             const std::pair<int, int>& parentAdress(unfoldIndexAdress(index.internalId()));
 
             mIdCollection->setNestedData(parentAdress.first, parentAdress.second, value, index.row(), index.column());
-        }
-        return true;
-    }
+           
+            emit dataChanged (CSMWorld::IdTable::index (parentAdress.first, 0),
+                              CSMWorld::IdTable::index (parentAdress.second, mIdCollection->getColumns()-1));
 
+            return true;
+        } else
+        {
+            return false;
+        }
+    }
+    
+    if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
+    {
+        mIdCollection->setData (index.row(), index.column(), value);
+        
+        emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
+                          CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
+        
+        return true;
+    } 
+    
     return false;
 }
 
@@ -131,9 +143,9 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
     {
         for (int i = 0; i < count; ++i)
         {
-            mIdCollection->removeNestedRows(parent.row(), parent.column(), row+i); 
+            mIdCollection->removeNestedRows(parent.row(), parent.column(), row+i);
         }
-    } else 
+    } else
     {
 
         beginRemoveRows (parent, row, row+count-1);
@@ -157,7 +169,7 @@ void CSMWorld::IdTable::addNestedRow(const QModelIndex& parent, int position)
 
     emit dataChanged (CSMWorld::IdTable::index (row, 0),
                       CSMWorld::IdTable::index (row, mIdCollection->getColumns()-1));
-    
+
     endInsertRows();
 }
 

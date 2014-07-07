@@ -7,6 +7,7 @@
 #include <QHeaderView>
 #include <QContextMenuEvent>
 #include <QMenu>
+#include <QDebug>
 
 CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
                                    CSMWorld::NestedTableModel* model,
@@ -32,7 +33,7 @@ CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
         CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
                                                                                          undoStack,
                                                                                          this);
-
+        
         setItemDelegateForColumn(i, delegate);
     }
 
