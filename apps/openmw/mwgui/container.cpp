@@ -258,6 +258,12 @@ namespace MWGui
             onTakeAllButtonClicked(mTakeButton);
     }
 
+    void ContainerWindow::resetReference()
+    {
+        ReferenceInterface::resetReference();
+        mItemView->setModel(NULL);
+    }
+
     void ContainerWindow::close()
     {
         WindowBase::close();

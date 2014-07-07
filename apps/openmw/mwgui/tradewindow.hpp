@@ -37,6 +37,7 @@ namespace MWGui
 
             virtual void exit();
 
+            virtual void resetReference();
 
         private:
             ItemView* mItemView;
