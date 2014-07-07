@@ -8,9 +8,9 @@
 
 #include <components/misc/stringops.hpp>
 
-CSMWorld::Resources::Resources (const std::string& baseDirectory,
+CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::Type type,
     const char * const *extensions)
-: mBaseDirectory (baseDirectory)
+: mBaseDirectory (baseDirectory), mType (type)
 {
     int baseSize = mBaseDirectory.size();
 
@@ -95,4 +95,9 @@ int CSMWorld::Resources::searchId (const std::string& id) const
         return -1;
 
     return iter->second;
+}
+
+CSMWorld::UniversalId::Type CSMWorld::Resources::getType() const
+{
+    return mType;
 }

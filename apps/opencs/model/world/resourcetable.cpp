@@ -26,7 +26,7 @@ int CSMWorld::ResourceTable::columnCount (const QModelIndex & parent) const
     if (parent.isValid())
         return 0;
 
-    return 1;
+    return 2; // ID, type
 }
 
 QVariant CSMWorld::ResourceTable::data  (const QModelIndex & index, int role) const
@@ -34,10 +34,13 @@ QVariant CSMWorld::ResourceTable::data  (const QModelIndex & index, int role) co
     if (role!=Qt::DisplayRole)
         return QVariant();
 
-    if (index.column()!=0)
-        throw std::logic_error ("Invalid column in resource table");
+    if (index.column()==0)
+        return QString::fromUtf8 (mResources->getId (index.row()).c_str());
 
-    return QString::fromUtf8 (mResources->getId (index.row()).c_str());
+    if (index.column()==1)
+        return static_cast<int> (mResources->getType());
+
+    throw std::logic_error ("Invalid column in resource table");
 }
 
 QVariant CSMWorld::ResourceTable::headerData (int section, Qt::Orientation orientation,
@@ -46,14 +49,33 @@ QVariant CSMWorld::ResourceTable::headerData (int section, Qt::Orientation orien
     if (orientation==Qt::Vertical)
         return QVariant();
 
-    if (role==Qt::DisplayRole)
-        return "ID";
-
     if (role==ColumnBase::Role_Flags)
         return ColumnBase::Flag_Table;
 
-    if (role==ColumnBase::Role_Display)
-        return ColumnBase::Display_String;
+    switch (section)
+    {
+        case 0:
+
+            if (role==Qt::DisplayRole)
+                return Columns::getName (Columns::ColumnId_Id).c_str();
+
+            if (role==ColumnBase::Role_Display)
+                return ColumnBase::Display_String;
+
+            break;
+
+        case 1:
+
+            if (role==Qt::DisplayRole)
+                return Columns::getName (Columns::ColumnId_RecordType).c_str();
+
+            if (role==ColumnBase::Role_Display)
+                return ColumnBase::Display_Integer;
+
+            break;
+    }
+
+    // xxx
 
     return QVariant();
 }
@@ -78,7 +100,7 @@ QModelIndex CSMWorld::ResourceTable::index (int row, int column, const QModelInd
     if (row<0 || row>=mResources->getSize())
         return QModelIndex();
 
-    if (column!=0)
+    if (column<0 || column>1)
         return QModelIndex();
 
     return createIndex (row, column);
@@ -98,6 +120,9 @@ int CSMWorld::ResourceTable::searchColumnIndex (Columns::ColumnId id) const
 {
     if (id==Columns::ColumnId_Id)
         return 0;
+
+    if (id==Columns::ColumnId_RecordType)
+        return 1;
 
     return -1;
 }

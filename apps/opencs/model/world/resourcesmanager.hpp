@@ -12,6 +12,10 @@ namespace CSMWorld
     {
             std::map<UniversalId::Type, Resources> mResources;
 
+        private:
+
+            void addResources (const Resources& resources);
+
         public:
 
             /// Ask OGRE for a list of available resources.

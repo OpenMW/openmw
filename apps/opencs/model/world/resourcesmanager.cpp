@@ -3,17 +3,21 @@
 
 #include <stdexcept>
 
+void CSMWorld::ResourcesManager::addResources (const Resources& resources)
+{
+    mResources.insert (std::make_pair (resources.getType(), resources));
+}
+
 void CSMWorld::ResourcesManager::listResources()
 {
     static const char * const sMeshTypes[] = { "nif", 0 };
 
-    mResources.insert (
-        std::make_pair (UniversalId::Type_Mesh, Resources ("meshes", sMeshTypes)));
-    mResources.insert (std::make_pair (UniversalId::Type_Icon, "icons"));
-    mResources.insert (std::make_pair (UniversalId::Type_Music, "music"));
-    mResources.insert (std::make_pair (UniversalId::Type_SoundRes, "sound"));
-    mResources.insert (std::make_pair (UniversalId::Type_Texture, "textures"));
-    mResources.insert (std::make_pair (UniversalId::Type_Video, "videos"));
+    addResources (Resources ("meshes", UniversalId::Type_Mesh, sMeshTypes));
+    addResources (Resources ("icons", UniversalId::Type_Icon));
+    addResources (Resources ("music", UniversalId::Type_Music));
+    addResources (Resources ("sound", UniversalId::Type_SoundRes));
+    addResources (Resources ("textures", UniversalId::Type_Texture));
+    addResources (Resources ("videos", UniversalId::Type_Video));
 }
 
 const CSMWorld::Resources& CSMWorld::ResourcesManager::get (UniversalId::Type type) const

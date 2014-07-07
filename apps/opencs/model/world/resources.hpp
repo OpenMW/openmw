@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+#include "universalid.hpp"
+
 namespace CSMWorld
 {
     class Resources
@@ -12,10 +14,13 @@ namespace CSMWorld
             std::map<std::string, int> mIndex;
             std::vector<std::string> mFiles;
             std::string mBaseDirectory;
+            UniversalId::Type mType;
 
         public:
 
-            Resources (const std::string& baseDirectory, const char * const *extensions = 0);
+            /// \param type Type of resources in this table.
+            Resources (const std::string& baseDirectory, UniversalId::Type type,
+                const char * const *extensions = 0);
 
             int getSize() const;
 
@@ -24,6 +29,8 @@ namespace CSMWorld
             int getIndex (const std::string& id) const;
 
             int searchId (const std::string& id) const;
+
+            UniversalId::Type getType() const;
     };
 }
 
