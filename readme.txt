@@ -249,6 +249,8 @@ Bug #1590: Failed to save game: compile error
 Bug #1598: Segfault when making Drain/Fortify Skill spells
 Bug #1599: Unable to switch to fullscreen
 Bug #1613: Morrowind Rebirth duplicate objects / vanilla objects not removed
+Bug #1618: Death notice fails to show up
+Bug #1628: Alt+Tab Segfault
 Feature #32: Periodic Cleanup/Refill
 Feature #41: Precipitation and weather particles
 Feature #568: Editor: Configuration setup
