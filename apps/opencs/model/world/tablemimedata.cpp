@@ -258,7 +258,12 @@ namespace
         { CSMWorld::UniversalId::Type_JournalInfo, CSMWorld::ColumnBase::Display_JournalInfo },
         { CSMWorld::UniversalId::Type_Scene, CSMWorld::ColumnBase::Display_Scene },
         { CSMWorld::UniversalId::Type_Script, CSMWorld::ColumnBase::Display_Script },
-
+        { CSMWorld::UniversalId::Type_Mesh, CSMWorld::ColumnBase::Display_Mesh },
+        { CSMWorld::UniversalId::Type_Icon, CSMWorld::ColumnBase::Display_Icon },
+        { CSMWorld::UniversalId::Type_Music, CSMWorld::ColumnBase::Display_Music },
+        { CSMWorld::UniversalId::Type_SoundRes, CSMWorld::ColumnBase::Display_SoundRes },
+        { CSMWorld::UniversalId::Type_Texture, CSMWorld::ColumnBase::Display_Texture },
+        { CSMWorld::UniversalId::Type_Video, CSMWorld::ColumnBase::Display_Video },
 
         { CSMWorld::UniversalId::Type_None, CSMWorld::ColumnBase::Display_None } // end marker
     };

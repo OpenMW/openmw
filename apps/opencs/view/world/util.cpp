@@ -177,11 +177,19 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Faction:
         case CSMWorld::ColumnBase::Display_Miscellaneous:
         case CSMWorld::ColumnBase::Display_Sound:
+        case CSMWorld::ColumnBase::Display_Mesh:
+        case CSMWorld::ColumnBase::Display_Icon:
+        case CSMWorld::ColumnBase::Display_Music:
+        case CSMWorld::ColumnBase::Display_SoundRes:
+        case CSMWorld::ColumnBase::Display_Texture:
+        case CSMWorld::ColumnBase::Display_Video:
 
             return new DropLineEdit(parent);
-    }
 
-    return QStyledItemDelegate::createEditor (parent, option, index);
+        default:
+
+            return QStyledItemDelegate::createEditor (parent, option, index);
+    }
 }
 
 void CSVWorld::CommandDelegate::setEditLock (bool locked)

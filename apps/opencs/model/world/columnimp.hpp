@@ -604,7 +604,7 @@ namespace CSMWorld
     struct SoundFileColumn : public Column<ESXRecordT>
     {
         SoundFileColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_Sound)
+        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_SoundRes)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
