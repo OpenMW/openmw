@@ -31,6 +31,11 @@ namespace Files
     class ConfigurationManager;
 }
 
+namespace CSMWorld
+{
+    class ResourcesManager;
+}
+
 namespace CSMDoc
 {
     class Document : public QObject
@@ -73,7 +78,7 @@ namespace CSMDoc
             Document (const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
-                ToUTF8::FromType encoding);
+                ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager);
 
             ~Document();
 

@@ -22,7 +22,10 @@ namespace CSMWorld
                 Class_RecordList,
                 Class_Collection, // multiple types of records combined
                 Class_Transient, // not part of the world data or the project data
-                Class_NonRecord // record like data that is not part of the world
+                Class_NonRecord, // record like data that is not part of the world
+                Class_Resource, ///< \attention Resource IDs are unique only within the
+                                /// respective collection
+                Class_ResourceList
             };
 
             enum ArgumentType
@@ -104,7 +107,19 @@ namespace CSMWorld
                 Type_Enchantments,
                 Type_Enchantment,
                 Type_BodyParts,
-                Type_BodyPart
+                Type_BodyPart,
+                Type_Meshes,
+                Type_Mesh,
+                Type_Icons,
+                Type_Icon,
+                Type_Musics,
+                Type_Music,
+                Type_SoundsRes,
+                Type_SoundRes,
+                Type_Textures,
+                Type_Texture,
+                Type_Videos,
+                Type_Video
             };
 
             enum { NumberOfTypes = Type_BodyPart+1 };

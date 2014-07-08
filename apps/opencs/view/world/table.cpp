@@ -14,6 +14,7 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtableproxymodel.hpp"
+#include "../../model/world/idtablebase.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
 #include "../../model/world/columns.hpp"
@@ -53,7 +54,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     ///  \todo add menu items for select all and clear selection
 
-    if (!mEditLock)
+    if (!mEditLock && !(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
     {
         if (selectedRows.size()==1)
         {
@@ -82,7 +83,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 menu.addAction (mExtendedDeleteAction);
         }
 
-        if (mModel->getFeatures() & CSMWorld::IdTable::Feature_ReorderWithinTopic)
+        if (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_ReorderWithinTopic)
         {
             /// \todo allow reordering of multiple rows
             if (selectedRows.size()==1)
@@ -119,7 +120,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
         row = mProxyModel->mapToSource (mProxyModel->index (row, 0)).row();
 
-        if (mModel->getFeatures() & CSMWorld::IdTable::Feature_View)
+        if (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_View)
         {
             CSMWorld::UniversalId id = mModel->view (row).first;
 
@@ -131,7 +132,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 menu.addAction (mViewAction);
         }
 
-        if (mModel->getFeatures() & CSMWorld::IdTable::Feature_Preview)
+        if (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Preview)
         {
             QModelIndex index = mModel->index (row,
                 mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification));
@@ -152,7 +153,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 : mCreateAction (0), mCloneAction(0), mRecordStatusDisplay (0),
   DragRecordTable(document)
 {
-    mModel = &dynamic_cast<CSMWorld::IdTable&> (*mDocument.getData().getTableModel (id));
+    mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 
     mProxyModel = new CSMWorld::IdTableProxyModel (this);
     mProxyModel->setSourceModel (mModel);
@@ -275,7 +276,7 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
 
 void CSVWorld::Table::editRecord()
 {
-    if (!mEditLock)
+    if (!mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
 
@@ -286,11 +287,11 @@ void CSVWorld::Table::editRecord()
 
 void CSVWorld::Table::cloneRecord()
 {
-    if (!mEditLock)
+    if (!mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
         const CSMWorld::UniversalId& toClone = getUniversalId(selectedRows.begin()->row());
-        if (selectedRows.size()==1 && !mModel->getRecord(toClone.getId()).isDeleted())
+        if (selectedRows.size()==1 && !mModel->isDeleted (toClone.getId()))
         {
             emit cloneRequest (toClone);
         }
@@ -299,7 +300,7 @@ void CSVWorld::Table::cloneRecord()
 
 void CSVWorld::Table::moveUpRecord()
 {
-    if (mEditLock)
+    if (mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
         return;
 
     QModelIndexList selectedRows = selectionModel()->selectedRows();
@@ -324,14 +325,15 @@ void CSVWorld::Table::moveUpRecord()
             for (int i=1; i<row2-row; ++i)
                 newOrder[i] = i;
 
-            mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
+            mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (
+                dynamic_cast<CSMWorld::IdTable&> (*mModel), row, newOrder));
         }
     }
 }
 
 void CSVWorld::Table::moveDownRecord()
 {
-    if (mEditLock)
+    if (mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
         return;
 
     QModelIndexList selectedRows = selectionModel()->selectedRows();
@@ -356,7 +358,8 @@ void CSVWorld::Table::moveDownRecord()
             for (int i=1; i<row2-row; ++i)
                 newOrder[i] = i;
 
-            mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (*mModel, row, newOrder));
+            mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (
+                dynamic_cast<CSMWorld::IdTable&> (*mModel), row, newOrder));
         }
     }
 }
@@ -422,21 +425,27 @@ void CSVWorld::Table::tableSizeUpdate()
     {
         int rows = mProxyModel->rowCount();
 
-        for (int i=0; i<rows; ++i)
+        int columnIndex = mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_Modification);
+
+        if (columnIndex!=-1)
         {
-            QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (i, 0));
-
-            int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
-            int state = mModel->data (mModel->index (index.row(), columnIndex)).toInt();
-
-            switch (state)
+            for (int i=0; i<rows; ++i)
             {
-                case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
-                case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
-                case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
-                case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (i, 0));
+
+                int state = mModel->data (mModel->index (index.row(), columnIndex)).toInt();
+
+                switch (state)
+                {
+                    case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
+                    case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
+                    case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
+                    case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                }
             }
         }
+        else
+            size = rows;
     }
 
     tableSizeChanged (size, deleted, modified);

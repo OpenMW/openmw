@@ -47,6 +47,9 @@ namespace ESM
 
 namespace CSMWorld
 {
+    class ResourcesManager;
+    class Resources;
+
     class Data : public QObject
     {
             Q_OBJECT
@@ -73,6 +76,7 @@ namespace CSMWorld
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<CSMFilter::Filter> mFilters;
+            const ResourcesManager& mResourcesManager;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
             std::string mAuthor;
@@ -98,7 +102,7 @@ namespace CSMWorld
 
         public:
 
-            Data (ToUTF8::FromType encoding);
+            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);
 
             virtual ~Data();
 
@@ -185,6 +189,9 @@ namespace CSMWorld
             const IdCollection<ESM::BodyPart>& getBodyParts() const;
 
             IdCollection<ESM::BodyPart>& getBodyParts();
+
+            /// Throws an exception, if \a id does not match a resources list.
+            const Resources& getResources (const UniversalId& id) const;
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.

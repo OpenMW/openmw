@@ -49,7 +49,7 @@ namespace CSMWorld
 
         public:
 
-            CloneCommand (IdTable& model, const std::string& idOrigin, 
+            CloneCommand (IdTable& model, const std::string& idOrigin,
                           const std::string& IdDestination,
                           const UniversalId::Type type,
                           QUndoCommand* parent = 0);

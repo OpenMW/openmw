@@ -92,7 +92,14 @@ namespace CSMWorld
             Display_EnchantmentType,
             Display_BodyPartType,
             Display_MeshType,
-            Display_Gender
+            Display_Gender,
+            Display_Mesh,
+            Display_Icon,
+            Display_Music,
+            Display_SoundRes,
+            Display_Texture,
+            Display_Video,
+            Display_Colour
         };
 
         int mColumnId;
