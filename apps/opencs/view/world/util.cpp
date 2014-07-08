@@ -145,10 +145,11 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
     if (display != CSMWorld::ColumnBase::Display_None)
     {
-        if (variant.type() == QVariant::Color)
+        if (display == CSMWorld::ColumnBase::Display_Colour)
         {
             return new QLineEdit(parent);
         }
+
         if (display == CSMWorld::ColumnBase::Display_Integer)
         {
             return new QSpinBox(parent);

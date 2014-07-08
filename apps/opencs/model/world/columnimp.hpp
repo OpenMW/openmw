@@ -634,7 +634,7 @@ namespace CSMWorld
     {
         /// \todo Replace Display_Integer with something that displays the colour value more directly.
         MapColourColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_MapColour, ColumnBase::Display_Integer)
+        : Column<ESXRecordT> (Columns::ColumnId_MapColour, ColumnBase::Display_Colour)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
