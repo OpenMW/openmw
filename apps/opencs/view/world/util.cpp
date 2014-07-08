@@ -143,49 +143,46 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         }
     }
 
-    if (display != CSMWorld::ColumnBase::Display_None)
+    switch (display)
     {
-        if (display == CSMWorld::ColumnBase::Display_Colour)
-        {
-            return new QLineEdit(parent);
-        }
+        case CSMWorld::ColumnBase::Display_Colour:
 
-        if (display == CSMWorld::ColumnBase::Display_Integer)
-        {
-            return new QSpinBox(parent);
-        }
-        if (display == CSMWorld::ColumnBase::Display_Var)
-        {
             return new QLineEdit(parent);
-        }
-        if (display == CSMWorld::ColumnBase::Display_Float)
-        {
+
+        case CSMWorld::ColumnBase::Display_Integer:
+
+            return new QSpinBox(parent);
+
+        case CSMWorld::ColumnBase::Display_Var:
+
+            return new QLineEdit(parent);
+
+        case CSMWorld::ColumnBase::Display_Float:
+
             return new QDoubleSpinBox(parent);
-        }
-        if (display == CSMWorld::ColumnBase::Display_LongString)
-        {
+
+        case CSMWorld::ColumnBase::Display_LongString:
+
             return new QTextEdit(parent);
-        }
-        if (display == CSMWorld::ColumnBase::Display_String ||
-            display == CSMWorld::ColumnBase::Display_Skill ||
-            display == CSMWorld::ColumnBase::Display_Script ||
-            display == CSMWorld::ColumnBase::Display_Race ||
-            display == CSMWorld::ColumnBase::Display_Class ||
-            display == CSMWorld::ColumnBase::Display_Faction ||
-            display == CSMWorld::ColumnBase::Display_Miscellaneous ||
-            display == CSMWorld::ColumnBase::Display_Sound)
-        {
-            return new DropLineEdit(parent);
-        }
-        if (display == CSMWorld::ColumnBase::Display_Boolean)
-        {
+
+        case CSMWorld::ColumnBase::Display_Boolean:
+
             return new QCheckBox(parent);
-        }
+
+        case CSMWorld::ColumnBase::Display_String:
+        case CSMWorld::ColumnBase::Display_Skill:
+        case CSMWorld::ColumnBase::Display_Script:
+        case CSMWorld::ColumnBase::Display_Race:
+        case CSMWorld::ColumnBase::Display_Class:
+        case CSMWorld::ColumnBase::Display_Faction:
+        case CSMWorld::ColumnBase::Display_Miscellaneous:
+        case CSMWorld::ColumnBase::Display_Sound:
+
+            return new DropLineEdit(parent);
     }
 
     return QStyledItemDelegate::createEditor (parent, option, index);
 }
-
 
 void CSVWorld::CommandDelegate::setEditLock (bool locked)
 {
