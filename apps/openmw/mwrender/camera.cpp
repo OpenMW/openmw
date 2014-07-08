@@ -149,6 +149,8 @@ namespace MWRender
             mViewModeToggleQueued = true;
             return;
         }
+        else
+            mViewModeToggleQueued = false;
 
         mFirstPersonView = !mFirstPersonView;
         processViewChange();

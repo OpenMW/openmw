@@ -20,6 +20,8 @@ namespace MWGui
 
         virtual void exit();
 
+        virtual void resetReference();
+
         void open(const MWWorld::Ptr& npc);
         void onFrame ();
 

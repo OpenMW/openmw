@@ -570,10 +570,14 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         if (cls.hasInventoryStore(mPtr))
         {
             getActiveWeapon(cls.getCreatureStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
+            if (mWeaponType != WeapType_None)
+            {
+                mUpperBodyState = UpperCharState_WeapEquiped;
+                getWeaponGroup(mWeaponType, mCurrentWeapon);
+            }
+
             if(mWeaponType != WeapType_None && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
             {
-                getWeaponGroup(mWeaponType, mCurrentWeapon);
-                mUpperBodyState = UpperCharState_WeapEquiped;
                 mAnimation->showWeapons(true);
                 mAnimation->setWeaponGroup(mCurrentWeapon);
             }
