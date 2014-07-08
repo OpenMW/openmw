@@ -1,9 +1,9 @@
-#ifndef CSV_WORLD_SCENETOOL_H
-#define CSV_WORLD_SCENETOOL_H
+#ifndef CSV_WIDGET_SCENETOOL_H
+#define CSV_WIDGET_SCENETOOL_H
 
 #include <QPushButton>
 
-namespace CSVWorld
+namespace CSVWidget
 {
     class SceneToolbar;
 

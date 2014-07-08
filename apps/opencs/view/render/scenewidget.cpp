@@ -11,7 +11,7 @@
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
 
-#include "../world/scenetoolmode.hpp"
+#include "../widget/scenetoolmode.hpp"
 
 #include "navigation.hpp"
 #include "lighting.hpp"
@@ -54,9 +54,9 @@ namespace CSVRender
         timer->start (20); /// \todo make this configurable
     }
 
-    CSVWorld::SceneToolMode *SceneWidget::makeLightingSelector (CSVWorld::SceneToolbar *parent)
+    CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
     {
-        CSVWorld::SceneToolMode *tool = new CSVWorld::SceneToolMode (parent);
+        CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent);
 
         tool->addButton (":door.png", "day"); /// \todo replace icons
         tool->addButton (":GMST.png", "night");

@@ -7,7 +7,7 @@
 
 #include "scenetoolbar.hpp"
 
-CSVWorld::SceneToolMode::SceneToolMode (SceneToolbar *parent)
+CSVWidget::SceneToolMode::SceneToolMode (SceneToolbar *parent)
 : SceneTool (parent), mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize())
 {
     mPanel = new QFrame (this, Qt::Popup);
@@ -19,13 +19,13 @@ CSVWorld::SceneToolMode::SceneToolMode (SceneToolbar *parent)
     mPanel->setLayout (mLayout);
 }
 
-void CSVWorld::SceneToolMode::showPanel (const QPoint& position)
+void CSVWidget::SceneToolMode::showPanel (const QPoint& position)
 {
     mPanel->move (position);
     mPanel->show();
 }
 
-void CSVWorld::SceneToolMode::addButton (const std::string& icon, const std::string& id)
+void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id)
 {
     QPushButton *button = new QPushButton (QIcon (QPixmap (icon.c_str())), "", mPanel);
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -42,7 +42,7 @@ void CSVWorld::SceneToolMode::addButton (const std::string& icon, const std::str
         setIcon (button->icon());
 }
 
-void CSVWorld::SceneToolMode::selected()
+void CSVWidget::SceneToolMode::selected()
 {
     std::map<QPushButton *, std::string>::const_iterator iter =
         mButtons.find (dynamic_cast<QPushButton *> (sender()));

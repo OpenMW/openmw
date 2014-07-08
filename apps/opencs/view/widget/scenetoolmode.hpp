@@ -1,5 +1,5 @@
-#ifndef CSV_WORLD_SCENETOOL_MODE_H
-#define CSV_WORLD_SCENETOOL_MODE_H
+#ifndef CSV_WIDGET_SCENETOOL_MODE_H
+#define CSV_WIDGET_SCENETOOL_MODE_H
 
 #include "scenetool.hpp"
 
@@ -7,7 +7,7 @@
 
 class QHBoxLayout;
 
-namespace CSVWorld
+namespace CSVWidget
 {
     class SceneToolbar;
 

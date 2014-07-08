@@ -5,7 +5,7 @@
 
 #include "scenetool.hpp"
 
-CSVWorld::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
+CSVWidget::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
 : QWidget (parent), mButtonSize (buttonSize), mIconSize (buttonSize-6)
 {
     setFixedWidth (mButtonSize);
@@ -18,17 +18,17 @@ CSVWorld::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
     setLayout (mLayout);
 }
 
-void CSVWorld::SceneToolbar::addTool (SceneTool *tool)
+void CSVWidget::SceneToolbar::addTool (SceneTool *tool)
 {
     mLayout->addWidget (tool, 0, Qt::AlignTop);
 }
 
-int CSVWorld::SceneToolbar::getButtonSize() const
+int CSVWidget::SceneToolbar::getButtonSize() const
 {
     return mButtonSize;
 }
 
-int CSVWorld::SceneToolbar::getIconSize() const
+int CSVWidget::SceneToolbar::getIconSize() const
 {
     return mIconSize;
 }

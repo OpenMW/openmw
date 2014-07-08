@@ -13,7 +13,7 @@ namespace CSMWorld
 {
     class UniversalId;
 }
-namespace CSVWorld
+namespace CSVWidget
 {
     class SceneToolMode;
     class SceneToolbar;
@@ -49,7 +49,7 @@ namespace CSVRender
 
             WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = 0);
 
-            CSVWorld::SceneToolMode *makeNavigationSelector (CSVWorld::SceneToolbar *parent);
+            CSVWidget::SceneToolMode *makeNavigationSelector (CSVWidget::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
             /// is the responsibility of the calling function.
 

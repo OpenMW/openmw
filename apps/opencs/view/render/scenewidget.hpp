@@ -16,7 +16,7 @@ namespace Ogre
     class RenderWindow;
 }
 
-namespace CSVWorld
+namespace CSVWidget
 {
     class SceneToolMode;
     class SceneToolbar;
@@ -38,7 +38,7 @@ namespace CSVRender
 
             QPaintEngine* paintEngine() const;
 
-            CSVWorld::SceneToolMode *makeLightingSelector (CSVWorld::SceneToolbar *parent);
+            CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
             /// is the responsibility of the calling function.
 

@@ -7,8 +7,9 @@
 
 #include <QtGui/qevent.h>
 
-#include "../world/scenetoolmode.hpp"
-#include <apps/opencs/model/world/universalid.hpp>
+#include "../../model/world/universalid.hpp"
+
+#include "../widget/scenetoolmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (parent), mDocument(document)
@@ -53,10 +54,10 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
     setNavigation (&m1st);
 }
 
-CSVWorld::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
-    CSVWorld::SceneToolbar *parent)
+CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
+    CSVWidget::SceneToolbar *parent)
 {
-    CSVWorld::SceneToolMode *tool = new CSVWorld::SceneToolMode (parent);
+    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent);
 
     tool->addButton (":door.png", "1st"); /// \todo replace icons
     tool->addButton (":GMST.png", "free");

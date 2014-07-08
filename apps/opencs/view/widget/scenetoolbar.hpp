@@ -1,11 +1,11 @@
-#ifndef CSV_WORLD_SCENETOOLBAR_H
-#define CSV_WORLD_SCENETOOLBAR_H
+#ifndef CSV_WIDGET_SCENETOOLBAR_H
+#define CSV_WIDGET_SCENETOOLBAR_H
 
 #include <QWidget>
 
 class QVBoxLayout;
 
-namespace CSVWorld
+namespace CSVWidget
 {
     class SceneTool;
 
