@@ -209,170 +209,79 @@ bool CSMWorld::TableMimeData::fromDocument (const CSMDoc::Document& document) co
     return &document == &mDocument;
 }
 
-CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (CSMWorld::ColumnBase::Display type)
+namespace
 {
-    switch (type)
+    struct Mapping
     {
-        case CSMWorld::ColumnBase::Display_Race:
-            return CSMWorld::UniversalId::Type_Race;
-
-
-        case CSMWorld::ColumnBase::Display_Skill:
-            return CSMWorld::UniversalId::Type_Skill;
-
-
-        case CSMWorld::ColumnBase::Display_Class:
-            return CSMWorld::UniversalId::Type_Class;
-
-
-        case CSMWorld::ColumnBase::Display_Faction:
-            return CSMWorld::UniversalId::Type_Faction;
-
-
-        case CSMWorld::ColumnBase::Display_Sound:
-            return CSMWorld::UniversalId::Type_Sound;
-
-
-        case CSMWorld::ColumnBase::Display_Region:
-            return CSMWorld::UniversalId::Type_Region;
-
-
-        case CSMWorld::ColumnBase::Display_Birthsign:
-            return CSMWorld::UniversalId::Type_Birthsign;
-
-
-        case CSMWorld::ColumnBase::Display_Spell:
-            return CSMWorld::UniversalId::Type_Spell;
-
-
-        case CSMWorld::ColumnBase::Display_Cell:
-            return CSMWorld::UniversalId::Type_Cell;
-
-
-        case CSMWorld::ColumnBase::Display_Referenceable:
-            return CSMWorld::UniversalId::Type_Referenceable;
-
-
-        case CSMWorld::ColumnBase::Display_Activator:
-            return CSMWorld::UniversalId::Type_Activator;
-
-
-        case CSMWorld::ColumnBase::Display_Potion:
-            return CSMWorld::UniversalId::Type_Potion;
-
-
-        case CSMWorld::ColumnBase::Display_Apparatus:
-            return CSMWorld::UniversalId::Type_Apparatus;
-
-
-        case CSMWorld::ColumnBase::Display_Armor:
-            return CSMWorld::UniversalId::Type_Armor;
-
-
-        case CSMWorld::ColumnBase::Display_Book:
-            return CSMWorld::UniversalId::Type_Book;
-
-
-        case CSMWorld::ColumnBase::Display_Clothing:
-            return CSMWorld::UniversalId::Type_Clothing;
-
-
-        case CSMWorld::ColumnBase::Display_Container:
-            return CSMWorld::UniversalId::Type_Container;
-
-
-        case CSMWorld::ColumnBase::Display_Creature:
-            return CSMWorld::UniversalId::Type_Creature;
-
-
-        case CSMWorld::ColumnBase::Display_Door:
-            return CSMWorld::UniversalId::Type_Door;
-
-
-        case CSMWorld::ColumnBase::Display_Ingredient:
-            return CSMWorld::UniversalId::Type_Ingredient;
-
-
-        case CSMWorld::ColumnBase::Display_CreatureLevelledList:
-            return CSMWorld::UniversalId::Type_CreatureLevelledList;
-
-
-        case CSMWorld::ColumnBase::Display_ItemLevelledList:
-            return CSMWorld::UniversalId::Type_ItemLevelledList;
-
-
-        case CSMWorld::ColumnBase::Display_Light:
-            return CSMWorld::UniversalId::Type_Light;
-
-
-        case CSMWorld::ColumnBase::Display_Lockpick:
-            return CSMWorld::UniversalId::Type_Lockpick;
-
-
-        case CSMWorld::ColumnBase::Display_Miscellaneous:
-            return CSMWorld::UniversalId::Type_Miscellaneous;
-
-
-        case CSMWorld::ColumnBase::Display_Npc:
-            return CSMWorld::UniversalId::Type_Npc;
-
-
-        case CSMWorld::ColumnBase::Display_Probe:
-            return CSMWorld::UniversalId::Type_Probe;
-
-
-        case CSMWorld::ColumnBase::Display_Repair:
-            return CSMWorld::UniversalId::Type_Repair;
-
-
-        case CSMWorld::ColumnBase::Display_Static:
-            return CSMWorld::UniversalId::Type_Static;
-
-
-        case CSMWorld::ColumnBase::Display_Weapon:
-            return CSMWorld::UniversalId::Type_Weapon;
-
-
-        case CSMWorld::ColumnBase::Display_Reference:
-            return CSMWorld::UniversalId::Type_Reference;
-
-
-        case CSMWorld::ColumnBase::Display_Filter:
-            return CSMWorld::UniversalId::Type_Filter;
-
-
-        case CSMWorld::ColumnBase::Display_Topic:
-            return CSMWorld::UniversalId::Type_Topic;
-
-
-        case CSMWorld::ColumnBase::Display_Journal:
-            return CSMWorld::UniversalId::Type_Journal;
-
-
-        case CSMWorld::ColumnBase::Display_TopicInfo:
-            return CSMWorld::UniversalId::Type_TopicInfo;
-
-
-        case CSMWorld::ColumnBase::Display_JournalInfo:
-            return CSMWorld::UniversalId::Type_JournalInfo;
-
-
-        case CSMWorld::ColumnBase::Display_Scene:
-            return CSMWorld::UniversalId::Type_Scene;
-
-
-        case CSMWorld::ColumnBase::Display_Script:
-            return CSMWorld::UniversalId::Type_Script;
-
-
-        default:
-            return CSMWorld::UniversalId::Type_None;
-
-    }
+        CSMWorld::UniversalId::Type mUniversalIdType;
+        CSMWorld::ColumnBase::Display mDisplayType;
+    };
+
+    const Mapping mapping[] =
+    {
+        { CSMWorld::UniversalId::Type_Race, CSMWorld::ColumnBase::Display_Race },
+        { CSMWorld::UniversalId::Type_Skill, CSMWorld::ColumnBase::Display_Skill },
+        { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
+        { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
+        { CSMWorld::UniversalId::Type_Faction, CSMWorld::ColumnBase::Display_Faction },
+        { CSMWorld::UniversalId::Type_Sound, CSMWorld::ColumnBase::Display_Sound },
+        { CSMWorld::UniversalId::Type_Region, CSMWorld::ColumnBase::Display_Region },
+        { CSMWorld::UniversalId::Type_Birthsign, CSMWorld::ColumnBase::Display_Birthsign },
+        { CSMWorld::UniversalId::Type_Spell, CSMWorld::ColumnBase::Display_Spell },
+        { CSMWorld::UniversalId::Type_Cell, CSMWorld::ColumnBase::Display_Cell },
+        { CSMWorld::UniversalId::Type_Referenceable, CSMWorld::ColumnBase::Display_Referenceable },
+        { CSMWorld::UniversalId::Type_Activator, CSMWorld::ColumnBase::Display_Activator },
+        { CSMWorld::UniversalId::Type_Potion, CSMWorld::ColumnBase::Display_Potion },
+        { CSMWorld::UniversalId::Type_Apparatus, CSMWorld::ColumnBase::Display_Apparatus },
+        { CSMWorld::UniversalId::Type_Armor, CSMWorld::ColumnBase::Display_Armor },
+        { CSMWorld::UniversalId::Type_Book, CSMWorld::ColumnBase::Display_Book },
+        { CSMWorld::UniversalId::Type_Clothing, CSMWorld::ColumnBase::Display_Clothing },
+        { CSMWorld::UniversalId::Type_Container, CSMWorld::ColumnBase::Display_Container },
+        { CSMWorld::UniversalId::Type_Creature, CSMWorld::ColumnBase::Display_Creature },
+        { CSMWorld::UniversalId::Type_Door, CSMWorld::ColumnBase::Display_Door },
+        { CSMWorld::UniversalId::Type_Ingredient, CSMWorld::ColumnBase::Display_Ingredient },
+        { CSMWorld::UniversalId::Type_CreatureLevelledList, CSMWorld::ColumnBase::Display_CreatureLevelledList },
+        { CSMWorld::UniversalId::Type_ItemLevelledList, CSMWorld::ColumnBase::Display_ItemLevelledList },
+        { CSMWorld::UniversalId::Type_Light, CSMWorld::ColumnBase::Display_Light },
+        { CSMWorld::UniversalId::Type_Lockpick, CSMWorld::ColumnBase::Display_Lockpick },
+        { CSMWorld::UniversalId::Type_Miscellaneous, CSMWorld::ColumnBase::Display_Miscellaneous },
+        { CSMWorld::UniversalId::Type_Npc, CSMWorld::ColumnBase::Display_Npc },
+        { CSMWorld::UniversalId::Type_Probe, CSMWorld::ColumnBase::Display_Probe },
+        { CSMWorld::UniversalId::Type_Repair, CSMWorld::ColumnBase::Display_Repair },
+        { CSMWorld::UniversalId::Type_Static, CSMWorld::ColumnBase::Display_Static },
+        { CSMWorld::UniversalId::Type_Weapon, CSMWorld::ColumnBase::Display_Weapon },
+        { CSMWorld::UniversalId::Type_Reference, CSMWorld::ColumnBase::Display_Reference },
+        { CSMWorld::UniversalId::Type_Filter, CSMWorld::ColumnBase::Display_Filter },
+        { CSMWorld::UniversalId::Type_Topic, CSMWorld::ColumnBase::Display_Topic },
+        { CSMWorld::UniversalId::Type_Journal, CSMWorld::ColumnBase::Display_Journal },
+        { CSMWorld::UniversalId::Type_TopicInfo, CSMWorld::ColumnBase::Display_TopicInfo },
+        { CSMWorld::UniversalId::Type_JournalInfo, CSMWorld::ColumnBase::Display_JournalInfo },
+        { CSMWorld::UniversalId::Type_Scene, CSMWorld::ColumnBase::Display_Scene },
+        { CSMWorld::UniversalId::Type_Script, CSMWorld::ColumnBase::Display_Script },
+
+
+        { CSMWorld::UniversalId::Type_None, CSMWorld::ColumnBase::Display_None } // end marker
+    };
 }
 
-CSMWorld::ColumnBase::Display CSMWorld::TableMimeData::convertEnums (CSMWorld::UniversalId::Type type)
+CSMWorld::UniversalId::Type CSMWorld::TableMimeData::convertEnums (ColumnBase::Display type)
 {
+    for (int i=0; mapping[i].mUniversalIdType!=CSMWorld::UniversalId::Type_None; ++i)
+        if (mapping[i].mDisplayType==type)
+            return mapping[i].mUniversalIdType;
+
+    return CSMWorld::UniversalId::Type_None;
+}
+
+CSMWorld::ColumnBase::Display CSMWorld::TableMimeData::convertEnums (UniversalId::Type type)
+{
+    for (int i=0; mapping[i].mUniversalIdType!=CSMWorld::UniversalId::Type_None; ++i)
+        if (mapping[i].mUniversalIdType==type)
+            return mapping[i].mDisplayType;
+
+    return CSMWorld::ColumnBase::Display_None;
+
+
     switch (type)
     {
         case CSMWorld::UniversalId::Type_Race:
