@@ -86,16 +86,24 @@ namespace MWScript
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
 
+                    MWWorld::LocalRotation localRot = ptr.getRefData().getLocalRotation();
+
                     if (axis == "x")
                     {
+                        localRot.rot[0] = 0;
+                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
                     else if (axis == "y")
                     {
+                        localRot.rot[1] = 0;
+                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
                     else if (axis == "z")
                     {
+                        localRot.rot[2] = 0;
+                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
                     else

@@ -1123,7 +1123,10 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        mWorldScene->updateObjectRotation(ptr);
+        if (ptr.getClass().isActor())
+            mWorldScene->updateObjectRotation(ptr);
+        else
+            mWorldScene->updateObjectLocalRotation(ptr);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
