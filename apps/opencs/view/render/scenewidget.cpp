@@ -347,6 +347,9 @@ namespace CSVRender
 
         mLighting = lighting;
         mLighting->activate (mSceneMgr, mHasDefaultAmbient ? &mDefaultAmbient : 0);
+
+        if (mWindow)
+            mWindow->update();
     }
 
     void SceneWidget::selectLightingMode (const std::string& mode)
