@@ -24,6 +24,9 @@ void CSVWidget::SceneToolMode::showPanel (const QPoint& position)
 {
     mPanel->move (position);
     mPanel->show();
+
+    if (!mButtons.empty())
+        mButtons.begin()->first->setFocus (Qt::OtherFocusReason);
 }
 
 void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id)
