@@ -9,8 +9,18 @@ namespace CSVWidget
     {
             Q_OBJECT
 
+        public:
+
+            enum Type
+            {
+                Type_TopMode, // top level button for mode selector panel
+                Type_Mode // mode button
+            };
+
+        private:
+
             bool mKeepOpen;
-            bool mPush;
+            Type mType;
 
         private:
 
@@ -27,11 +37,11 @@ namespace CSVWidget
         public:
 
             /// \param push Do not maintain a toggle state
-            PushButton (const QIcon& icon, bool push = false, const std::string& tooltip = "",
+            PushButton (const QIcon& icon, Type type, const std::string& tooltip = "",
                 QWidget *parent = 0);
 
             /// \param push Do not maintain a toggle state
-            PushButton (bool push = false, const std::string& tooltip = "",
+            PushButton (Type type, const std::string& tooltip = "",
                 QWidget *parent = 0);
 
             bool hasKeepOpen() const;

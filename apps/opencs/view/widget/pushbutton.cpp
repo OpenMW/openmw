@@ -11,9 +11,23 @@ void CSVWidget::PushButton::setExtendedToolTip (const std::string& text)
     if (tooltip.empty())
         tooltip = "(Tool tip not implemented yet)";
 
-    if (!mPush)
-        tooltip +=
-            "<p>(left click to activate,<br>shift-left click to activate and keep panel open)";
+    switch (mType)
+    {
+        case Type_TopMode:
+
+            tooltip +=
+                "<p>(left click to change mode)";
+
+            break;
+
+        case Type_Mode:
+
+            tooltip +=
+                "<p>(left click to activate,"
+                "<br>shift-left click to activate and keep panel open)";
+
+            break;
+    }
 
     setToolTip (QString::fromUtf8 (tooltip.c_str()));
 }
@@ -43,18 +57,18 @@ void CSVWidget::PushButton::mouseReleaseEvent (QMouseEvent *event)
     QPushButton::mouseReleaseEvent (event);
 }
 
-CSVWidget::PushButton::PushButton (const QIcon& icon, bool push, const std::string& tooltip,
+CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const std::string& tooltip,
     QWidget *parent)
-: QPushButton (icon, "", parent), mKeepOpen (false), mPush (push)
+: QPushButton (icon, "", parent), mKeepOpen (false), mType (type)
 {
-    setCheckable (!push);
+    setCheckable (type==Type_Mode);
     setExtendedToolTip (tooltip);
 }
 
-CSVWidget::PushButton::PushButton (bool push, const std::string& tooltip, QWidget *parent)
-: QPushButton (parent), mKeepOpen (false), mPush (push)
+CSVWidget::PushButton::PushButton (Type type, const std::string& tooltip, QWidget *parent)
+: QPushButton (parent), mKeepOpen (false), mType (type)
 {
-    setCheckable (!push);
+    setCheckable (type==Type_Mode);
     setExtendedToolTip (tooltip);
 }
 
