@@ -29,8 +29,8 @@ void CSVWidget::PushButton::mouseReleaseEvent (QMouseEvent *event)
     QPushButton::mouseReleaseEvent (event);
 }
 
-CSVWidget::PushButton::PushButton (const QIcon& icon, const QString& text, QWidget *parent)
-: QPushButton (icon, text, parent), mKeepOpen (false)
+CSVWidget::PushButton::PushButton (const QIcon& icon, QWidget *parent)
+: QPushButton (icon, "", parent), mKeepOpen (false)
 {
     setCheckable (true);
 }

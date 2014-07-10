@@ -21,7 +21,7 @@ namespace CSVWidget
 
         public:
 
-            PushButton (const QIcon& icon, const QString& text, QWidget *parent = 0);
+            PushButton (const QIcon& icon, QWidget *parent = 0);
 
             bool hasKeepOpen() const;
     };
