@@ -28,7 +28,7 @@ void CSVWidget::SceneToolMode::showPanel (const QPoint& position)
 
 void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id)
 {
-    PushButton *button = new PushButton (QIcon (QPixmap (icon.c_str())), mPanel);
+    PushButton *button = new PushButton (QIcon (QPixmap (icon.c_str())), false, mPanel);
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize (QSize (mIconSize, mIconSize));
     button->setFixedSize (mButtonSize, mButtonSize);

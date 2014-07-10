@@ -21,7 +21,11 @@ namespace CSVWidget
 
         public:
 
-            PushButton (const QIcon& icon, QWidget *parent = 0);
+            /// \param push Do not maintain a toggle state
+            PushButton (const QIcon& icon, bool push = false, QWidget *parent = 0);
+
+            /// \param push Do not maintain a toggle state
+            PushButton (bool push = false, QWidget *parent = 0);
 
             bool hasKeepOpen() const;
     };
