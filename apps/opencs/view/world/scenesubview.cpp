@@ -242,4 +242,5 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
     mLayout->addWidget (mScene, 1);
 
     mScene->selectDefaultNavigationMode();
+    setFocusProxy (mScene);
 }
