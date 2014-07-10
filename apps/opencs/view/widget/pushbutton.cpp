@@ -12,6 +12,17 @@ void CSVWidget::PushButton::keyPressEvent (QKeyEvent *event)
     QPushButton::keyPressEvent (event);
 }
 
+void CSVWidget::PushButton::keyReleaseEvent (QKeyEvent *event)
+{
+    if (event->key()==Qt::Key_Return || event->key()==Qt::Key_Enter)
+    {
+        mKeepOpen = event->modifiers() & Qt::ShiftModifier;
+        emit clicked();
+    }
+
+    QPushButton::keyReleaseEvent (event);
+}
+
 void CSVWidget::PushButton::mouseReleaseEvent (QMouseEvent *event)
 {
     mKeepOpen = event->button()==Qt::LeftButton && (event->modifiers() & Qt::ShiftModifier);
