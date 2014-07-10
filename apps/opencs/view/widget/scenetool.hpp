@@ -1,14 +1,14 @@
 #ifndef CSV_WIDGET_SCENETOOL_H
 #define CSV_WIDGET_SCENETOOL_H
 
-#include <QPushButton>
+#include "pushbutton.hpp"
 
 namespace CSVWidget
 {
     class SceneToolbar;
 
     ///< \brief Tool base class
-    class SceneTool : public QPushButton
+    class SceneTool : public PushButton
     {
             Q_OBJECT
 
