@@ -6,6 +6,7 @@
 #include <QSignalMapper>
 
 #include "scenetoolbar.hpp"
+#include "pushbutton.hpp"
 
 CSVWidget::SceneToolMode::SceneToolMode (SceneToolbar *parent)
 : SceneTool (parent), mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize())
@@ -27,7 +28,7 @@ void CSVWidget::SceneToolMode::showPanel (const QPoint& position)
 
 void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id)
 {
-    QPushButton *button = new QPushButton (QIcon (QPixmap (icon.c_str())), "", mPanel);
+    PushButton *button = new PushButton (QIcon (QPixmap (icon.c_str())), "", mPanel);
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize (QSize (mIconSize, mIconSize));
     button->setFixedSize (mButtonSize, mButtonSize);
@@ -44,12 +45,13 @@ void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::st
 
 void CSVWidget::SceneToolMode::selected()
 {
-    std::map<QPushButton *, std::string>::const_iterator iter =
-        mButtons.find (dynamic_cast<QPushButton *> (sender()));
+    std::map<PushButton *, std::string>::const_iterator iter =
+        mButtons.find (dynamic_cast<PushButton *> (sender()));
 
     if (iter!=mButtons.end())
     {
-        mPanel->hide();
+        if (!iter->first->hasKeepOpen())
+            mPanel->hide();
 
         setIcon (iter->first->icon());
         emit modeChanged (iter->second);
