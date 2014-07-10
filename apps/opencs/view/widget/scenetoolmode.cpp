@@ -40,7 +40,10 @@ void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::st
     connect (button, SIGNAL (clicked()), this, SLOT (selected()));
 
     if (mButtons.size()==1)
+    {
         setIcon (button->icon());
+        button->setChecked (true);
+    }
 }
 
 void CSVWidget::SceneToolMode::selected()
@@ -52,6 +55,10 @@ void CSVWidget::SceneToolMode::selected()
     {
         if (!iter->first->hasKeepOpen())
             mPanel->hide();
+
+        for (std::map<PushButton *, std::string>::const_iterator iter2 = mButtons.begin();
+            iter2!=mButtons.end(); ++iter2)
+            iter2->first->setChecked (iter2==iter);
 
         setIcon (iter->first->icon());
         emit modeChanged (iter->second);

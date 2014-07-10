@@ -21,6 +21,7 @@ void CSVWidget::PushButton::mouseReleaseEvent (QMouseEvent *event)
 CSVWidget::PushButton::PushButton (const QIcon& icon, const QString& text, QWidget *parent)
 : QPushButton (icon, text, parent), mKeepOpen (false)
 {
+    setCheckable (true);
 }
 
 bool CSVWidget::PushButton::hasKeepOpen() const
