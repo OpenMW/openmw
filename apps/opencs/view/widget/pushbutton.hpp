@@ -10,6 +10,11 @@ namespace CSVWidget
             Q_OBJECT
 
             bool mKeepOpen;
+            bool mPush;
+
+        private:
+
+            void setExtendedToolTip (const std::string& text);
 
         protected:
 
@@ -22,10 +27,12 @@ namespace CSVWidget
         public:
 
             /// \param push Do not maintain a toggle state
-            PushButton (const QIcon& icon, bool push = false, QWidget *parent = 0);
+            PushButton (const QIcon& icon, bool push = false, const std::string& tooltip = "",
+                QWidget *parent = 0);
 
             /// \param push Do not maintain a toggle state
-            PushButton (bool push = false, QWidget *parent = 0);
+            PushButton (bool push = false, const std::string& tooltip = "",
+                QWidget *parent = 0);
 
             bool hasKeepOpen() const;
     };
