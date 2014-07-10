@@ -58,9 +58,23 @@ namespace CSVRender
     {
         CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent);
 
-        tool->addButton (":door.png", "day"); /// \todo replace icons
-        tool->addButton (":GMST.png", "night");
-        tool->addButton (":Info.png", "bright");
+        /// \todo replace icons
+        tool->addButton (":door.png", "day",
+            "Day"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Strong directional light source/lir>"
+            "<li>This mode closely resembles day time in-game</li></ul>");
+        tool->addButton (":GMST.png", "night",
+            "Night"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Weak directional light source</li>"
+            "<li>This mode closely resembles night time in-game</li></ul>");
+        tool->addButton (":Info.png", "bright",
+            "Bright"
+            "<ul><li>Maximum ambient</li>"
+            "<li>Strong directional light source</li></ul>");
 
         connect (tool, SIGNAL (modeChanged (const std::string&)),
             this, SLOT (selectLightingMode (const std::string&)));

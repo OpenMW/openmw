@@ -29,10 +29,11 @@ void CSVWidget::SceneToolMode::showPanel (const QPoint& position)
         mButtons.begin()->first->setFocus (Qt::OtherFocusReason);
 }
 
-void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id)
+void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id,
+    const std::string& tooltip)
 {
     PushButton *button = new PushButton (QIcon (QPixmap (icon.c_str())), PushButton::Type_Mode,
-        "", mPanel);
+        tooltip, mPanel);
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize (QSize (mIconSize, mIconSize));
     button->setFixedSize (mButtonSize, mButtonSize);

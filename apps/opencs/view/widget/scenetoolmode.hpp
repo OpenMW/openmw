@@ -29,7 +29,8 @@ namespace CSVWidget
 
             virtual void showPanel (const QPoint& position);
 
-            void addButton (const std::string& icon, const std::string& id);
+            void addButton (const std::string& icon, const std::string& id,
+                const std::string& tooltip = "");
 
         signals:
 
