@@ -177,8 +177,8 @@ namespace MWMechanics
 
             x *= 0.1f * magicEffect->mData.mBaseCost;
             x *= 0.5f * (effect.mMagnMin + effect.mMagnMax);
-            x += effect.mArea * 0.05f * magicEffect->mData.mBaseCost; // XXX spell.radius
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) // XXX effect.flags & CAST_TARGET
+            x += effect.mArea * 0.05f * magicEffect->mData.mBaseCost;
+            if (effect.mRange == ESM::RT_Target)
                 x *= 1.5f;
 
             static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
