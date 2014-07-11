@@ -2652,6 +2652,8 @@ namespace MWWorld
         {
             mGoToJail = false;
 
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
+
             MWWorld::Ptr player = getPlayerPtr();
             teleportToClosestMarker(player, "prisonmarker");
             int bounty = player.getClass().getNpcStats(player).getBounty();
