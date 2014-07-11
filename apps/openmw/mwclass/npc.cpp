@@ -22,6 +22,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/autocalcspell.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -193,18 +194,6 @@ namespace
                     majorMultiplier = 1.0f;
                     break;
                 }
-                if (class_->mData.mSkills[k][1] == skillIndex)
-                {
-                    // Major skill -> add starting spells for this skill if existing
-                    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-                    MWWorld::Store<ESM::Spell>::iterator it = store.get<ESM::Spell>().begin();
-                    for (; it != store.get<ESM::Spell>().end(); ++it)
-                    {
-                        if (it->mData.mFlags & ESM::Spell::F_Autocalc
-                                && MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(&*it, ptr)) == skillIndex)
-                            npcStats.getSpells().add(it->mId);
-                    }
-                }
             }
 
             // is this skill in the same Specialization as the class?
@@ -223,6 +212,42 @@ namespace
                     + specBonus
                     + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100));
         }
+
+        int skills[ESM::Skill::Length];
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            skills[i] = npcStats.getSkill(i).getBase();
+
+        int attributes[ESM::Attribute::Length];
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            attributes[i] = npcStats.getAttribute(i).getBase();
+
+        std::cout << npc->mId << std::endl;
+        std::cout << "Skills: " << std::endl;
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            std::cout << skills[i] << std::endl;
+        std::cout << "Attributes: " << std::endl;
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            std::cout << attributes[i] << std::endl;
+        std::set<std::string> spells = MWMechanics::autoCalcNpcSpells(skills, attributes, race);
+        std::cout << "Spells: " << spells.size() << std::endl;
+        for (std::set<std::string>::iterator it = spells.begin(); it != spells.end(); ++it)
+        {
+            std::cout << *it << ", ";
+            npcStats.getSpells().add(*it);
+        }
+        std::cout << std::endl;
+
+        const char* compare[] = { "weary","dire noise","reflect","weak spelldrinker","absorb endurance","absorb personality","absorb speed","absorb strength","absorb willpower","fortify alteration skill","fortify illusion skill","fortify unarmored skill","fortify mysticism skill","fortify restoration skill","assured sublime wisdom","surpassing sublime wisdom","surpassing golden wisdom","blood gift","surpassing silver wisdom","surpassing unseen wisdom","surpassing green wisdom","powerwell","orc's strength","surpassing fluid evasion","poet's whim","rapid regenerate","dispel","shadow weave" };
+        int n = sizeof(compare) / sizeof(compare[0]);
+        std::set<std::string> compareSet;
+        for (int i=0; i<n; ++i)
+            compareSet.insert(compare[i]);
+        std::cout << "Compare: " << n << std::endl;
+        for (std::set<std::string>::iterator it = compareSet.begin(); it != compareSet.end(); ++it)
+        {
+            std::cout << *it << ", ";
+        }
+        std::cout << std::endl;
     }
 }
 
