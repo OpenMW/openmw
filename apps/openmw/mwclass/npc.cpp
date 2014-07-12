@@ -230,7 +230,7 @@ namespace
                     + 5
                     + raceBonus
                     + specBonus
-                    + (level-1) * (majorMultiplier + specMultiplier)), 100));
+                    +(int(level)-1) * (majorMultiplier + specMultiplier)), 100)); // Must gracefully handle level 0
         }
 
         int skills[ESM::Skill::Length];
