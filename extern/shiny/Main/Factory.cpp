@@ -267,10 +267,11 @@ namespace sh
 
 	MaterialInstance* Factory::searchInstance (const std::string& name)
 	{
-		if (mMaterials.find(name) != mMaterials.end())
-				return &mMaterials.find(name)->second;
-
-		return NULL;
+		MaterialMap::iterator it = mMaterials.find(name);
+		if (it != mMaterials.end())
+			return &(it->second);
+                else
+			return NULL;
 	}
 
 	MaterialInstance* Factory::findInstance (const std::string& name)
@@ -434,8 +435,9 @@ namespace sh
 
 	std::string Factory::retrieveTextureAlias (const std::string& name)
 	{
-		if (mTextureAliases.find(name) != mTextureAliases.end())
-			return mTextureAliases[name];
+		TextureAliasMap::iterator it = mTextureAliases.find(name);
+		if (it != mTextureAliases.end())
+			return it->second;
 		else
 			return "";
 	}

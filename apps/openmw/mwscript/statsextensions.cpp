@@ -260,7 +260,7 @@ namespace MWScript
                     MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
                         .getDynamic (mIndex));
 
-                    stat.setCurrent (diff + current);
+                    stat.setCurrent (diff + current, true);
 
                     ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
@@ -1165,6 +1165,17 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpGetStat : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                // dummy
+                runtime.push(0);
+            }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
@@ -1307,6 +1318,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
             interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobatics, new OpSetWerewolfAcrobatics<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetStat, new OpGetStat<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetStatExplicit, new OpGetStat<ExplicitRef>);
         }
     }
 }

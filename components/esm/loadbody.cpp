@@ -22,4 +22,14 @@ void BodyPart::save(ESMWriter &esm) const
     esm.writeHNT("BYDT", mData, 4);
 }
 
+    void BodyPart::blank()
+    {
+        mData.mPart = 0;
+        mData.mVampire = 0;
+        mData.mFlags = 0;
+        mData.mType = 0;
+
+        mModel.clear();
+        mRace.clear();
+    }
 }

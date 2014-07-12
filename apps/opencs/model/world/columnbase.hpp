@@ -90,10 +90,20 @@ namespace CSMWorld
             Display_RefRecordType,
             Display_DialogueType,
             Display_QuestStatusType,
-            Display_Gender,
 
             //Those are top level columns that nest other columns
-            Display_NestedItemList
+            Display_NestedItemList,
+            Display_EnchantmentType,
+            Display_BodyPartType,
+            Display_MeshType,
+            Display_Gender,
+            Display_Mesh,
+            Display_Icon,
+            Display_Music,
+            Display_SoundRes,
+            Display_Texture,
+            Display_Video,
+            Display_Colour
         };
 
         int mColumnId;

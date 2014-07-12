@@ -172,6 +172,13 @@ namespace CSMWorld
             ColumnId_ContainerContent = 157,
             ColumnId_ItemCount = 158,
             ColumnId_InventoryItemId = 159,
+            ColumnId_CombatState = 160,
+            ColumnId_MagicState = 161,
+            ColumnId_StealthState = 162,
+            ColumnId_EnchantmentType = 163,
+            ColumnId_Vampire = 164,
+            ColumnId_BodyPartType = 165,
+            ColumnId_MeshType = 166,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

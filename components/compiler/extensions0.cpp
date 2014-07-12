@@ -431,6 +431,8 @@ namespace Compiler
             extensions.registerInstruction("setlevel", "l", opcodeSetLevel, opcodeSetLevelExplicit);
             extensions.registerFunction("getlevel", 'l', "", opcodeGetLevel, opcodeGetLevelExplicit);
 
+            extensions.registerFunction("getstat", 'l', "c", opcodeGetStat, opcodeGetStatExplicit);
+
             extensions.registerFunction ("getdeadcount", 'l', "c", opcodeGetDeadCount);
 
             extensions.registerFunction ("getpcfacrep", 'l', "/c", opcodeGetPCFacRep, opcodeGetPCFacRepExplicit);

@@ -146,6 +146,10 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *spells = new QAction (tr ("Spells"), this);
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
     mechanics->addAction (spells);
+
+    QAction *enchantments = new QAction (tr ("Enchantments"), this);
+    connect (enchantments, SIGNAL (triggered()), this, SLOT (addEnchantmentsSubView()));
+    mechanics->addAction (enchantments);
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -187,6 +191,10 @@ void CSVDoc::View::setupCharacterMenu()
     QAction *journalInfos = new QAction (tr ("Journal Infos"), this);
     connect (journalInfos, SIGNAL (triggered()), this, SLOT (addJournalInfosSubView()));
     characters->addAction (journalInfos);
+
+    QAction *bodyParts = new QAction (tr ("Body Parts"), this);
+    connect (bodyParts, SIGNAL (triggered()), this, SLOT (addBodyPartsSubView()));
+    characters->addAction (bodyParts);
 }
 
 void CSVDoc::View::setupAssetsMenu()
@@ -196,6 +204,32 @@ void CSVDoc::View::setupAssetsMenu()
     QAction *sounds = new QAction (tr ("Sounds"), this);
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
     assets->addAction (sounds);
+
+    assets->addSeparator(); // resources follow here
+
+    QAction *meshes = new QAction (tr ("Meshes"), this);
+    connect (meshes, SIGNAL (triggered()), this, SLOT (addMeshesSubView()));
+    assets->addAction (meshes);
+
+    QAction *icons = new QAction (tr ("Icons"), this);
+    connect (icons, SIGNAL (triggered()), this, SLOT (addIconsSubView()));
+    assets->addAction (icons);
+
+    QAction *musics = new QAction (tr ("Music"), this);
+    connect (musics, SIGNAL (triggered()), this, SLOT (addMusicsSubView()));
+    assets->addAction (musics);
+
+    QAction *soundsRes = new QAction (tr ("Sound Files"), this);
+    connect (soundsRes, SIGNAL (triggered()), this, SLOT (addSoundsResSubView()));
+    assets->addAction (soundsRes);
+
+    QAction *textures = new QAction (tr ("Textures"), this);
+    connect (textures, SIGNAL (triggered()), this, SLOT (addTexturesSubView()));
+    assets->addAction (textures);
+
+    QAction *videos = new QAction (tr ("Videos"), this);
+    connect (videos, SIGNAL (triggered()), this, SLOT (addVideosSubView()));
+    assets->addAction (videos);
 }
 
 void CSVDoc::View::setupUi()
@@ -467,6 +501,46 @@ void CSVDoc::View::addTopicInfosSubView()
 void CSVDoc::View::addJournalInfosSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_JournalInfos);
+}
+
+void CSVDoc::View::addEnchantmentsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Enchantments);
+}
+
+void CSVDoc::View::addBodyPartsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_BodyParts);
+}
+
+void CSVDoc::View::addMeshesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Meshes);
+}
+
+void CSVDoc::View::addIconsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Icons);
+}
+
+void CSVDoc::View::addMusicsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Musics);
+}
+
+void CSVDoc::View::addSoundsResSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_SoundsRes);
+}
+
+void CSVDoc::View::addTexturesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Textures);
+}
+
+void CSVDoc::View::addVideosSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Videos);
 }
 
 void CSVDoc::View::abortOperation (int type)

@@ -15,6 +15,8 @@
 #include "columnimp.hpp"
 #include "regionmap.hpp"
 #include "columns.hpp"
+#include "resourcesmanager.hpp"
+#include "resourcetable.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
@@ -56,8 +58,9 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding)
-: mEncoder (encoding), mRefs (mCells), mReader (0), mDialogue (0)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
+: mEncoder (encoding), mRefs (mCells), mResourcesManager (resourcesManager), mReader (0),
+  mDialogue (0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -198,6 +201,25 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
 
+    mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
+    mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
+    mEnchantments.addColumn (new FixedRecordTypeColumn<ESM::Enchantment> (UniversalId::Type_Enchantment));
+    mEnchantments.addColumn (new EnchantmentTypeColumn<ESM::Enchantment>);
+    mEnchantments.addColumn (new CostColumn<ESM::Enchantment>);
+    mEnchantments.addColumn (new ChargesColumn2<ESM::Enchantment>);
+    mEnchantments.addColumn (new AutoCalcColumn<ESM::Enchantment>);
+
+    mBodyParts.addColumn (new StringIdColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new RecordStateColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new FixedRecordTypeColumn<ESM::BodyPart> (UniversalId::Type_BodyPart));
+    mBodyParts.addColumn (new BodyPartTypeColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new VampireColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Female, ESM::BodyPart::BPF_Female));
+    mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Playable, ESM::BodyPart::BPF_NotPlayable, true));
+    mBodyParts.addColumn (new MeshTypeColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new ModelColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new RaceColumn<ESM::BodyPart>);
+
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new FixedRecordTypeColumn<CellRef> (UniversalId::Type_Reference));
@@ -252,10 +274,24 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
     addModel (new IdTable (&mTopicInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_TopicInfo);
     addModel (new IdTable (&mJournalInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_JournalInfo);
     addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
+    addModel (new IdTable (&mEnchantments), UniversalId::Type_Enchantment);
+    addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Mesh)),
+        UniversalId::Type_Mesh);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icon)),
+        UniversalId::Type_Icon);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Music)),
+        UniversalId::Type_Music);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundRes)),
+        UniversalId::Type_SoundRes);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Texture)),
+        UniversalId::Type_Texture);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Video)),
+        UniversalId::Type_Video);
 }
 
 CSMWorld::Data::~Data()
@@ -457,6 +493,31 @@ CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters()
     return mFilters;
 }
 
+const CSMWorld::IdCollection<ESM::Enchantment>& CSMWorld::Data::getEnchantments() const
+{
+    return mEnchantments;
+}
+
+CSMWorld::IdCollection<ESM::Enchantment>& CSMWorld::Data::getEnchantments()
+{
+    return mEnchantments;
+}
+
+const CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts() const
+{
+    return mBodyParts;
+}
+
+CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
+{
+    return mBodyParts;
+}
+
+const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
+{
+    return mResourcesManager.get (UniversalId::getParentType (id.getType()));
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -534,6 +595,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_REGN: mRegions.load (*mReader, mBase); break;
         case ESM::REC_BSGN: mBirthsigns.load (*mReader, mBase); break;
         case ESM::REC_SPEL: mSpells.load (*mReader, mBase); break;
+        case ESM::REC_ENCH: mEnchantments.load (*mReader, mBase); break;
+        case ESM::REC_BODY: mBodyParts.load (*mReader, mBase); break;
 
         case ESM::REC_CELL:
         {
@@ -668,6 +731,8 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getTopics().searchId (id)!=-1 ||
         getJournals().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
+        getEnchantments().searchId (id)!=-1 ||
+        getBodyParts().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
 }
 
@@ -686,6 +751,8 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mBirthsigns) +
         count (state, mSpells) +
         count (state, mCells) +
+        count (state, mEnchantments) +
+        count (state, mBodyParts) +
         count (state, mReferenceables);
 }
 
@@ -726,6 +793,8 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     appendIds (ids, mTopics, listDeleted);
     appendIds (ids, mJournals, listDeleted);
     appendIds (ids, mCells, listDeleted);
+    appendIds (ids, mEnchantments, listDeleted);
+    appendIds (ids, mBodyParts, listDeleted);
     appendIds (ids, mReferenceables, listDeleted);
 
     std::sort (ids.begin(), ids.end());

@@ -53,7 +53,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     ModelColumns modelColumns (baseColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Model, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Model, ColumnBase::Display_Mesh));
     modelColumns.mModel = &mColumns.back();
 
     NameColumns nameColumns (modelColumns);
@@ -65,7 +65,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     InventoryColumns inventoryColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Icon, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Icon, ColumnBase::Display_Icon));
     inventoryColumns.mIcon = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Weight, ColumnBase::Display_Float));
     inventoryColumns.mWeight = &mColumns.back();
@@ -183,6 +183,15 @@ CSMWorld::RefIdCollection::RefIdCollection()
     creatureColumns.mScale = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_OriginalCreature, ColumnBase::Display_String));
     creatureColumns.mOriginal = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_CombatState, ColumnBase::Display_Integer));
+    creatureColumns.mCombat = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_MagicState, ColumnBase::Display_Integer));
+    creatureColumns.mMagic = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_StealthState, ColumnBase::Display_Integer));
+    creatureColumns.mStealth = &mColumns.back();
 
     static const struct
     {

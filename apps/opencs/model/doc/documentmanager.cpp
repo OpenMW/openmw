@@ -52,7 +52,7 @@ CSMDoc::DocumentManager::~DocumentManager()
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding);
+    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager);
 
     mDocuments.push_back (document);
 
@@ -83,6 +83,11 @@ void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& par
 void CSMDoc::DocumentManager::setEncoding (ToUTF8::FromType encoding)
 {
     mEncoding = encoding;
+}
+
+void CSMDoc::DocumentManager::listResources()
+{
+    mResourcesManager.listResources();
 }
 
 void CSMDoc::DocumentManager::documentLoaded (Document *document)

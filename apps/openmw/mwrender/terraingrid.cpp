@@ -64,6 +64,8 @@ void TerrainGrid::loadCell(int x, int y)
 
     element.mChunk = new Terrain::Chunk(mCache.getUVBuffer(), bounds, positions, normals, colours);
     element.mChunk->setIndexBuffer(mCache.getIndexBuffer(0));
+    element.mChunk->setVisibilityFlags(mVisibilityFlags);
+    element.mChunk->setCastShadows(true);
 
     std::vector<Ogre::PixelBox> blendmaps;
     std::vector<Terrain::LayerInfo> layerList;

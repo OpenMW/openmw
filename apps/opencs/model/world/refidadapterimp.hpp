@@ -646,6 +646,9 @@ namespace CSMWorld
         const RefIdColumn *mSoul;
         const RefIdColumn *mScale;
         const RefIdColumn *mOriginal;
+        const RefIdColumn *mCombat;
+        const RefIdColumn *mMagic;
+        const RefIdColumn *mStealth;
 
         CreatureColumns (const ActorColumns& actorColumns);
     };

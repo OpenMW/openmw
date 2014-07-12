@@ -20,4 +20,13 @@ void Enchantment::save(ESMWriter &esm) const
     mEffects.save(esm);
 }
 
+    void Enchantment::blank()
+    {
+        mData.mType = 0;
+        mData.mCost = 0;
+        mData.mCharge = 0;
+        mData.mAutocalc = 0;
+
+        mEffects.mList.clear();
+    }
 }

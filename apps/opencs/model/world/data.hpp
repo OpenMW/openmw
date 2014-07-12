@@ -21,6 +21,8 @@
 #include <components/esm/loadbsgn.hpp>
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loaddial.hpp>
+#include <components/esm/loadench.hpp>
+#include <components/esm/loadbody.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -45,6 +47,9 @@ namespace ESM
 
 namespace CSMWorld
 {
+    class ResourcesManager;
+    class Resources;
+
     class Data : public QObject
     {
             Q_OBJECT
@@ -63,12 +68,15 @@ namespace CSMWorld
             IdCollection<ESM::Spell> mSpells;
             IdCollection<ESM::Dialogue> mTopics;
             IdCollection<ESM::Dialogue> mJournals;
+            IdCollection<ESM::Enchantment> mEnchantments;
+            IdCollection<ESM::BodyPart> mBodyParts;
             InfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<CSMFilter::Filter> mFilters;
+            const ResourcesManager& mResourcesManager;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
             std::string mAuthor;
@@ -94,7 +102,7 @@ namespace CSMWorld
 
         public:
 
-            Data (ToUTF8::FromType encoding);
+            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);
 
             virtual ~Data();
 
@@ -173,6 +181,17 @@ namespace CSMWorld
             const IdCollection<CSMFilter::Filter>& getFilters() const;
 
             IdCollection<CSMFilter::Filter>& getFilters();
+
+            const IdCollection<ESM::Enchantment>& getEnchantments() const;
+
+            IdCollection<ESM::Enchantment>& getEnchantments();
+
+            const IdCollection<ESM::BodyPart>& getBodyParts() const;
+
+            IdCollection<ESM::BodyPart>& getBodyParts();
+
+            /// Throws an exception, if \a id does not match a resources list.
+            const Resources& getResources (const UniversalId& id) const;
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
