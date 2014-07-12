@@ -1123,7 +1123,10 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        mWorldScene->updateObjectRotation(ptr);
+        if (ptr.getClass().isActor())
+            mWorldScene->updateObjectRotation(ptr);
+        else
+            mWorldScene->updateObjectLocalRotation(ptr);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
@@ -2648,6 +2651,8 @@ namespace MWWorld
         else
         {
             mGoToJail = false;
+
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
             MWWorld::Ptr player = getPlayerPtr();
             teleportToClosestMarker(player, "prisonmarker");

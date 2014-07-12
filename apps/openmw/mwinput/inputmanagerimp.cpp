@@ -707,11 +707,13 @@ namespace MWInput
     }
 
     void InputManager::quickLoad() {
-        MWBase::Environment::get().getStateManager()->quickLoad();
+        if (!MyGUI::InputManager::getInstance().isModalAny())
+            MWBase::Environment::get().getStateManager()->quickLoad();
     }
 
     void InputManager::quickSave() {
-        MWBase::Environment::get().getStateManager()->quickSave();
+        if (!MyGUI::InputManager::getInstance().isModalAny())
+            MWBase::Environment::get().getStateManager()->quickSave();
     }
     void InputManager::toggleSpell()
     {

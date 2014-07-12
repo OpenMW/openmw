@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.30.0
+Version: 0.31.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -95,6 +95,188 @@ Allowed options:
   --activate-dist arg (=-1)             activation distance override
 
 CHANGELOG
+
+0.31.0
+
+Bug #245: Cloud direction and weather systems differ from Morrowind
+Bug #275: Local Map does not always show objects that span multiple cells
+Bug #538: Update CenterOnCell (COC) function behavior
+Bug #618: Local and World Map Textures are sometimes Black
+Bug #640: Water behaviour at night
+Bug #668: OpenMW doesn't support non-latin paths on Windows
+Bug #746: OpenMW doesn't check if the background music was already played
+Bug #747: Door is stuck if cell is left before animation finishes
+Bug #772: Disabled statics are visible on map
+Bug #829: OpenMW uses up all available vram, when playing for extended time
+Bug #869: Dead bodies don't collide with anything
+Bug #894: Various character creation issues
+Bug #897/#1369: opencs Segmentation Fault after "new" or "load"
+Bug #899: Various jumping issues
+Bug #952: Reflection effects are one frame delayed
+Bug #993: Able to interact with world during Wait/Rest dialog
+Bug #995: Dropped items can be placed inside the wall
+Bug #1008: Corpses always face up upon reentering the cell
+Bug #1035: Random colour patterns appearing in automap
+Bug #1037: Footstep volume issues
+Bug #1047: Creation of wrong links in dialogue window
+Bug #1129: Summoned creature time life duration seems infinite
+Bug #1134: Crimes can be committed against hostile NPCs
+Bug #1136: Creature run speed formula is incorrect
+Bug #1150: Weakness to Fire doesn't apply to Fire Damage in the same spell
+Bug #1155: NPCs killing each other
+Bug #1166: Bittercup script still does not work
+Bug #1178: .bsa file names are case sensitive.
+Bug #1179: Crash after trying to load game after being killed
+Bug #1180: Changing footstep sound location
+Bug #1196: Jumping not disabled when showing messageboxes
+Bug #1202: "strange" keys are not shown in binding menu, and are not saved either, but works
+Bug #1217: Container content changes based on the current position of the mouse
+Bug #1234: Loading/saving issues with dynamic records
+Bug #1277: Text pasted into the console appears twice
+Bug #1284: Crash on New Game
+Bug #1303: It's possible to skip the chargen
+Bug #1304: Slaughterfish should not detect the player unless the player is in the water
+Bug #1311: Editor: deleting Record Filter line does not reset the filter
+Bug #1324: ERROR: ESM Error: String table overflow when loading Animated Morrowind.esp
+Bug #1328: Editor: Bogus Filter created when dragging multiple records to filter bar of non-applicable table
+Bug #1331: Walking/running sound persist after killing NPC`s that are walking/running.
+Bug #1334: Previously equipped items not shown as unequipped after attempting to sell them.
+Bug #1335: Actors ignore vertical axis when deciding to attack
+Bug #1338: Unknown toggle option for shadows
+Bug #1339: "Ashlands Region" is visible when beginning new game during "Loading Area" process
+Bug #1340: Guards prompt Player with punishment options after resisting arrest with another guard.
+Bug #1348: Regression: Bug #1098 has returned with a vengeance
+Bug #1349: [TR] TR_Data mesh tr_ex_imp_gatejamb01 cannot be activated
+Bug #1352: Disabling an ESX file does not disable dependent ESX files
+Bug #1355: CppCat Checks OpenMW
+Bug #1356: Incorrect voice type filtering for sleep interrupts
+Bug #1357: Restarting the game clears saves
+Bug #1360: Seyda Neen silk rider dialog problem
+Bug #1361: Some lights don't work
+Bug #1364: It is difficult to bind "Mouse 1" to an action in the options menu
+Bug #1370: Animation compilation mod does not work properly
+Bug #1371: SL_Pick01.nif from third party fails to load in openmw, but works in Vanilla
+Bug #1373: When stealing in front of Sellus Gravius cannot exit the dialog
+Bug #1378: Installs to /usr/local are not working
+Bug #1380: Loading a save file fail if one of the content files is disabled
+Bug #1382: "getHExact() size mismatch" crash on loading official plugin "Siege at Firemoth.esp"
+Bug #1386: Arkngthand door will not open
+Bug #1388: Segfault when modifying View Distance in Menu options
+Bug #1389: Crash when loading a save after dying
+Bug #1390: Apostrophe characters not displayed [French version]
+Bug #1391: Custom made icon background texture for magical weapons and stuff isn't scaled properly on GUI.
+Bug #1393: Coin icon during the level up dialogue are off of the background
+Bug #1394: Alt+F4 doesn't work on Win version
+Bug #1395: Changing rings switches only the last one put on
+Bug #1396: Pauldron parts aren't showing when the robe is equipped
+Bug #1402: Dialogue of some shrines have wrong button orientation
+Bug #1403: Items are floating in the air when they're dropped onto dead bodies.
+Bug #1404: Forearms are not rendered on Argonian females
+Bug #1407: Alchemy allows making potions from two of the same item
+Bug #1408: "Max sale" button gives you all the items AND all the trader's gold
+Bug #1409: Rest "Until Healed" broken for characters with stunted magicka.
+Bug #1412: Empty travel window opens while playing through start game
+Bug #1413: Save game ignores missing writing permission
+Bug #1414: The Underground 2 ESM Error
+Bug #1416: Not all splash screens in the Splash directory are used
+Bug #1417: Loading saved game does not terminate
+Bug #1419: Skyrim: Home of the Nords error
+Bug #1422: ClearInfoActor
+Bug #1423: ForceGreeting closes existing dialogue windows
+Bug #1425: Cannot load save game
+Bug #1426: Read skill books aren't stored in savegame
+Bug #1427: Useless items can be set under hotkeys
+Bug #1429: Text variables in journal
+Bug #1432: When attacking friendly NPC, the crime is reported and bounty is raised after each swing
+Bug #1435: Stealing priceless items is without punishment
+Bug #1437: Door marker at Jobasha's Rare Books is spawning PC in the air
+Bug #1440: Topic selection menu should be wider
+Bug #1441: Dropping items on the rug makes them inaccessible
+Bug #1442: When dropping and taking some looted items, bystanders consider that as a crime
+Bug #1444: Arrows and bolts are not dropped where the cursor points
+Bug #1445: Security trainers offering acrobatics instead
+Bug #1447: Character dash not displayed, French edition
+Bug #1448: When the player is killed by the guard while having a bounty on his head, the guard dialogue opens over and over instead of loading dialogue
+Bug #1454: Script error in SkipTutorial
+Bug #1456: Bad lighting when using certain Morrowind.ini generated by MGE
+Bug #1457: Heart of Lorkan comes after you when attacking it
+Bug #1458: Modified Keybindings are not remembered
+Bug #1459: Dura Gra-Bol doesn't respond to PC attack
+Bug #1462: Interior cells not loaded with Morrowind Patch active
+Bug #1469: Item tooltip should show the base value, not real value
+Bug #1477: Death count is not stored in savegame
+Bug #1478: AiActivate does not trigger activate scripts
+Bug #1481: Weapon not rendered when partially submerged in water
+Bug #1483: Enemies are attacking even while dying
+Bug #1486: ESM Error: Don't know what to do with INFO
+Bug #1490: Arrows shot at PC can end up in inventory
+Bug #1492: Monsters respawn on top of one another
+Bug #1493: Dialogue box opens with follower NPC even if NPC is dead
+Bug #1494: Paralysed cliffracers remain airbourne
+Bug #1495: Dialogue box opens with follower NPC even the game is paused
+Bug #1496: GUI messages are not cleared when loading another saved game
+Bug #1499: Underwater sound sometimes plays when transitioning from interior.
+Bug #1500: Targetted spells and water.
+Bug #1502: Console error message on info refusal
+Bug #1507: Bloodmoon MQ The Ritual of Beasts: Can't remove the arrow
+Bug #1508: Bloodmoon: Fort Frostmoth, cant talk with Carnius Magius
+Bug #1516: PositionCell doesn't move actors to current cell
+Bug #1518: ForceGreeting broken for explicit references
+Bug #1522: Crash after attempting to play non-music file
+Bug #1523: World map empty after loading interior save
+Bug #1524: Arrows in waiting/resting dialog act like minimum and maximum buttons
+Bug #1525: Werewolf: Killed NPC's don't fill werewolfs hunger for blood
+Bug #1527: Werewolf: Detect life detects wrong type of actor
+Bug #1529: OpenMW crash during "the shrine of the dead" mission (tribunal)
+Bug #1530: Selected text in the console has the same color as the background
+Bug #1539: Barilzar's Mazed Band: Tribunal
+Bug #1542: Looping taunts from NPC`s after death: Tribunal
+Bug #1543: OpenCS crash when using drag&drop in script editor
+Bug #1547: Bamz-Amschend: Centurion Archers combat problem
+Bug #1548: The Missing Hand: Tribunal
+Bug #1549: The Mad God: Tribunal, Dome of Serlyn
+Bug #1557: A bounty is calculated from actual item cost
+Bug #1562: Invisible terrain on top of Red Mountain
+Bug #1564: Cave of the hidden music: Bloodmoon
+Bug #1567: Editor: Deleting of referenceables does not work
+Bug #1568: Picking up a stack of items and holding the enter key and moving your mouse around paints a bunch of garbage on screen.
+Bug #1574: Solstheim: Drauger cant inflict damage on player
+Bug #1578: Solstheim: Bonewolf running animation not working
+Bug #1585: Particle effects on PC are stopped when paralyzed
+Bug #1589: Tribunal: Crimson Plague quest does not update when Gedna Relvel is killed
+Bug #1590: Failed to save game: compile error
+Bug #1598: Segfault when making Drain/Fortify Skill spells
+Bug #1599: Unable to switch to fullscreen
+Bug #1613: Morrowind Rebirth duplicate objects / vanilla objects not removed
+Feature #32: Periodic Cleanup/Refill
+Feature #41: Precipitation and weather particles
+Feature #568: Editor: Configuration setup
+Feature #649: Editor: Threaded loading
+Feature #930: Editor: Cell record saving
+Feature #934: Editor: Body part table
+Feature #935: Editor: Enchantment effect table
+Feature #1162: Dialogue merging
+Feature #1174: Saved Game: add missing creature state
+Feature #1177: Saved Game: fog of war state
+Feature #1312: Editor: Combat/Magic/Stealth values for creatures are not displayed
+Feature #1314: Make NPCs and creatures fight each other
+Feature #1315: Crime: Murder
+Feature #1321: Sneak skill enhancements
+Feature #1323: Handle restocking items
+Feature #1332: Saved Game: levelled creatures
+Feature #1347: modFactionReaction script instruction
+Feature #1362: Animated main menu support
+Feature #1433: Store walk/run toggle
+Feature #1449: Use names instead of numbers for saved game files and folders
+Feature #1453: Adding Delete button to the load menu
+Feature #1460: Enable Journal screen while in dialogue
+Feature #1480: Play Battle music when in combat
+Feature #1501: Followers unable to fast travel with you
+Feature #1520: Disposition and distance-based aggression/ShouldAttack
+Feature #1595: Editor: Object rendering in cells
+Task #940: Move license to locations where applicable
+Task #1333: Remove cmake git tag reading
+Task #1566: Editor: Object rendering refactoring
 
 0.30.0
 

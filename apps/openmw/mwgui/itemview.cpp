@@ -140,26 +140,28 @@ void ItemView::onMouseWheel(MyGUI::Widget *_sender, int _rel)
 
 void ItemView::setSize(const MyGUI::IntSize &_value)
 {
+    bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setSize(_value);
-    update();
+    if (changed)
+        update();
 }
 
 void ItemView::setSize(int _width, int _height)
 {
-    Base::setSize(_width, _height);
-    update();
+    setSize(MyGUI::IntSize(_width, _height));
 }
 
 void ItemView::setCoord(const MyGUI::IntCoord &_value)
 {
+    bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setCoord(_value);
-    update();
+    if (changed)
+        update();
 }
 
 void ItemView::setCoord(int _left, int _top, int _width, int _height)
 {
-    Base::setCoord(_left, _top, _width, _height);
-    update();
+    setCoord(MyGUI::IntCoord(_left, _top, _width, _height));
 }
 
 void ItemView::registerComponents()

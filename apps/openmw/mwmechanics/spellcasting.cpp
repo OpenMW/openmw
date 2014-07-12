@@ -92,7 +92,7 @@ namespace MWMechanics
             x *= 0.1 * magicEffect->mData.mBaseCost;
             x *= 0.5 * (it->mMagnMin + it->mMagnMax);
             x *= it->mArea * 0.05 * magicEffect->mData.mBaseCost;
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::CastTarget)
+            if (it->mRange == ESM::RT_Target)
                 x *= 1.5;
             static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                         "fEffectCostMult")->getFloat();
