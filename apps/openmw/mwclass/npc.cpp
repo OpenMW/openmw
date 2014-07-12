@@ -54,6 +54,24 @@ namespace
         return new NpcCustomData (*this);
     }
 
+    int is_even(double d) {
+        double int_part;
+        modf(d / 2.0, &int_part);
+        return 2.0 * int_part == d;
+    }
+
+    int round_ieee_754(double d) {
+        double i = floor(d);
+        d -= i;
+        if(d < 0.5)
+            return i;
+        if(d > 0.5)
+            return i + 1.0;
+        if(is_even(i))
+            return i;
+        return i + 1.0;
+    }
+
     void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
     {
         // race bonus
@@ -109,8 +127,9 @@ namespace
                 }
                 modifierSum += add;
             }
-            creatureStats.setAttribute(attribute, std::min(creatureStats.getAttribute(attribute).getBase()
-                + static_cast<int>((level-1) * modifierSum+0.5), 100) );
+            creatureStats.setAttribute(attribute, std::min(
+                                           round_ieee_754(creatureStats.getAttribute(attribute).getBase()
+                + (level-1) * modifierSum), 100) );
         }
 
         // initial health
@@ -206,11 +225,12 @@ namespace
 
             npcStats.getSkill(skillIndex).setBase(
                   std::min(
-                    npcStats.getSkill(skillIndex).getBase()
+                    round_ieee_754(
+                            npcStats.getSkill(skillIndex).getBase()
                     + 5
                     + raceBonus
                     + specBonus
-                    + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100));
+                    + (level-1) * (majorMultiplier + specMultiplier)), 100));
         }
 
         int skills[ESM::Skill::Length];
