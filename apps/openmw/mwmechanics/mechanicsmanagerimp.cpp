@@ -186,7 +186,7 @@ namespace MWMechanics
         const ESM::Spell* weakestSpell = NULL;
         int minCost = INT_MAX;
 
-        std::set<std::string> selectedSpells;
+        std::vector<std::string> selectedSpells;
 
         const ESM::Race* race = NULL;
         if (mRaceSelected)
@@ -212,8 +212,6 @@ namespace MWMechanics
                 continue;
             if (reachedLimit && spell->mData.mCost <= minCost)
                 continue;
-            if (selectedSpells.find(spell->mId) != selectedSpells.end())
-                continue;
             if (race && std::find(race->mPowers.mList.begin(), race->mPowers.mList.end(), spell->mId) != race->mPowers.mList.end())
                 continue;
             if (baseMagicka < spell->mData.mCost)
@@ -226,18 +224,19 @@ namespace MWMechanics
             if (!attrSkillCheck(spell, skills, attributes))
                 continue;
 
-            selectedSpells.insert(spell->mId);
+            selectedSpells.push_back(spell->mId);
 
             if (reachedLimit)
             {
-                selectedSpells.erase(weakestSpell->mId);
+                std::vector<std::string>::iterator it = std::find(selectedSpells.begin(), selectedSpells.end(), weakestSpell->mId);
+                if (it != selectedSpells.end())
+                    selectedSpells.erase(it);
 
                 minCost = INT_MAX;
-                for (std::set<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
+                for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
                 {
                     const ESM::Spell* testSpell = esmStore.get<ESM::Spell>().find(*weakIt);
-                    if (testSpell->mData.mCost < minCost) // XXX what if 2 candidates have the same cost?
-                                                        // Note iAutoPCSpellMax is 100 by default, so reachedLimit is very unlikely to happen
+                    if (testSpell->mData.mCost < minCost)
                     {
                         minCost = testSpell->mData.mCost;
                         weakestSpell = testSpell;
@@ -257,7 +256,7 @@ namespace MWMechanics
             }
         }
 
-        for (std::set<std::string>::iterator it = selectedSpells.begin(); it != selectedSpells.end(); ++it)
+        for (std::vector<std::string>::iterator it = selectedSpells.begin(); it != selectedSpells.end(); ++it)
             creatureStats.getSpells().add(*it);
 
         // forced update and current value adjustments
