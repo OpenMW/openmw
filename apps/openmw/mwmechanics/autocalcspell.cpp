@@ -20,7 +20,7 @@ namespace MWMechanics
         std::string mWeakestSpell;
     };
 
-    std::set<std::string> autoCalcNpcSpells(const int *actorSkills, const int *actorAttributes, const ESM::Race* race)
+    std::vector<std::string> autoCalcNpcSpells(const int *actorSkills, const int *actorAttributes, const ESM::Race* race)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fNPCbaseMagickaMult = gmst.find("fNPCbaseMagickaMult")->getFloat();
@@ -53,10 +53,13 @@ namespace MWMechanics
             schoolCaps[i] = caps;
         }
 
-        std::set<std::string> selectedSpells;
+        std::vector<std::string> selectedSpells;
 
         const MWWorld::Store<ESM::Spell> &spells =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
+
+        // Note: the algorithm heavily depends on the traversal order of the spells. For vanilla-compatible results the
+        // Store must preserve the record ordering as it was in the content files.
         for (MWWorld::Store<ESM::Spell>::iterator iter = spells.begin(); iter != spells.end(); ++iter)
         {
             const ESM::Spell* spell = &*iter;
@@ -88,18 +91,32 @@ namespace MWMechanics
             if (calcAutoCastChance(spell, actorSkills, actorAttributes, school) < fAutoSpellChance)
                 continue;
 
-            selectedSpells.insert(spell->mId);
+            selectedSpells.push_back(spell->mId);
 
             if (cap.mReachedLimit)
             {
-                selectedSpells.erase(cap.mWeakestSpell);
+                std::vector<std::string>::iterator found = std::find(selectedSpells.begin(), selectedSpells.end(), cap.mWeakestSpell);
+                if (found != selectedSpells.end())
+                    selectedSpells.erase(found);
 
-                // Note: not school specific
                 cap.mMinCost = INT_MAX;
-                for (std::set<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
+                for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
                 {
                     const ESM::Spell* testSpell = spells.find(*weakIt);
-                    if (testSpell->mData.mCost < cap.mMinCost) // XXX what if 2 candidates have the same cost?
+
+                    //int testSchool;
+                    //float dummySkillTerm;
+                    //calcWeakestSchool(testSpell, actorSkills, testSchool, dummySkillTerm);
+
+                    // Note: if there are multiple spells with the same cost, we pick the first one we found.
+                    // So the algorithm depends on the iteration order of the outer loop.
+                    if (
+                            // There is a huge bug here. It is not checked that weakestSpell is of the correct school.
+                            // As result multiple SchoolCaps could have the same mWeakestSpell. Erasing the weakest spell would then fail if another school
+                            // already erased it, and so the number of spells would often exceed the sum of limits.
+                            // This bug cannot be fixed without significantly changing the results of the spell autocalc, which will not have been playtested.
+                            //testSchool == school &&
+                            testSpell->mData.mCost < cap.mMinCost)
                     {
                         cap.mMinCost = testSpell->mData.mCost;
                         cap.mWeakestSpell = testSpell->mId;
@@ -119,6 +136,7 @@ namespace MWMechanics
                 }
             }
         }
+
         return selectedSpells;
     }
 

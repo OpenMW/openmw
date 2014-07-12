@@ -209,8 +209,6 @@ namespace MWWorld
         }
 
         void setUp() {
-            //std::sort(mStatic.begin(), mStatic.end(), RecordCmp());
-
             mShared.clear();
             mShared.reserve(mStatic.size());
             typename std::map<std::string, T>::iterator it = mStatic.begin();
@@ -675,18 +673,15 @@ namespace MWWorld
         }
 
         void setUp() {
-            //typedef std::vector<ESM::Cell>::iterator Iterator;
             typedef DynamicExt::iterator ExtIterator;
             typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
 
-            //std::sort(mInt.begin(), mInt.end(), RecordCmp());
             mSharedInt.clear();
             mSharedInt.reserve(mInt.size());
             for (IntIterator it = mInt.begin(); it != mInt.end(); ++it) {
                 mSharedInt.push_back(&(it->second));
             }
 
-            //std::sort(mExt.begin(), mExt.end(), ExtCmp());
             mSharedExt.clear();
             mSharedExt.reserve(mExt.size());
             for (ExtIterator it = mExt.begin(); it != mExt.end(); ++it) {
@@ -1146,6 +1141,37 @@ namespace MWWorld
             return mStatic.end();
         }
     };
+
+
+    // Specialisation for ESM::Spell to preserve record order as it was in the content files.
+    // The NPC spell autocalc code heavily depends on this order.
+    // We could also do this in the base class, but it's usually not a good idea to depend on record order.
+    template<>
+    inline void Store<ESM::Spell>::clearDynamic()
+    {
+        // remove the dynamic part of mShared
+        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+        mDynamic.clear();
+    }
+
+    template<>
+    inline void Store<ESM::Spell>::load(ESM::ESMReader &esm, const std::string &id) {
+        std::string idLower = Misc::StringUtils::lowerCase(id);
+
+        std::pair<Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, ESM::Spell()));
+        if (inserted.second)
+            mShared.push_back(&mStatic[idLower]);
+
+        inserted.first->second.mId = idLower;
+        inserted.first->second.load(esm);
+    }
+
+    template<>
+    inline void Store<ESM::Spell>::setUp()
+    {
+        // remove the dynamic part of mShared
+        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+    }
 
 } //end namespace
 
