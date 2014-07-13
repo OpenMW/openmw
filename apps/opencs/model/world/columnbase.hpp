@@ -93,6 +93,7 @@ namespace CSMWorld
 
             //Those are top level columns that nest other columns
             Display_NestedItemList,
+
             Display_EnchantmentType,
             Display_BodyPartType,
             Display_MeshType,
@@ -138,8 +139,6 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct Column : public ColumnBase
     {
-        int mFlags;
-
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue, bool canNest = false)
             : ColumnBase (columnId, displayType, flags, canNest) {}
 
