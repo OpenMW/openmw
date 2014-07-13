@@ -59,9 +59,34 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
 {
     CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent);
 
-    tool->addButton (":door.png", "1st"); /// \todo replace icons
-    tool->addButton (":GMST.png", "free");
-    tool->addButton (":Info.png", "orbit");
+    /// \todo replace icons
+    /// \todo consider user-defined button-mapping
+    tool->addButton (":door.png", "1st",
+        "First Person"
+        "<ul><li>Mouse-Look while holding the left button</li>"
+        "<li>WASD movement keys</li>"
+        "<li>Mouse wheel moves the camera forawrd/backward</li>"
+        "<li>Stafing (also vertically) by holding the left mouse button and control</li>"
+        "<li>Camera is held upright</li>"
+        "<li>Hold shift to speed up movement</li>"
+        "</ul>");
+    tool->addButton (":GMST.png", "free",
+        "Free Camera"
+        "<ul><li>Mouse-Look while holding the left button</li>"
+        "<li>Stafing (also vertically) via WASD or by holding the left mouse button and control</li>"
+        "<li>Mouse wheel moves the camera forawrd/backward</li>"
+        "<li>Roll camera with Q and E keys</li>"
+        "<li>Hold shift to speed up movement</li>"
+        "</ul>");
+    tool->addButton (":Info.png", "orbit",
+        "Orbiting Camera"
+        "<ul><li>Always facing the centre point</li>"
+        "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"
+        "<li>Mouse wheel moves camera away or towards centre point but can not pass through it</li>"
+        "<li>Roll camera with Q and E keys</li>"
+        "<li>Stafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
+        "<li>Hold shift to speed up movement</li>"
+        "</ul>");
 
     connect (tool, SIGNAL (modeChanged (const std::string&)),
         this, SLOT (selectNavigationMode (const std::string&)));
