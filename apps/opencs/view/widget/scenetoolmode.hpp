@@ -22,15 +22,18 @@ namespace CSVWidget
             std::map<PushButton *, std::string> mButtons; // widget, id
             int mButtonSize;
             int mIconSize;
+            QString mToolTip;
+
+            void adjustToolTip (const PushButton *activeMode);
 
         public:
 
-            SceneToolMode (SceneToolbar *parent);
+            SceneToolMode (SceneToolbar *parent, const QString& toolTip);
 
             virtual void showPanel (const QPoint& position);
 
             void addButton (const std::string& icon, const std::string& id,
-                const std::string& tooltip = "");
+                const QString& tooltip = "");
 
         signals:
 

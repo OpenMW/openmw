@@ -8,8 +8,20 @@
 #include "scenetoolbar.hpp"
 #include "pushbutton.hpp"
 
-CSVWidget::SceneToolMode::SceneToolMode (SceneToolbar *parent)
-: SceneTool (parent), mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize())
+void CSVWidget::SceneToolMode::adjustToolTip (const PushButton *activeMode)
+{
+    QString toolTip = mToolTip;
+
+    toolTip += "<p>Currently selected: " + activeMode->getBaseToolTip();
+
+    toolTip += "<p>(left click to change mode)";
+
+    setToolTip (toolTip);
+}
+
+CSVWidget::SceneToolMode::SceneToolMode (SceneToolbar *parent, const QString& toolTip)
+: SceneTool (parent), mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize()),
+  mToolTip (toolTip)
 {
     mPanel = new QFrame (this, Qt::Popup);
 
@@ -30,7 +42,7 @@ void CSVWidget::SceneToolMode::showPanel (const QPoint& position)
 }
 
 void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id,
-    const std::string& tooltip)
+    const QString& tooltip)
 {
     PushButton *button = new PushButton (QIcon (QPixmap (icon.c_str())), PushButton::Type_Mode,
         tooltip, mPanel);
@@ -48,6 +60,7 @@ void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::st
     {
         setIcon (button->icon());
         button->setChecked (true);
+        adjustToolTip (button);
     }
 }
 
@@ -66,6 +79,7 @@ void CSVWidget::SceneToolMode::selected()
             iter2->first->setChecked (iter2==iter);
 
         setIcon (iter->first->icon());
+        adjustToolTip (iter->first);
         emit modeChanged (iter->second);
     }
 }

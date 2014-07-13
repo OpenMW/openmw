@@ -56,7 +56,7 @@ namespace CSVRender
 
     CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
     {
-        CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent);
+        CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
 
         /// \todo replace icons
         tool->addButton (":door.png", "day",

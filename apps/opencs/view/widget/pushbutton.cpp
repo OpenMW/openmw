@@ -4,11 +4,11 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
-void CSVWidget::PushButton::setExtendedToolTip (const std::string& text)
+void CSVWidget::PushButton::setExtendedToolTip (const QString& text)
 {
-    std::string tooltip = text;
+    QString tooltip = text;
 
-    if (tooltip.empty())
+    if (tooltip.isEmpty())
         tooltip = "(Tool tip not implemented yet)";
 
     switch (mType)
@@ -29,7 +29,7 @@ void CSVWidget::PushButton::setExtendedToolTip (const std::string& text)
             break;
     }
 
-    setToolTip (QString::fromUtf8 (tooltip.c_str()));
+    setToolTip (tooltip);
 }
 
 void CSVWidget::PushButton::keyPressEvent (QKeyEvent *event)
@@ -57,16 +57,16 @@ void CSVWidget::PushButton::mouseReleaseEvent (QMouseEvent *event)
     QPushButton::mouseReleaseEvent (event);
 }
 
-CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const std::string& tooltip,
+CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const QString& tooltip,
     QWidget *parent)
-: QPushButton (icon, "", parent), mKeepOpen (false), mType (type)
+: QPushButton (icon, "", parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
     setCheckable (type==Type_Mode);
     setExtendedToolTip (tooltip);
 }
 
-CSVWidget::PushButton::PushButton (Type type, const std::string& tooltip, QWidget *parent)
-: QPushButton (parent), mKeepOpen (false), mType (type)
+CSVWidget::PushButton::PushButton (Type type, const QString& tooltip, QWidget *parent)
+: QPushButton (parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
     setCheckable (type==Type_Mode);
     setExtendedToolTip (tooltip);
@@ -75,4 +75,9 @@ CSVWidget::PushButton::PushButton (Type type, const std::string& tooltip, QWidge
 bool CSVWidget::PushButton::hasKeepOpen() const
 {
     return mKeepOpen;
+}
+
+QString CSVWidget::PushButton::getBaseToolTip() const
+{
+    return mToolTip;
 }

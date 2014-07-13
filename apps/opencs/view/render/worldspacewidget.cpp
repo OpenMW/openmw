@@ -57,7 +57,7 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
     CSVWidget::SceneToolbar *parent)
 {
-    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent);
+    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Camera Mode");
 
     /// \todo replace icons
     /// \todo consider user-defined button-mapping
