@@ -607,6 +607,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
     if(mDeathState == CharState_None)
         refreshCurrentAnims(mIdleState, mMovementState, true);
+
+    mAnimation->runAnimation(0.f);
 }
 
 CharacterController::~CharacterController()
