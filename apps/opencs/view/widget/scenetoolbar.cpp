@@ -5,6 +5,14 @@
 
 #include "scenetool.hpp"
 
+void CSVWidget::SceneToolbar::focusInEvent (QFocusEvent *event)
+{
+    QWidget::focusInEvent (event);
+
+    if (mLayout->count())
+        dynamic_cast<QWidgetItem&> (*mLayout->itemAt (0)).widget()->setFocus();
+}
+
 CSVWidget::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
 : QWidget (parent), mButtonSize (buttonSize), mIconSize (buttonSize-6)
 {

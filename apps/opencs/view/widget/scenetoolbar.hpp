@@ -17,6 +17,10 @@ namespace CSVWidget
             int mButtonSize;
             int mIconSize;
 
+        protected:
+
+            virtual void focusInEvent (QFocusEvent *event);
+
         public:
 
             SceneToolbar (int buttonSize, QWidget *parent = 0);
