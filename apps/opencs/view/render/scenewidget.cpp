@@ -3,6 +3,7 @@
 #include <QEvent>
 #include <QResizeEvent>
 #include <QTimer>
+#include <QShortcut>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -51,7 +52,11 @@ namespace CSVRender
         QTimer *timer = new QTimer (this);
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
-        timer->start (20); /// \todo make this configurable
+        timer->start (20); ///< \todo make this configurable
+
+        /// \todo make shortcut configurable
+        QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this);
+        connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
     }
 
     CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)

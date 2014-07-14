@@ -238,6 +238,8 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
     mScene = widget;
     mToolbar = toolbar;
 
+    connect (mScene, SIGNAL (focusToolbarRequest()), mToolbar, SLOT (setFocus()));
+
     mLayout->addWidget (mToolbar, 0);
     mLayout->addWidget (mScene, 1);
 
