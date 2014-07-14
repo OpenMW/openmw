@@ -47,6 +47,7 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
     connect (mScene, SIGNAL (referenceableIdChanged (const std::string&)),
         this, SLOT (referenceableIdChanged (const std::string&)));
     connect (mScene, SIGNAL (focusToolbarRequest()), toolbar, SLOT (setFocus()));
+    connect (toolbar, SIGNAL (focusSceneRequest()), mScene, SLOT (setFocus()));
 }
 
 void CSVWorld::PreviewSubView::setEditLock (bool locked) {}

@@ -55,7 +55,7 @@ namespace CSVRender
         timer->start (20); ///< \todo make this configurable
 
         /// \todo make shortcut configurable
-        QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this);
+        QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
         connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
     }
 

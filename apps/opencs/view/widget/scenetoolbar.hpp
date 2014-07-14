@@ -30,6 +30,10 @@ namespace CSVWidget
             int getButtonSize() const;
 
             int getIconSize() const;
+
+        signals:
+
+            void focusSceneRequest();
     };
 }
 
