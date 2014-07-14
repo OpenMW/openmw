@@ -157,6 +157,8 @@ void CompanionWindow::resetReference()
 {
     ReferenceInterface::resetReference();
     mItemView->setModel(NULL);
+    mModel = NULL;
+    mSortModel = NULL;
 }
 
 

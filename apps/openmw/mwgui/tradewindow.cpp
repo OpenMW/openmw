@@ -536,5 +536,7 @@ namespace MWGui
     {
         ReferenceInterface::resetReference();
         mItemView->setModel(NULL);
+        mTradeModel = NULL;
+        mSortModel = NULL;
     }
 }

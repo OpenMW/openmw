@@ -262,6 +262,8 @@ namespace MWGui
     {
         ReferenceInterface::resetReference();
         mItemView->setModel(NULL);
+        mModel = NULL;
+        mSortModel = NULL;
     }
 
     void ContainerWindow::close()
