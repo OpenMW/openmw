@@ -3,6 +3,7 @@
 #include <QEvent>
 #include <QResizeEvent>
 #include <QTimer>
+#include <QShortcut>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -11,7 +12,7 @@
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
 
-#include "../world/scenetoolmode.hpp"
+#include "../widget/scenetoolmode.hpp"
 
 #include "navigation.hpp"
 #include "lighting.hpp"
@@ -51,16 +52,34 @@ namespace CSVRender
         QTimer *timer = new QTimer (this);
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
-        timer->start (20); /// \todo make this configurable
+        timer->start (20); ///< \todo make this configurable
+
+        /// \todo make shortcut configurable
+        QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
+        connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
     }
 
-    CSVWorld::SceneToolMode *SceneWidget::makeLightingSelector (CSVWorld::SceneToolbar *parent)
+    CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
     {
-        CSVWorld::SceneToolMode *tool = new CSVWorld::SceneToolMode (parent);
+        CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
 
-        tool->addButton (":door.png", "day"); /// \todo replace icons
-        tool->addButton (":GMST.png", "night");
-        tool->addButton (":Info.png", "bright");
+        /// \todo replace icons
+        tool->addButton (":door.png", "day",
+            "Day"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Strong directional light source/lir>"
+            "<li>This mode closely resembles day time in-game</li></ul>");
+        tool->addButton (":GMST.png", "night",
+            "Night"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Weak directional light source</li>"
+            "<li>This mode closely resembles night time in-game</li></ul>");
+        tool->addButton (":Info.png", "bright",
+            "Bright"
+            "<ul><li>Maximum ambient</li>"
+            "<li>Strong directional light source</li></ul>");
 
         connect (tool, SIGNAL (modeChanged (const std::string&)),
             this, SLOT (selectLightingMode (const std::string&)));
@@ -347,6 +366,9 @@ namespace CSVRender
 
         mLighting = lighting;
         mLighting->activate (mSceneMgr, mHasDefaultAmbient ? &mDefaultAmbient : 0);
+
+        if (mWindow)
+            mWindow->update();
     }
 
     void SceneWidget::selectLightingMode (const std::string& mode)
