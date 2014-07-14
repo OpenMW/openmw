@@ -195,21 +195,21 @@ namespace MWGui
     {
         if (mPtr.getTypeName() == typeid(ESM::Container).name())
         {
-            // check that we don't exceed container capacity
-            MWWorld::Ptr item = mDragAndDrop->mItem.mBase;
-            float weight = item.getClass().getWeight(item) * mDragAndDrop->mDraggedCount;
-            if (mPtr.getClass().getCapacity(mPtr) < mPtr.getClass().getEncumbrance(mPtr) + weight)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
-                return;
-            }
-
             // check container organic flag
             MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
             if (ref->mBase->mFlags & ESM::Container::Organic)
             {
                 MWBase::Environment::get().getWindowManager()->
                     messageBox("#{sContentsMessage2}");
+                return;
+            }
+
+            // check that we don't exceed container capacity
+            MWWorld::Ptr item = mDragAndDrop->mItem.mBase;
+            float weight = item.getClass().getWeight(item) * mDragAndDrop->mDraggedCount;
+            if (mPtr.getClass().getCapacity(mPtr) < mPtr.getClass().getEncumbrance(mPtr) + weight)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
                 return;
             }
         }
