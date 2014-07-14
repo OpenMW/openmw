@@ -23,6 +23,7 @@ namespace CSVWidget
             int mButtonSize;
             int mIconSize;
             QString mToolTip;
+            PushButton *mFirst;
 
             void adjustToolTip (const PushButton *activeMode);
 

@@ -21,7 +21,7 @@ void CSVWidget::SceneToolMode::adjustToolTip (const PushButton *activeMode)
 
 CSVWidget::SceneToolMode::SceneToolMode (SceneToolbar *parent, const QString& toolTip)
 : SceneTool (parent), mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize()),
-  mToolTip (toolTip)
+  mToolTip (toolTip), mFirst (0)
 {
     mPanel = new QFrame (this, Qt::Popup);
 
@@ -37,8 +37,8 @@ void CSVWidget::SceneToolMode::showPanel (const QPoint& position)
     mPanel->move (position);
     mPanel->show();
 
-    if (!mButtons.empty())
-        mButtons.begin()->first->setFocus (Qt::OtherFocusReason);
+    if (mFirst)
+        mFirst->setFocus (Qt::OtherFocusReason);
 }
 
 void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::string& id,
@@ -58,6 +58,7 @@ void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::st
 
     if (mButtons.size()==1)
     {
+        mFirst = button;
         setIcon (button->icon());
         button->setChecked (true);
         adjustToolTip (button);
