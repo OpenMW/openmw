@@ -113,6 +113,8 @@ namespace MWScript
 
             script.mRunning = iter->second.mRunning ? 1 : 0;
 
+            script.mTargetId = iter->second.mId;
+
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
             writer.endRecord (ESM::REC_GSCR);
@@ -145,6 +147,7 @@ namespace MWScript
 
             iter->second.mRunning = script.mRunning!=0;
             iter->second.mLocals.read (script.mLocals, script.mId);
+            iter->second.mId = script.mTargetId;
 
             return true;
         }
