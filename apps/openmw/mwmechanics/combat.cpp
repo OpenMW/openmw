@@ -256,4 +256,52 @@ namespace MWMechanics
         return hitchance;
     }
 
+    void applyElementalShields(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim)
+    {
+        for (int i=0; i<3; ++i)
+        {
+            float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).mMagnitude;
+
+            if (!magnitude)
+                continue;
+
+            CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
+            float saveTerm = attacker.getClass().getSkill(attacker, ESM::Skill::Destruction)
+                    + 0.2f * attackerStats.getAttribute(ESM::Attribute::Willpower).getModified()
+                    + 0.1f * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
+
+            int fatigueMax = attackerStats.getFatigue().getModified();
+            int fatigueCurrent = attackerStats.getFatigue().getCurrent();
+
+            float normalisedFatigue = fatigueMax==0 ? 1 : std::max (0.0f, static_cast<float> (fatigueCurrent)/fatigueMax);
+
+            saveTerm *= 1.25f * normalisedFatigue;
+
+            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            float x = std::max(0.f, saveTerm - roll);
+
+            int element = ESM::MagicEffect::FireDamage;
+            if (i == 1)
+                element = ESM::MagicEffect::ShockDamage;
+            if (i == 2)
+                element = ESM::MagicEffect::FrostDamage;
+
+            short resistanceEffect = ESM::MagicEffect::getResistanceEffect(element);
+            short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(element);
+            float elementResistance = 0;
+            if (resistanceEffect != -1)
+                elementResistance += attackerStats.getMagicEffects().get(resistanceEffect).mMagnitude;
+            if (weaknessEffect != -1)
+                elementResistance -= attackerStats.getMagicEffects().get(weaknessEffect).mMagnitude;
+
+            x = std::min(100.f, x + elementResistance);
+
+            static const float fElementalShieldMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fElementalShieldMult")->getFloat();
+            x = fElementalShieldMult * magnitude * (1.f - 0.01f * x);
+            MWMechanics::DynamicStat<float> health = attackerStats.getHealth();
+            health.setCurrent(health.getCurrent() - x);
+            attackerStats.setHealth(health);
+        }
+    }
+
 }
