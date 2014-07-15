@@ -286,13 +286,7 @@ namespace MWMechanics
             if (i == 2)
                 element = ESM::MagicEffect::FrostDamage;
 
-            short resistanceEffect = ESM::MagicEffect::getResistanceEffect(element);
-            short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(element);
-            float elementResistance = 0;
-            if (resistanceEffect != -1)
-                elementResistance += attackerStats.getMagicEffects().get(resistanceEffect).mMagnitude;
-            if (weaknessEffect != -1)
-                elementResistance -= attackerStats.getMagicEffects().get(weaknessEffect).mMagnitude;
+            float elementResistance = MWMechanics::getEffectResistanceAttribute(element, &attackerStats.getMagicEffects());
 
             x = std::min(100.f, x + elementResistance);
 

@@ -148,6 +148,27 @@ namespace MWMechanics
         return school;
     }
 
+    float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects)
+    {
+        short resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
+        short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);
+
+        float resistance = 0;
+        if (resistanceEffect != -1)
+            resistance += actorEffects->get(resistanceEffect).mMagnitude;
+        if (weaknessEffect != -1)
+            resistance -= actorEffects->get(weaknessEffect).mMagnitude;
+
+        if (effectId == ESM::MagicEffect::FireDamage)
+            resistance += actorEffects->get(ESM::MagicEffect::FireShield).mMagnitude;
+        if (effectId == ESM::MagicEffect::ShockDamage)
+            resistance += actorEffects->get(ESM::MagicEffect::LightningShield).mMagnitude;
+        if (effectId == ESM::MagicEffect::FrostDamage)
+            resistance += actorEffects->get(ESM::MagicEffect::FrostShield).mMagnitude;
+
+        return resistance;
+    }
+
     float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                                const ESM::Spell* spell, const MagicEffects* effects)
     {
@@ -163,16 +184,7 @@ namespace MWMechanics
         float resisted = 0;
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
         {
-
-            short resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
-            short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);
-
-            float resistance = 0;
-            if (resistanceEffect != -1)
-                resistance += magicEffects->get(resistanceEffect).mMagnitude;
-            if (weaknessEffect != -1)
-                resistance -= magicEffects->get(weaknessEffect).mMagnitude;
-
+            float resistance = getEffectResistanceAttribute(effectId, magicEffects);
 
             float willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
             float luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
