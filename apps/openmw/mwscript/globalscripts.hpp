@@ -44,7 +44,7 @@ namespace MWScript
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void addScript (const std::string& name);
+            void addScript (const std::string& name, const std::string& targetId = "");
 
             void removeScript (const std::string& name);
 

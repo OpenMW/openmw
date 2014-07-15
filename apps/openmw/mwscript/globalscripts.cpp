@@ -24,7 +24,7 @@ namespace MWScript
         addStartup();
     }
 
-    void GlobalScripts::addScript (const std::string& name)
+    void GlobalScripts::addScript (const std::string& name, const std::string& targetId)
     {
         std::map<std::string, GlobalScriptDesc>::iterator iter =
             mScripts.find (::Misc::StringUtils::lowerCase (name));
@@ -36,12 +36,16 @@ namespace MWScript
                 GlobalScriptDesc desc;
                 desc.mRunning = true;
                 desc.mLocals.configure (*script);
+                desc.mId = targetId;
 
                 mScripts.insert (std::make_pair (name, desc));
             }
         }
-        else
+        else if (!iter->second.mRunning)
+        {
             iter->second.mRunning = true;
+            iter->second.mId = targetId;
+        }
     }
 
     void GlobalScripts::removeScript (const std::string& name)

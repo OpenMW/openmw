@@ -113,7 +113,7 @@ namespace MWScript
 
             virtual bool isScriptRunning (const std::string& name) const;
 
-            virtual void startScript (const std::string& name);
+            virtual void startScript (const std::string& name, const std::string& targetId = "");
 
             virtual void stopScript (const std::string& name);
 

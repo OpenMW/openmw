@@ -81,7 +81,7 @@ namespace Interpreter
 
             virtual bool isScriptRunning (const std::string& name) const = 0;
 
-            virtual void startScript (const std::string& name) = 0;
+            virtual void startScript (const std::string& name, const std::string& targetId = "") = 0;
 
             virtual void stopScript (const std::string& name) = 0;
 

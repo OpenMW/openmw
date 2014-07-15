@@ -366,9 +366,9 @@ namespace MWScript
         return MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning (name);
     }
 
-    void InterpreterContext::startScript (const std::string& name)
+    void InterpreterContext::startScript (const std::string& name, const std::string& targetId)
     {
-        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript (name);
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript (name, targetId);
     }
 
     void InterpreterContext::stopScript (const std::string& name)
