@@ -92,6 +92,8 @@ namespace Compiler
 
             bool scanSpecial (char c, Parser& parser, bool& cont);
 
+            bool isStringCharacter (char c, bool lookAhead = true);
+
             static bool isWhitespace (char c);
 
         public:
