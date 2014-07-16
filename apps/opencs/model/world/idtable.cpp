@@ -75,19 +75,19 @@ QVariant CSMWorld::IdTable::headerData (int section,
 
 QVariant CSMWorld::IdTable::nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role) const
 {
-    assert(mIdCollection->getColumn(section).canHaveNestedColumns());
+    const NestColumn& parentColumn = dynamic_cast<const NestColumn&>(mIdCollection->getColumn(section));
 
     if (orientation==Qt::Vertical)
         return QVariant();
 
     if (role==Qt::DisplayRole)
-        return tr (mIdCollection->getColumn(section).getNestedColumnTitle(subSection).c_str());
+        return tr(parentColumn.nestedColumn(subSection).getTitle().c_str());
 
     if (role==ColumnBase::Role_Flags)
         return mIdCollection->getColumn (section).mFlags;
 
     if (role==ColumnBase::Role_Display)
-        return mIdCollection->getColumn (section).mNestedDisplayType.at(subSection);
+        return parentColumn.nestedColumn(subSection).mDisplayType;
 
     return QVariant();
 }
@@ -354,6 +354,6 @@ bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
 {
     return (index.isValid() &&
             index.internalId() == 0 &&
-            mIdCollection->getColumn (index.column()).canHaveNestedColumns() &&
+            mIdCollection->getColumn(index.column()).mCanNest &&
             index.data().isValid());
 }

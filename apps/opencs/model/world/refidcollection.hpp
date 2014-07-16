@@ -18,7 +18,7 @@ namespace CSMWorld
 {
     class RefIdAdapter;
 
-    class RefIdColumn : public ColumnBase
+    class RefIdColumn : public NestColumn 
     {
             bool mEditable;
             bool mUserEditable;

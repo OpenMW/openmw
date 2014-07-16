@@ -2,8 +2,6 @@
 
 #include "columns.hpp"
 
-#include <cassert>
-
 CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags, bool canNest)
     : mColumnId (columnId), mDisplayType (displayType), mFlags (flags), mCanNest(canNest)
 {}
@@ -25,28 +23,42 @@ int  CSMWorld::ColumnBase::getId() const
     return mColumnId;
 }
 
-bool CSMWorld::ColumnBase::canHaveNestedColumns() const
+bool CSMWorld::NestColumn::canHaveNestedColumns() const
 {
     return mCanNest;
 }
 
-std::string CSMWorld::ColumnBase::getNestedColumnTitle(int columnNumber) const
+void CSMWorld::NestColumn::addNestedColumn(int columnId, Display displayType)
 {
-    assert (mCanNest);
-
-    return Columns::getName(static_cast<Columns::ColumnId>(mNestedColumnId[columnNumber]));
+    if (!mCanNest)
+        throw std::logic_error("Tried to nest inside of the non-nest column");
+    
+    mNestedColumns.push_back(CSMWorld::NestedColumn(columnId, displayType, mFlags, this));
 }
 
-void CSMWorld::ColumnBase::addNestedColumnDisplay(CSMWorld::ColumnBase::Display displayDefinition)
+const CSMWorld::ColumnBase& CSMWorld::NestColumn::nestedColumn(int subColumn) const 
 {
-    assert (mCanNest);
-
-    mNestedDisplayType.push_back(displayDefinition);
+    if (!mCanNest)
+        throw std::logic_error("Tried to access nested column of the non-nest column");
+    
+    return mNestedColumns.at(subColumn);
 }
 
-void CSMWorld::ColumnBase::addNestedColumnId(int columnId)
+int CSMWorld::NestColumn::nestedColumnCount() const
 {
-    assert (mCanNest);
+    if (!mCanNest)
+        throw std::logic_error("Tried to access number of the subcolumns in the non-nest column");
+    
+    return mNestedColumns.size();
+}
 
-    mNestedColumnId.push_back(columnId);
+CSMWorld::NestColumn::NestColumn(int columnId, Display displayType, int flags, bool canNest)
+    : CSMWorld::ColumnBase(columnId, displayType, flags, canNest) {}
+
+CSMWorld::NestedColumn::NestedColumn(int columnId, Display displayType, int flag, const CSMWorld::NestColumn* parent)
+    : mParent(parent), CSMWorld::ColumnBase(columnId, displayType, flag) {}
+
+bool CSMWorld::NestedColumn::isEditable() const
+{
+    return mParent->isEditable();
 }

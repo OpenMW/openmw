@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <exception>
 
 #include <Qt>
 #include <QVariant>
@@ -110,9 +111,7 @@ namespace CSMWorld
         int mColumnId;
         int mFlags;
         Display mDisplayType;
-        std::vector<Display> mNestedDisplayType; //used only for the columns that actually nest other columns
-        std::vector<int> mNestedColumnId; //used only for the columns that actually nest other columns
-        const bool mCanNest;
+        bool mCanNest;
 
         ColumnBase (int columnId, Display displayType, int flag, bool canNest = false);
 
@@ -125,22 +124,42 @@ namespace CSMWorld
 
         virtual std::string getTitle() const;
 
-        std::string getNestedColumnTitle(int columnNumber) const;
-
-        void addNestedColumnDisplay(Display displayDefinition);
-
-        void addNestedColumnId(int columnId);
-
         virtual int getId() const;
-
-        bool canHaveNestedColumns() const;
     };
 
+    class NestedColumn;
+
+    class NestColumn : public ColumnBase
+    {
+        std::vector<NestedColumn> mNestedColumns;
+
+    public:
+        NestColumn(int columnId, Display displayType, int flags, bool canNest);
+
+        void addNestedColumn(int columnId, Display displayType);
+
+        bool canHaveNestedColumns() const;
+        
+        const ColumnBase& nestedColumn(int subColumn) const;
+        
+        int nestedColumnCount() const;
+    };
+
+    class NestedColumn : public ColumnBase
+    {
+        const ColumnBase* mParent;
+
+    public:
+        NestedColumn(int columnId, Display displayType, int flag, const NestColumn* parent);
+        
+        virtual bool isEditable() const;
+    };
+    
     template<typename ESXRecordT>
-    struct Column : public ColumnBase
+    struct Column : public NestColumn
     {
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue, bool canNest = false)
-            : ColumnBase (columnId, displayType, flags, canNest) {}
+            : NestColumn (columnId, displayType, canNest, flags) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 

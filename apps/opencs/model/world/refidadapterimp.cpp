@@ -1,6 +1,7 @@
 #include "refidadapterimp.hpp"
 
 #include <cassert>
+#include <stdexcept>
 
 CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const InventoryColumns& columns,
     const RefIdColumn *autoCalc)
@@ -296,7 +297,7 @@ void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column,
                 break;
 
             default:
-                throw "Trying to access non-existing column in the nested table!";
+                throw std::logic_error("Trying to access non-existing column in the nested table!");
         }
     } else
     {
@@ -326,11 +327,11 @@ QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdCo
                 return content.mCount;
 
             default:
-                throw "Trying to access non-existing column in the nested table!";
+                throw std::logic_error("Trying to access non-existing column in the nested table!");
         }
     } else
     {
-        throw "This column does not hold multiple values.";
+        throw std::logic_error("This column does not hold multiple values.");
     }
 }
 

@@ -13,7 +13,7 @@
 
 CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
                                     bool editable, bool userEditable, bool canNest)
-    : ColumnBase (columnId, displayType, flag, canNest), mEditable (editable), mUserEditable (userEditable)
+    : NestColumn (columnId, displayType, flag, canNest), mEditable (editable), mUserEditable (userEditable)
 {}
 
 bool CSMWorld::RefIdColumn::isEditable() const
@@ -168,10 +168,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue, true, true, true));
     const RefIdColumn *content = &mColumns.back();
-    (&mColumns.back())->addNestedColumnDisplay(CSMWorld::ColumnBase::Display_String);
-    (&mColumns.back())->addNestedColumnDisplay(CSMWorld::ColumnBase::Display_Integer);
-    (&mColumns.back())->addNestedColumnId(Columns::ColumnId_InventoryItemId);
-    (&mColumns.back())->addNestedColumnId(Columns::ColumnId_ItemCount);
+    (&mColumns.back())->addNestedColumn(Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String);
+    (&mColumns.back())->addNestedColumn(Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer);
 
     CreatureColumns creatureColumns (actorsColumns);
 
