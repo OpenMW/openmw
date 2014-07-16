@@ -512,28 +512,21 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
         // empty this slot
         mSlots[slot] = end();
 
-        // restack the previously equipped item with other (non-equipped) items
-        for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+        if (it->getRefData().getCount())
         {
-            if (stacks(*iter, *it))
-            {
-                iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
-                it->getRefData().setCount(0);
-                retval = iter;
-                break;
-            }
-        }
+            retval = restack(*it);
 
-        if (actor.getRefData().getHandle() == "player")
-        {
-            // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
-            const std::string& script = it->getClass().getScript(*it);
-            if (script != "")
-                (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
-
-            if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
+            if (actor.getRefData().getHandle() == "player")
             {
-                mSelectedEnchantItem = end();
+                // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
+                const std::string& script = it->getClass().getScript(*it);
+                if (script != "")
+                    (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
+
+                if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
+                {
+                    mSelectedEnchantItem = end();
+                }
             }
         }
 
@@ -633,8 +626,15 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
         static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "fMagicItemRechargePerSecond")->getFloat();
 
-        it->first->getCellRef().setEnchantmentCharge(std::min (it->first->getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
-                                                              it->second));
+        if (it->first->getCellRef().getEnchantmentCharge() <= it->second)
+        {
+            it->first->getCellRef().setEnchantmentCharge(std::min (it->first->getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
+                                                                  it->second));
+
+            // attempt to restack when fully recharged
+            if (it->first->getCellRef().getEnchantmentCharge() == it->second)
+                it->first = restack(*it->first);
+        }
     }
 }
 

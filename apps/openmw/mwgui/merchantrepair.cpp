@@ -117,15 +117,18 @@ void MerchantRepair::exit()
 
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
     // repair
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
     item.getCellRef().setCharge(item.getClass().getItemMaxHealth(item));
+
+    player.getClass().getContainerStore(player).restack(item);
 
     MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
 
     int price = boost::lexical_cast<int>(sender->getUserString("Price"));
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
     startRepair(mActor);
