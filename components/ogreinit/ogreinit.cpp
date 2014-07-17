@@ -193,7 +193,7 @@ namespace OgreInit
                 pluginDir = Ogre::macFrameworksPath();
     #endif
     #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-            pluginDir = OGRE_PLUGIN_DIR_REL;
+            pluginDir = OGRE_PLUGIN_DIR;
     #endif
         }
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
