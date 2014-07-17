@@ -23,6 +23,7 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
 
 void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
 {
+    mEncoding = encoding;
     if (encoding == QLatin1String("win1252"))
         mCodec = QTextCodec::codecForName("windows-1252");
 
@@ -449,7 +450,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         try {
             ESM::ESMReader fileReader;
             ToUTF8::Utf8Encoder encoder =
-            ToUTF8::calculateEncoding(QString(mCodec->name()).toStdString());
+            ToUTF8::calculateEncoding(mEncoding.toStdString());
             fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
