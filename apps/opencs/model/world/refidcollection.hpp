@@ -18,7 +18,7 @@ namespace CSMWorld
 {
     class RefIdAdapter;
 
-    class RefIdColumn : public NestColumn 
+    class RefIdColumn : public NestColumn
     {
             bool mEditable;
             bool mUserEditable;
@@ -76,11 +76,11 @@ namespace CSMWorld
             virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
 
             virtual void removeRows (int index, int count);
-        
+
             virtual void removeNestedRows(int row, int column, int subRow);
 
             virtual void addNestedRow(int row, int col, int position);
-        
+
             virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const UniversalId::Type type);
@@ -124,9 +124,8 @@ namespace CSMWorld
 
             void save (int index, ESM::ESMWriter& writer) const;
 
-	    const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
+            const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
     };
 }
 
 #endif
-
