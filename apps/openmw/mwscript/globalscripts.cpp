@@ -75,8 +75,15 @@ namespace MWScript
         {
             if (iter->second.mRunning)
             {
+                MWWorld::Ptr ptr;
+
+                if (!iter->second.mId.empty())
+                    ptr = MWBase::Environment::get().getWorld()->getPtr (
+                        iter->second.mId, false);
+
                 MWScript::InterpreterContext interpreterContext (
-                    &iter->second.mLocals, MWWorld::Ptr());
+                    &iter->second.mLocals, ptr);
+
                 MWBase::Environment::get().getScriptManager()->run (iter->first, interpreterContext);
             }
         }
