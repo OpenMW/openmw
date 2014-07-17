@@ -266,7 +266,7 @@ namespace MWDialogue
             }
             catch (const std::exception& error)
             {
-                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
+                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
             }
         }
     }
