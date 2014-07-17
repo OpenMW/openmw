@@ -22,7 +22,7 @@
 
 namespace MWScript
 {
-    MWWorld::Ptr InterpreterContext::getReference (
+    MWWorld::Ptr InterpreterContext::getReferenceImp (
         const std::string& id, bool activeOnly, bool doThrow)
     {
         if (!id.empty())
@@ -31,6 +31,10 @@ namespace MWScript
         }
         else
         {
+            if (mReference.isEmpty() && !mTargetId.empty())
+                mReference =
+                    MWBase::Environment::get().getWorld()->searchPtr (mTargetId, false);
+
             if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
 
@@ -38,7 +42,7 @@ namespace MWScript
         }
     }
 
-    const MWWorld::Ptr InterpreterContext::getReference (
+    const MWWorld::Ptr InterpreterContext::getReferenceImp (
         const std::string& id, bool activeOnly, bool doThrow) const
     {
         if (!id.empty())
@@ -47,6 +51,10 @@ namespace MWScript
         }
         else
         {
+            if (mReference.isEmpty() && !mTargetId.empty())
+                mReference =
+                    MWBase::Environment::get().getWorld()->searchPtr (mTargetId, false);
+
             if (mReference.isEmpty() && doThrow)
                 throw std::runtime_error ("no implicit reference");
 
@@ -64,7 +72,7 @@ namespace MWScript
         }
         else
         {
-            const MWWorld::Ptr ptr = getReference (id, false);
+            const MWWorld::Ptr ptr = getReferenceImp (id, false);
 
              id = ptr.getClass().getScript (ptr);
 
@@ -84,7 +92,7 @@ namespace MWScript
         }
         else
         {
-            const MWWorld::Ptr ptr = getReference (id, false);
+            const MWWorld::Ptr ptr = getReferenceImp (id, false);
 
             id = ptr.getClass().getScript (ptr);
 
@@ -96,9 +104,9 @@ namespace MWScript
     }
 
     InterpreterContext::InterpreterContext (
-        MWScript::Locals *locals, MWWorld::Ptr reference)
+        MWScript::Locals *locals, MWWorld::Ptr reference, const std::string& targetId)
     : mLocals (locals), mReference (reference),
-      mActivationHandled (false)
+      mActivationHandled (false), mTargetId (targetId)
     {}
 
     int InterpreterContext::getLocalShort (int index) const
@@ -236,34 +244,34 @@ namespace MWScript
 
     std::string InterpreterContext::getNPCName() const
     {
-        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        ESM::NPC npc = *getReferenceImp().get<ESM::NPC>()->mBase;
         return npc.mName;
     }
 
     std::string InterpreterContext::getNPCRace() const
     {
-        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        ESM::NPC npc = *getReferenceImp().get<ESM::NPC>()->mBase;
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc.mRace);
         return race->mName;
     }
 
     std::string InterpreterContext::getNPCClass() const
     {
-        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        ESM::NPC npc = *getReferenceImp().get<ESM::NPC>()->mBase;
         const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc.mClass);
         return class_->mName;
     }
 
     std::string InterpreterContext::getNPCFaction() const
     {
-        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        ESM::NPC npc = *getReferenceImp().get<ESM::NPC>()->mBase;
         const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npc.mFaction);
         return faction->mName;
     }
 
     std::string InterpreterContext::getNPCRank() const
     {
-        std::map<std::string, int> ranks = mReference.getClass().getNpcStats (mReference).getFactionRanks();
+        std::map<std::string, int> ranks = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.begin();
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -299,7 +307,7 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        std::string factionId = mReference.getClass().getNpcStats (mReference).getFactionRanks().begin()->first;
+        std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
 
         std::map<std::string, int> ranks = player.getClass().getNpcStats (player).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.find(factionId);
@@ -326,7 +334,7 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        std::string factionId = mReference.getClass().getNpcStats (mReference).getFactionRanks().begin()->first;
+        std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
 
         std::map<std::string, int> ranks = player.getClass().getNpcStats (player).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.find(factionId);
@@ -383,7 +391,7 @@ namespace MWScript
         MWWorld::Ptr ref2;
 
         if (id.empty())
-            ref2 = getReference("", true, true);
+            ref2 = getReferenceImp();
         else
             ref2 = MWBase::Environment::get().getWorld()->searchPtr(id, true);
 
@@ -448,19 +456,19 @@ namespace MWScript
 
     bool InterpreterContext::isDisabled (const std::string& id) const
     {
-        const MWWorld::Ptr ref = getReference (id, false);
+        const MWWorld::Ptr ref = getReferenceImp (id, false);
         return !ref.getRefData().isEnabled();
     }
 
     void InterpreterContext::enable (const std::string& id)
     {
-        MWWorld::Ptr ref = getReference (id, false);
+        MWWorld::Ptr ref = getReferenceImp (id, false);
         MWBase::Environment::get().getWorld()->enable (ref);
     }
 
     void InterpreterContext::disable (const std::string& id)
     {
-        MWWorld::Ptr ref = getReference (id, false);
+        MWWorld::Ptr ref = getReferenceImp (id, false);
         MWBase::Environment::get().getWorld()->disable (ref);
     }
 
@@ -542,6 +550,11 @@ namespace MWScript
 
     MWWorld::Ptr InterpreterContext::getReference(bool required)
     {
-        return getReference ("", true, required);
+        return getReferenceImp ("", true, required);
+    }
+
+    std::string InterpreterContext::getTargetId() const
+    {
+        return mTargetId;
     }
 }
