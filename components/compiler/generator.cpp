@@ -300,9 +300,9 @@ namespace
         code.push_back (Compiler::Generator::segment5 (46));
     }
 
-    void opStartScript (Compiler::Generator::CodeContainer& code)
+    void opStartScript (Compiler::Generator::CodeContainer& code, bool targeted)
     {
-        code.push_back (Compiler::Generator::segment5 (47));
+        code.push_back (Compiler::Generator::segment5 (targeted ? 71 : 47));
     }
 
     void opStopScript (Compiler::Generator::CodeContainer& code)
@@ -830,9 +830,16 @@ namespace Compiler
             opScriptRunning (code);
         }
 
-        void startScript (CodeContainer& code)
+        void startScript (CodeContainer& code, Literals& literals, const std::string& id)
         {
-            opStartScript (code);
+            if (id.empty())
+                opStartScript (code, false);
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opStartScript (code, true);
+            }
         }
 
         void stopScript (CodeContainer& code)
