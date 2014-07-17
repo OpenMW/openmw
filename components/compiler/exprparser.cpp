@@ -386,6 +386,9 @@ namespace Compiler
                     mExplicit.clear();
                     mRefOp = false;
 
+                    std::vector<Interpreter::Type_Code> ignore;
+                    parseArguments ("x", scanner, ignore);
+
                     mNextOperand = false;
                     return true;
                 }
@@ -526,6 +529,9 @@ namespace Compiler
 
                 Generator::getDisabled (mCode, mLiterals, "");
                 mOperands.push_back ('l');
+
+                std::vector<Interpreter::Type_Code> ignore;
+                parseArguments ("x", scanner, ignore);
 
                 mNextOperand = false;
                 return true;
