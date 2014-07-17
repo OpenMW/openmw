@@ -73,10 +73,10 @@ namespace CSMWorld
             ///< Add a new record (modified)
 
             virtual int getSize() const;
-	    
-	    virtual int getNestedColumnsCount(int column) const;
 
-	    virtual int getNestedRowsCount(int row, int column) const;
+            virtual int getNestedColumnsCount(int column) const;
+
+            virtual int getNestedRowsCount(int row, int column) const;
 
             virtual std::string getId (int index) const;
 
@@ -253,19 +253,17 @@ namespace CSMWorld
     {
         return mRecords.size();
     }
-    
+
     template<typename ESXRecordT, typename IdAccessorT>
     int Collection<ESXRecordT, IdAccessorT>::getNestedRowsCount(int row, int column) const
     {
-	//TODO
-	return 0;
+        return 0;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     int Collection<ESXRecordT, IdAccessorT>::getNestedColumnsCount(int column) const
     {
-	//TODO
-	return 0;
+        return 0;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -300,7 +298,7 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     QVariant Collection<ESXRecordT, IdAccessorT>::getNestedData(int row, int column, int subRow, int subColumn) const
     {
-        return 10; //TODO
+        return QVariant();
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
