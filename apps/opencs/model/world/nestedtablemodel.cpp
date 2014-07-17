@@ -1,7 +1,7 @@
 #include "nestedtablemodel.hpp"
 
 #include <cassert>
-#include "./idtable.hpp"
+#include "idtable.hpp"
 
 CSMWorld::NestedTableModel::NestedTableModel(const QModelIndex& parent,
                                              ColumnBase::Display columnId,
