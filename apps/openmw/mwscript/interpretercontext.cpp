@@ -107,7 +107,13 @@ namespace MWScript
         MWScript::Locals *locals, MWWorld::Ptr reference, const std::string& targetId)
     : mLocals (locals), mReference (reference),
       mActivationHandled (false), mTargetId (targetId)
-    {}
+    {
+        // If we run on a reference (local script, dialogue script or console with object
+        // selected), store the ID of that reference store it so it can be inherited by
+        // targeted scripts started from this one.
+        if (targetId.empty() && !reference.isEmpty())
+            mTargetId = reference.getClass().getId (reference);
+    }
 
     int InterpreterContext::getLocalShort (int index) const
     {
