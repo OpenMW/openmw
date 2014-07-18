@@ -448,12 +448,14 @@ public:
         if(life_time-particle_time < mGrowTime)
         {
             Ogre::Real scale = (life_time-particle_time) / mGrowTime;
+            assert (scale >= 0);
             width *= scale;
             height *= scale;
         }
         if(particle_time < mFadeTime)
         {
             Ogre::Real scale = particle_time / mFadeTime;
+            assert (scale >= 0);
             width *= scale;
             height *= scale;
         }
@@ -479,12 +481,14 @@ public:
             if(life_time-particle_time < mGrowTime)
             {
                 Ogre::Real scale = (life_time-particle_time) / mGrowTime;
+                assert (scale >= 0);
                 width *= scale;
                 height *= scale;
             }
             if(particle_time < mFadeTime)
             {
                 Ogre::Real scale = particle_time / mFadeTime;
+                assert (scale >= 0);
                 width *= scale;
                 height *= scale;
             }

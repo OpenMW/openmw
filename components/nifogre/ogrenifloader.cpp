@@ -762,8 +762,8 @@ class NIFObjectLoader
         else
             emitter->setEmissionRate(partctrl->numParticles / (partctrl->lifetime + partctrl->lifetimeRandom/2));
 
-        emitter->setTimeToLive(partctrl->lifetime,
-                               partctrl->lifetime + partctrl->lifetimeRandom);
+        emitter->setTimeToLive(std::max(0.f, partctrl->lifetime),
+                               std::max(0.f, partctrl->lifetime + partctrl->lifetimeRandom));
         emitter->setParameter("width", Ogre::StringConverter::toString(partctrl->offsetRandom.x));
         emitter->setParameter("height", Ogre::StringConverter::toString(partctrl->offsetRandom.y));
         emitter->setParameter("depth", Ogre::StringConverter::toString(partctrl->offsetRandom.z));
