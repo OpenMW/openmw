@@ -27,6 +27,11 @@ namespace
 
 namespace MWClass
 {
+    std::string CreatureLevList::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::CreatureLevList>()->mBase->mId;
+    }
+
     std::string CreatureLevList::getName (const MWWorld::Ptr& ptr) const
     {
         return "";

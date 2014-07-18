@@ -24,6 +24,11 @@
 
 namespace MWClass
 {
+    std::string Potion::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Potion>()->mBase->mId;
+    }
+
     void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);

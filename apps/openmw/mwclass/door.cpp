@@ -42,6 +42,11 @@ namespace
 
 namespace MWClass
 {
+    std::string Door::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Door>()->mBase->mId;
+    }
+
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);

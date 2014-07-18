@@ -38,6 +38,11 @@ bool isGold (const MWWorld::Ptr& ptr)
 
 namespace MWClass
 {
+    std::string Miscellaneous::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Miscellaneous>()->mBase->mId;
+    }
+
     void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);

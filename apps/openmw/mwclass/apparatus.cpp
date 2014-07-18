@@ -21,6 +21,11 @@
 
 namespace MWClass
 {
+    std::string Apparatus::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Apparatus>()->mBase->mId;
+    }
+
     void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
