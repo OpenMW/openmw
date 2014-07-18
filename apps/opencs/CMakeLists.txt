@@ -19,7 +19,7 @@ opencs_hdrs_noqt (model/doc
 
 opencs_units (model/world
     idtable idtableproxymodel regionmap data commanddispatcher
-    idtablebase resourcetable nestedtablemodel
+    idtablebase resourcetable nestedtablemodel nestedtablewrapper
     )
 
 

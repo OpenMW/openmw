@@ -177,26 +177,10 @@ CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTable& model, const std::s
       mModel(model),
       mParentColumn(parentColumn),
       QUndoCommand(parent),
-      mNestedRow(nestedRow)
+      mNestedRow(nestedRow),
+      mOld(model.nestedTable(model.getModelIndex(id, parentColumn)))
 {
     setText (("Delete nested row in " + mId).c_str());
-
-    const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
-
-    const int columnsCount = mModel.columnCount(parentIndex);
-
-    for (int i = 0; i < columnsCount; ++i)
-    {
-        const QModelIndex& childIndex = mModel.index(nestedRow, i, parentIndex);
-
-        QVariant data = childIndex.data();
-        if (!data.isValid())
-        {
-            data = childIndex.data(Qt::DisplayRole);
-        }
-
-        mOld.push_back(data);
-    }
 }
 
 void CSMWorld::DeleteNestedCommand::redo()
@@ -211,14 +195,7 @@ void CSMWorld::DeleteNestedCommand::undo()
 {
     const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
 
-    mModel.addNestedRow(parentIndex, mNestedRow);
-    
-    for (int i = 0; i < mModel.columnCount(parentIndex); ++i)
-    {
-        const QModelIndex& current = mModel.index(mNestedRow, i, parentIndex);
-
-        mModel.setData(current, mOld[i]);
-    }
+    mModel.setNestedTable(parentIndex, mOld);
 }
 
 CSMWorld::AddNestedCommand::AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
@@ -226,7 +203,8 @@ CSMWorld::AddNestedCommand::AddNestedCommand(IdTable& model, const std::string& 
       mId(id),
       mNewRow(nestedRow),
       mParentColumn(parentColumn),
-      QUndoCommand(parent)
+      QUndoCommand(parent),
+      mOld(model.nestedTable(model.getModelIndex(id, parentColumn)))
 {
     setText (("Added nested row in " + mId).c_str());
 }
@@ -241,6 +219,6 @@ void CSMWorld::AddNestedCommand::redo()
 void CSMWorld::AddNestedCommand::undo()
 {
     const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
-    
-    mModel.removeRows(mNewRow, 1, parentIndex);
+
+    mModel.setNestedTable(parentIndex, mOld);
 }

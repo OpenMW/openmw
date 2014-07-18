@@ -10,6 +10,7 @@ namespace CSMWorld
     class RefIdColumn;
     class RefIdData;
     class RecordBase;
+    class NestedTableWrapperBase;
 
     class RefIdAdapter
     {
@@ -41,7 +42,7 @@ namespace CSMWorld
             NestedRefIdAdapter();
 
             virtual ~NestedRefIdAdapter();
- 
+
             virtual void setNestedData (const RefIdColumn *column, RefIdData& data, int row,
                                         const QVariant& value, int subRowIndex, int subColIndex) const = 0;
 
@@ -53,8 +54,12 @@ namespace CSMWorld
             virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const = 0;
 
             virtual void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const = 0;
-        
+
             virtual void addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const = 0;
+
+            virtual void setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) = 0;
+
+            virtual NestedTableWrapperBase nestedTable (const RefIdColumn * column, const RefIdData& data, int index) const = 0;
     };
 }
 

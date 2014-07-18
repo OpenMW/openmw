@@ -15,6 +15,8 @@
 
 namespace CSMWorld
 {
+    class NestedTableWrapperBase;
+
     struct BaseColumns
     {
         const RefIdColumn *mId;
@@ -637,6 +639,10 @@ namespace CSMWorld
             virtual void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const;
 
             virtual void addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const;
+        
+            virtual NestedTableWrapperBase nestedTable (const RefIdColumn * column, const RefIdData& data, int index) const;
+
+            virtual void setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable);
     };
 
     struct CreatureColumns : public ActorColumns

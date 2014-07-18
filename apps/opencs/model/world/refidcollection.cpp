@@ -10,6 +10,7 @@
 #include "refidadapter.hpp"
 #include "refidadapterimp.hpp"
 #include "columns.hpp"
+#include "nestedtablewrapper.hpp"
 
 CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
                                     bool editable, bool userEditable, bool canNest)
@@ -27,7 +28,7 @@ bool CSMWorld::RefIdColumn::isUserEditable() const
 }
 
 
-const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdaptor (UniversalId::Type type) const
+CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdaptor (UniversalId::Type type) const
 {
     std::map<UniversalId::Type, RefIdAdapter *>::const_iterator iter = mAdapters.find (type);
 
@@ -640,4 +641,22 @@ void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
 
     adaptor.addNestedRow(&mColumns.at(col), mData, localIndex.first, position);
+}
+
+void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+
+    adaptor.setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
+}
+
+CSMWorld::NestedTableWrapperBase CSMWorld::RefIdCollection::nestedTable(int row, int column) const
+{
+    RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+    
+    return adaptor.nestedTable(&mColumns.at(column), mData, localIndex.first);
 }

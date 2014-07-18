@@ -1,7 +1,9 @@
 #include "refidadapterimp.hpp"
+#include "nestedtablewrapper.hpp"
 
 #include <cassert>
 #include <stdexcept>
+#include <components/esm/loadcont.hpp>
 
 CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const InventoryColumns& columns,
     const RefIdColumn *autoCalc)
@@ -303,6 +305,27 @@ void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column,
     {
         assert(false);
     }
+}
+
+void CSMWorld::ContainerRefIdAdapter::setNestedTable(const RefIdColumn* column,
+                                                    RefIdData& data,
+                                                    int index, 
+                                                    const NestedTableWrapperBase& nestedTable)
+{
+    Record<ESM::Container>& record = dynamic_cast<Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    record.get().mInventory.mList = dynamic_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable).getNestedTable();
+}
+
+CSMWorld::NestedTableWrapperBase CSMWorld::ContainerRefIdAdapter::nestedTable (const RefIdColumn* column, 
+                                                                              const RefIdData& data, 
+                                                                              int index) const
+{
+    const Record<ESM::Container>& record = dynamic_cast<const Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    return NestedTableWrapper<std::vector<ESM::ContItem> >(record.get().mInventory.mList);
 }
 
 QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdColumn* column,

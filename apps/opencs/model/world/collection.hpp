@@ -16,6 +16,8 @@
 
 #include "collectionbase.hpp"
 
+#include "nestedtablewrapper.hpp"
+
 namespace CSMWorld
 {
     /// \brief Access to ID field in records
@@ -89,6 +91,10 @@ namespace CSMWorld
             virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
 
             virtual void setData (int index, int column, const QVariant& data);
+
+            virtual NestedTableWrapperBase nestedTable(int row, int column) const;
+
+            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
 
             virtual const ColumnBase& getColumn (int column) const;
 
@@ -299,6 +305,18 @@ namespace CSMWorld
     QVariant Collection<ESXRecordT, IdAccessorT>::getNestedData(int row, int column, int subRow, int subColumn) const
     {
         return QVariant();
+    }
+    
+    template<typename ESXRecordT, typename IdAccessorT>
+    NestedTableWrapperBase Collection<ESXRecordT, IdAccessorT>::nestedTable(int row, int column) const 
+    {
+        return NestedTableWrapperBase();
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    void Collection<ESXRecordT, IdAccessorT>::setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable)
+    {
+        throw std::logic_error("setNestedTable was not overriden");
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

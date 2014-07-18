@@ -17,6 +17,7 @@ namespace ESM
 namespace CSMWorld
 {
     class RefIdAdapter;
+    class NestedTableWrapperBase;
 
     class RefIdColumn : public NestColumn
     {
@@ -44,7 +45,7 @@ namespace CSMWorld
 
         private:
 
-            const RefIdAdapter& findAdaptor (UniversalId::Type) const;
+            RefIdAdapter& findAdaptor (UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
 
         public:
@@ -70,6 +71,10 @@ namespace CSMWorld
             virtual QVariant getData (int index, int column) const;
 
             virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+        
+            virtual NestedTableWrapperBase nestedTable(int row, int column) const;
+
+            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
 
             virtual void setData (int index, int column, const QVariant& data);
 

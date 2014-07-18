@@ -2,6 +2,7 @@
 #include <QDebug>
 
 #include <cassert>
+#include "nestedtablewrapper.hpp"
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
@@ -356,4 +357,24 @@ bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
             index.internalId() == 0 &&
             mIdCollection->getColumn(index.column()).mCanNest &&
             index.data().isValid());
+}
+
+void CSMWorld::IdTable::setNestedTable(const QModelIndex& index, const CSMWorld::NestedTableWrapperBase& nestedTable)
+{
+    if (!hasChildren(index))
+    {
+        throw std::logic_error("Tried to set nested table, but index has no children");
+    }
+    
+    mIdCollection->setNestedTable(index.row(), index.column(), nestedTable);
+}
+
+CSMWorld::NestedTableWrapperBase CSMWorld::IdTable::nestedTable(const QModelIndex& index) const
+{
+    if (!hasChildren(index))
+    {
+        throw std::logic_error("Tried to retrive nested table, but index has no children");
+    }
+    
+    return mIdCollection->nestedTable(index.row(), index.column());
 }

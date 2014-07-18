@@ -13,6 +13,7 @@
 #include <QVariant>
 
 #include "universalid.hpp"
+#include "nestedtablewrapper.hpp"
 
 class QModelIndex;
 class QAbstractItemModel;
@@ -22,6 +23,7 @@ namespace CSMWorld
     class IdTable;
     class IdTable;
     class RecordBase;
+    class NestedTableWrapperBase;
 
     class ModifyCommand : public QUndoCommand
     {
@@ -143,7 +145,7 @@ namespace CSMWorld
 
             std::string mId;
 
-            std::vector<QVariant> mOld;
+            NestedTableWrapperBase mOld;
 
             int mParentColumn;
 
@@ -163,6 +165,8 @@ namespace CSMWorld
             IdTable& mModel;
 
             std::string mId;
+
+            NestedTableWrapperBase mOld;
 
             int mNewRow;
 
