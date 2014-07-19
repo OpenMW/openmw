@@ -20,7 +20,8 @@ namespace CSMWorld
 
     public:
         
-        NestedTableWrapper(const NestedTable& nestedTable) {}
+        NestedTableWrapper(const NestedTable& nestedTable) 
+            : mNestedTable(nestedTable) {}
 
         NestedTable getNestedTable() const
         {

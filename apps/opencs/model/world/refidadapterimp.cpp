@@ -1,9 +1,10 @@
 #include "refidadapterimp.hpp"
-#include "nestedtablewrapper.hpp"
 
 #include <cassert>
 #include <stdexcept>
+
 #include <components/esm/loadcont.hpp>
+#include "nestedtablewrapper.hpp"
 
 CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const InventoryColumns& columns,
     const RefIdColumn *autoCalc)
@@ -315,7 +316,7 @@ void CSMWorld::ContainerRefIdAdapter::setNestedTable(const RefIdColumn* column,
     Record<ESM::Container>& record = dynamic_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
-    record.get().mInventory.mList = dynamic_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable).getNestedTable();
+    record.get().mInventory.mList = (dynamic_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable)).getNestedTable();
 }
 
 CSMWorld::NestedTableWrapperBase CSMWorld::ContainerRefIdAdapter::nestedTable (const RefIdColumn* column, 
