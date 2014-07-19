@@ -2586,8 +2586,14 @@ namespace MWWorld
         float fCrimeGoldDiscountMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
         float fCrimeGoldTurnInMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->getFloat();
 
-        int discount = bounty*fCrimeGoldDiscountMult;
+        int discount = bounty * fCrimeGoldDiscountMult;
         int turnIn = bounty * fCrimeGoldTurnInMult;
+
+        if (bounty > 0)
+        {
+            discount = std::max(1, discount);
+            turnIn = std::max(1, turnIn);
+        }
 
         mGlobalVariables["pchascrimegold"].setInteger((bounty <= playerGold) ? 1 : 0);
 
