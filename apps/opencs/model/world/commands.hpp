@@ -145,7 +145,7 @@ namespace CSMWorld
 
             std::string mId;
 
-            NestedTableWrapperBase mOld;
+            NestedTableWrapperBase* mOld;
 
             int mParentColumn;
 
@@ -154,6 +154,8 @@ namespace CSMWorld
         public:
 
             DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+
+            ~DeleteNestedCommand();
 
             virtual void redo();
 
@@ -166,7 +168,7 @@ namespace CSMWorld
 
             std::string mId;
 
-            NestedTableWrapperBase mOld;
+            NestedTableWrapperBase* mOld;
 
             int mNewRow;
 
@@ -175,6 +177,8 @@ namespace CSMWorld
         public:
 
             AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+        
+            ~AddNestedCommand();
 
             virtual void redo();
 

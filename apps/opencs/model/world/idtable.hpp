@@ -53,7 +53,7 @@ namespace CSMWorld
 
             QVariant nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
         
-            NestedTableWrapperBase nestedTable(const QModelIndex &index) const;
+            NestedTableWrapperBase* nestedTable(const QModelIndex &index) const;
         
             void setNestedTable(const QModelIndex &index, const NestedTableWrapperBase& nestedTable);
 

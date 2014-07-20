@@ -227,24 +227,24 @@ void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column
 
     std::vector<ESM::ContItem>& list = static_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container))).get().mInventory.mList;
-    
+
     list.erase (list.begin () + rowToRemove);
 }
 
 void CSMWorld::ContainerRefIdAdapter::addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const
 {
     assert(column==mContent);
-    
+
     std::vector<ESM::ContItem>& list = static_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container))).get().mInventory.mList;
-    
+
     ESM::ContItem newRow = {0, ""};
     if (position >= (int)list.size())
     {
         list.push_back(newRow);
         return;
     }
-    
+
     list.insert(list.begin()+position, newRow);
 
     return;
@@ -310,23 +310,23 @@ void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column,
 
 void CSMWorld::ContainerRefIdAdapter::setNestedTable(const RefIdColumn* column,
                                                     RefIdData& data,
-                                                    int index, 
+                                                    int index,
                                                     const NestedTableWrapperBase& nestedTable)
 {
     Record<ESM::Container>& record = dynamic_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
-    record.get().mInventory.mList = (dynamic_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable)).getNestedTable();
+    record.get().mInventory.mList = (static_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable)).mNestedTable;
 }
 
-CSMWorld::NestedTableWrapperBase CSMWorld::ContainerRefIdAdapter::nestedTable (const RefIdColumn* column, 
-                                                                              const RefIdData& data, 
+CSMWorld::NestedTableWrapperBase* CSMWorld::ContainerRefIdAdapter::nestedTable (const RefIdColumn* column,
+                                                                              const RefIdData& data,
                                                                               int index) const
 {
     const Record<ESM::Container>& record = dynamic_cast<const Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
-    return NestedTableWrapper<std::vector<ESM::ContItem> >(record.get().mInventory.mList);
+    return new NestedTableWrapper<std::vector<ESM::ContItem> >(record.get().mInventory.mList);
 }
 
 QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdColumn* column,

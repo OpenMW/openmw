@@ -367,9 +367,12 @@ void CSMWorld::IdTable::setNestedTable(const QModelIndex& index, const CSMWorld:
     }
     
     mIdCollection->setNestedTable(index.row(), index.column(), nestedTable);
+
+    emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
+                      CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
 }
 
-CSMWorld::NestedTableWrapperBase CSMWorld::IdTable::nestedTable(const QModelIndex& index) const
+CSMWorld::NestedTableWrapperBase* CSMWorld::IdTable::nestedTable(const QModelIndex& index) const
 {
     if (!hasChildren(index))
     {

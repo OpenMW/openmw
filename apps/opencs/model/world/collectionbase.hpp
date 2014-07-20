@@ -51,7 +51,7 @@ namespace CSMWorld
 
             virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const = 0;
 
-            virtual NestedTableWrapperBase nestedTable(int row, int column) const = 0;
+            virtual NestedTableWrapperBase* nestedTable(int row, int column) const = 0;
 
             virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable) = 0;
 

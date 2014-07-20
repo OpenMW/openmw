@@ -4,6 +4,7 @@
 
 #include "idtable.hpp"
 #include <components/misc/stringops.hpp>
+#include "nestedtablewrapper.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
@@ -178,7 +179,7 @@ CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTable& model, const std::s
       mParentColumn(parentColumn),
       QUndoCommand(parent),
       mNestedRow(nestedRow),
-      mOld(model.nestedTable(model.getModelIndex(id, parentColumn)))
+      mOld (model.nestedTable(model.getModelIndex(id, parentColumn)))
 {
     setText (("Delete nested row in " + mId).c_str());
 }
@@ -195,7 +196,12 @@ void CSMWorld::DeleteNestedCommand::undo()
 {
     const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
 
-    mModel.setNestedTable(parentIndex, mOld);
+    mModel.setNestedTable(parentIndex, *mOld);
+}
+
+CSMWorld::DeleteNestedCommand::~DeleteNestedCommand()
+{
+    delete mOld;
 }
 
 CSMWorld::AddNestedCommand::AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
@@ -204,7 +210,7 @@ CSMWorld::AddNestedCommand::AddNestedCommand(IdTable& model, const std::string& 
       mNewRow(nestedRow),
       mParentColumn(parentColumn),
       QUndoCommand(parent),
-      mOld(model.nestedTable(model.getModelIndex(id, parentColumn)))
+      mOld (model.nestedTable(model.getModelIndex(id, parentColumn)))
 {
     setText (("Added nested row in " + mId).c_str());
 }
@@ -220,5 +226,10 @@ void CSMWorld::AddNestedCommand::undo()
 {
     const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
 
-    mModel.setNestedTable(parentIndex, mOld);
+    mModel.setNestedTable(parentIndex, *mOld);
+}
+
+CSMWorld::AddNestedCommand::~AddNestedCommand()
+{
+    delete mOld;
 }

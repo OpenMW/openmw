@@ -652,7 +652,7 @@ void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWor
     adaptor.setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
 }
 
-CSMWorld::NestedTableWrapperBase CSMWorld::RefIdCollection::nestedTable(int row, int column) const
+CSMWorld::NestedTableWrapperBase* CSMWorld::RefIdCollection::nestedTable(int row, int column) const
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 

@@ -7,6 +7,7 @@
 #include <cctype>
 #include <stdexcept>
 #include <functional>
+#include <cassert>
 
 #include <QVariant>
 
@@ -92,7 +93,7 @@ namespace CSMWorld
 
             virtual void setData (int index, int column, const QVariant& data);
 
-            virtual NestedTableWrapperBase nestedTable(int row, int column) const;
+            virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
 
             virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
 
@@ -308,9 +309,10 @@ namespace CSMWorld
     }
     
     template<typename ESXRecordT, typename IdAccessorT>
-    NestedTableWrapperBase Collection<ESXRecordT, IdAccessorT>::nestedTable(int row, int column) const 
+    NestedTableWrapperBase* Collection<ESXRecordT, IdAccessorT>::nestedTable(int row, int column) const 
     {
-        return NestedTableWrapperBase();
+        assert(false);
+        return new NestedTableWrapperBase();
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
