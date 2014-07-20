@@ -496,7 +496,11 @@ namespace MWMechanics
             if (effectId == ESM::MagicEffect::Lock)
             {
                 if (target.getCellRef().getLockLevel() < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
+                {
+                    if (caster.getRefData().getHandle() == "player")
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
                     target.getCellRef().setLockLevel(magnitude);
+                }
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
@@ -504,12 +508,14 @@ namespace MWMechanics
                 {
                     if (target.getCellRef().getLockLevel() > 0)
                     {
-                        //Door not already unlocked
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
                         if (!caster.isEmpty() && caster.getClass().isActor())
                             MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
+
+                        if (caster.getRefData().getHandle() == "player")
+                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
-                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel())); //unlocks the door
+                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel()));
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
