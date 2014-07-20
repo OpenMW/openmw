@@ -308,13 +308,13 @@ namespace MWClass
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
-                float weaponDamage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                weaponDamage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                damage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
                 if(weaphashealth)
                 {
                     int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
                     int weaphealth = weapon.getClass().getItemHealth(weapon);
-                    weaponDamage *= float(weaphealth) / weapmaxhealth;
+                    damage *= float(weaphealth) / weapmaxhealth;
 
                     if (!MWBase::Environment::get().getWorld()->getGodModeState())
                     {
@@ -329,8 +329,6 @@ namespace MWClass
                     if (weapon.getCellRef().getCharge() == 0)
                         weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
                 }
-
-                damage += weaponDamage;
             }
 
             // Apply "On hit" enchanted weapons
