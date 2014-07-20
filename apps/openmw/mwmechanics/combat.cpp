@@ -147,11 +147,7 @@ namespace MWMechanics
         float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).mMagnitude
                 - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).mMagnitude);
 
-        float multiplier = 0;
-        if (resistance >= 0)
-            multiplier = 1 - resistance / 100.f;
-        else
-            multiplier = -(resistance-100) / 100.f;
+        float multiplier = 1.f - resistance / 100.f;
 
         if (!(weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
               || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
@@ -213,16 +209,10 @@ namespace MWMechanics
         damage *= fDamageStrengthBase +
                 (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1);
 
+
         if(attacker.getRefData().getHandle() == "player")
             attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
 
-        bool detected = MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
-        if(!detected)
-        {
-            damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-            MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
-        }
         if (victim.getClass().getCreatureStats(victim).getKnockedDown())
             damage *= gmst.find("fCombatKODamageMult")->getFloat();
 

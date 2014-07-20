@@ -600,8 +600,8 @@ namespace MWClass
             damage  = stats.getSkill(weapskill).getModified();
             damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
 
-            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f)
-                    || (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
+            healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                    || otherstats.getKnockedDown();
             if(stats.isWerewolf())
             {
                 healthdmg = true;
@@ -623,15 +623,21 @@ namespace MWClass
                 sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
         }
         if(ptr.getRefData().getHandle() == "player")
+        {
             skillUsageSucceeded(ptr, weapskill, 0);
 
-        bool detected = MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, victim);
-        if(!detected)
-        {
-            damage *= store.find("fCombatCriticalStrikeMult")->getFloat();
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-            MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            const MWMechanics::AiSequence& seq = victim.getClass().getCreatureStats(victim).getAiSequence();
+
+            bool unaware = !seq.isInCombat()
+                    && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, victim);
+            if(unaware)
+            {
+                damage *= store.find("fCombatCriticalStrikeMult")->getFloat();
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            }
         }
+
         if (othercls.getCreatureStats(victim).getKnockedDown())
             damage *= store.find("fCombatKODamageMult")->getFloat();
 

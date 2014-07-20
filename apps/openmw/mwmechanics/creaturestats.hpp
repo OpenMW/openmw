@@ -208,7 +208,8 @@ namespace MWMechanics
         float getEvasion() const;
 
         void setKnockedDown(bool value);
-        ///Returns true for the entire duration of the actor being knocked down
+        /// Returns true for the entire duration of the actor being knocked down or knocked out,
+        /// including transition animations (falling down & standing up)
         bool getKnockedDown() const;
         void setKnockedDownOneFrame(bool value);
         ///Returns true only for the first frame of the actor being knocked out; used for "onKnockedOut" command
