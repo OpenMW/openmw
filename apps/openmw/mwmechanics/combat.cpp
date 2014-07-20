@@ -55,11 +55,24 @@ namespace MWMechanics
         if (!blocker.getClass().hasInventoryStore(blocker))
             return false;
 
-        if (blocker.getClass().getCreatureStats(blocker).getKnockedDown()
-                || blocker.getClass().getCreatureStats(blocker).getHitRecovery())
+        MWMechanics::CreatureStats& blockerStats = blocker.getClass().getCreatureStats(blocker);
+
+        if (blockerStats.getKnockedDown() // Used for both knockout or knockdown
+                || blockerStats.getHitRecovery()
+                || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0)
+            return false;
+
+        // Don't block when in spellcasting state (shield is equipped, but not visible)
+        if (blockerStats.getDrawState() == DrawState_Spell)
             return false;
 
         MWWorld::InventoryStore& inv = blocker.getClass().getInventoryStore(blocker);
+
+        // Don't block when in hand-to-hand combat (shield is equipped, but not visible)
+        if (blockerStats.getDrawState() == DrawState_Weapon &&
+                inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight) == inv.end())
+            return false;
+
         MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
             return false;
@@ -71,17 +84,6 @@ namespace MWMechanics
         if (angle.valueDegrees() < gmst.find("fCombatBlockLeftAngle")->getFloat())
             return false;
         if (angle.valueDegrees() > gmst.find("fCombatBlockRightAngle")->getFloat())
-            return false;
-
-        MWMechanics::CreatureStats& blockerStats = blocker.getClass().getCreatureStats(blocker);
-
-        // Don't block when in spellcasting state (shield is equipped, but not visible)
-        if (blockerStats.getDrawState() == DrawState_Spell)
-            return false;
-
-        // Don't block when in hand-to-hand combat (shield is equipped, but not visible)
-        if (blockerStats.getDrawState() == DrawState_Weapon &&
-                inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight) == inv.end())
             return false;
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
