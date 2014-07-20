@@ -254,6 +254,23 @@ namespace MWClass
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
+
+            // Weapon health is reduced by 1 even if the attack misses
+            const bool weaphashealth = !weapon.isEmpty() && weapon.getClass().hasItemHealth(weapon);
+            if(weaphashealth)
+            {
+                int weaphealth = weapon.getClass().getItemHealth(weapon);
+
+                if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                {
+                    weaphealth -= std::min(1, weaphealth);
+                    weapon.getCellRef().setCharge(weaphealth);
+                }
+
+                // Weapon broken? unequip it
+                if (weapon.getCellRef().getCharge() == 0)
+                    weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
+            }
             return;
         }
 
