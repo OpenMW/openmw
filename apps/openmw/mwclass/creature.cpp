@@ -637,8 +637,7 @@ namespace MWClass
 
     float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
     {
-        /// \todo add Shield magic effect magnitude here, controlled by a GMST (Vanilla vs MCP behaviour)
-        return 0.f;
+        return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
     }
 
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
