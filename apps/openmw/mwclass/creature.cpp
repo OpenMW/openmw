@@ -394,6 +394,9 @@ namespace MWClass
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
+        if (damage < 0.001f)
+            damage = 0;
+
         if (damage > 0.f)
         {
             // Check for knockdown
@@ -408,6 +411,8 @@ namespace MWClass
             }
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
+
+            damage = std::max(1.f, damage);
 
             if(ishealth)
             {
@@ -639,6 +644,7 @@ namespace MWClass
 
     float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
     {
+        // Note this is currently unused. Creatures do not use armor mitigation.
         return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
     }
 

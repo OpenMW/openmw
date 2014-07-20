@@ -280,6 +280,7 @@ namespace MWClass
             gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
             gmst.fDamageStrengthBase = store.find("fDamageStrengthBase");
             gmst.fDamageStrengthMult = store.find("fDamageStrengthMult");
+            gmst.fCombatArmorMinMult = store.find("fCombatArmorMinMult");
 
             inited = true;
         }
@@ -706,6 +707,9 @@ namespace MWClass
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
+        if (damage < 0.001f)
+            damage = 0;
+
         if(damage > 0.0f)
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
@@ -734,7 +738,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(ishealth && !attacker.isEmpty()) // Don't use armor mitigation for fall damage
+            if(damage > 0 && ishealth && !attacker.isEmpty()) // Don't use armor mitigation for fall damage
             {
                 // Hit percentages:
                 // cuirass = 30%
@@ -754,9 +758,12 @@ namespace MWClass
                 };
                 int hitslot = hitslots[(int)(::rand()/(RAND_MAX+1.0)*20.0)];
 
-                float damagediff = damage;
-                damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
-                damagediff -= damage;
+                float unmitigatedDamage = damage;
+                float x = damage / (damage + getArmorRating(ptr));
+                damage *= std::max(gmst.fCombatArmorMinMult->getFloat(), x);
+                int damageDiff = unmitigatedDamage - damage;
+                if (damage < 1)
+                    damage = 1;
 
                 MWWorld::InventoryStore &inv = getInventoryStore(ptr);
                 MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
@@ -764,13 +771,13 @@ namespace MWClass
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
                     int armorhealth = armor.getClass().getItemHealth(armor);
-                    armorhealth -= std::min(std::max(1, (int)damagediff),
+                    armorhealth -= std::min(std::max(1, damageDiff),
                                                  armorhealth);
                     armor.getCellRef().setCharge(armorhealth);
 
                     // Armor broken? unequip it
                     if (armorhealth == 0)
-                        inv.unequipItem(armor, ptr);
+                        armor = *inv.unequipItem(armor, ptr);
 
                     if (ptr.getRefData().getHandle() == "player")
                         skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
