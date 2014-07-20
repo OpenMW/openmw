@@ -9,6 +9,7 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -412,6 +413,9 @@ namespace MWClass
 
             if(ishealth)
             {
+                if (!attacker.isEmpty())
+                    damage = scaleDamage(damage, attacker, ptr);
+
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
                 float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
                 setActorHealth(ptr, health, attacker);

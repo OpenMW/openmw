@@ -23,6 +23,7 @@
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -788,6 +789,9 @@ namespace MWClass
 
         if(ishealth)
         {
+            if (!attacker.isEmpty())
+                damage = scaleDamage(damage, attacker, ptr);
+
             if(damage > 0.0f)
                 sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
             float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;

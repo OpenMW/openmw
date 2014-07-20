@@ -10,6 +10,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -292,6 +293,10 @@ namespace MWMechanics
 
             static const float fElementalShieldMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fElementalShieldMult")->getFloat();
             x = fElementalShieldMult * magnitude * (1.f - 0.01f * x);
+
+            // Note swapped victim and attacker, since the attacker takes the damage here.
+            x = scaleDamage(x, victim, attacker);
+
             MWMechanics::DynamicStat<float> health = attackerStats.getHealth();
             health.setCurrent(health.getCurrent() - x);
             attackerStats.setHealth(health);
