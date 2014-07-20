@@ -259,7 +259,7 @@ struct JournalViewModelImpl : JournalViewModel
                 os
                     << itr->mDayOfMonth << ' '
                     << MWBase::Environment::get().getWorld()->getMonthName (itr->mMonth)
-                    << " (" << dayStr << " " << (itr->mDay + 1) << ')';
+                    << " (" << dayStr << " " << (itr->mDay) << ')';
 
                 timestamp_buffer = os.str ();
             }
