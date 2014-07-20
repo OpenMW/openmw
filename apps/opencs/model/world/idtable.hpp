@@ -52,9 +52,9 @@ namespace CSMWorld
             virtual QVariant headerData (int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
             QVariant nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-        
+
             NestedTableWrapperBase* nestedTable(const QModelIndex &index) const;
-        
+
             void setNestedTable(const QModelIndex &index, const NestedTableWrapperBase& nestedTable);
 
             virtual bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
@@ -105,6 +105,11 @@ namespace CSMWorld
             virtual bool isDeleted (const std::string& id) const;
 
             int getColumnId(int column) const;
+
+    signals:
+        void resetStart(const QString& id);
+
+        void resetEnd(const QString& id);
     };
 }
 

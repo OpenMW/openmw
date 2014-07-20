@@ -366,10 +366,22 @@ void CSMWorld::IdTable::setNestedTable(const QModelIndex& index, const CSMWorld:
         throw std::logic_error("Tried to set nested table, but index has no children");
     }
     
+    bool removeRowsMode = false;
+    if (nestedTable.size() != this->nestedTable(index)->size())
+    {
+        emit resetStart(this->index(index.row(), 0).data().toString());
+        removeRowsMode = true;
+    }
+    
     mIdCollection->setNestedTable(index.row(), index.column(), nestedTable);
 
     emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
                       CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
+
+    if (removeRowsMode)
+    {
+        emit resetEnd(this->index(index.row(), 0).data().toString());
+    }
 }
 
 CSMWorld::NestedTableWrapperBase* CSMWorld::IdTable::nestedTable(const QModelIndex& index) const

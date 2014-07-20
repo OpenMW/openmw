@@ -26,6 +26,12 @@ CSMWorld::NestedTableModel::NestedTableModel(const QModelIndex& parent,
 
     connect(mMainModel, SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
             this, SLOT(forwardRowsRemoved(const QModelIndex &, int, int)));
+    
+    connect(mMainModel, SIGNAL(resetStart(const QString&)),
+            this, SLOT(forwardResetStart(const QString&)));
+
+    connect(mMainModel, SIGNAL(resetEnd(const QString&)),
+            this, SLOT(forwardResetEnd(const QString&)));
 }
 
 QModelIndex CSMWorld::NestedTableModel::mapFromSource(const QModelIndex& sourceIndex) const
@@ -156,4 +162,16 @@ void CSMWorld::NestedTableModel::forwardRowsRemoved(const QModelIndex& parent, i
     {
         endRemoveRows();
     }
+}
+
+void CSMWorld::NestedTableModel::forwardResetStart(const QString& id)
+{
+    if (id.toUtf8() == mId.c_str())
+        beginResetModel();
+}
+
+void CSMWorld::NestedTableModel::forwardResetEnd(const QString& id)
+{
+    if (id.toUtf8() == mId.c_str())
+        endResetModel();
 }

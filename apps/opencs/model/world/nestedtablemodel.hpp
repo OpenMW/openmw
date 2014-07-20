@@ -70,6 +70,10 @@ namespace CSMWorld
         void forwardRowsAboutToRemoved(const QModelIndex & parent, int first, int last);
 
         void forwardRowsRemoved(const QModelIndex & parent, int first, int last);
+        
+        void forwardResetStart(const QString& id);
+        
+        void forwardResetEnd(const QString& id);
     };
 }
 

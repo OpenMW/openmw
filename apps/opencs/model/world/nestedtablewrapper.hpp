@@ -7,9 +7,11 @@ namespace CSMWorld
     {
         virtual ~NestedTableWrapperBase();
         
+        virtual int size() const;
+        
         NestedTableWrapperBase();
     };
-
+    
     template<typename NestedTable>
     struct NestedTableWrapper : public NestedTableWrapperBase
     {
@@ -19,6 +21,11 @@ namespace CSMWorld
             : mNestedTable(nestedTable) {}
 
         virtual ~NestedTableWrapper() {}
+
+        virtual int size() const
+        {
+            return mNestedTable.size(); //i hope that this will be enough
+        }
     };
 }
 #endif
