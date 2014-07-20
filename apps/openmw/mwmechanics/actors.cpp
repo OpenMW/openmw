@@ -1281,12 +1281,8 @@ namespace MWMechanics
         {
             const MWWorld::Class &cls = iter->getClass();
             CreatureStats &stats = cls.getCreatureStats(*iter);
-            if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdCombat)
-            {
-                MWMechanics::AiCombat* package = static_cast<MWMechanics::AiCombat*>(stats.getAiSequence().getActivePackage());
-                if(package->getTarget() == actor)
-                    list.push_front(*iter);
-            }
+            if (!stats.isDead() && stats.getAiSequence().isInCombat(actor))
+                list.push_front(*iter);
         }
         return list;
     }
