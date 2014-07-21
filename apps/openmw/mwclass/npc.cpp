@@ -885,6 +885,7 @@ namespace MWClass
         if(ptr.getRefData().getHandle() == "player")
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
 
+        // Werewolfs can't activate NPCs
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -895,6 +896,7 @@ namespace MWClass
 
             return action;
         }
+
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
         if(ptr.getClass().getCreatureStats(ptr).isHostile())
@@ -902,8 +904,10 @@ namespace MWClass
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         
+        // Can't talk to werewolfs
+        if(ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).isWerewolf())
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
-
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
