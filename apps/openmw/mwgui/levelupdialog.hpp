@@ -28,8 +28,11 @@ namespace MWGui
 
         std::vector<int> mSpentAttributes;
 
-        void onOkButtonClicked (MyGUI::Widget* sender);
-        void onAttributeClicked (MyGUI::Widget* sender);
+        unsigned int mCoinCount;
+        static const unsigned int sMaxCoins;
+
+        void onOkButtonClicked(MyGUI::Widget* sender);
+        void onAttributeClicked(MyGUI::Widget* sender);
 
         void assignCoins();
         void resetCoins();
