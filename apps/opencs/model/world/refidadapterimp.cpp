@@ -329,24 +329,9 @@ QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdCo
                                                         int subRowIndex,
                                                         int subColIndex) const
 {
-    const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
-        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
-
     if (column==mContent)
     {
-        const ESM::ContItem& content = record.get().mInventory.mList.at(subRowIndex);
-
-        switch (subColIndex)
-        {
-            case 0:
-                return QString::fromUtf8(content.mItem.toString().c_str());
-
-            case 1:
-                return content.mCount;
-
-            default:
-                throw std::logic_error("Trying to access non-existing column in the nested table!");
-        }
+        return mHelper.getNestedData(column, data, index, subRowIndex, subColIndex);
     } else
     {
         throw std::logic_error("This column does not hold multiple values.");

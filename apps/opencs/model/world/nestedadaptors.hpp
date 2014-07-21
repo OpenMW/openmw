@@ -10,6 +10,8 @@
 #include "refiddata.hpp"
 #include "refidadapter.hpp"
 
+#include <QVariant>
+
 namespace CSMWorld
 {
     template <typename ESXRecordT>
@@ -35,6 +37,27 @@ namespace CSMWorld
                                             int index) const
         {
             return new NestedTableWrapper<std::vector<ESM::ContItem> >(getRecord(data, index).get().mInventory.mList);
+        }
+        
+        QVariant getNestedData(const CSMWorld::RefIdColumn* column,
+                               const CSMWorld::RefIdData& data,
+                               int index,
+                               int subRowIndex,
+                               int subColIndex) const
+        {
+            const ESM::ContItem& content = getRecord(data, index).get().mInventory.mList.at(subRowIndex);
+
+            switch (subColIndex)
+            {
+            case 0:
+                return QString::fromUtf8(content.mItem.toString().c_str());
+                
+            case 1:
+                return content.mCount;
+                
+            default:
+                throw std::logic_error("Trying to access non-existing column in the nested table!");
+            }
         }
         
     private:
