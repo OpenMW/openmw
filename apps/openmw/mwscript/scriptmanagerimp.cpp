@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <algorithm>
 
 #include <components/esm/loadscpt.hpp>
 
@@ -22,12 +23,19 @@
 namespace MWScript
 {
     ScriptManager::ScriptManager (const MWWorld::ESMStore& store, bool verbose,
-        Compiler::Context& compilerContext, int warningsMode)
+        Compiler::Context& compilerContext, int warningsMode,
+        const std::vector<std::string>& scriptBlacklist)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
       mOpcodesInstalled (false), mGlobalScripts (store)
     {
         mErrorHandler.setWarningsMode (warningsMode);
+
+        mScriptBlacklist.resize (scriptBlacklist.size());
+
+        std::transform (scriptBlacklist.begin(), scriptBlacklist.end(),
+            mScriptBlacklist.begin(), Misc::StringUtils::lowerCase);
+        std::sort (mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 
     bool ScriptManager::compile (const std::string& name)
@@ -133,11 +141,17 @@ namespace MWScript
         int success = 0;
 
         const MWWorld::Store<ESM::Script>& scripts = mStore.get<ESM::Script>();
-        MWWorld::Store<ESM::Script>::iterator it = scripts.begin();
 
-        for (; it != scripts.end(); ++it, ++count)
-            if (compile (it->mId))
-                ++success;
+        for (MWWorld::Store<ESM::Script>::iterator iter = scripts.begin();
+            iter != scripts.end(); ++iter)
+            if (!std::binary_search (mScriptBlacklist.begin(), mScriptBlacklist.end(),
+                Misc::StringUtils::lowerCase (iter->mId)))
+            {
+                ++count;
+
+                if (compile (iter->mId))
+                    ++success;
+            }
 
         return std::make_pair (count, success);
     }

@@ -144,6 +144,12 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\t1 - show warning but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors")
 
+        ("script-blacklist", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+            ->multitoken(), "ignore the specified script (if the use of the blacklist is enabled)")
+
+        ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
+            ->default_value(true), "enable script blacklisting")
+
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
 
@@ -241,15 +247,19 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCell(variables["start"].as<std::string>());
     engine.setSkipMenu (variables["skip-menu"].as<bool>());
 
-    // other settings
-    engine.setSoundUsage(!variables["no-sound"].as<bool>());
-    engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
+    // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());
-    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+    engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
-    engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.setWarningsMode (variables["script-warn"].as<int>());
+    engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
+    engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
+
+    // other settings
+    engine.setSoundUsage(!variables["no-sound"].as<bool>());
+    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+    engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
 
     return true;
 }
