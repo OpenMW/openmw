@@ -777,11 +777,22 @@ namespace Compiler
                         ++optionalCount;
                 }
             }
+            else if (*iter=='X')
+            {
+                parser.reset();
+
+                parser.setOptional (true);
+
+                scanner.scan (parser);
+
+                if (optional && parser.isEmpty())
+                    break;
+            }
             else
             {
                 parser.reset();
 
-                if (optional || *iter == 'X')
+                if (optional)
                     parser.setOptional (true);
 
                 scanner.scan (parser);
@@ -789,20 +800,17 @@ namespace Compiler
                 if (optional && parser.isEmpty())
                     break;
 
-                if (*iter != 'X')
-                {
-                    std::vector<Interpreter::Type_Code> tmp;
+                std::vector<Interpreter::Type_Code> tmp;
 
-                    char type = parser.append (tmp);
+                char type = parser.append (tmp);
 
-                    if (type!=*iter)
-                        Generator::convert (tmp, type, *iter);
+                if (type!=*iter)
+                    Generator::convert (tmp, type, *iter);
 
-                    stack.push (tmp);
+                stack.push (tmp);
 
-                    if (optional)
-                        ++optionalCount;
-                }
+                if (optional)
+                    ++optionalCount;
             }
         }
 
