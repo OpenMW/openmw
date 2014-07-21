@@ -232,21 +232,12 @@ void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column
 
 void CSMWorld::ContainerRefIdAdapter::addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const
 {
-    assert(column==mContent);
-
-    std::vector<ESM::ContItem>& list = static_cast<Record<ESM::Container>&> (
-        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container))).get().mInventory.mList;
-
-    ESM::ContItem newRow = {0, ""};
-    if (position >= (int)list.size())
+    if(column!=mContent)
     {
-        list.push_back(newRow);
-        return;
+        throw std::logic_error("This column does not hold multiple values.");
     }
 
-    list.insert(list.begin()+position, newRow);
-
-    return;
+    mHelper.addNestedRow(column, data, index, position);
 }
 
 void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,

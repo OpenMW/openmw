@@ -90,6 +90,20 @@ namespace CSMWorld
             }
         }
         
+        void addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const
+        {
+            std::vector<ESM::ContItem>& list = getRecord(data, index).get().mInventory.mList;
+
+            ESM::ContItem newRow = {0, ""};
+            if (position >= (int)list.size())
+            {
+                list.push_back(newRow);
+                return;
+            }
+            
+            list.insert(list.begin()+position, newRow);
+        }
+        
     private:
 
         const Record<ESXRecordT>& getRecord(const RefIdData& data, int index) const
