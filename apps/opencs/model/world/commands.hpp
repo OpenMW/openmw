@@ -139,13 +139,25 @@ namespace CSMWorld
             virtual void undo();
     };
 
-    class DeleteNestedCommand : public QUndoCommand
+    class NestedTableStoring
+    {
+        NestedTableWrapperBase* mOld;
+
+    public:
+        NestedTableStoring(const IdTable& model, const std::string& id, int parentColumn);
+        
+        ~NestedTableStoring();
+        
+    protected:
+
+        const NestedTableWrapperBase& getOld() const;
+    };
+    
+    class DeleteNestedCommand : public QUndoCommand, private NestedTableStoring
     {
             IdTable& mModel;
 
             std::string mId;
-
-            NestedTableWrapperBase* mOld;
 
             int mParentColumn;
 
@@ -155,20 +167,16 @@ namespace CSMWorld
 
             DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
-            ~DeleteNestedCommand();
-
             virtual void redo();
 
             virtual void undo();
     };
     
-    class AddNestedCommand : public QUndoCommand
+    class AddNestedCommand : public QUndoCommand, private NestedTableStoring
     {
             IdTable& mModel;
 
             std::string mId;
-
-            NestedTableWrapperBase* mOld;
 
             int mNewRow;
 
@@ -177,8 +185,6 @@ namespace CSMWorld
         public:
 
             AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
-        
-            ~AddNestedCommand();
 
             virtual void redo();
 
