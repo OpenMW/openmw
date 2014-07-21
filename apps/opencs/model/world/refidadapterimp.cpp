@@ -223,7 +223,10 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, co
 
 void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const
 {
-    assert(column==mContent);
+    if(column!=mContent)
+    {
+        throw std::logic_error("This column does not hold multiple values.");
+    }
 
     std::vector<ESM::ContItem>& list = static_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container))).get().mInventory.mList;
@@ -289,7 +292,7 @@ void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column,
         mHelper.setNestedData(column, data, index, value, subRowIndex, subColIndex);
     } else
     {
-        assert(false);
+        throw std::logic_error("This column do not nest other columns");
     }
 }
 
@@ -319,7 +322,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdCo
         return mHelper.getNestedData(column, data, index, subRowIndex, subColIndex);
     } else
     {
-        throw std::logic_error("This column does not hold multiple values.");
+        throw std::logic_error("This column do not nest other columns");
     }
 }
 
