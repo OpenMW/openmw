@@ -180,7 +180,7 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
 CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
     const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content)
 : NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, columns), mWeight (weight),
-  mOrganic (organic), mRespawn (respawn), mContent(content)
+  mOrganic (organic), mRespawn (respawn), mContent(content), mHelper(InventoryHelper<ESM::Container>(UniversalId::Type_Container))
 {}
 
 int CSMWorld::ContainerRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
@@ -313,20 +313,14 @@ void CSMWorld::ContainerRefIdAdapter::setNestedTable(const RefIdColumn* column,
                                                     int index,
                                                     const NestedTableWrapperBase& nestedTable)
 {
-    Record<ESM::Container>& record = dynamic_cast<Record<ESM::Container>&> (
-        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
-
-    record.get().mInventory.mList = (static_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable)).mNestedTable;
+    mHelper.setNestedTable(column, data, index, nestedTable);
 }
 
 CSMWorld::NestedTableWrapperBase* CSMWorld::ContainerRefIdAdapter::nestedTable (const RefIdColumn* column,
                                                                               const RefIdData& data,
                                                                               int index) const
 {
-    const Record<ESM::Container>& record = dynamic_cast<const Record<ESM::Container>&> (
-        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
-
-    return new NestedTableWrapper<std::vector<ESM::ContItem> >(record.get().mInventory.mList);
+    return mHelper.nestedTable(column, data, index);
 }
 
 QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdColumn* column,

@@ -12,6 +12,7 @@
 #include "refiddata.hpp"
 #include "universalid.hpp"
 #include "refidadapter.hpp"
+#include "nestedadaptors.hpp"
 
 namespace CSMWorld
 {
@@ -614,6 +615,8 @@ namespace CSMWorld
             const RefIdColumn *mOrganic;
             const RefIdColumn *mRespawn;
             const RefIdColumn *mContent;
+        
+        InventoryHelper<ESM::Container> mHelper;
 
         public:
 
