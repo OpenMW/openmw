@@ -190,6 +190,18 @@ stop:
 	free(buffer); buffer = 0;
 }
 
+void CSVRender::PagedWorldspaceWidget::displayCellCoord(bool display)
+{
+	mDisplayCellCoord = display;
+	std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter(mCells.begin());
+
+	while (iter != mCells.end())
+	{
+		getSceneManager()->getBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace))->setVisible(display);
+		iter++;
+	}
+}
+
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
     bool modified = false;
@@ -210,6 +222,12 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             {
                 delete iter->second;
                 mCells.erase (iter++);
+
+				getSceneManager()->getSceneNode("CellBillboardNode" + iter->first.getId(mWorldspace))->detachAllObjects();
+				getSceneManager()->getBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace))->removeBillboard(
+					getSceneManager()->getBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace))->getBillboard(0));
+				getSceneManager()->destroyBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace));
+
                 modified = true;
             }
             else
@@ -256,8 +274,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 			{
 				font = Ogre::FontManager::getSingletonPtr()->getByName("CellBillboardFont" + iter->getId(mWorldspace)).getPointer();
 			}
-			
-			//std::
 
 			Ogre::TexturePtr texture;
 			if (Ogre::TextureManager::getSingleton().resourceExists("CellBillboardTexture" + iter->getId(mWorldspace)))
@@ -293,6 +309,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 			myBillboard->setDimensions(4000, 2000);
 			mySet->setRenderQueueGroup(mySet->getRenderQueueGroup() + 1); // render the bilboard on top
 			billboardNode->attachObject(mySet);
+
+			mySet->setVisible(mDisplayCellCoord);
 
             modified = true;
         }
@@ -365,7 +383,7 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
 }
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default")
+: WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mDisplayCellCoord(true)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
