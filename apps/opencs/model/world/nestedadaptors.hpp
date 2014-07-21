@@ -2,6 +2,7 @@
 #define CSM_WORLD_NESTEDADAPTORS_H
 
 #include <vector>
+#include <stdexcept>
 
 #include "universalid.hpp"
 #include "nestedtablewrapper.hpp"
@@ -54,6 +55,28 @@ namespace CSMWorld
                 
             case 1:
                 return content.mCount;
+                
+            default:
+                throw std::logic_error("Trying to access non-existing column in the nested table!");
+            }
+        }
+
+        void setNestedData (const RefIdColumn *column,
+                            RefIdData& data,
+                            int index,
+                            const QVariant& value,
+                            int subRowIndex,
+                            int subColIndex) const
+        {
+            switch(subColIndex)
+            {
+            case 0:
+                getRecord(data, index).get().mInventory.mList.at(subRowIndex).mItem.assign(std::string(value.toString().toUtf8().constData()));
+                break;
+
+            case 1:
+                getRecord(data, index).get().mInventory.mList.at(subRowIndex).mCount = value.toInt();
+                break;
                 
             default:
                 throw std::logic_error("Trying to access non-existing column in the nested table!");

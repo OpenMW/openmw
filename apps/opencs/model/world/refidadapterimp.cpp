@@ -285,23 +285,8 @@ void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column,
 {
 
     if (column==mContent)
-    {
-        Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
-            data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
-
-        switch (subColIndex)
-        {
-            case 0:
-                record.get().mInventory.mList.at(subRowIndex).mItem.assign(std::string(value.toString().toUtf8().constData()));
-                break;
-
-            case 1:
-                record.get().mInventory.mList.at(subRowIndex).mCount = value.toInt();
-                break;
-
-            default:
-                throw std::logic_error("Trying to access non-existing column in the nested table!");
-        }
+    { 
+        mHelper.setNestedData(column, data, index, value, subRowIndex, subColIndex);
     } else
     {
         assert(false);
