@@ -227,11 +227,7 @@ void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column
     {
         throw std::logic_error("This column does not hold multiple values.");
     }
-
-    std::vector<ESM::ContItem>& list = static_cast<Record<ESM::Container>&> (
-        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container))).get().mInventory.mList;
-
-    list.erase (list.begin () + rowToRemove);
+    mHelper.removeNestedRow(column, data, index, rowToRemove);
 }
 
 void CSMWorld::ContainerRefIdAdapter::addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const

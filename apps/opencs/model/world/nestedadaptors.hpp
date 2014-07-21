@@ -61,6 +61,13 @@ namespace CSMWorld
             }
         }
 
+        void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const
+        {
+            std::vector<ESM::ContItem>& list = getRecord(data, index).get().mInventory.mList;
+
+            list.erase (list.begin () + rowToRemove);
+        }
+
         void setNestedData (const RefIdColumn *column,
                             RefIdData& data,
                             int index,
