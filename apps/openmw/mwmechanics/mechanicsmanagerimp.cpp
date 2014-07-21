@@ -653,6 +653,10 @@ namespace MWMechanics
         return mActors.countDeaths (id);
     }
 
+    void MechanicsManager::killDeadActors()
+    {
+        mActors.killDeadActors();
+    }
 
     void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
         float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange)

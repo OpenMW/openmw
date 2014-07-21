@@ -1029,10 +1029,6 @@ namespace MWMechanics
                 iter->second->update(duration);
             }
 
-            // Kill dead actors, update some variables
-
-            int hostilesCount = 0; // need to know this to play Battle music
-
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 const MWWorld::Class &cls = iter->first.getClass();
@@ -1048,67 +1044,22 @@ namespace MWMechanics
                     stats.setKnockedDownOneFrame(false);
                     stats.setKnockedDownOverOneFrame(true);
                 }
+            }
+
+            int hostilesCount = 0; // need to know this to play Battle music
+
+            for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            {
+                const MWWorld::Class &cls = iter->first.getClass();
+                CreatureStats &stats = cls.getCreatureStats(iter->first);
 
                 if(!stats.isDead())
                 {
                     if (stats.isHostile()) hostilesCount++;
-
-                    if(iter->second->isDead())
-                    {
-                        // Actor has been resurrected. Notify the CharacterController and re-enable collision.
-                        MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
-                        iter->second->resurrect();
-                    }
-
-                    if(!stats.isDead())
-                        continue;
-                }
-
-                // If it's the player and God Mode is turned on, keep it alive
-                if (iter->first.getRefData().getHandle()=="player" &&
-                    MWBase::Environment::get().getWorld()->getGodModeState())
-                {
-                    MWMechanics::DynamicStat<float> stat (stats.getHealth());
-
-                    if (stat.getModified()<1)
-                    {
-                        stat.setModified(1, 0);
-                        stats.setHealth(stat);
-                    }
-                    stats.resurrect();
-                    continue;
-                }
-
-                if (iter->second->kill())
-                {
-                    ++mDeathCount[cls.getId(iter->first)];
-
-                    // Make sure spell effects with CasterLinked flag are removed
-                    for (PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
-                    {
-                        MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
-                        spells.purge(stats.getActorId());
-                    }
-
-                    // Apply soultrap
-                    if (iter->first.getTypeName() == typeid(ESM::Creature).name())
-                    {
-                        SoulTrap soulTrap (iter->first);
-                        stats.getActiveSpells().visitEffectSources(soulTrap);
-                    }
-
-                    // Reset magic effects and recalculate derived effects
-                    // One case where we need this is to make sure bound items are removed upon death
-                    stats.setMagicEffects(MWMechanics::MagicEffects());
-                    stats.getActiveSpells().clear();
-                    calculateCreatureStatModifiers(iter->first, 0);
-
-                    MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
-
-                    if (cls.isEssential(iter->first))
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
                 }
             }
+
+            killDeadActors();
 
             // check if we still have any player enemies to switch music
             static bool isBattleMusic = false;
@@ -1184,6 +1135,74 @@ namespace MWMechanics
             }
         }
     }
+
+    void Actors::killDeadActors()
+    {
+        for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        {
+            const MWWorld::Class &cls = iter->first.getClass();
+            CreatureStats &stats = cls.getCreatureStats(iter->first);
+
+            if(!stats.isDead())
+            {
+                if(iter->second->isDead())
+                {
+                    // Actor has been resurrected. Notify the CharacterController and re-enable collision.
+                    MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
+                    iter->second->resurrect();
+                }
+
+                if(!stats.isDead())
+                    continue;
+            }
+
+            // If it's the player and God Mode is turned on, keep it alive
+            if (iter->first.getRefData().getHandle()=="player" &&
+                MWBase::Environment::get().getWorld()->getGodModeState())
+            {
+                MWMechanics::DynamicStat<float> stat (stats.getHealth());
+
+                if (stat.getModified()<1)
+                {
+                    stat.setModified(1, 0);
+                    stats.setHealth(stat);
+                }
+                stats.resurrect();
+                continue;
+            }
+
+            if (iter->second->kill())
+            {
+                ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
+
+                // Make sure spell effects with CasterLinked flag are removed
+                for (PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
+                {
+                    MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
+                    spells.purge(stats.getActorId());
+                }
+
+                // Apply soultrap
+                if (iter->first.getTypeName() == typeid(ESM::Creature).name())
+                {
+                    SoulTrap soulTrap (iter->first);
+                    stats.getActiveSpells().visitEffectSources(soulTrap);
+                }
+
+                // Reset magic effects and recalculate derived effects
+                // One case where we need this is to make sure bound items are removed upon death
+                stats.setMagicEffects(MWMechanics::MagicEffects());
+                stats.getActiveSpells().clear();
+                calculateCreatureStatModifiers(iter->first, 0);
+
+                MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, false);
+
+                if (cls.isEssential(iter->first))
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
+            }
+        }
+    }
+
     void Actors::restoreDynamicStats(bool sleep)
     {
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
