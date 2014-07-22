@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <utility>
 
 #include <components/esm/loadcont.hpp>
 #include "nestedtablewrapper.hpp"
@@ -180,28 +181,18 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
 CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
     const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content)
 : NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, columns), mWeight (weight),
-  mOrganic (organic), mRespawn (respawn), mContent(content), mHelper(InventoryHelper<ESM::Container>(UniversalId::Type_Container))
-{}
-
-int CSMWorld::ContainerRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+  mOrganic (organic), mRespawn (respawn), mContent(content)
 {
-    assert(column==mContent);
+    std::vector<std::pair <const RefIdColumn*, HelperBase*> > assoCol;
 
-    return 2;
+    assoCol.push_back(std::make_pair(content, new InventoryHelper<ESM::Container>(UniversalId::Type_Container)));
+    
+    setAssocColumns(assoCol);
 }
 
-int CSMWorld::ContainerRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
-{
-    assert(column==mContent);
-
-    const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
-        data.getRecord(RefIdData::LocalIndex (index, UniversalId::Type_Container)));
-
-    return record.get().mInventory.mList.size();
-}
-
-QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
-    int index) const
+QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, 
+                                                   const RefIdData& data,
+                                                   int index) const
 {
     const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
@@ -221,24 +212,6 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, co
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
 
-void CSMWorld::ContainerRefIdAdapter::removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const
-{
-    if(column!=mContent)
-    {
-        throw std::logic_error("This column does not hold multiple values.");
-    }
-    mHelper.removeNestedRow(column, data, index, rowToRemove);
-}
-
-void CSMWorld::ContainerRefIdAdapter::addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const
-{
-    if(column!=mContent)
-    {
-        throw std::logic_error("This column does not hold multiple values.");
-    }
-
-    mHelper.addNestedRow(column, data, index, position);
-}
 
 void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
     const QVariant& value) const
@@ -265,54 +238,6 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
     else
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
 }
-
-void CSMWorld::ContainerRefIdAdapter::setNestedData(const RefIdColumn *column,
-                                                    RefIdData& data,
-                                                    int index,
-                                                    const QVariant& value,
-                                                    int subRowIndex,
-                                                    int subColIndex) const
-{
-
-    if (column==mContent)
-    { 
-        mHelper.setNestedData(column, data, index, value, subRowIndex, subColIndex);
-    } else
-    {
-        throw std::logic_error("This column do not nest other columns");
-    }
-}
-
-void CSMWorld::ContainerRefIdAdapter::setNestedTable(const RefIdColumn* column,
-                                                    RefIdData& data,
-                                                    int index,
-                                                    const NestedTableWrapperBase& nestedTable)
-{
-    mHelper.setNestedTable(column, data, index, nestedTable);
-}
-
-CSMWorld::NestedTableWrapperBase* CSMWorld::ContainerRefIdAdapter::nestedTable (const RefIdColumn* column,
-                                                                              const RefIdData& data,
-                                                                              int index) const
-{
-    return mHelper.nestedTable(column, data, index);
-}
-
-QVariant CSMWorld::ContainerRefIdAdapter::getNestedData (const CSMWorld::RefIdColumn* column,
-                                                        const CSMWorld::RefIdData& data,
-                                                        int index,
-                                                        int subRowIndex,
-                                                        int subColIndex) const
-{
-    if (column==mContent)
-    {
-        return mHelper.getNestedData(column, data, index, subRowIndex, subColIndex);
-    } else
-    {
-        throw std::logic_error("This column do not nest other columns");
-    }
-}
-
 
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
 : ActorColumns (actorColumns)

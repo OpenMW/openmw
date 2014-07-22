@@ -6,45 +6,85 @@
 
 #include "universalid.hpp"
 #include "nestedtablewrapper.hpp"
-#include <components/esm/loadcont.hpp>
 #include "record.hpp"
 #include "refiddata.hpp"
 #include "refidadapter.hpp"
+#include <components/esm/loadcont.hpp>
 
 #include <QVariant>
 
 namespace CSMWorld
 {
-    template <typename ESXRecordT>
-    class InventoryHelper
+    class RefIdColumn;
+
+    class HelperBase
     {
-        CSMWorld::UniversalId::Type mType;
+    protected:
+        const CSMWorld::UniversalId::Type mType;
 
     public:
+        HelperBase(CSMWorld::UniversalId::Type type);
+        
+        virtual ~HelperBase();
+        
+        virtual void setNestedTable(RefIdData& data,
+                                    int index,
+                                    const NestedTableWrapperBase& nestedTable) = 0;
+        
+        virtual NestedTableWrapperBase* nestedTable(const RefIdData& data,
+                                                    int index) const = 0;
+        
+        virtual QVariant getNestedData(const CSMWorld::RefIdData& data,
+                                       int index,
+                                       int subRowIndex,
+                                       int subColIndex) const = 0;
 
-        InventoryHelper(CSMWorld::UniversalId::Type type) : mType(type) {};
+        virtual void removeNestedRow (RefIdData& data,
+                                      int index,
+                                      int rowToRemove) const = 0;
 
-        void setNestedTable(const RefIdColumn* column,
-                            RefIdData& data,
-                            int index,
-                            const NestedTableWrapperBase& nestedTable)
+        virtual void setNestedData (RefIdData& data,
+                                    int index,
+                                    const QVariant& value,
+                                    int subRowIndex,
+                                    int subColIndex) const = 0;
+        
+        virtual void addNestedRow (RefIdData& data,
+                                   int index,
+                                   int position) const = 0;
+
+        virtual int getNestedColumnsCount(const RefIdData& data) const = 0;
+
+        virtual int getNestedRowsCount(const RefIdData& data,
+                                       int index) const = 0;
+    };
+
+    template <typename ESXRecordT>
+    class InventoryHelper : public HelperBase
+    {
+    public:
+
+        InventoryHelper(CSMWorld::UniversalId::Type type) 
+            : HelperBase(type) {}
+
+        virtual void setNestedTable(RefIdData& data,
+                                    int index,
+                                    const NestedTableWrapperBase& nestedTable)
         {
             getRecord(data, index).get().mInventory.mList = 
                 (static_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable)).mNestedTable;
         }
         
-        NestedTableWrapperBase* nestedTable(const RefIdColumn* column,
-                                            const RefIdData& data,
-                                            int index) const
+        virtual NestedTableWrapperBase* nestedTable(const RefIdData& data,
+                                                    int index) const
         {
             return new NestedTableWrapper<std::vector<ESM::ContItem> >(getRecord(data, index).get().mInventory.mList);
         }
         
-        QVariant getNestedData(const CSMWorld::RefIdColumn* column,
-                               const CSMWorld::RefIdData& data,
-                               int index,
-                               int subRowIndex,
-                               int subColIndex) const
+        virtual QVariant getNestedData(const CSMWorld::RefIdData& data,
+                                       int index,
+                                       int subRowIndex,
+                                       int subColIndex) const
         {
             const ESM::ContItem& content = getRecord(data, index).get().mInventory.mList.at(subRowIndex);
 
@@ -61,15 +101,14 @@ namespace CSMWorld
             }
         }
 
-        void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const
+        virtual void removeNestedRow (RefIdData& data, int index, int rowToRemove) const
         {
             std::vector<ESM::ContItem>& list = getRecord(data, index).get().mInventory.mList;
 
             list.erase (list.begin () + rowToRemove);
         }
 
-        void setNestedData (const RefIdColumn *column,
-                            RefIdData& data,
+        void setNestedData (RefIdData& data,
                             int index,
                             const QVariant& value,
                             int subRowIndex,
@@ -90,7 +129,7 @@ namespace CSMWorld
             }
         }
         
-        void addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const
+        virtual void addNestedRow (RefIdData& data, int index, int position) const
         {
             std::vector<ESM::ContItem>& list = getRecord(data, index).get().mInventory.mList;
 
@@ -104,6 +143,18 @@ namespace CSMWorld
             list.insert(list.begin()+position, newRow);
         }
         
+        virtual int getNestedColumnsCount(const RefIdData& data) const
+        {
+            return 2;
+        }
+            
+
+        virtual int getNestedRowsCount(const RefIdData& data,
+                                       int index) const
+        {
+            return getRecord(data, index).get().mInventory.mList.size();
+        }
+
     private:
 
         const Record<ESXRecordT>& getRecord(const RefIdData& data, int index) const

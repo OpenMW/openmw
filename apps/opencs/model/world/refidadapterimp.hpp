@@ -616,36 +616,16 @@ namespace CSMWorld
             const RefIdColumn *mRespawn;
             const RefIdColumn *mContent;
         
-        InventoryHelper<ESM::Container> mHelper;
-
         public:
 
             ContainerRefIdAdapter (const NameColumns& columns, const RefIdColumn *weight,
                                    const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content);
 
-            virtual QVariant getNestedData (const RefIdColumn *column, const RefIdData& data, int index,
-                                            int subRowIndex, int subColIndex) const;
-
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index) const;
-
-            virtual void setNestedData (const RefIdColumn *column, RefIdData& data, int index,
-                                        const QVariant& value, int subRowIndex, int subColIndex) const;
 
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
                                   const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
-
-            virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
-
-            virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
-
-            virtual void removeNestedRow (const RefIdColumn *column, RefIdData& data, int index, int rowToRemove) const;
-
-            virtual void addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const;
-        
-            virtual NestedTableWrapperBase* nestedTable (const RefIdColumn * column, const RefIdData& data, int index) const;
-
-            virtual void setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable);
     };
 
     struct CreatureColumns : public ActorColumns
