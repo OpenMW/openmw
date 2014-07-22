@@ -5,8 +5,8 @@
 
 #include "../render/previewwidget.hpp"
 
-#include "scenetoolbar.hpp"
-#include "scenetoolmode.hpp"
+#include "../widget/scenetoolbar.hpp"
+#include "../widget/scenetoolmode.hpp"
 
 CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id)
@@ -28,9 +28,9 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
     else
         mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), true, this);
 
-    SceneToolbar *toolbar = new SceneToolbar (48+6, this);
+    CSVWidget::SceneToolbar *toolbar = new CSVWidget::SceneToolbar (48+6, this);
 
-    SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
+    CSVWidget::SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
 
     layout->addWidget (toolbar, 0);
@@ -46,6 +46,8 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
     connect (mScene, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
     connect (mScene, SIGNAL (referenceableIdChanged (const std::string&)),
         this, SLOT (referenceableIdChanged (const std::string&)));
+    connect (mScene, SIGNAL (focusToolbarRequest()), toolbar, SLOT (setFocus()));
+    connect (toolbar, SIGNAL (focusSceneRequest()), mScene, SLOT (setFocus()));
 }
 
 void CSVWorld::PreviewSubView::setEditLock (bool locked) {}

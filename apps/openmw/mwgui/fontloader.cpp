@@ -260,21 +260,28 @@ namespace MWGui
 
             // More hacks! The french game uses several win1252 characters that are not included
             // in the cp437 encoding of the font. Fall back to similar available characters.
-            // Same for U+2013
-            std::map<int, int> additional;
-            additional[39] = 0x2019; // apostrophe
-            additional[45] = 0x2013; // dash
-            if (additional.find(i) != additional.end() && mEncoding == ToUTF8::CP437)
+            if (mEncoding == ToUTF8::CP437)
             {
-                MyGUI::xml::ElementPtr code = codes->createChild("Code");
-                code->addAttribute("index", additional[i]);
-                code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
-                                            + MyGUI::utility::toString(y1) + " "
-                                            + MyGUI::utility::toString(w) + " "
-                                            + MyGUI::utility::toString(h));
-                code->addAttribute("advance", data[i].width);
-                code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
-                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                std::multimap<int, int> additional;
+                additional.insert(std::make_pair(39, 0x2019)); // apostrophe
+                additional.insert(std::make_pair(45, 0x2013)); // dash
+                additional.insert(std::make_pair(34, 0x201D)); // right double quotation mark
+                additional.insert(std::make_pair(34, 0x201C)); // left double quotation mark
+                for (std::multimap<int, int>::iterator it = additional.begin(); it != additional.end(); ++it)
+                {
+                    if (it->first != i)
+                        continue;
+
+                    MyGUI::xml::ElementPtr code = codes->createChild("Code");
+                    code->addAttribute("index", it->second);
+                    code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
+                                                + MyGUI::utility::toString(y1) + " "
+                                                + MyGUI::utility::toString(w) + " "
+                                                + MyGUI::utility::toString(h));
+                    code->addAttribute("advance", data[i].width);
+                    code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
+                                       + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                }
             }
 
             // ASCII vertical bar, use this as text input cursor

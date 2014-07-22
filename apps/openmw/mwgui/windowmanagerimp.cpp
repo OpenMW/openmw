@@ -1529,6 +1529,8 @@ namespace MWGui
         mCompanionWindow->resetReference();
         mConsole->resetReference();
 
+        mSelectedSpell.clear();
+
         mGuiModes.clear();
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();

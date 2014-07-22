@@ -265,7 +265,7 @@ namespace MWMechanics
 
         const ESM::Weapon *weapon = NULL;
         MWMechanics::WeaponType weaptype;
-        float weapRange;
+        float weapRange = 1.0f;
 
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
@@ -300,7 +300,7 @@ namespace MWMechanics
         else //is creature
         {
             weaptype = WeapType_HandToHand; //doesn't matter, should only reflect if it is melee or distant weapon
-            weapRange = 150; //TODO: use true attack range (the same problem in Creature::hit)
+            weapRange = 150.0f; //TODO: use true attack range (the same problem in Creature::hit)
         }
 
         float rangeAttack;

@@ -321,6 +321,11 @@ namespace MWGui
         skillValueWidget->_setWidgetState(state);
         skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
 
+        // resize dynamically according to text size
+        int textWidthPlusMargin = skillValueWidget->getTextSize().width + 12;
+        skillValueWidget->setCoord(coord2.left + coord2.width - textWidthPlusMargin, coord2.top, textWidthPlusMargin, coord2.height);
+        skillNameWidget->setSize(skillNameWidget->getSize() + MyGUI::IntSize(coord2.width - textWidthPlusMargin, 0));
+
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 

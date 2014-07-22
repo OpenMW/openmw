@@ -361,9 +361,10 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
          * beginning. */
         int mode = ((movement == mCurrentMovement) ? 2 : 1);
 
+        mMovementAnimationControlled = true;
+
         mAnimation->disable(mCurrentMovement);
         mCurrentMovement = movement;
-        mMovementAnimVelocity = 0.0f;
         if(!mCurrentMovement.empty())
         {
             float vel, speedmult = 1.0f;
@@ -383,16 +384,18 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
             {
-                mMovementAnimVelocity = vel;
                 speedmult = mMovementSpeed / vel;
             }
             else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
                 speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
             else if (mMovementSpeed > 0.0f)
+            {
                 // The first person anims don't have any velocity to calculate a speed multiplier from.
                 // We use the third person velocities instead.
                 // FIXME: should be pulled from the actual animation, but it is not presently loaded.
                 speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
+                mMovementAnimationControlled = false;
+            }
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
@@ -506,6 +509,7 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
     mJumpState = JumpState_None;
     mAnimation->disable(mCurrentJump);
     mCurrentJump = "";
+    mMovementAnimationControlled = true;
 
     mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                     false, 1.0f, "start", "stop", startpoint, 0);
@@ -547,7 +551,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mIdleState(CharState_None)
     , mMovementState(CharState_None)
     , mMovementSpeed(0.0f)
-    , mMovementAnimVelocity(0.0f)
+    , mMovementAnimationControlled(true)
     , mDeathState(CharState_None)
     , mHitState(CharState_None)
     , mUpperBodyState(UpperCharState_Nothing)
@@ -570,10 +574,14 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         if (cls.hasInventoryStore(mPtr))
         {
             getActiveWeapon(cls.getCreatureStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
+            if (mWeaponType != WeapType_None)
+            {
+                mUpperBodyState = UpperCharState_WeapEquiped;
+                getWeaponGroup(mWeaponType, mCurrentWeapon);
+            }
+
             if(mWeaponType != WeapType_None && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
             {
-                getWeaponGroup(mWeaponType, mCurrentWeapon);
-                mUpperBodyState = UpperCharState_WeapEquiped;
                 mAnimation->showWeapons(true);
                 mAnimation->setWeaponGroup(mCurrentWeapon);
             }
@@ -1241,6 +1249,7 @@ void CharacterController::update(float duration)
         if (inwater || flying)
             cls.getCreatureStats(mPtr).land();
 
+        bool inJump = true;
         if(!onground && !flying && !inwater)
         {
             // In the air (either getting up —ascending part of jump— or falling).
@@ -1330,6 +1339,8 @@ void CharacterController::update(float duration)
                 mJumpState = JumpState_None;
             vec.z = 0.0f;
 
+            inJump = false;
+
             if(std::abs(vec.x/2.0f) > std::abs(vec.y))
             {
                 if(vec.x > 0.0f)
@@ -1391,6 +1402,8 @@ void CharacterController::update(float duration)
             forcestateupdate = updateCreatureState() || forcestateupdate;
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
+        if (inJump)
+            mMovementAnimationControlled = false;
 
         if (!mSkipAnim)
         {
@@ -1402,7 +1415,7 @@ void CharacterController::update(float duration)
             else //avoid z-rotating for knockdown
                 world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
 
-            if (mMovementAnimVelocity == 0)
+            if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
         }
         else
@@ -1446,7 +1459,7 @@ void CharacterController::update(float duration)
         }
 
         // Update movement
-        if(mMovementAnimVelocity > 0)
+        if(mMovementAnimationControlled && mPtr.getClass().isActor())
             world->queueMovement(mPtr, moved);
     }
     else if (mAnimation)

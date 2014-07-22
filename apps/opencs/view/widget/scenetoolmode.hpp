@@ -1,5 +1,5 @@
-#ifndef CSV_WORLD_SCENETOOL_MODE_H
-#define CSV_WORLD_SCENETOOL_MODE_H
+#ifndef CSV_WIDGET_SCENETOOL_MODE_H
+#define CSV_WIDGET_SCENETOOL_MODE_H
 
 #include "scenetool.hpp"
 
@@ -7,9 +7,10 @@
 
 class QHBoxLayout;
 
-namespace CSVWorld
+namespace CSVWidget
 {
     class SceneToolbar;
+    class PushButton;
 
     ///< \brief Mode selector tool
     class SceneToolMode : public SceneTool
@@ -18,17 +19,22 @@ namespace CSVWorld
 
             QWidget *mPanel;
             QHBoxLayout *mLayout;
-            std::map<QPushButton *, std::string> mButtons; // widget, id
+            std::map<PushButton *, std::string> mButtons; // widget, id
             int mButtonSize;
             int mIconSize;
+            QString mToolTip;
+            PushButton *mFirst;
+
+            void adjustToolTip (const PushButton *activeMode);
 
         public:
 
-            SceneToolMode (SceneToolbar *parent);
+            SceneToolMode (SceneToolbar *parent, const QString& toolTip);
 
             virtual void showPanel (const QPoint& position);
 
-            void addButton (const std::string& icon, const std::string& id);
+            void addButton (const std::string& icon, const std::string& id,
+                const QString& tooltip = "");
 
         signals:
 

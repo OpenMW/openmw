@@ -23,7 +23,7 @@ namespace CSMWorld
     class Data;
     class UniversalId;
     class IdTableProxyModel;
-    class IdTable;
+    class IdTableBase;
     class CommandDispatcher;
 }
 
@@ -49,7 +49,7 @@ namespace CSVWorld
             QAction *mExtendedDeleteAction;
             QAction *mExtendedRevertAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
-            CSMWorld::IdTable *mModel;
+            CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
             CSMWorld::CommandDispatcher *mDispatcher;
 

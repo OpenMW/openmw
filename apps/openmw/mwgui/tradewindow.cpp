@@ -531,4 +531,10 @@ namespace MWGui
             sellerStats.setLastRestockTime(MWBase::Environment::get().getWorld()->getTimeStamp());
         }
     }
+
+    void TradeWindow::resetReference()
+    {
+        ReferenceInterface::resetReference();
+        mItemView->setModel(NULL);
+    }
 }

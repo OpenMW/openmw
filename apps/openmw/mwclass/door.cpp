@@ -250,8 +250,11 @@ namespace MWClass
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+        {
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
-
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+        }
         info.text = text;
 
         return info;

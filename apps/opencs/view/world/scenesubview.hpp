@@ -4,7 +4,6 @@
 #include <QHBoxLayout>
 
 #include "../doc/subview.hpp"
-#include "scenetoolbar.hpp"
 
 class QModelIndex;
 
@@ -25,6 +24,11 @@ namespace CSVRender
     class UnpagedWorldspaceWidget;
 }
 
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
 namespace CSVWorld
 {
     class Table;
@@ -39,7 +43,7 @@ namespace CSVWorld
             CSVRender::WorldspaceWidget *mScene;
             QHBoxLayout* mLayout;
             CSMDoc::Document& mDocument;
-            SceneToolbar* mToolbar;
+            CSVWidget::SceneToolbar* mToolbar;
 
         public:
 
@@ -59,14 +63,15 @@ namespace CSVWorld
 
             void makeConnections(CSVRender::UnpagedWorldspaceWidget* widget);
 
-            void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, SceneToolbar* toolbar);
+            void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, CSVWidget::SceneToolbar* toolbar);
 
             enum widgetType
             {
                 widget_Paged,
                 widget_Unpaged
             };
-            SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
+
+            CSVWidget::SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
 
         private slots:
 

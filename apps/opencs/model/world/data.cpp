@@ -15,6 +15,8 @@
 #include "columnimp.hpp"
 #include "regionmap.hpp"
 #include "columns.hpp"
+#include "resourcesmanager.hpp"
+#include "resourcetable.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
@@ -56,8 +58,9 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding)
-: mEncoder (encoding), mRefs (mCells), mReader (0), mDialogue (0)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
+: mEncoder (encoding), mRefs (mCells), mResourcesManager (resourcesManager), mReader (0),
+  mDialogue (0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -277,6 +280,18 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding)
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Mesh)),
+        UniversalId::Type_Mesh);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icon)),
+        UniversalId::Type_Icon);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Music)),
+        UniversalId::Type_Music);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundRes)),
+        UniversalId::Type_SoundRes);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Texture)),
+        UniversalId::Type_Texture);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Video)),
+        UniversalId::Type_Video);
 }
 
 CSMWorld::Data::~Data()
@@ -496,6 +511,11 @@ const CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts() cons
 CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
 {
     return mBodyParts;
+}
+
+const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
+{
+    return mResourcesManager.get (UniversalId::getParentType (id.getType()));
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)

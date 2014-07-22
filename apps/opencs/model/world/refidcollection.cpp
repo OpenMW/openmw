@@ -52,7 +52,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     ModelColumns modelColumns (baseColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Model, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Model, ColumnBase::Display_Mesh));
     modelColumns.mModel = &mColumns.back();
 
     NameColumns nameColumns (modelColumns);
@@ -64,7 +64,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     InventoryColumns inventoryColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Icon, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Icon, ColumnBase::Display_Icon));
     inventoryColumns.mIcon = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Weight, ColumnBase::Display_Float));
     inventoryColumns.mWeight = &mColumns.back();

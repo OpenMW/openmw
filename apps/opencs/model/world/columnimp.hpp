@@ -604,7 +604,7 @@ namespace CSMWorld
     struct SoundFileColumn : public Column<ESXRecordT>
     {
         SoundFileColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_Sound)
+        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_SoundRes)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -634,7 +634,7 @@ namespace CSMWorld
     {
         /// \todo Replace Display_Integer with something that displays the colour value more directly.
         MapColourColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_MapColour, ColumnBase::Display_Integer)
+        : Column<ESXRecordT> (Columns::ColumnId_MapColour, ColumnBase::Display_Colour)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
