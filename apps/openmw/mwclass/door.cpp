@@ -62,7 +62,7 @@ namespace MWClass
             const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
             if (customData.mDoorState > 0)
             {
-                MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState == 1 ? true : false);
+                MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState);
             }
         }
     }
