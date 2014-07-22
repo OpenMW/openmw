@@ -8,6 +8,8 @@
 #include <OgreGpuProgramManager.h>
 #include <OgreVector4.h>
 
+#include <iostream>
+
 namespace sh
 {
 	OgreGpuProgram::OgreGpuProgram(

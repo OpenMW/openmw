@@ -1,5 +1,7 @@
 #include "occlusionquery.hpp"
 
+#include <iostream>
+
 #include <OgreRenderSystem.h>
 #include <OgreRoot.h>
 #include <OgreBillboardSet.h>
