@@ -445,6 +445,7 @@ namespace CSMWorld
         const RefIdColumn *mFlee;
         const RefIdColumn *mFight;
         const RefIdColumn *mAlarm;
+        const RefIdColumn *mInventory;
         std::map<const RefIdColumn *, unsigned int> mServices;
 
         ActorColumns (const NameColumns& base) : NameColumns (base) {}
@@ -452,7 +453,7 @@ namespace CSMWorld
 
     /// \brief Adapter for actor IDs (handles common AI functionality)
     template<typename RecordT>
-    class ActorRefIdAdapter : public NameRefIdAdapter<RecordT>
+    class ActorRefIdAdapter : public NameRefIdAdapter<RecordT>, public NestedRefIdAdapter
     {
             ActorColumns mActors;
 
@@ -472,7 +473,13 @@ namespace CSMWorld
     ActorRefIdAdapter<RecordT>::ActorRefIdAdapter (UniversalId::Type type,
         const ActorColumns& columns)
     : NameRefIdAdapter<RecordT> (type, columns), mActors (columns)
-    {}
+    {
+        std::vector<std::pair <const RefIdColumn*, HelperBase*> > assoCol;
+
+        assoCol.push_back(std::make_pair(mActors.mInventory, new InventoryHelper<RecordT>(type)));
+        
+        setAssocColumns(assoCol);
+    }
 
     template<typename RecordT>
     QVariant ActorRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
@@ -495,6 +502,9 @@ namespace CSMWorld
 
         if (column==mActors.mAlarm)
             return record.get().mAiData.mAlarm;
+
+        if (column==mActors.mInventory)
+            return true;
 
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
             mActors.mServices.find (column);

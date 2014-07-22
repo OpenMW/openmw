@@ -99,6 +99,10 @@ CSMWorld::RefIdCollection::RefIdCollection()
     actorsColumns.mFight = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_AiAlarm, ColumnBase::Display_Integer));
     actorsColumns.mAlarm = &mColumns.back();
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue, true, true, true));
+    actorsColumns.mInventory = &mColumns.back();
+    mColumns.back().addNestedColumn(Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String);
+    mColumns.back().addNestedColumn(Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer);
 
     static const struct
     {
