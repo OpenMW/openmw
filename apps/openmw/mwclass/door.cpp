@@ -254,6 +254,7 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
             text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
             text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getGlobalVariable(), "Global");
         }
         info.text = text;
 

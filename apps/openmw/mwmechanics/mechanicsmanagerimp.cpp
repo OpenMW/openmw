@@ -38,6 +38,13 @@ namespace
                 isFactionOwned = true;
         }
 
+        const std::string& globalVariable = item.getCellRef().getGlobalVariable();
+        if (!globalVariable.empty() && MWBase::Environment::get().getWorld()->getGlobalInt(Misc::StringUtils::lowerCase(globalVariable)) == 1)
+        {
+            isOwned = false;
+            isFactionOwned = false;
+        }
+
         if (!item.getCellRef().getOwner().empty())
             victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().getOwner(), true);
 

@@ -61,6 +61,11 @@ namespace MWWorld
         std::string getOwner() const;
         void setOwner(const std::string& owner);
 
+        // Name of a global variable. If the global variable is set to '1', using the object is temporarily allowed
+        // even if it has an Owner field.
+        // Used by bed rent scripts to allow the player to use the bed for the duration of the rent.
+        std::string getGlobalVariable() const;
+
         // ID of creature trapped in this soul gem
         std::string getSoul() const;
         void setSoul(const std::string& soul);

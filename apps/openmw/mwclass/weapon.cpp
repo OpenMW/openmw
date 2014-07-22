@@ -353,6 +353,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
             text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getGlobalVariable(), "Global");
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 

@@ -35,12 +35,13 @@ namespace ESM
 
             float mScale;          // Scale applied to mesh
 
-            // The NPC that owns this object (and will get angry if you steal
-            // it)
+            // The NPC that owns this object (and will get angry if you steal it)
             std::string mOwner;
 
-            // I have no idea, looks like a link to a global variable?
-            std::string mGlob;
+            // Name of a global variable. If the global variable is set to '1', using the object is temporarily allowed
+            // even if it has an Owner field.
+            // Used by bed rent scripts to allow the player to use the bed for the duration of the rent.
+            std::string mGlobalVariable;
 
             // ID of creature trapped in this soul gem
             std::string mSoul;

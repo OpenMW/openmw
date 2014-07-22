@@ -88,6 +88,11 @@ namespace MWWorld
         return mCellRef.mOwner;
     }
 
+    std::string CellRef::getGlobalVariable() const
+    {
+        return mCellRef.mGlobalVariable;
+    }
+
     void CellRef::setOwner(const std::string &owner)
     {
         if (owner != mCellRef.mOwner)

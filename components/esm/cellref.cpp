@@ -27,7 +27,7 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     esm.getHNOT (mScale, "XSCL");
 
     mOwner = esm.getHNOString ("ANAM");
-    mGlob = esm.getHNOString ("BNAM");
+    mGlobalVariable = esm.getHNOString ("BNAM");
     mSoul = esm.getHNOString ("XSOL");
 
     mFaction = esm.getHNOString ("CNAM");
@@ -90,7 +90,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     }
 
     esm.writeHNOCString("ANAM", mOwner);
-    esm.writeHNOCString("BNAM", mGlob);
+    esm.writeHNOCString("BNAM", mGlobalVariable);
     esm.writeHNOCString("XSOL", mSoul);
 
     esm.writeHNOCString("CNAM", mFaction);
@@ -144,7 +144,7 @@ void ESM::CellRef::blank()
     mRefID.clear();
     mScale = 1;
     mOwner.clear();
-    mGlob.clear();
+    mGlobalVariable.clear();
     mSoul.clear();
     mFaction.clear();
     mFactIndex = -1;
