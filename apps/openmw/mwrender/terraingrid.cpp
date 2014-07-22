@@ -3,6 +3,7 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 #include <OgreAxisAlignedBox.h>
+#include <OgreTextureManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
