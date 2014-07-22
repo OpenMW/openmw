@@ -31,8 +31,8 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     mSoul = esm.getHNOString ("XSOL");
 
     mFaction = esm.getHNOString ("CNAM");
-    mFactIndex = -2;
-    esm.getHNOT (mFactIndex, "INDX");
+    mFactionRank = -2;
+    esm.getHNOT (mFactionRank, "INDX");
 
     mGoldValue = 1;
     mCharge = -1;
@@ -94,8 +94,8 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     esm.writeHNOCString("XSOL", mSoul);
 
     esm.writeHNOCString("CNAM", mFaction);
-    if (mFactIndex != -2) {
-        esm.writeHNT("INDX", mFactIndex);
+    if (mFactionRank != -2) {
+        esm.writeHNT("INDX", mFactionRank);
     }
 
     if (mEnchantmentCharge != -1)
@@ -147,7 +147,7 @@ void ESM::CellRef::blank()
     mGlobalVariable.clear();
     mSoul.clear();
     mFaction.clear();
-    mFactIndex = -1;
+    mFactionRank = -2;
     mCharge = 0;
     mEnchantmentCharge = 0;
     mGoldValue = 0;

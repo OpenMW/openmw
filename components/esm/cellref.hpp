@@ -50,9 +50,8 @@ namespace ESM
             // you take it and are not a faction member)
             std::string mFaction;
 
-            // INDX might be PC faction rank required to use the item? Sometimes
-            // is -1, which I assume means "any rank".
-            int mFactIndex;
+            // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
+            int mFactionRank;
 
             // For weapon or armor, this is the remaining item health.
             // For tools (lockpicks, probes, repair hammer) it is the remaining uses.

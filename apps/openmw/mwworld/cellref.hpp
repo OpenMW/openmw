@@ -75,6 +75,9 @@ namespace MWWorld
         std::string getFaction() const;
         void setFaction (const std::string& faction);
 
+        // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
+        int getFactionRank() const;
+
         // Lock level for doors and containers
         // Positive for a locked door. 0 for a door that was never locked.
         // For an unlocked door, it is set to -(previous locklevel)

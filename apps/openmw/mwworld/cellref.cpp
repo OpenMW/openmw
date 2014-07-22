@@ -93,6 +93,11 @@ namespace MWWorld
         return mCellRef.mGlobalVariable;
     }
 
+    int CellRef::getFactionRank() const
+    {
+        return mCellRef.mFactionRank;
+    }
+
     void CellRef::setOwner(const std::string &owner)
     {
         if (owner != mCellRef.mOwner)
