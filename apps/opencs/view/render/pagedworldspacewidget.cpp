@@ -262,7 +262,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 			billboardNode->setPosition(8192 * iter->getX() + 4096, 8192 * iter->getY() + 4096, 0);
 
 			Ogre::Font* font;
-			if (Ogre::FontManager::getSingletonPtr()->getByName("CellBillboardFont" + iter->getId(mWorldspace)).isNull())
+			if (!Ogre::FontManager::getSingletonPtr()->resourceExists("CellBillboardFont" + iter->getId(mWorldspace)))
 			{
 				font = Ogre::FontManager::getSingletonPtr()->create("CellBillboardFont" + iter->getId(mWorldspace), "Data00000001").getPointer();
 				font->setType(Ogre::FT_TRUETYPE);
