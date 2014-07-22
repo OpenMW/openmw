@@ -19,6 +19,7 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
+//all credits to http://www.ogre3d.org/tikiwiki/tiki-index.php?page=HowTo:+Write+text+on+texture
 void WriteToTexture(const Ogre::String &str, Ogre::TexturePtr destTexture, Ogre::Image::Box destRectangle, Ogre::Font* font, const Ogre::ColourValue &color, char justify = 'l', bool wordwrap = true)
 {
 	using namespace Ogre;
