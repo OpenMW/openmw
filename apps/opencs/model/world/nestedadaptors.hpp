@@ -60,25 +60,47 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
-    class InventoryHelper : public HelperBase
+    class CastableHelper : public HelperBase
+    {
+ 
+    public:
+        CastableHelper(CSMWorld::UniversalId::Type type)
+            : HelperBase(type) {}
+
+    protected:
+        const Record<ESXRecordT>& getRecord(const RefIdData& data, int index) const
+        {
+            return dynamic_cast<const Record<ESXRecordT>&> (
+                data.getRecord (RefIdData::LocalIndex (index, mType)));
+        }
+
+        Record<ESXRecordT>& getRecord(RefIdData& data, int index) const
+        {
+            return dynamic_cast<Record<ESXRecordT>&> (
+                data.getRecord (RefIdData::LocalIndex (index, mType)));
+        }
+    };
+
+    template <typename ESXRecordT>
+    class InventoryHelper : public CastableHelper<ESXRecordT>
     {
     public:
 
         InventoryHelper(CSMWorld::UniversalId::Type type) 
-            : HelperBase(type) {}
+            : CastableHelper<ESXRecordT>(type) {}
 
         virtual void setNestedTable(RefIdData& data,
                                     int index,
                                     const NestedTableWrapperBase& nestedTable)
         {
-            getRecord(data, index).get().mInventory.mList = 
+            CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList = 
                 (static_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable)).mNestedTable;
         }
         
         virtual NestedTableWrapperBase* nestedTable(const RefIdData& data,
                                                     int index) const
         {
-            return new NestedTableWrapper<std::vector<ESM::ContItem> >(getRecord(data, index).get().mInventory.mList);
+            return new NestedTableWrapper<std::vector<ESM::ContItem> >(CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList);
         }
         
         virtual QVariant getNestedData(const CSMWorld::RefIdData& data,
@@ -86,7 +108,7 @@ namespace CSMWorld
                                        int subRowIndex,
                                        int subColIndex) const
         {
-            const ESM::ContItem& content = getRecord(data, index).get().mInventory.mList.at(subRowIndex);
+            const ESM::ContItem& content = CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList.at(subRowIndex);
 
             switch (subColIndex)
             {
@@ -103,7 +125,7 @@ namespace CSMWorld
 
         virtual void removeNestedRow (RefIdData& data, int index, int rowToRemove) const
         {
-            std::vector<ESM::ContItem>& list = getRecord(data, index).get().mInventory.mList;
+            std::vector<ESM::ContItem>& list = CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList;
 
             list.erase (list.begin () + rowToRemove);
         }
@@ -117,11 +139,11 @@ namespace CSMWorld
             switch(subColIndex)
             {
             case 0:
-                getRecord(data, index).get().mInventory.mList.at(subRowIndex).mItem.assign(std::string(value.toString().toUtf8().constData()));
+                CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList.at(subRowIndex).mItem.assign(std::string(value.toString().toUtf8().constData()));
                 break;
 
             case 1:
-                getRecord(data, index).get().mInventory.mList.at(subRowIndex).mCount = value.toInt();
+                CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList.at(subRowIndex).mCount = value.toInt();
                 break;
                 
             default:
@@ -131,7 +153,7 @@ namespace CSMWorld
         
         virtual void addNestedRow (RefIdData& data, int index, int position) const
         {
-            std::vector<ESM::ContItem>& list = getRecord(data, index).get().mInventory.mList;
+            std::vector<ESM::ContItem>& list = CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList;
 
             ESM::ContItem newRow = {0, ""};
             if (position >= (int)list.size())
@@ -152,22 +174,9 @@ namespace CSMWorld
         virtual int getNestedRowsCount(const RefIdData& data,
                                        int index) const
         {
-            return getRecord(data, index).get().mInventory.mList.size();
+            return CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList.size();
         }
 
-    private:
-
-        const Record<ESXRecordT>& getRecord(const RefIdData& data, int index) const
-        {
-            return dynamic_cast<const Record<ESXRecordT>&> (
-                data.getRecord (RefIdData::LocalIndex (index, mType)));
-        }
-
-        Record<ESXRecordT>& getRecord(RefIdData& data, int index) const
-        {
-            return dynamic_cast<Record<ESXRecordT>&> (
-                data.getRecord (RefIdData::LocalIndex (index, mType)));
-        }
     };
 }
 
