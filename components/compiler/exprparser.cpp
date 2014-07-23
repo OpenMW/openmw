@@ -16,6 +16,7 @@
 #include "stringparser.hpp"
 #include "extensions.hpp"
 #include "context.hpp"
+#include "discardparser.hpp"
 
 namespace Compiler
 {
@@ -743,6 +744,7 @@ namespace Compiler
 
         ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
         StringParser stringParser (getErrorHandler(), getContext(), mLiterals);
+        DiscardParser discardParser (getErrorHandler(), getContext());
 
         std::stack<std::vector<Interpreter::Type_Code> > stack;
 
@@ -785,7 +787,17 @@ namespace Compiler
 
                 scanner.scan (parser);
 
-                if (optional && parser.isEmpty())
+                if (parser.isEmpty())
+                    break;
+            }
+            else if (*iter=='z')
+            {
+                discardParser.reset();
+                discardParser.setOptional (true);
+
+                scanner.scan (discardParser);
+
+                if (discardParser.isEmpty())
                     break;
             }
             else
