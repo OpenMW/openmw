@@ -6,6 +6,12 @@
 
 #include "nestedadaptors.hpp"
 
+/*! \brief
+ * Adaptors acts as indirection layer, abstracting details of the record types (in the wrappers) from the higher levels of model.
+ * Please notice that nested adaptor uses helper classes for actually performing any actions. Different record types require different helpers (needs to be created in the subclass and then fetched via member function).
+ * Important point: don't forget to make sure that getData on the nestedColumn returns true (otherwise code will not treat the index pointing to the column as having childs!
+ */
+
 class QVariant;
 
 namespace CSMWorld
@@ -30,6 +36,7 @@ namespace CSMWorld
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int idnex)
                 const = 0;
+            ///< If called on the nest column, should return QVariant(true).
 
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
                 const QVariant& value) const = 0;
@@ -95,6 +102,9 @@ namespace CSMWorld
 
     protected:
         void setAssocColumns(const std::vector<std::pair <const RefIdColumn*, HelperBase*> >& assocColumns);
+        ///The ownership of the Helper pointers is transfered.
+        ///The ownership of the column pointers it not transfered (it is not surprising, since columns are created by collection).
+        ///You MUST call this method to setup the nested adaptor!
         
     private:
         

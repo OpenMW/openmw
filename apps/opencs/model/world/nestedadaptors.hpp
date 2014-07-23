@@ -13,6 +13,10 @@
 
 #include <QVariant>
 
+/*! \brief
+ * Nested adapter redirects responsibility to the helper class. Helper classes are polymorhpic (vide HelperBase and CastableHelper) and most likely templates.
+ */
+
 namespace CSMWorld
 {
     class RefIdColumn;
