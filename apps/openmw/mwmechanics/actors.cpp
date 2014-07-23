@@ -184,7 +184,7 @@ namespace MWMechanics
 
         calculateCreatureStatModifiers (ptr, duration);
         // fatigue restoration
-        calculateRestoration(ptr, duration, false);
+        calculateRestoration(ptr, duration);
     }
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
@@ -293,7 +293,7 @@ namespace MWMechanics
         creatureStats.setFatigue(fatigue);
     }
 
-    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration, bool sleep)
+    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
     {
         if (ptr.getClass().getCreatureStats(ptr).isDead())
             return;
@@ -332,9 +332,29 @@ namespace MWMechanics
         x *= fEndFatigueMult * endurance;
 
         DynamicStat<float> fatigue = stats.getFatigue();
+        fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
+        stats.setFatigue (fatigue);
+    }
+
+    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
+    {
+        if (ptr.getClass().getCreatureStats(ptr).isDead())
+            return;
+
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+        const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+
+        // restore fatigue
+        float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
+        float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
+
+        float x = fFatigueReturnBase + fFatigueReturnMult * endurance;
+
+        DynamicStat<float> fatigue = stats.getFatigue();
         fatigue.setCurrent (fatigue.getCurrent() + duration * x);
         stats.setFatigue (fatigue);
-
     }
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
@@ -1206,7 +1226,7 @@ namespace MWMechanics
     void Actors::restoreDynamicStats(bool sleep)
     {
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-            calculateRestoration(iter->first, 3600, sleep);
+            restoreDynamicStats(iter->first, sleep);
     }
 
     int Actors::getHoursToRest(const MWWorld::Ptr &ptr) const

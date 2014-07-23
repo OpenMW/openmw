@@ -36,7 +36,7 @@ namespace MWMechanics
             void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration);
             void calculateNpcStatModifiers (const MWWorld::Ptr& ptr);
 
-            void calculateRestoration (const MWWorld::Ptr& ptr, float duration, bool sleep);
+            void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
             void updateDrowning (const MWWorld::Ptr& ptr, float duration);
 
@@ -89,6 +89,8 @@ namespace MWMechanics
 
             void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.
+
+            void restoreDynamicStats(const MWWorld::Ptr& actor, bool sleep);
 
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed
