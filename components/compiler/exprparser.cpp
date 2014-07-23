@@ -408,6 +408,21 @@ namespace Compiler
                     mNextOperand = false;
                     return true;
                 }
+                else if (keyword==Scanner::K_scriptrunning)
+                {
+                    start();
+
+                    mTokenLoc = loc;
+                    parseArguments ("c", scanner);
+
+                    Generator::scriptRunning (mCode);
+                    mOperands.push_back ('l');
+
+                    mExplicit.clear();
+                    mRefOp = false;
+                    mNextOperand = false;
+                    return true;
+                }
 
                 // check for custom extensions
                 if (const Extensions *extensions = getContext().getExtensions())

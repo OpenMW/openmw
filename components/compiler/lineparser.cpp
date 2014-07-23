@@ -269,6 +269,13 @@ namespace Compiler
                     Generator::startScript (mCode, mLiterals, mExplicit);
                     mState = EndState;
                     return true;
+
+                case Scanner::K_stopscript:
+
+                    mExprParser.parseArguments ("c", scanner, mCode);
+                    Generator::stopScript (mCode);
+                    mState = EndState;
+                    return true;
             }
 
             // check for custom extensions
