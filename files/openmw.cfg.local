@@ -4,3 +4,4 @@ data=./data
 data-local="?userdata?data"
 resources=./resources
 script-blacklist=Museum
+script-blacklist=MockChangeScript
