@@ -326,11 +326,9 @@ namespace MWMechanics
         // restore fatigue
         float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
-        float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
 
-        float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
-        x *= fEndFatigueMult * endurance;
-
+        float x = fFatigueReturnBase + fFatigueReturnMult * endurance;
+        
         DynamicStat<float> fatigue = stats.getFatigue();
         fatigue.setCurrent (fatigue.getCurrent() + duration * x);
         stats.setFatigue (fatigue);
