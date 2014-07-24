@@ -59,8 +59,17 @@ opencs_hdrs_noqt (view/doc
 
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
-    cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
+    cellcreator referenceablecreator referencecreator scenesubview
+    infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
+    )
+
+opencs_units_noqt (view/world
+    subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
+    scripthighlighter idvalidator dialoguecreator
+    )
+
+opencs_units (view/widget
+    scenetoolbar scenetool scenetoolmode pushbutton
     )
 
 opencs_units (view/render
@@ -71,11 +80,6 @@ opencs_units (view/render
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
     lightingbright object cell
-    )
-
-opencs_units_noqt (view/world
-    subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator
     )
 
 

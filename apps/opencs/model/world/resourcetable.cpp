@@ -75,8 +75,6 @@ QVariant CSMWorld::ResourceTable::headerData (int section, Qt::Orientation orien
             break;
     }
 
-    // xxx
-
     return QVariant();
 }
 

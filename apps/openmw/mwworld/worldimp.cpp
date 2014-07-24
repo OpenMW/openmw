@@ -2320,15 +2320,10 @@ namespace MWWorld
             }
 
             // If this is a power, check if it was already used in the last 24h
-            if (!fail && spell->mData.mType == ESM::Spell::ST_Power)
+            if (!fail && spell->mData.mType == ESM::Spell::ST_Power && !stats.getSpells().canUsePower(spell->mId))
             {
-                if (stats.getSpells().canUsePower(spell->mId))
-                    stats.getSpells().usePower(spell->mId);
-                else
-                {
-                    message = "#{sPowerAlreadyUsed}";
-                    fail = true;
-                }
+                message = "#{sPowerAlreadyUsed}";
+                fail = true;
             }
 
             // Reduce mana
@@ -2361,6 +2356,10 @@ namespace MWWorld
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+	    
+	    // A power can be used once per 24h
+	    if (spell->mData.mType == ESM::Spell::ST_Power)
+	        stats.getSpells().usePower(spell->mId);
 
             cast.cast(spell);
         }

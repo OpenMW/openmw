@@ -16,9 +16,10 @@
 
 namespace MWGui
 {
-
+    const unsigned int LevelupDialog::sMaxCoins = 3;
     LevelupDialog::LevelupDialog()
-        : WindowBase("openmw_levelup_dialog.layout")
+        : WindowBase("openmw_levelup_dialog.layout"),
+          mCoinCount(sMaxCoins)
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mClassImage, "ClassImage");
@@ -46,12 +47,10 @@ namespace MWGui
             mAttributeMultipliers.push_back(t);
         }
 
-        int curX = mMainWidget->getWidth()/2 - (16 + 2) * 1.5;
-        for (int i=0; i<3; ++i)
+        for (unsigned int i = 0; i < mCoinCount; ++i)
         {
-            MyGUI::ImageBox* image = mMainWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(curX,250,16,16), MyGUI::Align::Default);
+            MyGUI::ImageBox* image = mCoinBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0,0,16,16), MyGUI::Align::Default);
             image->setImageTexture ("icons\\tx_goldicon.dds");
-            curX += 24+2;
             mCoins.push_back(image);
         }
 
@@ -61,15 +60,15 @@ namespace MWGui
     void LevelupDialog::setAttributeValues()
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats (player);
+        MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
-        for (int i=0; i<8; ++i)
+        for (int i = 0; i < 8; ++i)
         {
-            int val = creatureStats.getAttribute (i).getBase ();
+            int val = creatureStats.getAttribute(i).getBase();
             if (std::find(mSpentAttributes.begin(), mSpentAttributes.end(), i) != mSpentAttributes.end())
             {
-                val += pcStats.getLevelupAttributeMultiplier (i);
+                val += pcStats.getLevelupAttributeMultiplier(i);
             }
 
             if (val >= 100)
@@ -80,20 +79,21 @@ namespace MWGui
     }
 
 
-    void LevelupDialog::resetCoins ()
+    void LevelupDialog::resetCoins()
     {
-        int curX = 0;
-        for (int i=0; i<3; ++i)
+        const int coinSpacing = 10;
+        int curX = mCoinBox->getWidth()/2 - (coinSpacing*(mCoinCount - 1) + 16*mCoinCount)/2;
+        for (unsigned int i=0; i<mCoinCount; ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
             image->attachToWidget(mCoinBox);
             image->setCoord(MyGUI::IntCoord(curX,0,16,16));
-            curX += 24+2;
+            curX += 16+coinSpacing;
         }
     }
 
-    void LevelupDialog::assignCoins ()
+    void LevelupDialog::assignCoins()
     {
         resetCoins();
         for (unsigned int i=0; i<mSpentAttributes.size(); ++i)
@@ -118,13 +118,8 @@ namespace MWGui
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-        MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats (player);
-        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
-
-        mSpentAttributes.clear();
-        resetCoins();
-
-        setAttributeValues();
+        MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
+        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         const ESM::NPC *playerData = player.get<ESM::NPC>()->mBase;
 
@@ -154,61 +149,89 @@ namespace MWGui
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + boost::lexical_cast<std::string>(level));
 
         std::string levelupdescription;
-        if(level>20)
+        if(level > 20)
             levelupdescription=world->getFallback()->getFallbackString("Level_Up_Default");
         else
             levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+boost::lexical_cast<std::string>(level));
 
         mLevelDescription->setCaption (levelupdescription);
 
-        for (int i=0; i<8; ++i)
+        unsigned int availableAttributes = 0;
+        for (int i = 0; i < 8; ++i)
         {
             MyGUI::TextBox* text = mAttributeMultipliers[i];
-            int mult = pcStats.getLevelupAttributeMultiplier (i);
-            text->setCaption(mult <= 1 ? "" : "x" + boost::lexical_cast<std::string>(mult));
+            if (pcStats.getAttribute(i).getBase() < 100)
+            {
+                mAttributes[i]->setEnabled(true);
+                availableAttributes++;
+
+                int mult = pcStats.getLevelupAttributeMultiplier (i);
+                text->setCaption(mult <= 1 ? "" : "x" + boost::lexical_cast<std::string>(mult));
+            }
+            else
+            {
+                mAttributes[i]->setEnabled(false);
+
+                text->setCaption("");
+            }
         }
+
+        mCoinCount = std::min(sMaxCoins, availableAttributes);
+
+        for (unsigned int i = 0; i < sMaxCoins; i++)
+        {
+            if (i < mCoinCount)
+                mCoins[i]->attachToWidget(mCoinBox);
+            else
+                mCoins[i]->detachFromWidget();
+        }
+
+        mSpentAttributes.clear();
+        resetCoins();
+
+        setAttributeValues();
 
         center();
     }
 
-    void LevelupDialog::onOkButtonClicked (MyGUI::Widget* sender)
+    void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
-        if (mSpentAttributes.size() < 3)
-            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage36}");
+        if (mSpentAttributes.size() < mCoinCount)
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage36}");
         else
         {
             // increase attributes
-            for (int i=0; i<3; ++i)
+            for (unsigned int i = 0; i < mCoinCount; ++i)
             {
                 MWMechanics::AttributeValue attribute = pcStats.getAttribute(mSpentAttributes[i]);
-                attribute.setBase (attribute.getBase () + pcStats.getLevelupAttributeMultiplier (mSpentAttributes[i]));
+                attribute.setBase(attribute.getBase() + pcStats.getLevelupAttributeMultiplier(mSpentAttributes[i]));
 
                 if (attribute.getBase() >= 100)
                     attribute.setBase(100);
                 pcStats.setAttribute(mSpentAttributes[i], attribute);
             }
 
-            pcStats.levelUp ();
+            pcStats.levelUp();
 
-            MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Levelup);
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Levelup);
         }
 
     }
 
-    void LevelupDialog::onAttributeClicked (MyGUI::Widget *sender)
+    void LevelupDialog::onAttributeClicked(MyGUI::Widget *sender)
     {
         int attribute = *sender->getUserData<int>();
 
         std::vector<int>::iterator found = std::find(mSpentAttributes.begin(), mSpentAttributes.end(), attribute);
         if (found != mSpentAttributes.end())
-            mSpentAttributes.erase (found);
+            mSpentAttributes.erase(found);
         else
         {
-            if (mSpentAttributes.size() == 3)
-                mSpentAttributes[2] = attribute;
+            if (mSpentAttributes.size() == mCoinCount)
+                mSpentAttributes[mCoinCount - 1] = attribute;
             else
                 mSpentAttributes.push_back(attribute);
         }

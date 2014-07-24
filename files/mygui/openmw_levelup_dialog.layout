@@ -23,7 +23,7 @@
         </Widget>
 
         <Widget type="Widget" skin="" position="0 0 100 16" name="Coins">
-            <UserString key="HStretch" value="false"/>
+            <UserString key="HStretch" value="true"/>
             <UserString key="VStretch" value="false"/>
         </Widget>
 
