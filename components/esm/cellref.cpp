@@ -63,6 +63,8 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     mTrap = esm.getHNOString ("TNAM");
 
     esm.getHNOT (mReferenceBlocked, "UNAM");
+    if (esm.isNextSub("FLTV")) // no longer used
+        esm.skipHSub();
 
     esm.getHNOT(mPos, "DATA", 24);
 
