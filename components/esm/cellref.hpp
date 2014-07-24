@@ -82,12 +82,6 @@ namespace ESM
             // -1 is not blocked, otherwise it is blocked.
             signed char mReferenceBlocked;
 
-            // Occurs in Tribunal.esm, eg. in the cell "Mournhold, Plaza
-            // Brindisi Dorom", where it has the value 100. Also only for
-            // activators.
-            int mFltv;
-            int mNam0;
-
             // Position and rotation of this object within the cell
             Position mPos;
 

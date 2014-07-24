@@ -6,10 +6,12 @@
 
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 {
-    // NAM0 sometimes appears here, sometimes further on
-    mNam0 = 0;
+    // According to Hrnchamd, this does not belong to the actual ref. Instead, it is a marker indicating that
+    // the following refs are part of a "temp refs" section. A temp ref is not being tracked by the moved references system.
+    // Its only purpose is a performance optimization for "immovable" things. We don't need this, and it's problematic anyway,
+    // because any item can theoretically be moved by a script.
     if (esm.isNextSub ("NAM0"))
-        esm.getHT (mNam0);
+        esm.skipHSub();
 
     if (wideRefNum)
         esm.getHNT (mRefNum, "FRMR", 8);
@@ -60,20 +62,12 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     mKey = esm.getHNOString ("KNAM");
     mTrap = esm.getHNOString ("TNAM");
 
-    mFltv = 0;
     esm.getHNOT (mReferenceBlocked, "UNAM");
-    esm.getHNOT (mFltv, "FLTV");
 
     esm.getHNOT(mPos, "DATA", 24);
 
-    // Number of references in the cell? Maximum once in each cell,
-    // but not always at the beginning, and not always right. In other
-    // words, completely useless.
-    // Update: Well, maybe not completely useless. This might actually be
-    //  number_of_references + number_of_references_moved_here_Across_boundaries,
-    //  and could be helpful for collecting these weird moved references.
-    if (esm.isNextSub ("NAM0"))
-        esm.getHT (mNam0);
+    if (esm.isNextSub("NAM0"))
+        esm.skipHSub();
 }
 
 void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) const
@@ -127,14 +121,8 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     if (mReferenceBlocked != -1)
         esm.writeHNT("UNAM", mReferenceBlocked);
 
-    if (!inInventory && mFltv != 0)
-        esm.writeHNT("FLTV", mFltv);
-
     if (!inInventory)
         esm.writeHNT("DATA", mPos, 24);
-
-    if (!inInventory && mNam0 != 0)
-        esm.writeHNT("NAM0", mNam0);
 }
 
 void ESM::CellRef::blank()
@@ -156,8 +144,6 @@ void ESM::CellRef::blank()
     mKey.clear();
     mTrap.clear();
     mReferenceBlocked = 0;
-    mFltv = 0;
-    mNam0 = 0;
     mTeleport = false;
 
     for (int i=0; i<3; ++i)
