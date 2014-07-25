@@ -149,6 +149,9 @@ namespace MWGui
         mPtr = actor;
 
         startEditing ();
+        mPrice->setVisible(true);
+        mPriceText->setVisible(true);
+        updateLabels();
     }
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
@@ -162,7 +165,6 @@ namespace MWGui
 
         mPtr = player;
         startEditing();
-        mEnchanting.setSoulGem(soulgem);
 
         setSoulGem(soulgem);
 
