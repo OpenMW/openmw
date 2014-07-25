@@ -14,12 +14,15 @@ namespace MWScript
 {
     void Locals::configure (const ESM::Script& script)
     {
+        const Compiler::Locals& locals =
+            MWBase::Environment::get().getScriptManager()->getLocals (script.mId);
+
         mShorts.clear();
-        mShorts.resize (script.mData.mNumShorts, 0);
+        mShorts.resize (locals.get ('s').size(), 0);
         mLongs.clear();
-        mLongs.resize (script.mData.mNumLongs, 0);
+        mLongs.resize (locals.get ('l').size(), 0);
         mFloats.clear();
-        mFloats.resize (script.mData.mNumFloats, 0);
+        mFloats.resize (locals.get ('f').size(), 0);
     }
 
     bool Locals::isEmpty() const
