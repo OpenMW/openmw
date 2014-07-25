@@ -71,4 +71,9 @@
         <file alias="edit-content">raster/startup/big/edit-content.png</file>
         <file alias="configure">raster/startup/small/configure.png</file>
     </qresource>
+    <qresource prefix="/scenetoolbar">
+        <file alias="night">Moon-48.png</file>
+        <file alias="day">Sun-48.png</file>
+        <file alias="bright">Lightbulb-48.png</file>
+    </qresource>
 </RCC>
