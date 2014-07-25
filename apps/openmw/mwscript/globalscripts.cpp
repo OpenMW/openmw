@@ -20,9 +20,7 @@ namespace MWScript
 
     GlobalScripts::GlobalScripts (const MWWorld::ESMStore& store)
     : mStore (store)
-    {
-        addStartup();
-    }
+    {}
 
     void GlobalScripts::addScript (const std::string& name, const std::string& targetId)
     {
