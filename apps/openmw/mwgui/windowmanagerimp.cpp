@@ -785,6 +785,7 @@ namespace MWGui
         } else {
             mMessageBoxManager->createInteractiveMessageBox(message, buttons);
             MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
+            updateVisible();
         }
     }
 
