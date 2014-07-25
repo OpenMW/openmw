@@ -287,6 +287,27 @@ namespace MWMechanics
 
         bool castByPlayer = (!caster.isEmpty() && caster.getRefData().getHandle() == "player");
 
+        // Try absorbing if it's a spell
+        // NOTE: Vanilla does this once per effect source instead of adding the % from all sources together, not sure
+        // if that is worth replicating.
+        bool absorbed = false;
+        if (spell && caster != target && target.getClass().isActor())
+        {
+            int absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).mMagnitude;
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            absorbed = (roll < absorb);
+            if (absorbed)
+            {
+                const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
+                MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
+                            "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
+                // Magicka is increased by cost of spell
+                DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
+                magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
+                target.getClass().getCreatureStats(target).setMagicka(magicka);
+            }
+        }
+
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
             effectIt!=effects.mList.end(); ++effectIt)
         {
@@ -326,30 +347,12 @@ namespace MWMechanics
             {
                 anyHarmfulEffect = true;
 
+                if (absorbed) // Absorbed, and we know there was a harmful effect (figuring that out is the only reason we are in this loop)
+                    break;
+
                 // If player is attempting to cast a harmful spell, show the target's HP bar
                 if (castByPlayer && target != caster)
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
-
-                // Try absorbing if it's a spell
-                // NOTE: Vanilla does this once per effect source instead of adding the % from all sources together, not sure
-                // if that is worth replicating.
-                if (spell && caster != target)
-                {
-                    int absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).mMagnitude;
-                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-                    bool isAbsorbed = (roll < absorb);
-                    if (isAbsorbed)
-                    {
-                        const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
-                        MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                                    "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::Reflect, false, "");
-                        // Magicka is increased by cost of spell
-                        DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
-                        magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
-                        target.getClass().getCreatureStats(target).setMagicka(magicka);
-                        magnitudeMult = 0;
-                    }
-                }
 
                 // Try reflecting
                 if (!reflected && magnitudeMult > 0 && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
@@ -382,8 +385,7 @@ namespace MWMechanics
                 }
             }
 
-
-            if (magnitudeMult > 0)
+            if (magnitudeMult > 0 && !absorbed)
             {
                 float random = std::rand() / static_cast<float>(RAND_MAX);
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
